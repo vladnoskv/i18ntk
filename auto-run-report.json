@@ -1,0 +1,31 @@
+{
+  "timestamp": "2025-07-24T09:43:58.248Z",
+  "summary": {
+    "successful": 3,
+    "failed": 0,
+    "requiredFailed": 0
+  },
+  "steps": [
+    {
+      "step": "Analyze Translations",
+      "command": "node 02-analyze-translations.js",
+      "status": "success",
+      "duration": 115,
+      "required": true
+    },
+    {
+      "step": "Validate Translations",
+      "command": "node 03-validate-translations.js",
+      "status": "success",
+      "duration": 111,
+      "required": true
+    },
+    {
+      "step": "Check Usage",
+      "command": "node 04-check-usage.js",
+      "status": "success",
+      "duration": 126,
+      "required": false
+    }
+  ]
+}

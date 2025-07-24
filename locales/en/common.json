@@ -1,0 +1,33 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "hello": "Hello",
+    "goodbye": "Goodbye",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading..."
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "settings": "Settings"
+  },
+  "offlineTitle": "You are offline",
+  "offlineMessage": "Please check your internet connection",
+  "tryReconnect": "Try to reconnect",
+  "logout": "Logout",
+  "login": "Login",
+  "amount": "Amount",
+  "timePeriods": {
+    "customRange": "Custom Range"
+  },
+  "unknownUser": "Unknown User",
+  "notSet": "Not Set",
+  "announcement_id": "Announcement ID",
+  "last_sign_in_at": "Last Sign In"
+}

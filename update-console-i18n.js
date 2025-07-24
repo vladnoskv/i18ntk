@@ -19,13 +19,23 @@
 const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
+const settingsManager = require('./settings-manager');
 
 // Import the i18n helper
 const { loadTranslations, t } = require('./utils/i18n-helper');
 
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    reportPath: settings.directories?.outputDir ? path.join(settings.directories.outputDir, 'console-i18n-report.json') : './i18n-reports/console-i18n-report.json'
+  };
+}
+
 class ConsoleI18nUpdater {
   constructor(options = {}) {
-    this.reportPath = options.reportPath || './i18n-reports/console-i18n-report.json';
+    const config = getConfig();
+    this.reportPath = options.reportPath || config.reportPath;
     this.dryRun = options.dryRun || false;
     this.targetFile = options.file || null;
     this.stats = {

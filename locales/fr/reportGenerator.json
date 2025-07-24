@@ -1,0 +1,20 @@
+{
+  "reportTypes": {
+    "prospects": "NOT_TRANSLATED",
+    "activities": "NOT_TRANSLATED",
+    "goals": "NOT_TRANSLATED",
+    "team": "NOT_TRANSLATED",
+    "hotLeads": "NOT_TRANSLATED"
+  },
+  "timePeriods": {
+    "allTime": "NOT_TRANSLATED",
+    "last7days": "NOT_TRANSLATED",
+    "last30days": "NOT_TRANSLATED",
+    "thisYear": "NOT_TRANSLATED"
+  },
+  "layouts": {
+    "summary": "NOT_TRANSLATED",
+    "detailed": "NOT_TRANSLATED",
+    "visual_charts": "NOT_TRANSLATED"
+  }
+}

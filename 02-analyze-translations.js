@@ -15,25 +15,30 @@
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('./utils/i18n-helper');
+const settingsManager = require('./settings-manager');
 
-// Default configuration
-const DEFAULT_CONFIG = {
-  sourceDir: './locales',
-  sourceLanguage: 'en',
-  notTranslatedMarker: '__NOT_TRANSLATED__',
-  outputDir: './i18n-reports',
-  excludeFiles: ['.DS_Store', 'Thumbs.db']
-};
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    sourceDir: settings.directories?.sourceDir || './locales',
+    sourceLanguage: settings.directories?.sourceLanguage || 'en',
+    notTranslatedMarker: settings.processing?.notTranslatedMarker || '__NOT_TRANSLATED__',
+    outputDir: settings.directories?.outputDir || './i18n-reports',
+    excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
+  };
+}
 
 class I18nAnalyzer {
   constructor(config = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = { ...getConfig(), ...config };
     this.sourceDir = path.resolve(this.config.sourceDir);
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     this.outputDir = path.resolve(this.config.outputDir);
     
-    // Initialize i18n
-    loadTranslations();
+    // Initialize i18n with UI language
+    const uiLanguage = this.config.uiLanguage || 'en';
+    loadTranslations(uiLanguage);
     this.t = t;
   }
 
@@ -53,8 +58,13 @@ class I18nAnalyzer {
           parsed.outputReports = true;
         } else if (key === 'output-dir') {
           parsed.outputDir = value;
+        } else if (key === 'ui-language') {
+          parsed.uiLanguage = value;
         } else if (key === 'help') {
           parsed.help = true;
+        } else if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(key)) {
+          // Support shorthand language flags like --de, --fr, etc.
+          parsed.uiLanguage = key;
         }
       }
     });
@@ -422,6 +432,13 @@ class I18nAnalyzer {
       
       // Parse command line arguments
       const args = this.parseArgs();
+      
+      // Handle UI language change
+      if (args.uiLanguage) {
+        loadTranslations(args.uiLanguage);
+        this.t = t;
+      }
+      
       if (args.sourceDir) {
         this.config.sourceDir = args.sourceDir;
         this.sourceDir = path.resolve(this.config.sourceDir);

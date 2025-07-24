@@ -2,6 +2,18 @@
 
 const fs = require('fs');
 const path = require('path');
+const settingsManager = require('./settings-manager');
+
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    sourceLanguage: settings.directories?.sourceLanguage || 'en',
+    excludeFiles: settings.processing?.excludeFiles || ['index.js', 'index.ts', '.DS_Store'],
+    supportedExtensions: settings.processing?.supportedExtensions || ['.json', '.js', '.ts'],
+    sourceDir: settings.directories?.sourceDir || null
+  };
+}
 
 /**
  * I18N SUMMARY REPORT GENERATOR
@@ -13,12 +25,7 @@ const path = require('path');
  */
 class I18nSummaryReporter {
   constructor() {
-    this.config = {
-      sourceLanguage: 'en',
-      excludeFiles: ['index.js', 'index.ts', '.DS_Store'],
-      supportedExtensions: ['.json', '.js', '.ts'],
-      sourceDir: null
-    };
+    this.config = getConfig();
     
     this.stats = {
       languages: [],

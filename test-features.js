@@ -17,14 +17,24 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const settingsManager = require('./settings-manager');
+
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    testDataDir: settings.directories?.outputDir ? path.join(settings.directories.outputDir, 'test-data') : './test-data'
+  };
+}
 
 class I18nFeatureTester {
   constructor(options = {}) {
+    const config = getConfig();
     this.quick = options.quick || false;
     this.verbose = options.verbose || false;
     this.testResults = [];
     this.packageDir = __dirname;
-    this.testDataDir = path.join(this.packageDir, 'test-data');
+    this.testDataDir = path.resolve(config.testDataDir);
   }
 
   // Log test output

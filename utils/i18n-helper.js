@@ -1,5 +1,14 @@
 const fs = require('fs');
 const path = require('path');
+const settingsManager = require('../settings-manager');
+
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    uiLocalesDir: settings.directories?.uiLocalesDir || path.join(__dirname, '..', 'ui-locales')
+  };
+}
 
 // Global translations object
 let translations = {};
@@ -11,7 +20,8 @@ let currentLanguage = 'en';
  */
 function loadTranslations(language = 'en') {
   currentLanguage = language;
-  const localesDir = path.join(__dirname, '..', 'ui-locales');
+  const config = getConfig();
+  const localesDir = path.resolve(config.uiLocalesDir);
   const translationFile = path.join(localesDir, `${language}.json`);
   
   try {
@@ -89,7 +99,8 @@ function getCurrentLanguage() {
  * @returns {string[]} - Array of available language codes
  */
 function getAvailableLanguages() {
-  const localesDir = path.join(__dirname, '..', 'ui-locales');
+  const config = getConfig();
+  const localesDir = path.resolve(config.uiLocalesDir);
   try {
     if (fs.existsSync(localesDir)) {
       return fs.readdirSync(localesDir)

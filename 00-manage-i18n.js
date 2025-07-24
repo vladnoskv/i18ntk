@@ -27,6 +27,7 @@ const I18nAnalyzer = require('./02-analyze-translations');
 const I18nValidator = require('./03-validate-translations');
 const I18nUsageAnalyzer = require('./04-check-usage');
 const I18nSizingAnalyzer = require('./06-analyze-sizing');
+const SettingsCLI = require('./settings-cli');
 
 // Default configuration
 const DEFAULT_CONFIG = {
@@ -50,32 +51,40 @@ class I18nManager {
     const args = process.argv.slice(2);
     const parsed = {};
     
-    args.forEach(arg => {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      
       if (arg.startsWith('--')) {
         const [key, value] = arg.substring(2).split('=');
+        
         if (key === 'command') {
           parsed.command = value;
         } else if (key === 'help') {
           parsed.help = true;
         } else if (key === 'source-dir') {
-          parsed.sourceDir = value;
+          parsed.sourceDir = value || args[++i];
         } else if (key === 'languages') {
-          parsed.languages = value.split(',');
+          parsed.languages = (value || args[++i]).split(',');
         } else if (key === 'interactive') {
-          parsed.interactive = value !== 'false';
+          parsed.interactive = (value || args[++i]) !== 'false';
         } else if (key === 'ui-language') {
-          parsed.uiLanguage = value;
+          parsed.uiLanguage = value || args[++i];
         } else if (key === 'report-language') {
-          parsed.reportLanguage = value;
+          parsed.reportLanguage = value || args[++i];
         } else if (key === 'sizing') {
           parsed.sizing = true;
         } else if (key === 'sizing-threshold') {
-          parsed.sizingThreshold = parseInt(value);
+          parsed.sizingThreshold = parseInt(value || args[++i]);
         } else if (key === 'sizing-format') {
-          parsed.sizingFormat = value;
+          parsed.sizingFormat = value || args[++i];
+        }
+      } else {
+        // Handle commands without -- prefix
+        if (!parsed.command && ['init', 'analyze', 'validate', 'usage', 'complete', 'sizing', 'status', 'workflow', 'delete', 'help'].includes(arg)) {
+          parsed.command = arg;
         }
       }
-    });
+    }
     
     return parsed;
   }
@@ -221,6 +230,7 @@ class I18nManager {
     console.log(`9. ${uiI18n.t('menu.options.delete')}`);
     console.log(`10. ${uiI18n.t('menu.options.language')}`);
     console.log(`11. ${uiI18n.t('menu.options.help')}`);
+    console.log(`12. ${uiI18n.t('menu.options.settings')} (Advanced)`);
     console.log(`0. ${uiI18n.t('menu.options.exit')}\n`);
     
     const choice = await this.prompt(uiI18n.t('menu.prompt'));
@@ -254,7 +264,8 @@ class I18nManager {
     const analyzer = new I18nAnalyzer({
       sourceDir: this.config.sourceDir,
       sourceLanguage: this.config.sourceLanguage,
-      outputDir: this.config.outputDir
+      outputDir: this.config.outputDir,
+      uiLanguage: uiI18n.getCurrentLanguage()
     });
     
     // Override command line args for specific languages
@@ -277,7 +288,8 @@ class I18nManager {
     
     const validator = new I18nValidator({
       sourceDir: this.config.sourceDir,
-      sourceLanguage: this.config.sourceLanguage
+      sourceLanguage: this.config.sourceLanguage,
+      uiLanguage: uiI18n.getCurrentLanguage()
     });
     
     // Override command line args for specific languages
@@ -437,6 +449,39 @@ class I18nManager {
     console.log('\n' + uiI18n.t('operations.workflow.completed'));
   }
 
+  // Open settings interface
+  async openSettings() {
+    console.log('\n' + uiI18n.t('operations.settings.title'));
+    console.log(uiI18n.t('operations.settings.separator'));
+    
+    try {
+      const settingsCLI = new SettingsCLI();
+      await settingsCLI.start();
+      
+      // Reload settings in case they were changed
+       try {
+         const settingsManager = require('./settings-manager');
+         const newSettings = settingsManager.getSettings();
+         
+         // Update current config
+         this.config = { ...this.config, ...newSettings };
+         
+         // Reinitialize UI language if changed
+         if (newSettings.ui && newSettings.ui.language !== uiI18n.getCurrentLanguage()) {
+           await uiI18n.changeLanguage(newSettings.ui.language);
+         }
+         
+         console.log(uiI18n.t('operations.settings.reloaded'));
+       } catch (error) {
+         console.log(uiI18n.t('operations.settings.reloadError', 'Warning: Could not reload configuration:'), error.message);
+       }
+      
+    } catch (error) {
+      console.error(uiI18n.t('operations.settings.error'), error.message);
+      console.log(uiI18n.t('operations.settings.fallback', 'You can manually edit the user-config.json file instead.'));
+    }
+  }
+
   // Main execution
   async run() {
     try {
@@ -494,6 +539,9 @@ console.log(uiI18n.t('menu.separator'));
           case 'delete':
             await this.deleteReports();
             break;
+          case 'settings':
+            await this.openSettings();
+            break;
           case 'help':
             this.showHelp();
             break;
@@ -547,6 +595,9 @@ this.showHelp();
               break;
             case '11':
               this.showHelp();
+              break;
+            case '12':
+              await this.openSettings();
               break;
             case '0':
               console.log('\n' + uiI18n.t('menu.goodbye'));

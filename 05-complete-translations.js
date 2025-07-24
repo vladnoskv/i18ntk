@@ -13,14 +13,18 @@
 
 const fs = require('fs');
 const path = require('path');
+const settingsManager = require('./settings-manager');
 
-// Default configuration
-const DEFAULT_CONFIG = {
-  sourceDir: './locales',
-  sourceLanguage: 'en',
-  notTranslatedMarker: '__NOT_TRANSLATED__',
-  excludeFiles: ['.DS_Store', 'Thumbs.db']
-};
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    sourceDir: settings.directories?.sourceDir || './locales',
+    sourceLanguage: settings.directories?.sourceLanguage || 'en',
+    notTranslatedMarker: settings.directories?.notTranslatedMarker || '__NOT_TRANSLATED__',
+    excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
+  };
+}
 
 // Common missing keys that should be added to all projects
 const COMMON_MISSING_KEYS = {
@@ -77,9 +81,13 @@ const COMMON_MISSING_KEYS = {
 
 class I18nCompletionTool {
   constructor(config = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = { ...getConfig(), ...config };
     this.sourceDir = path.resolve(this.config.sourceDir);
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+    
+    // Initialize UI i18n for console messages
+    this.ui = require('./ui-i18n');
+    this.t = this.ui.t.bind(this.ui);
   }
 
   // Parse command line arguments
@@ -290,12 +298,12 @@ class I18nCompletionTool {
     
     // Delete old report to ensure fresh data
     if (fs.existsSync(usageReportPath)) {
-      console.log(this.t("completeTranslations.deleting_old_usage_analysis_re"));;
+      console.log(this.t("completeTranslations.deleting_old_usage_analysis_re"));
       fs.unlinkSync(usageReportPath);
     }
     
     // Generate fresh usage analysis report
-    console.log(this.t("completeTranslations.generating_fresh_usage_analysi"));;
+    console.log(this.t("completeTranslations.generating_fresh_usage_analysi"));
     const { execSync } = require('child_process');
     try {
       execSync('node scripts/i18n/package/04-check-usage.js --output-report', { 
@@ -303,12 +311,12 @@ class I18nCompletionTool {
         cwd: process.cwd()
       });
     } catch (error) {
-      console.log(this.t("completeTranslations.could_not_generate_usage_analy"));;
+      console.log(this.t("completeTranslations.could_not_generate_usage_analy"));
       return Object.keys(COMMON_MISSING_KEYS);
     }
     
     if (!fs.existsSync(usageReportPath)) {
-      console.log(this.t("completeTranslations.usage_analysis_report_not_foun"));;
+      console.log(this.t("completeTranslations.usage_analysis_report_not_foun"));
       return Object.keys(COMMON_MISSING_KEYS);
     }
     
@@ -344,10 +352,10 @@ class I18nCompletionTool {
         }
       }
       
-      console.log(this.t("completeTranslations.found_missingkeyslength_missin", { missingKeys.length })); ;
+      console.log(this.t("completeTranslations.found_missingkeyslength_missin", { missingKeysLength: missingKeys.length }));
       return missingKeys.length > 0 ? missingKeys : Object.keys(COMMON_MISSING_KEYS);
     } catch (error) {
-      console.log(this.t("completeTranslations.could_not_parse_usage_analysis"));;
+      console.log(this.t("completeTranslations.could_not_parse_usage_analysis"));
       return Object.keys(COMMON_MISSING_KEYS);
     }
   }
@@ -362,73 +370,73 @@ class I18nCompletionTool {
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     }
     
-    console.log(this.t("completeTranslations.i18n_translation_completion_to"));;
+    console.log(this.t("completeTranslations.i18n_translation_completion_to"));
     console.log('============================================================');
-    console.log(this.t("completeTranslations.source_directory_thissourcedir", { this.sourceDir })); ;
-    console.log(this.t("completeTranslations.source_language_thisconfigsour", { this.config.sourceLanguage })); ;
+    console.log(this.t("completeTranslations.source_directory_thissourcedir", { sourceDir: this.sourceDir }));
+    console.log(this.t("completeTranslations.source_language_thisconfigsour", { sourceLanguage: this.config.sourceLanguage }));
     
     if (args.dryRun) {
-      console.log(this.t("completeTranslations.dry_run_mode_no_files_will_be_"));;
+      console.log(this.t("completeTranslations.dry_run_mode_no_files_will_be_"));
     }
     
     try {
       // Get available languages
       const languages = this.getAvailableLanguages();
-      console.log(this.t("completeTranslations.languages_languagesjoin", { variables })); // Replace 'variables' with actual variables}`);
+      console.log(this.t("completeTranslations.languages_languagesjoin", { languages: languages.join(', ') }));
       
       // Get missing keys from usage analysis or use common keys
       const missingKeys = this.getMissingKeysFromUsage();
-      console.log(this.t("completeTranslations.adding_missingkeyslength_missi", { missingKeys.length })); ;
+      console.log(this.t("completeTranslations.adding_missingkeyslength_missi", { missingKeysLength: missingKeys.length }));
       
       let totalChanges = 0;
       
       // Process each language
       for (const language of languages) {
-        console.log(this.t("completeTranslations.n_processing_language", { language })); ;
+        console.log(this.t("completeTranslations.n_processing_language", { language }));
         
         const changes = this.addMissingKeysToLanguage(language, missingKeys, args.dryRun);
         
         if (changes.length > 0) {
-          console.log(this.t("completeTranslations.added_changeslength_keys", { changes.length })); ;
+          console.log(this.t("completeTranslations.added_changeslength_keys", { changesLength: changes.length }));
           totalChanges += changes.length;
           
           // Show sample of changes
           const sampleChanges = changes.slice(0, 3);
           sampleChanges.forEach(change => {
-            console.log(this.t("completeTranslations.changefile_changekey", { change.file, change.key })); ;
+            console.log(this.t("completeTranslations.changefile_changekey", { file: change.file, key: change.key }));
           });
           
           if (changes.length > 3) {
-            console.log(this.t("completeTranslations.and_changeslength_3_more", { changes.length - 3 })); ;
+            console.log(this.t("completeTranslations.and_changeslength_3_more", { moreChanges: changes.length - 3 }));
           }
         } else {
-          console.log(this.t("completeTranslations.no_changes_needed"));;
+          console.log(this.t("completeTranslations.no_changes_needed"));
         }
       }
       
-      console.log(this.t("completeTranslations.n"));;
-      console.log(this.t("completeTranslations.completion_summary"));;
+      console.log(this.t("completeTranslations.n"));
+      console.log(this.t("completeTranslations.completion_summary"));
       console.log('============================================================');
-      console.log(this.t("completeTranslations.total_changes_totalchanges", { totalChanges })); ;
-      console.log(this.t("completeTranslations.languages_processed_languagesl", { languages.length })); ;
-      console.log(this.t("completeTranslations.missing_keys_added_missingkeys", { missingKeys.length })); ;
+      console.log(this.t("completeTranslations.total_changes_totalchanges", { totalChanges }));
+      console.log(this.t("completeTranslations.languages_processed_languagesl", { languagesLength: languages.length }));
+      console.log(this.t("completeTranslations.missing_keys_added_missingkeys", { missingKeysLength: missingKeys.length }));
       
       if (!args.dryRun) {
-        console.log(this.t("completeTranslations.n_next_steps"));;
+        console.log(this.t("completeTranslations.n_next_steps"));
         console.log('============================================================');
-        console.log(this.t("completeTranslations.1_run_usage_analysis_to_verify"));;
-        console.log(this.t("completeTranslations.node_scriptsi18n04checkusagejs"));;
-        console.log(this.t("completeTranslations.2_validate_all_translations"));;
-        console.log(this.t("completeTranslations.node_scriptsi18n03validatetran"));;
-        console.log(this.t("completeTranslations.3_run_analysis_for_overall_sta"));;
-        console.log(this.t("completeTranslations.node_scriptsi18n02analyzetrans"));;
-        console.log(this.t("completeTranslations.n_all_actually_used_translatio"));;
+        console.log(this.t("completeTranslations.1_run_usage_analysis_to_verify"));
+        console.log(this.t("completeTranslations.node_scriptsi18n04checkusagejs"));
+        console.log(this.t("completeTranslations.2_validate_all_translations"));
+        console.log(this.t("completeTranslations.node_scriptsi18n03validatetran"));
+        console.log(this.t("completeTranslations.3_run_analysis_for_overall_sta"));
+        console.log(this.t("completeTranslations.node_scriptsi18n02analyzetrans"));
+        console.log(this.t("completeTranslations.n_all_actually_used_translatio"));
       } else {
-        console.log(this.t("completeTranslations.n_run_without_dryrun_to_apply_"));;
+        console.log(this.t("completeTranslations.n_run_without_dryrun_to_apply_"));
       }
       
     } catch (error) {
-      console.error(this.t("completeTranslations.error_during_completion", { variables })); // Replace 'variables' with actual variables;
+      console.error(this.t("completeTranslations.error_during_completion", { error: error.message }));
       process.exit(1);
     }
   }
@@ -438,7 +446,7 @@ class I18nCompletionTool {
 if (require.main === module) {
   const tool = new I18nCompletionTool();
   tool.run().catch(error => {
-    console.error(this.t("completeTranslations.fatal_error", { variables })); // Replace 'variables' with actual variables;
+    console.error('Fatal error:', error.message);
     process.exit(1);
   });
 }

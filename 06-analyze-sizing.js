@@ -33,19 +33,32 @@
 const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
-const { createI18nHelper } = require('./i18n-helper');
+const { loadTranslations, t } = require('./utils/i18n-helper');
+const settingsManager = require('./settings-manager');
+
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    sourceDir: settings.directories?.sourceDir || './src/locales',
+    outputDir: settings.directories?.outputDir || './reports',
+    threshold: settings.processing?.sizingThreshold || 50
+  };
+}
 
 class I18nSizingAnalyzer {
   constructor(options = {}) {
-    this.sourceDir = options.sourceDir || './src/locales';
-    this.outputDir = options.outputDir || './reports';
+    const config = getConfig();
+    this.sourceDir = options.sourceDir || config.sourceDir;
+    this.outputDir = options.outputDir || config.outputDir;
     this.languages = options.languages || [];
-    this.threshold = options.threshold || 50; // Size difference threshold in percentage
+    this.threshold = options.threshold || config.threshold; // Size difference threshold in percentage
     this.format = options.format || 'table';
     this.outputReport = options.outputReport || false;
     
     // Initialize i18n
-    this.t = createI18nHelper();
+    loadTranslations('en');
+    this.t = t;
     
     this.stats = {
       files: {},
@@ -129,7 +142,7 @@ class I18nSizingAnalyzer {
         });
         
       } catch (error) {
-        console.error(this.t("sizing.error_parsing_language_error", { language, errorMessage: error.message }));
+        console.error(this.t("sizing.failed_to_parse_language_error", { language, errorMessage: error.message }));
       }
     });
   }
@@ -278,23 +291,23 @@ class I18nSizingAnalyzer {
   // Display results in table format
   displayTable() {
     console.log(this.t("sizing.sizing_analysis_results"));
-    console.log(this.t("sizing.separator"));
+    console.log("=".repeat(80));
     
     // File sizes table
-    console.log(this.t("sizing.file_sizes_title"));
-    console.log(this.t("sizing.separator"));
+    console.log("\n" + this.t("sizing.file_sizes_title"));
+    console.log("-".repeat(80));
     console.log(this.t("sizing.file_sizes_header"));
-    console.log(this.t("sizing.separator"));
+    console.log("-".repeat(80));
     
     Object.entries(this.stats.files).forEach(([lang, data]) => {
       console.log(this.t("sizing.file_size_row", { lang, sizeKB: data.sizeKB, lines: data.lines, characters: data.characters }));
     });
     
     // Language statistics
-    console.log(this.t("sizing.language_statistics_title"));
-    console.log(this.t("sizing.separator"));
+    console.log("\n" + this.t("sizing.language_statistics_title"));
+    console.log("-".repeat(80));
     console.log(this.t("sizing.language_stats_header"));
-    console.log(this.t("sizing.separator"));
+    console.log("-".repeat(80));
     
     Object.entries(this.stats.languages).forEach(([lang, data]) => {
       console.log(this.t("sizing.language_stats_row", { lang, totalKeys: data.totalKeys, totalCharacters: data.totalCharacters, averageKeyLength: data.averageKeyLength.toFixed(1), maxKeyLength: data.maxKeyLength, emptyKeys: data.emptyKeys }));
@@ -302,10 +315,10 @@ class I18nSizingAnalyzer {
     
     // Size variations
     if (this.stats.summary.sizeVariations) {
-      console.log(this.t("sizing.size_variations_title"));
-      console.log(this.t("sizing.separator"));
+      console.log("\n" + this.t("sizing.size_variations_title"));
+      console.log("-".repeat(80));
       console.log(this.t("sizing.size_variations_header"));
-      console.log(this.t("sizing.separator"));
+      console.log("-".repeat(80));
       
       Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
         const problematic = data.isProblematic ? '⚠️  Yes' : '✅ No';
@@ -315,8 +328,8 @@ class I18nSizingAnalyzer {
     
     // Recommendations
     if (this.stats.summary.recommendations.length > 0) {
-      console.log(this.t("sizing.recommendations_title"));
-      console.log(this.t("sizing.separator"));
+      console.log("\n" + this.t("sizing.recommendations_title"));
+      console.log("-".repeat(80));
       this.stats.summary.recommendations.forEach((rec, index) => {
         console.log(this.t("sizing.recommendation_item", { index: index + 1, recommendation: rec }));
       });

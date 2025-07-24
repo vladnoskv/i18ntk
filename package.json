@@ -1,6 +1,6 @@
 {
   "name": "i18n-management-toolkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A comprehensive internationalization (i18n) management toolkit for JavaScript/TypeScript projects",
   "main": "00-manage-i18n.js",
   "bin": {
@@ -58,9 +58,10 @@
     "README.md",
     "LICENSE"
   ],
-  "dependencies": {},
-  "devDependencies": {},
-  "peerDependencies": {},
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  },
   "preferGlobal": true,
   "publishConfig": {
     "access": "public"

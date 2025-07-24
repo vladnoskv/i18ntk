@@ -15,30 +15,34 @@
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('./utils/i18n-helper');
+const settingsManager = require('./settings-manager');
 
-// Default configuration
-const DEFAULT_CONFIG = {
-  sourceDir: './',
-  i18nDir: './locales',
-  sourceLanguage: 'en',
-  outputDir: './i18n-reports',
-  excludeDirs: ['node_modules', '.git', 'dist', 'build', '.next', 'coverage'],
-  includeExtensions: ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
-  translationPatterns: [
-    // Common i18n patterns
-    /t\(['"`]([^'"`)]+)['"`]\)/g,                    // t('key')
-    /t\(['"`]([^'"`)]+)['"`],/g,                     // t('key', ...)
-    /\$t\(['"`]([^'"`)]+)['"`]\)/g,                  // $t('key')
-    /i18n\.t\(['"`]([^'"`)]+)['"`]\)/g,              // i18n.t('key')
-    /translate\(['"`]([^'"`)]+)['"`]\)/g,            // translate('key')
-    /useTranslation\(['"`]([^'"`)]+)['"`]\)/g,       // useTranslation('key')
-    /formatMessage\(\{\s*id:\s*['"`]([^'"`)]+)['"`]/g, // formatMessage({ id: 'key' })
-  ]
-};
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    sourceDir: settings.directories?.sourceDir || './',
+    i18nDir: settings.directories?.sourceDir || './locales',
+    sourceLanguage: settings.directories?.sourceLanguage || 'en',
+    outputDir: settings.directories?.outputDir || './i18n-reports',
+    excludeDirs: settings.processing?.excludeDirs || ['node_modules', '.git', 'dist', 'build', '.next', 'coverage'],
+    includeExtensions: settings.processing?.includeExtensions || ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
+    translationPatterns: settings.processing?.translationPatterns || [
+      // Common i18n patterns
+      /t\(['"\`]([^'"\`)]+)['"\`]\)/g,                    // t('key')
+      /t\(['"\`]([^'"\`)]+)['"\`],/g,                     // t('key', ...)
+      /\$t\(['"\`]([^'"\`)]+)['"\`]\)/g,                  // $t('key')
+      /i18n\.t\(['"\`]([^'"\`)]+)['"\`]\)/g,              // i18n.t('key')
+      /translate\(['"\`]([^'"\`)]+)['"\`]\)/g,            // translate('key')
+      /useTranslation\(['"\`]([^'"\`)]+)['"\`]\)/g,       // useTranslation('key')
+      /formatMessage\(\{\s*id:\s*['"\`]([^'"\`)]+)['"\`]/g, // formatMessage({ id: 'key' })
+    ]
+  };
+}
 
 class I18nUsageAnalyzer {
   constructor(config = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = { ...getConfig(), ...config };
     this.sourceDir = path.resolve(this.config.sourceDir);
     this.i18nDir = path.resolve(this.config.i18nDir);
     this.outputDir = path.resolve(this.config.outputDir);

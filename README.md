@@ -21,6 +21,24 @@ The toolkit itself supports multiple languages for its interactive interface and
 
 **All interactive scripts, reports, and error messages are provided in the user's selected language for easier diagnosis and management.**
 
+## 🆕 What's New in Version 1.1
+
+### ✨ Recent Improvements
+
+- **🔧 Enhanced Translation Key Management**: Fixed missing `status.separator` and other status-related translation keys across all supported languages
+- **🌍 Complete Multi-Language Support**: All UI locale files now include comprehensive status reporting keys
+- **📊 Improved Status Reporting**: Enhanced project status display with proper localization
+- **🛠️ Bug Fixes**: Resolved "Translation key not found" errors for status commands
+- **📝 Updated Documentation**: Comprehensive documentation updates for version 1.1
+- **🔄 Better Error Handling**: Improved error messages and validation across all scripts
+
+### 🎯 Key Features Added
+
+- Complete status translation keys for all 7 supported languages (EN, DE, ES, FR, RU, JA, ZH)
+- Enhanced project status reporting with proper formatting
+- Improved translation key validation and error reporting
+- Better consistency across all locale files
+
 ## 📋 Table of Contents
 
 - [🚀 Quick Start](#-quick-start)
@@ -56,6 +74,7 @@ node 00-manage-i18n.js --command=sizing
 node 00-manage-i18n.js --command=status
 node 00-manage-i18n.js --command=workflow
 node 00-manage-i18n.js --command=delete
+node 00-manage-i18n.js --command=settings
 node 00-manage-i18n.js --command=help
 
 # Generate reports in specific language
@@ -220,6 +239,7 @@ node scripts/i18n/package/00-manage-i18n.js --ui-language=es
 node scripts/i18n/package/00-manage-i18n.js --command=status
 node scripts/i18n/package/00-manage-i18n.js --command=workflow
 node scripts/i18n/package/00-manage-i18n.js --command=sizing
+node scripts/i18n/package/00-manage-i18n.js --command=settings
 node scripts/i18n/package/00-manage-i18n.js --help
 
 # Sizing analysis with options
@@ -241,7 +261,8 @@ node scripts/i18n/package/00-manage-i18n.js --command=sizing --sizing-format=jso
 8. 📋 Show project status
 9. 🗑️  Delete all reports
 10. 🌍 Change interface language
-11. ❓ Help
+11. ⚙️  Settings
+12. ❓ Help
 0. 🚪 Exit
 ```
 
@@ -259,7 +280,8 @@ node scripts/i18n/package/00-manage-i18n.js --command=sizing --sizing-format=jso
 8. 📋 Projektstatus anzeigen
 9. 🗑️  Alle Berichte löschen
 10. 🌍 Sprache der Benutzeroberfläche ändern
-11. ❓ Hilfe
+11. ⚙️  Einstellungen
+12. ❓ Hilfe
 0. 🚪 Beenden
 ```
 
@@ -453,6 +475,59 @@ Generates comprehensive project-wide translation summaries.
 - 📈 Progress tracking
 - 🎯 Priority recommendations
 - 📄 Exportable reports
+
+### ⚙️ Web-Based Settings Management
+
+A modern, user-friendly web interface for managing all i18n toolkit settings and configurations.
+
+**Features:**
+- 🌐 **Modern Web Interface** - Intuitive settings management through your browser
+- 🎨 **Light/Dark Theme Support** - Comfortable viewing in any environment
+- 🌍 **Multi-language UI** - Settings interface in your preferred language
+- 💾 **Real-time Validation** - Instant feedback on configuration changes
+- 🔄 **Auto-save & Manual Save** - Flexible saving options with backup creation
+- 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
+- 🔍 **Settings Preview** - Preview changes before applying them
+- ⚡ **Live Configuration** - Changes take effect immediately without restart
+- 🛡️ **Backup & Restore** - Automatic backups before major changes
+- 🔧 **Advanced Settings** - Fine-tune performance and behavior options
+
+**Usage:**
+```bash
+# Open web-based settings interface
+node scripts/i18n/package/00-manage-i18n.js --command=settings
+
+# Or use the interactive menu option 11
+node scripts/i18n/package/00-manage-i18n.js
+# Then select: 11. ⚙️ Settings
+```
+
+**Settings Categories:**
+- **🌍 UI Language & Theme** - Interface language and visual theme
+- **📁 Directories** - Source and output directory paths
+- **🔤 Languages** - Source language and default target languages
+- **📊 Analysis** - Translation size limits and batch processing
+- **🔄 Behavior** - Auto-save, notifications, and validation settings
+- **⚙️ Advanced** - Performance tuning and enterprise features
+
+**Sample Settings Interface:**
+```
+⚙️ I18N SETTINGS MANAGEMENT
+============================================================
+🚀 Starting settings server...
+✅ Settings server started on port 3000
+🌐 Opening settings page in browser...
+✅ Settings page opened: http://localhost:3000
+🔄 Settings server is running. Press Ctrl+C to stop.
+```
+
+The web interface provides:
+- **Real-time form validation** with helpful error messages
+- **Keyboard shortcuts** for quick navigation (Ctrl+S to save, Ctrl+R to reset)
+- **Settings preview** to see changes before applying
+- **Automatic backup creation** before saving changes
+- **Responsive design** that works on all devices
+- **Accessibility features** for screen readers and keyboard navigation
 
 ## ⚙️ Configuration
 

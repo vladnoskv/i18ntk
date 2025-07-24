@@ -1,0 +1,20 @@
+{
+  "reportTypes": {
+    "prospects": "Prospects Report",
+    "activities": "Activities Report",
+    "goals": "Goals Report",
+    "team": "Team Report",
+    "hotLeads": "Hot Leads Report"
+  },
+  "timePeriods": {
+    "allTime": "All Time",
+    "last7days": "Last 7 Days",
+    "last30days": "Last 30 Days",
+    "thisYear": "This Year"
+  },
+  "layouts": {
+    "summary": "Summary Layout",
+    "detailed": "Detailed Layout",
+    "visual_charts": "Visual Charts Layout"
+  }
+}

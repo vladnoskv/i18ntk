@@ -15,26 +15,31 @@
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('./utils/i18n-helper');
+const settingsManager = require('./settings-manager');
 
-// Default configuration
-const DEFAULT_CONFIG = {
-  sourceDir: './locales',
-  sourceLanguage: 'en',
-  notTranslatedMarker: '__NOT_TRANSLATED__',
-  excludeFiles: ['.DS_Store', 'Thumbs.db'],
-  strictMode: false
-};
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    sourceDir: settings.directories?.sourceDir || './locales',
+    sourceLanguage: settings.directories?.sourceLanguage || 'en',
+    notTranslatedMarker: settings.processing?.notTranslatedMarker || '__NOT_TRANSLATED__',
+    excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
+    strictMode: settings.processing?.strictMode || false
+  };
+}
 
 class I18nValidator {
   constructor(config = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = { ...getConfig(), ...config };
     this.sourceDir = path.resolve(this.config.sourceDir);
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     this.errors = [];
     this.warnings = [];
     
-    // Initialize i18n
-    loadTranslations();
+    // Initialize i18n with UI language
+    const uiLanguage = this.config.uiLanguage || 'en';
+    loadTranslations(uiLanguage);
     this.t = t;
   }
 
@@ -52,8 +57,13 @@ class I18nValidator {
           parsed.sourceDir = value;
         } else if (key === 'strict') {
           parsed.strictMode = true;
+        } else if (key === 'ui-language') {
+          parsed.uiLanguage = value;
         } else if (key === 'help') {
           parsed.help = true;
+        } else if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(key)) {
+          // Support shorthand language flags like --de, --fr, etc.
+          parsed.uiLanguage = key;
         }
       }
     });
@@ -381,6 +391,13 @@ class I18nValidator {
       
       // Parse command line arguments
       const args = this.parseArgs();
+      
+      // Handle UI language change
+      if (args.uiLanguage) {
+        loadTranslations(args.uiLanguage);
+        this.t = t;
+      }
+      
       if (args.sourceDir) {
         this.config.sourceDir = args.sourceDir;
         this.sourceDir = path.resolve(this.config.sourceDir);

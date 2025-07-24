@@ -13,15 +13,26 @@
 const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
+const settingsManager = require('./settings-manager');
 
 // Import the i18n helper
 const { loadTranslations, t } = require('./utils/i18n-helper');
 
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    excludeDirs: settings.processing?.excludeDirs || ['node_modules', '.git', 'i18n-reports', 'ui-locales'],
+    includeExtensions: settings.processing?.includeExtensions || ['.js']
+  };
+}
+
 class ConsoleI18nTester {
   constructor() {
+    const config = getConfig();
     this.rootDir = path.resolve(__dirname);
-    this.excludeDirs = ['node_modules', '.git', 'i18n-reports', 'ui-locales'];
-    this.includeExtensions = ['.js'];
+    this.excludeDirs = config.excludeDirs;
+    this.includeExtensions = config.includeExtensions;
     this.targetFiles = [
       '02-analyze-translations.js',
       '03-validate-translations.js',

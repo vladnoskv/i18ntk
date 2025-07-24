@@ -1,0 +1,33 @@
+{
+  "common": {
+    "welcome": "__NOT_TRANSLATED__",
+    "hello": "__NOT_TRANSLATED__",
+    "goodbye": "__NOT_TRANSLATED__",
+    "yes": "__NOT_TRANSLATED__",
+    "no": "__NOT_TRANSLATED__",
+    "save": "__NOT_TRANSLATED__",
+    "cancel": "__NOT_TRANSLATED__",
+    "delete": "__NOT_TRANSLATED__",
+    "edit": "__NOT_TRANSLATED__",
+    "loading": "__NOT_TRANSLATED__"
+  },
+  "navigation": {
+    "home": "__NOT_TRANSLATED__",
+    "about": "__NOT_TRANSLATED__",
+    "contact": "__NOT_TRANSLATED__",
+    "settings": "__NOT_TRANSLATED__"
+  },
+  "offlineTitle": "NOT_TRANSLATED",
+  "offlineMessage": "NOT_TRANSLATED",
+  "tryReconnect": "NOT_TRANSLATED",
+  "logout": "NOT_TRANSLATED",
+  "login": "NOT_TRANSLATED",
+  "amount": "NOT_TRANSLATED",
+  "timePeriods": {
+    "customRange": "NOT_TRANSLATED"
+  },
+  "unknownUser": "NOT_TRANSLATED",
+  "notSet": "NOT_TRANSLATED",
+  "announcement_id": "NOT_TRANSLATED",
+  "last_sign_in_at": "NOT_TRANSLATED"
+}

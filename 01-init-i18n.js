@@ -14,15 +14,19 @@
 
 const fs = require('fs');
 const path = require('path');
+const settingsManager = require('./settings-manager');
 
-// Default configuration
-const DEFAULT_CONFIG = {
-  sourceDir: './locales',
-  sourceLanguage: 'en',
-  defaultLanguages: ['de', 'es', 'fr', 'ru'],
-  notTranslatedMarker: '__NOT_TRANSLATED__',
-  excludeFiles: ['.DS_Store', 'Thumbs.db']
-};
+// Get configuration from settings manager
+function getConfig() {
+  const settings = settingsManager.getSettings();
+  return {
+    sourceDir: settings.directories?.sourceDir || './locales',
+    sourceLanguage: settings.directories?.sourceLanguage || 'en',
+    defaultLanguages: settings.processing?.defaultLanguages || ['de', 'es', 'fr', 'ru'],
+    notTranslatedMarker: settings.processing?.notTranslatedMarker || '__NOT_TRANSLATED__',
+    excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
+  };
+}
 
 // Language configurations with native names
 const LANGUAGE_CONFIG = {
@@ -50,7 +54,7 @@ const LANGUAGE_CONFIG = {
 
 class I18nInitializer {
   constructor(config = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = { ...getConfig(), ...config };
     this.sourceDir = path.resolve(this.config.sourceDir);
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
   }

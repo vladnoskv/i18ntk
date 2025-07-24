@@ -1,44 +1,132 @@
 {
-  "timestamp": "2025-07-24T05:32:58.233Z",
-  "duration": "0.03",
+  "timestamp": "2025-07-24T08:34:58.587Z",
+  "duration": "0.31",
   "summary": {
-    "total": 188,
-    "translated": 187,
-    "hardcoded": 1,
-    "coverage": 99.46808510638297
+    "total": 192,
+    "translated": 180,
+    "hardcoded": 12,
+    "coverage": 93.75
   },
   "fileStats": {
     "02-analyze-translations.js": {
-      "total": 32,
-      "translated": 32,
+      "total": 33,
+      "translated": 33,
       "hardcoded": 0
     },
     "03-validate-translations.js": {
-      "total": 43,
-      "translated": 43,
+      "total": 44,
+      "translated": 44,
       "hardcoded": 0
     },
     "04-check-usage.js": {
-      "total": 43,
-      "translated": 43,
-      "hardcoded": 0
+      "total": 45,
+      "translated": 44,
+      "hardcoded": 1
     },
     "05-complete-translations.js": {
       "total": 34,
-      "translated": 34,
-      "hardcoded": 0
+      "translated": 33,
+      "hardcoded": 1
     },
     "06-analyze-sizing.js": {
       "total": 36,
-      "translated": 35,
-      "hardcoded": 1
+      "translated": 26,
+      "hardcoded": 10
     }
   },
   "hardcodedTexts": [
     {
+      "file": "04-check-usage.js",
+      "line": 574,
+      "statement": "console.error(error.message)",
+      "textContent": "Complex expression",
+      "suggestedKey": "checkUsage.complex_expression",
+      "suggestedReplacement": "console.error(this.t(\"checkUsage.complex_expression\"));"
+    },
+    {
+      "file": "05-complete-translations.js",
+      "line": 449,
+      "statement": "console.error('Fatal error:', error.message)",
+      "textContent": "Fatal error:",
+      "suggestedKey": "completeTranslations.fatal_error",
+      "suggestedReplacement": "console.error(this.t(\"completeTranslations.fatal_error\", { variables })); // Replace 'variables' with actual variables"
+    },
+    {
       "file": "06-analyze-sizing.js",
-      "line": 425,
-      "statement": "console.log(`\nI18n Sizing Analyzer\n\nUsage: node 06-analyze-sizing.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory (default: ./src/locales)",
+      "line": 294,
+      "statement": "console.log(\"=\".repeat(80)",
+      "textContent": "=",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 298,
+      "statement": "console.log(\"-\".repeat(80)",
+      "textContent": "-",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 300,
+      "statement": "console.log(\"-\".repeat(80)",
+      "textContent": "-",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 308,
+      "statement": "console.log(\"-\".repeat(80)",
+      "textContent": "-",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 310,
+      "statement": "console.log(\"-\".repeat(80)",
+      "textContent": "-",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 319,
+      "statement": "console.log(\"-\".repeat(80)",
+      "textContent": "-",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 321,
+      "statement": "console.log(\"-\".repeat(80)",
+      "textContent": "-",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 332,
+      "statement": "console.log(\"-\".repeat(80)",
+      "textContent": "-",
+      "suggestedKey": "sizing.message",
+      "suggestedReplacement": "console.log(this.t(\"sizing.message\"));"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 418,
+      "statement": "console.log(JSON.stringify(this.stats, null, 2)",
+      "textContent": "Complex expression",
+      "suggestedKey": "sizing.complex_expression",
+      "suggestedReplacement": "console.log(this.t(\"sizing.complex_expression\", { variables })); // Replace 'variables' with actual variables"
+    },
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 442,
+      "statement": "console.log(`\nI18n Sizing Analyzer\n\nUsage: node 06-analyze-sizing.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory containing translation files (default: ./src/locales)",
       "textContent": "Complex expression",
       "suggestedKey": "sizing.complex_expression",
       "suggestedReplacement": "console.log(this.t(\"sizing.complex_expression\"));"
