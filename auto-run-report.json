@@ -1,31 +1,52 @@
 {
-  "timestamp": "2025-07-24T09:43:58.248Z",
+  "timestamp": "2025-07-24T10:59:01.995Z",
   "summary": {
-    "successful": 3,
+    "successful": 6,
     "failed": 0,
     "requiredFailed": 0
   },
   "steps": [
     {
       "step": "Analyze Translations",
-      "command": "node 02-analyze-translations.js",
+      "command": "node i18ntk-analyze.js",
       "status": "success",
-      "duration": 115,
+      "duration": 167,
       "required": true
     },
     {
       "step": "Validate Translations",
-      "command": "node 03-validate-translations.js",
+      "command": "node i18ntk-validate.js",
       "status": "success",
-      "duration": 111,
+      "duration": 486,
       "required": true
     },
     {
       "step": "Check Usage",
-      "command": "node 04-check-usage.js",
+      "command": "node i18ntk-usage.js",
       "status": "success",
-      "duration": 126,
+      "duration": 238,
       "required": false
+    },
+    {
+      "step": "Complete Translations",
+      "command": "node i18ntk-complete.js",
+      "status": "success",
+      "duration": 316,
+      "required": false
+    },
+    {
+      "step": "Analyze Sizing",
+      "command": "node i18ntk-sizing.js",
+      "status": "success",
+      "duration": 272,
+      "required": false
+    },
+    {
+      "step": "Generate Summary",
+      "command": "node i18ntk-summary.js",
+      "status": "success",
+      "duration": 206,
+      "required": true
     }
   ]
 }

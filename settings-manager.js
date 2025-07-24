@@ -10,27 +10,74 @@ class SettingsManager {
     constructor() {
         this.configFile = path.join(__dirname, 'user-config.json');
         this.defaultConfig = {
-            language: 'en',
-            sizeLimit: null,
-            sourceDir: './locales',
-            sourceLanguage: 'en',
-            defaultLanguages: ['de', 'es', 'fr', 'ru'],
-            outputDir: './i18n-reports',
-            reportLanguage: 'auto',
-            theme: 'light',
-            autoSave: true,
-            notifications: true,
+            // UI Language Settings
+            language: 'en', // Default: 'en' | Options: 'en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'
+            
+            // File Size Limits
+            sizeLimit: null, // Default: null (no limit) | Example: 1048576 (1MB in bytes)
+            
+            // Directory Configuration
+            sourceDir: './locales', // Default: './locales' | Example: './src/i18n/locales'
+            sourceLanguage: 'en', // Default: 'en' | Recommended: Use your primary development language
+            defaultLanguages: ['de', 'es', 'fr', 'ru'], // Default target languages | Example: ['de', 'es', 'fr', 'ru', 'ja', 'zh']
+            outputDir: './i18n-reports', // Default: './i18n-reports' | Example: './reports/i18n'
+            
+            // Report Settings
+            reportLanguage: 'auto', // Default: 'auto' (matches UI language) | Options: 'auto', 'en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'
+            
+            // UI Preferences
+            theme: 'light', // Default: 'light' | Options: 'light', 'dark'
+            
+            // Behavior Settings
+            autoSave: true, // Default: true | Automatically save settings changes
+            
+            // Notification Settings
+            notifications: {
+                enabled: true, // Default: true | Enable/disable all notifications
+                types: {
+                    success: true, // Show success notifications (e.g., "Translation completed")
+                    warnings: true, // Show warning notifications (e.g., "Missing translations found")
+                    errors: true, // Show error notifications (e.g., "File not found")
+                    progress: true // Show progress notifications during long operations
+                },
+                sound: false, // Default: false | Play notification sounds
+                desktop: false // Default: false | Show desktop notifications (requires permission)
+            },
+            
+            // Date and Time Formatting
+            dateFormat: 'DD/MM/YYYY', // Default: 'DD/MM/YYYY' | Options: 'DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD', 'DD.MM.YYYY'
+            timeFormat: '24h', // Default: '24h' | Options: '24h', '12h'
+            timezone: 'auto', // Default: 'auto' (system timezone) | Example: 'UTC', 'Europe/London', 'America/New_York'
+            
+            // Processing Settings
+            processing: {
+                notTranslatedMarker: 'NOT_TRANSLATED', // Default marker for untranslated content
+                excludeFiles: ['.DS_Store', 'Thumbs.db', '*.tmp'], // Files to ignore during processing
+                excludeDirs: ['node_modules', '.git', 'dist', 'build'], // Directories to ignore
+                includeExtensions: ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'], // File extensions to scan
+                strictMode: false, // Default: false | Enable strict validation (fails on warnings)
+                defaultLanguages: ['de', 'es', 'fr', 'ru'], // Languages to create when initializing
+                translationPatterns: [ // Patterns to detect translation keys in code
+                    /t\(['"`]([^'"`]+)['"`]\)/g, // t('key')
+                    /\$t\(['"`]([^'"`]+)['"`]\)/g, // $t('key')
+                    /i18n\.t\(['"`]([^'"`]+)['"`]\)/g // i18n.t('key')
+                ]
+            },
+            
+            // Advanced Performance Settings
             advanced: {
-                batchSize: 100,
-                maxConcurrentFiles: 10,
-                enableProgressBars: true,
-                enableColorOutput: true,
-                strictMode: false,
-                enableAuditLog: false,
-                backupBeforeChanges: true,
-                validateOnSave: true,
-                sizingThreshold: 50,
-                sizingFormat: 'table'
+                batchSize: 100, // Default: 100 | Recommended: 50-200 | Number of items processed per batch
+                maxConcurrentFiles: 10, // Default: 10 | Recommended: 5-20 | Maximum files processed simultaneously
+                enableProgressBars: true, // Default: true | Show progress bars for long operations
+                enableColorOutput: true, // Default: true | Use colored console output
+                strictMode: false, // Default: false | Enable strict validation mode
+                enableAuditLog: false, // Default: false | Track all translation changes (creates audit.log)
+                backupBeforeChanges: true, // Default: true | Create backups before modifications
+                validateOnSave: true, // Default: true | Auto-validate translations after saving
+                sizingThreshold: 50, // Default: 50% | Threshold for size variation warnings
+                sizingFormat: 'table', // Default: 'table' | Options: 'table', 'json', 'csv'
+                memoryLimit: '512MB', // Default: '512MB' | Memory limit for large file processing
+                timeout: 30000 // Default: 30000ms (30s) | Timeout for individual operations
             }
         };
         this.settings = this.loadSettings();
@@ -62,7 +109,22 @@ class SettingsManager {
     mergeWithDefaults(loadedSettings) {
         const merged = { ...this.defaultConfig, ...loadedSettings };
         
-        // Ensure advanced settings are properly merged
+        // Ensure nested objects are properly merged
+        if (loadedSettings.notifications) {
+            merged.notifications = { 
+                ...this.defaultConfig.notifications, 
+                ...loadedSettings.notifications,
+                types: {
+                    ...this.defaultConfig.notifications.types,
+                    ...(loadedSettings.notifications.types || {})
+                }
+            };
+        }
+        
+        if (loadedSettings.processing) {
+            merged.processing = { ...this.defaultConfig.processing, ...loadedSettings.processing };
+        }
+        
         if (loadedSettings.advanced) {
             merged.advanced = { ...this.defaultConfig.advanced, ...loadedSettings.advanced };
         }
@@ -204,22 +266,75 @@ class SettingsManager {
                 return false;
             }
             
+            // Validate date format
+            const validDateFormats = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD', 'DD.MM.YYYY'];
+            if (settings.dateFormat && !validDateFormats.includes(settings.dateFormat)) {
+                console.error(`❌ Invalid dateFormat: ${settings.dateFormat}. Valid options: ${validDateFormats.join(', ')}`);
+                return false;
+            }
+            
+            // Validate time format
+            const validTimeFormats = ['24h', '12h'];
+            if (settings.timeFormat && !validTimeFormats.includes(settings.timeFormat)) {
+                console.error(`❌ Invalid timeFormat: ${settings.timeFormat}. Valid options: ${validTimeFormats.join(', ')}`);
+                return false;
+            }
+            
+            // Validate notifications settings
+            if (settings.notifications && typeof settings.notifications === 'object') {
+                if (settings.notifications.types && typeof settings.notifications.types !== 'object') {
+                    console.error('❌ notifications.types must be an object');
+                    return false;
+                }
+            }
+            
+            // Validate processing settings
+            if (settings.processing && typeof settings.processing === 'object') {
+                const processing = settings.processing;
+                
+                if (processing.excludeFiles && !Array.isArray(processing.excludeFiles)) {
+                    console.error('❌ processing.excludeFiles must be an array');
+                    return false;
+                }
+                
+                if (processing.excludeDirs && !Array.isArray(processing.excludeDirs)) {
+                    console.error('❌ processing.excludeDirs must be an array');
+                    return false;
+                }
+                
+                if (processing.includeExtensions && !Array.isArray(processing.includeExtensions)) {
+                    console.error('❌ processing.includeExtensions must be an array');
+                    return false;
+                }
+            }
+            
             // Validate advanced settings if present
             if (settings.advanced) {
                 const advanced = settings.advanced;
                 
                 if (advanced.batchSize && (typeof advanced.batchSize !== 'number' || advanced.batchSize < 1)) {
-                    console.error('❌ Invalid batchSize');
+                    console.error('❌ Invalid batchSize: must be a positive number');
                     return false;
                 }
                 
                 if (advanced.maxConcurrentFiles && (typeof advanced.maxConcurrentFiles !== 'number' || advanced.maxConcurrentFiles < 1)) {
-                    console.error('❌ Invalid maxConcurrentFiles');
+                    console.error('❌ Invalid maxConcurrentFiles: must be a positive number');
                     return false;
                 }
                 
                 if (advanced.sizingThreshold && (typeof advanced.sizingThreshold !== 'number' || advanced.sizingThreshold < 0)) {
-                    console.error('❌ Invalid sizingThreshold');
+                    console.error('❌ Invalid sizingThreshold: must be a non-negative number');
+                    return false;
+                }
+                
+                if (advanced.timeout && (typeof advanced.timeout !== 'number' || advanced.timeout < 1000)) {
+                    console.error('❌ Invalid timeout: must be at least 1000ms');
+                    return false;
+                }
+                
+                const validSizingFormats = ['table', 'json', 'csv'];
+                if (advanced.sizingFormat && !validSizingFormats.includes(advanced.sizingFormat)) {
+                    console.error(`❌ Invalid sizingFormat: ${advanced.sizingFormat}. Valid options: ${validSizingFormats.join(', ')}`);
                     return false;
                 }
             }

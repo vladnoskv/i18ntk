@@ -13,7 +13,61 @@
   "reportLanguage": "auto",
   "theme": "light",
   "autoSave": true,
-  "notifications": true,
+  "directories": {
+    "sourceDir": "./locales",
+    "sourceLanguage": "en",
+    "outputDir": "./i18n-reports",
+    "uiLocalesDir": "./ui-locales",
+    "configFile": "./user-config.json"
+  },
+  "notifications": {
+    "enabled": true,
+    "types": {
+      "success": true,
+      "warnings": true,
+      "errors": true,
+      "progress": true
+    },
+    "sound": false,
+    "desktop": false
+  },
+  "dateFormat": "DD/MM/YYYY",
+  "timeFormat": "24h",
+  "timezone": "auto",
+  "processing": {
+    "notTranslatedMarker": "NOT_TRANSLATED",
+    "excludeFiles": [
+      ".DS_Store",
+      "Thumbs.db",
+      "*.tmp"
+    ],
+    "excludeDirs": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build"
+    ],
+    "includeExtensions": [
+      ".js",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".vue",
+      ".svelte"
+    ],
+    "strictMode": false,
+    "defaultLanguages": [
+      "de",
+      "es",
+      "fr",
+      "ru"
+    ],
+    "translationPatterns": [
+      {},
+      {},
+      {}
+    ]
+  },
   "advanced": {
     "batchSize": 100,
     "maxConcurrentFiles": 10,
@@ -24,10 +78,13 @@
     "backupBeforeChanges": false,
     "validateOnSave": true,
     "sizingThreshold": 50,
-    "sizingFormat": "table"
+    "sizingFormat": "table",
+    "memoryLimit": "512MB",
+    "timeout": 30000
   },
   "ui": {
     "language": "en",
-    "theme": "WHITE"
+    "theme": "white",
+    "dateFormat": "DD/MM/YYYY"
   }
 }

@@ -6,10 +6,10 @@
  * and structural integrity across all languages.
  * 
  * Usage:
- *   node scripts/i18n/03-validate-translations.js
- *   node scripts/i18n/03-validate-translations.js --strict
- *   node scripts/i18n/03-validate-translations.js --language=de
- *   node scripts/i18n/03-validate-translations.js --source-dir=./src/i18n/locales
+ *   node i18ntk-validate.js
+ *   node i18ntk-validate.js --strict
+ *   node i18ntk-validate.js --language=de
+ *   node i18ntk-validate.js --source-dir=./src/i18n/locales
  */
 
 const fs = require('fs');
@@ -362,11 +362,11 @@ class I18nValidator {
   // Check for unused translation keys (basic implementation)
   checkUnusedKeys(language) {
     // Note: For comprehensive unused key detection, use the dedicated
-    // usage analysis script: 04-check-usage.js
+    // usage analysis script: i18ntk-usage.js
     const warnings = [];
     
     // This method provides basic validation only
-    // For detailed usage analysis, run: node 04-check-usage.js
+    // For detailed usage analysis, run: node i18ntk-usage.js
     
     return warnings;
   }

@@ -1,25 +1,38 @@
 {
   "name": "i18n-management-toolkit",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "A comprehensive internationalization (i18n) management toolkit for JavaScript/TypeScript projects",
-  "main": "00-manage-i18n.js",
+  "main": "i18ntk-manage.js",
   "bin": {
-    "i18n-manage": "./00-manage-i18n.js",
-    "i18n-init": "./01-init-i18n.js",
-    "i18n-analyze": "./02-analyze-translations.js",
-    "i18n-validate": "./03-validate-translations.js",
-    "i18n-usage": "./04-check-usage.js",
-    "i18n-complete": "./05-complete-translations.js"
+    "i18ntk-manage": "./i18ntk-manage.js",
+    "i18ntk-init": "./i18ntk-init.js",
+    "i18ntk-analyze": "./i18ntk-analyze.js",
+    "i18ntk-validate": "./i18ntk-validate.js",
+    "i18ntk-usage": "./i18ntk-usage.js",
+    "i18ntk-complete": "./i18ntk-complete.js",
+    "i18ntk-sizing": "./i18ntk-sizing.js",
+    "i18ntk-summary": "./i18ntk-summary.js"
   },
   "scripts": {
-    "start": "node 00-manage-i18n.js",
-    "init": "node 01-init-i18n.js",
-    "analyze": "node 02-analyze-translations.js",
-    "validate": "node 03-validate-translations.js",
-    "usage": "node 04-check-usage.js",
-    "complete": "node 05-complete-translations.js",
-    "workflow": "node 00-manage-i18n.js --command=workflow",
-    "status": "node 00-manage-i18n.js --command=status",
+    "start": "node i18ntk-manage.js",
+    "i18ntk": "node auto-run.js",
+    "i18ntk:init": "node i18ntk-init.js",
+    "i18ntk:analyze": "node i18ntk-analyze.js",
+    "i18ntk:validate": "node i18ntk-validate.js",
+    "i18ntk:usage": "node i18ntk-usage.js",
+    "i18ntk:complete": "node i18ntk-complete.js",
+    "i18ntk:sizing": "node i18ntk-sizing.js",
+    "i18ntk:sizing:detailed": "node i18ntk-sizing.js --detailed",
+    "i18ntk:summary": "node i18ntk-summary.js",
+    "i18ntk:manage": "node i18ntk-manage.js",
+    "workflow": "node auto-run.js",
+    "init": "node i18ntk-init.js",
+    "analyze": "node i18ntk-analyze.js",
+    "validate": "node i18ntk-validate.js",
+    "usage": "node i18ntk-usage.js",
+    "complete": "node i18ntk-complete.js",
+    "sizing": "node i18ntk-sizing.js",
+    "summary": "node i18ntk-summary.js",
     "full-coverage": "npm run complete && npm run analyze"
   },
   "keywords": [
@@ -37,19 +50,19 @@
     "cli"
   ],
   "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com",
-    "url": "https://github.com/yourusername"
+    "name": "Vladimir Noskov",
+    "email": "vladnoskv@gmail.com",
+    "url": "https://github.com/vladnoskv"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/i18n-management-toolkit.git"
+    "url": "https://github.com/vladnoskv/i18n-management-toolkit-main.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/i18n-management-toolkit/issues"
+    "url": "https://github.com/vladnoskv/i18n-management-toolkit-main/issues"
   },
-  "homepage": "https://github.com/yourusername/i18n-management-toolkit#readme",
+  "homepage": "https://github.com/vladnoskv/i18n-management-toolkit-main#readme",
   "engines": {
     "node": ">=12.0.0"
   },
@@ -68,6 +81,6 @@
   },
   "funding": {
     "type": "github",
-    "url": "https://github.com/sponsors/yourusername"
+    "url": "https://github.com/sponsors/vladnoskv"
   }
 }

@@ -6,18 +6,21 @@
 const { execSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
+const settingsManager = require('./settings-manager');
 
 class AutoRunner {
     constructor() {
         this.steps = [
-            { name: 'Analyze Translations', command: 'node 02-analyze-translations.js', required: true },
-            { name: 'Validate Translations', command: 'node 03-validate-translations.js', required: true },
-            { name: 'Check Usage', command: 'node 04-check-usage.js', required: false },
-            { name: 'Complete Translations', command: 'node 05-complete-translations.js', required: false },
-            { name: 'Analyze Sizing', command: 'node 06-analyze-sizing.js', required: false },
-            { name: 'Generate Summary', command: 'node 07-summary-report.js', required: true }
+            { name: 'Analyze Translations', command: 'node i18ntk-analyze.js', required: true },
+            { name: 'Validate Translations', command: 'node i18ntk-validate.js', required: true },
+            { name: 'Check Usage', command: 'node i18ntk-usage.js', required: false },
+            { name: 'Complete Translations', command: 'node i18ntk-complete.js', required: false },
+            { name: 'Analyze Sizing', command: 'node i18ntk-sizing.js', required: false },
+            { name: 'Generate Summary', command: 'node i18ntk-summary.js', required: true }
         ];
         this.results = [];
+        this.settingsManager = settingsManager;
     }
 
     /**
@@ -33,7 +36,7 @@ class AutoRunner {
         for (const file of requiredFiles) {
             if (!fs.existsSync(file)) {
                 console.log(`❌ Missing required file/directory: ${file}`);
-                console.log('🔧 Please run initialization first: node 01-init-i18n.js');
+                console.log('🔧 Please run initialization first: node i18ntk-init.js');
                 return false;
             }
         }
@@ -203,6 +206,69 @@ class AutoRunner {
     }
 
     /**
+     * Prompt for custom settings configuration
+     */
+    async promptForSettings() {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        const question = (prompt) => new Promise((resolve) => {
+            rl.question(prompt, resolve);
+        });
+
+        console.log('\n🔧 Custom Settings Configuration\n');
+        console.log('Press Enter to use default values or type new values:\n');
+
+        try {
+            const currentSettings = this.settingsManager.getSettings();
+            const newSettings = { ...currentSettings };
+
+            // Source directory
+      const sourceDir = await question(`Source directory [${currentSettings.sourceDir || './locales'}]: `);
+      if (sourceDir.trim()) {
+        newSettings.sourceDir = sourceDir.trim();
+      }
+
+      // Source language
+      const sourceLang = await question(`Source language [${currentSettings.sourceLanguage || 'en'}]: `);
+      if (sourceLang.trim()) {
+        newSettings.sourceLanguage = sourceLang.trim();
+      }
+
+      // Target languages
+      const defaultLangs = currentSettings.defaultLanguages || ['de', 'es', 'fr', 'ru'];
+      const targetLangs = await question(`Target languages (comma-separated) [${defaultLangs.join(', ')}]: `);
+      if (targetLangs.trim()) {
+        newSettings.defaultLanguages = targetLangs.split(',').map(lang => lang.trim());
+      }
+
+      // Translation marker
+      const marker = await question(`Translation marker [${currentSettings.processing?.notTranslatedMarker || 'NOT_TRANSLATED'}]: `);
+      if (marker.trim()) {
+        if (!newSettings.processing) newSettings.processing = {};
+        newSettings.processing.notTranslatedMarker = marker.trim();
+      }
+
+      // Output directory
+      const outputDir = await question(`Output directory [${currentSettings.outputDir || './i18n-reports'}]: `);
+      if (outputDir.trim()) {
+        newSettings.outputDir = outputDir.trim();
+      }
+
+            // Save settings
+            this.settingsManager.saveSettings(newSettings);
+            console.log('\n✅ Settings updated successfully!\n');
+
+        } catch (error) {
+            console.error('❌ Error configuring settings:', error.message);
+        } finally {
+            rl.close();
+        }
+    }
+
+    /**
      * Show help information
      */
     showHelp() {
@@ -210,6 +276,7 @@ class AutoRunner {
         console.log('=' .repeat(40));
         console.log('\nUsage:');
         console.log('  node auto-run.js                    # Run all steps');
+        console.log('  node auto-run.js --config           # Configure settings first');
         console.log('  node auto-run.js --steps 1,2,3      # Run specific steps');
         console.log('  node auto-run.js --help             # Show this help');
         console.log('\nAvailable Steps:');
@@ -218,6 +285,7 @@ class AutoRunner {
             console.log(`  ${index + 1}. ${step.name} ${required}`);
         });
         console.log('\nExamples:');
+        console.log('  node auto-run.js --config           # Configure settings first');
         console.log('  node auto-run.js --steps 1,2        # Run only analyze and validate');
         console.log('  node auto-run.js --steps 6          # Run only summary report');
     }
@@ -229,6 +297,10 @@ function parseArgs() {
     
     if (args.includes('--help') || args.includes('-h')) {
         return { action: 'help' };
+    }
+    
+    if (args.includes('--config') || args.includes('-c')) {
+        return { action: 'config' };
     }
     
     const stepsIndex = args.indexOf('--steps');
@@ -251,6 +323,15 @@ if (require.main === module) {
     switch (args.action) {
         case 'help':
             runner.showHelp();
+            break;
+        case 'config':
+            runner.promptForSettings().then(() => {
+                console.log('\n🚀 Configuration complete! You can now run the auto-runner with:');
+                console.log('  node auto-run.js\n');
+            }).catch(error => {
+                console.error('❌ Configuration failed:', error.message);
+                process.exit(1);
+            });
             break;
         case 'steps':
             if (args.steps.length === 0) {

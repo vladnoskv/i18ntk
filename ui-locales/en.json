@@ -49,7 +49,7 @@
     "workflowCompleted": "✅ Full workflow completed successfully!"
   },
   "analyzeTranslations": {
-    "help_message": "\nI18n Translation Analyzer\n\nUsage: node 02-analyze-translations.js [options]\n\nOptions:\n  --language <lang>      Analyze specific language (default: all)\n  --source-dir <dir>     Source directory (default: ./src/locales)\n  --output-reports       Generate detailed reports\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node 02-analyze-translations.js --output-reports\n  node 02-analyze-translations.js --language=de --output-reports\n  node 02-analyze-translations.js --source-dir=./locales --output-dir=./analysis\n",
+    "help_message": "\nI18n Translation Analyzer\n\nUsage: node i18ntk-analyze.js [options]\n\nOptions:\n  --language <lang>      Analyze specific language (default: all)\n  --source-dir <dir>     Source directory (default: ./src/locales)\n  --output-reports       Generate detailed reports\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-analyze.js --output-reports\n  node i18ntk-analyze.js --language=de --output-reports\n  node i18ntk-analyze.js --source-dir=./locales --output-dir=./analysis\n",
     "i18n_translation_analysis": "🔍 I18N TRANSLATION ANALYSIS",
     "message": "=",
     "complex_expression": "Complex expression",
@@ -75,10 +75,10 @@
     "totalmissing_total_translation": "⚠️  {{totalMissing}} total translations needed across all languages",
     "next_step_1": "1. Review the analysis results above",
     "2_translate_missing_values_in_": "2. Translate missing values in language files",
-    "3_run_node_scriptsi18n03valida": "3. Run: node 03-validate-translations.js"
+    "3_run_node_scriptsi18n03valida": "3. Run: node i18ntk-validate.js"
   },
   "validateTranslations": {
-    "help_message": "\nI18n Translation Validator\n\nUsage: node 03-validate-translations.js [options]\n\nOptions:\n  --language <lang>      Validate specific language (default: all)\n  --source-dir <dir>     Source directory (default: ./src/locales)\n  --strict               Enable strict mode (warnings become errors)\n  --help                 Show this help\n\nExamples:\n  node 03-validate-translations.js\n  node 03-validate-translations.js --language=de\n  node 03-validate-translations.js --source-dir=./locales --strict\n",
+    "help_message": "\nI18n Translation Validator\n\nUsage: node i18ntk-validate.js [options]\n\nOptions:\n  --language <lang>      Validate specific language (default: all)\n  --source-dir <dir>     Source directory (default: ./src/locales)\n  --strict               Enable strict mode (warnings become errors)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-validate.js\n  node i18ntk-validate.js --language=de\n  node i18ntk-validate.js --source-dir=./locales --strict\n",
     "title": "🔍 I18N TRANSLATION VALIDATION",
     "deletedOldReport": "🗑️  Deleted old validation report",
     "sourceDirectory": "📁 Source directory: {{dir}}",
@@ -147,10 +147,10 @@
     "found_languages": "Found languages: {{languages}}",
     "analysis_completed": "✅ Analysis completed in {{duration}}ms",
     "analysis_failed": "❌ Sizing analysis failed: {{errorMessage}}",
-    "help_message": "I18n Sizing Analyzer\n\nUsage: node 06-analyze-sizing.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory containing translation files (default: ./locales)\n  --languages <langs>    Comma-separated list of languages to analyze (default: all)\n  --output-report        Generate detailed sizing report\n  --format <format>      Output format: json, csv, table (default: table)\n  --threshold <number>   Size difference threshold for warnings (default: 20%)\n  --help                 Show this help message\n\nExamples:\n  node 06-analyze-sizing.js --output-report\n  node 06-analyze-sizing.js --languages=en,de,fr --format=json\n  node 06-analyze-sizing.js --threshold=30 --output-report"
+    "help_message": "I18n Sizing Analyzer\n\nUsage: node i18ntk-sizing.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory containing translation files (default: ./locales)\n  --languages <langs>    Comma-separated list of languages to analyze (default: all)\n  --output-report        Generate detailed sizing report\n  --format <format>      Output format: json, csv, table (default: table)\n  --threshold <number>   Size difference threshold for warnings (default: 20%)\n  --help                 Show this help message\n\nExamples:\n  node i18ntk-sizing.js --output-report\n  node i18ntk-sizing.js --languages=en,de,fr --format=json\n  node i18ntk-sizing.js --threshold=30 --output-report"
   },
   "checkUsage": {
-    "help_message": "\nI18n Usage Analyzer\n\nUsage: node 04-check-usage.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --i18n-dir <dir>       I18n directory (default: ./src/locales)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node 04-check-usage.js --output-report\n  node 04-check-usage.js --source-dir=./app --i18n-dir=./locales\n  node 04-check-usage.js --output-dir=./analysis --output-report\n",
+    "help_message": "\nI18n Usage Analyzer\n\nUsage: node i18ntk-usage.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --i18n-dir <dir>       I18n directory (default: ./src/locales)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
     "title": "🔍 I18N USAGE ANALYSIS",
     "i18n_usage_analysis": "🔍 I18N USAGE ANALYSIS",
     "source_directory": "📁 Source directory: {{sourceDir}}",

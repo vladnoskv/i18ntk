@@ -1,21 +1,21 @@
 {
   "common": {
-    "welcome": "__NOT_TRANSLATED__",
-    "hello": "__NOT_TRANSLATED__",
-    "goodbye": "__NOT_TRANSLATED__",
-    "yes": "__NOT_TRANSLATED__",
-    "no": "__NOT_TRANSLATED__",
-    "save": "__NOT_TRANSLATED__",
-    "cancel": "__NOT_TRANSLATED__",
-    "delete": "__NOT_TRANSLATED__",
-    "edit": "__NOT_TRANSLATED__",
-    "loading": "__NOT_TRANSLATED__"
+    "welcome": "NOT_TRANSLATED",
+  "hello": "NOT_TRANSLATED",
+  "goodbye": "NOT_TRANSLATED",
+  "yes": "NOT_TRANSLATED",
+  "no": "NOT_TRANSLATED",
+  "save": "NOT_TRANSLATED",
+  "cancel": "NOT_TRANSLATED",
+  "delete": "NOT_TRANSLATED",
+  "edit": "NOT_TRANSLATED",
+  "loading": "NOT_TRANSLATED"
   },
   "navigation": {
-    "home": "__NOT_TRANSLATED__",
-    "about": "__NOT_TRANSLATED__",
-    "contact": "__NOT_TRANSLATED__",
-    "settings": "__NOT_TRANSLATED__"
+    "home": "NOT_TRANSLATED",
+    "about": "NOT_TRANSLATED",
+    "contact": "NOT_TRANSLATED",
+    "settings": "NOT_TRANSLATED"
   },
   "offlineTitle": "NOT_TRANSLATED",
   "offlineMessage": "NOT_TRANSLATED",

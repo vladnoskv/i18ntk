@@ -17,11 +17,12 @@
  *   node 06-analyze-sizing.js [options]
  *   
  * Options:
- *   --source-dir <dir>     Source directory containing translation files (default: ./src/locales)
+ *   --source-dir <dir>     Source directory containing translation files (default: ./locales)
  *   --languages <langs>    Comma-separated list of languages to analyze (default: all)
  *   --output-report        Generate detailed sizing report
  *   --format <format>      Output format: json, csv, table (default: table)
  *   --threshold <number>   Size difference threshold for warnings (default: 50%)
+ *   --detailed             Generate detailed report with more information
  *   --help                 Show this help message
  * 
  * Examples:
@@ -40,8 +41,8 @@ const settingsManager = require('./settings-manager');
 function getConfig() {
   const settings = settingsManager.getSettings();
   return {
-    sourceDir: settings.directories?.sourceDir || './src/locales',
-    outputDir: settings.directories?.outputDir || './reports',
+    sourceDir: settings.sourceDir || './locales',
+    outputDir: settings.outputDir || './i18n-reports',
     threshold: settings.processing?.sizingThreshold || 50
   };
 }
@@ -74,16 +75,38 @@ class I18nSizingAnalyzer {
       throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
 
-    const files = fs.readdirSync(this.sourceDir)
-      .filter(file => file.endsWith('.json'))
-      .map(file => {
-        const lang = path.basename(file, '.json');
-        return {
+    const files = [];
+    const items = fs.readdirSync(this.sourceDir);
+    
+    // Check for nested language directories
+    for (const item of items) {
+      const itemPath = path.join(this.sourceDir, item);
+      const stat = fs.statSync(itemPath);
+      
+      if (stat.isDirectory()) {
+        // This is a language directory, combine all JSON files
+        const langFiles = fs.readdirSync(itemPath)
+          .filter(file => file.endsWith('.json'))
+          .map(file => path.join(itemPath, file));
+        
+        if (langFiles.length > 0) {
+          files.push({
+            language: item,
+            file: `${item}/*.json`,
+            path: itemPath,
+            files: langFiles
+          });
+        }
+      } else if (item.endsWith('.json')) {
+        // Direct JSON file in root
+        const lang = path.basename(item, '.json');
+        files.push({
           language: lang,
-          file: file,
-          path: path.join(this.sourceDir, file)
-        };
-      });
+          file: item,
+          path: itemPath
+        });
+      }
+    }
 
     if (this.languages.length > 0) {
       return files.filter(f => this.languages.includes(f.language));
@@ -96,18 +119,50 @@ class I18nSizingAnalyzer {
   analyzeFileSizes(files) {
     console.log(this.t("sizing.analyzing_file_sizes"));
     
-    files.forEach(({ language, file, path: filePath }) => {
-      const stats = fs.statSync(filePath);
-      const content = fs.readFileSync(filePath, 'utf8');
-      
-      this.stats.files[language] = {
-        file,
-        size: stats.size,
-        sizeKB: (stats.size / 1024).toFixed(2),
-        lines: content.split('\n').length,
-        characters: content.length,
-        lastModified: stats.mtime
-      };
+    files.forEach(({ language, file, path: filePath, files: langFiles }) => {
+      if (langFiles) {
+        // Handle nested directory structure
+        let totalSize = 0;
+        let totalLines = 0;
+        let totalCharacters = 0;
+        let lastModified = new Date(0);
+        
+        langFiles.forEach(langFile => {
+          const stats = fs.statSync(langFile);
+          const content = fs.readFileSync(langFile, 'utf8');
+          
+          totalSize += stats.size;
+          totalLines += content.split('\n').length;
+          totalCharacters += content.length;
+          if (stats.mtime > lastModified) {
+            lastModified = stats.mtime;
+          }
+        });
+        
+        this.stats.files[language] = {
+          file,
+          size: totalSize,
+          sizeKB: (totalSize / 1024).toFixed(2),
+          lines: totalLines,
+          characters: totalCharacters,
+          lastModified: lastModified,
+          fileCount: langFiles.length
+        };
+      } else {
+        // Handle single file structure
+        const stats = fs.statSync(filePath);
+        const content = fs.readFileSync(filePath, 'utf8');
+        
+        this.stats.files[language] = {
+          file,
+          size: stats.size,
+          sizeKB: (stats.size / 1024).toFixed(2),
+          lines: content.split('\n').length,
+          characters: content.length,
+          lastModified: stats.mtime,
+          fileCount: 1
+        };
+      }
     });
   }
 
@@ -115,15 +170,28 @@ class I18nSizingAnalyzer {
   analyzeTranslationContent(files) {
     console.log(this.t("sizing.analyzing_translation_content"));
     
-    files.forEach(({ language, path: filePath }) => {
+    files.forEach(({ language, path: filePath, files: langFiles }) => {
       try {
-        const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        const analysis = this.analyzeTranslationObject(content, '');
+        let combinedContent = {};
+        
+        if (langFiles) {
+          // Handle nested directory structure - combine all JSON files
+          langFiles.forEach(langFile => {
+            const fileContent = JSON.parse(fs.readFileSync(langFile, 'utf8'));
+            const fileName = path.basename(langFile, '.json');
+            combinedContent[fileName] = fileContent;
+          });
+        } else {
+          // Handle single file structure
+          combinedContent = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        }
+        
+        const analysis = this.analyzeTranslationObject(combinedContent, '');
         
         this.stats.languages[language] = {
           totalKeys: analysis.keyCount,
           totalCharacters: analysis.charCount,
-          averageKeyLength: analysis.charCount / analysis.keyCount,
+          averageKeyLength: analysis.keyCount > 0 ? analysis.charCount / analysis.keyCount : 0,
           maxKeyLength: analysis.maxLength,
           minKeyLength: analysis.minLength,
           emptyKeys: analysis.emptyKeys,
@@ -445,11 +513,12 @@ I18n Sizing Analyzer
 Usage: node 06-analyze-sizing.js [options]
 
 Options:
-  --source-dir <dir>     Source directory containing translation files (default: ./src/locales)
+  --source-dir <dir>     Source directory containing translation files (default: ./locales)
   --languages <langs>    Comma-separated list of languages to analyze (default: all)
   --output-report        Generate detailed sizing report
   --format <format>      Output format: json, csv, table (default: table)
   --threshold <number>   Size difference threshold for warnings (default: 50%)
+  --detailed             Generate detailed report with more information
   --help                 Show this help message
 
 Examples:
@@ -464,6 +533,9 @@ Examples:
       options.languages = args[++i].split(',');
     } else if (arg === '--output-report') {
       options.outputReport = true;
+    } else if (arg === '--detailed') {
+      options.outputReport = true;
+      options.detailed = true;
     } else if (arg === '--format' && i + 1 < args.length) {
       options.format = args[++i];
     } else if (arg === '--threshold' && i + 1 < args.length) {

@@ -23,7 +23,7 @@ function getConfig() {
   return {
     sourceDir: settings.directories?.sourceDir || './locales',
     sourceLanguage: settings.directories?.sourceLanguage || 'en',
-    notTranslatedMarker: settings.processing?.notTranslatedMarker || '__NOT_TRANSLATED__',
+    notTranslatedMarker: settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
     outputDir: settings.directories?.outputDir || './i18n-reports',
     excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
   };
