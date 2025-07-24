@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-07-24T10:59:01.995Z",
+  "timestamp": "2025-07-24T19:08:04.118Z",
   "summary": {
     "successful": 6,
     "failed": 0,
@@ -10,42 +10,42 @@
       "step": "Analyze Translations",
       "command": "node i18ntk-analyze.js",
       "status": "success",
-      "duration": 167,
+      "duration": 103,
       "required": true
     },
     {
       "step": "Validate Translations",
       "command": "node i18ntk-validate.js",
       "status": "success",
-      "duration": 486,
+      "duration": 122,
       "required": true
     },
     {
       "step": "Check Usage",
       "command": "node i18ntk-usage.js",
       "status": "success",
-      "duration": 238,
+      "duration": 94,
       "required": false
     },
     {
       "step": "Complete Translations",
       "command": "node i18ntk-complete.js",
       "status": "success",
-      "duration": 316,
+      "duration": 259,
       "required": false
     },
     {
       "step": "Analyze Sizing",
       "command": "node i18ntk-sizing.js",
       "status": "success",
-      "duration": 272,
+      "duration": 119,
       "required": false
     },
     {
       "step": "Generate Summary",
       "command": "node i18ntk-summary.js",
       "status": "success",
-      "duration": 206,
+      "duration": 154,
       "required": true
     }
   ]

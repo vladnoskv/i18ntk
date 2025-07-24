@@ -17,17 +17,21 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const settingsManager = require('./settings-manager');
+const SecurityUtils = require('./utils/security');
+const AdminCLI = require('./utils/admin-cli');
 
 // Import UI internationalization
 const uiI18n = require('./ui-i18n');
 
 // Import other i18n scripts
-const I18nInitializer = require('./01-init-i18n');
-const I18nAnalyzer = require('./02-analyze-translations');
-const I18nValidator = require('./03-validate-translations');
-const I18nUsageAnalyzer = require('./04-check-usage');
-const I18nSizingAnalyzer = require('./06-analyze-sizing');
+const I18nInitializer = require('./i18ntk-init');
+const I18nAnalyzer = require('./i18ntk-analyze');
+const I18nValidator = require('./i18ntk-validate');
+const I18nUsageAnalyzer = require('./i18ntk-usage');
+const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const SettingsCLI = require('./settings-cli');
+const I18nDebugger = require('./dev/debug/debugger');
 
 // Default configuration
 const DEFAULT_CONFIG = {
@@ -42,14 +46,18 @@ class I18nManager {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
+      terminal: true,
+      historySize: 0
     });
+    this.isAuthenticated = false; // Track authentication state for session
+    this.settingsManager = settingsManager;
   }
 
-  // Parse command line arguments
+  // Parse and validate command line arguments securely
   parseArgs() {
     const args = process.argv.slice(2);
-    const parsed = {};
+    const rawParsed = {};
     
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
@@ -58,35 +66,48 @@ class I18nManager {
         const [key, value] = arg.substring(2).split('=');
         
         if (key === 'command') {
-          parsed.command = value;
+          rawParsed.command = value;
         } else if (key === 'help') {
-          parsed.help = true;
+          rawParsed.help = true;
         } else if (key === 'source-dir') {
-          parsed.sourceDir = value || args[++i];
+          rawParsed.sourceDir = value || args[++i];
         } else if (key === 'languages') {
-          parsed.languages = (value || args[++i]).split(',');
+          rawParsed.languages = (value || args[++i]).split(',');
         } else if (key === 'interactive') {
-          parsed.interactive = (value || args[++i]) !== 'false';
+          rawParsed.interactive = (value || args[++i]) !== 'false';
         } else if (key === 'ui-language') {
-          parsed.uiLanguage = value || args[++i];
+          rawParsed.uiLanguage = value || args[++i];
         } else if (key === 'report-language') {
-          parsed.reportLanguage = value || args[++i];
+          rawParsed.reportLanguage = value || args[++i];
         } else if (key === 'sizing') {
-          parsed.sizing = true;
+          rawParsed.sizing = true;
         } else if (key === 'sizing-threshold') {
-          parsed.sizingThreshold = parseInt(value || args[++i]);
+          rawParsed.sizingThreshold = parseInt(value || args[++i]);
         } else if (key === 'sizing-format') {
-          parsed.sizingFormat = value || args[++i];
+          rawParsed.sizingFormat = value || args[++i];
+        } else if (key === 'setup-admin') {
+          rawParsed.setupAdmin = true;
+        } else if (key === 'disable-admin') {
+          rawParsed.disableAdmin = true;
+        } else if (key === 'admin-status') {
+          rawParsed.adminStatus = true;
         }
       } else {
         // Handle commands without -- prefix
-        if (!parsed.command && ['init', 'analyze', 'validate', 'usage', 'complete', 'sizing', 'status', 'workflow', 'delete', 'help'].includes(arg)) {
-          parsed.command = arg;
+        if (!rawParsed.command && ['init', 'analyze', 'validate', 'usage', 'complete', 'sizing', 'status', 'workflow', 'delete', 'debug', 'help'].includes(arg)) {
+          rawParsed.command = arg;
         }
       }
     }
     
-    return parsed;
+    // Validate and sanitize arguments
+    const validatedArgs = SecurityUtils.validateCommandArgs(rawParsed);
+    SecurityUtils.logSecurityEvent('Command arguments parsed', 'info', { 
+      originalCount: Object.keys(rawParsed).length,
+      validatedCount: Object.keys(validatedArgs).length
+    });
+    
+    return validatedArgs;
   }
 
   // Display help information
@@ -105,6 +126,7 @@ class I18nManager {
     console.log(`  status    ${uiI18n.t('help.commandList.status')}`);
     console.log(`  workflow  ${uiI18n.t('help.commandList.workflow')}`);
     console.log(`  delete    ${uiI18n.t('help.commandList.delete')}`);
+    console.log(`  debug     ${uiI18n.t('help.commandList.debug')}`);
     console.log(`  help      ${uiI18n.t('help.commandList.help')}\n`);
     
     console.log(uiI18n.t('help.options'));
@@ -116,7 +138,10 @@ class I18nManager {
     console.log(`  ${uiI18n.t('help.optionList.reportLanguage')}`);
     console.log(`  ${uiI18n.t('help.optionList.sizing')}`);
     console.log(`  ${uiI18n.t('help.optionList.sizingThreshold')}`);
-    console.log(`  ${uiI18n.t('help.optionList.sizingFormat')}\n`);
+    console.log(`  ${uiI18n.t('help.optionList.sizingFormat')}`);
+    console.log(`  --setup-admin          Set up admin PIN protection`);
+    console.log(`  --disable-admin        Disable admin PIN protection`);
+    console.log(`  --admin-status         Show admin protection status\n`);
     
     console.log(uiI18n.t('help.examples'));
     uiI18n.t('help.exampleList').forEach(example => {
@@ -125,13 +150,42 @@ class I18nManager {
     console.log('');
   }
 
-  // Prompt user for input
+  // Prompt user for input with sanitization
   async prompt(question) {
     return new Promise((resolve) => {
       this.rl.question(question, (answer) => {
-        resolve(answer.trim());
+        // Sanitize input
+        const sanitizedAnswer = SecurityUtils.sanitizeInput(answer.trim());
+        SecurityUtils.logSecurityEvent('User input accepted', 'info', { question: question.substring(0, 50) });
+        resolve(sanitizedAnswer);
       });
     });
+  }
+
+  // Handle persistent authentication
+  async authenticateIfRequired(operation) {
+    // Check if admin authentication is required for this operation
+    if (!AdminCLI.requiresAuth(operation)) {
+      return true;
+    }
+
+    // Check if we should keep authentication until exit
+    const securitySettings = this.settingsManager.getSecurity();
+    const keepAuthUntilExit = securitySettings.keepAuthenticatedUntilExit !== false;
+
+    // If already authenticated and keeping auth until exit, return true
+    if (this.isAuthenticated && keepAuthUntilExit) {
+      return true;
+    }
+
+    // Perform authentication
+    const authenticated = await AdminCLI.authenticate();
+    if (authenticated && keepAuthUntilExit) {
+      this.isAuthenticated = true;
+      console.log('🔓 You are now authenticated for this session.');
+    }
+
+    return authenticated;
   }
 
   // Get project status
@@ -229,8 +283,9 @@ class I18nManager {
     console.log(`8. ${uiI18n.t('menu.options.status')}`);
     console.log(`9. ${uiI18n.t('menu.options.delete')}`);
     console.log(`10. ${uiI18n.t('menu.options.language')}`);
-    console.log(`11. ${uiI18n.t('menu.options.help')}`);
-    console.log(`12. ${uiI18n.t('menu.options.settings')} (Advanced)`);
+    console.log(`11. ${uiI18n.t('menu.options.debugger')}`);
+    console.log(`12. ${uiI18n.t('menu.options.help')}`);
+    console.log(`13. ${uiI18n.t('menu.options.settings')} (Advanced)`);
     console.log(`0. ${uiI18n.t('menu.options.exit')}\n`);
     
     const choice = await this.prompt(uiI18n.t('menu.prompt'));
@@ -327,7 +382,7 @@ class I18nManager {
     console.log(uiI18n.t('operations.complete.separator'));
     
     try {
-      const I18nCompleter = require('./05-complete-translations');
+      const I18nCompleter = require('./complete-console-translations');
       const completer = new I18nCompleter({
         sourceDir: this.config.sourceDir,
         sourceLanguage: this.config.sourceLanguage,
@@ -449,6 +504,140 @@ class I18nManager {
     console.log('\n' + uiI18n.t('operations.workflow.completed'));
   }
 
+  // Run debugger
+  async runDebugger() {
+    console.log('\n' + uiI18n.t('debugger.title'));
+    console.log(uiI18n.t('menu.separator'));
+    
+    while (true) {
+      console.log(`1. ${uiI18n.t('debugger.menu.full')}`);
+      console.log(`2. ${uiI18n.t('debugger.menu.config')}`);
+      console.log(`3. ${uiI18n.t('debugger.menu.translations')}`);
+      console.log(`4. ${uiI18n.t('debugger.menu.performance')}`);
+      console.log(`0. ${uiI18n.t('debugger.menu.back')}\n`);
+      
+      const choice = await this.prompt(uiI18n.t('debugger.prompt'));
+      
+      switch (choice) {
+        case '1':
+          await this.runFullDebug();
+          break;
+        case '2':
+          await this.runConfigDebug();
+          break;
+        case '3':
+          await this.runTranslationDebug();
+          break;
+        case '4':
+          await this.runPerformanceDebug();
+          break;
+        case '0':
+          return;
+        default:
+          console.log(uiI18n.t('debugger.invalidChoice'));
+          continue;
+      }
+      
+      await this.prompt('\nPress Enter to continue...');
+    }
+  }
+
+  // Run full system debug
+  async runFullDebug() {
+    console.log('\n' + uiI18n.t('debugger.running'));
+    
+    try {
+      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
+      const result = await debuggerInstance.run();
+      
+      console.log(uiI18n.t('debugger.completed'));
+      
+      if (report.issues.length === 0 && report.warnings.length === 0) {
+        console.log(uiI18n.t('debugger.noIssues'));
+      } else {
+        if (report.issues.length > 0) {
+          console.log(uiI18n.t('debugger.issuesFound', { count: report.issues.length }));
+        }
+        if (report.warnings.length > 0) {
+          console.log(uiI18n.t('debugger.warningsFound', { count: report.warnings.length }));
+        }
+        
+        const reportPath = path.join(this.config.outputDir, 'debug-report.txt');
+        console.log(uiI18n.t('debugger.reportGenerated', { reportPath }));
+      }
+    } catch (error) {
+      console.error('❌ Debug error:', error.message);
+    }
+  }
+
+  // Run configuration debug
+  async runConfigDebug() {
+    console.log('\n🔧 Running configuration debug...');
+    
+    try {
+      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
+      await debuggerInstance.checkUserConfig();
+      await debuggerInstance.checkPackageJson();
+      
+      const report = debuggerInstance.generateReport();
+      console.log('✅ Configuration debug completed!');
+      
+      if (report.issues.length === 0 && report.warnings.length === 0) {
+        console.log('✅ No configuration issues found!');
+      } else {
+        console.log(`⚠️  Found ${report.issues.length} issue(s) and ${report.warnings.length} warning(s)`);
+        console.log(report.summary);
+      }
+    } catch (error) {
+      console.error('❌ Configuration debug error:', error.message);
+    }
+  }
+
+  // Run translation debug
+  async runTranslationDebug() {
+    console.log('\n🌐 Running translation debug...');
+    
+    try {
+      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
+      await debuggerInstance.checkTranslationKeys();
+      
+      const report = debuggerInstance.generateReport();
+      console.log('✅ Translation debug completed!');
+      
+      if (report.issues.length === 0 && report.warnings.length === 0) {
+        console.log('✅ No translation issues found!');
+      } else {
+        console.log(`⚠️  Found ${report.issues.length} issue(s) and ${report.warnings.length} warning(s)`);
+        console.log(report.summary);
+      }
+    } catch (error) {
+      console.error('❌ Translation debug error:', error.message);
+    }
+  }
+
+  // Run performance debug
+  async runPerformanceDebug() {
+    console.log('\n⚡ Running performance debug...');
+    
+    try {
+      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
+      await debuggerInstance.checkCoreFiles();
+      await debuggerInstance.checkDependencies();
+      
+      const report = debuggerInstance.generateReport();
+      console.log('✅ Performance debug completed!');
+      
+      if (report.issues.length === 0 && report.warnings.length === 0) {
+        console.log('✅ No performance issues found!');
+      } else {
+        console.log(`⚠️  Found ${report.issues.length} issue(s) and ${report.warnings.length} warning(s)`);
+        console.log(report.summary);
+      }
+    } catch (error) {
+      console.error('❌ Performance debug error:', error.message);
+    }
+  }
+
   // Open settings interface
   async openSettings() {
     console.log('\n' + uiI18n.t('operations.settings.title'));
@@ -460,8 +649,7 @@ class I18nManager {
       
       // Reload settings in case they were changed
        try {
-         const settingsManager = require('./settings-manager');
-         const newSettings = settingsManager.getSettings();
+         const newSettings = this.settingsManager.getSettings();
          
          // Update current config
          this.config = { ...this.config, ...newSettings };
@@ -482,8 +670,13 @@ class I18nManager {
     }
   }
 
-  // Main execution
+  // Main execution with security logging
   async run() {
+    SecurityUtils.logSecurityEvent('I18nManager started', 'info', { 
+      nodeVersion: process.version,
+      platform: process.platform
+    });
+    
     try {
       const args = this.parseArgs();
       
@@ -502,12 +695,39 @@ class I18nManager {
         return;
       }
       
+      // Handle admin commands
+      if (args.setupAdmin) {
+        await AdminCLI.setupAdmin();
+        this.rl.close();
+        return;
+      }
+      
+      if (args.disableAdmin) {
+        await AdminCLI.disableAdmin();
+        this.rl.close();
+        return;
+      }
+      
+      if (args.adminStatus) {
+        await AdminCLI.showStatus();
+        this.rl.close();
+        return;
+      }
+      
       // Show header
       console.log('\n' + uiI18n.t('menu.title'));
 console.log(uiI18n.t('menu.separator'));
       
       // Direct command execution
       if (args.command) {
+        // Check if admin authentication is required for this command
+        const authenticated = await this.authenticateIfRequired(args.command.toLowerCase());
+        if (!authenticated) {
+          console.log('❌ Authentication failed. Access denied.');
+          this.rl.close();
+          return;
+        }
+        
         switch (args.command.toLowerCase()) {
           case 'init':
             await this.runInit(args.languages);
@@ -539,6 +759,9 @@ console.log(uiI18n.t('menu.separator'));
           case 'delete':
             await this.deleteReports();
             break;
+          case 'debug':
+            await this.runDebugger();
+            break;
           case 'settings':
             await this.openSettings();
             break;
@@ -560,6 +783,21 @@ this.showHelp();
         
         while (true) {
           const choice = await this.showMenu();
+          
+          // Check if admin authentication is required for interactive operations
+          const operationMap = {
+            '1': 'init',
+            '7': 'workflow',
+            '9': 'delete'
+          };
+          
+          if (operationMap[choice]) {
+            const authenticated = await this.authenticateIfRequired(operationMap[choice]);
+            if (!authenticated) {
+              console.log('❌ Authentication failed. Access denied.');
+              continue;
+            }
+          }
           
           switch (choice) {
             case '1':
@@ -594,13 +832,19 @@ this.showHelp();
               uiI18n.saveLanguagePreference(selectedLang);
               break;
             case '11':
-              this.showHelp();
+              await this.runDebugger();
               break;
             case '12':
+              this.showHelp();
+              break;
+            case '13':
               await this.openSettings();
               break;
             case '0':
               console.log('\n' + uiI18n.t('menu.goodbye'));
+              if (this.isAuthenticated) {
+                console.log('🔒 Admin session ended. Goodbye!');
+              }
               this.rl.close();
               return;
             default:
@@ -620,6 +864,7 @@ this.showHelp();
       
     } catch (error) {
       console.error('❌ Error:', error.message);
+      SecurityUtils.logSecurityEvent('Application error', 'error', { error: error.message });
       this.rl.close();
       process.exit(1);
     }

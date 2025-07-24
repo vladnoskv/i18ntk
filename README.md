@@ -4,7 +4,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D16.0.0-green?logo=node.js)](https://nodejs.org/)
 [![i18next](https://img.shields.io/badge/i18next-25.3.2-orange)](https://www.i18next.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/Version-1.2.1-brightgreen)](https://github.com/vladnoskv/i18n-management-toolkit)
+[![Version](https://img.shields.io/badge/Version-1.3.7-brightgreen)](https://github.com/vladnoskv/i18n-management-toolkit-main)
 
 A comprehensive internationalization (i18n) management toolkit for JavaScript/TypeScript projects. **i18nTK** (i18n Toolkit) helps you manage the constant need to track translations effectively, especially in large and complex projects with multiple languages. It prevents i18n debug errors by ensuring translation keys exist, and when visible, clearly displays "NOT_TRANSLATED" text to users, making missing translations immediately apparent.
 
@@ -22,30 +22,62 @@ The toolkit itself supports multiple languages for its interactive interface and
 
 **All interactive scripts, reports, and error messages are provided in the user's selected language for easier diagnosis and management.**
 
-## 🆕 What's New in Version 1.2.1
+## 🆕 What's New in Version 1.3.7
 
-### ✨ Recent Improvements
+### ✨ Latest Features
+
+- **⚙️ Advanced Settings Management**: New interactive settings CLI with comprehensive configuration options
+  - **Settings Menu**: Access via `npm run i18ntk:settings` or `node i18ntk-manage.js --command=settings`
+  - **Configuration Management**: View, edit, and validate user-config.json settings
+  - **Language Preferences**: Change UI language and report language settings
+  - **Path Configuration**: Manage input/output directories and file paths
+  - **Admin Settings**: Configure admin authentication and security options
+- **🐛 Built-in Bug Reporting**: Integrated bug reporting system for easier issue submission
+  - **GitHub Integration**: Direct links to create issues with pre-filled templates
+  - **System Information**: Automatic collection of relevant system details
+  - **Error Context**: Streamlined process for reporting bugs with proper context
+- **🔧 Terminal Interface Fixes**: Critical fixes for double character input issues
+  - **Readline Configuration**: Enhanced terminal interface stability
+  - **Input Handling**: Improved user input processing across all interactive scripts
+  - **Cross-platform Compatibility**: Better support for different terminal environments
+
+### 🎯 Previous Major Features (1.3.0)
+
+### ✨ Major New Features
+
+- **🔧 Debug Tools**: Comprehensive debugging system for i18n projects
+  - **Full System Debug**: Complete project analysis and health check
+  - **Configuration Debug**: Validate user-config.json and package.json settings
+  - **Translation Debug**: Deep analysis of translation files and structure
+  - **Performance Debug**: Identify performance bottlenecks and optimization opportunities
+- **🎯 Dynamic Path Support**: All tools now properly handle custom input/output paths from user configuration
+- **📊 Enhanced Reporting**: Improved debug reports with detailed issue categorization and recommendations
+- **🛠️ Better Error Detection**: Advanced detection of configuration issues, missing files, and structural problems
+- **📦 NPM Package Ready**: Fully prepared for npm package distribution with proper binary commands
+
+### 🎯 Key Improvements
+
+- **New Debug Command**: `npm run i18ntk:debug` or `node i18ntk-manage.js --command=debug`
+- **Binary Command**: Direct access via `i18ntk-debug` for standalone debugging
+- **Interactive Debug Menu**: Choose specific debug types through an intuitive interface
+- **Detailed Debug Reports**: Comprehensive reports saved to `debug-report.txt` with actionable insights
+- **Dynamic Configuration**: No more hardcoded paths - all tools respect user-defined directories
+- **Enhanced CLI Experience**: Improved help text and command descriptions
+
+### 🔄 Previous Improvements (1.2.1)
 
 - **🏷️ i18nTK Branding**: Introduced new i18nTK branding with consistent file naming (`i18ntk-*` prefix)
 - **📦 Enhanced NPM Integration**: Added comprehensive npm scripts and binary commands for all tools
 - **🔧 Critical Bug Fixes**: Fixed 'Analyze Sizing' step failure and incorrect default paths
 - **📁 Nested File Support**: Improved support for nested directory structures in translations
 - **⚡ Performance Improvements**: Enhanced error handling and processing efficiency
-- **🛠️ Better CLI Experience**: Updated all commands to use new i18nTK naming convention
 
-### 🎯 Key Features Added
+### 🔄 Migration from 1.2.x
 
-- **New NPM Scripts**: `npm run i18ntk`, `npm run i18ntk:analyze`, `npm run i18ntk:validate`, etc.
-- **Binary Commands**: Direct access via `i18ntk-manage`, `i18ntk-init`, `i18ntk-analyze`, etc.
-- **Dynamic Settings Support**: All scripts now properly use settings from configuration files
-- **Improved Auto-Run**: Enhanced `auto-run.js` with better error handling and reporting
-- **Version 1.3 Preview**: Planned debugger improvements for open-source development
-
-### 🔄 Migration from 1.1.x
-
-- Old numbered scripts (`01-init-i18n.js`) → New i18nTK scripts (`i18ntk-init.js`)
-- Updated `package.json` with new binary commands and scripts
-- All functionality remains the same, just with improved naming and accessibility
+- All existing functionality remains unchanged
+- New debug tools are additive and optional
+- Enhanced configuration validation helps identify and fix setup issues
+- Improved dynamic path handling ensures tools work with any project structure
 
 ## 📋 Table of Contents
 
@@ -76,6 +108,8 @@ npm run i18ntk:validate    # Validate translations
 npm run i18ntk:usage       # Check usage
 npm run i18ntk:complete    # Complete translations
 npm run i18ntk:sizing      # Analyze sizing
+npm run i18ntk:debug       # Run debug tools
+npm run i18ntk:settings    # Manage settings and configuration
 npm run i18ntk:summary     # Generate summary
 ```
 
@@ -97,6 +131,7 @@ node i18ntk-manage.js --command=validate
 node i18ntk-manage.js --command=usage
 node i18ntk-manage.js --command=complete
 node i18ntk-manage.js --command=sizing
+node i18ntk-manage.js --command=debug
 node i18ntk-manage.js --command=status
 node i18ntk-manage.js --command=workflow
 node i18ntk-manage.js --command=delete
@@ -118,6 +153,7 @@ i18ntk-validate
 i18ntk-usage
 i18ntk-complete
 i18ntk-sizing
+i18ntk-debug
 i18ntk-summary
 ```
 
@@ -207,8 +243,11 @@ your-project/
 │   ├── i18ntk-sizing.js
 │   ├── i18ntk-summary.js
 │   ├── auto-run.js              # Automated workflow
+│   ├── dev/
+│   │   └── debug/
+│   │       └── debugger.js      # Debug tools and system analysis
 │   ├── package.json             # NPM scripts and dependencies
-│   ├── locales/                 # Multi-language UI support
+│   ├── ui-locales/              # Multi-language UI support
 │   └── README.md
 ```
 
@@ -255,10 +294,13 @@ i18ntk/
 ├── i18ntk-sizing.js           # 📏 Analyze translation sizing and layout impact
 ├── i18ntk-summary.js          # 📋 Generate summary reports
 ├── auto-run.js                # 🔄 Automated workflow execution
+├── dev/
+│   └── debug/
+│       └── debugger.js        # 🔧 Debug tools and system analysis
 ├── package.json               # 📦 NPM scripts and dependencies
 ├── CHANGELOG.md               # 📝 Version history and changes
 ├── i18n-reports/              # 📈 Generated reports
-├── locales/                   # 🌍 Multi-language UI support
+├── ui-locales/                # 🌍 Multi-language UI support
 └── README.md                  # 📖 This documentation
 ```
 
@@ -582,6 +624,110 @@ node i18ntk-summary.js --detailed
 node i18ntk-summary.js --format=json
 ```
 
+### 🔧 Debug Tools - System Analysis & Troubleshooting
+
+Comprehensive debugging system for i18n projects with advanced diagnostics and issue detection.
+
+**Features:**
+- 🔍 **Full System Debug**: Complete project health check and analysis
+- ⚙️ **Configuration Debug**: Validate user-config.json and package.json settings
+- 🌐 **Translation Debug**: Deep analysis of translation files and structure
+- ⚡ **Performance Debug**: Identify bottlenecks and optimization opportunities
+- 📊 **Dynamic Path Support**: Respects custom input/output paths from configuration
+- 📄 **Detailed Reports**: Comprehensive debug reports with actionable recommendations
+- 🛠️ **Issue Detection**: Advanced detection of configuration and structural problems
+
+**Usage:**
+```bash
+# NPM Script (Recommended)
+npm run i18ntk:debug
+
+# Direct execution - Interactive debug menu
+node i18ntk-manage.js --command=debug
+
+# Direct debugger execution
+node dev/debug/debugger.js
+
+# Binary command (if installed)
+i18ntk-debug
+```
+
+**Interactive Debug Menu:**
+```
+🔧 DEBUG TOOLS
+============================================================
+1. 🔍 Full System Debug
+2. ⚙️  Configuration Debug
+3. 🌐 Translation Debug
+4. ⚡ Performance Debug
+0. 🔙 Back to main menu
+
+Select debug type (0-4):
+```
+
+**Debug Types:**
+
+#### 🔍 Full System Debug
+Comprehensive analysis of the entire i18n project:
+- ✅ Configuration file validation
+- 📁 Directory structure verification
+- 🌐 Translation file integrity checks
+- 🔗 Dependency validation
+- 📊 Performance analysis
+- 🛠️ Issue identification and recommendations
+
+#### ⚙️ Configuration Debug
+Validates project configuration:
+- 📄 `user-config.json` structure and paths
+- 📦 `package.json` dependencies and scripts
+- 🔗 File path validation
+- ⚙️ Settings consistency checks
+
+#### 🌐 Translation Debug
+Deep analysis of translation files:
+- 📁 Translation file structure
+- 🔤 Key consistency across languages
+- 🌍 Missing translation detection
+- 📊 Translation completeness analysis
+
+#### ⚡ Performance Debug
+Identifies performance issues:
+- 📏 File size analysis
+- 🔍 Unused key detection
+- ⚡ Loading performance assessment
+- 🎯 Optimization recommendations
+
+**Sample Debug Report:**
+```
+🔧 I18N TOOLKIT DEBUG REPORT
+============================================================
+Generated: 2024-01-15 14:30:25
+Project Root: /path/to/your/project
+Debug Type: Full System Debug
+
+📊 SUMMARY
+============================================================
+✅ Issues Found: 2
+⚠️  Warnings: 1
+
+🔍 ISSUES
+============================================================
+❌ Missing user-config.json file
+❌ Translation key 'header.title' missing in de.json
+
+⚠️  WARNINGS
+============================================================
+⚠️  Large translation file detected: common.json (>50KB)
+
+🎯 RECOMMENDATIONS
+============================================================
+• Create user-config.json with proper directory paths
+• Add missing translation keys to maintain consistency
+• Consider splitting large translation files for better performance
+
+📄 Report saved to: debug-report.txt
+```
+
 ### ⚙️ Settings Management
 
 Comprehensive configuration management for all i18n toolkit settings and preferences.
@@ -617,6 +763,124 @@ node i18ntk-manage.js --command=settings
 - **📊 Analysis Options** - Translation analysis and reporting settings
 - **🔄 Behavior Settings** - Auto-save, notifications, and validation preferences
 - **⚙️ Advanced Options** - Performance tuning and enterprise features
+
+## 🔐 Admin Authentication
+
+The toolkit includes an optional admin authentication system to protect sensitive operations with PIN-based security.
+
+### Admin Authentication Features
+- **🔒 PIN Protection**: 4-digit PIN authentication for administrative operations
+- **🛡️ Secure Storage**: Encrypted PIN storage with salt-based hashing
+- **👁️ Hidden Input**: PIN input is hidden for enhanced security
+- **✅ Confirmation Prompts**: Double confirmation for destructive operations
+- **📝 Audit Trail**: Security event logging for all admin operations
+- **🔄 Optional**: Can be enabled/disabled as needed
+- **🔧 CLI & Interactive**: Works in both command-line and interactive modes
+
+### Protected Operations
+The following operations require admin authentication when enabled:
+- **Project Initialization** (`init`) - Setting up new i18n projects
+- **Project Deletion** (`delete`) - Removing translation files and reports
+- **Workflow Management** (`workflow`) - Running automated workflows
+
+### Admin Commands
+
+#### Setting Up Admin Protection
+```bash
+# Enable admin PIN protection
+node i18ntk-validate.js --setup-admin
+node i18ntk-manage.js --setup-admin
+
+# Or through interactive menu
+node i18ntk-manage.js
+# Then use admin commands in the interface
+```
+
+#### Managing Admin Authentication
+```bash
+# Check admin protection status
+node i18ntk-validate.js --admin-status
+node i18ntk-manage.js --admin-status
+
+# Disable admin protection
+node i18ntk-validate.js --disable-admin
+node i18ntk-manage.js --disable-admin
+```
+
+### Admin Setup Process
+
+1. **Enable Protection**:
+   ```bash
+   node i18ntk-manage.js --setup-admin
+   ```
+
+2. **Set 4-Digit PIN**:
+   ```
+   🔐 Setting up Admin PIN Protection
+   This will require a 4-digit PIN for administrative operations.
+   
+   Do you want to enable admin PIN protection? (y/N): y
+   Enter a 4-digit PIN: ****
+   Confirm PIN: ****
+   
+   ✅ Admin PIN protection enabled successfully!
+   ⚠️  Remember your PIN - it cannot be recovered if lost.
+   ```
+
+3. **Authentication Required**:
+   ```
+   🔐 Admin authentication required for: project initialization
+   Enter admin PIN: ****
+   ✅ Authentication successful!
+   ```
+
+### Security Features
+
+- **Encrypted Storage**: PINs are stored using PBKDF2 with 100,000 iterations
+- **Salt Protection**: Each PIN uses a unique salt for additional security
+- **Lockout Protection**: Failed attempts are tracked and logged
+- **Session Management**: Temporary authentication sessions for convenience
+- **Audit Logging**: All authentication events are logged for security auditing
+
+### Admin Status Display
+
+```bash
+node i18ntk-manage.js --admin-status
+```
+
+**Output when enabled**:
+```
+🔐 Admin Protection Status
+========================
+Status: ENABLED
+Protection: 4-digit PIN required for admin operations
+Protected Operations: init, delete, workflow
+```
+
+**Output when disabled**:
+```
+🔐 Admin Protection Status
+========================
+Status: DISABLED
+Protection: No authentication required
+Risk: Administrative operations are unprotected
+```
+
+### Best Practices
+
+- **Enable for Production**: Always enable admin protection in production environments
+- **Secure PIN**: Choose a PIN that's not easily guessable
+- **Regular Review**: Periodically review admin authentication logs
+- **Team Access**: Share PIN securely with authorized team members only
+- **Backup Strategy**: Document PIN recovery procedures for your team
+
+### Integration with Existing Workflows
+
+Admin authentication integrates seamlessly with existing workflows:
+- **Backward Compatible**: Existing scripts work unchanged when admin auth is disabled
+- **Optional Protection**: Enable only for operations that need protection
+- **Team Friendly**: Multiple team members can use the same PIN
+- **CI/CD Compatible**: Can be disabled for automated environments
 
 ## ⚙️ Configuration Management
 

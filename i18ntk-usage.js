@@ -16,70 +16,109 @@ const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('./utils/i18n-helper');
 const settingsManager = require('./settings-manager');
+const SecurityUtils = require('./utils/security');
 
 // Get configuration from settings manager
-function getConfig() {
-  const settings = settingsManager.getSettings();
-  return {
-    sourceDir: settings.directories?.sourceDir || './',
-    i18nDir: settings.directories?.sourceDir || './locales',
-    sourceLanguage: settings.directories?.sourceLanguage || 'en',
-    outputDir: settings.directories?.outputDir || './i18n-reports',
-    excludeDirs: settings.processing?.excludeDirs || ['node_modules', '.git', 'dist', 'build', '.next', 'coverage'],
-    includeExtensions: settings.processing?.includeExtensions || ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
-    translationPatterns: settings.processing?.translationPatterns || [
-      // Common i18n patterns
-      /t\(['"\`]([^'"\`)]+)['"\`]\)/g,                    // t('key')
-      /t\(['"\`]([^'"\`)]+)['"\`],/g,                     // t('key', ...)
-      /\$t\(['"\`]([^'"\`)]+)['"\`]\)/g,                  // $t('key')
-      /i18n\.t\(['"\`]([^'"\`)]+)['"\`]\)/g,              // i18n.t('key')
-      /translate\(['"\`]([^'"\`)]+)['"\`]\)/g,            // translate('key')
-      /useTranslation\(['"\`]([^'"\`)]+)['"\`]\)/g,       // useTranslation('key')
-      /formatMessage\(\{\s*id:\s*['"\`]([^'"\`)]+)['"\`]/g, // formatMessage({ id: 'key' })
-    ]
-  };
+async function getConfig() {
+  try {
+    await SecurityUtils.logSecurityEvent('config_load_attempt', { component: 'i18ntk-usage' });
+    const settings = settingsManager.getSettings();
+    const config = {
+      sourceDir: settings.directories?.sourceDir || './',
+      i18nDir: settings.directories?.sourceDir || './locales',
+      sourceLanguage: settings.directories?.sourceLanguage || 'en',
+      outputDir: settings.directories?.outputDir || './i18n-reports',
+      excludeDirs: settings.processing?.excludeDirs || ['node_modules', '.git', 'dist', 'build', '.next', 'coverage'],
+      includeExtensions: settings.processing?.includeExtensions || ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
+      translationPatterns: settings.processing?.translationPatterns || [
+        // Common i18n patterns
+        /t\(['"`]([^'"`]+)['"`]\)/g,                    // t('key')
+        /t\(['"`]([^'"`]+)['"`],/g,                     // t('key', ...)
+        /\$t\(['"`]([^'"`]+)['"`]\)/g,                  // $t('key')
+        /i18n\.t\(['"`]([^'"`]+)['"`]\)/g,              // i18n.t('key')
+        /translate\(['"`]([^'"`]+)['"`]\)/g,            // translate('key')
+        /useTranslation\(['"`]([^'"`]+)['"`]\)/g,       // useTranslation('key')
+        /formatMessage\(\{\s*id:\s*['"`]([^'"`]+)['"`]/g, // formatMessage({ id: 'key' })
+      ]
+    };
+    await SecurityUtils.validateConfig(config);
+    await SecurityUtils.logSecurityEvent('config_loaded', { component: 'i18ntk-usage' });
+    return config;
+  } catch (error) {
+    await SecurityUtils.logSecurityEvent('config_load_failed', { component: 'i18ntk-usage', error: error.message });
+    throw error;
+  }
 }
 
 class I18nUsageAnalyzer {
   constructor(config = {}) {
-    this.config = { ...getConfig(), ...config };
-    this.sourceDir = path.resolve(this.config.sourceDir);
-    this.i18nDir = path.resolve(this.config.i18nDir);
-    this.outputDir = path.resolve(this.config.outputDir);
-    this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
-    
+    this.config = config;
     this.usedKeys = new Set();
     this.availableKeys = new Set();
     this.fileUsage = new Map();
-    
-    // Initialize i18n
-    loadTranslations();
     this.t = t;
   }
 
+  async initialize() {
+    try {
+      const baseConfig = await getConfig();
+      this.config = { ...baseConfig, ...this.config };
+      
+      await SecurityUtils.validatePath(this.config.sourceDir);
+      await SecurityUtils.validatePath(this.config.i18nDir);
+      await SecurityUtils.validatePath(this.config.outputDir);
+      
+      this.sourceDir = path.resolve(this.config.sourceDir);
+      this.i18nDir = path.resolve(this.config.i18nDir);
+      this.outputDir = path.resolve(this.config.outputDir);
+      this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+      
+      // Initialize i18n
+      loadTranslations();
+      
+      await SecurityUtils.logSecurityEvent('analyzer_initialized', { component: 'i18ntk-usage' });
+    } catch (error) {
+      await SecurityUtils.logSecurityEvent('analyzer_init_failed', { component: 'i18ntk-usage', error: error.message });
+      throw error;
+    }
+  }
+
   // Parse command line arguments
-  parseArgs() {
-    const args = process.argv.slice(2);
-    const parsed = {};
-    
-    args.forEach(arg => {
-      if (arg.startsWith('--')) {
-        const [key, value] = arg.substring(2).split('=');
-        if (key === 'source-dir') {
-          parsed.sourceDir = value;
-        } else if (key === 'i18n-dir') {
-          parsed.i18nDir = value;
-        } else if (key === 'output-report') {
-          parsed.outputReport = true;
-        } else if (key === 'output-dir') {
-          parsed.outputDir = value;
-        } else if (key === 'help') {
-          parsed.help = true;
+  async parseArgs() {
+    try {
+      const args = process.argv.slice(2);
+      const validatedArgs = await SecurityUtils.validateCommandArgs(args);
+      const parsed = {};
+      
+      for (const arg of validatedArgs) {
+        if (arg.startsWith('--')) {
+          const [key, value] = arg.substring(2).split('=');
+          if (key === 'source-dir' && value) {
+            const sanitized = await SecurityUtils.sanitizeInput(value);
+            await SecurityUtils.validatePath(sanitized);
+            parsed.sourceDir = sanitized;
+          } else if (key === 'i18n-dir' && value) {
+            const sanitized = await SecurityUtils.sanitizeInput(value);
+            await SecurityUtils.validatePath(sanitized);
+            parsed.i18nDir = sanitized;
+          } else if (key === 'output-report') {
+            parsed.outputReport = true;
+          } else if (key === 'output-dir' && value) {
+            const sanitized = await SecurityUtils.sanitizeInput(value);
+            await SecurityUtils.validatePath(sanitized);
+            parsed.outputDir = sanitized;
+          } else if (key === 'help') {
+            parsed.help = true;
+          }
         }
       }
-    });
-    
-    return parsed;
+      
+      await SecurityUtils.logSecurityEvent('args_parsed', { component: 'i18ntk-usage', args: parsed });
+      return parsed;
+    } catch (error) {
+      await SecurityUtils.logSecurityEvent('args_parse_failed', { component: 'i18ntk-usage', error: error.message });
+      throw error;
+    }
   }
 
   // Show help message
@@ -88,62 +127,90 @@ class I18nUsageAnalyzer {
   }
 
   // Get all files recursively from a directory
-  getAllFiles(dir, extensions = this.config.includeExtensions) {
+  async getAllFiles(dir, extensions = this.config.includeExtensions) {
     const files = [];
     
-    const traverse = (currentDir) => {
-      if (!fs.existsSync(currentDir)) {
-        return;
-      }
-      
-      const items = fs.readdirSync(currentDir);
-      
-      for (const item of items) {
-        const itemPath = path.join(currentDir, item);
-        const stat = fs.statSync(itemPath);
+    const traverse = async (currentDir) => {
+      try {
+        await SecurityUtils.validatePath(currentDir);
         
-        if (stat.isDirectory()) {
-          // Skip excluded directories
-          if (!this.config.excludeDirs.includes(item)) {
-            traverse(itemPath);
-          }
-        } else if (stat.isFile()) {
-          // Include files with specified extensions
-          const ext = path.extname(item);
-          if (extensions.includes(ext)) {
-            files.push(itemPath);
+        if (!fs.existsSync(currentDir)) {
+          return;
+        }
+        
+        const items = fs.readdirSync(currentDir);
+        
+        for (const item of items) {
+          const itemPath = path.join(currentDir, item);
+          await SecurityUtils.validatePath(itemPath);
+          
+          const stat = fs.statSync(itemPath);
+          
+          if (stat.isDirectory()) {
+            // Skip excluded directories
+            if (!this.config.excludeDirs.includes(item)) {
+              await traverse(itemPath);
+            }
+          } else if (stat.isFile()) {
+            // Include files with specified extensions
+            const ext = path.extname(item);
+            if (extensions.includes(ext)) {
+              files.push(itemPath);
+            }
           }
         }
+      } catch (error) {
+        await SecurityUtils.logSecurityEvent('file_traversal_error', { 
+          component: 'i18ntk-usage', 
+          directory: currentDir, 
+          error: error.message 
+        });
       }
     };
     
-    traverse(dir);
+    await traverse(dir);
     return files;
   }
 
   // Get all translation keys from i18n files
-  getAllTranslationKeys() {
+  async getAllTranslationKeys() {
     const keys = new Set();
     
-    if (!fs.existsSync(this.sourceLanguageDir)) {
-      console.warn(this.t("checkUsage.source_language_directory_not_", { sourceLanguageDir: this.sourceLanguageDir }));
-      return keys;
-    }
-    
-    const jsonFiles = fs.readdirSync(this.sourceLanguageDir)
-      .filter(file => file.endsWith('.json'));
-    
-    for (const fileName of jsonFiles) {
-      const filePath = path.join(this.sourceLanguageDir, fileName);
+    try {
+      await SecurityUtils.validatePath(this.sourceLanguageDir);
       
-      try {
-        const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        const namespace = fileName.replace('.json', '');
-        const fileKeys = this.extractKeysFromObject(content, '', namespace);
-        fileKeys.forEach(key => keys.add(key));
-      } catch (error) {
-        console.warn(this.t("checkUsage.failed_to_parse_filename_error", { fileName, errorMessage: error.message }));
+      if (!fs.existsSync(this.sourceLanguageDir)) {
+        console.warn(this.t("checkUsage.source_language_directory_not_", { sourceLanguageDir: this.sourceLanguageDir }));
+        return keys;
       }
+      
+      const jsonFiles = fs.readdirSync(this.sourceLanguageDir)
+        .filter(file => file.endsWith('.json'));
+      
+      for (const fileName of jsonFiles) {
+        const filePath = path.join(this.sourceLanguageDir, fileName);
+        
+        try {
+          await SecurityUtils.validatePath(filePath);
+          const content = await SecurityUtils.safeReadFile(filePath);
+          const jsonData = await SecurityUtils.safeParseJSON(content);
+          const namespace = fileName.replace('.json', '');
+          const fileKeys = this.extractKeysFromObject(jsonData, '', namespace);
+          fileKeys.forEach(key => keys.add(key));
+        } catch (error) {
+          console.warn(this.t("checkUsage.failed_to_parse_filename_error", { fileName, errorMessage: error.message }));
+          await SecurityUtils.logSecurityEvent('translation_file_parse_error', {
+            component: 'i18ntk-usage',
+            file: fileName,
+            error: error.message
+          });
+        }
+      }
+    } catch (error) {
+      await SecurityUtils.logSecurityEvent('translation_keys_load_error', {
+        component: 'i18ntk-usage',
+        error: error.message
+      });
     }
     
     return keys;
@@ -173,11 +240,12 @@ class I18nUsageAnalyzer {
   }
 
   // Extract translation keys from source code
-  extractKeysFromFile(filePath) {
+  async extractKeysFromFile(filePath) {
     const keys = new Set();
     
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      await SecurityUtils.validatePath(filePath);
+      const content = await SecurityUtils.safeReadFile(filePath);
       
       // Apply all translation patterns
       for (const pattern of this.config.translationPatterns) {
@@ -206,8 +274,13 @@ class I18nUsageAnalyzer {
           }
         }
       }
-          } catch (error) {
+    } catch (error) {
       console.warn(this.t("checkUsage.failed_to_read_filepath_errorm", { filePath, errorMessage: error.message }));
+      await SecurityUtils.logSecurityEvent('source_file_read_error', {
+        component: 'i18ntk-usage',
+        file: filePath,
+        error: error.message
+      });
     }
     
     return keys;
@@ -420,25 +493,48 @@ class I18nUsageAnalyzer {
   }
 
   // Save report to file
-  saveReport(report) {
-    if (!fs.existsSync(this.outputDir)) {
-      fs.mkdirSync(this.outputDir, { recursive: true });
+  async saveReport(report) {
+    try {
+      await SecurityUtils.validatePath(this.outputDir);
+      
+      if (!fs.existsSync(this.outputDir)) {
+        fs.mkdirSync(this.outputDir, { recursive: true });
+      }
+      
+      const reportPath = path.join(this.outputDir, 'usage-analysis.txt');
+      await SecurityUtils.validatePath(reportPath);
+      await SecurityUtils.safeWriteFile(reportPath, report);
+      
+      await SecurityUtils.logSecurityEvent('report_saved', {
+        component: 'i18ntk-usage',
+        reportPath
+      });
+      
+      return reportPath;
+    } catch (error) {
+      await SecurityUtils.logSecurityEvent('report_save_error', {
+        component: 'i18ntk-usage',
+        error: error.message
+      });
+      throw error;
     }
-    
-    const reportPath = path.join(this.outputDir, 'usage-analysis.txt');
-    fs.writeFileSync(reportPath, report, 'utf8');
-    
-    return reportPath;
   }
 
   // Main analysis process
   async analyze() {
     try {
+      await SecurityUtils.logSecurityEvent('analysis_started', { component: 'i18ntk-usage' });
+      
       console.log(this.t('checkUsage.title'));
       console.log(this.t("checkUsage.message"));
       
+      // Initialize if not already done
+      if (!this.sourceDir) {
+        await this.initialize();
+      }
+      
       // Parse command line arguments
-      const args = this.parseArgs();
+      const args = await this.parseArgs();
       
       // Show help if requested
       if (args.help) {
@@ -464,6 +560,9 @@ class I18nUsageAnalyzer {
       console.log(this.t("checkUsage.i18n_directory_thisi18ndir", { i18nDir: this.i18nDir }));
       
       // Validate directories
+      await SecurityUtils.validatePath(this.sourceDir);
+      await SecurityUtils.validatePath(this.i18nDir);
+      
       if (!fs.existsSync(this.sourceDir)) {
         throw new Error(`Source directory not found: ${this.sourceDir}`);
       }
@@ -473,10 +572,10 @@ class I18nUsageAnalyzer {
       }
       
       // Load available keys
-      this.loadAvailableKeys();
+      await this.loadAvailableKeys();
       
       // Analyze usage
-      this.analyzeUsage();
+      await this.analyzeUsage();
       
       // Generate analysis results
       const unusedKeys = this.findUnusedKeys();
@@ -520,7 +619,7 @@ class I18nUsageAnalyzer {
       if (args.outputReport) {
         console.log(this.t("checkUsage.n_generating_detailed_report"));
         const report = this.generateUsageReport();
-        const reportPath = this.saveReport(report);
+        const reportPath = await this.saveReport(report);
         console.log(this.t("checkUsage.report_saved_reportpath", { reportPath }));
       }
       
@@ -554,6 +653,18 @@ class I18nUsageAnalyzer {
       console.log(this.t("checkUsage.3_remove_unused_keys_or_add_mi"));
       console.log(this.t("checkUsage.4_rerun_analysis_to_verify_imp"));
       
+      await SecurityUtils.logSecurityEvent('analysis_completed', {
+        component: 'i18ntk-usage',
+        stats: {
+          availableKeys: this.availableKeys.size,
+          usedKeys: this.usedKeys.size - dynamicKeys.length,
+          dynamicKeys: dynamicKeys.length,
+          unusedKeys: unusedKeys.length,
+          missingKeys: missingKeys.length,
+          filesScanned: this.fileUsage.size
+        }
+      });
+      
       return {
         success: true,
         stats: {
@@ -572,6 +683,12 @@ class I18nUsageAnalyzer {
     } catch (error) {
       console.error(this.t("checkUsage.usage_analysis_failed"));
       console.error(error.message);
+      
+      await SecurityUtils.logSecurityEvent('analysis_failed', {
+        component: 'i18ntk-usage',
+        error: error.message
+      });
+      
       return {
         success: false,
         error: error.message

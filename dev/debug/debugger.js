@@ -8,10 +8,18 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const SecurityUtils = require('../../utils/security');
 
 class I18nDebugger {
-    constructor() {
-        this.projectRoot = path.resolve(__dirname, '../..');
+    constructor(projectRoot = null) {
+        // Validate and sanitize project root path
+        const defaultRoot = path.resolve(__dirname, '../..');
+        const validatedRoot = SecurityUtils.validatePath(projectRoot || defaultRoot, process.cwd());
+        if (!validatedRoot) {
+            throw new Error('Invalid project root path provided');
+        }
+        
+        this.projectRoot = validatedRoot;
         this.issues = [];
         this.warnings = [];
         this.logFile = path.join(__dirname, 'logs', `debug-${new Date().toISOString().replace(/[:.]/g, '-')}.log`);
@@ -41,13 +49,26 @@ class I18nDebugger {
     }
 
     checkFileExists(filePath, description) {
-        const fullPath = path.resolve(this.projectRoot, filePath);
-        if (!fs.existsSync(fullPath)) {
-            this.addIssue(`Missing file: ${filePath} (${description})`);
+        try {
+            // Validate path before checking existence
+            const validatedPath = SecurityUtils.validatePath(filePath, this.projectRoot);
+            if (!validatedPath) {
+                this.addIssue(`Invalid file path: ${filePath}`);
+                return false;
+            }
+            
+            const fullPath = path.resolve(this.projectRoot, filePath);
+            if (!fs.existsSync(fullPath)) {
+                this.addIssue(`Missing file: ${filePath} (${description})`);
+                return false;
+            }
+            this.log(`✓ Found: ${filePath}`);
+            return true;
+        } catch (error) {
+            this.addIssue(`Error checking file existence: ${filePath} - ${error.message}`);
+            SecurityUtils.logSecurityEvent('File existence check failed', 'warn', { filePath, error: error.message });
             return false;
         }
-        this.log(`✓ Found: ${filePath}`);
-        return true;
     }
 
     checkOldNamingConventions() {
@@ -74,7 +95,7 @@ class I18nDebugger {
         this.checkForOldReferences();
     }
 
-    checkForOldReferences() {
+    async checkForOldReferences() {
         this.log('Checking for old file references in code...');
         const filesToCheck = [
             'i18ntk-complete.js',
@@ -94,20 +115,27 @@ class I18nDebugger {
             '07-generate-summary.js'
         ];
 
-        filesToCheck.forEach(file => {
+        for (const file of filesToCheck) {
             const fullPath = path.resolve(this.projectRoot, file);
             if (fs.existsSync(fullPath)) {
-                const content = fs.readFileSync(fullPath, 'utf8');
-                oldReferences.forEach(oldRef => {
-                    if (content.includes(oldRef)) {
-                        this.addIssue(`Old reference '${oldRef}' found in ${file}`);
+                try {
+                    const content = await SecurityUtils.safeReadFile(fullPath, this.projectRoot);
+                    if (content) {
+                        oldReferences.forEach(oldRef => {
+                            if (content.includes(oldRef)) {
+                                this.addIssue(`Old reference '${oldRef}' found in ${file}`);
+                            }
+                        });
                     }
-                });
+                } catch (error) {
+                    this.addIssue(`Error reading file ${fullPath}: ${error.message}`);
+                    SecurityUtils.logSecurityEvent('File read failed during reference check', 'error', { filePath: fullPath, error: error.message });
+                }
             }
-        });
+        }
     }
 
-    checkTranslationKeys() {
+    async checkTranslationKeys() {
         this.log('Checking for missing translation keys...');
         const uiLocalesDir = path.resolve(this.projectRoot, 'ui-locales');
         
@@ -129,23 +157,51 @@ class I18nDebugger {
             return;
         }
 
-        const enLocale = JSON.parse(fs.readFileSync(enPath, 'utf8'));
-        const requiredKeys = this.extractAllKeys(enLocale);
-
-        localeFiles.forEach(file => {
-            const filePath = path.join(uiLocalesDir, file);
-            try {
-                const locale = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                const existingKeys = this.extractAllKeys(locale);
-                
-                const missingKeys = requiredKeys.filter(key => !existingKeys.includes(key));
-                if (missingKeys.length > 0) {
-                    this.addIssue(`Missing translation keys in ${file}: ${missingKeys.join(', ')}`);
-                }
-            } catch (error) {
-                this.addIssue(`Invalid JSON in ${file}: ${error.message}`);
+        try {
+            const enContent = await SecurityUtils.safeReadFile(enPath, this.projectRoot);
+            if (!enContent) {
+                this.addIssue('Failed to read en.json file');
+                return;
             }
-        });
+            
+            const enLocale = SecurityUtils.safeParseJSON(enContent);
+            if (!enLocale) {
+                this.addIssue('Failed to parse en.json file');
+                return;
+            }
+            
+            const requiredKeys = this.extractAllKeys(enLocale);
+
+            for (const file of localeFiles) {
+                const filePath = path.join(uiLocalesDir, file);
+                try {
+                    const content = await SecurityUtils.safeReadFile(filePath, this.projectRoot);
+                    if (!content) {
+                        this.addIssue(`Failed to read ${file}`);
+                        continue;
+                    }
+                    
+                    const locale = SecurityUtils.safeParseJSON(content);
+                    if (!locale) {
+                        this.addIssue(`Failed to parse ${file}`);
+                        continue;
+                    }
+                    
+                    const existingKeys = this.extractAllKeys(locale);
+                    
+                    const missingKeys = requiredKeys.filter(key => !existingKeys.includes(key));
+                    if (missingKeys.length > 0) {
+                        this.addIssue(`Missing translation keys in ${file}: ${missingKeys.join(', ')}`);
+                    }
+                } catch (error) {
+                    this.addIssue(`Error processing ${file}: ${error.message}`);
+                    SecurityUtils.logSecurityEvent('Translation file processing failed', 'error', { file, error: error.message });
+                }
+            }
+        } catch (error) {
+            this.addIssue(`Error processing en.json: ${error.message}`);
+            SecurityUtils.logSecurityEvent('English translation file processing failed', 'error', { error: error.message });
+        }
     }
 
     extractAllKeys(obj, prefix = '') {
@@ -161,41 +217,61 @@ class I18nDebugger {
         return keys;
     }
 
-    checkConfiguration() {
-        this.log('Checking configuration files...');
+    async checkUserConfig() {
+        this.log('Checking user configuration...');
         
         // Check user-config.json
         const configPath = path.resolve(this.projectRoot, 'user-config.json');
         if (this.checkFileExists('user-config.json', 'Main configuration file')) {
             try {
-                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                const content = await SecurityUtils.safeReadFile(configPath, this.projectRoot);
+                if (!content) {
+                    this.addIssue('Failed to read user-config.json');
+                    return;
+                }
+                
+                const config = SecurityUtils.safeParseJSON(content);
+                if (!config) {
+                    this.addIssue('Failed to parse user-config.json');
+                    return;
+                }
+                
+                // Validate configuration structure
+                const validatedConfig = SecurityUtils.validateConfig(config);
+                if (!validatedConfig) {
+                    this.addIssue('Invalid configuration structure in user-config.json');
+                    return;
+                }
                 
                 // Check required sections
                 const requiredSections = ['directories', 'processing', 'advanced', 'ui'];
                 requiredSections.forEach(section => {
-                    if (!config[section]) {
+                    if (!validatedConfig[section]) {
                         this.addWarning(`Missing configuration section: ${section}`);
                     }
                 });
 
-                // Check directory paths
-                if (config.directories) {
+                // Check directory paths with security validation
+                if (validatedConfig.directories) {
                     const dirs = ['sourceDir', 'outputDir', 'uiLocalesDir'];
                     dirs.forEach(dir => {
-                        if (config.directories[dir]) {
-                            const dirPath = path.resolve(this.projectRoot, config.directories[dir]);
-                            if (!fs.existsSync(dirPath)) {
-                                this.addWarning(`Configured directory does not exist: ${config.directories[dir]}`);
+                        if (validatedConfig.directories[dir]) {
+                            const dirPath = SecurityUtils.validatePath(validatedConfig.directories[dir], this.projectRoot);
+                            if (!dirPath || !fs.existsSync(dirPath)) {
+                                this.addWarning(`Configured directory does not exist or is invalid: ${validatedConfig.directories[dir]}`);
                             }
                         }
                     });
                 }
             } catch (error) {
-                this.addIssue(`Invalid JSON in user-config.json: ${error.message}`);
+                this.addIssue(`Error processing user-config.json: ${error.message}`);
+                SecurityUtils.logSecurityEvent('User config processing failed', 'error', { error: error.message });
             }
         }
+    }
 
-        // Check package.json
+    checkPackageJson() {
+        this.log('Checking package configuration...');
         this.checkFileExists('package.json', 'Package configuration');
     }
 
@@ -235,49 +311,86 @@ class I18nDebugger {
         }
     }
 
-    generateReport() {
-        this.log('\n=== DEBUG REPORT ===');
-        this.log(`Total Issues: ${this.issues.length}`);
-        this.log(`Total Warnings: ${this.warnings.length}`);
+    async generateReport() {
+        const timestamp = new Date().toLocaleString();
+        let summary = '';
+        
+        summary += '\n' + '='.repeat(60) + '\n';
+        summary += '           i18nTK DEBUG REPORT\n';
+        summary += '='.repeat(60) + '\n';
+        summary += `Generated: ${timestamp}\n`;
+        summary += `Project Root: ${this.projectRoot}\n`;
+        summary += '-'.repeat(60) + '\n';
+        summary += `📊 Summary: ${this.issues.length} issue(s), ${this.warnings.length} warning(s)\n`;
+        summary += '-'.repeat(60) + '\n';
         
         if (this.issues.length > 0) {
-            this.log('\nISSUES:');
+            summary += '\n🚨 CRITICAL ISSUES:\n';
             this.issues.forEach((issue, index) => {
-                this.log(`${index + 1}. ${issue}`);
+                summary += `   ${index + 1}. ❌ ${issue}\n`;
             });
         }
 
         if (this.warnings.length > 0) {
-            this.log('\nWARNINGS:');
+            summary += '\n⚠️  WARNINGS:\n';
             this.warnings.forEach((warning, index) => {
-                this.log(`${index + 1}. ${warning}`);
+                summary += `   ${index + 1}. ⚠️  ${warning}\n`;
             });
         }
 
         if (this.issues.length === 0 && this.warnings.length === 0) {
-            this.log('\n✅ No issues found! The i18nTK project appears to be healthy.');
+            summary += '\n✅ EXCELLENT! No issues found.\n';
+            summary += '   The i18nTK project appears to be healthy.\n';
         }
 
-        this.log(`\nDebug log saved to: ${this.logFile}`);
+        summary += '\n' + '='.repeat(60) + '\n';
+        summary += `📄 Full debug log: ${this.logFile}\n`;
+        summary += '='.repeat(60) + '\n';
+        
+        console.log(summary);
+        
+        // Save report to file securely
+        const reportPath = path.join(path.dirname(this.logFile), 'debug-report.txt');
+        const success = await SecurityUtils.safeWriteFile(reportPath, summary, this.projectRoot);
+        if (!success) {
+            console.warn('Warning: Could not save debug report due to security restrictions');
+            SecurityUtils.logSecurityEvent('Debug report save failed', 'warn', { reportPath });
+        }
+        
+        return {
+            issues: this.issues,
+            warnings: this.warnings,
+            summary: summary,
+            reportPath: reportPath,
+            logFile: this.logFile
+        };
     }
 
     async run() {
         this.log('Starting i18nTK Debug Analysis...');
         this.log(`Project Root: ${this.projectRoot}`);
         
-        this.checkCoreFiles();
-        this.checkConfiguration();
-        this.checkOldNamingConventions();
-        this.checkTranslationKeys();
-        this.checkDependencies();
+        SecurityUtils.logSecurityEvent('Debug analysis started', 'info', { projectRoot: this.projectRoot });
         
-        this.generateReport();
-        
-        return {
-            issues: this.issues,
-            warnings: this.warnings,
-            logFile: this.logFile
-        };
+        try {
+            this.checkCoreFiles();
+            await this.checkUserConfig();
+            this.checkPackageJson();
+            this.checkOldNamingConventions();
+            await this.checkTranslationKeys();
+            this.checkDependencies();
+            
+            SecurityUtils.logSecurityEvent('Debug analysis completed', 'info', { 
+                issuesFound: this.issues.length, 
+                warningsFound: this.warnings.length 
+            });
+            
+            return await this.generateReport();
+        } catch (error) {
+            this.addIssue(`Debug analysis failed: ${error.message}`);
+            SecurityUtils.logSecurityEvent('Debug analysis failed', 'error', { error: error.message });
+            return await this.generateReport();
+        }
     }
 }
 

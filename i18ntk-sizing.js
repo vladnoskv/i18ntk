@@ -36,6 +36,7 @@ const path = require('path');
 const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('./utils/i18n-helper');
 const settingsManager = require('./settings-manager');
+const SecurityUtils = require('./utils/security');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -71,23 +72,31 @@ class I18nSizingAnalyzer {
 
   // Get available language files
   getLanguageFiles() {
-    if (!fs.existsSync(this.sourceDir)) {
-      throw new Error(`Source directory not found: ${this.sourceDir}`);
+    const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
+    if (!validatedSourceDir) {
+      throw new Error(`Invalid source directory path: ${this.sourceDir}`);
+    }
+
+    if (!fs.existsSync(validatedSourceDir)) {
+      throw new Error(`Source directory not found: ${validatedSourceDir}`);
     }
 
     const files = [];
-    const items = fs.readdirSync(this.sourceDir);
+    const items = fs.readdirSync(validatedSourceDir);
     
     // Check for nested language directories
     for (const item of items) {
-      const itemPath = path.join(this.sourceDir, item);
+      const itemPath = SecurityUtils.validatePath(path.join(validatedSourceDir, item), process.cwd());
+      if (!itemPath) continue;
+      
       const stat = fs.statSync(itemPath);
       
       if (stat.isDirectory()) {
         // This is a language directory, combine all JSON files
         const langFiles = fs.readdirSync(itemPath)
           .filter(file => file.endsWith('.json'))
-          .map(file => path.join(itemPath, file));
+          .map(file => SecurityUtils.validatePath(path.join(itemPath, file), process.cwd()))
+          .filter(file => file !== null);
         
         if (langFiles.length > 0) {
           files.push({
@@ -129,7 +138,7 @@ class I18nSizingAnalyzer {
         
         langFiles.forEach(langFile => {
           const stats = fs.statSync(langFile);
-          const content = fs.readFileSync(langFile, 'utf8');
+          const content = SecurityUtils.safeReadFileSync(langFile, process.cwd());
           
           totalSize += stats.size;
           totalLines += content.split('\n').length;
@@ -151,7 +160,7 @@ class I18nSizingAnalyzer {
       } else {
         // Handle single file structure
         const stats = fs.statSync(filePath);
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = SecurityUtils.safeReadFileSync(filePath, process.cwd());
         
         this.stats.files[language] = {
           file,
@@ -177,13 +186,17 @@ class I18nSizingAnalyzer {
         if (langFiles) {
           // Handle nested directory structure - combine all JSON files
           langFiles.forEach(langFile => {
-            const fileContent = JSON.parse(fs.readFileSync(langFile, 'utf8'));
-            const fileName = path.basename(langFile, '.json');
-            combinedContent[fileName] = fileContent;
+            const rawContent = SecurityUtils.safeReadFileSync(langFile, process.cwd());
+            const fileContent = SecurityUtils.safeParseJSON(rawContent);
+            if (fileContent) {
+              const fileName = path.basename(langFile, '.json');
+              combinedContent[fileName] = fileContent;
+            }
           });
         } else {
           // Handle single file structure
-          combinedContent = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          const rawContent = SecurityUtils.safeReadFileSync(filePath, process.cwd());
+          combinedContent = SecurityUtils.safeParseJSON(rawContent) || {};
         }
         
         const analysis = this.analyzeTranslationObject(combinedContent, '');
@@ -410,13 +423,22 @@ class I18nSizingAnalyzer {
     
     console.log(this.t("sizing.generating_detailed_report"));
     
+    const validatedOutputDir = SecurityUtils.validatePath(this.outputDir, process.cwd());
+    if (!validatedOutputDir) {
+      throw new Error(`Invalid output directory path: ${this.outputDir}`);
+    }
+
     // Ensure output directory exists
-    if (!fs.existsSync(this.outputDir)) {
-      fs.mkdirSync(this.outputDir, { recursive: true });
+    if (!fs.existsSync(validatedOutputDir)) {
+      fs.mkdirSync(validatedOutputDir, { recursive: true });
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const reportPath = path.join(this.outputDir, `sizing-analysis-${timestamp}.json`);
+    const reportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.json`), process.cwd());
+    
+    if (!reportPath) {
+      throw new Error('Invalid report file path');
+    }
     
     const report = {
       timestamp: new Date().toISOString(),
@@ -433,8 +455,13 @@ class I18nSizingAnalyzer {
       }
     };
     
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    console.log(this.t("sizing.report_saved_to", { reportPath }));
+    const success = SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd());
+    if (success) {
+      console.log(this.t("sizing.report_saved_to", { reportPath }));
+      SecurityUtils.logSecurityEvent('Sizing report saved', 'info', { reportPath });
+    } else {
+      throw new Error('Failed to save report securely');
+    }
     
     // Generate CSV if requested
     if (this.format === 'csv') {
@@ -444,7 +471,15 @@ class I18nSizingAnalyzer {
 
   // Generate CSV report
   async generateCSVReport(timestamp) {
-    const csvPath = path.join(this.outputDir, `sizing-analysis-${timestamp}.csv`);
+    const validatedOutputDir = SecurityUtils.validatePath(this.outputDir, process.cwd());
+    if (!validatedOutputDir) {
+      throw new Error(`Invalid output directory path: ${this.outputDir}`);
+    }
+
+    const csvPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.csv`), process.cwd());
+    if (!csvPath) {
+      throw new Error('Invalid CSV file path');
+    }
     
     let csvContent = 'Language,File Size (KB),Lines,Characters,Total Keys,Avg Key Length,Max Key Length,Empty Keys,Long Keys\n';
     
@@ -455,8 +490,13 @@ class I18nSizingAnalyzer {
       csvContent += `${lang},${fileData.sizeKB},${fileData.lines},${fileData.characters},${langData.totalKeys},${langData.averageKeyLength.toFixed(1)},${langData.maxKeyLength},${langData.emptyKeys},${langData.longKeys}\n`;
     });
     
-    fs.writeFileSync(csvPath, csvContent);
-    console.log(this.t("sizing.csv_report_saved_to", { csvPath }));
+    const success = SecurityUtils.safeWriteFileSync(csvPath, csvContent, process.cwd());
+    if (success) {
+      console.log(this.t("sizing.csv_report_saved_to", { csvPath }));
+      SecurityUtils.logSecurityEvent('CSV report saved', 'info', { csvPath });
+    } else {
+      throw new Error('Failed to save CSV report securely');
+    }
   }
 
   // Main analysis method

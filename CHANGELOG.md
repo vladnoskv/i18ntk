@@ -5,6 +5,212 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.7] - 2025-07-25
+
+### 🎛️ Enhanced Settings Management
+- **New Feature**: Comprehensive interactive settings CLI interface (`settings-cli.js`)
+- Added terminal-based settings management with color-coded interface
+- Implemented settings categories: UI, Directory, Processing, and Advanced settings
+- Added settings validation, backup, and restore functionality
+- Enhanced settings schema support for dynamic UI generation
+- Integrated with existing `SettingsManager` for centralized configuration
+
+### 🐛 Bug Reporting Integration
+- **New Feature**: Built-in bug reporting functionality in settings CLI
+- Added "Report Bug" option (key '8') in main settings menu
+- Automatic browser opening to GitHub issues page with cross-platform support
+- Comprehensive bug reporting guidelines and best practices
+- User-friendly instructions for effective issue reporting
+
+### 🔧 Terminal Interface Improvements
+- **Critical Fix**: Resolved double character input/output issues across all CLI interfaces
+- Updated all `readline.createInterface` configurations with `terminal: true` and `historySize: 0`
+- Fixed readline configuration in:
+  - `settings-cli.js`: Enhanced settings management interface
+  - `i18ntk-manage.js`: Main management interface
+  - `i18ntk-autorun.js`: Automated workflow interface
+  - `i18ntk-init.js`: Project initialization interface
+  - `ui-i18n.js`: Language selection interface
+  - `utils/admin-cli.js`: Admin authentication interface
+
+### 🎨 User Experience Enhancements
+- Improved terminal output with consistent ANSI color coding
+- Enhanced interactive menus with better visual hierarchy
+- Added comprehensive help text and option descriptions
+- Improved error handling and user feedback across all interfaces
+- Better keyboard navigation and input handling
+
+### 🛠️ Code Quality & Maintenance
+- Enhanced module imports and dependency management
+- Improved error handling and validation throughout the codebase
+- Better separation of concerns between UI and business logic
+- Enhanced code documentation and inline comments
+- Consistent coding standards across all CLI interfaces
+
+### 📋 Notes
+- All terminal interface improvements are backward compatible
+- Settings CLI provides intuitive management of all configuration options
+- Bug reporting feature streamlines issue submission process
+- Enhanced user experience with professional-grade terminal interfaces
+- No breaking changes to existing functionality
+
+## [1.3.6] - 2025-07-25
+
+### 🔐 Enhanced Admin Authentication System
+- **New Feature**: Comprehensive admin PIN authentication with advanced security features
+- Implemented persistent authentication sessions with configurable timeout
+- Added admin PIN setup prompt during project initialization
+- Enhanced `AdminAuth` class with session management and lockout protection
+- Integrated admin authentication with `SettingsManager` for centralized configuration
+- Added support for "keep authenticated until exit" functionality
+- Implemented failed attempt tracking with automatic lockout after configurable attempts
+- Enhanced security logging with debug mode integration
+
+### ⚙️ Advanced Settings Management
+- **New Feature**: Comprehensive settings system with security and debug configurations
+- Added `security` settings section with admin PIN, session timeout, and lockout controls
+- Added `debug` settings section with logging preferences and security log visibility
+- Implemented settings validation and backup functionality
+- Enhanced `SettingsManager` with new methods for security and debug configuration
+- Added settings schema for UI generation and validation
+
+### 🛡️ Security Enhancements
+- Enhanced `SecurityUtils` with debug mode integration for conditional logging
+- Improved security event logging with settings-based visibility controls
+- Added comprehensive input validation for admin PIN setup (4-8 digits)
+- Implemented secure session management with automatic cleanup
+- Enhanced path validation and file operation security
+- Added audit trails for all admin authentication events
+
+### 🌍 Internationalization Improvements
+- Added new translation keys for admin PIN setup and session management
+- Enhanced UI locales with debug and security-related messages
+- Improved user experience with clear feedback during admin operations
+- Added multilingual support for admin authentication prompts
+
+### 🔧 File Management
+- **Renamed**: `auto-run.js` → `i18ntk-autorun.js` for consistent naming convention
+- Fixed `SettingsManager` import issues across all modules
+- Corrected singleton pattern usage for settings management
+- Enhanced module imports for better compatibility
+- **Fixed**: Added missing `safeReadFileSync` function to `SecurityUtils` for synchronous file operations
+- **Fixed**: Resolved `SecurityUtils.validateConfig` compatibility issues in completion script
+- **Fixed**: All auto-run workflow steps now execute successfully without errors
+
+### 🚀 Performance & Reliability
+- Improved error handling in admin authentication flows
+- Enhanced session cleanup and memory management
+- Better integration between authentication and settings systems
+- Optimized security logging with conditional output
+- Fixed constructor issues with singleton pattern implementations
+
+### 📝 Developer Experience
+- Enhanced code documentation with comprehensive inline comments
+- Improved error messages and user feedback
+- Better separation of concerns between authentication, settings, and security
+- Added comprehensive testing for admin authentication flows
+- Enhanced debugging capabilities with detailed logging options
+
+### 📋 Notes
+- All admin authentication features are backward compatible
+- Settings system provides sensible defaults for all new configurations
+- Debug mode can be enabled/disabled without affecting core functionality
+- Admin PIN setup is optional and can be configured during or after initialization
+- Session management provides both security and user convenience
+
+## [1.3.5] - 2025-07-24
+
+### 🔐 Admin Authentication
+- **New Feature**: Added comprehensive admin authentication system with PIN protection
+- Implemented `AdminCLI` utility module for secure admin operations
+- Added admin commands to `i18ntk-validate.js` and `i18ntk-manage.js`:
+  - `--setup-admin`: Set up admin PIN protection
+  - `--disable-admin`: Disable admin authentication
+  - `--admin-status`: Check admin authentication status
+- Protected sensitive operations with admin authentication:
+  - Project initialization (`init`)
+  - Project deletion (`delete`)
+  - Workflow management (`workflow`)
+- Enhanced security with hidden PIN input and confirmation prompts
+- Added admin authentication checks for both CLI and interactive modes
+
+### 🛡️ Security Enhancements
+- PIN-based authentication for administrative operations
+- Secure PIN storage with encryption
+- Hidden PIN input for enhanced security
+- Confirmation prompts for destructive operations
+- Audit trail for admin authentication events
+
+### 📝 Updated
+- Enhanced help messages in English locale to include admin commands
+- Updated command-line argument parsing for admin functionality
+- Improved user experience with clear admin status feedback
+- Added comprehensive error handling for admin operations
+
+### 🔧 Development
+- New `utils/admin-cli.js` module for admin functionality
+- Enhanced CLI interfaces with admin command support
+- Improved security architecture with role-based access
+- Better separation of concerns for authentication logic
+
+### 📋 Notes
+- Admin authentication is optional and can be enabled/disabled as needed
+- Existing functionality remains unchanged for non-admin operations
+- Enhanced security for production environments
+- Backward compatible with existing workflows
+
+## [1.3.0] - 2025-01-27
+
+### 🔒 Security
+- **Major Security Enhancement**: Implemented comprehensive security framework with `SecurityUtils` module
+- Added secure file operations with path validation and sanitization
+- Implemented input validation and sanitization for all user inputs
+- Added security event logging for audit trails
+- Enhanced configuration validation with security checks
+- Protected against path traversal attacks with strict path validation
+- Added secure JSON parsing with error handling
+- Implemented safe file read/write operations with proper error handling
+- Added command-line argument sanitization
+- Enhanced directory validation with security checks
+
+### 🛡️ Security Features
+- **SecurityUtils Module**: Centralized security utilities for all operations
+  - `validatePath()`: Prevents path traversal attacks
+  - `sanitizeInput()`: Sanitizes user input to prevent injection attacks
+  - `safeReadFile()`: Secure file reading with validation
+  - `safeWriteFile()`: Secure file writing with validation
+  - `safeParseJSON()`: Safe JSON parsing with error handling
+  - `validateConfig()`: Configuration validation with security checks
+  - `logSecurityEvent()`: Security event logging for audit trails
+
+### 🔧 Updated Scripts
+- **i18ntk-init.js**: Integrated SecurityUtils for secure initialization
+- **i18ntk-analyze.js**: Added security validation for analysis operations
+- **i18ntk-complete.js**: Enhanced with secure file operations
+- **i18ntk-sizing.js**: Implemented security checks for sizing analysis
+- **i18ntk-summary.js**: Added secure report generation
+- **i18ntk-usage.js**: Enhanced with comprehensive security validation
+- **i18ntk-validate.js**: Strengthened validation with security checks
+
+### 📝 Changed
+- All file operations now use secure methods with validation
+- Configuration loading enhanced with security validation
+- User input processing now includes sanitization
+- Error handling improved with security considerations
+- Logging enhanced with security event tracking
+
+### 🛠️ Development
+- Added comprehensive security testing framework
+- Enhanced error handling with security focus
+- Improved code quality with security best practices
+- Added security documentation and guidelines
+
+### 📋 Notes
+- This version focuses on security hardening and vulnerability prevention
+- All user inputs and file operations are now properly validated and sanitized
+- Security event logging provides audit trails for all operations
+- No breaking changes to existing functionality
+
 ## [1.2.2] - 2025-07-24
 
 ### 🔧 Fixed

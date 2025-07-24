@@ -211,7 +211,9 @@ class AutoRunner {
     async promptForSettings() {
         const rl = readline.createInterface({
             input: process.stdin,
-            output: process.stdout
+            output: process.stdout,
+            terminal: true,
+            historySize: 0
         });
 
         const question = (prompt) => new Promise((resolve) => {

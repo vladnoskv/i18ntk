@@ -1,0 +1,11 @@
+[2025-07-24T15:36:28.401Z] [INFO] Checking core i18nTK files...
+[2025-07-24T15:36:28.405Z] [INFO] ✓ Found: i18ntk-manage.js
+[2025-07-24T15:36:28.407Z] [INFO] ✓ Found: i18ntk-init.js
+[2025-07-24T15:36:28.408Z] [INFO] ✓ Found: i18ntk-analyze.js
+[2025-07-24T15:36:28.410Z] [INFO] ✓ Found: i18ntk-validate.js
+[2025-07-24T15:36:28.412Z] [INFO] ✓ Found: i18ntk-usage.js
+[2025-07-24T15:36:28.414Z] [INFO] ✓ Found: i18ntk-complete.js
+[2025-07-24T15:36:28.416Z] [INFO] ✓ Found: i18ntk-sizing.js
+[2025-07-24T15:36:28.418Z] [INFO] ✓ Found: i18ntk-summary.js
+[2025-07-24T15:36:28.419Z] [INFO] Checking dependencies...
+[2025-07-24T15:36:28.421Z] [INFO] Found 2 dependencies

@@ -19,14 +19,33 @@
       "status": "📋 Show project status",
       "delete": "🗑️  Delete all reports",
       "language": "🌍 Change UI language",
-      "settings": "⚙️  Settings",
+      "debugger": "🔧 Debug Tools",
       "help": "❓ Help",
+      "settings": "⚙️  Settings",
       "exit": "🚪 Exit"
     },
-    "prompt": "Select an option (0-12): ",
-    "invalidChoice": "❌ Invalid choice. Please select 0-12.",
+    "prompt": "Select an option (0-13): ",
+    "invalidChoice": "❌ Invalid choice. Please select 0-13.",
     "continuePrompt": "Press Enter to continue...",
     "goodbye": "👋 Goodbye!"
+  },
+  "debugger": {
+    "title": "🔧 Debug Tools",
+    "menu": {
+      "full": "🔍 Full System Debug",
+      "config": "⚙️  Configuration Debug",
+      "translations": "🌐 Translation Debug",
+      "performance": "⚡ Performance Debug",
+      "back": "⬅️  Back to Main Menu"
+    },
+    "prompt": "Select debug option (0-4): ",
+    "invalidChoice": "❌ Invalid choice. Please select 0-4.",
+    "running": "🔄 Running debug analysis...",
+    "completed": "✅ Debug analysis completed!",
+    "reportGenerated": "📄 Debug report generated: {reportPath}",
+    "noIssues": "✅ No issues found!",
+    "issuesFound": "⚠️  {count} issue(s) found",
+    "warningsFound": "⚠️  {count} warning(s) found"
   },
   "status": {
     "title": "📊 I18N PROJECT STATUS",
@@ -78,7 +97,7 @@
     "3_run_node_scriptsi18n03valida": "3. Run: node i18ntk-validate.js"
   },
   "validateTranslations": {
-    "help_message": "\nI18n Translation Validator\n\nUsage: node i18ntk-validate.js [options]\n\nOptions:\n  --language <lang>      Validate specific language (default: all)\n  --source-dir <dir>     Source directory (default: ./src/locales)\n  --strict               Enable strict mode (warnings become errors)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-validate.js\n  node i18ntk-validate.js --language=de\n  node i18ntk-validate.js --source-dir=./locales --strict\n",
+    "help_message": "\nI18n Translation Validator\n\nUsage: node i18ntk-validate.js [options]\n\nOptions:\n  --language <lang>      Validate specific language (default: all)\n  --source-dir <dir>     Source directory (default: ./src/locales)\n  --strict               Enable strict mode (warnings become errors)\n  --help                 Show this help\n\nAdmin Commands:\n  --setup-admin          Set up admin PIN protection\n  --disable-admin        Disable admin PIN protection\n  --admin-status         Show admin protection status\n\nExamples:\n  node i18ntk-validate.js\n  node i18ntk-validate.js --language=de\n  node i18ntk-validate.js --source-dir=./locales --strict\n  node i18ntk-validate.js --setup-admin\n",
     "title": "🔍 I18N TRANSLATION VALIDATION",
     "deletedOldReport": "🗑️  Deleted old validation report",
     "sourceDirectory": "📁 Source directory: {{dir}}",
@@ -152,6 +171,7 @@
   "checkUsage": {
     "help_message": "\nI18n Usage Analyzer\n\nUsage: node i18ntk-usage.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --i18n-dir <dir>       I18n directory (default: ./src/locales)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
     "title": "🔍 I18N USAGE ANALYSIS",
+    "message": "Starting usage analysis...",
     "i18n_usage_analysis": "🔍 I18N USAGE ANALYSIS",
     "source_directory": "📁 Source directory: {{sourceDir}}",
     "i18n_directory": "📁 I18n directory: {{i18nDir}}",
@@ -408,6 +428,16 @@
       "errorReading": "❌ Error reading reports directory:",
       "errorCreating": "❌ Error creating reports directory:"
     },
+    "deleteReports": {
+      "title": "🗑️  DELETE REPORTS",
+      "separator": "============================================================",
+      "lookingFor": "🔍 Looking for report files...",
+      "foundFiles": "📄 Found report files:",
+      "confirmPrompt": "⚠️  Are you sure you want to delete all reports? (y/N): ",
+      "deleted": "✅ Deleted: {file}",
+      "successfullyDeleted": "🎉 Successfully deleted {count} report files.",
+      "noFilesToDelete": "📄 No report files found to delete."
+    },
     "fullWorkflow": {
       "title": "🚀 RUNNING FULL I18N WORKFLOW",
       "separator": "============================================================"
@@ -451,6 +481,7 @@
       "status": "Show overall i18n status",
       "workflow": "Run full workflow with completion",
       "delete": "Delete all report files",
+      "debug": "Run debug tools for system analysis",
       "help": "Show this help message"
     },
     "options": "OPTIONS:",

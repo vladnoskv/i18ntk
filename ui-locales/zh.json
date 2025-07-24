@@ -14,90 +14,14 @@
       "language": "🌍 更改界面语言",
       "help": "❓ 帮助",
       "exit": "🚪 退出",
-      "sizing": "[ZH] 📏 Analyze sizing"
+      "sizing": "📏 Analyze sizing",
+      "debugger": "🔧 调试工具",
+      "settings": "⚙️ 设置"
     },
     "prompt": "请选择选项（0-12）: ",
     "invalidChoice": "❌ 无效选择。请选择0-12。",
     "continuePrompt": "按Enter键继续...",
     "goodbye": "👋 再见！"
-  },
-  "status": {
-    "title": "📊 I18N项目状态",
-    "sourceDir": "📁 源目录",
-    "sourceLanguage": "🔤 源语言",
-    "i18nSetup": "🌐 i18n设置",
-    "availableLanguages": "🗂️  可用语言",
-    "translationFiles": "📄 翻译文件",
-    "totalKeys": "🔤 翻译键总数",
-    "yes": "✅ 是",
-    "no": "❌ 否",
-    "suggestions": {
-      "analysis": "💡 您可以运行分析来检查翻译完整性",
-      "init": "💡 运行初始化以在您的项目中设置i18n"
-    },
-    "projectStatus": "[ZH] 📊 Project Status:",
-    "outputDirectory": "[ZH] Output Directory: {{directory}}",
-    "reportsDeleted": "[ZH] ✅ Reports deleted successfully",
-    "noReportsFound": "[ZH] ℹ️  No reports directory found",
-    "workflowCompleted": "[ZH] ✅ Full workflow completed successfully!"
-  },
-  "operations": {
-    "init": {
-      "title": "🚀 I18N初始化",
-      "separator": "============================================================"
-    },
-    "analyze": {
-      "title": "🔍 翻译分析",
-      "separator": "============================================================"
-    },
-    "validate": {
-      "title": "✅ 翻译验证",
-      "separator": "============================================================"
-    },
-    "usage": {
-      "title": "📊 键使用情况分析",
-      "separator": "============================================================"
-    },
-    "complete": {
-      "title": "🎯 翻译完成",
-      "separator": "============================================================"
-    },
-    "workflow": {
-      "title": "🔄 运行完整I18N工作流",
-      "separator": "============================================================",
-      "steps": {
-        "completing": "1️⃣ 正在完成翻译以实现100%覆盖率...",
-        "validating": "2️⃣ 正在验证翻译...",
-        "analyzing": "3️⃣ 正在分析翻译完整性...",
-        "usage": "4️⃣ 正在检查键使用情况...",
-        "completed": "🎉 工作流已完成，实现100%覆盖率！请检查报告目录以获取详细结果。"
-      },
-      "notSetup": "❌ i18n未设置。请先运行初始化。"
-    },
-    "delete": {
-      "title": "🗑️  删除所有报告",
-      "separator": "============================================================",
-      "looking": "🔍 正在查找报告",
-      "noDirectory": "📁 报告目录不存在。正在创建...",
-      "directoryCreated": "✅ 报告目录已创建。",
-      "noFiles": "📄 未找到要删除的报告文件。",
-      "found": "📄 找到{count}个报告文件：",
-      "confirmPrompt": "⚠️  您确定要删除所有报告吗？（y/N）: ",
-      "deleted": "✅ 已删除: {file}",
-      "failed": "❌ 删除{file}失败: {error}",
-      "success": "🎉 成功删除{count}个报告文件。",
-      "cancelled": "❌ 操作已取消。",
-      "errorReading": "❌ 读取报告目录时出错：",
-      "errorCreating": "❌ 创建报告目录时出错："
-    },
-    "sizing": {
-      "title": "[ZH] 📏 ANALYZING TRANSLATION SIZES",
-      "separator": "[ZH] ============================================================"
-    },
-    "fullWorkflow": {
-      "title": "[ZH] 🚀 RUNNING FULL I18N WORKFLOW",
-      "separator": "[ZH] ============================================================"
-    }
   },
   "status": {
     "title": "🌐 I18N项目状态",
@@ -112,6 +36,82 @@
     "totalKeys": "🔤 翻译键总数",
     "suggestions": {
       "analysis": "💡 运行分析以获得详细见解"
+    }
+  },
+  "operations": {
+    "settings": {
+      "title": "⚙️  I18N设置管理",
+      "separator": "============================================================",
+      "reloaded": "🔄 配置已重新加载",
+      "reloadError": "❌ 重新加载配置时出错：{{error}}",
+      "error": "❌ 配置错误：{{error}}",
+      "fallback": "⚠️  由于错误，正在使用默认配置"
+    },
+    "init": {
+      "title": "🚀 I18N初始化",
+      "separator": "============================================================"
+    },
+    "analyze": {
+      "title": "🔍 分析翻译",
+      "separator": "============================================================"
+    },
+    "validate": {
+      "title": "✅ 验证翻译",
+      "separator": "============================================================"
+    },
+    "usage": {
+      "title": "📊 分析键使用情况",
+      "separator": "============================================================"
+    },
+    "complete": {
+      "title": "🎯 完成翻译",
+      "separator": "============================================================"
+    },
+    "sizing": {
+      "title": "📏 分析翻译大小",
+      "separator": "============================================================"
+    },
+    "workflow": {
+      "title": "🔄 执行完整的I18N工作流程",
+      "separator": "============================================================",
+      "steps": {
+        "completing": "[NOT TRANSLATED] 1️⃣ Completing translations for 100% coverage...",
+        "validating": "[NOT TRANSLATED] 2️⃣ Validating translations...",
+        "analyzing": "[NOT TRANSLATED] 3️⃣ Analyzing translation completeness...",
+        "usage": "[NOT TRANSLATED] 4️⃣ Checking key usage...",
+        "completed": "[NOT TRANSLATED] 🎉 Workflow completed with 100..."
+      },
+      "notSetup": "[NOT TRANSLATED] ❌ I18n not set up. Please run ..."
+    },
+    "delete": {
+      "title": "[NOT TRANSLATED] 🗑️  DELETING ALL REPORTS",
+      "separator": "[NOT TRANSLATED] ==============================...",
+      "looking": "[NOT TRANSLATED] 🔍 Looking for reports in",
+      "noDirectory": "[NOT TRANSLATED] 📁 Reports directory does not ...",
+      "directoryCreated": "[NOT TRANSLATED] ✅ Reports directory created.",
+      "noFiles": "[NOT TRANSLATED] 📄 No report files found to delete.",
+      "found": "[NOT TRANSLATED] 📄 Found {count} report files:",
+      "confirmPrompt": "[NOT TRANSLATED] ⚠️  Are you sure you want to d...",
+      "deleted": "[NOT TRANSLATED] ✅ Deleted: {file}",
+      "failed": "[NOT TRANSLATED] ❌ Failed to delete {file}: {error}",
+      "success": "[NOT TRANSLATED] 🎉 Successfully deleted {count} report files.",
+      "cancelled": "[NOT TRANSLATED] ❌ Operation cancelled.",
+      "errorReading": "[NOT TRANSLATED] ❌ Error reading reports directory:",
+      "errorCreating": "[NOT TRANSLATED] ❌ Error creating reports directory:"
+    },
+    "deleteReports": {
+      "title": "[NOT TRANSLATED] 🗑️  DELETE REPORTS",
+      "separator": "[NOT TRANSLATED] ==============================...",
+      "lookingFor": "[NOT TRANSLATED] 🔍 Looking for report files...",
+      "foundFiles": "[NOT TRANSLATED] 📄 Found report files:",
+      "confirmPrompt": "[NOT TRANSLATED] ⚠️  Are you sure you want to d...",
+      "deleted": "[NOT TRANSLATED] ✅ Deleted: {file}",
+      "successfullyDeleted": "[NOT TRANSLATED] 🎉 Successfully deleted {count} report files.",
+      "noFilesToDelete": "[NOT TRANSLATED] 📄 No report files found to delete."
+    },
+    "fullWorkflow": {
+      "title": "[NOT TRANSLATED] 🚀 RUNNING FULL I18N WORKFLOW",
+      "separator": "[NOT TRANSLATED] ==============================..."
     }
   },
   "help": {
@@ -129,7 +129,8 @@
       "workflow": "运行包含完成的完整工作流",
       "delete": "删除所有报告文件",
       "help": "显示此帮助消息",
-      "sizing": "[ZH] Analyze translation file sizes and character counts"
+      "sizing": "Analyze translation file sizes and character counts",
+      "debug": "[NOT TRANSLATED] Run debug tools for system analysis"
     },
     "options": "选项：",
     "optionList": {
@@ -139,9 +140,9 @@
       "interactive": "--interactive=false    禁用交互模式",
       "uiLanguage": "--ui-language=<lang>   设置UI语言（en, de, es, fr, ru, ja, zh）",
       "reportLanguage": "--report-language=<lang> 设置报告语言",
-      "sizing": "[ZH] --sizing               Run sizing analysis",
-      "sizingThreshold": "[ZH] --sizing-threshold <n> Size difference threshold % (default: 50)",
-      "sizingFormat": "[ZH] --sizing-format <fmt>  Sizing report format: json, csv, table (default: table)"
+      "sizing": "--sizing               Run sizing analysis",
+      "sizingThreshold": "--sizing-threshold <n> Size difference threshold % (default: 50)",
+      "sizingFormat": "--sizing-format <fmt>  Sizing report format: json, csv, table (default: table)"
     },
     "examples": "示例：",
     "exampleList": [
@@ -157,14 +158,14 @@
     "unknown": "❌ 错误：",
     "unknownCommand": "❌ 未知命令：",
     "errorRunning": "❌ 运行完成时出错：",
-    "invalidChoice": "[ZH] ❌ Invalid choice. Please try again.",
-    "operationFailed": "[ZH] ❌ Operation failed: {{error}}",
-    "fileNotFound": "[ZH] ❌ File not found: {{file}}",
-    "directoryNotFound": "[ZH] ❌ Directory not found: {{directory}}",
-    "errorDeleting": "[ZH] ❌ Error deleting reports:",
-    "errorInWorkflow": "[ZH] ❌ Error in full workflow:",
-    "errorCreatingDirectory": "[ZH] ❌ Error creating reports directory:",
-    "errorReadingDirectory": "[ZH] ❌ Error reading reports directory:"
+    "invalidChoice": "❌ Invalid choice. Please try again.",
+    "operationFailed": "❌ Operation failed: {{error}}",
+    "fileNotFound": "❌ File not found: {{file}}",
+    "directoryNotFound": "❌ Directory not found: {{directory}}",
+    "errorDeleting": "❌ Error deleting reports:",
+    "errorInWorkflow": "❌ Error in full workflow:",
+    "errorCreatingDirectory": "❌ Error creating reports directory:",
+    "errorReadingDirectory": "❌ Error reading reports directory:"
   },
   "language": {
     "title": "🌍 更改界面语言",
@@ -189,29 +190,29 @@
     "init": {
       "sourceLanguage": "🔤 源语言: {language}",
       "targetLanguages": "🌐 目标语言: {languages}",
-      "title": "[ZH] 🚀 I18N INITIALIZATION",
-      "separator": "[ZH] ==================================================",
-      "creatingSourceDir": "[ZH] 📁 Creating source directory: {dir}",
-      "creatingSourceLangDir": "[ZH] 📁 Creating source language directory: {dir}",
-      "createdSampleFile": "[ZH] ✅ Created sample translation file: {file}",
-      "sourceDir": "[ZH] 📁 Source directory: {dir}",
-      "noTargetLanguages": "[ZH] ❌ No target languages specified. Exiting.",
-      "foundSourceFiles": "[ZH] 📄 Found {count} source files: {files}",
-      "processing": "[ZH] 🔄 Processing {language} ({name})...",
-      "fileStats": "[ZH] ✅ {file}: {translated}/{total} ({percentage}%)",
-      "overallStats": "[ZH] 📊 Overall: {translated}/{total} ({percentage}%)",
-      "summaryTitle": "[ZH] 📊 INITIALIZATION SUMMARY",
-      "languageStatus": "[ZH] {icon} {name} ({lang}): {percentage}% complete",
-      "files": "[ZH] 📄 Files: {count}",
-      "keys": "[ZH] 🔤 Keys: {translated}/{total}",
-      "missing": "[ZH] ⚠️  Missing: {count}",
-      "completed": "[ZH] 🎉 Initialization completed successfully!",
-      "nextSteps": "[ZH] 📋 Next steps:",
-      "nextStep1": "[ZH] 1. Run: node scripts/i18n/02-analyze-translations.js",
-      "nextStep2": "[ZH] 2. Translate missing values in language files",
-      "nextStep3": "[ZH] 3. Run: node scripts/i18n/03-validate-translations.js",
-      "languageSelection": "[ZH] 🌍 I18N LANGUAGE SELECTION",
-      "availableLanguages": "[ZH] Available languages:",
+      "title": "🚀 I18N INITIALIZATION",
+      "separator": "==================================================",
+      "creatingSourceDir": "📁 Creating source directory: {dir}",
+      "creatingSourceLangDir": "📁 Creating source language directory: {dir}",
+      "createdSampleFile": "✅ Created sample translation file: {file}",
+      "sourceDir": "📁 Source directory: {dir}",
+      "noTargetLanguages": "❌ No target languages specified. Exiting.",
+      "foundSourceFiles": "📄 Found {count} source files: {files}",
+      "processing": "🔄 Processing {language} ({name})...",
+      "fileStats": "✅ {file}: {translated}/{total} ({percentage}%)",
+      "overallStats": "📊 Overall: {translated}/{total} ({percentage}%)",
+      "summaryTitle": "📊 INITIALIZATION SUMMARY",
+      "languageStatus": "{icon} {name} ({lang}): {percentage}% complete",
+      "files": "📄 Files: {count}",
+      "keys": "🔤 Keys: {translated}/{total}",
+      "missing": "⚠️  Missing: {count}",
+      "completed": "🎉 Initialization completed successfully!",
+      "nextSteps": "📋 Next steps:",
+      "nextStep1": "1. Run: node scripts/i18n/02-analyze-translations.js",
+      "nextStep2": "2. Translate missing values in language files",
+      "nextStep3": "3. Run: node scripts/i18n/03-validate-translations.js",
+      "languageSelection": "🌍 I18N LANGUAGE SELECTION",
+      "availableLanguages": "Available languages:",
       "defaultLanguages": "[TRANSLATE] 📋 Default languages: {languages}"
     },
     "analyze": {
@@ -398,6 +399,27 @@
       "foundKeys": "[TRANSLATE] ✅ Found {count} translation keys",
       "issuesFound": "[TRANSLATE] ⚠️  Found {count} issues that need attention",
       "noIssues": "[TRANSLATE] 🎉 No issues found - your i18n setup looks great!"
+    },
+    "settings": {
+      "title": "[NOT TRANSLATED] ⚙️  I18N SETTINGS MANAGEMENT",
+      "separator": "[NOT TRANSLATED] ==============================...",
+      "starting_server": "[NOT TRANSLATED] 🚀 Starting settings server...",
+      "server_started": "[NOT TRANSLATED] ✅ Settings server started on port {port}",
+      "opening_browser": "[NOT TRANSLATED] 🌐 Opening settings page in browser...",
+      "browser_opened": "[NOT TRANSLATED] ✅ Settings page opened: {url}",
+      "browser_failed": "[NOT TRANSLATED] ⚠️  Could not open browser aut...",
+      "server_running": "[NOT TRANSLATED] 🔄 Settings server is running....",
+      "server_stopped": "[NOT TRANSLATED] 🛑 Settings server stopped",
+      "config_reloaded": "[NOT TRANSLATED] 🔄 Configuration reloaded",
+      "error_starting_server": "[NOT TRANSLATED] ❌ Error starting settings server: {error}",
+      "error_stopping_server": "[NOT TRANSLATED] ❌ Error stopping settings server: {error}",
+      "port_in_use": "[NOT TRANSLATED] ⚠️  Port {port} is in use, try...",
+      "no_available_port": "[NOT TRANSLATED] ❌ No available port found in range {start}-{end}",
+      "settings_saved": "[NOT TRANSLATED] ✅ Settings saved successfully",
+      "settings_reset": "[NOT TRANSLATED] 🔄 Settings reset to defaults",
+      "validation_error": "[NOT TRANSLATED] ❌ Validation error: {error}",
+      "backup_created": "[NOT TRANSLATED] 💾 Backup created: {path}",
+      "backup_failed": "[NOT TRANSLATED] ⚠️  Failed to create backup: {error}"
     }
   },
   "common": {
@@ -652,16 +674,6 @@
     "update_completed_in_duration": "[TRANSLATE] \n⏱️  Update completed in {{duration}}s",
     "help_message": "[TRANSLATE] \nI18n Console Message Updater\n\nUsage:\n  node update-console-i18n.js [options]\n\nOptions:\n  --dry-run             Show changes without applying them\n  --file <filename>     Only update a specific file\n  --help                Show this help message\n"
   },
-  "operations": {
-    "settings": {
-      "title": "⚙️  I18N设置管理",
-      "separator": "============================================================",
-      "reloaded": "🔄 配置已重新加载",
-      "reloadError": "❌ 重新加载配置时出错：{{error}}",
-      "error": "❌ 配置错误：{{error}}",
-      "fallback": "⚠️  由于错误，正在使用默认配置"
-    }
-  },
   "consoleI18nTester": {
     "i18n_console_translation_checker": "[TRANSLATE] 🔍 I18N CONSOLE TRANSLATION CHECKER",
     "script_description_line1": "[TRANSLATE] This script checks if all console messages in the i18n toolkit files",
@@ -743,5 +755,23 @@
     "validation_error": "❌ 验证错误: {error}",
     "backup_created": "💾 备份已创建: {path}",
     "backup_failed": "⚠️  创建备份失败: {error}"
+  },
+  "debugger": {
+    "title": "🔧 调试工具",
+    "menu": {
+      "full": "[NOT TRANSLATED] 🔍 Full System Debug",
+      "config": "[NOT TRANSLATED] ⚙️  Configuration Debug",
+      "translations": "[NOT TRANSLATED] 🌐 Translation Debug",
+      "performance": "[NOT TRANSLATED] ⚡ Performance Debug",
+      "back": "[NOT TRANSLATED] ⬅️  Back to Main Menu"
+    },
+    "prompt": "[NOT TRANSLATED] Select debug option (0-4): ",
+    "invalidChoice": "[NOT TRANSLATED] ❌ Invalid choice. Please select 0-4.",
+    "running": "[NOT TRANSLATED] 🔄 Running debug analysis...",
+    "completed": "[NOT TRANSLATED] ✅ Debug analysis completed!",
+    "reportGenerated": "[NOT TRANSLATED] 📄 Debug report generated: {reportPath}",
+    "noIssues": "[NOT TRANSLATED] ✅ No issues found!",
+    "issuesFound": "[NOT TRANSLATED] ⚠️  {count} issue(s) found",
+    "warningsFound": "[NOT TRANSLATED] ⚠️  {count} warning(s) found"
   }
 }

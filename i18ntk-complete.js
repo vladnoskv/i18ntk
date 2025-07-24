@@ -13,17 +13,32 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+const SecurityUtils = require('./utils/security');
 const settingsManager = require('./settings-manager');
 
-// Get configuration from settings manager
-function getConfig() {
-  const settings = settingsManager.getSettings();
-  return {
-    sourceDir: settings.directories?.sourceDir || './locales',
-    sourceLanguage: settings.directories?.sourceLanguage || 'en',
-    notTranslatedMarker: settings.directories?.notTranslatedMarker || 'NOT_TRANSLATED',
-    excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
-  };
+// Get configuration from settings manager securely
+async function getConfig() {
+  try {
+    const settings = await settingsManager.getSettings();
+    const config = {
+      sourceDir: settings.directories?.sourceDir || './locales',
+      sourceLanguage: settings.directories?.sourceLanguage || 'en',
+      notTranslatedMarker: settings.directories?.notTranslatedMarker || 'NOT_TRANSLATED',
+      excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
+    };
+    
+    // Basic validation for required fields
+    if (!config.sourceDir || !config.sourceLanguage) {
+      throw new Error('Configuration validation failed: missing required fields');
+    }
+    
+    SecurityUtils.logSecurityEvent('Configuration loaded successfully', 'info');
+    return config;
+  } catch (error) {
+    SecurityUtils.logSecurityEvent('Configuration loading failed', 'error', { error: error.message });
+    throw error;
+  }
 }
 
 // Common missing keys that should be added to all projects
@@ -81,13 +96,20 @@ const COMMON_MISSING_KEYS = {
 
 class I18nCompletionTool {
   constructor(config = {}) {
-    this.config = { ...getConfig(), ...config };
-    this.sourceDir = path.resolve(this.config.sourceDir);
-    this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+    this.config = config;
+    this.sourceDir = null;
+    this.sourceLanguageDir = null;
     
     // Initialize UI i18n for console messages
     this.ui = require('./ui-i18n');
     this.t = this.ui.t.bind(this.ui);
+  }
+  
+  async initialize() {
+    const baseConfig = await getConfig();
+    this.config = { ...baseConfig, ...this.config };
+    this.sourceDir = path.resolve(this.config.sourceDir);
+    this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
   }
 
   // Parse command line arguments
@@ -362,6 +384,14 @@ class I18nCompletionTool {
 
   // Run the completion process
   async run() {
+    SecurityUtils.logSecurityEvent('I18n completion tool started', 'info', { 
+      version: '1.3.7',
+      nodeVersion: process.version,
+      platform: process.platform
+    });
+    
+    await this.initialize();
+    
     const args = this.parseArgs();
     
     if (args.sourceDir) {
@@ -447,6 +477,7 @@ if (require.main === module) {
   const tool = new I18nCompletionTool();
   tool.run().catch(error => {
     console.error('Fatal error:', error.message);
+    SecurityUtils.logSecurityEvent('I18n completion tool failed', 'error', { error: error.message });
     process.exit(1);
   });
 }

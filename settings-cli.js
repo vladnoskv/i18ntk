@@ -32,7 +32,8 @@ class SettingsCLI {
         this.rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
-            terminal: false
+            terminal: true,
+            historySize: 0
         });
         this.settings = null;
         this.schema = null;
@@ -102,6 +103,7 @@ class SettingsCLI {
             { key: '5', label: 'View All Settings', description: 'Display current configuration' },
             { key: '6', label: 'Import/Export', description: 'Backup and restore settings' },
             { key: '7', label: 'Reset to Defaults', description: 'Restore factory settings' },
+            { key: '8', label: 'Report Bug', description: 'Submit an issue report on GitHub' },
             { key: 's', label: 'Save Changes', description: 'Save current settings to file' },
             { key: 'h', label: 'Help', description: 'Show detailed help information' },
             { key: 'q', label: 'Quit', description: 'Exit settings (with save prompt if needed)' }
@@ -145,6 +147,9 @@ class SettingsCLI {
                 break;
             case '7':
                 await this.resetToDefaults();
+                break;
+            case '8':
+                await this.reportBug();
                 break;
             case 's':
                 await this.saveSettings();
@@ -528,6 +533,59 @@ class SettingsCLI {
         
         console.log(`Press Enter to continue...`);
         await this.prompt('');
+    }
+
+    /**
+     * Report a bug - opens GitHub issues page
+     */
+    async reportBug() {
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}Report a Bug${colors.reset}\n`);
+        
+        console.log(`${colors.cyan}GitHub Issues Page:${colors.reset}`);
+        console.log(`https://github.com/vladnoskv/i18n-management-toolkit-main/issues\n`);
+        
+        console.log(`${colors.yellow}Before reporting a bug, please:${colors.reset}`);
+        console.log(`  • Check if the issue already exists`);
+        console.log(`  • Include steps to reproduce the problem`);
+        console.log(`  • Provide error messages and logs`);
+        console.log(`  • Mention your operating system and Node.js version\n`);
+        
+        console.log(`${colors.cyan}Opening GitHub issues page...${colors.reset}`);
+        
+        try {
+            const { exec } = require('child_process');
+            const url = 'https://github.com/vladnoskv/i18n-management-toolkit-main/issues';
+            
+            // Try to open the URL in the default browser
+            let command;
+            switch (process.platform) {
+                case 'darwin': // macOS
+                    command = `open "${url}"`;
+                    break;
+                case 'win32': // Windows
+                    command = `start "" "${url}"`;
+                    break;
+                default: // Linux and others
+                    command = `xdg-open "${url}"`;
+                    break;
+            }
+            
+            exec(command, (error) => {
+                if (error) {
+                    console.log(`${colors.yellow}Could not automatically open browser.${colors.reset}`);
+                    console.log(`Please manually visit: ${url}`);
+                } else {
+                    console.log(`${colors.green}✅ Browser opened successfully!${colors.reset}`);
+                }
+            });
+        } catch (error) {
+            console.log(`${colors.yellow}Could not automatically open browser.${colors.reset}`);
+            console.log(`Please manually visit: https://github.com/vladnoskv/i18n-management-toolkit-main/issues`);
+        }
+        
+        await this.pause();
     }
 
     /**

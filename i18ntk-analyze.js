@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('./utils/i18n-helper');
 const settingsManager = require('./settings-manager');
+const SecurityUtils = require('./utils/security');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -89,11 +90,12 @@ class I18nAnalyzer {
   getLanguageFiles(language) {
     const languageDir = path.join(this.sourceDir, language);
     
-    if (!fs.existsSync(languageDir)) {
+    const validatedPath = SecurityUtils.validatePath(languageDir, this.sourceDir);
+    if (!validatedPath || !fs.existsSync(validatedPath)) {
       return [];
     }
     
-    return fs.readdirSync(languageDir)
+    return fs.readdirSync(validatedPath)
       .filter(file => {
         return file.endsWith('.json') && 
                !this.config.excludeFiles.includes(file);
@@ -266,7 +268,27 @@ class I18nAnalyzer {
       let sourceContent, targetContent;
       
       try {
-        sourceContent = JSON.parse(fs.readFileSync(sourceFilePath, 'utf8'));
+        const validatedSourcePath = SecurityUtils.validatePath(sourceFilePath, this.sourceDir);
+        if (!validatedSourcePath) {
+          analysis.files[fileName] = {
+            error: 'Invalid source file path'
+          };
+          continue;
+        }
+        const sourceFileContent = SecurityUtils.safeReadFile(validatedSourcePath, this.sourceDir);
+        if (!sourceFileContent) {
+          analysis.files[fileName] = {
+            error: 'Failed to read source file securely'
+          };
+          continue;
+        }
+        sourceContent = SecurityUtils.safeParseJSON(sourceFileContent);
+        if (!sourceContent) {
+          analysis.files[fileName] = {
+            error: 'Failed to parse source file JSON'
+          };
+          continue;
+        }
       } catch (error) {
         analysis.files[fileName] = {
           error: `Failed to parse source file: ${error.message}`
@@ -283,7 +305,27 @@ class I18nAnalyzer {
       }
       
       try {
-        targetContent = JSON.parse(fs.readFileSync(targetFilePath, 'utf8'));
+        const validatedTargetPath = SecurityUtils.validatePath(targetFilePath, this.sourceDir);
+        if (!validatedTargetPath) {
+          analysis.files[fileName] = {
+            error: 'Invalid target file path'
+          };
+          continue;
+        }
+        const targetFileContent = SecurityUtils.safeReadFile(validatedTargetPath, this.sourceDir);
+        if (!targetFileContent) {
+          analysis.files[fileName] = {
+            error: 'Failed to read target file securely'
+          };
+          continue;
+        }
+        targetContent = SecurityUtils.safeParseJSON(targetFileContent);
+        if (!targetContent) {
+          analysis.files[fileName] = {
+            error: 'Failed to parse target file JSON'
+          };
+          continue;
+        }
       } catch (error) {
         analysis.files[fileName] = {
           error: `Failed to parse target file: ${error.message}`
@@ -408,15 +450,20 @@ class I18nAnalyzer {
   }
 
   // Save report to file
-  saveReport(language, report) {
-    if (!fs.existsSync(this.outputDir)) {
-      fs.mkdirSync(this.outputDir, { recursive: true });
+  async saveReport(language, report) {
+    const reportPath = path.join(this.outputDir, `analysis-${language}.txt`);
+    const validatedPath = SecurityUtils.validatePath(reportPath, this.outputDir);
+    
+    if (!validatedPath) {
+      throw new Error('Invalid report file path');
     }
     
-    const reportPath = path.join(this.outputDir, `analysis-${language}.txt`);
-    fs.writeFileSync(reportPath, report, 'utf8');
+    const success = await SecurityUtils.safeWriteFile(validatedPath, report, this.outputDir);
+    if (!success) {
+      throw new Error('Failed to write report file securely');
+    }
     
-    return reportPath;
+    return validatedPath;
   }
 
   // Show help message
@@ -504,7 +551,7 @@ class I18nAnalyzer {
         // Generate and save report if requested
         if (args.outputReports) {
           const report = this.generateLanguageReport(analysis);
-          const reportPath = this.saveReport(language, report);
+          const reportPath = await this.saveReport(language, report);
           console.log(this.t("analyzeTranslations.report_saved_reportpath", { reportPath }));
         }
       }

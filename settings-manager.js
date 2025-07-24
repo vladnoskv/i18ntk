@@ -78,6 +78,26 @@ class SettingsManager {
                 sizingFormat: 'table', // Default: 'table' | Options: 'table', 'json', 'csv'
                 memoryLimit: '512MB', // Default: '512MB' | Memory limit for large file processing
                 timeout: 30000 // Default: 30000ms (30s) | Timeout for individual operations
+            },
+            
+            // Security & Admin Settings
+            security: {
+                adminPinEnabled: false, // Default: false | Enable admin PIN protection for sensitive operations
+                adminPinPromptOnInit: false, // Default: false | Prompt to set admin PIN during project initialization
+                keepAuthenticatedUntilExit: true, // Default: true | Keep user authenticated until application exit
+                sessionTimeout: 30, // Default: 30 minutes | Admin session timeout in minutes
+                maxFailedAttempts: 3, // Default: 3 | Maximum failed authentication attempts before lockout
+                lockoutDuration: 15 // Default: 15 minutes | Lockout duration after max failed attempts
+            },
+            
+            // Debug & Development Settings
+            debug: {
+                enabled: false, // Default: false | Enable debug mode
+                showSecurityLogs: false, // Default: false | Show security console logs when debug mode is enabled
+                verboseLogging: false, // Default: false | Enable verbose logging for debugging
+                logLevel: 'info', // Default: 'info' | Options: 'error', 'warn', 'info', 'debug'
+                saveDebugLogs: false, // Default: false | Save debug logs to file
+                debugLogPath: './debug.log' // Default: './debug.log' | Path for debug log file
             }
         };
         this.settings = this.loadSettings();
@@ -381,6 +401,73 @@ class SettingsManager {
             { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },
             { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' }
         ];
+    }
+
+    /**
+     * Set security settings
+     * @param {Object} securitySettings - Security settings object
+     */
+    setSecurity(securitySettings) {
+        if (typeof securitySettings !== 'object' || securitySettings === null) {
+            throw new Error('Security settings must be an object');
+        }
+        
+        this.settings.security = { ...this.settings.security, ...securitySettings };
+        this.saveSettings();
+    }
+
+    /**
+     * Set debug settings
+     * @param {Object} debugSettings - Debug settings object
+     */
+    setDebug(debugSettings) {
+        if (typeof debugSettings !== 'object' || debugSettings === null) {
+            throw new Error('Debug settings must be an object');
+        }
+        
+        this.settings.debug = { ...this.settings.debug, ...debugSettings };
+        this.saveSettings();
+    }
+
+    /**
+     * Get security settings
+     * @returns {Object} Security settings
+     */
+    getSecurity() {
+        return this.settings.security || this.defaultConfig.security;
+    }
+
+    /**
+     * Get debug settings
+     * @returns {Object} Debug settings
+     */
+    getDebug() {
+        return this.settings.debug || this.defaultConfig.debug;
+    }
+
+    /**
+     * Check if admin PIN is enabled
+     * @returns {boolean} True if admin PIN is enabled
+     */
+    isAdminPinEnabled() {
+        return this.getSecurity().adminPinEnabled || false;
+    }
+
+    /**
+     * Check if debug mode is enabled
+     * @returns {boolean} True if debug mode is enabled
+     */
+    isDebugEnabled() {
+        return this.getDebug().enabled || false;
+    }
+
+    /**
+     * Check if security logs should be shown
+     * @returns {boolean} True if security logs should be shown
+     */
+    shouldShowSecurityLogs() {
+        const debug = this.getDebug();
+        return debug.enabled && debug.showSecurityLogs;
     }
 
     /**

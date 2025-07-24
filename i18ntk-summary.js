@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const settingsManager = require('./settings-manager');
+const SecurityUtils = require('./utils/security');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -165,9 +166,13 @@ console.log('  node 07-summary-report.js --keep-reports\n');
   }
 
   // Extract keys from a translation file
-  extractKeysFromFile(filePath) {
+  async extractKeysFromFile(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = await SecurityUtils.safeReadFile(filePath, this.config.sourceDir);
+      if (!content) {
+        console.warn(`⚠️  Could not read file: ${filePath}`);
+        return [];
+      }
       
       if (filePath.endsWith('.json')) {
         const data = JSON.parse(content);
@@ -213,13 +218,16 @@ console.log('  node 07-summary-report.js --keep-reports\n');
   }
 
   // Check if file is empty or has no meaningful content
-  isFileEmpty(filePath) {
+  async isFileEmpty(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8').trim();
+      const content = await SecurityUtils.safeReadFile(filePath, this.config.sourceDir);
       if (!content) return true;
+      const trimmedContent = content.trim();
+      if (!trimmedContent) return true;
       
       if (filePath.endsWith('.json')) {
-        const data = JSON.parse(content);
+        const data = SecurityUtils.safeParseJSON(trimmedContent);
+        if (!data) return true;
         return Object.keys(data).length === 0;
       }
       
@@ -230,12 +238,14 @@ console.log('  node 07-summary-report.js --keep-reports\n');
   }
 
   // Check if file is malformed
-  isFileMalformed(filePath) {
+  async isFileMalformed(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = await SecurityUtils.safeReadFile(filePath, this.config.sourceDir);
+      if (!content) return true;
       
       if (filePath.endsWith('.json')) {
-        JSON.parse(content);
+        const parsed = SecurityUtils.safeParseJSON(content);
+        if (!parsed) return true;
       }
       
       return false;
@@ -245,9 +255,10 @@ console.log('  node 07-summary-report.js --keep-reports\n');
   }
 
   // Find duplicate keys within a file
-  findDuplicateKeys(filePath) {
+  async findDuplicateKeys(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = await SecurityUtils.safeReadFile(filePath, this.config.sourceDir);
+      if (!content) return [];
       
       if (filePath.endsWith('.json')) {
         // For JSON files, check for duplicate keys in the raw content
@@ -270,7 +281,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
   }
 
   // Analyze folder structure and collect statistics
-  analyzeStructure() {
+  async analyzeStructure() {
     console.log('📊 Analyzing i18n folder structure...');
     
     this.stats.languages = this.getAvailableLanguages();
@@ -312,24 +323,24 @@ console.log('  node 07-summary-report.js --keep-reports\n');
         const filePath = path.join(this.config.sourceDir, language, file);
         
         // Check if file is empty
-        if (this.isFileEmpty(filePath)) {
+        if (await this.isFileEmpty(filePath)) {
           this.stats.emptyFiles.push({ language, file });
         }
         
         // Check if file is malformed
-        if (this.isFileMalformed(filePath)) {
+        if (await this.isFileMalformed(filePath)) {
           this.stats.malformedFiles.push({ language, file });
           continue;
         }
         
         // Find duplicate keys
-        const duplicates = this.findDuplicateKeys(filePath);
+        const duplicates = await this.findDuplicateKeys(filePath);
         if (duplicates.length > 0) {
           this.stats.duplicateKeys.push({ language, file, duplicates });
         }
         
         // Extract keys
-        const keys = this.extractKeysFromFile(filePath);
+        const keys = await this.extractKeysFromFile(filePath);
         this.stats.keysByLanguage[language][file] = keys;
         totalKeysForLanguage += keys.length;
         
@@ -573,7 +584,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
     
     try {
       // Analyze structure
-      this.analyzeStructure();
+      await this.analyzeStructure();
       
       // Generate report
       console.log('\n📄 Generating summary report...');
@@ -582,8 +593,12 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       // Output report
       if (args.outputFile) {
         const outputPath = path.resolve(args.outputFile);
-        fs.writeFileSync(outputPath, report, 'utf8');
-        console.log(`📄 Report saved to: ${outputPath}`);
+        const success = await SecurityUtils.safeWriteFile(outputPath, report, process.cwd());
+        if (success) {
+          console.log(`📄 Report saved to: ${outputPath}`);
+        } else {
+          console.error('❌ Failed to save report file');
+        }
       } else {
         console.log('\n' + report);
       }

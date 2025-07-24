@@ -14,90 +14,14 @@
       "language": "🌍 Изменить язык интерфейса",
       "help": "❓ Помощь",
       "exit": "🚪 Выход",
-      "sizing": "[RU] 📏 Analyze sizing"
+      "sizing": "📏 Analyze sizing",
+      "debugger": "🔧 Debug Tools",
+      "settings": "⚙️  Settings"
     },
     "prompt": "Выберите опцию (0-12): ",
     "invalidChoice": "❌ Неверный выбор. Пожалуйста, выберите 0-12.",
     "continuePrompt": "Нажмите Enter для продолжения...",
     "goodbye": "👋 До свидания!"
-  },
-  "status": {
-    "title": "📊 СТАТУС ПРОЕКТА I18N",
-    "sourceDir": "📁 Исходная директория",
-    "sourceLanguage": "🔤 Исходный язык",
-    "i18nSetup": "🌐 Настройка i18n",
-    "availableLanguages": "🗂️  Доступные языки",
-    "translationFiles": "📄 Файлы переводов",
-    "totalKeys": "🔤 Общее количество ключей переводов",
-    "yes": "✅ Да",
-    "no": "❌ Нет",
-    "suggestions": {
-      "analysis": "💡 Вы можете запустить анализ для проверки полноты переводов",
-      "init": "💡 Запустите инициализацию для настройки i18n в вашем проекте"
-    },
-    "projectStatus": "[RU] 📊 Project Status:",
-    "outputDirectory": "[RU] Output Directory: {{directory}}",
-    "reportsDeleted": "[RU] ✅ Reports deleted successfully",
-    "noReportsFound": "[RU] ℹ️  No reports directory found",
-    "workflowCompleted": "[RU] ✅ Full workflow completed successfully!"
-  },
-  "operations": {
-    "init": {
-      "title": "🚀 ИНИЦИАЛИЗАЦИЯ I18N",
-      "separator": "============================================================"
-    },
-    "analyze": {
-      "title": "🔍 АНАЛИЗ ПЕРЕВОДОВ",
-      "separator": "============================================================"
-    },
-    "validate": {
-      "title": "✅ ПРОВЕРКА ПЕРЕВОДОВ",
-      "separator": "============================================================"
-    },
-    "usage": {
-      "title": "📊 АНАЛИЗ ИСПОЛЬЗОВАНИЯ КЛЮЧЕЙ",
-      "separator": "============================================================"
-    },
-    "complete": {
-      "title": "🎯 ЗАВЕРШЕНИЕ ПЕРЕВОДОВ",
-      "separator": "============================================================"
-    },
-    "workflow": {
-      "title": "🔄 ВЫПОЛНЕНИЕ ПОЛНОГО РАБОЧЕГО ПРОЦЕССА I18N",
-      "separator": "============================================================",
-      "steps": {
-        "completing": "1️⃣ Завершение переводов для 100% покрытия...",
-        "validating": "2️⃣ Проверка переводов...",
-        "analyzing": "3️⃣ Анализ полноты переводов...",
-        "usage": "4️⃣ Проверка использования ключей...",
-        "completed": "🎉 Рабочий процесс завершен со 100% покрытием! Проверьте директорию отчетов для подробных результатов."
-      },
-      "notSetup": "❌ I18n не настроен. Пожалуйста, сначала запустите инициализацию."
-    },
-    "delete": {
-      "title": "🗑️  УДАЛЕНИЕ ВСЕХ ОТЧЕТОВ",
-      "separator": "============================================================",
-      "looking": "🔍 Поиск отчетов в",
-      "noDirectory": "📁 Директория отчетов не существует. Создание...",
-      "directoryCreated": "✅ Директория отчетов создана.",
-      "noFiles": "📄 Файлы отчетов для удаления не найдены.",
-      "found": "📄 Найдено {count} файлов отчетов:",
-      "confirmPrompt": "⚠️  Вы уверены, что хотите удалить все отчеты? (д/Н): ",
-      "deleted": "✅ Удален: {file}",
-      "failed": "❌ Не удалось удалить {file}: {error}",
-      "success": "🎉 Успешно удалено {count} файлов отчетов.",
-      "cancelled": "❌ Операция отменена.",
-      "errorReading": "❌ Ошибка чтения директории отчетов:",
-      "errorCreating": "❌ Ошибка создания директории отчетов:"
-    },
-    "sizing": {
-      "title": "[RU] 📏 ANALYZING TRANSLATION SIZES",
-      "separator": "[RU] ============================================================"
-    },
-    "fullWorkflow": {
-      "title": "[RU] 🚀 RUNNING FULL I18N WORKFLOW",
-      "separator": "[RU] ============================================================"
-    }
   },
   "status": {
     "title": "🌐 СТАТУС ПРОЕКТА I18N",
@@ -112,6 +36,82 @@
     "totalKeys": "🔤 Общее количество ключей перевода",
     "suggestions": {
       "analysis": "💡 Запустите анализ для получения подробной информации"
+    }
+  },
+  "operations": {
+    "settings": {
+      "title": "⚙️  УПРАВЛЕНИЕ НАСТРОЙКАМИ I18N",
+      "separator": "============================================================",
+      "reloaded": "🔄 Конфигурация перезагружена",
+      "reloadError": "❌ Ошибка при перезагрузке конфигурации: {{error}}",
+      "error": "❌ Ошибка конфигурации: {{error}}",
+      "fallback": "⚠️  Использование конфигурации по умолчанию из-за ошибки"
+    },
+    "init": {
+      "title": "🚀 INITIALIZING I18N",
+      "separator": "==============================..."
+    },
+    "analyze": {
+      "title": "🔍 ANALYZING TRANSLATIONS",
+      "separator": "==============================..."
+    },
+    "validate": {
+      "title": "✅ VALIDATING TRANSLATIONS",
+      "separator": "==============================..."
+    },
+    "usage": {
+      "title": "📊 ANALYZING KEY USAGE",
+      "separator": "==============================..."
+    },
+    "complete": {
+      "title": "🎯 COMPLETING TRANSLATIONS",
+      "separator": "==============================..."
+    },
+    "sizing": {
+      "title": "📏 ANALYZING TRANSLATION SIZES",
+      "separator": "==============================..."
+    },
+    "workflow": {
+      "title": "🔄 RUNNING COMPREHENSIVE I18N WORKFLOW",
+      "separator": "==============================...",
+      "steps": {
+        "completing": "1️⃣ Completing translations for 100% coverage...",
+        "validating": "2️⃣ Validating translations...",
+        "analyzing": "3️⃣ Analyzing translation completeness...",
+        "usage": "4️⃣ Checking key usage...",
+        "completed": "🎉 Workflow completed with 100..."
+      },
+      "notSetup": "❌ I18n not set up. Please run ..."
+    },
+    "delete": {
+      "title": "🗑️  DELETING ALL REPORTS",
+      "separator": "==============================...",
+      "looking": "🔍 Looking for reports in",
+      "noDirectory": "📁 Reports directory does not ...",
+      "directoryCreated": "✅ Reports directory created.",
+      "noFiles": "📄 No report files found to delete.",
+      "found": "📄 Found {count} report files:",
+      "confirmPrompt": "⚠️  Are you sure you want to d...",
+      "deleted": "✅ Deleted: {file}",
+      "failed": "❌ Failed to delete {file}: {error}",
+      "success": "🎉 Successfully deleted {count} report files.",
+      "cancelled": "❌ Operation cancelled.",
+      "errorReading": "❌ Error reading reports directory:",
+      "errorCreating": "❌ Error creating reports directory:"
+    },
+    "deleteReports": {
+      "title": "🗑️  DELETE REPORTS",
+      "separator": "==============================...",
+      "lookingFor": "🔍 Looking for report files...",
+      "foundFiles": "📄 Found report files:",
+      "confirmPrompt": "⚠️  Are you sure you want to d...",
+      "deleted": "✅ Deleted: {file}",
+      "successfullyDeleted": "🎉 Successfully deleted {count} report files.",
+      "noFilesToDelete": "📄 No report files found to delete."
+    },
+    "fullWorkflow": {
+      "title": "🚀 RUNNING FULL I18N WORKFLOW",
+      "separator": "==============================..."
     }
   },
   "help": {
@@ -129,7 +129,8 @@
       "workflow": "Выполнить полный рабочий процесс с завершением",
       "delete": "Удалить все файлы отчетов",
       "help": "Показать это сообщение помощи",
-      "sizing": "[RU] Analyze translation file sizes and character counts"
+      "sizing": "Analyze translation file sizes and character counts",
+      "debug": "Run debug tools for system analysis"
     },
     "options": "ОПЦИИ:",
     "optionList": {
@@ -139,9 +140,9 @@
       "interactive": "--interactive=false    Отключить интерактивный режим",
       "uiLanguage": "--ui-language=<язык>   Установить язык интерфейса (en, de, es, fr, ru, ja, zh)",
       "reportLanguage": "--report-language=<язык> Установить язык отчетов",
-      "sizing": "[RU] --sizing               Run sizing analysis",
-      "sizingThreshold": "[RU] --sizing-threshold <n> Size difference threshold % (default: 50)",
-      "sizingFormat": "[RU] --sizing-format <fmt>  Sizing report format: json, csv, table (default: table)"
+      "sizing": "--sizing               Run sizing analysis",
+      "sizingThreshold": "--sizing-threshold <n> Size difference threshold % (default: 50)",
+      "sizingFormat": "--sizing-format <fmt>  Sizing report format: json, csv, table (default: table)"
     },
     "examples": "ПРИМЕРЫ:",
     "exampleList": [
@@ -157,14 +158,14 @@
     "unknown": "❌ Ошибка:",
     "unknownCommand": "❌ Неизвестная команда:",
     "errorRunning": "❌ Ошибка выполнения завершения:",
-    "invalidChoice": "[RU] ❌ Invalid choice. Please try again.",
-    "operationFailed": "[RU] ❌ Operation failed: {{error}}",
-    "fileNotFound": "[RU] ❌ File not found: {{file}}",
-    "directoryNotFound": "[RU] ❌ Directory not found: {{directory}}",
-    "errorDeleting": "[RU] ❌ Error deleting reports:",
-    "errorInWorkflow": "[RU] ❌ Error in full workflow:",
-    "errorCreatingDirectory": "[RU] ❌ Error creating reports directory:",
-    "errorReadingDirectory": "[RU] ❌ Error reading reports directory:"
+    "invalidChoice": "❌ Invalid choice. Please try again.",
+    "operationFailed": "❌ Operation failed: {{error}}",
+    "fileNotFound": "❌ File not found: {{file}}",
+    "directoryNotFound": "❌ Directory not found: {{directory}}",
+    "errorDeleting": "❌ Error deleting reports:",
+    "errorInWorkflow": "❌ Error in full workflow:",
+    "errorCreatingDirectory": "❌ Error creating reports directory:",
+    "errorReadingDirectory": "❌ Error reading reports directory:"
   },
   "language": {
     "title": "🌍 ИЗМЕНИТЬ ЯЗЫК ИНТЕРФЕЙСА",
@@ -189,29 +190,29 @@
     "init": {
       "sourceLanguage": "🔤 Исходный язык: {language}",
       "targetLanguages": "🌐 Целевые языки: {languages}",
-      "title": "[RU] 🚀 I18N INITIALIZATION",
-      "separator": "[RU] ==================================================",
-      "creatingSourceDir": "[RU] 📁 Creating source directory: {dir}",
-      "creatingSourceLangDir": "[RU] 📁 Creating source language directory: {dir}",
-      "createdSampleFile": "[RU] ✅ Created sample translation file: {file}",
-      "sourceDir": "[RU] 📁 Source directory: {dir}",
-      "noTargetLanguages": "[RU] ❌ No target languages specified. Exiting.",
-      "foundSourceFiles": "[RU] 📄 Found {count} source files: {files}",
-      "processing": "[RU] 🔄 Processing {language} ({name})...",
-      "fileStats": "[RU] ✅ {file}: {translated}/{total} ({percentage}%)",
-      "overallStats": "[RU] 📊 Overall: {translated}/{total} ({percentage}%)",
-      "summaryTitle": "[RU] 📊 INITIALIZATION SUMMARY",
-      "languageStatus": "[RU] {icon} {name} ({lang}): {percentage}% complete",
-      "files": "[RU] 📄 Files: {count}",
-      "keys": "[RU] 🔤 Keys: {translated}/{total}",
-      "missing": "[RU] ⚠️  Missing: {count}",
-      "completed": "[RU] 🎉 Initialization completed successfully!",
-      "nextSteps": "[RU] 📋 Next steps:",
-      "nextStep1": "[RU] 1. Run: node scripts/i18n/02-analyze-translations.js",
-      "nextStep2": "[RU] 2. Translate missing values in language files",
-      "nextStep3": "[RU] 3. Run: node scripts/i18n/03-validate-translations.js",
-      "languageSelection": "[RU] 🌍 I18N LANGUAGE SELECTION",
-      "availableLanguages": "[RU] Available languages:",
+      "title": "🚀 I18N INITIALIZATION",
+      "separator": "==================================================",
+      "creatingSourceDir": "📁 Creating source directory: {dir}",
+      "creatingSourceLangDir": "📁 Creating source language directory: {dir}",
+      "createdSampleFile": "✅ Created sample translation file: {file}",
+      "sourceDir": "📁 Source directory: {dir}",
+      "noTargetLanguages": "❌ No target languages specified. Exiting.",
+      "foundSourceFiles": "📄 Found {count} source files: {files}",
+      "processing": "🔄 Processing {language} ({name})...",
+      "fileStats": "✅ {file}: {translated}/{total} ({percentage}%)",
+      "overallStats": "📊 Overall: {translated}/{total} ({percentage}%)",
+      "summaryTitle": "📊 INITIALIZATION SUMMARY",
+      "languageStatus": "{icon} {name} ({lang}): {percentage}% complete",
+      "files": "📄 Files: {count}",
+      "keys": "🔤 Keys: {translated}/{total}",
+      "missing": "⚠️  Missing: {count}",
+      "completed": "🎉 Initialization completed successfully!",
+      "nextSteps": "📋 Next steps:",
+      "nextStep1": "1. Run: node scripts/i18n/02-analyze-translations.js",
+      "nextStep2": "2. Translate missing values in language files",
+      "nextStep3": "3. Run: node scripts/i18n/03-validate-translations.js",
+      "languageSelection": "🌍 I18N LANGUAGE SELECTION",
+      "availableLanguages": "Available languages:",
       "defaultLanguages": "[TRANSLATE] 📋 Default languages: {languages}"
     },
     "analyze": {
@@ -398,6 +399,27 @@
       "foundKeys": "[TRANSLATE] ✅ Found {count} translation keys",
       "issuesFound": "[TRANSLATE] ⚠️  Found {count} issues that need attention",
       "noIssues": "[TRANSLATE] 🎉 No issues found - your i18n setup looks great!"
+    },
+    "settings": {
+      "title": "⚙️  I18N SETTINGS MANAGEMENT",
+      "separator": "==============================...",
+      "starting_server": "🚀 Starting settings server...",
+      "server_started": "✅ Settings server started on port {port}",
+      "opening_browser": "🌐 Opening settings page in browser...",
+      "browser_opened": "✅ Settings page opened: {url}",
+      "browser_failed": "⚠️  Could not open browser aut...",
+      "server_running": "🔄 Settings server is running....",
+      "server_stopped": "🛑 Settings server stopped",
+      "config_reloaded": "🔄 Configuration reloaded",
+      "error_starting_server": "❌ Error starting settings server: {error}",
+      "error_stopping_server": "❌ Error stopping settings server: {error}",
+      "port_in_use": "⚠️  Port {port} is in use, try...",
+      "no_available_port": "❌ No available port found in range {start}-{end}",
+      "settings_saved": "✅ Settings saved successfully",
+      "settings_reset": "🔄 Settings reset to defaults",
+      "validation_error": "❌ Validation error: {error}",
+      "backup_created": "💾 Backup created: {path}",
+      "backup_failed": "⚠️  Failed to create backup: {error}"
     }
   },
   "validateTranslations": {
@@ -652,16 +674,6 @@
     "update_completed_in_duration": "[TRANSLATE] \n⏱️  Update completed in {{duration}}s",
     "help_message": "[TRANSLATE] \nI18n Console Message Updater\n\nUsage:\n  node update-console-i18n.js [options]\n\nOptions:\n  --dry-run             Show changes without applying them\n  --file <filename>     Only update a specific file\n  --help                Show this help message\n"
   },
-  "operations": {
-    "settings": {
-      "title": "⚙️  УПРАВЛЕНИЕ НАСТРОЙКАМИ I18N",
-      "separator": "============================================================",
-      "reloaded": "🔄 Конфигурация перезагружена",
-      "reloadError": "❌ Ошибка при перезагрузке конфигурации: {{error}}",
-      "error": "❌ Ошибка конфигурации: {{error}}",
-      "fallback": "⚠️  Использование конфигурации по умолчанию из-за ошибки"
-    }
-  },
   "consoleI18nTester": {
     "i18n_console_translation_checker": "[TRANSLATE] 🔍 I18N CONSOLE TRANSLATION CHECKER",
     "script_description_line1": "[TRANSLATE] This script checks if all console messages in the i18n toolkit files",
@@ -743,5 +755,55 @@
     "validation_error": "❌ Ошибка валидации: {error}",
     "backup_created": "💾 Резервная копия создана: {path}",
     "backup_failed": "⚠️  Не удалось создать резервную копию: {error}"
+  },
+  "debugger": {
+    "title": "🔧 Debug Tools",
+    "menu": {
+      "full": "🔍 Full System Debug",
+      "config": "⚙️  Configuration Debug",
+      "translations": "🌐 Translation Debug",
+      "performance": "⚡ Performance Debug",
+      "back": "⬅️  Back to Main Menu"
+    },
+    "prompt": "Select debug option (0-4): ",
+    "invalidChoice": "❌ Invalid choice. Please select 0-4.",
+    "running": "🔄 Running debug analysis...",
+    "completed": "✅ Debug analysis completed!",
+    "reportGenerated": "📄 Debug report generated: {reportPath}",
+    "noIssues": "✅ No issues found!",
+    "issuesFound": "⚠️  {count} issue(s) found",
+    "warningsFound": "⚠️  {count} warning(s) found"
+  },
+  "admin": {
+    "pinSetup": {
+      "title": "Admin PIN Setup (Optional)",
+      "description": "Admin PIN protection adds secu...",
+      "operations": [
+        "• Deleting translation files",
+        "• Modifying project configuration",
+        "• Running administrative commands"
+      ],
+      "prompt": "Would you like to set up an admin PIN? (y/N): ",
+      "enterPin": "Enter admin PIN (4-8 digits): ",
+      "confirmPin": "Confirm admin PIN: ",
+      "invalidPin": "PIN must be 4-8 digits only. Please try again.",
+      "mismatch": "PINs do not match. Please try again.",
+      "success": "Admin PIN has been set up successfully!",
+      "enabled": "Admin protection is now enable...",
+      "error": "Error setting up admin PIN:",
+      "continuing": "Continuing without admin PIN protection.",
+      "skipped": "Skipping admin PIN setup. You ..."
+    },
+    "session": {
+      "authenticated": "You are now authenticated for this session.",
+      "ended": "Admin session ended. Goodbye!",
+      "failed": "Authentication failed. Access denied."
+    }
+  },
+  "debug": {
+    "securityLogs": {
+      "enabled": "Security logs are now visible in debug mode.",
+      "disabled": "Security logs are hidden for cleaner UI."
+    }
   }
 }

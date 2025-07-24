@@ -1,25 +1,8 @@
 {
-  "common": {
-    "welcome": "Welcome",
-    "hello": "Hello",
-    "goodbye": "Goodbye",
-    "yes": "Yes",
-    "no": "No",
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "loading": "Loading..."
-  },
-  "navigation": {
-    "home": "Home",
-    "about": "About",
-    "contact": "Contact",
-    "settings": "Settings"
-  },
   "offlineTitle": "You are offline",
   "offlineMessage": "Please check your internet connection",
   "tryReconnect": "Try to reconnect",
+  "common": "Common",
   "logout": "Logout",
   "login": "Login",
   "amount": "Amount",

@@ -15,6 +15,8 @@
 const fs = require('fs');
 const path = require('path');
 const settingsManager = require('./settings-manager');
+const SecurityUtils = require('./utils/security');
+const AdminAuth = require('./utils/admin-auth');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -81,17 +83,27 @@ class I18nInitializer {
   }
 
   // Setup initial directory structure if needed
-  setupInitialStructure() {
+  async setupInitialStructure() {
+    // Validate paths
+    const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
+    const validatedSourceLanguageDir = SecurityUtils.validatePath(this.sourceLanguageDir, process.cwd());
+    
+    if (!validatedSourceDir || !validatedSourceLanguageDir) {
+      SecurityUtils.logSecurityEvent('Invalid directory paths in setupInitialStructure', 'error', { sourceDir: this.sourceDir, sourceLanguageDir: this.sourceLanguageDir });
+      throw new Error('Invalid directory paths detected');
+    }
+    
     // Create source directory if it doesn't exist
-    if (!fs.existsSync(this.sourceDir)) {
-      console.log(`📁 Creating source directory: ${this.sourceDir}`);
-      fs.mkdirSync(this.sourceDir, { recursive: true });
+    if (!fs.existsSync(validatedSourceDir)) {
+      console.log(`📁 Creating source directory: ${validatedSourceDir}`);
+      fs.mkdirSync(validatedSourceDir, { recursive: true });
+      SecurityUtils.logSecurityEvent('Source directory created', 'info', { dir: validatedSourceDir });
     }
     
     // Create source language directory if it doesn't exist
-    if (!fs.existsSync(this.sourceLanguageDir)) {
-      console.log(`📁 Creating source language directory: ${this.sourceLanguageDir}`);
-      fs.mkdirSync(this.sourceLanguageDir, { recursive: true });
+    if (!fs.existsSync(validatedSourceLanguageDir)) {
+      console.log(`📁 Creating source language directory: ${validatedSourceLanguageDir}`);
+      fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });
       
       // Create a sample common.json file
       const sampleTranslations = {
@@ -115,9 +127,23 @@ class I18nInitializer {
         }
       };
       
-      const sampleFilePath = path.join(this.sourceLanguageDir, 'common.json');
-      fs.writeFileSync(sampleFilePath, JSON.stringify(sampleTranslations, null, 2), 'utf8');
-      console.log(`✅ Created sample translation file: ${sampleFilePath}`);
+      const sampleFilePath = path.join(validatedSourceLanguageDir, 'common.json');
+      const validatedSampleFilePath = SecurityUtils.validatePath(sampleFilePath, process.cwd());
+      
+      if (!validatedSampleFilePath) {
+        SecurityUtils.logSecurityEvent('Invalid sample file path', 'error', { path: sampleFilePath });
+        throw new Error('Invalid sample file path');
+      }
+      
+      const success = await SecurityUtils.safeWriteFile(validatedSampleFilePath, JSON.stringify(sampleTranslations, null, 2), process.cwd());
+      
+      if (success) {
+        console.log(`✅ Created sample translation file: ${validatedSampleFilePath}`);
+        SecurityUtils.logSecurityEvent('Sample translation file created', 'info', { file: validatedSampleFilePath });
+      } else {
+        SecurityUtils.logSecurityEvent('Failed to create sample translation file', 'error', { file: validatedSampleFilePath });
+        throw new Error('Failed to create sample translation file');
+      }
     }
   }
   
@@ -170,35 +196,55 @@ class I18nInitializer {
     return obj;
   }
 
-  // Create or update a language file
-  createLanguageFile(sourceFile, targetLanguage, sourceContent) {
+  // Create or update a language file securely
+  async createLanguageFile(sourceFile, targetLanguage, sourceContent) {
     const targetDir = path.join(this.sourceDir, targetLanguage);
     const targetFile = path.join(targetDir, sourceFile);
     
+    // Validate paths
+    const validatedTargetDir = SecurityUtils.validatePath(targetDir, this.sourceDir);
+    const validatedTargetFile = SecurityUtils.validatePath(targetFile, this.sourceDir);
+    
+    if (!validatedTargetDir || !validatedTargetFile) {
+      SecurityUtils.logSecurityEvent('Invalid path detected in createLanguageFile', 'error', { targetDir, targetFile });
+      throw new Error('Invalid file path detected');
+    }
+    
     // Create target directory if it doesn't exist
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+    if (!fs.existsSync(validatedTargetDir)) {
+      fs.mkdirSync(validatedTargetDir, { recursive: true });
     }
     
     let targetContent;
     
     // If target file exists, preserve existing translations
-    if (fs.existsSync(targetFile)) {
+    if (fs.existsSync(validatedTargetFile)) {
       try {
-        const existingContent = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
-        targetContent = this.mergeTranslations(sourceContent, existingContent);
+        const existingContent = await SecurityUtils.safeReadFile(validatedTargetFile, this.sourceDir);
+        if (existingContent) {
+          targetContent = this.mergeTranslations(sourceContent, JSON.parse(existingContent));
+        } else {
+          targetContent = this.markAsNotTranslated(sourceContent);
+        }
       } catch (error) {
-        console.warn(`⚠️  Warning: Could not parse existing file ${targetFile}, creating new one`);
+        console.warn(`⚠️  Warning: Could not parse existing file ${validatedTargetFile}, creating new one`);
+        SecurityUtils.logSecurityEvent('File parse error', 'warn', { file: validatedTargetFile, error: error.message });
         targetContent = this.markAsNotTranslated(sourceContent);
       }
     } else {
       targetContent = this.markAsNotTranslated(sourceContent);
     }
     
-    // Write the file
-    fs.writeFileSync(targetFile, JSON.stringify(targetContent, null, 2), 'utf8');
+    // Write the file securely
+    const success = await SecurityUtils.safeWriteFile(validatedTargetFile, JSON.stringify(targetContent, null, 2), this.sourceDir);
     
-    return targetFile;
+    if (!success) {
+      SecurityUtils.logSecurityEvent('Failed to write language file', 'error', { file: validatedTargetFile });
+      throw new Error(`Failed to write file: ${validatedTargetFile}`);
+    }
+    
+    SecurityUtils.logSecurityEvent('Language file created/updated', 'info', { file: validatedTargetFile, language: targetLanguage });
+    return validatedTargetFile;
   }
 
   // Merge existing translations with new structure
@@ -260,12 +306,75 @@ class I18nInitializer {
     };
   }
 
+  // Interactive admin PIN setup
+  async promptAdminPinSetup() {
+    const readline = require('readline');
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      terminal: true,
+      historySize: 0
+    });
+    
+    const question = (query) => new Promise(resolve => rl.question(query, resolve));
+    
+    console.log('\n🔐 ADMIN PIN SETUP (OPTIONAL)');
+    console.log('=' .repeat(50));
+    console.log('Admin PIN protection adds security for sensitive operations like:');
+    console.log('• Deleting translation files');
+    console.log('• Modifying project configuration');
+    console.log('• Running administrative commands');
+    
+    const setupPin = await question('\nWould you like to set up an admin PIN? (y/N): ');
+    
+    if (setupPin.toLowerCase() === 'y' || setupPin.toLowerCase() === 'yes') {
+      try {
+        const adminAuth = new AdminAuth();
+        
+        // Enable admin PIN in settings
+        settingsManager.setSecurity({ adminPinEnabled: true, adminPinPromptOnInit: true });
+        
+        console.log('\n📝 Setting up admin PIN...');
+        
+        let pin1, pin2;
+        do {
+          pin1 = await question('Enter admin PIN (4-8 digits): ');
+          
+          if (!/^\d{4,8}$/.test(pin1)) {
+            console.log('❌ PIN must be 4-8 digits only. Please try again.');
+            continue;
+          }
+          
+          pin2 = await question('Confirm admin PIN: ');
+          
+          if (pin1 !== pin2) {
+            console.log('❌ PINs do not match. Please try again.');
+          }
+        } while (pin1 !== pin2 || !/^\d{4,8}$/.test(pin1));
+        
+        await adminAuth.setupPin(pin1);
+        console.log('✅ Admin PIN has been set up successfully!');
+        console.log('🔒 Admin protection is now enabled for sensitive operations.');
+        
+      } catch (error) {
+        console.error('❌ Error setting up admin PIN:', error.message);
+        console.log('⚠️  Continuing without admin PIN protection.');
+      }
+    } else {
+      console.log('⏭️  Skipping admin PIN setup. You can set it up later using the settings.');
+    }
+    
+    rl.close();
+  }
+
   // Interactive language selection
   async selectLanguages() {
     const readline = require('readline');
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
+      terminal: true,
+      historySize: 0
     });
     
     const question = (query) => new Promise(resolve => rl.question(query, resolve));
@@ -322,6 +431,13 @@ class I18nInitializer {
       // Validate source
       this.validateSource();
       
+      // Prompt for admin PIN setup if not already configured
+      const securitySettings = settingsManager.getSecurity();
+      
+      if (!securitySettings.adminPinEnabled && securitySettings.adminPinPromptOnInit !== false) {
+        await this.promptAdminPinSetup();
+      }
+      
       // Get target languages
       const targetLanguages = args.languages || await this.selectLanguages();
       
@@ -349,12 +465,31 @@ class I18nInitializer {
         
         for (const sourceFile of sourceFiles) {
           const sourceFilePath = path.join(this.sourceLanguageDir, sourceFile);
-          const sourceContent = JSON.parse(fs.readFileSync(sourceFilePath, 'utf8'));
+          const validatedSourceFilePath = SecurityUtils.validatePath(sourceFilePath, process.cwd());
           
-          const targetFilePath = this.createLanguageFile(sourceFile, targetLanguage, sourceContent);
+          if (!validatedSourceFilePath) {
+            SecurityUtils.logSecurityEvent('Invalid source file path', 'error', { path: sourceFilePath });
+            continue;
+          }
+          
+          const sourceContentRaw = await SecurityUtils.safeReadFile(validatedSourceFilePath, process.cwd());
+          if (!sourceContentRaw) {
+            SecurityUtils.logSecurityEvent('Failed to read source file', 'error', { file: validatedSourceFilePath });
+            continue;
+          }
+          
+          const sourceContent = JSON.parse(sourceContentRaw);
+          
+          const targetFilePath = await this.createLanguageFile(sourceFile, targetLanguage, sourceContent);
           
           // Get stats for this file
-          const targetContent = JSON.parse(fs.readFileSync(targetFilePath, 'utf8'));
+          const targetContentRaw = await SecurityUtils.safeReadFile(targetFilePath, process.cwd());
+          if (!targetContentRaw) {
+            SecurityUtils.logSecurityEvent('Failed to read target file for stats', 'error', { file: targetFilePath });
+            continue;
+          }
+          
+          const targetContent = JSON.parse(targetContentRaw);
           const stats = this.getTranslationStats(targetContent);
           
           languageResults.files.push({
