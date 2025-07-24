@@ -215,7 +215,7 @@ class I18nCompletionTool {
         try {
           fileContent = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         } catch (error) {
-          console.warn(`⚠️  Warning: Could not parse ${filePath}, creating new structure`);
+          console.warn(this.t("completeTranslations.warning_could_not_parse_filepa", { filePath })); ;
           fileContent = {};
         }
       } else {
@@ -290,12 +290,12 @@ class I18nCompletionTool {
     
     // Delete old report to ensure fresh data
     if (fs.existsSync(usageReportPath)) {
-      console.log('🗑️  Deleting old usage analysis report...');
+      console.log(this.t("completeTranslations.deleting_old_usage_analysis_re"));;
       fs.unlinkSync(usageReportPath);
     }
     
     // Generate fresh usage analysis report
-    console.log('🔄 Generating fresh usage analysis...');
+    console.log(this.t("completeTranslations.generating_fresh_usage_analysi"));;
     const { execSync } = require('child_process');
     try {
       execSync('node scripts/i18n/package/04-check-usage.js --output-report', { 
@@ -303,12 +303,12 @@ class I18nCompletionTool {
         cwd: process.cwd()
       });
     } catch (error) {
-      console.log('⚠️  Could not generate usage analysis. Using common missing keys.');
+      console.log(this.t("completeTranslations.could_not_generate_usage_analy"));;
       return Object.keys(COMMON_MISSING_KEYS);
     }
     
     if (!fs.existsSync(usageReportPath)) {
-      console.log('⚠️  Usage analysis report not found after generation. Using common missing keys.');
+      console.log(this.t("completeTranslations.usage_analysis_report_not_foun"));;
       return Object.keys(COMMON_MISSING_KEYS);
     }
     
@@ -344,10 +344,10 @@ class I18nCompletionTool {
         }
       }
       
-      console.log(`📊 Found ${missingKeys.length} missing keys from usage analysis`);
+      console.log(this.t("completeTranslations.found_missingkeyslength_missin", { missingKeys.length })); ;
       return missingKeys.length > 0 ? missingKeys : Object.keys(COMMON_MISSING_KEYS);
     } catch (error) {
-      console.log('⚠️  Could not parse usage analysis. Using common missing keys.');
+      console.log(this.t("completeTranslations.could_not_parse_usage_analysis"));;
       return Object.keys(COMMON_MISSING_KEYS);
     }
   }
@@ -362,73 +362,73 @@ class I18nCompletionTool {
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     }
     
-    console.log('🔧 I18N TRANSLATION COMPLETION TOOL');
+    console.log(this.t("completeTranslations.i18n_translation_completion_to"));;
     console.log('============================================================');
-    console.log(`📁 Source directory: ${this.sourceDir}`);
-    console.log(`🔤 Source language: ${this.config.sourceLanguage}`);
+    console.log(this.t("completeTranslations.source_directory_thissourcedir", { this.sourceDir })); ;
+    console.log(this.t("completeTranslations.source_language_thisconfigsour", { this.config.sourceLanguage })); ;
     
     if (args.dryRun) {
-      console.log('🧪 DRY RUN MODE - No files will be modified');
+      console.log(this.t("completeTranslations.dry_run_mode_no_files_will_be_"));;
     }
     
     try {
       // Get available languages
       const languages = this.getAvailableLanguages();
-      console.log(`🌐 Languages: ${languages.join(', ')}`);
+      console.log(this.t("completeTranslations.languages_languagesjoin", { variables })); // Replace 'variables' with actual variables}`);
       
       // Get missing keys from usage analysis or use common keys
       const missingKeys = this.getMissingKeysFromUsage();
-      console.log(`⚠️  Adding ${missingKeys.length} missing translation keys`);
+      console.log(this.t("completeTranslations.adding_missingkeyslength_missi", { missingKeys.length })); ;
       
       let totalChanges = 0;
       
       // Process each language
       for (const language of languages) {
-        console.log(`\n🔄 Processing ${language}...`);
+        console.log(this.t("completeTranslations.n_processing_language", { language })); ;
         
         const changes = this.addMissingKeysToLanguage(language, missingKeys, args.dryRun);
         
         if (changes.length > 0) {
-          console.log(`   ✅ Added ${changes.length} keys`);
+          console.log(this.t("completeTranslations.added_changeslength_keys", { changes.length })); ;
           totalChanges += changes.length;
           
           // Show sample of changes
           const sampleChanges = changes.slice(0, 3);
           sampleChanges.forEach(change => {
-            console.log(`      📝 ${change.file}: ${change.key}`);
+            console.log(this.t("completeTranslations.changefile_changekey", { change.file, change.key })); ;
           });
           
           if (changes.length > 3) {
-            console.log(`      ... and ${changes.length - 3} more`);
+            console.log(this.t("completeTranslations.and_changeslength_3_more", { changes.length - 3 })); ;
           }
         } else {
-          console.log(`   ✅ No changes needed`);
+          console.log(this.t("completeTranslations.no_changes_needed"));;
         }
       }
       
-      console.log('\n============================================================');
-      console.log('📊 COMPLETION SUMMARY');
+      console.log(this.t("completeTranslations.n"));;
+      console.log(this.t("completeTranslations.completion_summary"));;
       console.log('============================================================');
-      console.log(`✅ Total changes: ${totalChanges}`);
-      console.log(`🌐 Languages processed: ${languages.length}`);
-      console.log(`📄 Missing keys added: ${missingKeys.length}`);
+      console.log(this.t("completeTranslations.total_changes_totalchanges", { totalChanges })); ;
+      console.log(this.t("completeTranslations.languages_processed_languagesl", { languages.length })); ;
+      console.log(this.t("completeTranslations.missing_keys_added_missingkeys", { missingKeys.length })); ;
       
       if (!args.dryRun) {
-        console.log('\n📋 NEXT STEPS');
+        console.log(this.t("completeTranslations.n_next_steps"));;
         console.log('============================================================');
-        console.log('1. Run usage analysis to verify 100% coverage:');
-        console.log('   node scripts/i18n/04-check-usage.js --output-reports');
-        console.log('2. Validate all translations:');
-        console.log('   node scripts/i18n/03-validate-translations.js');
-        console.log('3. Run analysis for overall statistics:');
-        console.log('   node scripts/i18n/02-analyze-translations.js');
-        console.log('\n🎯 All actually used translation keys are now available!');
+        console.log(this.t("completeTranslations.1_run_usage_analysis_to_verify"));;
+        console.log(this.t("completeTranslations.node_scriptsi18n04checkusagejs"));;
+        console.log(this.t("completeTranslations.2_validate_all_translations"));;
+        console.log(this.t("completeTranslations.node_scriptsi18n03validatetran"));;
+        console.log(this.t("completeTranslations.3_run_analysis_for_overall_sta"));;
+        console.log(this.t("completeTranslations.node_scriptsi18n02analyzetrans"));;
+        console.log(this.t("completeTranslations.n_all_actually_used_translatio"));;
       } else {
-        console.log('\n💡 Run without --dry-run to apply changes');
+        console.log(this.t("completeTranslations.n_run_without_dryrun_to_apply_"));;
       }
       
     } catch (error) {
-      console.error('❌ Error during completion:', error.message);
+      console.error(this.t("completeTranslations.error_during_completion", { variables })); // Replace 'variables' with actual variables;
       process.exit(1);
     }
   }
@@ -438,7 +438,7 @@ class I18nCompletionTool {
 if (require.main === module) {
   const tool = new I18nCompletionTool();
   tool.run().catch(error => {
-    console.error('❌ Fatal error:', error.message);
+    console.error(this.t("completeTranslations.fatal_error", { variables })); // Replace 'variables' with actual variables;
     process.exit(1);
   });
 }

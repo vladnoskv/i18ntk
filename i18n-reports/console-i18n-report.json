@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-07-24T05:32:58.233Z",
+  "duration": "0.03",
+  "summary": {
+    "total": 188,
+    "translated": 187,
+    "hardcoded": 1,
+    "coverage": 99.46808510638297
+  },
+  "fileStats": {
+    "02-analyze-translations.js": {
+      "total": 32,
+      "translated": 32,
+      "hardcoded": 0
+    },
+    "03-validate-translations.js": {
+      "total": 43,
+      "translated": 43,
+      "hardcoded": 0
+    },
+    "04-check-usage.js": {
+      "total": 43,
+      "translated": 43,
+      "hardcoded": 0
+    },
+    "05-complete-translations.js": {
+      "total": 34,
+      "translated": 34,
+      "hardcoded": 0
+    },
+    "06-analyze-sizing.js": {
+      "total": 36,
+      "translated": 35,
+      "hardcoded": 1
+    }
+  },
+  "hardcodedTexts": [
+    {
+      "file": "06-analyze-sizing.js",
+      "line": 425,
+      "statement": "console.log(`\nI18n Sizing Analyzer\n\nUsage: node 06-analyze-sizing.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory (default: ./src/locales)",
+      "textContent": "Complex expression",
+      "suggestedKey": "sizing.complex_expression",
+      "suggestedReplacement": "console.log(this.t(\"sizing.complex_expression\"));"
+    }
+  ]
+}

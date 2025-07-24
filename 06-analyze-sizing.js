@@ -33,6 +33,7 @@
 const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
+const { createI18nHelper } = require('./i18n-helper');
 
 class I18nSizingAnalyzer {
   constructor(options = {}) {
@@ -42,6 +43,9 @@ class I18nSizingAnalyzer {
     this.threshold = options.threshold || 50; // Size difference threshold in percentage
     this.format = options.format || 'table';
     this.outputReport = options.outputReport || false;
+    
+    // Initialize i18n
+    this.t = createI18nHelper();
     
     this.stats = {
       files: {},
@@ -77,7 +81,7 @@ class I18nSizingAnalyzer {
 
   // Analyze file sizes
   analyzeFileSizes(files) {
-    console.log('📊 Analyzing file sizes...');
+    console.log(this.t("sizing.analyzing_file_sizes"));
     
     files.forEach(({ language, file, path: filePath }) => {
       const stats = fs.statSync(filePath);
@@ -96,7 +100,7 @@ class I18nSizingAnalyzer {
 
   // Analyze translation content
   analyzeTranslationContent(files) {
-    console.log('🔤 Analyzing translation content...');
+    console.log(this.t("sizing.analyzing_translation_content"));
     
     files.forEach(({ language, path: filePath }) => {
       try {
@@ -125,7 +129,7 @@ class I18nSizingAnalyzer {
         });
         
       } catch (error) {
-        console.error(`❌ Error parsing ${language}: ${error.message}`);
+        console.error(this.t("sizing.error_parsing_language_error", { language, errorMessage: error.message }));
       }
     });
   }
@@ -175,13 +179,13 @@ class I18nSizingAnalyzer {
 
   // Generate size comparison analysis
   generateSizeComparison() {
-    console.log('⚖️  Generating size comparisons...');
+    console.log(this.t("sizing.generating_size_comparisons"));
     
     const languages = Object.keys(this.stats.languages);
     const baseLanguage = languages[0]; // Use first language as baseline
     
     if (!baseLanguage) {
-      console.warn('⚠️  No languages found for comparison');
+      console.warn(this.t("sizing.no_languages_found_for_comparison"));
       return;
     }
     
@@ -273,48 +277,48 @@ class I18nSizingAnalyzer {
 
   // Display results in table format
   displayTable() {
-    console.log('\n📋 SIZING ANALYSIS RESULTS');
-    console.log('=' .repeat(80));
+    console.log(this.t("sizing.sizing_analysis_results"));
+    console.log(this.t("sizing.separator"));
     
     // File sizes table
-    console.log('\n📁 File Sizes:');
-    console.log('-'.repeat(60));
-    console.log('Language\tSize (KB)\tLines\tCharacters');
-    console.log('-'.repeat(60));
+    console.log(this.t("sizing.file_sizes_title"));
+    console.log(this.t("sizing.separator"));
+    console.log(this.t("sizing.file_sizes_header"));
+    console.log(this.t("sizing.separator"));
     
     Object.entries(this.stats.files).forEach(([lang, data]) => {
-      console.log(`${lang}\t\t${data.sizeKB}\t\t${data.lines}\t${data.characters}`);
+      console.log(this.t("sizing.file_size_row", { lang, sizeKB: data.sizeKB, lines: data.lines, characters: data.characters }));
     });
     
     // Language statistics
-    console.log('\n🔤 Language Statistics:');
-    console.log('-'.repeat(80));
-    console.log('Language\tKeys\tTotal Chars\tAvg Length\tMax Length\tEmpty Keys');
-    console.log('-'.repeat(80));
+    console.log(this.t("sizing.language_statistics_title"));
+    console.log(this.t("sizing.separator"));
+    console.log(this.t("sizing.language_stats_header"));
+    console.log(this.t("sizing.separator"));
     
     Object.entries(this.stats.languages).forEach(([lang, data]) => {
-      console.log(`${lang}\t\t${data.totalKeys}\t${data.totalCharacters}\t\t${data.averageKeyLength.toFixed(1)}\t\t${data.maxKeyLength}\t\t${data.emptyKeys}`);
+      console.log(this.t("sizing.language_stats_row", { lang, totalKeys: data.totalKeys, totalCharacters: data.totalCharacters, averageKeyLength: data.averageKeyLength.toFixed(1), maxKeyLength: data.maxKeyLength, emptyKeys: data.emptyKeys }));
     });
     
     // Size variations
     if (this.stats.summary.sizeVariations) {
-      console.log('\n⚖️  Size Variations (vs baseline):');
-      console.log('-'.repeat(60));
-      console.log('Language\tChar Diff\tPercentage\tProblematic');
-      console.log('-'.repeat(60));
+      console.log(this.t("sizing.size_variations_title"));
+      console.log(this.t("sizing.separator"));
+      console.log(this.t("sizing.size_variations_header"));
+      console.log(this.t("sizing.separator"));
       
       Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
         const problematic = data.isProblematic ? '⚠️  Yes' : '✅ No';
-        console.log(`${lang}\t\t${data.characterDifference}\t\t${data.percentageDifference}%\t\t${problematic}`);
+        console.log(this.t("sizing.size_variation_row", { lang, characterDifference: data.characterDifference, percentageDifference: data.percentageDifference, problematic }));
       });
     }
     
     // Recommendations
     if (this.stats.summary.recommendations.length > 0) {
-      console.log('\n💡 Recommendations:');
-      console.log('-'.repeat(60));
+      console.log(this.t("sizing.recommendations_title"));
+      console.log(this.t("sizing.separator"));
       this.stats.summary.recommendations.forEach((rec, index) => {
-        console.log(`${index + 1}. ${rec}`);
+        console.log(this.t("sizing.recommendation_item", { index: index + 1, recommendation: rec }));
       });
     }
   }
@@ -323,7 +327,7 @@ class I18nSizingAnalyzer {
   async generateReport() {
     if (!this.outputReport) return;
     
-    console.log('\n📄 Generating detailed sizing report...');
+    console.log(this.t("sizing.generating_detailed_report"));
     
     // Ensure output directory exists
     if (!fs.existsSync(this.outputDir)) {
@@ -349,7 +353,7 @@ class I18nSizingAnalyzer {
     };
     
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    console.log(`✅ Report saved to: ${reportPath}`);
+    console.log(this.t("sizing.report_saved_to", { reportPath }));
     
     // Generate CSV if requested
     if (this.format === 'csv') {
@@ -371,7 +375,7 @@ class I18nSizingAnalyzer {
     });
     
     fs.writeFileSync(csvPath, csvContent);
-    console.log(`✅ CSV report saved to: ${csvPath}`);
+    console.log(this.t("sizing.csv_report_saved_to", { csvPath }));
   }
 
   // Main analysis method
@@ -379,17 +383,17 @@ class I18nSizingAnalyzer {
     const startTime = performance.now();
     
     try {
-      console.log('🚀 Starting I18n Sizing Analysis...');
-      console.log(`📂 Source directory: ${this.sourceDir}`);
+      console.log(this.t("sizing.starting_i18n_sizing_analysis"));
+      console.log(this.t("sizing.source_directory", { sourceDir: this.sourceDir }));
       
       const files = this.getLanguageFiles();
       
       if (files.length === 0) {
-        console.log('❌ No translation files found');
+        console.log(this.t("sizing.no_translation_files_found"));
         return;
       }
       
-      console.log(`🌍 Found ${files.length} language files: ${files.map(f => f.language).join(', ')}`);
+      console.log(this.t("sizing.found_languages", { languages: files.map(f => f.language).join(', ') }));
       
       this.analyzeFileSizes(files);
       this.analyzeTranslationContent(files);
@@ -404,10 +408,10 @@ class I18nSizingAnalyzer {
       await this.generateReport();
       
       const endTime = performance.now();
-      console.log(`\n⏱️  Analysis completed in ${(endTime - startTime).toFixed(2)}ms`);
+      console.log(this.t("sizing.analysis_completed", { duration: (endTime - startTime).toFixed(2) }));
       
     } catch (error) {
-      console.error('❌ Analysis failed:', error.message);
+      console.error(this.t("sizing.analysis_failed", { errorMessage: error.message }));
       process.exit(1);
     }
   }
@@ -428,12 +432,12 @@ I18n Sizing Analyzer
 Usage: node 06-analyze-sizing.js [options]
 
 Options:
-  --source-dir <dir>     Source directory (default: ./src/locales)
-  --languages <langs>    Comma-separated languages (default: all)
-  --output-report        Generate detailed report
+  --source-dir <dir>     Source directory containing translation files (default: ./src/locales)
+  --languages <langs>    Comma-separated list of languages to analyze (default: all)
+  --output-report        Generate detailed sizing report
   --format <format>      Output format: json, csv, table (default: table)
-  --threshold <number>   Size difference threshold % (default: 50)
-  --help                 Show this help
+  --threshold <number>   Size difference threshold for warnings (default: 50%)
+  --help                 Show this help message
 
 Examples:
   node 06-analyze-sizing.js --output-report

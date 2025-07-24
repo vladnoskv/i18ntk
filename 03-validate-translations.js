@@ -14,6 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadTranslations, t } = require('./utils/i18n-helper');
 
 // Default configuration
 const DEFAULT_CONFIG = {
@@ -31,6 +32,10 @@ class I18nValidator {
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     this.errors = [];
     this.warnings = [];
+    
+    // Initialize i18n
+    loadTranslations();
+    this.t = t;
   }
 
   // Parse command line arguments
@@ -47,6 +52,8 @@ class I18nValidator {
           parsed.sourceDir = value;
         } else if (key === 'strict') {
           parsed.strictMode = true;
+        } else if (key === 'help') {
+          parsed.help = true;
         }
       }
     });
@@ -354,17 +361,22 @@ class I18nValidator {
     return warnings;
   }
 
+  // Show help message
+  showHelp() {
+    console.log(this.t('validateTranslations.help_message'));
+  }
+
   // Main validation process
   async validate() {
     try {
-      console.log('✅ I18N TRANSLATION VALIDATION');
-      console.log('=' .repeat(60));
+      console.log(this.t('validateTranslations.title'));
+      console.log(this.t("validateTranslations.message"));
       
       // Delete old validation report if it exists
       const reportPath = path.join(process.cwd(), 'validation-report.txt');
       if (fs.existsSync(reportPath)) {
         fs.unlinkSync(reportPath);
-        console.log('🗑️  Deleted old validation report');
+        console.log(this.t('validateTranslations.deletedOldReport'));
       }
       
       // Parse command line arguments
@@ -378,9 +390,9 @@ class I18nValidator {
         this.config.strictMode = true;
       }
       
-      console.log(`📁 Source directory: ${this.sourceDir}`);
-      console.log(`🔤 Source language: ${this.config.sourceLanguage}`);
-      console.log(`🔍 Strict mode: ${this.config.strictMode ? 'ON' : 'OFF'}`);
+      console.log(this.t('validateTranslations.sourceDirectory', { dir: this.sourceDir }));
+      console.log(this.t("validateTranslations.source_language_thisconfigsour", { sourceLanguage: this.config.sourceLanguage }));
+      console.log(this.t('validateTranslations.strictMode', { mode: this.config.strictMode ? 'ON' : 'OFF' }));
       
       // Validate source language directory exists
       if (!fs.existsSync(this.sourceLanguageDir)) {
@@ -395,7 +407,7 @@ class I18nValidator {
       const availableLanguages = this.getAvailableLanguages();
       
       if (availableLanguages.length === 0) {
-        console.log('⚠️  No target languages found.');
+        console.log(this.t('validateTranslations.noTargetLanguages'));
         return { success: true, message: 'No languages to validate' };
       }
       
@@ -412,63 +424,63 @@ class I18nValidator {
         throw new Error('Specified language not found');
       }
       
-      console.log(`🎯 Validating languages: ${targetLanguages.join(', ')}`);
+      console.log(this.t('validateTranslations.validatingLanguages', { langs: targetLanguages.join(', ') }));
       
       const results = {};
       
       // Validate each language
       for (const language of targetLanguages) {
-        console.log(`\n🔄 Validating ${language}...`);
+        console.log(this.t('validateTranslations.validatingLanguage', { lang: language }));
         
         const validation = this.validateLanguage(language);
         results[language] = validation;
         
         // Display summary
         const { summary } = validation;
-        console.log(`   📄 Files: ${summary.validFiles}/${summary.totalFiles}`);
-        console.log(`   🔤 Keys: ${summary.translatedKeys}/${summary.totalKeys} (${summary.percentage}%)`);
-        console.log(`   ❌ Missing files: ${summary.missingFiles.length}`);
-        console.log(`   🔧 Syntax errors: ${summary.syntaxErrors.length}`);
-        console.log(`   🏗️  Structural issues: ${summary.structuralIssues.length}`);
-        console.log(`   ⚠️  Translation issues: ${summary.translationIssues.length}`);
+        console.log(this.t('validateTranslations.filesCount', { count: summary.validFiles }));
+        console.log(this.t('validateTranslations.keysCount', { count: summary.totalKeys }));
+        console.log(this.t('validateTranslations.missingFilesCount', { count: summary.missingFiles.length }));
+        console.log(this.t('validateTranslations.syntaxErrorsCount', { count: summary.syntaxErrors.length }));
+        console.log(this.t('validateTranslations.structuralIssuesCount', { count: summary.structuralIssues.length }));
+        console.log(this.t('validateTranslations.translationIssuesCount', { count: summary.translationIssues.length }));
       }
       
       // Overall validation summary
-      console.log('\n' + '=' .repeat(60));
-      console.log('📊 VALIDATION SUMMARY');
-      console.log('=' .repeat(60));
+      console.log(this.t("validateTranslations.n"));
+      console.log(this.t("validateTranslations.validation_summary"));
+      console.log(this.t("validateTranslations.message"));
       
       const hasErrors = this.errors.length > 0;
       const hasWarnings = this.warnings.length > 0;
       
       if (!hasErrors && !hasWarnings) {
-        console.log('🎉 All validations passed! Translations are complete and consistent.');
+        console.log(this.t("validateTranslations.all_validations_passed_transla"));
       } else {
         if (hasErrors) {
-          console.log(`❌ ${this.errors.length} error(s) found:`);
+          console.log(this.t("validateTranslations.errors_found"));
           this.errors.slice(0, 10).forEach((error, index) => {
-            console.log(`   ${index + 1}. ${error.message}`);
+            console.log(this.t("validateTranslations.index_1_errormessage", { index: index + 1, message: error.message }));
             if (error.details.key) {
-              console.log(`      Key: ${error.details.key}`);
+              console.log(this.t("validateTranslations.key_errordetailskey", { key: error.details.key }));
             }
             if (error.details.fileName) {
-              console.log(`      File: ${error.details.fileName}`);
+              console.log(this.t("validateTranslations.file_errordetailsfilename", { fileName: error.details.fileName }));
             }
           });
           
           if (this.errors.length > 10) {
-            console.log(`   ... and ${this.errors.length - 10} more errors`);
+            console.log(this.t("validateTranslations.and_thiserrorslength_10_more_e", { count: this.errors.length - 10 }));
           }
         }
         
         if (hasWarnings && !this.config.strictMode) {
-          console.log(`\n⚠️  ${this.warnings.length} warning(s) found:`);
+          console.log(this.t("validateTranslations.warnings_found"));
           this.warnings.slice(0, 5).forEach((warning, index) => {
-            console.log(`   ${index + 1}. ${warning.message}`);
+            console.log(this.t("validateTranslations.index_1_warningmessage", { index: index + 1, message: warning.message }));
           });
           
           if (this.warnings.length > 5) {
-            console.log(`   ... and ${this.warnings.length - 5} more warnings`);
+            console.log(this.t("validateTranslations.and_thiswarningslength_5_more_", { count: this.warnings.length - 5 }));
           }
         }
       }
@@ -477,8 +489,8 @@ class I18nValidator {
       const sortedResults = Object.entries(results)
         .sort(([,a], [,b]) => b.summary.percentage - a.summary.percentage);
       
-      console.log('\n📋 LANGUAGE STATUS');
-      console.log('=' .repeat(60));
+      console.log(this.t("validateTranslations.n_language_status"));
+      console.log(this.t("validateTranslations.message"));
       
       sortedResults.forEach(([language, validation]) => {
         const { summary } = validation;
@@ -487,26 +499,26 @@ class I18nValidator {
                          summary.syntaxErrors.length > 0 || 
                          summary.structuralIssues.length > 0;
         
-        console.log(`${statusIcon} ${language.toUpperCase()}: ${summary.percentage}% complete${hasIssues ? ' (has issues)' : ''}`);
+        console.log(this.t("validateTranslations.language_status", { statusIcon, language, percentage: summary.percentage, issues: hasIssues ? ' (has issues)' : '' }));
       });
       
       // Recommendations
-      console.log('\n📋 RECOMMENDATIONS');
-      console.log('=' .repeat(60));
+      console.log(this.t("validateTranslations.n_recommendations"));
+      console.log(this.t("validateTranslations.message"));
       
       if (hasErrors) {
-        console.log('🔧 Fix errors first:');
-        console.log('1. Resolve missing files and syntax errors');
-        console.log('2. Fix structural inconsistencies');
-        console.log('3. Complete missing translations');
-        console.log('4. Re-run validation');
+        console.log(this.t("validateTranslations.fix_errors_first"));
+        console.log(this.t("validateTranslations.1_resolve_missing_files_and_sy"));
+        console.log(this.t("validateTranslations.2_fix_structural_inconsistenci"));
+        console.log(this.t("validateTranslations.3_complete_missing_translation"));
+        console.log(this.t("validateTranslations.4_rerun_validation"));
       } else if (hasWarnings) {
-        console.log('⚠️  Address warnings:');
-        console.log('1. Review extra keys (may be unused)');
-        console.log('2. Consider running with --strict for stricter validation');
+        console.log(this.t("validateTranslations.address_warnings"));
+        console.log(this.t("validateTranslations.review_warnings"));
+        console.log(this.t("validateTranslations.2_consider_running_with_strict"));
       } else {
-        console.log('🎉 All validations passed!');
-        console.log('💡 Consider running usage analysis to find unused keys');
+        console.log(this.t("validateTranslations.all_validations_passed"));
+        console.log(this.t("validateTranslations.consider_running_usage_analysi"));
       }
       
       // Exit with appropriate code
@@ -520,7 +532,7 @@ class I18nValidator {
       };
       
     } catch (error) {
-      console.error('❌ Validation failed:', error.message);
+      console.error(this.t("validateTranslations.validation_failed", { error: error.message }));
       return {
         success: false,
         error: error.message
@@ -532,9 +544,16 @@ class I18nValidator {
 // Run if called directly
 if (require.main === module) {
   const validator = new I18nValidator();
-  validator.validate().then(result => {
-    process.exit(result.success ? 0 : 1);
-  });
+  const args = validator.parseArgs();
+  
+  if (args.help) {
+    validator.showHelp();
+    process.exit(0);
+  } else {
+    validator.validate().then(result => {
+      process.exit(result.success ? 0 : 1);
+    });
+  }
 }
 
 module.exports = I18nValidator;

@@ -14,6 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadTranslations, t } = require('./utils/i18n-helper');
 
 // Default configuration
 const DEFAULT_CONFIG = {
@@ -30,6 +31,10 @@ class I18nAnalyzer {
     this.sourceDir = path.resolve(this.config.sourceDir);
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     this.outputDir = path.resolve(this.config.outputDir);
+    
+    // Initialize i18n
+    loadTranslations();
+    this.t = t;
   }
 
   // Parse command line arguments
@@ -48,6 +53,8 @@ class I18nAnalyzer {
           parsed.outputReports = true;
         } else if (key === 'output-dir') {
           parsed.outputDir = value;
+        } else if (key === 'help') {
+          parsed.help = true;
         }
       }
     });
@@ -373,7 +380,7 @@ class I18nAnalyzer {
     );
     
     if (notTranslatedIssues.length > 0) {
-      report += `KEYS TO TRANSLATE:\n`;
+      report += `console.log(this.t('analyzeTranslations.keysToTranslate'));\n`;
       report += `${'='.repeat(50)}\n\n`;
       
       notTranslatedIssues.slice(0, 50).forEach(issue => {
@@ -402,11 +409,16 @@ class I18nAnalyzer {
     return reportPath;
   }
 
+  // Show help message
+  showHelp() {
+    console.log(this.t('analyzeTranslations.help_message'));
+  }
+
   // Main analysis process
   async analyze() {
     try {
-      console.log('🔍 I18N TRANSLATION ANALYSIS');
-      console.log('=' .repeat(60));
+      console.log(this.t("analyzeTranslations.i18n_translation_analysis"));
+      console.log(this.t("analyzeTranslations.message"));
       
       // Parse command line arguments
       const args = this.parseArgs();
@@ -429,18 +441,18 @@ class I18nAnalyzer {
           oldReports.forEach(report => {
             fs.unlinkSync(path.join(this.outputDir, report));
           });
-          console.log(`🗑️  Deleted ${oldReports.length} old analysis report(s)`);
+          console.log(this.t("analyzeTranslations.deleted_old_reports"));
         }
       }
       
-      console.log(`📁 Source directory: ${this.sourceDir}`);
-      console.log(`🔤 Source language: ${this.config.sourceLanguage}`);
+      console.log(this.t("analyzeTranslations.source_directory_thissourcedir", { sourceDir: this.sourceDir }));
+      console.log(this.t("analyzeTranslations.source_language_thisconfigsour", { sourceLanguage: this.config.sourceLanguage }));
       
       // Get available languages
       const availableLanguages = this.getAvailableLanguages();
       
       if (availableLanguages.length === 0) {
-        console.log('❌ No target languages found.');
+        console.log(this.t("analyzeTranslations.no_target_languages_found"));
         return;
       }
       
@@ -450,40 +462,40 @@ class I18nAnalyzer {
         : availableLanguages;
       
       if (targetLanguages.length === 0) {
-        console.log(`❌ Specified language '${args.language}' not found.`);
+        console.log(this.t("analyzeTranslations.specified_language", { language: args.language }));
         return;
       }
       
-      console.log(`🎯 Analyzing languages: ${targetLanguages.join(', ')}`);
+      console.log(this.t("analyzeTranslations.analyzing_languages_targetlang", { targetLanguages: targetLanguages.join(', ') }));
       
       const results = {};
       
       // Analyze each language
       for (const language of targetLanguages) {
-        console.log(`\n🔄 Analyzing ${language}...`);
+        console.log(this.t("analyzeTranslations.n_analyzing_language", { language }));
         
         const analysis = this.analyzeLanguage(language);
         results[language] = analysis;
         
         // Display summary
         const { summary } = analysis;
-        console.log(`   📄 Files: ${summary.analyzedFiles}/${summary.totalFiles}`);
-        console.log(`   🔤 Keys: ${summary.translatedKeys}/${summary.totalKeys} (${summary.percentage}%)`);
-        console.log(`   ⚠️  Missing: ${summary.missingKeys}`);
-        console.log(`   🐛 Issues: ${summary.issues.length}`);
+        console.log(this.t("analyzeTranslations.files_summaryanalyzedfilessumm", { analyzedFiles: summary.analyzedFiles, totalFiles: summary.totalFiles }));
+        console.log(this.t("analyzeTranslations.keys_translated", { translatedKeys: summary.translatedKeys, totalKeys: summary.totalKeys }));
+        console.log(this.t("analyzeTranslations.missing_summarymissingkeys", { missingKeys: summary.missingKeys }));
+        console.log(this.t("analyzeTranslations.issues_summaryissueslength", { issuesLength: summary.issues.length }));
         
         // Generate and save report if requested
         if (args.outputReports) {
           const report = this.generateLanguageReport(analysis);
           const reportPath = this.saveReport(language, report);
-          console.log(`   📄 Report saved: ${reportPath}`);
+          console.log(this.t("analyzeTranslations.report_saved_reportpath", { reportPath }));
         }
       }
       
       // Overall summary
-      console.log('\n' + '=' .repeat(60));
-      console.log('📊 ANALYSIS SUMMARY');
-      console.log('=' .repeat(60));
+      console.log(this.t("analyzeTranslations.n"));
+      console.log(this.t("analyzeTranslations.analysis_summary"));
+      console.log(this.t("analyzeTranslations.message"));
       
       const sortedResults = Object.entries(results)
         .sort(([,a], [,b]) => b.summary.percentage - a.summary.percentage);
@@ -492,27 +504,27 @@ class I18nAnalyzer {
         const { summary } = analysis;
         const statusIcon = summary.percentage === 100 ? '✅' : summary.percentage >= 80 ? '🟡' : '🔴';
         
-        console.log(`${statusIcon} ${language.toUpperCase()}: ${summary.percentage}% complete`);
-        console.log(`   📄 Files: ${summary.analyzedFiles}/${summary.totalFiles}`);
-        console.log(`   🔤 Keys: ${summary.translatedKeys}/${summary.totalKeys}`);
-        console.log(`   ⚠️  Missing: ${summary.missingKeys}`);
+        console.log(this.t("analyzeTranslations.language_status", { statusIcon, language, percentage: summary.percentage }));
+        console.log(this.t("analyzeTranslations.files_summaryanalyzedfilessumm", { analyzedFiles: summary.analyzedFiles, totalFiles: summary.totalFiles }));
+        console.log(this.t("analyzeTranslations.keys_summarytranslatedkeyssumm", { translatedKeys: summary.translatedKeys, totalKeys: summary.totalKeys }));
+        console.log(this.t("analyzeTranslations.missing_summarymissingkeys", { missingKeys: summary.missingKeys }));
       });
       
       // Recommendations
       const totalMissing = Object.values(results)
         .reduce((sum, analysis) => sum + analysis.summary.missingKeys, 0);
       
-      console.log('\n📋 RECOMMENDATIONS');
-      console.log('=' .repeat(60));
+      console.log(this.t("analyzeTranslations.n_recommendations"));
+      console.log(this.t("analyzeTranslations.message"));
       
       if (totalMissing === 0) {
-        console.log('🎉 All translations are complete!');
+        console.log(this.t("analyzeTranslations.all_translations_are_complete"));
       } else {
-        console.log(`⚠️  ${totalMissing} total translations needed across all languages`);
-        console.log('\n🔧 Next steps:');
-        console.log('1. Review generated reports (if --output-reports was used)');
-        console.log('2. Translate missing values in language files');
-        console.log('3. Run: node scripts/i18n/03-validate-translations.js');
+        console.log(this.t("analyzeTranslations.totalmissing_total_translation", { totalMissing }));
+        console.log(this.t("analyzeTranslations.n_next_steps"));
+        console.log(this.t("analyzeTranslations.next_step_1"));
+        console.log(this.t("analyzeTranslations.2_translate_missing_values_in_"));
+        console.log(this.t("analyzeTranslations.3_run_node_scriptsi18n03valida"));
         
         // Suggest priority languages
         const priorityLanguages = sortedResults
@@ -521,12 +533,12 @@ class I18nAnalyzer {
           .map(([lang]) => lang);
         
         if (priorityLanguages.length > 0) {
-          console.log(`\n💡 Priority languages: ${priorityLanguages.join(', ')}`);
+          console.log(this.t("analyzeTranslations.n_priority_languages_priorityl", { priorityLanguages: priorityLanguages.join(', ') }));
         }
       }
       
     } catch (error) {
-      console.error('❌ Error during analysis:', error.message);
+      console.error(this.t("analyzeTranslations.error_during_analysis", { error: error.message }));
       process.exit(1);
     }
   }
@@ -535,7 +547,13 @@ class I18nAnalyzer {
 // Run if called directly
 if (require.main === module) {
   const analyzer = new I18nAnalyzer();
-  analyzer.analyze();
+  const args = analyzer.parseArgs();
+  
+  if (args.help) {
+    analyzer.showHelp();
+  } else {
+    analyzer.analyze();
+  }
 }
 
 module.exports = I18nAnalyzer;

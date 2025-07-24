@@ -39,21 +39,27 @@ The toolkit itself supports multiple languages for its interactive interface and
 
 ```bash
 # Interactive mode with language selection - recommended for first-time users
-node scripts/i18n/package/00-manage-i18n.js
+node 00-manage-i18n.js
 
 # Interactive mode with specific UI language
-node scripts/i18n/package/00-manage-i18n.js --ui-language=de
-node scripts/i18n/package/00-manage-i18n.js --ui-language=es
-node scripts/i18n/package/00-manage-i18n.js --ui-language=fr
+node 00-manage-i18n.js --ui-language=de
+node 00-manage-i18n.js --ui-language=es
+node 00-manage-i18n.js --ui-language=fr
 
 # Direct command execution
-node scripts/i18n/package/00-manage-i18n.js --command=init
-node scripts/i18n/package/00-manage-i18n.js --command=analyze
-node scripts/i18n/package/00-manage-i18n.js --command=validate
-node scripts/i18n/package/00-manage-i18n.js --command=usage
+node 00-manage-i18n.js --command=init
+node 00-manage-i18n.js --command=analyze
+node 00-manage-i18n.js --command=validate
+node 00-manage-i18n.js --command=usage
+node 00-manage-i18n.js --command=complete
+node 00-manage-i18n.js --command=sizing
+node 00-manage-i18n.js --command=status
+node 00-manage-i18n.js --command=workflow
+node 00-manage-i18n.js --command=delete
+node 00-manage-i18n.js --command=help
 
 # Generate reports in specific language
-node scripts/i18n/package/02-analyze-translations.js --report-language=de
+node 02-analyze-translations.js --report-language=de
 ```
 
 ### 🌍 Language Selection
