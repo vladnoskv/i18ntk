@@ -1,0 +1,72 @@
+{
+  "name": "i18n-management-toolkit",
+  "version": "1.0.0",
+  "description": "A comprehensive internationalization (i18n) management toolkit for JavaScript/TypeScript projects",
+  "main": "00-manage-i18n.js",
+  "bin": {
+    "i18n-manage": "./00-manage-i18n.js",
+    "i18n-init": "./01-init-i18n.js",
+    "i18n-analyze": "./02-analyze-translations.js",
+    "i18n-validate": "./03-validate-translations.js",
+    "i18n-usage": "./04-check-usage.js",
+    "i18n-complete": "./05-complete-translations.js"
+  },
+  "scripts": {
+    "start": "node 00-manage-i18n.js",
+    "init": "node 01-init-i18n.js",
+    "analyze": "node 02-analyze-translations.js",
+    "validate": "node 03-validate-translations.js",
+    "usage": "node 04-check-usage.js",
+    "complete": "node 05-complete-translations.js",
+    "workflow": "node 00-manage-i18n.js --command=workflow",
+    "status": "node 00-manage-i18n.js --command=status",
+    "full-coverage": "npm run complete && npm run analyze"
+  },
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "localization",
+    "translation",
+    "management",
+    "toolkit",
+    "javascript",
+    "typescript",
+    "react",
+    "vue",
+    "angular",
+    "cli"
+  ],
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://github.com/yourusername"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/i18n-management-toolkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/i18n-management-toolkit/issues"
+  },
+  "homepage": "https://github.com/yourusername/i18n-management-toolkit#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "*.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "peerDependencies": {},
+  "preferGlobal": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/yourusername"
+  }
+}

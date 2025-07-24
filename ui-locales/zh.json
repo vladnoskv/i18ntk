@@ -1,0 +1,259 @@
+{
+  "menu": {
+    "title": "🌐 I18N管理菜单",
+    "separator": "============================================================",
+    "options": {
+      "init": "🚀 初始化新语言",
+      "analyze": "🔍 分析翻译",
+      "validate": "✅验证翻译",
+      "usage": "📊 检查键使用情况",
+      "complete": "🎯 完成翻译（100%覆盖率）",
+      "workflow": "🔄 运行完整工作流",
+      "status": "📋 显示项目状态",
+      "delete": "🗑️  删除所有报告",
+      "language": "🌍 更改界面语言",
+      "help": "❓ 帮助",
+      "exit": "🚪 退出"
+    },
+    "prompt": "请选择选项（0-10）: ",
+    "invalidChoice": "❌ 无效选择。请选择0-10。",
+    "continuePrompt": "按Enter键继续...",
+    "goodbye": "👋 再见！"
+  },
+  "status": {
+    "title": "📊 I18N项目状态",
+    "sourceDir": "📁 源目录",
+    "sourceLanguage": "🔤 源语言",
+    "i18nSetup": "🌐 i18n设置",
+    "availableLanguages": "🗂️  可用语言",
+    "translationFiles": "📄 翻译文件",
+    "totalKeys": "🔤 翻译键总数",
+    "yes": "✅ 是",
+    "no": "❌ 否",
+    "suggestions": {
+      "analysis": "💡 您可以运行分析来检查翻译完整性",
+      "init": "💡 运行初始化以在您的项目中设置i18n"
+    }
+  },
+  "operations": {
+    "init": {
+      "title": "🚀 I18N初始化",
+      "separator": "============================================================"
+    },
+    "analyze": {
+      "title": "🔍 翻译分析",
+      "separator": "============================================================"
+    },
+    "validate": {
+      "title": "✅ 翻译验证",
+      "separator": "============================================================"
+    },
+    "usage": {
+      "title": "📊 键使用情况分析",
+      "separator": "============================================================"
+    },
+    "complete": {
+      "title": "🎯 翻译完成",
+      "separator": "============================================================"
+    },
+    "workflow": {
+      "title": "🔄 运行完整I18N工作流",
+      "separator": "============================================================",
+      "steps": {
+        "completing": "1️⃣ 正在完成翻译以实现100%覆盖率...",
+        "validating": "2️⃣ 正在验证翻译...",
+        "analyzing": "3️⃣ 正在分析翻译完整性...",
+        "usage": "4️⃣ 正在检查键使用情况...",
+        "completed": "🎉 工作流已完成，实现100%覆盖率！请检查报告目录以获取详细结果。"
+      },
+      "notSetup": "❌ i18n未设置。请先运行初始化。"
+    },
+    "delete": {
+      "title": "🗑️  删除所有报告",
+      "separator": "============================================================",
+      "looking": "🔍 正在查找报告",
+      "noDirectory": "📁 报告目录不存在。正在创建...",
+      "directoryCreated": "✅ 报告目录已创建。",
+      "noFiles": "📄 未找到要删除的报告文件。",
+      "found": "📄 找到{count}个报告文件：",
+      "confirmPrompt": "⚠️  您确定要删除所有报告吗？（y/N）: ",
+      "deleted": "✅ 已删除: {file}",
+      "failed": "❌ 删除{file}失败: {error}",
+      "success": "🎉 成功删除{count}个报告文件。",
+      "cancelled": "❌ 操作已取消。",
+      "errorReading": "❌ 读取报告目录时出错：",
+      "errorCreating": "❌ 创建报告目录时出错："
+    }
+  },
+  "help": {
+    "title": "🌐 I18N管理工具",
+    "separator": "============================================================",
+    "description": "此工具帮助您管理项目的国际化（i18n）。",
+    "commands": "命令：",
+    "commandList": {
+      "init": "为新语言初始化i18n",
+      "analyze": "分析翻译完整性",
+      "validate": "验证翻译文件",
+      "usage": "检查翻译键使用情况",
+      "complete": "完成翻译以实现100%覆盖率",
+      "status": "显示整体i18n状态",
+      "workflow": "运行包含完成的完整工作流",
+      "delete": "删除所有报告文件",
+      "help": "显示此帮助消息"
+    },
+    "options": "选项：",
+    "optionList": {
+      "command": "--command=<cmd>        直接执行特定命令",
+      "sourceDir": "--source-dir=<path>    设置i18n源目录",
+      "languages": "--languages=<list>     逗号分隔的语言列表",
+      "interactive": "--interactive=false    禁用交互模式",
+      "uiLanguage": "--ui-language=<lang>   设置UI语言（en, de, es, fr, ru, ja, zh）",
+      "reportLanguage": "--report-language=<lang> 设置报告语言"
+    },
+    "examples": "示例：",
+    "exampleList": [
+      "node scripts/i18n/00-manage-i18n.js",
+      "node scripts/i18n/00-manage-i18n.js --command=init",
+      "node scripts/i18n/00-manage-i18n.js --command=validate --languages=de,fr",
+      "node scripts/i18n/00-manage-i18n.js --source-dir=./locales",
+      "node scripts/i18n/00-manage-i18n.js --ui-language=de",
+      "node scripts/i18n/00-manage-i18n.js --report-language=es"
+    ]
+  },
+  "errors": {
+    "unknown": "❌ 错误：",
+    "unknownCommand": "❌ 未知命令：",
+    "errorRunning": "❌ 运行完成时出错："
+  },
+  "language": {
+    "title": "🌍 更改界面语言",
+    "separator": "============================================================",
+    "current": "当前UI语言: {language}",
+    "available": "可用语言：",
+    "prompt": "选择语言（1-7）或0取消: ",
+    "invalid": "❌ 无效选择。请选择1-7或0。",
+    "cancelled": "❌ 语言更改已取消。",
+    "changed": "✅ UI语言已更改为{language}。请重启工具以查看更改。",
+    "languages": {
+      "en": "英语（English）",
+      "de": "德语（Deutsch）",
+      "es": "西班牙语（Español）",
+      "fr": "法语（Français）",
+      "ru": "俄语（Русский）",
+      "ja": "日语（日本語）",
+      "zh": "中文"
+    }
+  },
+  "scripts": {
+    "init": {
+      "starting": "🚀 开始i18n初始化...",
+      "projectType": "📁 项目类型: {type}",
+      "sourceLanguage": "🔤 源语言: {language}",
+      "targetLanguages": "🌐 目标语言: {languages}",
+      "creatingDirectories": "📁 创建目录...",
+      "directoryCreated": "✅ 已创建目录: {dir}",
+      "directoryExists": "📁 目录已存在: {dir}",
+      "scanningFiles": "🔍 扫描{dir}中的文件...",
+      "foundFiles": "📄 找到{count}个文件需要处理",
+      "processingFile": "⚙️ 处理文件: {file}",
+      "extractedKeys": "🔤 从{file}提取了{count}个翻译键",
+      "generatingTranslations": "📝 生成翻译文件...",
+      "translationFileCreated": "✅ 已创建翻译文件: {file}",
+      "translationFileUpdated": "🔄 已更新翻译文件: {file}",
+      "addedKeys": "➕ 在{file}中添加了{count}个新键",
+      "initComplete": "🎉 i18n初始化完成！",
+      "totalKeys": "📊 翻译键总数: {count}",
+      "filesGenerated": "📄 生成的文件数: {count}",
+      "error": "❌ 初始化错误: {error}"
+    },
+    "analyze": {
+      "starting": "🔍 开始翻译分析...",
+      "loadingTranslations": "📄 加载翻译文件...",
+      "analyzingLanguage": "🌐 分析语言: {language}",
+      "translationStats": "📊 {language}的翻译统计:",
+      "totalKeys": "  📝 总键数: {count}",
+      "translatedKeys": "  ✅ 已翻译: {count}",
+      "missingKeys": "  ❌ 缺失: {count}",
+      "completionRate": "  📈 完成率: {rate}%",
+      "generatingReport": "📋 生成分析报告...",
+      "reportSaved": "💾 报告已保存: {file}",
+      "analysisComplete": "🎉 翻译分析完成！",
+      "error": "❌ 分析错误: {error}"
+    },
+    "validate": {
+      "starting": "✅ 开始翻译验证...",
+      "validatingFile": "🔍 验证文件: {file}",
+      "syntaxValid": "✅ JSON语法正确: {file}",
+      "syntaxError": "❌ {file}中的JSON语法错误: {error}",
+      "structureValid": "✅ 结构正确: {file}",
+      "structureError": "❌ {file}中的结构错误: {error}",
+      "keyMismatch": "⚠️ {file}中的键不匹配: 缺少{key}",
+      "extraKey": "⚠️ {file}中的额外键: {key}",
+      "validationComplete": "🎉 翻译验证完成！",
+      "allValid": "✅ 所有翻译文件都有效",
+      "issuesFound": "⚠️ 在{count}个文件中发现问题",
+      "error": "❌ 验证错误: {error}"
+    },
+    "usage": {
+      "starting": "📊 开始键使用情况分析...",
+      "scanningSource": "🔍 扫描源文件...",
+      "foundSourceFiles": "📄 找到{count}个源文件",
+      "analyzingFile": "⚙️ 分析文件: {file}",
+      "foundUsage": "🔤 在{file}中找到键使用情况: {count}",
+      "loadingTranslations": "📄 加载翻译键...",
+      "comparingUsage": "🔄 比较使用情况与翻译...",
+      "unusedKeys": "🗑️ 未使用的键: {count}",
+      "missingTranslations": "❌ 缺失的翻译: {count}",
+      "generatingReport": "📋 生成使用情况报告...",
+      "reportSaved": "💾 报告已保存: {file}",
+      "usageComplete": "🎉 使用情况分析完成！",
+      "error": "❌ 使用情况分析错误: {error}"
+    },
+    "complete": {
+      "starting": "🎯 开始翻译完成...",
+      "targetCoverage": "🎯 目标覆盖率: {coverage}%",
+      "analyzingCurrent": "📊 分析当前覆盖率...",
+      "currentCoverage": "📈 {language}当前覆盖率: {coverage}%",
+      "needsCompletion": "🔄 {language}需要完成（当前: {current}%, 目标: {target}%）",
+      "alreadyComplete": "✅ {language}已完成（{coverage}%）",
+      "completingLanguage": "🎯 完成{language}的翻译...",
+      "addingTranslations": "➕ 为{count}个键添加翻译",
+      "translationAdded": "✅ 为'{key}'添加了翻译: {value}",
+      "savingFile": "💾 保存{file}...",
+      "languageCompleted": "🎉 {language}已完成！覆盖率: {coverage}%",
+      "allComplete": "🎉 所有语言都已完成，覆盖率{coverage}%！",
+      "completionFinished": "🎯 翻译完成已结束！",
+      "error": "❌ 完成错误: {error}"
+    },
+    "sizing": {
+      "starting": "📏 开始翻译大小分析...",
+      "analyzingFile": "🔍 分析文件: {file}",
+      "fileSize": "📄 文件{file}大小: {size}字节",
+      "keyCount": "🔤 {file}中的键数: {count}",
+      "avgKeyLength": "📊 {file}中的平均键长度: {length}字符",
+      "longestKey": "📏 {file}中最长的键: '{key}' ({length}字符)",
+      "shortestKey": "📏 {file}中最短的键: '{key}' ({length}字符)",
+      "generatingReport": "📋 生成大小报告...",
+      "reportSaved": "💾 报告已保存: {file}",
+      "sizingComplete": "🎉 大小分析完成！",
+      "totalFiles": "📊 总共分析的文件数: {count}",
+      "error": "❌ 大小分析错误: {error}"
+    },
+    "summary": {
+      "starting": "📋 开始生成摘要报告...",
+      "gatheringReports": "📄 收集现有报告...",
+      "foundReports": "📊 找到报告: {count}",
+      "processingReport": "⚙️ 处理报告: {file}",
+      "analyzingData": "🔍 分析报告数据...",
+      "generatingOverview": "📋 生成项目概览...",
+      "calculatingStats": "📊 计算总体统计...",
+      "creatingCharts": "📈 创建图表和图形...",
+      "compilingRecommendations": "💡 编制建议...",
+      "savingReport": "💾 保存摘要报告...",
+      "reportSaved": "✅ 摘要报告已保存: {file}",
+      "summaryComplete": "🎉 摘要报告生成完成！",
+      "noReports": "⚠️ 未找到要汇总的报告",
+      "error": "❌ 摘要报告生成错误: {error}"
+    }
+  }
+}
