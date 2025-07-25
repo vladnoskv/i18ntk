@@ -1,6 +1,6 @@
 {
   "name": "i18n-management-toolkit",
-  "version": "1.3.7",
+  "version": "1.4.0",
   "description": "A comprehensive internationalization (i18n) management toolkit for JavaScript/TypeScript projects",
   "main": "i18ntk-manage.js",
   "bin": {
@@ -12,11 +12,12 @@
     "i18ntk-complete": "./i18ntk-complete.js",
     "i18ntk-sizing": "./i18ntk-sizing.js",
     "i18ntk-summary": "./i18ntk-summary.js",
+    "i18ntk-autorun": "./i18ntk-autorun.js",
     "i18ntk-debug": "./dev/debug/debugger.js"
   },
   "scripts": {
     "start": "node i18ntk-manage.js",
-    "i18ntk": "node auto-run.js",
+    "i18ntk": "node i18ntk-autorun.js",
     "i18ntk:init": "node i18ntk-init.js",
     "i18ntk:analyze": "node i18ntk-analyze.js",
     "i18ntk:validate": "node i18ntk-validate.js",
@@ -28,7 +29,8 @@
     "i18ntk:settings": "node i18ntk-manage.js --command=settings",
     "i18ntk:summary": "node i18ntk-summary.js",
     "i18ntk:manage": "node i18ntk-manage.js",
-    "workflow": "node auto-run.js",
+    "i18ntk:autorun": "node i18ntk-autorun.js",
+    "workflow": "node i18ntk-autorun.js",
     "init": "node i18ntk-init.js",
     "analyze": "node i18ntk-analyze.js",
     "validate": "node i18ntk-validate.js",
@@ -67,16 +69,30 @@
   },
   "homepage": "https://github.com/vladnoskv/i18n-management-toolkit#readme",
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=16.0.0"
   },
   "files": [
     "*.js",
+    "utils/",
+    "dev/",
+    "ui-locales/",
+    "locales/",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0"
+  "dependencies": {},
+  "peerDependencies": {
+    "i18next": ">=20.0.0",
+    "react-i18next": ">=11.0.0"
+  },
+  "peerDependenciesMeta": {
+    "i18next": {
+      "optional": false
+    },
+    "react-i18next": {
+      "optional": true
+    }
   },
   "preferGlobal": true,
   "publishConfig": {

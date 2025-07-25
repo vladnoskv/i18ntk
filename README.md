@@ -4,7 +4,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D16.0.0-green?logo=node.js)](https://nodejs.org/)
 [![i18next](https://img.shields.io/badge/i18next-25.3.2-orange)](https://www.i18next.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/Version-1.3.7-brightgreen)](https://github.com/vladnoskv/i18n-management-toolkit-main)
+[![Version](https://img.shields.io/badge/Version-1.4.0-brightgreen)](https://github.com/vladnoskv/i18n-management-toolkit-main)
 
 A comprehensive internationalization (i18n) management toolkit for JavaScript/TypeScript projects. **i18nTK** (i18n Toolkit) helps you manage the constant need to track translations effectively, especially in large and complex projects with multiple languages. It prevents i18n debug errors by ensuring translation keys exist, and when visible, clearly displays "NOT_TRANSLATED" text to users, making missing translations immediately apparent.
 
@@ -22,78 +22,27 @@ The toolkit itself supports multiple languages for its interactive interface and
 
 **All interactive scripts, reports, and error messages are provided in the user's selected language for easier diagnosis and management.**
 
-## 🆕 What's New in Version 1.3.7
+## 🆕 What's New in Version 1.4.0
 
 ### ✨ Latest Features
 
-- **⚙️ Advanced Settings Management**: New interactive settings CLI with comprehensive configuration options
-  - **Settings Menu**: Access via `npm run i18ntk:settings` or `node i18ntk-manage.js --command=settings`
-  - **Configuration Management**: View, edit, and validate user-config.json settings
-  - **Language Preferences**: Change UI language and report language settings
-  - **Path Configuration**: Manage input/output directories and file paths
-  - **Admin Settings**: Configure admin authentication and security options
-- **🐛 Built-in Bug Reporting**: Integrated bug reporting system for easier issue submission
-  - **GitHub Integration**: Direct links to create issues with pre-filled templates
-  - **System Information**: Automatic collection of relevant system details
-  - **Error Context**: Streamlined process for reporting bugs with proper context
-- **🔧 Terminal Interface Fixes**: Critical fixes for double character input issues
-  - **Readline Configuration**: Enhanced terminal interface stability
-  - **Input Handling**: Improved user input processing across all interactive scripts
-  - **Cross-platform Compatibility**: Better support for different terminal environments
+- **🔍 Enhanced Usage Analysis**: Major improvements to translation key detection and analysis
+  - **Modular Project Support**: Full support for projects with distributed translation files in multiple directories
+  - **Recursive Discovery**: Automatically finds translation files in nested folder structures like `/locales/module/en.json`
+  - **Smart File Filtering**: Excludes toolkit files from analysis to prevent processing errors
+  - **Translation Completeness**: Detailed analysis of "(NOT TRANSLATED)" placeholders across all languages
+- **🛠️ Robust Error Handling**: Enhanced error handling in usage analysis prevents workflow interruptions
+- **📊 Improved Reporting**: Better statistics and insights on translation usage and completeness
+- **⚡ Workflow Reliability**: All 6 auto-run workflow steps now complete successfully without errors
 
-### 🎯 Previous Major Features (1.3.0)
+### 🔧 Technical Improvements
 
-### ✨ Major New Features
+- **File Processing**: Enhanced file filtering prevents toolkit's own JavaScript files from being analyzed
+- **Pattern Matching**: Improved RegExp handling for more accurate translation key extraction
+- **Directory Traversal**: Better handling of complex project structures with nested translation files
+- **Performance**: Optimized analysis performance with better error handling and validation
 
-- **🔧 Debug Tools**: Comprehensive debugging system for i18n projects
-  - **Full System Debug**: Complete project analysis and health check
-  - **Configuration Debug**: Validate user-config.json and package.json settings
-  - **Translation Debug**: Deep analysis of translation files and structure
-  - **Performance Debug**: Identify performance bottlenecks and optimization opportunities
-- **🎯 Dynamic Path Support**: All tools now properly handle custom input/output paths from user configuration
-- **📊 Enhanced Reporting**: Improved debug reports with detailed issue categorization and recommendations
-- **🛠️ Better Error Detection**: Advanced detection of configuration issues, missing files, and structural problems
-- **📦 NPM Package Ready**: Fully prepared for npm package distribution with proper binary commands
-
-### 🎯 Key Improvements
-
-- **New Debug Command**: `npm run i18ntk:debug` or `node i18ntk-manage.js --command=debug`
-- **Binary Command**: Direct access via `i18ntk-debug` for standalone debugging
-- **Interactive Debug Menu**: Choose specific debug types through an intuitive interface
-- **Detailed Debug Reports**: Comprehensive reports saved to `debug-report.txt` with actionable insights
-- **Dynamic Configuration**: No more hardcoded paths - all tools respect user-defined directories
-- **Enhanced CLI Experience**: Improved help text and command descriptions
-
-### 🔄 Previous Improvements (1.2.1)
-
-- **🏷️ i18nTK Branding**: Introduced new i18nTK branding with consistent file naming (`i18ntk-*` prefix)
-- **📦 Enhanced NPM Integration**: Added comprehensive npm scripts and binary commands for all tools
-- **🔧 Critical Bug Fixes**: Fixed 'Analyze Sizing' step failure and incorrect default paths
-- **📁 Nested File Support**: Improved support for nested directory structures in translations
-- **⚡ Performance Improvements**: Enhanced error handling and processing efficiency
-
-### 🔄 Migration from 1.2.x
-
-- All existing functionality remains unchanged
-- New debug tools are additive and optional
-- Enhanced configuration validation helps identify and fix setup issues
-- Improved dynamic path handling ensures tools work with any project structure
-
-## 📋 Table of Contents
-
-- [🚀 Quick Start](#-quick-start)
-- [📦 Requirements](#-requirements)
-- [🛠️ Installation](#️-installation)
-- [📁 Project Structure](#-project-structure)
-- [🔧 Scripts Overview](#-scripts-overview)
-- [⚙️ Configuration](#️-configuration)
-- [📊 Workflow Guide](#-workflow-guide)
-- [📈 Visual Reports](#-visual-reports)
-- [🎯 Best Practices](#-best-practices)
-- [🔍 Troubleshooting](#-troubleshooting)
-- [🤝 Contributing](#-contributing)
-
-## 🚀 Quick Start
+// ... existing code ...
 
 ### 🎯 NPM Scripts (Recommended)
 

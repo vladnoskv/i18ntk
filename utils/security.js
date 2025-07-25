@@ -12,38 +12,47 @@ class SecurityUtils {
   /**
    * Validates and sanitizes file paths to prevent path traversal attacks
    * @param {string} inputPath - The input path to validate
-   * @param {string} basePath - The base path that the input should be within
+   * @param {string} basePath - The base path that the input should be within (optional)
    * @returns {string|null} - Sanitized path or null if invalid
    */
-  static validatePath(inputPath, basePath) {
-    if (!inputPath || typeof inputPath !== 'string') {
-      return null;
-    }
-
+  static validatePath(filePath, basePath = process.cwd()) {
     try {
-      // Normalize the paths to resolve any .. or . components
-      const normalizedInput = path.normalize(inputPath);
-      const normalizedBase = path.normalize(basePath);
+      if (!filePath || typeof filePath !== 'string') {
+        SecurityUtils.logSecurityEvent('path_validation_failed', {
+          inputPath: filePath,
+          reason: 'Invalid input type'
+        });
+        return null;
+      }
+
+      // Sanitize the input path
+      const sanitizedPath = path.normalize(filePath).replace(/\.\./g, '');
       
-      // Resolve to absolute paths
-      const resolvedInput = path.resolve(normalizedBase, normalizedInput);
-      const resolvedBase = path.resolve(normalizedBase);
+      // Resolve the full path
+      const resolvedPath = path.resolve(basePath, sanitizedPath);
       
-      // Check if the resolved input path is within the base path
-      if (!resolvedInput.startsWith(resolvedBase + path.sep) && resolvedInput !== resolvedBase) {
-        console.warn(`Security: Path traversal attempt detected: ${inputPath}`);
+      // Check if the resolved path is within the base path
+      const relativePath = path.relative(basePath, resolvedPath);
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+        SecurityUtils.logSecurityEvent('path_traversal_attempt', {
+          inputPath: filePath,
+          resolvedPath,
+          basePath
+        });
         return null;
       }
       
-      // Additional checks for suspicious patterns
-      if (normalizedInput.includes('..') || normalizedInput.includes('~')) {
-        console.warn(`Security: Suspicious path pattern detected: ${inputPath}`);
-        return null;
-      }
+      SecurityUtils.logSecurityEvent('path_validated', {
+        inputPath: filePath,
+        resolvedPath
+      });
       
-      return resolvedInput;
+      return resolvedPath;
     } catch (error) {
-      console.warn(`Security: Path validation error: ${error.message}`);
+      SecurityUtils.logSecurityEvent('path_validation_error', {
+        inputPath: filePath,
+        error: error.message
+      });
       return null;
     }
   }
@@ -221,39 +230,21 @@ class SecurityUtils {
    * @param {object} args - Command line arguments
    * @returns {object} - Validated arguments
    */
-  static validateCommandArgs(args) {
+  static async validateCommandArgs(args) {
     const validatedArgs = {};
     const allowedArgs = [
-      'command', 'language', 'languages', 'source-dir', 'output-dir',
-      'ui-language', 'report-language', 'threshold', 'format', 'strict',
-      'dry-run', 'output-reports', 'detailed', 'help', 'version',
-      'setup-admin', 'disable-admin', 'admin-status',
-      'setupAdmin', 'disableAdmin', 'adminStatus'
+      'source-dir', 'i18n-dir', 'output-dir', 'output-report', 
+      'help', 'language', 'strict-mode', 'exclude-files'
     ];
-
+    
     for (const [key, value] of Object.entries(args)) {
-      // Skip non-string keys or values
-      if (typeof key !== 'string' || (value !== undefined && typeof value !== 'string' && typeof value !== 'boolean')) {
-        continue;
-      }
-
-      // Check if argument is allowed
-      if (!allowedArgs.includes(key)) {
-        console.warn(`Security: Unknown command argument: ${key}`);
-        continue;
-      }
-
-      // Sanitize string values
-      if (typeof value === 'string') {
-        validatedArgs[key] = this.sanitizeInput(value, {
-          allowedChars: /^[a-zA-Z0-9\-_\.\,\/\\\:]+$/,
-          maxLength: 500
-        });
-      } else {
+      if (allowedArgs.includes(key)) {
         validatedArgs[key] = value;
+      } else {
+        console.warn(`Security: Unknown command argument: ${key}`);
       }
     }
-
+    
     return validatedArgs;
   }
 
@@ -272,7 +263,7 @@ class SecurityUtils {
       'sourceDir', 'outputDir', 'defaultLanguage', 'supportedLanguages',
       'filePattern', 'excludePatterns', 'reportFormat', 'logLevel',
       'i18nDir', 'sourceLanguage', 'excludeDirs', 'includeExtensions', 
-      'translationPatterns'
+      'translationPatterns', 'notTranslatedMarker', 'excludeFiles', 'strictMode'
     ];
 
     for (const [key, value] of Object.entries(config)) {

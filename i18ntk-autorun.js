@@ -1,13 +1,17 @@
 /**
  * Auto-Run Script for I18N Management Toolkit
  * Automatically executes the complete workflow after initialization
+ * 
+ * Usage:
+ *   npm run i18ntk:autorun
+ *   node i18ntk-autorun.js
  */
 
 const { execSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const settingsManager = require('./settings-manager');
+const settingsManager = require('./settings-manager'); // This is already an instance
 
 class AutoRunner {
     constructor() {
@@ -20,6 +24,7 @@ class AutoRunner {
             { name: 'Generate Summary', command: 'node i18ntk-summary.js', required: true }
         ];
         this.results = [];
+        // FIX: settingsManager is already an instance, not a constructor
         this.settingsManager = settingsManager;
     }
 

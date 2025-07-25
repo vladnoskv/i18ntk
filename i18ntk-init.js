@@ -542,6 +542,208 @@ class I18nInitializer {
       process.exit(1);
     }
   }
+
+  // Check if i18n framework is installed and offer installation
+  async checkI18nDependencies() {
+    const packageJsonPath = path.resolve('./package.json');
+    
+    if (!fs.existsSync(packageJsonPath)) {
+      console.log('⚠️  No package.json found.');
+      console.log('🔧 This toolkit requires an i18n framework to function properly.');
+      console.log('📦 Please install one of the supported frameworks:');
+      console.log('   - npm install i18next');
+      console.log('   - npm install react-i18next (for React projects)');
+      console.log('   - npm install vue-i18n (for Vue projects)');
+      console.log('   - npm install @angular/localize (for Angular projects)');
+      return false;
+    }
+    
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+      
+      const i18nFrameworks = [
+        'react-i18next',
+        'vue-i18n', 
+        'angular-i18n',
+        'i18next',
+        'next-i18next',
+        'svelte-i18n',
+        '@nuxtjs/i18n',
+        '@angular/localize'
+      ];
+      
+      const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
+      
+      if (installedFrameworks.length === 0) {
+        console.log('❌ No i18n framework detected in your project.');
+        console.log('🔧 This toolkit requires an i18n framework to function properly.');
+        console.log('📦 Please install one of the supported frameworks:');
+        console.log('   - npm install i18next');
+        console.log('   - npm install react-i18next (for React projects)');
+        console.log('   - npm install vue-i18n (for Vue projects)');
+        console.log('   - npm install @angular/localize (for Angular projects)');
+        
+        const readline = require('readline');
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout
+        });
+        
+        return new Promise((resolve) => {
+          rl.question('\n🤔 Would you like to install i18next now? (y/n): ', (answer) => {
+            rl.close();
+            if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+              console.log('📦 Installing i18next...');
+              try {
+                require('child_process').execSync('npm install i18next', { stdio: 'inherit' });
+                console.log('✅ i18next installed successfully!');
+                resolve(true);
+              } catch (error) {
+                console.log('❌ Failed to install i18next. Please install manually.');
+                resolve(false);
+              }
+            } else {
+              console.log('⚠️  Continuing without i18n framework. Some features may not work properly.');
+              resolve(false);
+            }
+          });
+        });
+      } else {
+        console.log(`✅ Found i18n framework(s): ${installedFrameworks.join(', ')}`);
+        return true;
+      }
+    } catch (error) {
+      console.log('❌ Error reading package.json:', error.message);
+      return false;
+    }
+  }
+
+  // Enhanced initialization with dependency checking
+  async initialize() {
+    console.log('🚀 Initializing i18n project...');
+    
+    // Check i18n dependencies first
+    const hasI18n = await this.checkI18nDependencies();
+    
+    if (!hasI18n) {
+      console.log('⚠️  Warning: Proceeding without proper i18n framework.');
+      console.log('🔧 Translation files will be created but may not work without proper i18n setup.');
+    }
+    
+    // Continue with existing initialization logic
+    await this.setupInitialStructure();
+    
+    // Validate source
+    this.validateSource();
+    
+    // Prompt for admin PIN setup if not already configured
+    const securitySettings = settingsManager.getSecurity();
+    
+    if (!securitySettings.adminPinEnabled && securitySettings.adminPinPromptOnInit !== false) {
+      await this.promptAdminPinSetup();
+    }
+    
+    // Get target languages
+    const targetLanguages = args.languages || await this.selectLanguages();
+    
+    if (targetLanguages.length === 0) {
+      console.log('❌ No target languages specified. Exiting.');
+      return;
+    }
+    
+    console.log(`\n🎯 Target languages: ${targetLanguages.map(lang => `${lang} (${LANGUAGE_CONFIG[lang]?.name || 'Unknown'})`).join(', ')}`);
+    
+    // Get source files
+    const sourceFiles = this.getSourceFiles();
+    console.log(`\n📄 Found ${sourceFiles.length} source files: ${sourceFiles.join(', ')}`);
+    
+    // Process each language
+    const results = {};
+    
+    for (const targetLanguage of targetLanguages) {
+      console.log(`\n🔄 Processing ${targetLanguage} (${LANGUAGE_CONFIG[targetLanguage]?.name || 'Unknown'})...`);
+      
+      const languageResults = {
+        files: [],
+        totalStats: { total: 0, translated: 0, missing: 0 }
+      };
+      
+      for (const sourceFile of sourceFiles) {
+        const sourceFilePath = path.join(this.sourceLanguageDir, sourceFile);
+        const validatedSourceFilePath = SecurityUtils.validatePath(sourceFilePath, process.cwd());
+        
+        if (!validatedSourceFilePath) {
+          SecurityUtils.logSecurityEvent('Invalid source file path', 'error', { path: sourceFilePath });
+          continue;
+        }
+        
+        const sourceContentRaw = await SecurityUtils.safeReadFile(validatedSourceFilePath, process.cwd());
+        if (!sourceContentRaw) {
+          SecurityUtils.logSecurityEvent('Failed to read source file', 'error', { file: validatedSourceFilePath });
+          continue;
+        }
+        
+        const sourceContent = JSON.parse(sourceContentRaw);
+        
+        const targetFilePath = await this.createLanguageFile(sourceFile, targetLanguage, sourceContent);
+        
+        // Get stats for this file
+        const targetContentRaw = await SecurityUtils.safeReadFile(targetFilePath, process.cwd());
+        if (!targetContentRaw) {
+          SecurityUtils.logSecurityEvent('Failed to read target file for stats', 'error', { file: targetFilePath });
+          continue;
+        }
+        
+        const targetContent = JSON.parse(targetContentRaw);
+        const stats = this.getTranslationStats(targetContent);
+        
+        languageResults.files.push({
+          name: sourceFile,
+          path: targetFilePath,
+          stats
+        });
+        
+        // Add to total stats
+        languageResults.totalStats.total += stats.total;
+        languageResults.totalStats.translated += stats.translated;
+        languageResults.totalStats.missing += stats.missing;
+        
+        console.log(`   ✅ ${sourceFile}: ${stats.translated}/${stats.total} (${stats.percentage}%)`);
+      }
+      
+      // Calculate overall percentage
+      languageResults.totalStats.percentage = languageResults.totalStats.total > 0 
+        ? Math.round((languageResults.totalStats.translated / languageResults.totalStats.total) * 100) 
+        : 0;
+      
+      results[targetLanguage] = languageResults;
+      
+      console.log(`   📊 Overall: ${languageResults.totalStats.translated}/${languageResults.totalStats.total} (${languageResults.totalStats.percentage}%)`);
+    }
+    
+    // Summary report
+    console.log('\n' + '=' .repeat(50));
+    console.log('📊 INITIALIZATION SUMMARY');
+    console.log('=' .repeat(50));
+    
+    Object.entries(results).forEach(([lang, data]) => {
+      const langName = LANGUAGE_CONFIG[lang]?.name || 'Unknown';
+      const statusIcon = data.totalStats.percentage === 100 ? '✅' : data.totalStats.percentage >= 80 ? '🟡' : '🔴';
+      
+      console.log(`${statusIcon} ${langName} (${lang}): ${data.totalStats.percentage}% complete`);
+      console.log(`   📄 Files: ${data.files.length}`);
+      console.log(`   🔤 Keys: ${data.totalStats.translated}/${data.totalStats.total}`);
+      console.log(`   ⚠️  Missing: ${data.totalStats.missing}`);
+    });
+    
+    console.log('\n🎉 Initialization completed successfully!');
+    console.log('\n📋 Next steps:');
+    console.log('1. Run: node scripts/i18n/02-analyze-translations.js');
+    console.log('2. Translate missing values in language files');
+    console.log('3. Run: node scripts/i18n/03-validate-translations.js');
+    
+  }
 }
 
 // Run if called directly

@@ -1,5 +1,97 @@
 # Changelog
 
+## [1.4.0] - 2025-07-25
+
+### 🚀 New Features
+- **Enhanced Usage Analysis**: Comprehensive improvements to `i18ntk-usage.js` for better translation key detection
+  - **Modular Folder Support**: Now supports multiple `en.json` files in modular structures like `/locales/pathname/en.json` and `/src/locales/pathname/en.json`
+  - **Recursive Translation Discovery**: Automatically discovers translation files in nested directory structures
+  - **NOT_TRANSLATED Analysis**: Analyzes and counts "(NOT TRANSLATED)" placeholders across all language files
+  - **Translation Completeness Reporting**: Provides detailed statistics on translation completeness per language
+- **Improved File Filtering**: Enhanced file processing to exclude toolkit's own JavaScript files from analysis
+- **Better Error Handling**: Robust error handling in translation key extraction with try-catch blocks
+
+### 🐛 Bug Fixes
+- **Fixed Usage Analysis Errors**: Resolved "Cannot read properties of undefined (reading 'map')" errors in `i18ntk-usage.js`
+- **Fixed File Processing**: Prevented toolkit files (debugger.js, admin-auth.js, etc.) from being incorrectly processed for translation keys
+- **Enhanced Pattern Matching**: Improved RegExp pattern handling for translation key extraction
+- **Fixed Source Directory Detection**: Better detection and exclusion of toolkit directories from source analysis
+
+### 🔧 Technical Improvements
+- **Enhanced getAllFiles Method**: Added `excludeFiles` array to prevent processing of toolkit's own files
+- **Improved extractKeysFromFile**: Added comprehensive error handling and validation
+- **Better Configuration**: Enhanced `includeExtensions` and `excludeDirs` configuration for more accurate file filtering
+- **Recursive Translation Loading**: `getAllTranslationKeys` now recursively searches for translation files in subdirectories
+- **Translation Completeness Metrics**: Added detailed analysis of translation status across all languages
+
+### 📊 Workflow Improvements
+- **Successful Auto-Run**: All 6 workflow steps now complete successfully without errors
+  - ✅ Analyze Translations
+  - ✅ Validate Translations  
+  - ✅ Check Usage
+  - ✅ Complete Translations
+  - ✅ Analyze Sizing
+  - ✅ Generate Summary
+- **Enhanced Reporting**: Improved usage analysis reports with accurate key detection and usage statistics
+- **Better Performance**: Optimized file processing and analysis performance
+
+### 🌍 Translation Management
+- **Consistent Placeholder Handling**: Standardized use of "(NOT TRANSLATED)" instead of confusing placeholders
+- **Multi-Language Analysis**: Enhanced support for analyzing translation completeness across all supported languages
+- **Modular Structure Support**: Full support for modern project structures with distributed translation files
+
+### 📋 Notes
+- Version 1.4.0 focuses on robust usage analysis and translation completeness tracking
+- All workflow steps now execute without the previous "map" property errors
+- Enhanced file filtering prevents toolkit files from interfering with project analysis
+- Improved support for complex project structures with nested translation files
+- No breaking changes to existing functionality
+
+## [1.3.9] - 2025-07-25
+
+### 🚀 New Features
+- **Enhanced Path Detection**: Automatically detects i18n directories from multiple common locations
+- **Cross-Platform Support**: Improved Windows, macOS, and Linux compatibility
+- **Framework Detection**: Automatically detects installed i18n frameworks (React, Vue, Angular, etc.)
+- **Multiple Source Directory Support**: Checks common source directories (src, app, components, etc.)
+
+### 🐛 Bug Fixes
+- **Fixed validation error**: Resolved "this.t is not a function" error in validation module
+- **Fixed auto-run error**: Resolved "SettingsManager is not a constructor" error
+- **Fixed path validation**: Improved handling of undefined paths in security validation
+- **Fixed double readline**: Resolved double character input when changing UI language
+
+### 📝 Documentation
+- **Updated file comments**: Replaced outdated script paths with npm run commands
+- **Enhanced usage examples**: Added both npm and direct node usage examples
+- **Improved error messages**: More descriptive error messages for troubleshooting
+
+### 🔧 Technical Improvements
+- **Enhanced security validation**: Better path validation and sanitization
+- **Improved configuration management**: More robust settings loading and validation
+- **Better error handling**: Enhanced error reporting and logging
+- **Cross-language support**: Improved support for multiple programming languages
+
+### 📋 Version 1.3.8 Changes (Completed)
+- Fixed critical readline interface conflicts
+- Resolved completion method naming issues
+- Fixed debug function undefined property errors
+- Enhanced error handling in core modules
+
+## [1.3.8] - 2025-07-25
+
+### 🐛 Critical Fixes
+- Fixed double character input issue in UI language selection
+- Fixed "completer.complete is not a function" error
+- Fixed "validatedArgs is not iterable" error
+- Fixed debug functions undefined 'length' property errors
+
+### 🔧 Technical Improvements
+- Enhanced readline interface management
+- Improved error handling in debug functions
+- Better validation of command arguments
+- Enhanced security logging
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

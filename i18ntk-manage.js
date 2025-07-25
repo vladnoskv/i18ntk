@@ -1,30 +1,30 @@
 #!/usr/bin/env node
 /**
- * I18N MANAGEMENT SCRIPT
+ * I18N MANAGEMENT TOOLKIT - MAIN MANAGER
  * 
  * This is the main entry point for all i18n operations.
  * It provides an interactive interface to manage translations.
  * 
  * Usage:
- *   node scripts/i18n/00-manage-i18n.js
- *   node scripts/i18n/00-manage-i18n.js --command=init
- *   node scripts/i18n/00-manage-i18n.js --command=analyze
- *   node scripts/i18n/00-manage-i18n.js --command=validate
- *   node scripts/i18n/00-manage-i18n.js --command=usage
- *   node scripts/i18n/00-manage-i18n.js --help
+ *   npm run i18ntk:manage
+ *   npm run i18ntk:manage -- --command=init
+ *   npm run i18ntk:manage -- --command=analyze
+ *   npm run i18ntk:manage -- --command=validate
+ *   npm run i18ntk:manage -- --command=usage
+ *   npm run i18ntk:manage -- --help
+ * 
+ * Alternative direct usage:
+ *   node i18ntk-manage.js
+ *   node i18ntk-manage.js --command=init
  */
 
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const settingsManager = require('./settings-manager');
+const uiI18n = require('./ui-i18n');
 const SecurityUtils = require('./utils/security');
 const AdminCLI = require('./utils/admin-cli');
-
-// Import UI internationalization
-const uiI18n = require('./ui-i18n');
-
-// Import other i18n scripts
+const settingsManager = require('./settings-manager');
 const I18nInitializer = require('./i18ntk-init');
 const I18nAnalyzer = require('./i18ntk-analyze');
 const I18nValidator = require('./i18ntk-validate');
@@ -33,12 +33,25 @@ const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const SettingsCLI = require('./settings-cli');
 const I18nDebugger = require('./dev/debug/debugger');
 
-// Default configuration
+// Enhanced default configuration with multiple path detection
 const DEFAULT_CONFIG = {
   sourceDir: './locales',
   sourceLanguage: 'en',
   defaultLanguages: ['de', 'es', 'fr', 'ru'],
-  outputDir: './i18n-reports'
+  outputDir: './i18n-reports',
+  // Multiple possible i18n locations to check
+  possibleI18nPaths: [
+    './locales',
+    './src/locales', 
+    './src/i18n',
+    './src/i18n/locales',
+    './app/locales',
+    './app/i18n',
+    './public/locales',
+    './assets/locales',
+    './translations',
+    './lang'
+  ]
 };
 
 class I18nManager {
@@ -50,824 +63,236 @@ class I18nManager {
       terminal: true,
       historySize: 0
     });
-    this.isAuthenticated = false; // Track authentication state for session
+    // Make readline interface globally available
+    global.activeReadlineInterface = this.rl;
+    this.isAuthenticated = false;
     this.settingsManager = settingsManager;
+    
+    // Auto-detect i18n directory on initialization
+    this.detectI18nDirectory();
   }
 
-  // Parse and validate command line arguments securely
-  parseArgs() {
-    const args = process.argv.slice(2);
-    const rawParsed = {};
-    
-    for (let i = 0; i < args.length; i++) {
-      const arg = args[i];
-      
-      if (arg.startsWith('--')) {
-        const [key, value] = arg.substring(2).split('=');
-        
-        if (key === 'command') {
-          rawParsed.command = value;
-        } else if (key === 'help') {
-          rawParsed.help = true;
-        } else if (key === 'source-dir') {
-          rawParsed.sourceDir = value || args[++i];
-        } else if (key === 'languages') {
-          rawParsed.languages = (value || args[++i]).split(',');
-        } else if (key === 'interactive') {
-          rawParsed.interactive = (value || args[++i]) !== 'false';
-        } else if (key === 'ui-language') {
-          rawParsed.uiLanguage = value || args[++i];
-        } else if (key === 'report-language') {
-          rawParsed.reportLanguage = value || args[++i];
-        } else if (key === 'sizing') {
-          rawParsed.sizing = true;
-        } else if (key === 'sizing-threshold') {
-          rawParsed.sizingThreshold = parseInt(value || args[++i]);
-        } else if (key === 'sizing-format') {
-          rawParsed.sizingFormat = value || args[++i];
-        } else if (key === 'setup-admin') {
-          rawParsed.setupAdmin = true;
-        } else if (key === 'disable-admin') {
-          rawParsed.disableAdmin = true;
-        } else if (key === 'admin-status') {
-          rawParsed.adminStatus = true;
-        }
-      } else {
-        // Handle commands without -- prefix
-        if (!rawParsed.command && ['init', 'analyze', 'validate', 'usage', 'complete', 'sizing', 'status', 'workflow', 'delete', 'debug', 'help'].includes(arg)) {
-          rawParsed.command = arg;
-        }
-      }
-    }
-    
-    // Validate and sanitize arguments
-    const validatedArgs = SecurityUtils.validateCommandArgs(rawParsed);
-    SecurityUtils.logSecurityEvent('Command arguments parsed', 'info', { 
-      originalCount: Object.keys(rawParsed).length,
-      validatedCount: Object.keys(validatedArgs).length
-    });
-    
-    return validatedArgs;
-  }
-
-  // Display help information
-  showHelp() {
-    console.log(`\n${uiI18n.t('help.title')}`);
-    console.log(uiI18n.t('help.separator'));
-    console.log(uiI18n.t('help.description') + '\n');
-    
-    console.log(uiI18n.t('help.commands'));
-    console.log(`  init      ${uiI18n.t('help.commandList.init')}`);
-    console.log(`  analyze   ${uiI18n.t('help.commandList.analyze')}`);
-    console.log(`  validate  ${uiI18n.t('help.commandList.validate')}`);
-    console.log(`  usage     ${uiI18n.t('help.commandList.usage')}`);
-    console.log(`  complete  ${uiI18n.t('help.commandList.complete')}`);
-    console.log(`  sizing    ${uiI18n.t('help.commandList.sizing')}`);
-    console.log(`  status    ${uiI18n.t('help.commandList.status')}`);
-    console.log(`  workflow  ${uiI18n.t('help.commandList.workflow')}`);
-    console.log(`  delete    ${uiI18n.t('help.commandList.delete')}`);
-    console.log(`  debug     ${uiI18n.t('help.commandList.debug')}`);
-    console.log(`  help      ${uiI18n.t('help.commandList.help')}\n`);
-    
-    console.log(uiI18n.t('help.options'));
-    console.log(`  ${uiI18n.t('help.optionList.command')}`);
-    console.log(`  ${uiI18n.t('help.optionList.sourceDir')}`);
-    console.log(`  ${uiI18n.t('help.optionList.languages')}`);
-    console.log(`  ${uiI18n.t('help.optionList.interactive')}`);
-    console.log(`  ${uiI18n.t('help.optionList.uiLanguage')}`);
-    console.log(`  ${uiI18n.t('help.optionList.reportLanguage')}`);
-    console.log(`  ${uiI18n.t('help.optionList.sizing')}`);
-    console.log(`  ${uiI18n.t('help.optionList.sizingThreshold')}`);
-    console.log(`  ${uiI18n.t('help.optionList.sizingFormat')}`);
-    console.log(`  --setup-admin          Set up admin PIN protection`);
-    console.log(`  --disable-admin        Disable admin PIN protection`);
-    console.log(`  --admin-status         Show admin protection status\n`);
-    
-    console.log(uiI18n.t('help.examples'));
-    uiI18n.t('help.exampleList').forEach(example => {
-      console.log(`  ${example}`);
-    });
-    console.log('');
-  }
-
-  // Prompt user for input with sanitization
-  async prompt(question) {
-    return new Promise((resolve) => {
-      this.rl.question(question, (answer) => {
-        // Sanitize input
-        const sanitizedAnswer = SecurityUtils.sanitizeInput(answer.trim());
-        SecurityUtils.logSecurityEvent('User input accepted', 'info', { question: question.substring(0, 50) });
-        resolve(sanitizedAnswer);
-      });
-    });
-  }
-
-  // Handle persistent authentication
-  async authenticateIfRequired(operation) {
-    // Check if admin authentication is required for this operation
-    if (!AdminCLI.requiresAuth(operation)) {
-      return true;
-    }
-
-    // Check if we should keep authentication until exit
-    const securitySettings = this.settingsManager.getSecurity();
-    const keepAuthUntilExit = securitySettings.keepAuthenticatedUntilExit !== false;
-
-    // If already authenticated and keeping auth until exit, return true
-    if (this.isAuthenticated && keepAuthUntilExit) {
-      return true;
-    }
-
-    // Perform authentication
-    const authenticated = await AdminCLI.authenticate();
-    if (authenticated && keepAuthUntilExit) {
-      this.isAuthenticated = true;
-      console.log('🔓 You are now authenticated for this session.');
-    }
-
-    return authenticated;
-  }
-
-  // Get project status
-  async getProjectStatus() {
-    const sourceDir = path.resolve(this.config.sourceDir);
-    const sourceLanguageDir = path.join(sourceDir, this.config.sourceLanguage);
-    
-    const status = {
-      hasI18n: fs.existsSync(sourceDir),
-      hasSourceLanguage: fs.existsSync(sourceLanguageDir),
-      languages: [],
-      files: [],
-      totalKeys: 0
-    };
-    
-    if (status.hasI18n) {
-      // Get available languages
-      status.languages = fs.readdirSync(sourceDir)
-        .filter(item => {
-          const itemPath = path.join(sourceDir, item);
-          return fs.statSync(itemPath).isDirectory();
-        });
-      
-      // Get translation files
-      if (status.hasSourceLanguage) {
-        status.files = fs.readdirSync(sourceLanguageDir)
-          .filter(file => file.endsWith('.json'));
-        
-        // Count total keys
-        for (const fileName of status.files) {
-          try {
-            const filePath = path.join(sourceLanguageDir, fileName);
-            const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            status.totalKeys += this.countKeys(content);
-          } catch (error) {
-            // Ignore parsing errors for status
+  // Auto-detect i18n directory from common locations
+  detectI18nDirectory() {
+    for (const possiblePath of this.config.possibleI18nPaths) {
+      const resolvedPath = path.resolve(possiblePath);
+      if (fs.existsSync(resolvedPath)) {
+        // Check if it contains language directories
+        try {
+          const items = fs.readdirSync(resolvedPath);
+          const hasLanguageDirs = items.some(item => {
+            const itemPath = path.join(resolvedPath, item);
+            return fs.statSync(itemPath).isDirectory() && 
+                   ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
+          });
+          
+          if (hasLanguageDirs) {
+            this.config.sourceDir = possiblePath;
+            console.log(`🔍 Auto-detected i18n directory: ${possiblePath}`);
+            break;
           }
+        } catch (error) {
+          // Continue checking other paths
         }
       }
     }
-    
-    return status;
   }
 
-  // Count keys recursively
-  countKeys(obj) {
-    let count = 0;
+  // Check if i18n framework is installed
+  async checkI18nDependencies() {
+    const packageJsonPath = path.resolve('./package.json');
     
-    for (const value of Object.values(obj)) {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        count += this.countKeys(value);
+    if (!fs.existsSync(packageJsonPath)) {
+      console.log('⚠️  No package.json found. This toolkit works independently but is recommended to be used with i18n frameworks.');
+      return false;
+    }
+    
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
+      
+      const i18nFrameworks = [
+        'react-i18next',
+        'vue-i18n', 
+        'angular-i18n',
+        'i18next',
+        'next-i18next',
+        'svelte-i18n',
+        '@nuxtjs/i18n'
+      ];
+      
+      const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
+      
+      if (installedFrameworks.length > 0) {
+        console.log(`✅ Detected i18n framework(s): ${installedFrameworks.join(', ')}`);
+        return true;
       } else {
-        count++;
-      }
-    }
-    
-    return count;
-  }
-
-  // Display project status
-  async showStatus() {
-    console.log(uiI18n.t('status.title'));
-    console.log(uiI18n.t('status.separator'));
-    
-    const status = await this.getProjectStatus();
-    
-    console.log(`${uiI18n.t('status.sourceDir')}: ${path.resolve(this.config.sourceDir)}`);
-    console.log(`${uiI18n.t('status.sourceLanguage')}: ${this.config.sourceLanguage}`);
-    console.log(`${uiI18n.t('status.i18nSetup')}: ${status.hasI18n ? uiI18n.t('status.yes') : uiI18n.t('status.no')}`);
-    
-    if (status.hasI18n) {
-      console.log(`${uiI18n.t('status.availableLanguages')}: ${status.languages.join(', ')}`);
-      console.log(`${uiI18n.t('status.translationFiles')}: ${status.files.length}`);
-      console.log(`${uiI18n.t('status.totalKeys')}: ${status.totalKeys}`);
-      
-      if (status.languages.length > 1) {
-        console.log('\n' + uiI18n.t('status.suggestions.analysis'));
-      }
-    } else {
-      console.log('\n' + uiI18n.t('status.suggestions.init'));
-    }
-  }
-
-  // Interactive menu
-  async showMenu() {
-    console.log('\n' + uiI18n.t('menu.title'));
-    console.log(uiI18n.t('menu.separator'));
-    console.log(`1. ${uiI18n.t('menu.options.init')}`);
-    console.log(`2. ${uiI18n.t('menu.options.analyze')}`);
-    console.log(`3. ${uiI18n.t('menu.options.validate')}`);
-    console.log(`4. ${uiI18n.t('menu.options.usage')}`);
-    console.log(`5. ${uiI18n.t('menu.options.complete')}`);
-    console.log(`6. ${uiI18n.t('menu.options.sizing')}`);
-    console.log(`7. ${uiI18n.t('menu.options.workflow')}`);
-    console.log(`8. ${uiI18n.t('menu.options.status')}`);
-    console.log(`9. ${uiI18n.t('menu.options.delete')}`);
-    console.log(`10. ${uiI18n.t('menu.options.language')}`);
-    console.log(`11. ${uiI18n.t('menu.options.debugger')}`);
-    console.log(`12. ${uiI18n.t('menu.options.help')}`);
-    console.log(`13. ${uiI18n.t('menu.options.settings')} (Advanced)`);
-    console.log(`0. ${uiI18n.t('menu.options.exit')}\n`);
-    
-    const choice = await this.prompt(uiI18n.t('menu.prompt'));
-    return choice;
-  }
-
-  // Run initialization
-  async runInit(languages = null) {
-    console.log('\n' + uiI18n.t('operations.init.title'));
-    console.log(uiI18n.t('operations.init.separator'));
-    
-    const initializer = new I18nInitializer({
-      sourceDir: this.config.sourceDir,
-      sourceLanguage: this.config.sourceLanguage
-    });
-    
-    if (languages) {
-      // Non-interactive mode with specified languages
-      await initializer.init(languages);
-    } else {
-      // Interactive mode
-      await initializer.init();
-    }
-  }
-
-  // Run analysis
-  async runAnalysis(languages = null) {
-    console.log('\n' + uiI18n.t('operations.analyze.title'));
-    console.log(uiI18n.t('operations.analyze.separator'));
-    
-    const analyzer = new I18nAnalyzer({
-      sourceDir: this.config.sourceDir,
-      sourceLanguage: this.config.sourceLanguage,
-      outputDir: this.config.outputDir,
-      uiLanguage: uiI18n.getCurrentLanguage()
-    });
-    
-    // Override command line args for specific languages
-    if (languages) {
-      process.argv = process.argv.slice(0, 2).concat([
-        `--languages=${languages.join(',')}`,
-        '--output-reports'
-      ]);
-    } else {
-      process.argv = process.argv.slice(0, 2).concat(['--output-reports']);
-    }
-    
-    await analyzer.analyze();
-  }
-
-  // Run validation
-  async runValidation(languages = null) {
-    console.log('\n' + uiI18n.t('operations.validate.title'));
-    console.log(uiI18n.t('operations.validate.separator'));
-    
-    const validator = new I18nValidator({
-      sourceDir: this.config.sourceDir,
-      sourceLanguage: this.config.sourceLanguage,
-      uiLanguage: uiI18n.getCurrentLanguage()
-    });
-    
-    // Override command line args for specific languages
-    if (languages) {
-      process.argv = process.argv.slice(0, 2).concat([
-        `--language=${languages[0]}` // Validator takes single language
-      ]);
-    }
-    
-    const result = await validator.validate();
-    return result;
-  }
-
-  // Run usage analysis
-  async runUsageAnalysis() {
-    console.log('\n' + uiI18n.t('operations.usage.title'));
-    console.log(uiI18n.t('operations.usage.separator'));
-    
-    const usageAnalyzer = new I18nUsageAnalyzer({
-      sourceDir: './src',
-      i18nDir: this.config.sourceDir,
-      sourceLanguage: this.config.sourceLanguage,
-      outputDir: this.config.outputDir
-    });
-    
-    // Override command line args
-    process.argv = process.argv.slice(0, 2).concat(['--output-report']);
-    
-    await usageAnalyzer.analyze();
-  }
-
-  // Run completion
-  async runCompletion() {
-    console.log('\n' + uiI18n.t('operations.complete.title'));
-    console.log(uiI18n.t('operations.complete.separator'));
-    
-    try {
-      const I18nCompleter = require('./complete-console-translations');
-      const completer = new I18nCompleter({
-        sourceDir: this.config.sourceDir,
-        sourceLanguage: this.config.sourceLanguage,
-        outputDir: this.config.outputDir
-      });
-      
-      await completer.complete();
-    } catch (error) {
-      console.error(uiI18n.t('errors.errorRunning'), error.message);
-    }
-  }
-
-  // Run sizing analysis
-  async runSizingAnalysis(options = {}) {
-    console.log('\n' + uiI18n.t('operations.sizing.title'));
-    console.log(uiI18n.t('operations.sizing.separator'));
-    
-    try {
-      const analyzer = new I18nSizingAnalyzer({
-        sourceDir: this.config.sourceDir,
-        sourceLanguage: this.config.sourceLanguage,
-        outputDir: this.config.outputDir,
-        ...options
-      });
-      
-      await analyzer.analyze();
-    } catch (error) {
-      console.error(uiI18n.t('errors.errorRunning'), error.message);
-    }
-  }
-
-  // Delete all reports
-  async deleteReports() {
-    console.log('\n' + uiI18n.t('operations.deleteReports.title'));
-    console.log(uiI18n.t('operations.deleteReports.separator'));
-    
-    // Use the configured output directory
-    const reportsDir = path.resolve(this.config.outputDir);
-    
-    console.log(uiI18n.t('operations.deleteReports.lookingFor', { dir: reportsDir }));
-    
-    // Ensure the reports directory exists, create if it doesn't
-    if (!fs.existsSync(reportsDir)) {
-      console.log(uiI18n.t('operations.deleteReports.directoryNotExists'));
-      try {
-        fs.mkdirSync(reportsDir, { recursive: true });
-        console.log(uiI18n.t('operations.deleteReports.directoryCreated'));
-        console.log(uiI18n.t('operations.deleteReports.noFilesToDelete'));
-        return;
-      } catch (error) {
-        console.error(uiI18n.t('errors.errorCreatingDirectory'), error.message);
-        return;
-      }
-    }
-    
-    try {
-      const files = fs.readdirSync(reportsDir);
-      const reportFiles = files.filter(file => 
-        file.endsWith('.txt') || file.endsWith('.json') || file.endsWith('.log')
-      );
-      
-      if (reportFiles.length === 0) {
-        console.log(uiI18n.t('operations.deleteReports.noFilesToDelete'));
-        return;
-      }
-      
-      console.log(uiI18n.t('operations.deleteReports.foundFiles', { count: reportFiles.length }));
-      reportFiles.forEach(file => console.log(`   - ${file}`));
-      
-      const confirm = await this.prompt('\n' + uiI18n.t('operations.deleteReports.confirmPrompt'));
-      
-      if (confirm.toLowerCase() === 'y' || confirm.toLowerCase() === 'yes') {
-        let deletedCount = 0;
-        
-        for (const file of reportFiles) {
-          try {
-            fs.unlinkSync(path.join(reportsDir, file));
-            deletedCount++;
-            console.log(uiI18n.t('operations.deleteReports.deleted', { file }));
-          } catch (error) {
-            console.log(uiI18n.t('operations.deleteReports.failedToDelete', { file, error: error.message }));
-          }
-        }
-        
-        console.log('\n' + uiI18n.t('operations.deleteReports.successfullyDeleted', { count: deletedCount }));
-      } else {
-        console.log(uiI18n.t('operations.deleteReports.cancelled'));
-      }
-      
-    } catch (error) {
-      console.error(uiI18n.t('errors.errorReadingDirectory'), error.message);
-    }
-  }
-
-  // Run comprehensive workflow
-  async runWorkflow() {
-    console.log('\n' + uiI18n.t('operations.workflow.title'));
-    console.log(uiI18n.t('operations.workflow.separator'));
-    
-    const status = await this.getProjectStatus();
-    
-    if (!status.hasI18n) {
-      console.log(uiI18n.t('operations.workflow.notSetup'));
-      return;
-    }
-    
-    console.log(uiI18n.t('operations.workflow.step1'));
-    await this.runCompletion();
-    
-    console.log('\n' + uiI18n.t('operations.workflow.step2'));
-    await this.runValidation();
-    
-    console.log('\n' + uiI18n.t('operations.workflow.step3'));
-    await this.runAnalysis();
-    
-    console.log('\n' + uiI18n.t('operations.workflow.step4'));
-    await this.runUsageAnalysis();
-    
-    console.log('\n' + uiI18n.t('operations.workflow.completed'));
-  }
-
-  // Run debugger
-  async runDebugger() {
-    console.log('\n' + uiI18n.t('debugger.title'));
-    console.log(uiI18n.t('menu.separator'));
-    
-    while (true) {
-      console.log(`1. ${uiI18n.t('debugger.menu.full')}`);
-      console.log(`2. ${uiI18n.t('debugger.menu.config')}`);
-      console.log(`3. ${uiI18n.t('debugger.menu.translations')}`);
-      console.log(`4. ${uiI18n.t('debugger.menu.performance')}`);
-      console.log(`0. ${uiI18n.t('debugger.menu.back')}\n`);
-      
-      const choice = await this.prompt(uiI18n.t('debugger.prompt'));
-      
-      switch (choice) {
-        case '1':
-          await this.runFullDebug();
-          break;
-        case '2':
-          await this.runConfigDebug();
-          break;
-        case '3':
-          await this.runTranslationDebug();
-          break;
-        case '4':
-          await this.runPerformanceDebug();
-          break;
-        case '0':
-          return;
-        default:
-          console.log(uiI18n.t('debugger.invalidChoice'));
-          continue;
-      }
-      
-      await this.prompt('\nPress Enter to continue...');
-    }
-  }
-
-  // Run full system debug
-  async runFullDebug() {
-    console.log('\n' + uiI18n.t('debugger.running'));
-    
-    try {
-      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
-      const result = await debuggerInstance.run();
-      
-      console.log(uiI18n.t('debugger.completed'));
-      
-      if (report.issues.length === 0 && report.warnings.length === 0) {
-        console.log(uiI18n.t('debugger.noIssues'));
-      } else {
-        if (report.issues.length > 0) {
-          console.log(uiI18n.t('debugger.issuesFound', { count: report.issues.length }));
-        }
-        if (report.warnings.length > 0) {
-          console.log(uiI18n.t('debugger.warningsFound', { count: report.warnings.length }));
-        }
-        
-        const reportPath = path.join(this.config.outputDir, 'debug-report.txt');
-        console.log(uiI18n.t('debugger.reportGenerated', { reportPath }));
+        console.log('💡 No i18n framework detected. Consider installing one of:');
+        console.log('   - react-i18next (for React)');
+        console.log('   - vue-i18n (for Vue)');
+        console.log('   - i18next (universal)');
+        console.log('   - @nuxtjs/i18n (for Nuxt)');
+        console.log('   - svelte-i18n (for Svelte)');
+        return false;
       }
     } catch (error) {
-      console.error('❌ Debug error:', error.message);
+      console.log('⚠️  Could not read package.json');
+      return false;
     }
   }
 
-  // Run configuration debug
-  async runConfigDebug() {
-    console.log('\n🔧 Running configuration debug...');
-    
-    try {
-      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
-      await debuggerInstance.checkUserConfig();
-      await debuggerInstance.checkPackageJson();
-      
-      const report = debuggerInstance.generateReport();
-      console.log('✅ Configuration debug completed!');
-      
-      if (report.issues.length === 0 && report.warnings.length === 0) {
-        console.log('✅ No configuration issues found!');
-      } else {
-        console.log(`⚠️  Found ${report.issues.length} issue(s) and ${report.warnings.length} warning(s)`);
-        console.log(report.summary);
-      }
-    } catch (error) {
-      console.error('❌ Configuration debug error:', error.message);
-    }
-  }
-
-  // Run translation debug
-  async runTranslationDebug() {
-    console.log('\n🌐 Running translation debug...');
-    
-    try {
-      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
-      await debuggerInstance.checkTranslationKeys();
-      
-      const report = debuggerInstance.generateReport();
-      console.log('✅ Translation debug completed!');
-      
-      if (report.issues.length === 0 && report.warnings.length === 0) {
-        console.log('✅ No translation issues found!');
-      } else {
-        console.log(`⚠️  Found ${report.issues.length} issue(s) and ${report.warnings.length} warning(s)`);
-        console.log(report.summary);
-      }
-    } catch (error) {
-      console.error('❌ Translation debug error:', error.message);
-    }
-  }
-
-  // Run performance debug
-  async runPerformanceDebug() {
-    console.log('\n⚡ Running performance debug...');
-    
-    try {
-      const debuggerInstance = new I18nDebugger(path.resolve(this.config.sourceDir, '..'));
-      await debuggerInstance.checkCoreFiles();
-      await debuggerInstance.checkDependencies();
-      
-      const report = debuggerInstance.generateReport();
-      console.log('✅ Performance debug completed!');
-      
-      if (report.issues.length === 0 && report.warnings.length === 0) {
-        console.log('✅ No performance issues found!');
-      } else {
-        console.log(`⚠️  Found ${report.issues.length} issue(s) and ${report.warnings.length} warning(s)`);
-        console.log(report.summary);
-      }
-    } catch (error) {
-      console.error('❌ Performance debug error:', error.message);
-    }
-  }
-
-  // Open settings interface
-  async openSettings() {
-    console.log('\n' + uiI18n.t('operations.settings.title'));
-    console.log(uiI18n.t('operations.settings.separator'));
-    
-    try {
-      const settingsCLI = new SettingsCLI();
-      await settingsCLI.start();
-      
-      // Reload settings in case they were changed
-       try {
-         const newSettings = this.settingsManager.getSettings();
-         
-         // Update current config
-         this.config = { ...this.config, ...newSettings };
-         
-         // Reinitialize UI language if changed
-         if (newSettings.ui && newSettings.ui.language !== uiI18n.getCurrentLanguage()) {
-           await uiI18n.changeLanguage(newSettings.ui.language);
-         }
-         
-         console.log(uiI18n.t('operations.settings.reloaded'));
-       } catch (error) {
-         console.log(uiI18n.t('operations.settings.reloadError', 'Warning: Could not reload configuration:'), error.message);
-       }
-      
-    } catch (error) {
-      console.error(uiI18n.t('operations.settings.error'), error.message);
-      console.log(uiI18n.t('operations.settings.fallback', 'You can manually edit the user-config.json file instead.'));
-    }
-  }
-
-  // Main execution with security logging
+  // Add this run method after the checkI18nDependencies method
   async run() {
-    SecurityUtils.logSecurityEvent('I18nManager started', 'info', { 
-      nodeVersion: process.version,
-      platform: process.platform
-    });
-    
     try {
-      const args = this.parseArgs();
+      console.log('🎛️  I18N Management Toolkit');
+      console.log('=' .repeat(40));
       
-      // Initialize UI language
-      await uiI18n.initializeLanguage();
+      // Check dependencies
+      await this.checkI18nDependencies();
       
-      // Update config from args
-      if (args.sourceDir) {
-        this.config.sourceDir = args.sourceDir;
-      }
+      // Parse command line arguments
+      const args = process.argv.slice(2);
       
-      // Show help
-      if (args.help) {
+      if (args.includes('--help') || args.includes('-h')) {
         this.showHelp();
-        this.rl.close();
         return;
       }
       
-      // Handle admin commands
-      if (args.setupAdmin) {
-        await AdminCLI.setupAdmin();
-        this.rl.close();
-        return;
-      }
-      
-      if (args.disableAdmin) {
-        await AdminCLI.disableAdmin();
-        this.rl.close();
-        return;
-      }
-      
-      if (args.adminStatus) {
-        await AdminCLI.showStatus();
-        this.rl.close();
-        return;
-      }
-      
-      // Show header
-      console.log('\n' + uiI18n.t('menu.title'));
-console.log(uiI18n.t('menu.separator'));
-      
-      // Direct command execution
-      if (args.command) {
-        // Check if admin authentication is required for this command
-        const authenticated = await this.authenticateIfRequired(args.command.toLowerCase());
-        if (!authenticated) {
-          console.log('❌ Authentication failed. Access denied.');
-          this.rl.close();
-          return;
-        }
-        
-        switch (args.command.toLowerCase()) {
-          case 'init':
-            await this.runInit(args.languages);
-            break;
-          case 'analyze':
-            await this.runAnalysis(args.languages);
-            break;
-          case 'validate':
-            await this.runValidation(args.languages);
-            break;
-          case 'usage':
-            await this.runUsageAnalysis();
-            break;
-          case 'complete':
-            await this.runCompletion();
-            break;
-          case 'sizing':
-            await this.runSizingAnalysis({
-              threshold: args.sizingThreshold,
-              format: args.sizingFormat
-            });
-            break;
-          case 'status':
-            await this.showStatus();
-            break;
-          case 'workflow':
-            await this.runWorkflow();
-            break;
-          case 'delete':
-            await this.deleteReports();
-            break;
-          case 'debug':
-            await this.runDebugger();
-            break;
-          case 'settings':
-            await this.openSettings();
-            break;
-          case 'help':
-            this.showHelp();
-            break;
-          default:
-            console.log(uiI18n.t('menu.invalidChoice') + `: ${args.command}`);
-this.showHelp();
-        }
-        
-        this.rl.close();
+      // Handle direct commands
+      const commandArg = args.find(arg => arg.startsWith('--command='));
+      if (commandArg) {
+        const command = commandArg.split('=')[1];
+        await this.executeCommand(command);
         return;
       }
       
       // Interactive mode
-      if (args.interactive !== false) {
-        await this.showStatus();
-        
-        while (true) {
-          const choice = await this.showMenu();
-          
-          // Check if admin authentication is required for interactive operations
-          const operationMap = {
-            '1': 'init',
-            '7': 'workflow',
-            '9': 'delete'
-          };
-          
-          if (operationMap[choice]) {
-            const authenticated = await this.authenticateIfRequired(operationMap[choice]);
-            if (!authenticated) {
-              console.log('❌ Authentication failed. Access denied.');
-              continue;
-            }
-          }
-          
-          switch (choice) {
-            case '1':
-              await this.runInit();
-              break;
-            case '2':
-              await this.runAnalysis();
-              break;
-            case '3':
-              await this.runValidation();
-              break;
-            case '4':
-              await this.runUsageAnalysis();
-              break;
-            case '5':
-              await this.runCompletion();
-              break;
-            case '6':
-              await this.runSizingAnalysis();
-              break;
-            case '7':
-              await this.runWorkflow();
-              break;
-            case '8':
-              await this.showStatus();
-              break;
-            case '9':
-              await this.deleteReports();
-              break;
-            case '10':
-              const selectedLang = await uiI18n.selectLanguage();
-              uiI18n.saveLanguagePreference(selectedLang);
-              break;
-            case '11':
-              await this.runDebugger();
-              break;
-            case '12':
-              this.showHelp();
-              break;
-            case '13':
-              await this.openSettings();
-              break;
-            case '0':
-              console.log('\n' + uiI18n.t('menu.goodbye'));
-              if (this.isAuthenticated) {
-                console.log('🔒 Admin session ended. Goodbye!');
-              }
-              this.rl.close();
-              return;
-            default:
-              console.log(uiI18n.t('menu.invalidChoice'));
-              // Do not exit, just continue the loop
-              continue;
-          }
-          
-          // Pause before showing menu again
-          await this.prompt('\nPress Enter to continue...');
-        }
-      } else {
-        // Non-interactive mode without command
-        await this.showStatus();
-        this.rl.close();
-      }
+      await this.showInteractiveMenu();
       
     } catch (error) {
       console.error('❌ Error:', error.message);
-      SecurityUtils.logSecurityEvent('Application error', 'error', { error: error.message });
-      this.rl.close();
       process.exit(1);
+    } finally {
+      if (this.rl) {
+        this.rl.close();
+      }
     }
+  }
+
+  showHelp() {
+    console.log('\nUsage:');
+    console.log('  npm run i18ntk:manage                    # Interactive mode');
+    console.log('  npm run i18ntk:manage -- --command=init  # Initialize project');
+    console.log('  npm run i18ntk:manage -- --command=analyze # Analyze translations');
+    console.log('  npm run i18ntk:manage -- --command=validate # Validate translations');
+    console.log('  npm run i18ntk:manage -- --command=usage # Check usage');
+    console.log('  npm run i18ntk:manage -- --help          # Show this help');
+    console.log('\nAvailable Commands:');
+    console.log('  init      - Initialize i18n structure');
+    console.log('  analyze   - Analyze translation completeness');
+    console.log('  validate  - Validate translation files');
+    console.log('  usage     - Check translation key usage');
+    console.log('  sizing    - Analyze translation sizing');
+    console.log('  complete  - Complete missing translations');
+    console.log('  summary   - Generate summary report');
+    console.log('  debug     - Run debug analysis');
+  }
+
+  async executeCommand(command) {
+    console.log(`🔄 Executing command: ${command}`);
+    
+    switch (command) {
+      case 'init':
+        const initializer = new I18nInitializer();
+        await initializer.run();
+        break;
+      case 'analyze':
+        const analyzer = new I18nAnalyzer();
+        await analyzer.run();
+        break;
+      case 'validate':
+        const validator = new I18nValidator();
+        await validator.run();
+        break;
+      case 'usage':
+        const usageAnalyzer = new I18nUsageAnalyzer();
+        await usageAnalyzer.run();
+        break;
+      case 'sizing':
+        const sizingAnalyzer = new I18nSizingAnalyzer();
+        await sizingAnalyzer.run();
+        break;
+      case 'debug':
+        const debuggerTool = new I18nDebugger();
+        await debuggerTool.run();
+        break;
+      default:
+        console.log(`❌ Unknown command: ${command}`);
+        this.showHelp();
+    }
+  }
+
+  async showInteractiveMenu() {
+    console.log('\n📋 Available Operations:');
+    console.log('1. Initialize i18n structure');
+    console.log('2. Analyze translations');
+    console.log('3. Validate translations');
+    console.log('4. Check usage');
+    console.log('5. Analyze sizing');
+    console.log('6. Complete translations');
+    console.log('7. Generate summary');
+    console.log('8. Debug analysis');
+    console.log('9. Settings');
+    console.log('0. Exit');
+    
+    const choice = await this.prompt('\nSelect an option (0-9): ');
+    
+    switch (choice.trim()) {
+      case '1':
+        await this.executeCommand('init');
+        break;
+      case '2':
+        await this.executeCommand('analyze');
+        break;
+      case '3':
+        await this.executeCommand('validate');
+        break;
+      case '4':
+        await this.executeCommand('usage');
+        break;
+      case '5':
+        await this.executeCommand('sizing');
+        break;
+      case '6':
+        const completeTool = require('./i18ntk-complete');
+        const tool = new completeTool();
+        await tool.run();
+        break;
+      case '7':
+        const summaryTool = require('./i18ntk-summary');
+        const summary = new summaryTool();
+        await summary.run();
+        break;
+      case '8':
+        await this.executeCommand('debug');
+        break;
+      case '9':
+        const settingsCLI = new SettingsCLI();
+        await settingsCLI.run();
+        break;
+      case '0':
+        console.log('👋 Goodbye!');
+        return;
+      default:
+        console.log('❌ Invalid option. Please try again.');
+        await this.showInteractiveMenu();
+    }
+  }
+
+  prompt(question) {
+    return new Promise((resolve) => {
+      this.rl.question(question, resolve);
+    });
   }
 }
 

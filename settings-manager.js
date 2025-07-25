@@ -82,12 +82,18 @@ class SettingsManager {
             
             // Security & Admin Settings
             security: {
-                adminPinEnabled: false, // Default: false | Enable admin PIN protection for sensitive operations
-                adminPinPromptOnInit: false, // Default: false | Prompt to set admin PIN during project initialization
-                keepAuthenticatedUntilExit: true, // Default: true | Keep user authenticated until application exit
-                sessionTimeout: 30, // Default: 30 minutes | Admin session timeout in minutes
-                maxFailedAttempts: 3, // Default: 3 | Maximum failed authentication attempts before lockout
-                lockoutDuration: 15 // Default: 15 minutes | Lockout duration after max failed attempts
+                adminPinEnabled: false,
+                adminPinPromptOnInit: false,
+                keepAuthenticatedUntilExit: true,
+                sessionTimeout: 30,
+                maxFailedAttempts: 3,
+                lockoutDuration: 15,
+                enablePathValidation: true,
+                maxFileSize: 10 * 1024 * 1024, // 10MB
+                allowedExtensions: ['.json', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
+                notTranslatedMarker: '[NOT TRANSLATED]',
+                excludeFiles: ['node_modules', '.git', 'dist', 'build'],
+                strictMode: false
             },
             
             // Debug & Development Settings
@@ -395,7 +401,7 @@ class SettingsManager {
         return [
             { code: 'en', name: 'English', flag: '🇺🇸' },
             { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪' },
-            { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸' },
+            { code: 'es', name: 'Español (Spanish)', flag: '🇪���8' },
             { code: 'fr', name: 'Français (French)', flag: '🇫🇷' },
             { code: 'ru', name: 'Русский (Russian)', flag: '🇷🇺' },
             { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },

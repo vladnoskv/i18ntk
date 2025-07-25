@@ -197,13 +197,13 @@ class UIi18n {
      * @returns {Promise<string>} Selected language code
      */
     async selectLanguage() {
-        const readline = require('readline');
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-            terminal: true,
-            historySize: 0
-        });
+        // Use the existing readline interface from the manager if available
+        const rl = global.activeReadlineInterface;
+        
+        if (!rl) {
+            console.error('❌ No active readline interface available');
+            return this.currentLanguage;
+        }
 
         return new Promise((resolve) => {
             console.log('\n' + this.t('language.title'));
@@ -222,17 +222,14 @@ class UIi18n {
                 
                 if (choice === 0) {
                     console.log(this.t('language.cancelled'));
-                    rl.close();
                     resolve(this.currentLanguage);
                 } else if (choice >= 1 && choice <= this.availableLanguages.length) {
                     const selectedLang = this.availableLanguages[choice - 1];
                     this.changeLanguage(selectedLang);
                     console.log(this.t('language.changed', { language: this.getLanguageDisplayName(selectedLang) }));
-                    rl.close();
                     resolve(selectedLang);
                 } else {
                     console.log(this.t('language.invalid'));
-                    rl.close();
                     resolve(this.currentLanguage);
                 }
             });

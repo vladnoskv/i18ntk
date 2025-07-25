@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 /**
- * I18N TRANSLATION VALIDATION SCRIPT
+ * I18N TRANSLATION VALIDATION TOOLKIT
  * 
  * This script validates translation files for completeness, consistency,
  * and structural integrity across all languages.
  * 
  * Usage:
+ *   npm run i18ntk:validate
+ *   npm run i18ntk:validate -- --strict
+ *   npm run i18ntk:validate -- --language=de
+ *   npm run i18ntk:validate -- --source-dir=./src/i18n/locales
+ * 
+ * Alternative direct usage:
  *   node i18ntk-validate.js
- *   node i18ntk-validate.js --strict
- *   node i18ntk-validate.js --language=de
- *   node i18ntk-validate.js --source-dir=./src/i18n/locales
  */
 
 const fs = require('fs');
@@ -48,6 +51,7 @@ class I18nValidator {
     this.config = config;
     this.errors = [];
     this.warnings = [];
+    this.t = null; // Initialize as null
   }
   
   async initialize() {
@@ -68,13 +72,18 @@ class I18nValidator {
       
       // Validate and resolve paths
       const resolvedSourceDir = path.resolve(this.config.sourceDir);
-      this.sourceDir = resolvedSourceDir; // Use resolved path directly since it's already absolute
+      this.sourceDir = resolvedSourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
-      // Initialize i18n with UI language
+      // Initialize i18n with UI language - FIX: Properly initialize translation function
       const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
       loadTranslations(uiLanguage);
-      this.t = t;
+      this.t = t; // Assign the translation function
+      
+      // Verify translation function is working
+      if (typeof this.t !== 'function') {
+        throw new Error('Translation function not properly initialized');
+      }
       
       SecurityUtils.logSecurityEvent('validator_initialized', 'info', 'I18n validator initialized successfully');
     } catch (error) {

@@ -13,13 +13,6 @@
   "reportLanguage": "auto",
   "theme": "light",
   "autoSave": true,
-  "directories": {
-    "sourceDir": "./locales",
-    "sourceLanguage": "en",
-    "outputDir": "./i18n-reports",
-    "uiLocalesDir": "./ui-locales",
-    "configFile": "./user-config.json"
-  },
   "notifications": {
     "enabled": true,
     "types": {
@@ -75,16 +68,27 @@
     "enableColorOutput": true,
     "strictMode": false,
     "enableAuditLog": false,
-    "backupBeforeChanges": false,
+    "backupBeforeChanges": true,
     "validateOnSave": true,
     "sizingThreshold": 50,
     "sizingFormat": "table",
     "memoryLimit": "512MB",
     "timeout": 30000
   },
-  "ui": {
-    "language": "en",
-    "theme": "white",
-    "dateFormat": "DD/MM/YYYY"
+  "security": {
+    "adminPinEnabled": false,
+    "adminPinPromptOnInit": false,
+    "keepAuthenticatedUntilExit": true,
+    "sessionTimeout": 30,
+    "maxFailedAttempts": 3,
+    "lockoutDuration": 15
+  },
+  "debug": {
+    "enabled": false,
+    "showSecurityLogs": false,
+    "verboseLogging": false,
+    "logLevel": "info",
+    "saveDebugLogs": false,
+    "debugLogPath": "./debug.log"
   }
 }
