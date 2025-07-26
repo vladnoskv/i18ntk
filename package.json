@@ -1,43 +1,44 @@
 {
-  "name": "i18n-management-toolkit",
-  "version": "1.4.0",
-  "description": "A comprehensive internationalization (i18n) management toolkit for JavaScript/TypeScript projects",
-  "main": "i18ntk-manage.js",
+  "name": "i18ntk",
+  "version": "1.5.2",
+  "description": "i18ntk (i18n Toolkit) - A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects with advanced analysis, validation, and automation features",
+  "main": "main/i18ntk-manage.js",
   "bin": {
-    "i18ntk-manage": "./i18ntk-manage.js",
-    "i18ntk-init": "./i18ntk-init.js",
-    "i18ntk-analyze": "./i18ntk-analyze.js",
-    "i18ntk-validate": "./i18ntk-validate.js",
-    "i18ntk-usage": "./i18ntk-usage.js",
-    "i18ntk-complete": "./i18ntk-complete.js",
-    "i18ntk-sizing": "./i18ntk-sizing.js",
-    "i18ntk-summary": "./i18ntk-summary.js",
-    "i18ntk-autorun": "./i18ntk-autorun.js",
+    "i18ntk-manage": "./main/i18ntk-manage.js",
+    "i18ntk-init": "./main/i18ntk-init.js",
+    "i18ntk-analyze": "./main/i18ntk-analyze.js",
+    "i18ntk-validate": "./main/i18ntk-validate.js",
+    "i18ntk-usage": "./main/i18ntk-usage.js",
+    "i18ntk-complete": "./main/i18ntk-complete.js",
+    "i18ntk-sizing": "./main/i18ntk-sizing.js",
+    "i18ntk-summary": "./main/i18ntk-summary.js",
+    "i18ntk-autorun": "./main/i18ntk-autorun.js",
     "i18ntk-debug": "./dev/debug/debugger.js"
   },
   "scripts": {
-    "start": "node i18ntk-manage.js",
-    "i18ntk": "node i18ntk-autorun.js",
-    "i18ntk:init": "node i18ntk-init.js",
-    "i18ntk:analyze": "node i18ntk-analyze.js",
-    "i18ntk:validate": "node i18ntk-validate.js",
-    "i18ntk:usage": "node i18ntk-usage.js",
-    "i18ntk:complete": "node i18ntk-complete.js",
-    "i18ntk:sizing": "node i18ntk-sizing.js",
-    "i18ntk:sizing:detailed": "node i18ntk-sizing.js --detailed",
-    "i18ntk:debug": "node i18ntk-manage.js --command=debug",
-    "i18ntk:settings": "node i18ntk-manage.js --command=settings",
-    "i18ntk:summary": "node i18ntk-summary.js",
-    "i18ntk:manage": "node i18ntk-manage.js",
-    "i18ntk:autorun": "node i18ntk-autorun.js",
-    "workflow": "node i18ntk-autorun.js",
-    "init": "node i18ntk-init.js",
-    "analyze": "node i18ntk-analyze.js",
-    "validate": "node i18ntk-validate.js",
-    "usage": "node i18ntk-usage.js",
-    "complete": "node i18ntk-complete.js",
-    "sizing": "node i18ntk-sizing.js",
-    "summary": "node i18ntk-summary.js",
+    "start": "node main/i18ntk-manage.js",
+    "i18ntk": "node main/i18ntk-manage.js",
+    "i18ntk:init": "node main/i18ntk-init.js",
+    "i18ntk:analyze": "node main/i18ntk-analyze.js",
+    "i18ntk:validate": "node main/i18ntk-validate.js",
+    "i18ntk:usage": "node main/i18ntk-usage.js",
+    "i18ntk:complete": "node main/i18ntk-complete.js",
+    "i18ntk:sizing": "node main/i18ntk-sizing.js",
+    "i18ntk:sizing:detailed": "node main/i18ntk-sizing.js --detailed",
+    "i18ntk:debug": "node main/i18ntk-manage.js --command=debug",
+    "i18ntk:settings": "node main/i18ntk-manage.js --command=settings",
+    "i18ntk:summary": "node main/i18ntk-summary.js",
+    "i18ntk:manage": "node main/i18ntk-manage.js",
+    "i18n:autorun": "node main/i18ntk-autorun.js",
+    "i18ntk:autorun": "node main/i18ntk-autorun.js",
+    "workflow": "node main/i18ntk-autorun.js",
+    "init": "node main/i18ntk-init.js",
+    "analyze": "node main/i18ntk-analyze.js",
+    "validate": "node main/i18ntk-validate.js",
+    "usage": "node main/i18ntk-usage.js",
+    "complete": "node main/i18ntk-complete.js",
+    "sizing": "node main/i18ntk-sizing.js",
+    "summary": "node main/i18ntk-summary.js",
     "full-coverage": "npm run complete && npm run analyze"
   },
   "keywords": [
@@ -52,7 +53,13 @@
     "react",
     "vue",
     "angular",
-    "cli"
+    "cli",
+    "automation",
+    "validation",
+    "analysis",
+    "enterprise",
+    "debugging",
+    "reporting"
   ],
   "author": {
     "name": "Vladimir Noskov",
@@ -73,18 +80,19 @@
   },
   "files": [
     "*.js",
+    "main/",
     "utils/",
     "dev/",
     "ui-locales/",
     "locales/",
+    "docs/",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
-  "dependencies": {},
   "peerDependencies": {
     "i18next": ">=20.0.0",
-    "react-i18next": ">=11.0.0"
+    "react-i18next": "^15.6.1"
   },
   "peerDependenciesMeta": {
     "i18next": {
@@ -101,5 +109,29 @@
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/vladnoskv"
+  },
+  "versionInfo": {
+    "version": "1.5.2",
+    "releaseDate": "27/07/2025",
+    "lastUpdated": "27/07/2025",
+    "maintainer": "Vladimir Noskov",
+    "changelog": "./docs/CHANGELOG.md",
+    "documentation": "./docs/README.md",
+    "apiReference": "./docs/api/API_REFERENCE.md",
+    "majorChanges": [
+      "Documentation and version consistency updates",
+      "Improved reporting and bug fixes",
+      "All language files are now fully correct and consistent",
+      "Resolved translation context binding in summary report"
+    ],
+    "breakingChanges": [],
+    "deprecations": [],
+    "nextVersion": "1.5.3",
+    "supportedNodeVersions": ">=16.0.0",
+    "supportedFrameworks": {
+      "react-i18next": ">=11.0.0",
+      "vue-i18n": ">=9.0.0",
+      "angular-i18n": ">=12.0.0"
+    }
   }
 }

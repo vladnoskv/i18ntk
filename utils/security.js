@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const SettingsManager = require('../settings-manager');
+const SettingsManager = require('../settings/settings-manager');
 
 /**
  * Security utility module for i18nTK
@@ -366,7 +366,7 @@ class SecurityUtils {
 
     // Only show security logs if debug mode is enabled and showSecurityLogs is true
     try {
-      const settingsManager = new SettingsManager();
+      const settingsManager = SettingsManager;
       if (settingsManager.shouldShowSecurityLogs()) {
         console.log(`[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`, details);
       }

@@ -1,0 +1,24 @@
+TRANSLATION ANALYSIS REPORT FOR DE
+Generated: 2025-07-26T06:53:57.136Z
+Status: 0/0 translated (0%)
+Files analyzed: 0/5
+Keys needing translation: 0
+
+FILE BREAKDOWN:
+==================================================
+
+📄 auth.json
+   ❌ ❌ Analysis failed: Failed to parse source file JSON
+
+📄 common.json
+   ❌ ❌ Analysis failed: Failed to parse source file JSON
+
+📄 pagination.json
+   ❌ ❌ Analysis failed: Failed to parse source file JSON
+
+📄 reportGenerator.json
+   ❌ ❌ Analysis failed: Failed to parse source file JSON
+
+📄 validationStep.json
+   ❌ ❌ Analysis failed: Failed to parse source file JSON
+

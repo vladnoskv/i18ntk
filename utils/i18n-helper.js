@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const settingsManager = require('../settings-manager');
+const settingsManager = require('../settings/settings-manager');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -72,18 +72,25 @@ function t(key, params = {}) {
 
 /**
  * Interpolate parameters into a translation string
- * @param {string} template - Template string with {{param}} placeholders
+ * @param {string} template - Template string with {{param}} or {param} placeholders
  * @param {object} params - Parameters to interpolate
  * @returns {string} - Interpolated string
  */
 function interpolateParams(template, params) {
-  return template.replace(/\{\{(\w+)\}\}/g, (match, paramName) => {
-    if (paramName in params) {
-      return params[paramName];
-    }
-    console.warn(`Parameter not provided for placeholder: ${paramName}`);
-    return match; // Return the original placeholder if parameter not found
-  });
+  // Handle both {{param}} and {param} formats
+  return template
+    .replace(/\{\{(\w+)\}\}/g, (match, paramName) => {
+      if (paramName in params) {
+        return params[paramName];
+      }
+      return match;
+    })
+    .replace(/\{(\w+)\}/g, (match, paramName) => {
+      if (paramName in params) {
+        return params[paramName];
+      }
+      return match;
+    });
 }
 
 /**

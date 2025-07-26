@@ -1,8 +1,0 @@
-[2025-07-24T15:36:19.008Z] [INFO] Checking user configuration...
-[2025-07-24T15:36:19.011Z] [INFO] ✓ Found: user-config.json
-[2025-07-24T15:36:19.017Z] [WARN] WARNING: Missing configuration section: directories
-[2025-07-24T15:36:19.019Z] [WARN] WARNING: Missing configuration section: processing
-[2025-07-24T15:36:19.021Z] [WARN] WARNING: Missing configuration section: advanced
-[2025-07-24T15:36:19.023Z] [WARN] WARNING: Missing configuration section: ui
-[2025-07-24T15:36:19.024Z] [INFO] Checking package configuration...
-[2025-07-24T15:36:19.026Z] [INFO] ✓ Found: package.json

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const SecurityUtils = require('./security');
-const SettingsManager = require('../settings-manager');
+const SettingsManager = require('../settings/settings-manager');
 
 /**
  * Admin Authentication Module
@@ -11,7 +11,7 @@ const SettingsManager = require('../settings-manager');
 class AdminAuth {
   constructor() {
     this.configPath = path.join(process.cwd(), '.i18n-admin-config.json');
-    this.settingsManager = new SettingsManager();
+    this.settingsManager = SettingsManager;
     
     // Get settings from SettingsManager
     const securitySettings = this.settingsManager.getSecurity();
@@ -25,7 +25,7 @@ class AdminAuth {
     this.lockouts = new Map();
     
     // Clean up expired sessions every 5 minutes
-    setInterval(() => this.cleanupExpiredSessions(), 5 * 60 * 1000);
+    this.cleanupInterval = setInterval(this.cleanupExpiredSessions.bind(this), 5 * 60 * 1000);
   }
 
   /**
@@ -245,7 +245,7 @@ class AdminAuth {
     const sessionId = crypto.randomBytes(32).toString('hex');
     const expiresAt = Date.now() + this.sessionTimeout;
     
-    this.sessions.set(sessionId, {
+    this.activeSessions.set(sessionId, {
       createdAt: Date.now(),
       expiresAt,
       lastActivity: Date.now()
@@ -259,14 +259,14 @@ class AdminAuth {
    * Validate session
    */
   validateSession(sessionId) {
-    const session = this.sessions.get(sessionId);
+    const session = this.activeSessions.get(sessionId);
     if (!session) {
       return false;
     }
     
     const now = Date.now();
     if (now > session.expiresAt) {
-      this.sessions.delete(sessionId);
+      this.activeSessions.delete(sessionId);
       SecurityUtils.logSecurityEvent('admin_session_expired', 'info', 'Admin session expired');
       return false;
     }
@@ -280,7 +280,7 @@ class AdminAuth {
    * Destroy session
    */
   destroySession(sessionId) {
-    const deleted = this.sessions.delete(sessionId);
+    const deleted = this.activeSessions.delete(sessionId);
     if (deleted) {
       SecurityUtils.logSecurityEvent('admin_session_destroyed', 'info', 'Admin session destroyed');
     }
@@ -290,13 +290,13 @@ class AdminAuth {
   /**
    * Clean up expired sessions
    */
-  cleanupSessions() {
+  cleanupExpiredSessions() {
     const now = Date.now();
     let cleaned = 0;
     
-    for (const [sessionId, session] of this.sessions.entries()) {
+    for (const [sessionId, session] of this.activeSessions.entries()) {
       if (now > session.expiresAt) {
-        this.sessions.delete(sessionId);
+        this.activeSessions.delete(sessionId);
         cleaned++;
       }
     }
@@ -304,6 +304,13 @@ class AdminAuth {
     if (cleaned > 0) {
       SecurityUtils.logSecurityEvent('admin_sessions_cleaned', 'info', `Cleaned up ${cleaned} expired sessions`);
     }
+  }
+
+  /**
+   * Clean up expired sessions (alias for backward compatibility)
+   */
+  cleanupSessions() {
+    return this.cleanupExpiredSessions();
   }
 }
 

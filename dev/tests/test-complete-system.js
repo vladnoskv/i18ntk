@@ -81,7 +81,7 @@ class SystemTester {
         console.log('\n⚙️  Testing Settings Manager...');
         
         try {
-            const settingsManager = require('./settings-manager');
+            const settingsManager = require('../../settings/settings-manager');
             
             // Test settings loading
             const settings = settingsManager.getSettings();

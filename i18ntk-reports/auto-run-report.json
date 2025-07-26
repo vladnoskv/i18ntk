@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-07-26T06:53:57.793Z",
+  "summary": {
+    "successful": 1,
+    "failed": 1,
+    "requiredFailed": 1
+  },
+  "steps": [
+    {
+      "step": "Analyze Translations",
+      "command": "node main/i18ntk-analyze.js --no-prompt",
+      "status": "success",
+      "duration": 112,
+      "required": true
+    },
+    {
+      "step": "Validate Translations",
+      "command": "node main/i18ntk-validate.js --no-prompt",
+      "status": "failed",
+      "error": "Command failed: node main/i18ntk-validate.js --no-prompt",
+      "required": true
+    }
+  ]
+}

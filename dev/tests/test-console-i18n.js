@@ -13,16 +13,17 @@
 const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
-const settingsManager = require('./settings-manager');
+const settingsManager = require('../../settings/settings-manager');
 
 // Import the i18n helper
 const { loadTranslations, t } = require('./utils/i18n-helper');
+const UIi18n = require('../../main/ui-i18n');
 
 // Get configuration from settings manager
 function getConfig() {
   const settings = settingsManager.getSettings();
   return {
-    excludeDirs: settings.processing?.excludeDirs || ['node_modules', '.git', 'i18n-reports', 'ui-locales'],
+    excludeDirs: settings.processing?.excludeDirs || ['node_modules', '.git', 'i18ntk-reports', 'ui-locales'],
     includeExtensions: settings.processing?.includeExtensions || ['.js']
   };
 }
@@ -358,7 +359,7 @@ function main() {
   const duration = ((endTime - startTime) / 1000).toFixed(2);
   
   // Save report to file
-  const reportDir = path.join(__dirname, 'i18n-reports');
+  const reportDir = path.join(__dirname, 'i18ntk-reports');
   if (!fs.existsSync(reportDir)) {
     fs.mkdirSync(reportDir, { recursive: true });
   }

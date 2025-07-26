@@ -9,7 +9,7 @@
     "fr",
     "ru"
   ],
-  "outputDir": "./i18n-reports",
+  "outputDir": "./i18ntk-reports",
   "reportLanguage": "auto",
   "theme": "light",
   "autoSave": true,
@@ -28,6 +28,6 @@
   },
   "ui": {
     "language": "en",
-    "theme": "WHITE"
+    "theme": "default"
   }
 }

@@ -1,0 +1,97 @@
+{
+  "language": "en",
+  "sizeLimit": null,
+  "sourceDir": "./locales",
+  "sourceLanguage": "en",
+  "defaultLanguages": [
+    "de",
+    "es",
+    "fr",
+    "ru"
+  ],
+  "outputDir": "./i18ntk-reports",
+  "reportLanguage": "auto",
+  "theme": "light",
+  "autoSave": true,
+  "notifications": {
+    "enabled": true,
+    "types": {
+      "success": true,
+      "warnings": true,
+      "errors": true,
+      "progress": true
+    },
+    "sound": false,
+    "desktop": false
+  },
+  "dateFormat": "DD/MM/YYYY",
+  "timeFormat": "24h",
+  "timezone": "auto",
+  "processing": {
+    "notTranslatedMarker": "NOT_TRANSLATED",
+    "excludeFiles": [
+      ".DS_Store",
+      "Thumbs.db",
+      "*.tmp"
+    ],
+    "excludeDirs": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build"
+    ],
+    "includeExtensions": [
+      ".js",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".vue",
+      ".svelte"
+    ],
+    "strictMode": false,
+    "defaultLanguages": [
+      "de",
+      "es",
+      "fr",
+      "ru"
+    ],
+    "translationPatterns": [
+      {},
+      {},
+      {}
+    ]
+  },
+  "advanced": {
+    "batchSize": 100,
+    "maxConcurrentFiles": 10,
+    "enableProgressBars": true,
+    "enableColorOutput": true,
+    "strictMode": false,
+    "enableAuditLog": false,
+    "backupBeforeChanges": true,
+    "validateOnSave": true,
+    "sizingThreshold": 50,
+    "sizingFormat": "table",
+    "memoryLimit": "512MB",
+    "timeout": 30000
+  },
+  "security": {
+    "adminPinEnabled": "1111",
+    "adminPinPromptOnInit": false,
+    "keepAuthenticatedUntilExit": true,
+    "sessionTimeout": 30,
+    "maxFailedAttempts": 3,
+    "lockoutDuration": 15
+  },
+  "debug": {
+    "enabled": false,
+    "showSecurityLogs": false,
+    "verboseLogging": false,
+    "logLevel": "info",
+    "saveDebugLogs": false,
+    "debugLogPath": "./debug.log"
+  },
+  "ui": {
+    "language": "fr"
+  }
+}

@@ -17,7 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const settingsManager = require('./settings-manager');
+const settingsManager = require('../../settings/settings-manager');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -182,7 +182,7 @@ class I18nFeatureTester {
     this.log('Testing UI i18n module...', 'test');
     
     try {
-      const uiI18n = require('./ui-i18n');
+      const uiI18n = require('../../main/ui-i18n');
       
       let passed = 0;
       let failed = 0;
