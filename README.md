@@ -4,7 +4,7 @@
 **Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
-A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/Node.js projects. This toolkit provides automated translation management, validation, analysis, and maintenance tools to ensure your application supports multiple languages effectively.
+A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects. This toolkit provides automated translation management, validation, analysis, and maintenance tools to ensure your application supports multiple languages effectively with advanced debugging capabilities and robust testing suite.
 
 ## 📦 Installation
 
@@ -38,6 +38,10 @@ npx i18ntk-init
 - **🛠️ Enhanced Quality Assurance:** All 25 tests passing with 100% translation coverage and zero inconsistencies.
 - **📦 NPM Release Ready:** Package is fully optimized and ready for stable npm/yarn distribution.
 - **🚀 Production Grade:** Enterprise-ready with comprehensive documentation and robust testing suite.
+- **🔧 Advanced Debugging Tools:** Comprehensive debug utilities in `dev/debug/` directory with console translation tools.
+- **🏗️ Enhanced Project Structure:** Organized documentation in `docs/` with API references, configuration guides, and release notes.
+- **🛡️ Security Features:** Admin authentication system with encrypted PIN protection and session management.
+- **📊 Comprehensive Reporting:** Analysis, validation, usage, sizing, and summary reports in `i18ntk-reports/` directory.
 
 ### 📊 Language Coverage Status
 - 🇺🇸 **English**: 573/573 keys (100%)
@@ -116,21 +120,98 @@ i18n-management-toolkit/
 │   ├── i18ntk-sizing.js    # Generate sizing reports
 │   ├── i18ntk-summary.js   # Generate summary reports
 │   ├── i18ntk-usage.js     # Analyze translation usage
-│   └── i18ntk-validate.js  # Validate translations
+│   ├── i18ntk-validate.js  # Validate translations
+│   └── ui-i18n.js          # UI internationalization
 ├── utils/                   # Utility scripts and helpers
 │   ├── admin-auth.js       # Admin authentication
 │   ├── admin-cli.js        # Admin command-line interface
+│   ├── admin-pin.js        # PIN management
 │   ├── i18n-helper.js      # i18n utility functions
 │   ├── security.js         # Security utilities
-│   └── [other utilities]   # Language validation, testing tools
+│   ├── detect-language-mismatches.js  # Language validation
+│   ├── maintain-language-purity.js    # Language purity tools
+│   ├── native-translations.js         # Native translation helpers
+│   ├── translate-mismatches.js        # Translation mismatch tools
+│   ├── validate-language-purity.js    # Language purity validation
+│   ├── test-complete-system.js        # System testing
+│   └── test-console-i18n.js           # Console i18n testing
 ├── dev/                     # Development and debugging tools
 │   ├── debug/              # Debug utilities and analyzers
+│   │   ├── debugger.js     # Main debugger
+│   │   ├── console-translations.js    # Console translation tools
+│   │   ├── complete-console-translations.js  # Console completion
+│   │   ├── console-key-checker.js     # Console key validation
+│   │   ├── export-missing-keys.js     # Missing key export
+│   │   ├── find-extra-keys.js         # Extra key detection
+│   │   ├── normalize-locales.js       # Locale normalization
+│   │   ├── refactor-locales.js        # Locale refactoring
+│   │   ├── reorder-locales.js         # Locale reordering
+│   │   └── replace-hardcoded-console.js  # Console replacement
 │   └── tests/              # Test suite
-├── locales/                 # Your project's translation files
-├── ui-locales/             # Toolkit's UI translations
-├── i18ntk-reports/         # Generated reports
-├── backups/                # Configuration backups
-└── settings-manager.js     # Configuration management
+│       ├── test-complete-system.js    # Complete system tests
+│       ├── test-console-i18n.js       # Console i18n tests
+│       ├── test-features.js           # Feature tests
+│       └── test-report.json           # Test reports
+├── docs/                    # Comprehensive documentation
+│   ├── api/                # API documentation
+│   │   ├── API_REFERENCE.md           # Complete API reference
+│   │   ├── COMPONENTS.md              # Component documentation
+│   │   ├── CONFIGURATION.md           # Configuration guide
+│   │   └── NPM_PUBLISHING_GUIDE.md    # NPM publishing guide
+│   ├── debug/              # Debug documentation
+│   │   ├── DEBUG_README.md            # Debug overview
+│   │   └── DEBUG_TOOLS.md             # Debug tools guide
+│   ├── development/        # Development documentation
+│   │   ├── AGENTS.md                  # AI agent guidelines
+│   │   ├── DEVELOPMENT_RULES.md       # Development rules
+│   │   └── DEV_README.md              # Development overview
+│   ├── release-notes/      # Release documentation
+│   │   ├── RELEASE_NOTES_v1.6.0.md    # v1.6.0 release notes
+│   │   ├── RELEASE_NOTES_v1.6.1.md    # v1.6.1 release notes
+│   │   └── RELEASE_NOTES_v1.6.3.md    # v1.6.3 release notes
+│   ├── reports/            # Report documentation
+│   │   ├── ANALYSIS_README.md         # Analysis reports
+│   │   ├── SIZING_README.md           # Sizing reports
+│   │   ├── SUMMARY_README.md          # Summary reports
+│   │   ├── USAGE_README.md            # Usage reports
+│   │   └── VALIDATION_README.md       # Validation reports
+│   ├── INSTALLATION.md     # Installation guide
+│   ├── README.md           # Documentation overview
+│   └── TODO_ROADMAP.md     # Future roadmap
+├── scripts/                 # Utility scripts
+│   ├── fix-missing-translation-keys.js  # Translation key fixes
+│   └── verify-package.js               # Package verification
+├── settings/                # Configuration management
+│   ├── admin-config.json   # Admin configuration
+│   ├── user-config.json    # User configuration
+│   ├── settings-cli.js     # Settings CLI
+│   ├── settings-manager.js # Settings management
+│   └── backups/            # Configuration backups
+├── locales/                 # Sample project translation files
+│   ├── en/                 # English translations
+│   ├── de/                 # German translations
+│   ├── es/                 # Spanish translations
+│   ├── fr/                 # French translations
+│   └── ru/                 # Russian translations
+├── ui-locales/             # Toolkit's UI translations (7 languages)
+│   ├── en.json             # English UI
+│   ├── de.json             # German UI
+│   ├── es.json             # Spanish UI
+│   ├── fr.json             # French UI
+│   ├── ja.json             # Japanese UI
+│   ├── ru.json             # Russian UI
+│   └── zh.json             # Chinese UI
+├── i18ntk-reports/         # Generated analysis reports
+│   ├── analysis/           # Translation analysis
+│   ├── validation/         # Validation reports
+│   ├── usage/              # Usage analysis
+│   ├── sizing/             # Sizing reports
+│   ├── summary/            # Summary reports
+│   └── workflow/           # Workflow reports
+├── package.json            # NPM package configuration
+├── CHANGELOG.md            # Version history
+├── INDEX.md                # Documentation index
+└── README.md               # This file
 ```
 
 ## 🚀 Quick Start
@@ -280,16 +361,26 @@ The toolkit generates comprehensive reports in the `i18ntk-reports/` directory:
 
 ## 🌍 Supported Languages
 
-The toolkit UI supports the following languages:
-- English (en)
-- Spanish (es)
-- French (fr)
-- German (de)
-- Russian (ru)
-- Japanese (ja)
-- Chinese (zh)
+The toolkit UI supports **7 languages** with complete internationalization:
 
-All console output and UI elements are fully internationalized in these languages. Contributions for additional languages are welcome!
+| Language | Code | Status | Coverage |
+|----------|------|--------|----------|
+| 🇺🇸 English | `en` | ✅ Complete | 573/573 keys (100%) |
+| 🇩🇪 German | `de` | ✅ Complete | 573/573 keys (100%) |
+| 🇪🇸 Spanish | `es` | ✅ Complete | 573/573 keys (100%) |
+| 🇫🇷 French | `fr` | ✅ Complete | 573/573 keys (100%) |
+| 🇯🇵 Japanese | `ja` | ✅ Complete | 573/573 keys (100%) |
+| 🇷🇺 Russian | `ru` | ✅ Complete | 573/573 keys (100%) |
+| 🇨🇳 Chinese | `zh` | ✅ Complete | 573/573 keys (100%) |
+
+**Features:**
+- 100% console output internationalization
+- Complete UI element translation
+- Dynamic placeholder support (`{language}`, `{fileName}`, etc.)
+- Zero missing or extra translation keys
+- Verified translation patterns across all languages
+
+Contributions for additional languages are welcome!
 
 ## 🧪 Development and Testing
 
@@ -354,1285 +445,7 @@ node dev/tests/test-features.js
 
 ---
 
-**Version 1.5.2 – Documentation and version consistency updates, improved reporting, bug fixes, and enhanced internationalisation support.**
+**Version 1.6.3 – Documentation and version consistency updates, improved reporting, bug fixes, and enhanced internationalisation support.**
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](./docs/debug/DEBUG_TOOLS.md)** - Debugging guide
-
-### Development
-- **🛠️ [Development Rules](./docs/development/DEVELOPMENT_RULES.md)** - Development guidelines
-- **🤖 [AI Agents](./docs/development/AGENTS.md)** - AI agent guidelines
-- **📝 [Changelog](./docs/CHANGELOG.md)** - Version history
-
-### Community
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Community discussions and Q&A
-
----
-
-**🌍 Happy Internationalizing!**
-
-*For the most up-to-date documentation and guides, visit [docs/README.md](./docs/README.md)*
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-## 🆘 Support
-
-### Documentation
-- **📚 [Complete Documentation](./docs/README.md)** - Main documentation hub
-- **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation
-- **🔧 [API Reference](./docs/api/API_REFERENCE.md)** - Complete API docs
-- **⚙️ [Configuration Guide](./docs/api/CONFIGURATION.md)** - Configuration options
-- **🐛 [Debug Tools](
