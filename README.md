@@ -1,4 +1,4 @@
-# I18N Management Toolkit
+# i18N Management Toolkit
 
 **Version:** 1.6.3  
 **Last Updated:** 27/07/2025  
