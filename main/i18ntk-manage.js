@@ -21,7 +21,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const UIi18n = require('./ui-i18n');
+const UIi18n = require('./i18ntk-ui');
 const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
@@ -181,31 +181,47 @@ class I18nManager {
   // Add this run method after the checkI18nDependencies method
   async run() {
     try {
+      // Parse command line arguments
+      const args = process.argv.slice(2);
+      let commandToExecute = null;
+
+      // Define valid direct commands
+      const directCommands = [
+        'init', 'analyze', 'validate', 'usage', 'sizing', 'complete', 'summary', 'debug', 'workflow'
+      ];
+
+      // Handle help immediately without dependency checks
+      if (args.includes('--help') || args.includes('-h')) {
+        this.showHelp();
+        return;
+      }
+
+      // Check for --command= argument first
+      const commandFlagArg = args.find(arg => arg.startsWith('--command='));
+      if (commandFlagArg) {
+        commandToExecute = commandFlagArg.split('=')[1];
+      } else if (args.length > 0 && directCommands.includes(args[0])) {
+        // If no --command=, check if the first argument is a direct command
+        commandToExecute = args[0];
+      }
+
+      if (commandToExecute) {
+        console.log(`🔄 Executing command: ${commandToExecute}`);
+        await this.executeCommand(commandToExecute);
+        this.safeClose();
+        return;
+      }
+
+      // If no direct command or an invalid one, proceed to interactive menu
       console.log(this.ui.t('menu.title'));
-      console.log('=' .repeat(40));
-      
+      console.log('='.repeat(40));
+
       // Check dependencies and exit if user chooses not to continue
       const shouldContinue = await this.checkI18nDependencies();
       if (!shouldContinue) {
         console.log(this.ui.t('init.errors.noFramework'));
         console.log(this.ui.t('init.suggestions.installFramework'));
         process.exit(0);
-      }
-      
-      // Parse command line arguments
-      const args = process.argv.slice(2);
-      
-      if (args.includes('--help') || args.includes('-h')) {
-        this.showHelp();
-        return;
-      }
-      
-      // Handle direct commands
-      const commandArg = args.find(arg => arg.startsWith('--command='));
-      if (commandArg) {
-        const command = commandArg.split('=')[1];
-        await this.executeCommand(command);
-        return;
       }
       
       // Interactive mode
@@ -236,19 +252,57 @@ class I18nManager {
     console.log(this.ui.t('help.completeCommand'));
     console.log(this.ui.t('help.summaryCommand'));
     console.log(this.ui.t('help.debugCommand'));
-    process.exit(0);
+
   }
 
-  async executeCommand(command) {
+
+
+  /**
+   * Determine execution context based on options and environment
+   */
+  getExecutionContext(options = {}) {
+    // Check if called from interactive menu
+    if (options.fromMenu === true) {
+      return { type: 'manager', source: 'interactive_menu' };
+    }
+    
+    // Check if called from workflow/autorun
+    if (options.fromWorkflow === true || process.env.I18NTK_WORKFLOW_MODE === 'true') {
+      return { type: 'workflow', source: 'autorun_script' };
+    }
+    
+    // Check if this is a direct command line execution
+    if (process.argv.some(arg => arg.startsWith('--command='))) {
+      return { type: 'direct', source: 'command_line' };
+    }
+    
+    // Default to direct execution
+    return { type: 'direct', source: 'unknown' };
+  }
+
+  async executeCommand(command, options = {}) {
     console.log(this.ui.t('hardcodedTexts.executingCommand', { command }));
+    
+    // Enhanced context detection
+    const executionContext = this.getExecutionContext(options);
+    const isDirectCommand = executionContext.type === 'direct';
+    const isWorkflowExecution = executionContext.type === 'workflow';
+    const isManagerExecution = executionContext.type === 'manager';
+    
+    // Ensure UI language is refreshed from settings for workflow and direct execution
+    if (isWorkflowExecution || isDirectCommand) {
+      this.ui.refreshLanguageFromSettings();
+    }
     
     // Check admin authentication for sensitive commands
     const sensitiveCommands = ['init', 'validate', 'complete', 'sizing', 'debug'];
     if (sensitiveCommands.includes(command)) {
       const authPassed = await this.checkAdminAuth();
       if (!authPassed) {
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
-        await this.showInteractiveMenu();
+        if (!this.isNonInteractiveMode() && !isDirectCommand) {
+          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.showInteractiveMenu();
+        }
         return;
       }
     }
@@ -290,8 +344,8 @@ class I18nManager {
                 console.log(this.ui.t('workflow.completed'));
                 console.log(this.ui.t('workflow.checkReports'));
                 
-                // Check if stdin is available before prompting
-                if (process.stdin.isTTY && !process.stdin.destroyed) {
+                // Check execution context for proper exit handling
+                if (isManagerExecution && !this.isNonInteractiveMode()) {
                     try {
                         await this.prompt('\n📝 Press Enter to return to main menu...');
                         await this.showInteractiveMenu();
@@ -301,7 +355,7 @@ class I18nManager {
                         process.exit(0);
                     }
                 } else {
-                    // If no TTY or stdin is closed, exit gracefully
+                    // For direct commands or workflow execution, exit gracefully
                     console.log(this.ui.t('workflow.exitingCompleted'));
                     process.exit(0);
                 }
@@ -310,21 +364,67 @@ class I18nManager {
                 const debuggerTool = new I18nDebugger();
                 await debuggerTool.run();
                 break;
+            case 'help':
+                this.showHelp();
+                if (isManagerExecution && !this.isNonInteractiveMode()) {
+                  await this.prompt(this.ui.t('usage.pressEnterToReturnToMenu'));
+                  await this.showInteractiveMenu();
+                } else if (isDirectCommand && !this.isNonInteractiveMode()) {
+                  await this.prompt(this.ui.t('usage.pressEnterToContinue'));
+                  console.log(this.ui.t('workflow.exitingCompleted'));
+                  this.safeClose();
+                  process.exit(0);
+                } else {
+                  console.log(this.ui.t('workflow.exitingCompleted'));
+                  this.safeClose();
+                  process.exit(0);
+                }
+                return;
+                break;
             default:
                 console.log(this.ui.t('hardcodedTexts.unknownCommand', { command }));
                 this.showHelp();
-                return;
+                // No return here, let the completion logic handle the exit/menu return
+                break;
         }
         
-        // Add session continuity
+        // Handle command completion based on execution context
         console.log(this.ui.t('operations.completed'));
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
-        await this.showInteractiveMenu();
+        
+        if (isManagerExecution && !this.isNonInteractiveMode()) {
+          // Interactive menu execution - return to menu
+          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToReturnToMenu'));
+          await this.showInteractiveMenu();
+        } else if (isDirectCommand && !this.isNonInteractiveMode()) {
+          // Direct command execution - show "enter to continue" and exit
+          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          console.log(this.ui.t('workflow.exitingCompleted'));
+          this.safeClose();
+          process.exit(0);
+        } else {
+          // Non-interactive mode or workflow execution - exit immediately
+          console.log(this.ui.t('workflow.exitingCompleted'));
+          this.safeClose();
+          process.exit(0);
+        }
         
     } catch (error) {
         console.error(this.ui.t('hardcodedTexts.errorExecutingCommand', { error: error.message }));
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
-        await this.showInteractiveMenu();
+        
+        if (isManagerExecution && !this.isNonInteractiveMode()) {
+          // Interactive menu execution - show error and return to menu
+          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.showInteractiveMenu();
+        } else if (isDirectCommand && !this.isNonInteractiveMode()) {
+          // Direct command execution - show "enter to continue" and exit with error
+          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          this.safeClose();
+          process.exit(1);
+        } else {
+          // Non-interactive mode or workflow execution - exit immediately with error
+          this.safeClose();
+          process.exit(1);
+        }
     }
 }
 
@@ -349,6 +449,32 @@ class I18nManager {
   }
 
   async showInteractiveMenu() {
+    // Check if we're in non-interactive mode (like echo 0 | node script)
+    if (this.isNonInteractiveMode()) {
+      console.log(`\n${this.ui.t('menu.title')}`);
+      console.log(this.ui.t('menu.separator'));
+      console.log(`1. ${this.ui.t('menu.options.init')}`);
+      console.log(`2. ${this.ui.t('menu.options.analyze')}`);
+      console.log(`3. ${this.ui.t('menu.options.validate')}`);
+      console.log(`4. ${this.ui.t('menu.options.usage')}`);
+      console.log(`5. ${this.ui.t('menu.options.complete')}`);
+      console.log(`6. ${this.ui.t('menu.options.sizing')}`);
+      console.log(`7. ${this.ui.t('menu.options.workflow')}`);
+      console.log(`8. ${this.ui.t('menu.options.status')}`);
+      console.log(`9. ${this.ui.t('menu.options.delete')}`);
+      console.log(`10. ${this.ui.t('menu.options.language')}`);
+      console.log(`11. ${this.ui.t('menu.options.settings')}`);
+      console.log(`12. ${this.ui.t('menu.options.help')}`);
+      console.log(`13. ${this.ui.t('menu.options.debug')}`);
+      console.log(`0. ${this.ui.t('menu.options.exit')}`);
+      console.log('\n⚠️ Non-interactive mode detected. Menu displayed for reference only.');
+      console.log('💡 Use: node main/i18ntk-manage.js --command=<command> for direct execution.');
+      console.log('📖 Use: node main/i18ntk-manage.js --help for available commands.');
+      this.safeClose();
+      process.exit(0);
+      return;
+    }
+    
     console.log(`\n${this.ui.t('menu.title')}`);
     console.log(this.ui.t('menu.separator'));
     console.log(`1. ${this.ui.t('menu.options.init')}`);
@@ -370,25 +496,25 @@ class I18nManager {
     
     switch (choice.trim()) {
       case '1':
-        await this.executeCommand('init');
+        await this.executeCommand('init', {fromMenu: true});
         break;
       case '2':
-        await this.executeCommand('analyze');
+        await this.executeCommand('analyze', {fromMenu: true});
         break;
       case '3':
-        await this.executeCommand('validate');
+        await this.executeCommand('validate', {fromMenu: true});
         break;
       case '4':
-        await this.executeCommand('usage');
+        await this.executeCommand('usage', {fromMenu: true});
         break;
       case '5':
         await this.executeCommand('complete', {fromMenu: true});
         break;
       case '6':
-        await this.executeCommand('sizing');
+        await this.executeCommand('sizing', {fromMenu: true});
         break;
       case '7':
-        await this.executeCommand('workflow');
+        await this.executeCommand('workflow', {fromMenu: true});
         break;
       case '8':
         console.log(this.ui.t('status.generating'));
@@ -398,8 +524,8 @@ class I18nManager {
           await summary.run();
           console.log(this.ui.t('status.completed'));
           
-          // Check if stdin is available before prompting
-          if (process.stdin.isTTY && !process.stdin.destroyed) {
+          // Check if we're in interactive mode before prompting
+          if (!this.isNonInteractiveMode()) {
             try {
               await this.prompt('\n' + this.ui.t('hardcodedTexts.pressEnterToContinue'));
               await this.showInteractiveMenu();
@@ -414,8 +540,8 @@ class I18nManager {
         } catch (error) {
           console.error(this.ui.t('hardcodedTexts.errorGeneratingStatusSummary', { error: error.message }));
           
-          // Check if stdin is available before prompting
-          if (process.stdin.isTTY && !process.stdin.destroyed) {
+          // Check if we're in interactive mode before prompting
+          if (!this.isNonInteractiveMode()) {
             try {
               await this.prompt('\n' + this.ui.t('hardcodedTexts.pressEnterToContinue'));
               await this.showInteractiveMenu();
@@ -440,6 +566,7 @@ class I18nManager {
         break;
       case '12':
         this.showHelp();
+        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToReturnToMenu'));
         await this.showInteractiveMenu();
         break;
       case '13':
@@ -828,6 +955,11 @@ class I18nManager {
     });
   }
   
+  // Safe method to check if we're in non-interactive mode
+  isNonInteractiveMode() {
+    return !process.stdin.isTTY || process.stdin.destroyed || this.isReadlineClosed;
+  }
+  
   safeClose() {
     if (this.rl && !this.isReadlineClosed) {
       try {
@@ -842,6 +974,39 @@ class I18nManager {
 
 // Run if called directly
 if (require.main === module) {
+  // Handle version and help immediately before any initialization
+  const args = process.argv.slice(2);
+  
+  if (args.includes('--version') || args.includes('-v')) {
+    try {
+      const packageJsonPath = path.resolve(__dirname, '../package.json');
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const versionInfo = packageJson.versionInfo || {};
+      
+      console.log(`\n🌍 i18ntk - Enterprise i18n Management Toolkit`);
+      console.log(`📦 Version: ${packageJson.version}`);
+      console.log(`📅 Release Date: ${versionInfo.releaseDate || 'N/A'}`);
+      console.log(`👤 Maintainer: ${versionInfo.maintainer || packageJson.author}`);
+      console.log(`🔧 Node.js: ${versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0'}`);
+      console.log(`📄 License: ${packageJson.license}`);
+      
+      if (versionInfo.majorChanges && versionInfo.majorChanges.length > 0) {
+        console.log(`\n✨ What's New in v${packageJson.version}:`);
+        versionInfo.majorChanges.forEach(change => {
+          console.log(`   ${change}`);
+        });
+      }
+      
+      console.log(`\n📚 Documentation: ${packageJson.homepage || 'https://github.com/vladnoskv/i18n-management-toolkit#readme'}`);
+      console.log(`🐛 Issues: ${packageJson.bugs?.url || 'https://github.com/vladnoskv/i18n-management-toolkit/issues'}`)
+      
+    } catch (error) {
+      console.log(`\ni18ntk version information unavailable`);
+      console.log(`Error: ${error.message}`);
+    }
+    process.exit(0);
+  }
+  
   const manager = new I18nManager();
   manager.run();
 }

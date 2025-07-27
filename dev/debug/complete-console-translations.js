@@ -9,7 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const ConsoleTranslationsChecker = require('./console-translations');
-const UIi18n = require('../../main/ui-i18n');
+const UIi18n = require('../../main/i18ntk-ui');
 
 class ConsoleTranslationsCompleter {
     constructor() {

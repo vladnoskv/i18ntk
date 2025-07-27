@@ -12,5 +12,10 @@
   "unknownUser": "NOT_TRANSLATED",
   "notSet": "NOT_TRANSLATED",
   "announcement_id": "NOT_TRANSLATED",
-  "last_sign_in_at": "NOT_TRANSLATED"
+  "last_sign_in_at": "NOT_TRANSLATED",
+  "usage": {
+    "analysisResults": "NOT_TRANSLATED",
+    "availableKeysCount": "NOT_TRANSLATED",
+    "usedKeysCount": "NOT_TRANSLATED"
+  }
 }

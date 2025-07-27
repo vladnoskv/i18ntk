@@ -11,7 +11,7 @@ const { execSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const UIi18n = require('./ui-i18n');
+const UIi18n = require('./i18ntk-ui');
 const settingsManager = require('../settings/settings-manager'); // This is already an instance
 
 class AutoRunner {
@@ -78,7 +78,7 @@ class AutoRunner {
         const requiredFiles = [
             './locales',
             './ui-locales/en.json',
-            './settings/user-config.json'
+            './settings/i18ntk-config.json'
         ];
 
         for (const file of requiredFiles) {
@@ -170,6 +170,9 @@ class AutoRunner {
         const isStandalone = require.main === module;
         const showOutput = isStandalone && !quiet;
         
+        // Set workflow mode environment variable
+        process.env.I18NTK_WORKFLOW_MODE = 'true';
+        
         if (showOutput) {
             console.log(this.ui.t('hardcodedTexts.startingAutoRunWorkflow'));
             console.log('=' .repeat(60));
@@ -225,6 +228,9 @@ class AutoRunner {
      * Run specific steps only
      */
     async runSteps(stepNumbers) {
+        // Set workflow mode environment variable
+        process.env.I18NTK_WORKFLOW_MODE = 'true';
+        
         console.log(this.ui.t('hardcodedTexts.runningSelectedSteps'));
         console.log('=' .repeat(60));
         

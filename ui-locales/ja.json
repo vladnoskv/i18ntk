@@ -120,6 +120,9 @@
     "init": {
       "title": "🚀 翻訳を初期化"
     },
+    "usage": {
+      "title": "📊 キー使用状況をチェック"
+    },
     "analyze": {
       "title": "📊 翻訳を分析"
     },
@@ -182,22 +185,37 @@
     },
     "noFiles": "📂 削除するファイルがありません。"
   },
-  "checkUsage": {
-    "help_message": "\nI18n 使用状況アナライザー\n\n使用方法: node i18ntk-usage.js [options]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ (デフォルト: ./src)\n  --i18n-dir <dir>       I18nディレクトリ (デフォルト: ./src/locales)\n  --output-report        詳細レポートを生成\n  --output-dir <dir>     レポートの出力先ディレクトリ (デフォルト: ./reports)\n  --help                 ヘルプを表示\n\n例:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
-    "source_directory_thissourcedir": "📁 ソースディレクトリ: {sourceDir}",
-    "i18n_directory_thisi18ndir": "🌐 I18nディレクトリ: {i18nDir}",
-    "failed_to_parse_filename_error": "⚠️ {fileName} の解析に失敗: {errorMessage}",
-    "analyzing_source_files": "🔍 ソースファイルを分析中...",
-    "found_files_in_source": "📂 ソースディレクトリで {numFiles} ファイルを発見",
-    "found_thisusedkeyssize_unique_": "🎯 {usedKeysSize} 個のユニークな使用中キーを発見",
-    "total_key_usages_totalkeysfoun": "📊 合計キー使用回数: {totalKeysFound}",
-    "loading_available_translation_": "📋 利用可能な翻訳キーを読み込み中...",
-    "found_thisavailablekeyssize_av": "✅ {availableKeysSize} 個の利用可能なキーを発見",
-    "title": "🔍 I18N 使用状況分析",
-    "message": "使用状況分析を開始しています...",
-    "n": "\n",
-    "usage_analysis_results": "📊 使用状況分析結果",
-    "source_files_scanned_thisfileu": "📄 スキャンされたソースファイル数: {fileUsageSize}",
+  "usage": {
+        "title": "🔍 I18N 使用状況分析",
+        "help_message": "\nI18n 使用状況アナライザー\n\n使用法: node i18ntk-usage.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ (デフォルト: ./src)\n  --i18n-dir <dir>       I18n ディレクトリ (デフォルト: ./src/locales)\n  --output-report        詳細レポートを生成\n  --output-dir <dir>     レポート出力ディレクトリ (デフォルト: ./reports)\n  --help                 このヘルプを表示\n\n例:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
+        "source_directory_thissourcedir": "📁 ソースディレクトリ: {sourceDir}",
+        "i18n_directory_thisi18ndir": "🌐 I18n ディレクトリ: {i18nDir}",
+        "failed_to_parse_filename_error": "⚠️  {fileName} の解析に失敗しました: {errorMessage}",
+        "analyzing_source_files": "🔍 ソースファイルを分析中...",
+        "analysisCompletedSuccessfully": "✅ 分析が正常に完了しました",
+        "analysisFailedError": "❌ 分析に失敗しました: {error}",
+        "detectedSourceDirectory": "📁 検出されたソースディレクトリ: {dir}",
+        "detectedI18nDirectory": "🌐 検出されたI18nディレクトリ: {dir}",
+        "foundTranslationFiles": "📄 翻訳ファイルが見つかりました: {count}",
+        "invalidPattern": "⚠️ 無効なパターン: {pattern}"
+  },
+  "hardcodedTexts": {
+    "autoDetectedI18nDirectory": "自動検出されたi18nディレクトリ",
+    "selectOptionPrompt": "オプションを選択してください",
+    "pressEnterToContinue": "続行するにはEnterを押してください",
+    "analyzingTranslationCompleteness": "翻訳の完全性を分析中...",
+        "patternMatchLimitReached": "⚠️ パターンマッチ制限に達しました: {limit}",
+        "found_files_in_source": "📂 ソースディレクトリに {numFiles} 個のファイルが見つかりました",
+        "found_thisusedkeyssize_unique_": "🎯 {usedKeysSize} 個の一意の使用済みキーが見つかりました",
+        "total_key_usages_totalkeysfoun": "📊 総キー使用数: {totalKeysFound}",
+        "loading_available_translation_": "📋 利用可能な翻訳キーを読み込み中...",
+        "found_thisavailablekeyssize_av": "✅ {availableKeysSize} 個の利用可能なキーが見つかりました",
+        "message": "使用状況分析を実行中...",
+        "n": "\n",
+        "analysisResults": "📊 使用状況分析結果",
+        "source_files_scanned_thisfileu": "📄 スキャンされたソースファイル: {fileUsageSize}",
+        "availableKeysCount": "✅ 利用可能なキー: {availableKeysSize}",
+        "usedKeysCount": "🎯 使用済みキー: {usedKeysSize}",
     "available_translation_keys_thi": "🔤 利用可能な翻訳キー数: {availableKeysSize}",
     "used_translation_keys_thisused": "🎯 使用された翻訳キー数: {usedKeysSize}",
     "dynamic_keys_detected_dynamick": "🔄 動的キー検出数: {dynamicKeysLength}",
@@ -492,6 +510,7 @@
     "invalidChoiceSelectRange": "無効な選択です。1から{max}の範囲で選択してください。",
     "errorGeneratingStatusSummary": "ステータスサマリーの生成中にエラーが発生しました：{error}",
     "debugToolNotFound": "デバッグツールが見つかりません：{tool}",
+    "pressEnterToReturnToMenu": "メニューに戻るにはEnterを押してください",
     "errorRunningDebugTool": "デバッグツールの実行中にエラーが発生しました：{error}",
     "autoDetectedI18nDirectory": "i18nディレクトリを自動検出しました：{directory}",
     "stepRunning": "🔄 ステップを実行中: {stepName}",
@@ -561,7 +580,8 @@
     "selectOptionPrompt": "オプションを選択してください (0-13): ",
     "selectDebugToolPrompt": "デバッグツールを選択してください (0-6): ",
     "pressEnterToContinue": "📝 続行するにはEnterを押してください...",
-    "selectLogPrompt": "表示するログを選択してください (1-{count}) または0で戻る: "
+    "selectLogPrompt": "表示するログを選択してください (1-{count}) または0で戻る: ",
+    "stepFailedWithError": "❌ ステップ {stepName} が失敗しました: {error}"
   },
   "help": {
     "usage": "使用方法：",
@@ -609,6 +629,9 @@
     "sourceDirectory": "ソースディレクトリ: {sourceDir}",
     "i18nDirectory": "I18nディレクトリ: {i18nDir}",
     "sourceFilesScanned": "スキャンされたソースファイル数: {count}",
+    "analysisResults": "分析結果",
+    "availableKeysCount": "利用可能なキー数",
+    "usedKeysCount": "使用済みキー数",
     "translationFilesFound": "発見された翻訳ファイル数: {count}",
     "availableKeys": "利用可能な翻訳キー数: {count}",
     "usedKeys": "使用された翻訳キー数: {count}",

@@ -16,6 +16,7 @@ class SystemTester {
             errors: []
         };
         this.missingTranslations = [];
+        this.translationConsistency = {};
     }
 
     /**
@@ -45,8 +46,9 @@ class SystemTester {
         console.log('\n📝 Testing UI Translations...');
         
         try {
-            const UIi18n = require('../main/ui-i18n');
+            const UIi18n = require('../main/i18ntk-ui');
             const uiI18n = new UIi18n();
+            uiI18n.loadLanguage('de'); // Load German language for testing
             
             // Test critical translation keys
             const criticalKeys = [
@@ -54,11 +56,12 @@ class SystemTester {
                 'operations.settings.separator',
                 'operations.init.title',
                 'operations.analyze.title',
-                'operations.validate.title',
-                'menu.title',
-                'common.success',
-                'common.error'
-            ];
+                    'operations.validate.title',
+                    'operations.usage.title',
+                    'menu.title',
+                    'common.success',
+                    'common.error'
+                ];
             
             for (const key of criticalKeys) {
                 const translation = uiI18n.t(key);
@@ -175,32 +178,36 @@ class SystemTester {
                     'common.success',
                     'common.error'
                 ];
-                
-                // Check only critical keys instead of all keys
+
                 const missingCritical = criticalKeys.filter(key => !keys.includes(key));
-                
+                const nonCriticalMissing = enKeys.filter(key => !criticalKeys.includes(key) && !keys.includes(key));
+                const extra = keys.filter(key => !enKeys.includes(key));
+
+                this.translationConsistency[file] = {
+                    criticalKeysPresent: missingCritical.length === 0,
+                    missingCriticalKeys: missingCritical,
+                    nonCriticalMissingKeys: nonCriticalMissing,
+                    extraKeys: extra
+                };
+
                 if (missingCritical.length > 0) {
                     this.logWarning(`${file}: ${missingCritical.length} missing critical keys`);
                     missingCritical.forEach(key => {
                         this.missingTranslations.push(`${file}:${key}`);
                     });
                 } else {
-                    // Report missing keys but don't count as errors
-                    const missing = enKeys.filter(key => !keys.includes(key));
-                    const extra = keys.filter(key => !enKeys.includes(key));
-                    
-                    if (missing.length > 0) {
-                        console.log(`ℹ️ ${file}: ${missing.length} non-critical missing keys`);
-                        missing.slice(0, 5).forEach(key => {
-                            this.missingTranslations.push(`${file}:${key}`);
-                        });
-                    }
-                    
-                    if (extra.length > 0) {
-                        console.log(`ℹ️ ${file}: ${extra.length} extra keys`);
-                    }
-                    
                     this.logSuccess(`${file}: All critical keys present`);
+                }
+
+                if (nonCriticalMissing.length > 0) {
+                    console.log(`ℹ️ ${file}: ${nonCriticalMissing.length} non-critical missing keys`);
+                    nonCriticalMissing.slice(0, 5).forEach(key => {
+                        this.missingTranslations.push(`${file}:${key}`);
+                    });
+                }
+
+                if (extra.length > 0) {
+                    console.log(`ℹ️ ${file}: ${extra.length} extra keys`);
                 }
             }
             
@@ -223,6 +230,7 @@ class SystemTester {
                 warnings: this.results.warnings
             },
             missingTranslations: this.missingTranslations,
+            translationConsistency: this.translationConsistency,
             errors: this.results.errors,
             recommendations: this.generateRecommendations()
         };

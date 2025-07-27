@@ -45,7 +45,7 @@ class SystemTester {
         console.log('\n📝 Testing UI Translations...');
         
         try {
-            const UIi18n = require('../../main/ui-i18n');
+            const UIi18n = require('../../main/i18ntk-ui');
             const uiI18n = new UIi18n();
             
             // Test critical translation keys

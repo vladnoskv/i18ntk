@@ -54,9 +54,6 @@
       "packageJsonRead": "❌ Error reading package.json",
       "noFramework": "❌ No supported i18n framework found"
     },
-    "creatingSourceDirectory": "📁 Creating source directory: {dir}",
-    "creatingSourceLanguageDirectory": "📁 Creating source language directory: {dir}",
-    "createdSampleTranslationFile": "✅ Created sample translation file: {file}",
     "adminPinSeparator": "==================================================",
     "adminPinDescription1": "Admin PIN protection adds security for sensitive operations like:",
     "adminPinDescription2": "• Deleting translation files",
@@ -105,25 +102,7 @@
     "creatingSourceDirectory": "📁 Creating source directory: {{dir}}",
     "creatingSourceLanguageDirectory": "📁 Creating source language directory: {{dir}}",
     "createdSampleTranslationFile": "📄 Created sample translation file: {{file}}",
-    "warnings": {
-      "noPackageJson": "⚠️  No package.json found in current directory."
-    },
-    "suggestions": {
-      "noFramework": "💡 No i18n framework detected. Consider installing one:",
-      "installFramework": "💡 Install an i18n framework and run this script again."
-    },
-    "frameworks": {
-      "react": "   npm install react-i18next i18next",
-      "vue": "   npm install vue-i18n",
-      "i18next": "   npm install i18next",
-      "nuxt": "   npm install @nuxtjs/i18n",
-      "svelte": "   npm install svelte-i18n"
-    },
-    "errors": {
-       "packageJsonRead": "❌ Error reading package.json",
-       "noFramework": "❌ No i18n framework found and user chose not to continue."
-     },
-      "initializationFailed": "❌ Initialization failed: {{error}}"
+    "initializationFailed": "❌ Initialization failed: {{error}}"
   },
   "workflow": {
     "starting": "🚀 Starting workflow...",
@@ -136,6 +115,10 @@
     "cancelled": "❌ Operation cancelled.",
     "init": {
       "title": "🚀 Initialize New Language"
+    },
+    
+    "usage": {
+      "title": "📊 Check Key Usage"
     },
     "analyze": {
       "title": "🔍 Analyze Translations"
@@ -190,9 +173,15 @@
   },
   "common": {
     "errorExiting": "\n📝 Error occurred. Exiting...",
-    "welcome": "👋 Welcome to I18n Management Toolkit!",
     "success": "✅ Operation completed successfully!",
-    "error": "❌ An error occurred!"
+    "error": "❌ An error occurred!",
+    "welcome": "👋 Welcome to I18n Management Toolkit!"
+  },
+  "hardcodedTexts": {
+    "analyzingTranslationCompleteness": "Analyzing translation completeness...",
+    "autoDetectedI18nDirectory": "✅ Auto-detected i18n directory: {path}",
+    "selectOptionPrompt": "Please select an option: ",
+    "pressEnterToContinue": "Press Enter to continue..."
   },
   "delete": {
     "options": {
@@ -203,7 +192,7 @@
     },
     "noFiles": "📂 No files to delete."
   },
-  "checkUsage": {
+  "usage": {
     "help_message": "\nI18n Usage Analyzer\n\nUsage: node i18ntk-usage.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --i18n-dir <dir>       I18n directory (default: ./src/locales)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
     "source_directory_thissourcedir": "📁 Source directory: {sourceDir}",
     "i18n_directory_thisi18ndir": "🌐 I18n directory: {i18nDir}",
@@ -214,13 +203,46 @@
     "total_key_usages_totalkeysfoun": "📊 Total key usages: {totalKeysFound}",
     "loading_available_translation_": "📋 Loading available translation keys...",
     "found_thisavailablekeyssize_av": "✅ Found {availableKeysSize} available keys",
-    "title": "🔍 I18N USAGE ANALYSIS",
+    "foundTranslationFiles": "✅ Found {count} translation files",
+    "notTranslatedKeysTotal": "⚠️  Not translated keys: {total}",
+    "reviewNotTranslatedKeys": "💡 Review not translated keys",
+    "analysisCompletedSuccessfully": "🎉 Analysis completed successfully!",
+    "checkUsage": {
+      "title": "🔍 I18N USAGE ANALYSIS",
+      "message": "Analyzing i18n key usage across your project.",
+      "source_directory_thissourcedir": "📁 Source directory: {sourceDir}",
+      "i18n_directory_thisi18ndir": "🌐 I18n directory: {i18nDir}",
+      "loading_available_translation_": "📋 Loading available translation keys...",
+      "found_thisavailablekeyssize_av": "✅ Found {availableKeysSize} available keys",
+      "analyzing_source_files": "🔍 Analyzing source files...",
+      "found_files_in_source": "📂 Found {numFiles} files in source directory",
+      "found_thisusedkeyssize_unique_": "🎯 Found {usedKeysSize} unique used keys",
+      "total_key_usages_totalkeysfoun": "📊 Total key usages: {totalKeysFound}",
+      "translation_completeness_title": "📊 TRANSLATION COMPLETENESS",
+      "language_completeness_stats": "  {language}: {translatedKeys}/{totalKeys} ({percentage}% translated, {notTranslatedCount} NOT_TRANSLATED)",
+      "n_sample_unused_keys": "\nSample unused keys:",
+      "key": "- {key}",
+      "and_unusedkeyslength_5_more": "...and {count} more.",
+      "n_recommendations": "\n📋 RECOMMENDATIONS",
+      "consider_removing_unused_trans": "💡 Consider removing unused translations to keep your project clean.",
+      "n_next_steps": "\n📋 NEXT STEPS",
+      "1_review_the_analysis_results": "1. Review the analysis results in the console or generated report.",
+      "2_run_with_outputreport_for_de": "2. Run with --output-report for detailed report.",
+      "3_remove_unused_keys_or_add_mi": "3. Remove unused keys or add missing keys to your source code.",
+      "4_rerun_analysis_to_verify_imp": "4. Re-run analysis to verify improvements.",
+      "usage_analysis_results": "📊 USAGE ANALYSIS RESULTS",
+      "source_files_scanned_thisfileu": "Source files scanned: {fileCount}",
+      "available_translation_keys_thi": "Available translation keys: {availableKeys}",
+      "used_translation_keys_thisused": "Used translation keys: {usedKeys}",
+      "dynamic_keys_detected_dynamick": "Dynamic keys detected: {dynamicKeys}",
+      "unused_keys_unusedkeyslength": "Unused keys: {unusedKeysCount}",
+      "missing_keys_missingkeyslength": "Missing keys: {missingKeysCount}",
     "message": "Starting usage analysis...",
     "n": "\n",
-    "usage_analysis_results": "📊 USAGE ANALYSIS RESULTS",
+    "analysisResults": "📊 USAGE ANALYSIS RESULTS",
     "source_files_scanned_thisfileu": "📄 Source files scanned: {fileUsageSize}",
-    "available_translation_keys_thi": "🔤 Available translation keys: {availableKeysSize}",
-    "used_translation_keys_thisused": "🎯 Used translation keys: {usedKeysSize}",
+    "availableKeysCount": "🔤 Available translation keys: {availableKeysSize}",
+    "usedKeysCount": "🎯 Used translation keys: {usedKeysSize}",
     "dynamic_keys_detected_dynamick": "🔄 Dynamic keys detected: {dynamicKeysLength}",
     "unused_keys_unusedkeyslength": "❌ Unused keys: {unusedKeysLength}",
     "missing_keys_missingkeyslength": "⚠️ Missing keys: {missingKeysLength}",
@@ -473,51 +495,21 @@
     "analysisFailed": "❌ Analysis failed: {error}",
     "analysisFailedError": "❌ Analysis failed",
     "usageReportUnusedTranslationKeys": "UNUSED TRANSLATION KEYS",
-    "usageReportUnusedKeysDescription": "These keys exist in translation files but are not used in source code:",
     "usageReportUnusedKey": "❌ {key}",
     "usageReportMissingTranslationKeys": "MISSING TRANSLATION KEYS",
-    "usageReportMissingKeysDescription": "These keys are used in source code but missing from translation files:",
     "usageReportMissingKey": "⚠️  {key}",
     "usageReportDynamicTranslationKeys": "DYNAMIC TRANSLATION KEYS",
-    "usageReportDynamicKeysDescription": "These keys use dynamic patterns and need manual verification:",
+
     "usageReportDynamicKey": "🔄 {key}",
-    "usageReportTranslationCompleteness": "TRANSLATION COMPLETENESS",
-    "usageReportLanguageCompleteness": "🌍 {language}: {completeness}% complete ({translated}/{total})",
-    "usageReportNotTranslatedInLanguage": "   🔄 NOT_TRANSLATED: {count} keys",
-    "usageReportTranslationFilesDiscovered": "TRANSLATION FILES DISCOVERED",
-    "usageReportFileInfo": "📄 {relativePath} ({namespace}, {type})",
-    "usageReportUsedIn": "📄 Used in: {filePath}",
-    "usageReportMoreFiles": "... and {count} more files",
-    "usageReportFileUsageBreakdown": "FILE USAGE BREAKDOWN",
-    "usageReportFileUsage": "📄 {filePath} ({count} keys)",
-    "usageReportMoreUnusedKeys": "... and {count} more unused keys",
     "unusedKeysCount": "   ❌ Unused keys: {count}",
     "missingKeysCount": "   ⚠️  Missing keys: {count}",
     "translationCompletenessTitle": "\n🌍 Translation Completeness:",
     "languageCompletenessStats": "   {language}: {completeness}% complete ({translated}/{total})",
-    "noLanguageDirectoriesFound": "❌ No language directories found!",
-    "couldNotReadFile": "⚠️  Could not read file: {filePath}",
-    "couldNotParseJSFile": "⚠️  Could not parse JS/TS file: {filePath}",
-    "errorReadingFile": "⚠️  Error reading file {filePath}: {error}",
-    "couldNotFindI18nDirectory": "❌ Could not find i18n directory. Please specify with --source-dir",
-    "sourceDirectoryDoesNotExist": "❌ Source directory does not exist: {sourceDir}",
     "configuration": "🔧 Configuration:",
     "sourceLanguage": "   Source language: {sourceLanguage}",
     "supportedExtensions": "   Supported extensions: {extensions}",
     "excludedFiles": "   Excluded files: {files}",
-    "generatingSummaryReport": "📄 Generating summary report...",
-    "cleaningUpReportFiles": "🗑️  Cleaning up report files...",
-    "couldNotDelete": "⚠️  Could not delete {file}: {error}",
-    "deletedOldReportFiles": "✅ Deleted {count} old report files.",
-    "noOldReportFilesToDelete": "📄 No old report files to delete.",
-    "errorCleaningUpReports": "⚠️  Error cleaning up reports: {error}",
-    "reportFilesPreserved": "📁 Report files preserved as requested.",
-    "analysisComplete": "📊 ANALYSIS COMPLETE",
-    "analyzedLanguages": "✅ Analyzed {count} languages",
-    "processedFiles": "✅ Processed {count} files",
-    "foundTranslationKeys": "✅ Found {count} translation keys",
     "foundIssues": "⚠️  Found {count} issues that need attention",
-    "errorDuringAnalysis": "❌ Error during analysis: {error}",
     "fatalError": "❌ Fatal error: {error}",
     "issuesFoundTitle": "ISSUES FOUND",
     "missingFilesTitle": "❌ Missing Files:",
@@ -612,7 +604,9 @@
        "selectOptionPrompt": "Select an option (0-13): ",
        "selectDebugToolPrompt": "Select debug tool (0-6): ",
        "pressEnterToContinue": "📝 Press Enter to continue...",
-       "selectLogPrompt": "Select log to view (1-{count}) or 0 to go back: "
+       "pressEnterToReturnToMenu": "Press Enter to return to menu.",
+       "selectLogPrompt": "Select log to view (1-{count}) or 0 to go back: ",
+       "stepFailedWithError": "❌ Step {stepName} failed: {error}"
     },
     "help": {
       "usage": "\nUsage:",
@@ -683,6 +677,10 @@
     "unusedKeysCount": "❌ Unused keys: {count}",
     "missingKeysCount": "⚠️ Missing keys: {count}",
     "translationCompletenessTitle": "🌍 Translation Completeness:",
-    "languageCompletenessStats": "   {language}: {completeness}% complete ({translated}/{total})"
+    "languageCompletenessStats": "   {language}: {completeness}% complete ({translated}/{total})",
+    "analysisResults": "Analysis Results:",
+    "availableKeysCount": "Available keys: {count}",
+    "usedKeysCount": "Used keys: {count}"
   }
+}
 }

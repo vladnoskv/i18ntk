@@ -119,6 +119,9 @@
     "analyze": {
       "title": "🔍 Analizar traducciones"
     },
+    "usage": {
+      "title": "📊 Comprobar uso de claves"
+    },
     "validate": {
       "title": "✅ Validar traducciones"
     },
@@ -167,6 +170,12 @@
     "exitingCompleted": "\n📝 Resumen de estado completado. Saliendo...",
     "i18nSetup": "🌐 Configuración I18n"
   },
+  "hardcodedTexts": {
+    "analyzingTranslationCompleteness": "Analizando la completitud de la traducción...",
+    "autoDetectedI18nDirectory": "✅ Directorio i18n detectado automáticamente: {path}",
+    "selectOptionPrompt": "Por favor, seleccione una opción: ",
+    "pressEnterToContinue": "Presione Enter para continuar..."
+  },
   "common": {
     "errorExiting": "\n📝 Ocurrió un error. Saliendo...",
     "welcome": "👋 ¡Bienvenido a la Herramienta de Gestión I18n!",
@@ -182,22 +191,25 @@
     },
     "noFiles": "📂 No hay archivos para eliminar."
   },
-  "checkUsage": {
-    "help_message": "\nAnalizador de uso I18n\n\nUso: node i18ntk-usage.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente para escanear (predeterminado: ./src)\n  --i18n-dir <dir>       Directorio I18n (predeterminado: ./src/locales)\n  --output-report        Generar reporte detallado\n  --output-dir <dir>     Directorio de salida para reportes (predeterminado: ./reports)\n  --help                 Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
+  "usage": {
+    "title": "🔍 ANÁLISIS DE USO DE I18N",
+    "help_message": "\nAnalizador de uso de I18n\n\nUso: node i18ntk-usage.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./src)\n  --i18n-dir <dir>       Directorio I18n (predeterminado: ./src/locales)\n  --output-report        Generar informe detallado\n  --output-dir <dir>     Directorio de salida para informes (predeterminado: ./reports)\n  --help                 Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
     "source_directory_thissourcedir": "📁 Directorio fuente: {sourceDir}",
     "i18n_directory_thisi18ndir": "🌐 Directorio I18n: {i18nDir}",
-    "failed_to_parse_filename_error": "⚠️ No se pudo analizar {fileName}: {errorMessage}",
+    "failed_to_parse_filename_error": "❌ Error al analizar el nombre del archivo: {file}",
     "analyzing_source_files": "🔍 Analizando archivos fuente...",
-    "found_files_in_source": "📂 Encontrados {numFiles} archivos en el directorio fuente",
-    "found_thisusedkeyssize_unique_": "🎯 Encontradas {usedKeysSize} claves únicas usadas",
-    "total_key_usages_totalkeysfoun": "📊 Uso total de claves: {totalKeysFound}",
-    "loading_available_translation_": "📋 Cargando claves de traducción disponibles...",
-    "found_thisavailablekeyssize_av": "✅ Encontradas {availableKeysSize} claves disponibles",
-    "title": "🔍 ANÁLISIS DE USO I18N",
-    "message": "Iniciando análisis de uso...",
-    "n": "\n",
-    "usage_analysis_results": "📊 RESULTADOS DEL ANÁLISIS DE USO",
-    "source_files_scanned_thisfileu": "📄 Archivos fuente escaneados: {fileUsageSize}",
+    "analysisCompletedSuccessfully": "✅ Análisis de uso completado con éxito",
+    "analysisFailedError": "❌ Análisis de uso fallido:",
+    "detectedSourceDirectory": "🔍 Directorio fuente detectado:",
+    "detectedI18nDirectory": "🔍 Directorio i18n detectado:",
+    "foundTranslationFiles": "🔍 {count} archivos de traducción encontrados",
+    "invalidPattern": "Patrón inválido:",
+    "patternMatchLimitReached": "Límite de coincidencia de patrón alcanzado para el archivo:",
+        "n": "\n",
+        "analysisResults": "📊 RESULTADOS DEL ANÁLISIS DE USO",
+        "source_files_scanned_thisfileu": "📄 Archivos fuente escaneados: {fileUsageSize}",
+        "availableKeysCount": "✅ Claves disponibles: {availableKeysSize}",
+        "usedKeysCount": "🎯 Claves usadas: {usedKeysSize}",
     "available_translation_keys_thi": "🔤 Claves de traducción disponibles: {availableKeysSize}",
     "used_translation_keys_thisused": "🎯 Claves de traducción usadas: {usedKeysSize}",
     "dynamic_keys_detected_dynamick": "🔄 Claves dinámicas detectadas: {dynamicKeysLength}",
@@ -462,7 +474,7 @@
     "missingKeysCount": "    ⚠️  Claves faltantes: {count}",
     "translationCompletenessTitle": "\n🌍 Completitud de Traducción:",
     "languageCompletenessStats": "    {language}: {completeness}% completo ({translated}/{total})",
-    "configuration": "🔧 Configuración:",
+      "configuration": "🔧 Configuración:",
     "sourceLanguage": "    Idioma fuente: {sourceLanguage}",
     "supportedExtensions": "    Extensiones soportadas: {extensions}",
     "excludedFiles": "    Archivos excluidos: {files}",
@@ -492,6 +504,7 @@
     "invalidChoiceSelectRange": "Selección inválida. Por favor seleccione un rango de {range}.",
     "errorGeneratingStatusSummary": "Error al generar resumen de estado: {error}",
     "debugToolNotFound": "Herramienta de depuración no encontrada: {tool}",
+    "pressEnterToReturnToMenu": "Presione Enter para volver al menú",
     "errorRunningDebugTool": "Error al ejecutar herramienta de depuración: {error}",
     "autoDetectedI18nDirectory": "Directorio i18n detectado automáticamente: {directory}",
     "executingCommand": "Ejecutando comando: {command}",
@@ -561,7 +574,8 @@
     "selectDebugToolPrompt": "Selecciona herramienta de depuración (0-6): ",
     "pressEnterToContinue": "📝 Presiona Enter para continuar...",
     "selectLogPrompt": "Selecciona log para ver (1-{count}) o 0 para volver: ",
-    "workflowCompleted": "🎉 ¡Flujo de trabajo completado!"
+    "workflowCompleted": "🎉 ¡Flujo de trabajo completado!",
+    "stepFailedWithError": "❌ Error al ejecutar el paso {stepName}: {error}"
   },
   "help": {
     "usage": "Uso:",
@@ -632,6 +646,9 @@
     "unusedKeysCount": "❌ Claves no usadas: {count}",
     "missingKeysCount": "⚠️ Claves faltantes: {count}",
     "translationCompletenessTitle": "🌍 Completitud de Traducción:",
-    "languageCompletenessStats": "    {language}: {completeness}% completo ({translated}/{total})"
+    "languageCompletenessStats": "    {language}: {completeness}% completo ({translated}/{total})",
+    "analysisResults": "Analysis Results:",
+    "availableKeysCount": "Available keys: {count}",
+    "usedKeysCount": "Used keys: {count}"
   }
 }

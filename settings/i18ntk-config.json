@@ -7,7 +7,9 @@
     "de",
     "es",
     "fr",
-    "ru"
+    "ru",
+    "zh",
+    "ja"
   ],
   "outputDir": "./i18ntk-reports",
   "reportLanguage": "auto",
@@ -90,8 +92,5 @@
     "logLevel": "info",
     "saveDebugLogs": false,
     "debugLogPath": "./debug.log"
-  },
-  "ui": {
-    "language": "fr"
   }
 }

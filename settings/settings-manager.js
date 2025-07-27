@@ -8,7 +8,7 @@ const path = require('path');
 
 class SettingsManager {
     constructor() {
-        this.configFile = path.join(__dirname, 'user-config.json');
+        this.configFile = path.join(__dirname, 'i18ntk-config.json');
         this.defaultConfig = {
             // UI Language Settings
             language: 'en', // Default: 'en' | Options: 'en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'
@@ -55,7 +55,7 @@ class SettingsManager {
             // Processing Settings
             processing: {
                 notTranslatedMarker: 'NOT_TRANSLATED', // Default marker for untranslated content
-                excludeFiles: ['.DS_Store', 'Thumbs.db', '*.tmp'], // Files to ignore during processing
+                excludeFiles: ['.DS_Store', 'Thumbs.db', '*.tmp', 'auth.json', 'pagination.json', 'reportGenerator.json', 'validationStep.json'], // Files to ignore during processing
                 excludeDirs: ['node_modules', '.git', 'dist', 'build'], // Directories to ignore
                 includeExtensions: ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'], // File extensions to scan
                 strictMode: false, // Default: false | Enable strict validation (fails on warnings)

@@ -182,7 +182,7 @@ class I18nFeatureTester {
     this.log('Testing UI i18n module...', 'test');
     
     try {
-      const uiI18n = require('../../main/ui-i18n');
+      const uiI18n = require('../../main/i18ntk-ui');
       
       let passed = 0;
       let failed = 0;
@@ -378,7 +378,7 @@ class I18nFeatureTester {
       'main/i18ntk-validate.js',
       'main/i18ntk-usage.js',
       'main/i18ntk-sizing.js',
-      'main/ui-i18n.js'
+      'main/i18ntk-ui.js'
     ];
     
     const requiredDirs = [

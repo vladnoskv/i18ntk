@@ -1,14 +1,37 @@
 # I18N Management Toolkit - Installation Guide
 
-**Version:** 1.0.0  
-**Release Date:** July 27, 2025  
-**Status:** Stable Release - NPM/Yarn Ready  
+**Version:** 1.1.2  
+**Release Date:** July 27, 2024  
+**Status:** Stable Release - Enhanced CLI & Local Usage  
 
 ## 📦 Installation Options
 
-### 🌍 Global Installation (Recommended)
+### 📁 Local Project Installation (Recommended)
 
 Install i18ntk globally to use it across all your projects:
+
+#### NPM
+```bash
+npm install i18ntk --save-dev
+```
+
+#### Yarn
+```bash
+yarn add -D i18ntk
+```
+
+#### Verification
+```bash
+# Verify installation
+npx i18ntk --version
+
+# Or check all available commands
+npm list i18ntk
+```
+
+### 🌍 Global Installation (Optional)
+
+While local installation is recommended, you can still install i18ntk globally:
 
 #### NPM
 ```bash
@@ -20,43 +43,12 @@ npm install -g i18ntk
 yarn global add i18ntk
 ```
 
-#### Verification
+#### Using with npx (No Installation Required)
+
+`npx` allows you to run i18ntk commands without installing it globally or locally. This is useful for one-off tasks or CI/CD environments.
+
 ```bash
-# Verify installation
-i18ntk-manage --version
-
-# Or check all available commands
-npm list -g i18ntk
-```
-
-### 📁 Local Project Installation
-
-Install i18ntk as a development dependency in your project:
-
-#### NPM
-```bash
-# Install as dev dependency
-npm install i18ntk --save-dev
-
-# Or install as regular dependency
-npm install i18ntk
-```
-
-#### Yarn
-```bash
-# Install as dev dependency
-yarn add i18ntk --dev
-
-# Or install as regular dependency
-yarn add i18ntk
-```
-
-#### Using with npx (No Installation)
-```bash
-# Run commands directly without installation
-npx i18ntk-manage
-npx i18ntk-init
-npx i18ntk-analyze
+npx i18ntk <command> # e.g., npx i18ntk init, npx i18ntk usage
 ```
 
 ## 🔧 System Requirements
@@ -90,8 +82,8 @@ yarn --version
 
 ### 1. Install i18ntk
 ```bash
-# Global installation (recommended)
-npm install -g i18ntk
+# Local installation (recommended)
+npm install i18ntk --save-dev
 ```
 
 ### 2. Initialize Your Project
@@ -100,16 +92,16 @@ npm install -g i18ntk
 cd your-project
 
 # Initialize i18n structure
-i18ntk-init
+npx i18ntk init
 ```
 
 ### 3. Configure Your Project
 ```bash
 # Run the main management interface
-i18ntk-manage
+npx i18ntk manage
 
 # Or use automated setup
-i18ntk-autorun
+npx i18ntk autorun
 ```
 
 ### 4. Verify Installation
@@ -131,12 +123,13 @@ yarn add react-i18next i18next
 
 #### 2. Install i18ntk
 ```bash
-npm install -g i18ntk
+npm install i18ntk --save-dev
+# or use npx directly without installation
 ```
 
 #### 3. Initialize
 ```bash
-i18ntk-init --framework react-i18next
+npx i18ntk init --framework react-i18next
 ```
 
 #### 4. Project Structure
@@ -165,12 +158,13 @@ yarn add vue-i18n
 
 #### 2. Install i18ntk
 ```bash
-npm install -g i18ntk
+npm install i18ntk --save-dev
+# or use npx directly without installation
 ```
 
 #### 3. Initialize
 ```bash
-i18ntk-init --framework vue-i18n
+npx i18ntk init --framework vue-i18n
 ```
 
 ### Angular with Angular i18n
@@ -182,12 +176,13 @@ ng add @angular/localize
 
 #### 2. Install i18ntk
 ```bash
-npm install -g i18ntk
+npm install i18ntk --save-dev
+# or use npx directly without installation
 ```
 
 #### 3. Initialize
 ```bash
-i18ntk-init --framework angular-i18n
+npx i18ntk init --framework angular-i18n
 ```
 
 ### Next.js with next-i18next
@@ -214,7 +209,7 @@ When you run `i18ntk-init`, it automatically creates:
 
 ```
 your-project/
-├── user-config.json     # User preferences
+├── i18ntk-config.json   # User preferences
 ├── admin-config.json    # Admin settings (if needed)
 ├── locales/            # Translation files
 │   ├── en/
@@ -224,7 +219,7 @@ your-project/
 ```
 
 ### Manual Configuration
-If you prefer manual setup, create `user-config.json`:
+If you prefer manual setup, create `i18ntk-config.json`:
 
 ```json
 {

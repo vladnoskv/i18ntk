@@ -220,26 +220,26 @@ class I18nDebugger {
     async checkUserConfig() {
         this.log('Checking user configuration...');
         
-        // Check user-config.json
-        const configPath = path.resolve(this.projectRoot, 'user-config.json');
-        if (this.checkFileExists('user-config.json', 'Main configuration file')) {
+        // Check i18ntk-config.json
+        const configPath = path.resolve(this.projectRoot, 'settings', 'i18ntk-config.json');
+        if (this.checkFileExists('settings/i18ntk-config.json', 'Main configuration file')) {
             try {
                 const content = await SecurityUtils.safeReadFile(configPath, this.projectRoot);
                 if (!content) {
-                    this.addIssue('Failed to read user-config.json');
+                    this.addIssue('Failed to read i18ntk-config.json');
                     return;
                 }
                 
                 const config = SecurityUtils.safeParseJSON(content);
                 if (!config) {
-                    this.addIssue('Failed to parse user-config.json');
+                    this.addIssue('Failed to parse i18ntk-config.json');
                     return;
                 }
                 
                 // Validate configuration structure
                 const validatedConfig = SecurityUtils.validateConfig(config);
                 if (!validatedConfig) {
-                    this.addIssue('Invalid configuration structure in user-config.json');
+                    this.addIssue('Invalid configuration structure in i18ntk-config.json');
                     return;
                 }
                 
@@ -264,7 +264,7 @@ class I18nDebugger {
                     });
                 }
             } catch (error) {
-                this.addIssue(`Error processing user-config.json: ${error.message}`);
+                this.addIssue(`Error processing i18ntk-config.json: ${error.message}`);
                 SecurityUtils.logSecurityEvent('User config processing failed', 'error', { error: error.message });
             }
         }

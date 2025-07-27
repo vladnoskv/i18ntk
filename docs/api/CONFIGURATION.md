@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Configuration Guide
 
-**Version:** 1.0.0  
+**Version:** 1.1.2  
 **Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
@@ -12,7 +12,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ### Primary Configuration Files
 
-#### `user-config.json`
+#### `i18ntk-config.json`
 **Location:** Project root directory  
 **Purpose:** User-specific settings and preferences  
 **Auto-generated:** Yes (on first run)  
@@ -127,15 +127,15 @@ This guide provides comprehensive information about configuring the I18N Managem
 ```json
 {
   "scripts": {
-    "i18ntk": "node main/i18ntk-manage.js",
-    "i18ntk:init": "node main/i18ntk-init.js",
-    "i18ntk:analyze": "node main/i18ntk-analyze.js",
-    "i18ntk:validate": "node main/i18ntk-validate.js",
-    "i18ntk:usage": "node main/i18ntk-usage.js",
-    "i18ntk:complete": "node main/i18ntk-complete.js",
-    "i18ntk:sizing": "node main/i18ntk-sizing.js",
-    "i18ntk:summary": "node main/i18ntk-summary.js",
-    "i18ntk:autorun": "node main/i18ntk-autorun.js"
+    "i18ntk": "npx i18ntk",
+    "i18ntk:init": "npx i18ntk init",
+    "i18ntk:analyze": "npx i18ntk analyze",
+    "i18ntk:validate": "npx i18ntk validate",
+    "i18ntk:usage": "npx i18ntk usage",
+    "i18ntk:complete": "npx i18ntk complete",
+    "i18ntk:sizing": "npx i18ntk sizing",
+    "i18ntk:summary": "npx i18ntk summary",
+    "i18ntk:autorun": "npx i18ntk autorun"
   }
 }
 ```
@@ -301,7 +301,7 @@ project-root/
 │   └── summary/
 ├── backups/                     # Configuration backups
 ├── docs/                        # Documentation
-├── user-config.json             # User configuration
+├── i18ntk-config.json           # User configuration
 ├── admin-config.json            # Admin configuration
 └── package.json
 ```

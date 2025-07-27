@@ -2,10 +2,72 @@
 
 All notable changes to the I18N Management Toolkit are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.0.5 (2025-01-27) - **PATCH RELEASE** 🧹
+**Current Version:** 1.1.2 (2024-07-27) - **PATCH RELEASE** 🩹
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.1.2] - 2024-07-27
+
+### 🚀 Enhanced CLI Experience
+- **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu for specified commands.
+
+### 🐛 Bug Fixes & Improvements
+- **Fixed**: Resolved "Missing required file/directory: ./settings/user-config.json" error by removing outdated global `i18ntk` installation, ensuring the local, up-to-date version is used.
+
+### ✅ Validation Results
+- **CLI**: Confirmed that `i18ntk workflow` now executes successfully without the `user-config.json` error, utilizing the correct `i18ntk-config.json`.
+- **Direct Commands**: Verified that `i18ntk usage` and other direct commands now execute as expected without launching the interactive menu.
+
+
+## [1.1.1] - 2025-01-28
+
+### 🐛 Bug Fixes & Improvements
+- **Fixed**: Interactive menu 'Help' option (option 12) now correctly waits for user input before returning to the main menu.
+- **Improved**: `executeCommand` function now properly handles the 'help' command within the interactive menu, ensuring a smooth user experience.
+- **Fixed**: Resolved issue where internal JSON files (`auth.json`, `pagination.json`, `reportGenerator.json`, `validationStep.json`) were incorrectly included in locale processing. These files are now properly excluded via `settings-manager.js`.
+
+### ✅ Validation Results
+- **Interactive Help**: Confirmed that the "Press Enter to return to menu." prompt is now correctly displayed and waits for user input after showing help.
+- **Locale File Exclusion**: Verified that specified internal JSON files are no longer processed as user locales, ensuring a cleaner and more accurate translation environment.
+
+## [1.1.0] - 2025-01-27
+
+### 🚀 Enhanced CLI Experience
+- **Fixed**: `i18ntk --version` and `i18ntk -v` now properly display version information instead of loading the management menu
+- **Enhanced**: Version command shows comprehensive information including toolkit name, version, release date, maintainer, Node.js compatibility, license, and recent changes
+- **Improved**: CLI argument handling to prevent unintended menu loading during version checks
+- **Added**: Short flag `-v` support for version command alongside existing `--version`
+- **Fixed**: Clean command execution without triggering initialization processes or dependency checks
+
+### 🔧 Critical Non-Interactive Mode Fixes
+- **Fixed**: Infinite loop issue when using piped input (e.g., `echo 0 | node main\i18ntk-manage.js`)
+- **Added**: `isNonInteractiveMode()` method to safely detect non-interactive input scenarios
+- **Enhanced**: Non-interactive mode detection checks for `process.stdin.isTTY`, destroyed stdin, and closed readline
+- **Improved**: Graceful exit handling in non-interactive environments with proper user guidance
+- **Fixed**: Multiple menu display issue in direct command execution mode
+- **Added**: `isDirectCommand` flag to differentiate between interactive menu and direct CLI commands
+- **Enhanced**: Clean command execution without redundant menu displays or infinite loops
+
+### 📚 Documentation Excellence
+- **Updated**: Comprehensive README.md update following current documentation standards and best practices
+- **Improved**: All sections updated to reflect current functionality and features with better organization
+- **Enhanced**: Version consistency across all project files and documentation
+- **Added**: Detailed documentation for new version command functionality
+- **Refined**: Structure and navigation throughout documentation for better user experience
+
+### 🛡️ Quality Improvements
+- **Enhanced**: Proper CLI behavior with commands executing as expected without side effects
+- **Improved**: Argument parsing and command execution flow for better reliability
+- **Upgraded**: User experience with cleaner, more intuitive command-line interactions
+- **Strengthened**: Production readiness with enhanced stability and professional CLI experience
+- **Optimized**: Module-level argument handling for better performance and cleaner output
+- **Secured**: Robust handling of various input scenarios including automated scripts and CI/CD environments
+
+### ✅ Validation Results
+- **Tests**: All existing functionality remains intact with no breaking changes
+- **CLI**: Version command works cleanly without duplicate output or unwanted initialization
+- **Non-Interactive**: Piped input and automated scripts now work correctly without infinite loops
+- **Direct Commands**: All direct command executions work without redundant menu displays
+- **Documentation**: All version references updated and consistent across the project
+- **Status**: Ready for production with enhanced CLI experience, improved stability, and better automation support
 
 ## [1.0.5] - 2025-01-27
 

@@ -110,7 +110,7 @@ i18n-management-toolkit/
 │   ├── i18ntk-summary.js   # Generate summary reports
 │   ├── i18ntk-usage.js     # Analyze translation usage
 │   ├── i18ntk-validate.js  # Validate translations
-│   └── ui-i18n.js          # UI internationalization helper
+│   └── i18ntk-ui.js        # UI internationalization helper
 ├── utils/                   # Utility scripts and helpers
 │   ├── admin-auth.js       # Admin authentication (legacy)
 │   ├── admin-cli.js        # Admin command-line interface
@@ -122,7 +122,7 @@ i18n-management-toolkit/
 ├── settings/                # Configuration management
 │   ├── settings-manager.js # Main settings manager
 │   ├── settings-cli.js     # Settings command-line interface
-│   ├── user-config.json    # User configuration
+│   ├── i18ntk-config.json  # User configuration
 │   ├── admin-config.json   # Admin configuration
 │   └── backups/            # Configuration backups
 ├── dev/                     # Development and debugging tools
@@ -160,7 +160,7 @@ locales/                     # Your project's translation files
 settings/
 ├── admin-pin.json          # Encrypted PIN storage (AES-256-GCM)
 ├── admin-config.json       # Admin configuration
-└── user-config.json        # User preferences
+└── i18ntk-config.json      # User preferences
 
 utils/
 ├── admin-pin.js            # Enhanced PIN security with session management

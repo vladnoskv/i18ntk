@@ -12,5 +12,10 @@
   "unknownUser": "Unknown User",
   "notSet": "Not Set",
   "announcement_id": "Announcement ID",
-  "last_sign_in_at": "Last Sign In"
+  "last_sign_in_at": "Last Sign In",
+  "usage": {
+    "analysisResults": "Analysis Results",
+    "availableKeysCount": "Available Keys Count",
+    "usedKeysCount": "Used Keys Count"
+  }
 }

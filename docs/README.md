@@ -1,7 +1,7 @@
 # I18N Management Toolkit - Documentation Hub
 
-**Version:** 1.0.4  
-**Last Updated:** January 27, 2025  
+**Version:** 1.1.2  
+**Last Updated:** July 27, 2024  
 **Maintainer:** Vladimir Noskov  
 
 ## 📚 Welcome to the Documentation Hub
@@ -14,7 +14,7 @@ This is your central hub for all I18N Management Toolkit documentation. Whether 
 Start with these essential documents:
 
 1. **[Main README](../README.md)** - Overview, installation, and quick start guide
-2. **[Release Notes v1.0.4](./release-notes/RELEASE_NOTES_v1.0.4.md)** - Latest translation system fixes
+2. **[Release Notes v1.1.2](../CHANGELOG.md)** - Latest bug fixes and CLI enhancements
 3. **[API Reference](./api/API_REFERENCE.md)** - Complete command and API documentation
 4. **[Configuration Guide](./api/CONFIGURATION.md)** - Detailed configuration options
 
@@ -89,26 +89,26 @@ docs/reports/
 ## 🎯 Common Use Cases
 
 ### 🆕 Setting Up a New Project
-1. **[Installation Guide](../README.md#-installation)** - Install i18ntk globally or locally
-2. **[Initialization](./api/API_REFERENCE.md#npm-run-i18ntkinit)** - Set up i18n structure
+1. **[Installation Guide](../INSTALLATION.md)** - Install i18ntk locally (recommended) or globally
+2. **[Initialization](./api/API_REFERENCE.md#i18ntk-init)** - Set up i18n structure (`npx i18ntk init`)
 3. **[Configuration](./api/CONFIGURATION.md#primary-configuration-files)** - Configure for your framework
-4. **[First Analysis](./api/API_REFERENCE.md#npm-run-i18ntkanalyze)** - Analyze your translations
+4. **[First Analysis](./api/API_REFERENCE.md#i18ntk-analyze)** - Analyze your translations (`npx i18ntk analyze`)
 
 ### 🔍 Analyzing Existing Projects
-1. **[Usage Analysis](./api/API_REFERENCE.md#npm-run-i18ntkusage)** - Find unused/missing keys
-2. **[Validation](./api/API_REFERENCE.md#npm-run-i18ntkvalidate)** - Check translation quality
-3. **[Sizing Analysis](./api/API_REFERENCE.md#npm-run-i18ntksizing)** - Analyze file sizes
-4. **[Summary Reports](./api/API_REFERENCE.md#npm-run-i18ntksummary)** - Generate comprehensive reports
+1. **[Usage Analysis](./api/API_REFERENCE.md#i18ntk-usage)** - Find unused/missing keys (`npx i18ntk usage`)
+2. **[Validation](./api/API_REFERENCE.md#i18ntk-validate)** - Check translation quality (`npx i18ntk validate`)
+3. **[Sizing Analysis](./api/API_REFERENCE.md#i18ntk-sizing)** - Analyze file sizes (`npx i18ntk sizing`)
+4. **[Summary Reports](./api/API_REFERENCE.md#i18ntk-summary)** - Generate comprehensive reports (`npx i18ntk summary`)
 
 ### 🛠️ Maintaining Translations
-1. **[Automated Workflow](./api/API_REFERENCE.md#npm-run-i18ntkautorun)** - Run complete maintenance
-2. **[Completing Translations](./api/API_REFERENCE.md#npm-run-i18ntkcomplete)** - Fill missing keys
+1. **[Automated Workflow](./api/API_REFERENCE.md#i18ntk-autorun)** - Run complete maintenance (`npx i18ntk autorun`)
+2. **[Completing Translations](./api/API_REFERENCE.md#i18ntk-complete)** - Fill missing keys (`npx i18ntk complete`)
 3. **[Debug Tools](./debug/DEBUG_TOOLS.md)** - Troubleshoot issues
 4. **[Quality Assurance](../README.md#-quality-assurance)** - Ensure 100% coverage
 
 ### 🚀 Production Deployment
-1. **[Final Validation](./api/API_REFERENCE.md#npm-run-i18ntkvalidate)** - Pre-deployment checks
-2. **[Performance Analysis](./api/API_REFERENCE.md#npm-run-i18ntksizing)** - Optimize bundle size
+1. **[Final Validation](./api/API_REFERENCE.md#i18ntk-validate)** - Pre-deployment checks (`npx i18ntk validate`)
+2. **[Performance Analysis](./api/API_REFERENCE.md#i18ntk-sizing)** - Optimize bundle size (`npx i18ntk sizing`)
 3. **[Testing](../README.md#-testing)** - Run comprehensive tests
 4. **[Documentation](./api/CONFIGURATION.md)** - Document your setup
 
@@ -143,7 +143,7 @@ All languages maintain **100% translation coverage** with **573/573 keys** trans
 
 ## 📊 Quality Assurance
 
-### Current Status (v1.0.4)
+### Current Status (v1.1.2)
 ```
 ✅ Tests Passing: 25/25 (100%)
 ✅ Translation Coverage: 573/573 keys (100%)
@@ -177,11 +177,15 @@ For enterprise support, custom integrations, or consulting services, please cont
 ## 🔄 Version History
 
 ### Recent Releases
-- **[v1.0.4](./release-notes/RELEASE_NOTES_v1.0.4.md)** - Critical Translation System Fixes (Current)
-- **[v1.0.3](../CHANGELOG.md#103---2025-01-27)** - CLI and Packaging Fixes
-- **[v1.0.2](../CHANGELOG.md#102---2025-01-27)** - Module Resolution Fixes
-- **[v1.0.1](../CHANGELOG.md#101---2025-07-27)** - CLI Usability Improvements
-- **[v1.0.0](../CHANGELOG.md#100---2025-07-27)** - First Stable Release
+- **[v1.1.2](../CHANGELOG.md)** - Enhanced CLI Experience & Bug Fixes (Current)
+- **[v1.1.1](../CHANGELOG.md)** - Interactive Menu & Locale Exclusion Fixes
+- **[v1.1.0](../CHANGELOG.md)** - Enhanced CLI Experience & Non-Interactive Mode Fixes
+- **[v1.0.5](../CHANGELOG.md)** - System Cleanup and Organization
+- **[v1.0.4](../CHANGELOG.md)** - Critical Translation System Fixes
+- **[v1.0.3](../CHANGELOG.md)** - CLI and Packaging Fixes
+- **[v1.0.2](../CHANGELOG.md)** - Module Resolution Fixes
+- **[v1.0.1](../CHANGELOG.md)** - CLI Usability Improvements
+- **[v1.0.0](../CHANGELOG.md)** - First Stable Release
 
 ### Migration Guides
 - **[Upgrading to v1.0.0](../RELEASE_NOTES_v1.0.0.md#-migration-guide)** - Seamless upgrade from dev versions
@@ -189,7 +193,7 @@ For enterprise support, custom integrations, or consulting services, please cont
 
 ## 🚀 What's Next
 
-### Upcoming Features (v1.1.0)
+### Upcoming Features
 - Enhanced AI-powered translation suggestions
 - Advanced framework integrations
 - Performance optimizations

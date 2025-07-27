@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const settingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
-const UIi18n = require('./ui-i18n');
+const UIi18n = require('./i18ntk-ui');
 
 // Get configuration from settings manager
 function getConfig() {

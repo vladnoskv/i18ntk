@@ -12,7 +12,7 @@ function getConfig() {
   const settings = settingsManager.getSettings();
   return {
     uiLocalesDir: settings.directories?.uiLocalesDir || path.join(__dirname, '..', 'ui-locales'),
-    configFile: settings.directories?.configFile || path.join(__dirname, '..', 'settings', 'user-config.json')
+    configFile: settings.directories?.configFile || path.join(__dirname, '..', 'settings', 'i18ntk-config.json')
   };
 }
 
@@ -69,28 +69,35 @@ class UIi18n {
     }
 
     /**
-     * Load user config from file or return default
+     * Get current language from settings manager
+     * @returns {string} Current language code
      */
-    loadUserConfig() {
-        try {
-            if (fs.existsSync(this.configFile)) {
-                const content = fs.readFileSync(this.configFile, 'utf8');
-                return JSON.parse(content);
-            }
-        } catch (error) {
-            console.error(`❌ Error loading user config:`, error.message);
-        }
-        return { language: null, sizeLimit: null };
+    getCurrentLanguageFromSettings() {
+        const settings = settingsManager.getSettings();
+        return settings.language || 'en';
     }
 
     /**
-     * Save user config to file
+     * Save language preference to settings manager
+     * @param {string} language - Language code to save
      */
-    saveUserConfig() {
+    saveLanguagePreference(language) {
         try {
-            fs.writeFileSync(this.configFile, JSON.stringify(this.userConfig, null, 2), 'utf8');
+            const settings = settingsManager.getSettings();
+            settings.language = language;
+            settingsManager.saveSettings(settings);
         } catch (error) {
-            console.error(`❌ Error saving user config:`, error.message);
+            console.error(`❌ Error saving language preference:`, error.message);
+        }
+    }
+
+    /**
+     * Refresh language from settings manager
+     */
+    refreshLanguageFromSettings() {
+        const configuredLanguage = this.getCurrentLanguageFromSettings();
+        if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
+            this.loadLanguage(configuredLanguage);
         }
     }
 
@@ -99,15 +106,15 @@ class UIi18n {
      * @returns {Promise<string>} Selected language code
      */
     async initializeLanguage() {
-        if (!this.userConfig.language) {
+        const currentLanguage = this.getCurrentLanguageFromSettings();
+        if (!currentLanguage || currentLanguage === 'en') {
             const selectedLang = await this.selectLanguage();
-            this.userConfig.language = selectedLang;
-            this.saveUserConfig();
+            this.saveLanguagePreference(selectedLang);
             this.changeLanguage(selectedLang);
             return selectedLang;
         } else {
-            this.changeLanguage(this.userConfig.language);
-            return this.userConfig.language;
+            this.changeLanguage(currentLanguage);
+            return currentLanguage;
         }
     }
 
@@ -244,6 +251,17 @@ class UIi18n {
             'ru': 'Русский (Russian)',
             'ja': '日本語 (Japanese)',
             'zh': '中文 (Chinese)'
+         };
+
+        // Hardcoded texts that are not part of the i18n system but need to be displayed
+        this.hardcodedTexts = {
+            autoDetectedI18nDirectory: '🔍 Auto-detected i18n directory: {path}',
+            executingCommand: 'Executing command: {command}',
+            unknownCommand: 'Unknown command: {command}',
+            errorExecutingCommand: '❌ Error executing command: {error}',
+            pressEnterToContinue: 'Press Enter to continue!',
+             pressEnterToReturnToMenu: 'Press Enter to return to main menu!'
+        
         };
         return displayNames[langCode] || langCode;
     }
@@ -293,20 +311,6 @@ class UIi18n {
     }
 
     /**
-     * Save language preference using settings manager
-     * @param {string} language - Language code to save
-     */
-    saveLanguagePreference(language) {
-        try {
-            const settings = settingsManager.getSettings();
-            settings.language = language;
-            settingsManager.saveSettings(settings);
-        } catch (error) {
-            console.error(`❌ Error saving language preference:`, error.message);
-        }
-    }
-
-    /**
      * Refresh language from current settings
      * Call this after settings changes to update UI language
      */
@@ -321,11 +325,6 @@ class UIi18n {
             }
         }
     }
-
-    /**
-     * Remove the old loadUserConfig and saveUserConfig methods
-     * as they're now handled by settings-manager
-     */
 }
 
 // Export the class, not a singleton instance

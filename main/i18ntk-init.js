@@ -18,7 +18,7 @@ const readline = require('readline');
 const settingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
-const UIi18n = require('./ui-i18n');
+const UIi18n = require('./i18ntk-ui');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -187,45 +187,69 @@ class I18nInitializer {
       console.log(this.ui.t('init.creatingSourceLanguageDirectory', { dir: validatedSourceLanguageDir }));
       fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });
       
-      // Create a sample common.json file
-      const sampleTranslations = {
-        "common": {
-          "welcome": "Welcome",
-          "hello": "Hello",
-          "goodbye": "Goodbye",
-          "yes": "Yes",
-          "no": "No",
-          "save": "Save",
-          "cancel": "Cancel",
-          "delete": "Delete",
-          "edit": "Edit",
-          "loading": "Loading..."
-        },
-        "navigation": {
-          "home": "Home",
-          "about": "About",
-          "contact": "Contact",
-          "settings": "Settings"
-        }
-      };
+      // Create a sample translation file only if no files exist
+      this.createSampleTranslationFile(validatedSourceLanguageDir);
+    } else {
+      // Directory exists, check if we need to create a sample file
+      const existingFiles = fs.readdirSync(validatedSourceLanguageDir)
+        .filter(file => file.endsWith('.json'));
       
-      const sampleFilePath = path.join(validatedSourceLanguageDir, 'common.json');
-      const validatedSampleFilePath = SecurityUtils.validatePath(sampleFilePath, process.cwd());
-      
-      if (!validatedSampleFilePath) {
-        SecurityUtils.logSecurityEvent('Invalid sample file path', 'error', { path: sampleFilePath });
-        throw new Error('Invalid sample file path');
+      if (existingFiles.length === 0) {
+        // No JSON files exist, create sample file
+        this.createSampleTranslationFile(validatedSourceLanguageDir);
       }
-      
-      const success = await SecurityUtils.safeWriteFile(validatedSampleFilePath, JSON.stringify(sampleTranslations, null, 2), process.cwd());
-      
-      if (success) {
-        console.log(this.ui.t('init.createdSampleTranslationFile', { file: validatedSampleFilePath }));
-        SecurityUtils.logSecurityEvent('Sample translation file created', 'info', { file: validatedSampleFilePath });
-      } else {
-        SecurityUtils.logSecurityEvent('Failed to create sample translation file', 'error', { file: validatedSampleFilePath });
-        throw new Error('Failed to create sample translation file');
+    }
+  }
+  
+  // Create sample translation file with smart naming
+  async createSampleTranslationFile(validatedSourceLanguageDir) {
+    const sampleTranslations = {
+      "common": {
+        "welcome": "Welcome",
+        "hello": "Hello",
+        "goodbye": "Goodbye",
+        "yes": "Yes",
+        "no": "No",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "loading": "Loading..."
+      },
+      "navigation": {
+        "home": "Home",
+        "about": "About",
+        "contact": "Contact",
+        "settings": "Settings"
       }
+    };
+    
+    // Determine filename: use common.json if it doesn't exist, otherwise i18ntk-common.json
+    const commonFilePath = path.join(validatedSourceLanguageDir, 'common.json');
+    const i18ntkCommonFilePath = path.join(validatedSourceLanguageDir, 'i18ntk-common.json');
+    
+    let sampleFilePath;
+    if (!fs.existsSync(commonFilePath)) {
+      sampleFilePath = commonFilePath;
+    } else {
+      sampleFilePath = i18ntkCommonFilePath;
+    }
+    
+    const validatedSampleFilePath = SecurityUtils.validatePath(sampleFilePath, process.cwd());
+    
+    if (!validatedSampleFilePath) {
+      SecurityUtils.logSecurityEvent('Invalid sample file path', 'error', { path: sampleFilePath });
+      throw new Error('Invalid sample file path');
+    }
+    
+    const success = await SecurityUtils.safeWriteFile(validatedSampleFilePath, JSON.stringify(sampleTranslations, null, 2), process.cwd());
+    
+    if (success) {
+      console.log(this.ui.t('init.createdSampleTranslationFile', { file: validatedSampleFilePath }));
+      SecurityUtils.logSecurityEvent('Sample translation file created', 'info', { file: validatedSampleFilePath });
+    } else {
+      SecurityUtils.logSecurityEvent('Failed to create sample translation file', 'error', { file: validatedSampleFilePath });
+      throw new Error('Failed to create sample translation file');
     }
   }
   

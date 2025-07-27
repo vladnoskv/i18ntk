@@ -1,8 +1,10 @@
 # i18ntk - Enterprise i18n Management Toolkit
 
-**Version:** 1.0.5 – System cleanup and organizational improvements. Enhanced production readiness! 🎉
+**Version:** 1.1.2 – Resolved `user-config.json` issue, enabled direct command execution, and enhanced CLI experience! 🚀
 
-[![1.0.5](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
+**Important Note on Versions:** We strongly recommend using the latest stable version (currently 1.1.2) of i18ntk. Older versions may contain known bugs and limitations that have been addressed in recent updates. For the most stable and feature-rich experience, please ensure you are always using the latest release.
+
+[![1.1.0](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
@@ -12,73 +14,116 @@
 
 ### Installation
 
-#### Global Installation (Recommended)
-```bash
-npm install -g i18ntk
-```
-
-#### Local Installation
+#### Local Installation (Recommended)
 ```bash
 npm install i18ntk --save-dev
 ```
 
+#### Using npx (for local installations)
+```bash
+npx i18ntk <command>
+```
+
+#### Global Installation (Optional)
+```bash
+npm install -g i18ntk
+```
+
 #### Using Yarn
 ```bash
-yarn global add i18ntk
-# or locally
 yarn add -D i18ntk
+# or globally
+yarn global add i18ntk
 ```
 
 ### Get Started in 30 Seconds
 
 ```bash
-# 1. Install globally
-npm install -g i18ntk
+# 1. Install locally
+npm install i18ntk --save-dev
 
 # 2. Initialize in your project
-i18ntk-init
+npx i18ntk-init
 
 # 3. Start managing translations
-i18ntk-manage
+npx i18ntk-manage
 
 # 4. Run complete analysis
-i18ntk-complete
+npx i18ntk-complete
 ```
 
 ### Available Commands
 
-Once installed globally, you have access to the main CLI command:
+Once installed, you can access the CLI commands using `npx` (for local installations) or directly if installed globally:
 
 ```bash
-i18ntk            # 🎛️  Main management interface (interactive menu)
-i18ntk --help     # ❓ Show help and available options
-i18ntk --version  # 📋 Show version information
+npx i18ntk            # 🎛️  Main management interface (interactive menu)
+npx i18ntk <command>  # 🚀 Execute a specific command directly (e.g., `npx i18ntk usage`)
+npx i18ntk --help     # ❓ Show help and available options
+npx i18ntk --version  # 📋 Show detailed version information
+npx i18ntk -v         # 📋 Show detailed version information (short flag)
 ```
 
 **Note:** Console UI translation support is at approximately 95%. Some hardcoded English text remains and will be addressed in upcoming updates, but this doesn't affect core functionality.
 
-## ✨ What's New in v1.0.5
+**Important:** Direct command execution (e.g., `npx i18ntk usage`) now bypasses the interactive menu, allowing for more streamlined workflows and scripting.
 
-### 🧹 System Cleanup and Organization
+## ✨ What's New in v1.1.2
+
+### 🚀 Enhanced CLI Experience
+- **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu for specified commands.
+
+### 🐛 Bug Fixes & Improvements
+- **Fixed**: Resolved "Missing required file/directory: ./settings/user-config.json" error by removing outdated global `i18ntk` installation, ensuring the local, up-to-date version is used.
+
+## ✨ What's New in v1.1.1
+
+### 🐛 Bug Fixes & Improvements
+- **Fixed**: Interactive menu 'Help' option (option 12) now correctly waits for user input before returning to the main menu.
+- **Improved**: `executeCommand` function now properly handles the 'help' command within the interactive menu, ensuring a smooth user experience.
+- **Fixed**: Resolved issue where internal JSON files (`auth.json`, `pagination.json`, `reportGenerator.json`, `validationStep.json`) were incorrectly included in locale processing. These files are now properly excluded via `settings-manager.js`.
+
+### ✅ Validation Results
+- **Interactive Help**: Confirmed that the "Press Enter to return to menu." prompt is now correctly displayed and waits for user input after showing help.
+- **Locale File Exclusion**: Verified that specified internal JSON files are no longer processed as user locales, ensuring a cleaner and more accurate translation environment.
+
+## ✨ What's New in v1.1.0
+
+### 🚀 Enhanced CLI Experience
 
 #### 🔧 Major Improvements
-- **Cleaned Translation Files**: Removed test-specific translation files from user locale directories
-- **Fixed Code Issues**: Removed hardcoded validationStep and reportGenerator keys from i18ntk-complete.js
-- **Better Organization**: Moved npm test reports to dev/debug/reports directory
-- **Enhanced Cleanliness**: Prevented pollution of user systems with non-applicable translation files
-- **Syntax Fixes**: Resolved syntax errors after key removal operations
+- **Fixed Version Command**: `i18ntk --version` and `i18ntk -v` now properly display version information instead of loading the management menu
+- **Detailed Version Info**: Version command shows comprehensive information including toolkit name, version, release date, maintainer, Node.js compatibility, license, and recent changes
+- **Improved Documentation**: Comprehensive README update with current standards and best practices
+- **Better CLI UX**: Enhanced command-line interface with proper argument handling
+- **Clean Output**: Version and help commands now execute cleanly without triggering other initialization processes
 
-#### 🎯 Production Readiness
-- **Essential Files Only**: Ensured only essential file (common.json) remain in locales
-- **Clean System**: Enhanced system cleanliness and prevented test artifacts in production
-- **Better Structure**: Improved project organization with proper separation of concerns
-- **Documentation Updates**: Updated documentation to reflect cleanup and organizational improvements
+#### 🔧 Critical Non-Interactive Mode Fixes
+- **Fixed Infinite Loop**: Resolved critical infinite loop issue when using piped input (e.g., `echo 0 | i18ntk-manage`)
+- **Enhanced Detection**: Added robust `isNonInteractiveMode()` method for reliable detection of non-interactive scenarios
+- **Graceful Exit**: Improved handling of non-interactive environments with proper user guidance
+- **Direct Command Support**: Fixed multiple menu display issues in direct command execution mode
+- **Automation Ready**: Better support for automated scripts and CI/CD pipelines
+- **Clean Execution**: Commands now execute without redundant menu displays or infinite loops
 
-#### 🛡️ Quality Assurance
-- **Test Isolation**: Test-specific files no longer pollute user installations
-- **Clean Initialization**: Only necessary translation files are created during project setup
-- **Improved Reliability**: Enhanced system stability through better file management
-- **Production Safety**: Eliminated risk of test artifacts affecting production deployments
+#### 🎯 Documentation Excellence
+- **Updated Standards**: README follows current documentation standards and best practices
+- **Comprehensive Coverage**: All sections updated to reflect current functionality and features
+- **Better Organization**: Improved structure and navigation throughout documentation
+- **Version Consistency**: All version references updated to maintain consistency across the project
+
+#### 🛡️ Quality Improvements
+- **Proper CLI Behavior**: Commands now behave as expected without unintended side effects
+- **Enhanced Reliability**: Improved argument parsing and command execution flow
+- **Better User Experience**: Cleaner, more intuitive command-line interactions
+- **Production Ready**: Enhanced stability and professional CLI experience
+- **Automation Support**: Robust handling of various input scenarios including automated scripts and CI/CD environments
+
+### 🧹 Previous Improvements (v1.0.5)
+- **System Cleanup**: Removed test-specific translation files and fixed hardcoded keys
+- **Better Organization**: Moved test reports to proper directories
+- **Production Safety**: Eliminated test artifacts from production deployments
+- **Enhanced Stability**: Improved file management and error handling
 
 ## 📚 Documentation
 
@@ -129,7 +174,7 @@ i18n-management-toolkit/
 │   ├── i18ntk-summary.js   # Generate summary reports
 │   ├── i18ntk-usage.js     # Analyze translation usage
 │   ├── i18ntk-validate.js  # Validate translations
-│   └── ui-i18n.js          # UI internationalization
+│   └── i18ntk-ui.js        # UI internationalization
 ├── utils/                   # Utility scripts and helpers
 │   ├── admin-auth.js       # Admin authentication
 │   ├── admin-cli.js        # Admin command-line interface
@@ -191,7 +236,7 @@ i18n-management-toolkit/
 │   └── verify-package.js               # Package verification
 ├── settings/                # Configuration management
 │   ├── admin-config.json   # Admin configuration
-│   ├── user-config.json    # User configuration
+│   ├── i18ntk-config.json  # User configuration
 │   ├── settings-cli.js     # Settings CLI
 │   ├── settings-manager.js # Settings management
 │   └── backups/            # Configuration backups
@@ -295,7 +340,7 @@ i18n-management-toolkit/
 
 ## 🔧 Configuration
 
-### User Configuration (`user-config.json`)
+### User Configuration (`i18ntk-config.json`)
 ```json
 {
   "localesPath": "./locales",
@@ -415,7 +460,7 @@ node dev/tests/test-features.js
 
 ---
 
-**Version:** 1.0.5 – System cleanup and organizational improvements. Enhanced production readiness! 🎉
+**Version:** 1.1.0 – Enhanced CLI experience with proper version command and improved documentation! 🚀
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

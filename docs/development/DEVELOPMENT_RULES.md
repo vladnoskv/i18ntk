@@ -45,12 +45,12 @@ project-root/
 │   └── summary/          # Summary reports
 ├── ui-locales/           # UI translation files
 ├── locales/              # Project translation files
-└── user-config.json      # Main configuration
+└── i18ntk-config.json    # Main configuration
 ```
 
 ### Testing Requirements
 - **ALWAYS** test scripts after making changes
-- **ALWAYS** run the full workflow: `npm run i18ntk`
+- **ALWAYS** run the full workflow: `npx i18ntk`
 - **ALWAYS** check for errors in all supported languages
 - **ALWAYS** validate configuration changes
 
@@ -65,7 +65,7 @@ project-root/
 Before committing any changes, ensure:
 
 - [ ] All tests pass: `npm test` (if available)
-- [ ] Full workflow runs successfully: `npm run i18ntk`
+- [ ] Full workflow runs successfully: `npx i18ntk`
 - [ ] No missing translation keys: `node dev/debug/debugger.js`
 - [ ] No old file references remain
 - [ ] Documentation is updated
@@ -101,9 +101,9 @@ Before committing any changes, ensure:
 
 ### Available Tools
 - `node dev/debug/debugger.js` - Main debugging script
-- `npm run i18ntk` - Full workflow validation
-- `node i18ntk-validate.js` - Translation validation
-- `node i18ntk-usage.js` - Usage analysis
+- `npx i18ntk` - Full workflow validation
+- `npx i18ntk validate` - Translation validation
+- `npx i18ntk usage` - Usage analysis
 
 ### When to Use Debug Tools
 - Before committing changes

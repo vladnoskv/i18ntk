@@ -8,7 +8,7 @@ const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
 const settingsManager = require('./settings-manager');
-const UIi18n = require('../main/ui-i18n');
+const UIi18n = require('../main/i18ntk-ui');
 const AdminPinManager = require('../utils/admin-pin');
 const uiI18n = new UIi18n();
 

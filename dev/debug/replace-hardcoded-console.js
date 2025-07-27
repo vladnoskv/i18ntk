@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const UIi18n = require('../../main/ui-i18n');
+const UIi18n = require('../../main/i18ntk-ui');
 
 class HardcodedConsoleReplacer {
     constructor() {
@@ -266,7 +266,7 @@ class HardcodedConsoleReplacer {
             
             // Check if we need to add UIi18n import
             if (fileModified && !modifiedContent.includes('UIi18n')) {
-                const relativePath = path.relative(path.dirname(filePath), path.join(this.projectRoot, 'ui-i18n.js'));
+                const relativePath = path.relative(path.dirname(filePath), path.join(this.projectRoot, 'i18ntk-ui.js'));
                 const importStatement = `const UIi18n = require('${relativePath}');\n`;
                 
                 // Add import after existing requires or at the top

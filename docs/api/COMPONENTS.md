@@ -154,7 +154,7 @@ This document provides detailed information about all components, utilities, and
 
 ### Core Utilities
 
-#### `ui-i18n.js`
+#### `i18ntk-ui.js`
 **Location:** Root directory  
 **Purpose:** User interface internationalization  
 **Features:**
@@ -401,7 +401,7 @@ i18ntk-manage.js
 └── I18nDebugger
 
 Core Utilities
-├── ui-i18n.js
+├── i18ntk-ui.js
 ├── settings-manager.js
 ├── settings-cli.js
 └── utils/
@@ -426,7 +426,7 @@ Debug Components
 Each component can be configured through:
 
 1. **Environment Variables**
-2. **Configuration Files** (`user-config.json`, `admin-config.json`)
+2. **Configuration Files** (`i18ntk-config.json`, `admin-config.json`)
 3. **Command-line Arguments**
 4. **Programmatic Configuration**
 

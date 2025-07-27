@@ -54,25 +54,6 @@ const COMMON_MISSING_KEYS = {
   'login': 'Login',
   'amount': 'Amount',
   
-  // Pagination
-  'pagination.showing': 'Showing',
-  'pagination.of': 'of',
-  'pagination.items': 'items',
-  'pagination.rowsPerPage': 'Rows per page',
-  
-  // Common time periods
-  'common:timePeriods.customRange': 'Custom Range',
-  
-  // Auth
-  'auth:supabaseNotConfigured': 'Supabase is not configured',
-  
-  // Common values
-  'common:unknownUser': 'Unknown User',
-  'common:notSet': 'Not Set',
-  
-  // Admin
-  'announcement_id': 'Announcement ID',
-  'last_sign_in_at': 'Last Sign In'
 };
 
 class I18nCompletionTool {
@@ -82,7 +63,7 @@ class I18nCompletionTool {
     this.sourceLanguageDir = null;
     
     // Initialize UI i18n for console messages
-    const UIi18n = require('./ui-i18n');
+    const UIi18n = require('./i18ntk-ui');
     this.ui = new UIi18n();
     this.t = this.ui.t.bind(this.ui);
   }

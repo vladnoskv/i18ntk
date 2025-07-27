@@ -1,105 +1,106 @@
 # I18N Management Toolkit - API Reference
 
-**Version:** 1.0.4  
-**Last Updated:** 27/01/2025  
+**Version:** 1.1.2  
+**Last Updated:** 28/01/2025  
 **Maintainer:** Vladimir Noskov  
 
 ## 📋 Overview
 
 This document provides a comprehensive API reference for the I18N Management Toolkit, including all available commands, configuration options, and programmatic interfaces.
 
-### 🔧 Latest Updates (v1.0.4)
-- **Fixed**: Translation system initialization issues
-- **Enhanced**: Dynamic value replacement in all outputs
-- **Improved**: Security configuration validation
-- **Added**: Auto-loading translation support
-- **Resolved**: All "Translation not found" errors
+### 🔧 Latest Updates (v1.1.2)
+- **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu.
+- **Fixed**: Resolved "Missing required file/directory: ./settings/user-config.json" error by removing outdated global `i18ntk` installation.
+- **Updated**: All CLI command examples to use `npx i18ntk <command>` for consistency with recommended local usage.
 
 ## 🚀 Command Line Interface (CLI)
 
 ### Core Commands
 
-#### `npm run i18ntk`
-**Description:** Interactive management menu  
-**Usage:** `npm run i18ntk`  
-**Options:** None  
-**Output:** Interactive menu with 12 options  
+#### `i18ntk` or `npx i18ntk`
+**Description:** Interactive management menu or direct command execution
+**Usage:** `i18ntk` (if globally installed) or `npx i18ntk` (for local installation)
+**Options:**
+- `<command>`: Execute a specific command directly (e.g., `npx i18ntk usage`)
+- `--help`: Show help and available options
+- `--version` or `-v`: Show detailed version information
+**Output:** Interactive menu or direct command output  
 
-#### `npm run i18ntk:init`
+#### `i18ntk init` or `npx i18ntk init`
 **Description:** Initialize i18n structure for new projects  
-**Usage:** `npm run i18ntk:init [options]`  
+**Usage:** `i18ntk init [options]` or `npx i18ntk init [options]`  
 **Options:**
 - `--source-dir <path>` - Source directory to scan (default: ./src)
 - `--locales-dir <path>` - Locales directory (default: ./locales)
 - `--languages <langs>` - Comma-separated language codes (default: en,es,fr,de)
 - `--framework <name>` - i18n framework (react-i18next, i18next, vue-i18n)
 
-#### `npm run i18ntk:analyze`
+#### `i18ntk analyze` or `npx i18ntk analyze`
 **Description:** Analyze translation completeness across all languages  
-**Usage:** `npm run i18ntk:analyze [options]`  
+**Usage:** `i18ntk analyze [options]` or `npx i18ntk analyze [options]`  
 **Options:**
 - `--detailed` - Show detailed analysis
 - `--output <format>` - Output format (json, csv, html)
 - `--threshold <number>` - Completion threshold percentage
 
-#### `npm run i18ntk:validate`
+#### `i18ntk validate` or `npx i18ntk validate`
 **Description:** Validate translation files for syntax and consistency  
-**Usage:** `npm run i18ntk:validate [options]`  
+**Usage:** `i18ntk validate [options]` or `npx i18ntk validate [options]`  
 **Options:**
 - `--strict` - Enable strict validation mode
 - `--fix` - Auto-fix common issues
 - `--format <type>` - Validation format (json, yaml)
 
-#### `npm run i18ntk:usage`
+#### `i18ntk usage` or `npx i18ntk usage`
 **Description:** Check translation key usage in source code  
-**Usage:** `npm run i18ntk:usage [options]`  
+**Usage:** `i18ntk usage [options]` or `npx i18ntk usage [options]`  
 **Options:**
 - `--unused` - Show only unused keys
 - `--missing` - Show only missing keys
 - `--source-dir <path>` - Source directory to scan
 
-#### `npm run i18ntk:complete`
+#### `i18ntk complete` or `npx i18ntk complete`
 **Description:** Complete missing translations using AI or manual input  
-**Usage:** `npm run i18ntk:complete [options]`  
+**Usage:** `i18ntk complete [options]` or `npx i18ntk complete [options]`  
 **Options:**
 - `--auto` - Use automatic translation
 - `--language <code>` - Target specific language
 - `--provider <name>` - Translation provider (google, deepl, openai)
 
-#### `npm run i18ntk:sizing`
+#### `i18ntk sizing` or `npx i18ntk sizing`
 **Description:** Analyze translation sizing and memory usage  
-**Usage:** `npm run i18ntk:sizing [options]`  
+**Usage:** `i18ntk sizing [options]` or `npx i18ntk sizing [options]`  
 **Options:**
 - `--detailed` - Show detailed sizing analysis
 - `--format <type>` - Output format (json, table)
 - `--threshold <size>` - Size threshold in bytes
 
-#### `npm run i18ntk:summary`
+#### `i18ntk summary` or `npx i18ntk summary`
 **Description:** Generate comprehensive project summary report  
-**Usage:** `npm run i18ntk:summary [options]`  
+**Usage:** `i18ntk summary [options]` or `npx i18ntk summary [options]`  
 **Options:**
 - `--format <type>` - Report format (html, pdf, json)
 - `--include <sections>` - Comma-separated sections to include
 
-#### `npm run i18ntk:autorun`
+#### `i18ntk autorun` or `npx i18ntk autorun`
 **Description:** Run full workflow automation  
-**Usage:** `npm run i18ntk:autorun [options]`  
+**Usage:** `i18ntk autorun [options]` or `npx i18ntk autorun [options]`  
 **Options:**
 - `--config <path>` - Configuration file path
 - `--skip <steps>` - Comma-separated steps to skip
 
 ### Debug Commands
 
-#### `npm run i18ntk:debug`
+#### `i18ntk debug` or `npx i18ntk debug`
 **Description:** Run debug analysis and diagnostics  
-**Usage:** `npm run i18ntk:debug [options]`  
+**Usage:** `i18ntk debug [options]` or `npx i18ntk debug [options]`  
 **Options:**
 - `--verbose` - Enable verbose output
 - `--component <name>` - Debug specific component
 
-#### `npm run i18ntk:settings`
+#### `i18ntk settings` or `npx i18ntk settings`
 **Description:** Manage toolkit settings and configuration  
-**Usage:** `npm run i18ntk:settings [options]`  
+**Usage:** `i18ntk settings [options]` or `npx i18ntk settings [options]`  
 **Options:**
 - `--reset` - Reset to default settings
 - `--export <path>` - Export current settings
@@ -109,7 +110,7 @@ This document provides a comprehensive API reference for the I18N Management Too
 
 ### Configuration Files
 
-#### `user-config.json`
+#### `i18ntk-config.json`
 **Location:** Project root  
 **Purpose:** User-specific configuration settings  
 

@@ -17,7 +17,7 @@ const settingsManager = require('../../settings/settings-manager');
 
 // Import the i18n helper
 const { loadTranslations, t } = require('../../utils/i18n-helper');
-const UIi18n = require('../../main/ui-i18n');
+const UIi18n = require('../../main/i18ntk-ui');
 
 // Get configuration from settings manager
 function getConfig() {
