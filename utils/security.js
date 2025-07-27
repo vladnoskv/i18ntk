@@ -264,7 +264,8 @@ class SecurityUtils {
       'sourceDir', 'outputDir', 'defaultLanguage', 'supportedLanguages',
       'filePattern', 'excludePatterns', 'reportFormat', 'logLevel',
       'i18nDir', 'sourceLanguage', 'excludeDirs', 'includeExtensions', 
-      'translationPatterns', 'notTranslatedMarker', 'excludeFiles', 'strictMode'
+      'translationPatterns', 'notTranslatedMarker', 'excludeFiles', 'strictMode',
+      'uiLanguage'
     ];
 
     for (const [key, value] of Object.entries(config)) {

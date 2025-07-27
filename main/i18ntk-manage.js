@@ -236,6 +236,7 @@ class I18nManager {
     console.log(this.ui.t('help.completeCommand'));
     console.log(this.ui.t('help.summaryCommand'));
     console.log(this.ui.t('help.debugCommand'));
+    process.exit(0);
   }
 
   async executeCommand(command) {

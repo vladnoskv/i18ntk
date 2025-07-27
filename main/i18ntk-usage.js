@@ -625,7 +625,7 @@ class I18nUsageAnalyzer {
       
       // If no files found, exit gracefully
       if (sourceFiles.length === 0) {
-        console.warn(t('hardcodedTexts.noSourceFilesFound'));
+        console.warn(this.t('hardcodedTexts.noSourceFilesFound'));
         return;
       }
       
@@ -678,11 +678,11 @@ class I18nUsageAnalyzer {
   // NEW: Analyze translation completeness across all languages
   async analyzeTranslationCompleteness() {
     try {
-      console.log('\n' + t('hardcodedTexts.analyzingTranslationCompleteness'));
+      console.log('\n' + this.t('hardcodedTexts.analyzingTranslationCompleteness'));
       
       // Check if i18n directory exists
       if (!fs.existsSync(this.i18nDir)) {
-        console.warn(t('hardcodedTexts.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
+        console.warn(this.t('hardcodedTexts.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         return;
       }
       

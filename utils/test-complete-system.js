@@ -227,7 +227,13 @@ class SystemTester {
             recommendations: this.generateRecommendations()
         };
         
-        const reportPath = './test-report.json';
+        // Ensure the reports directory exists
+        const reportsDir = path.join(__dirname, '..', 'dev', 'debug', 'reports');
+        if (!fs.existsSync(reportsDir)) {
+            fs.mkdirSync(reportsDir, { recursive: true });
+        }
+        
+        const reportPath = path.join(reportsDir, 'test-report.json');
         fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
         this.logSuccess(`Report saved to ${reportPath}`);
     }

@@ -148,9 +148,7 @@ locales/                     # Your project's translation files
 ├── en/                      # English (source language)
 │   ├── common.json
 │   ├── auth.json
-│   ├── pagination.json
-│   ├── reportGenerator.json
-│   └── validationStep.json
+│   └── pagination.json
 ├── de/                      # German translations
 ├── es/                      # Spanish translations
 ├── fr/                      # French translations

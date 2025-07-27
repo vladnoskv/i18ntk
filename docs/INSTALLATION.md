@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Installation Guide
 
-**Version:** 1.6.3  
+**Version:** 1.0.0  
 **Release Date:** July 27, 2025  
 **Status:** Stable Release - NPM/Yarn Ready  
 
@@ -228,7 +228,7 @@ If you prefer manual setup, create `user-config.json`:
 
 ```json
 {
-  "version": "1.6.3",
+  "version": "1.0.0",
   "project": {
     "name": "Your Project Name",
     "framework": "react-i18next"
@@ -409,7 +409,7 @@ npm view i18ntk version
 ```
 
 ### Migration Between Versions
-Version 1.6.3 has no breaking changes from previous versions. Simply update and continue using.
+Version 1.0.0 is the first stable release. Previous 0.x.x-dev versions can be upgraded seamlessly.
 
 ## 🆘 Getting Help
 

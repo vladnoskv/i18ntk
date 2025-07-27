@@ -60,22 +60,6 @@ const COMMON_MISSING_KEYS = {
   'pagination.items': 'items',
   'pagination.rowsPerPage': 'Rows per page',
   
-  // Report Generator
-  'reportGenerator:reportTypes.prospects': 'Prospects Report',
-  'reportGenerator:reportTypes.activities': 'Activities Report',
-  'reportGenerator:reportTypes.goals': 'Goals Report',
-  'reportGenerator:reportTypes.team': 'Team Report',
-  'reportGenerator:reportTypes.hotLeads': 'Hot Leads Report',
-  
-  'reportGenerator:timePeriods.allTime': 'All Time',
-  'reportGenerator:timePeriods.last7days': 'Last 7 Days',
-  'reportGenerator:timePeriods.last30days': 'Last 30 Days',
-  'reportGenerator:timePeriods.thisYear': 'This Year',
-  
-  'reportGenerator:layouts.summary': 'Summary Layout',
-  'reportGenerator:layouts.detailed': 'Detailed Layout',
-  'reportGenerator:layouts.visual_charts': 'Visual Charts Layout',
-  
   // Common time periods
   'common:timePeriods.customRange': 'Custom Range',
   
@@ -85,9 +69,6 @@ const COMMON_MISSING_KEYS = {
   // Common values
   'common:unknownUser': 'Unknown User',
   'common:notSet': 'Not Set',
-  
-  // Validation
-  'validationStep.invalidEmailFormat': 'Invalid email format',
   
   // Admin
   'announcement_id': 'Announcement ID',

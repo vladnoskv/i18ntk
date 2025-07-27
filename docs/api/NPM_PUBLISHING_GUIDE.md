@@ -1,6 +1,6 @@
 # NPM Publishing Guide - I18N Management Toolkit
 
-**Version:** 1.6.3  
+**Version:** 1.0.0  
 **Release Date:** July 27, 2025  
 **Status:** Ready for Stable NPM/Yarn Release  
 **Maintainer:** Vladimir Noskov  
@@ -11,7 +11,7 @@ The I18N Management Toolkit (i18ntk) is now ready for stable distribution on NPM
 
 ### Package Details
 - **Package Name:** `i18ntk`
-- **Current Version:** 1.6.3
+- **Current Version:** 1.0.0
 - **License:** MIT
 - **Repository:** [GitHub](https://github.com/vladnoskv/i18n-management-toolkit)
 - **Maintainer:** Vladimir Noskov <vladnoskv@gmail.com>
@@ -21,13 +21,13 @@ The I18N Management Toolkit (i18ntk) is now ready for stable distribution on NPM
 ### 🧪 Quality Assurance
 - [x] **All tests passing:** 25/25 tests (100%)
 - [x] **Translation coverage:** 573/573 keys (100%)
-- [x] **Zero extra keys:** Cleaned up in v1.6.3
+- [x] **Zero extra keys:** Production-ready quality
 - [x] **Dynamic translations:** Verified working
-- [x] **Documentation:** Updated to v1.6.3
+- [x] **Documentation:** Updated to v1.0.0
 - [x] **Package verification:** `npm run verify-package` passes
 
 ### 📋 Package Configuration
-- [x] **package.json:** Updated to v1.6.3
+- [x] **package.json:** Updated to v1.0.0
 - [x] **Version info:** All metadata current
 - [x] **Dependencies:** Properly configured
 - [x] **Scripts:** All commands working
@@ -35,11 +35,11 @@ The I18N Management Toolkit (i18ntk) is now ready for stable distribution on NPM
 - [x] **Keywords:** SEO optimized
 
 ### 📚 Documentation
-- [x] **README.md:** Updated with v1.6.3 features
+- [x] **README.md:** Updated with v1.0.0 stable release features
 - [x] **CHANGELOG.md:** Complete version history
 - [x] **API_REFERENCE.md:** Current API documentation
 - [x] **INSTALLATION.md:** Comprehensive setup guide
-- [x] **RELEASE_NOTES_v1.6.3.md:** Detailed release notes
+- [x] **RELEASE_NOTES_v1.0.0.md:** First stable release notes
 
 ## 🚀 Publishing Process
 
@@ -62,13 +62,13 @@ npm doctor
 ### 2. Version Management
 
 ```bash
-# Current version should be 1.6.3
+# Current version should be 1.0.0
 npm version --no-git-tag-version
 
 # If version needs updating:
-# npm version patch --no-git-tag-version  # 1.6.3 -> 1.6.4
-# npm version minor --no-git-tag-version  # 1.6.3 -> 1.7.0
-# npm version major --no-git-tag-version  # 1.6.3 -> 2.0.0
+# npm version patch --no-git-tag-version  # 1.0.0 -> 1.0.1
+# npm version minor --no-git-tag-version  # 1.0.0 -> 1.1.0
+# npm version major --no-git-tag-version  # 1.0.0 -> 2.0.0
 ```
 
 ### 3. Build and Package
@@ -129,7 +129,7 @@ npm install -g i18ntk@1.6.3
 ```json
 {
   "name": "i18ntk",
-  "version": "1.6.3",
+  "version": "1.0.0",
   "description": "Enterprise-grade internationalization management toolkit",
   "main": "main/i18ntk-manage.js",
   "license": "MIT",
@@ -289,11 +289,11 @@ npm view i18ntk
 ### 3. Version Tagging
 ```bash
 # Tag the release in Git
-git tag v1.6.3
-git push origin v1.6.3
+git tag v1.0.0
+git push origin v1.0.0
 
 # Create GitHub release
-# Use RELEASE_NOTES_v1.6.3.md content
+# Use RELEASE_NOTES_v1.0.0.md content
 ```
 
 ## 🔄 Update Process
@@ -413,7 +413,7 @@ npm pack --dry-run
 
 ## 🎉 Ready for Release!
 
-**Version 1.6.3 is fully prepared for stable NPM/Yarn distribution.**
+**Version 1.0.0 is the first stable release, fully prepared for NPM/Yarn distribution.**
 
 ### Final Checklist
 - [x] All tests passing (25/25)

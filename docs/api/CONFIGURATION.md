@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Configuration Guide
 
-**Version:** 1.6.3  
+**Version:** 1.0.0  
 **Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
@@ -19,7 +19,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.6.3",
+  "version": "1.0.0",
   "lastUpdated": "2025-07-27",
   "project": {
     "name": "My Project",

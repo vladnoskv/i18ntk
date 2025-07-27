@@ -1,20 +1,72 @@
 {
   "name": "i18ntk",
-  "version": "1.6.3",
+  "version": "1.0.5",
   "description": "i18ntk (i18n Toolkit) - A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects with advanced analysis, validation, and automation features",
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "localization",
+    "translation",
+    "management",
+    "toolkit",
+    "javascript",
+    "typescript",
+    "react",
+    "vue",
+    "angular",
+    "cli",
+    "automation",
+    "validation",
+    "analysis",
+    "enterprise",
+    "debugging",
+    "reporting"
+  ],
+  "homepage": "https://github.com/vladnoskv/i18n-management-toolkit#readme",
+  "bugs": {
+    "url": "https://github.com/vladnoskv/i18n-management-toolkit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vladnoskv/i18n-management-toolkit.git"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/vladnoskv"
+  },
+  "license": "MIT",
+  "author": "Vladimir Noskov <vladnoskv@gmail.com> (https://github.com/vladnoskv)",
+  "type": "commonjs",
   "main": "main/i18ntk-manage.js",
   "bin": {
-    "i18ntk-manage": "./main/i18ntk-manage.js",
-    "i18ntk-init": "./main/i18ntk-init.js",
-    "i18ntk-analyze": "./main/i18ntk-analyze.js",
-    "i18ntk-validate": "./main/i18ntk-validate.js",
-    "i18ntk-usage": "./main/i18ntk-usage.js",
-    "i18ntk-complete": "./main/i18ntk-complete.js",
-    "i18ntk-sizing": "./main/i18ntk-sizing.js",
-    "i18ntk-summary": "./main/i18ntk-summary.js",
-    "i18ntk-autorun": "./main/i18ntk-autorun.js",
-    "i18ntk-debug": "./dev/debug/debugger.js"
+    "i18ntk": "main/i18ntk-manage.js",
+    "i18ntk-manage": "main/i18ntk-manage.js",
+    "i18ntk-init": "main/i18ntk-init.js",
+    "i18ntk-analyze": "main/i18ntk-analyze.js",
+    "i18ntk-validate": "main/i18ntk-validate.js",
+    "i18ntk-usage": "main/i18ntk-usage.js",
+    "i18ntk-complete": "main/i18ntk-complete.js",
+    "i18ntk-sizing": "main/i18ntk-sizing.js",
+    "i18ntk-summary": "main/i18ntk-summary.js",
+    "i18ntk-autorun": "main/i18ntk-autorun.js",
+    "i18ntk-debug": "dev/debug/debugger.js"
   },
+  "directories": {
+    "doc": "docs"
+  },
+  "files": [
+    "*.js",
+    "main/",
+    "utils/",
+    "scripts/",
+    "settings/",
+    "ui-locales/",
+    "locales/",
+    "docs/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "node main/i18ntk-manage.js",
     "i18ntk": "node main/i18ntk-manage.js",
@@ -44,55 +96,14 @@
     "prepublishOnly": "npm run verify-package",
     "test": "node utils/test-complete-system.js"
   },
-  "keywords": [
-    "i18n",
-    "internationalization",
-    "localization",
-    "translation",
-    "management",
-    "toolkit",
-    "javascript",
-    "typescript",
-    "react",
-    "vue",
-    "angular",
-    "cli",
-    "automation",
-    "validation",
-    "analysis",
-    "enterprise",
-    "debugging",
-    "reporting"
-  ],
-  "author": {
-    "name": "Vladimir Noskov",
-    "email": "vladnoskv@gmail.com",
-    "url": "https://github.com/vladnoskv"
+  "dependencies": {
+    "html-parse-stringify": "^3.0.1",
+    "i18next": "^25.3.2",
+    "react": "^19.1.0",
+    "react-i18next": "^15.6.1",
+    "void-elements": "^3.1.0"
   },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vladnoskv/i18n-management-toolkit.git"
-  },
-  "bugs": {
-    "url": "https://github.com/vladnoskv/i18n-management-toolkit/issues"
-  },
-  "homepage": "https://github.com/vladnoskv/i18n-management-toolkit#readme",
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "files": [
-    "*.js",
-    "main/",
-    "utils/",
-    "scripts/",
-    "ui-locales/",
-    "locales/",
-    "docs/",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE"
-  ],
+  "devDependencies": {},
   "peerDependencies": {
     "i18next": ">=20.0.0",
     "react-i18next": "^15.6.1"
@@ -105,34 +116,34 @@
       "optional": true
     }
   },
-  "preferGlobal": true,
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "publishConfig": {
     "access": "public"
   },
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/vladnoskv"
-  },
+  "preferGlobal": true,
   "versionInfo": {
-    "version": "1.6.3",
-    "releaseDate": "27/07/2025",
-    "lastUpdated": "27/07/2025",
+    "version": "1.0.5",
+    "releaseDate": "27/01/2025",
+    "lastUpdated": "27/01/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "Removed 42 extra keys from translation files for cleaner codebase",
-      "Maintained 100% translation coverage with zero extra keys",
-      "Verified all dynamic translation patterns working correctly",
-      "Enhanced quality assurance with 25/25 tests passing",
-      "Package optimized and ready for stable npm/yarn release"
+      "🧹 Cleaned up test-specific translation files from user locale directories",
+      "🔧 Removed hardcoded validationStep and reportGenerator keys from i18ntk-complete.js",
+      "📊 Moved npm test reports to dev/debug/reports directory for better organization",
+      "✅ Fixed syntax error in i18ntk-complete.js after key removal",
+      "🛡️ Prevented pollution of user systems with non-applicable translation files",
+      "🎯 Ensured only essential files (auth.json, common.json, pagination.json) remain in locales",
+      "🔍 Enhanced system cleanliness and prevented test artifacts in production",
+      "📚 Updated documentation to reflect cleanup and organizational improvements"
     ],
     "breakingChanges": [],
-    "deprecations": [
-      "Old command patterns (node 0x-xxx-xxx.js) - use i18ntk commands instead"
-    ],
-    "nextVersion": "1.7.0",
+    "deprecations": [],
+    "nextVersion": "1.1.0",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",

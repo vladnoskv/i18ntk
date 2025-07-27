@@ -580,24 +580,24 @@ class I18nValidator {
         throw new Error('Specified language not found');
       }
       
-      console.log(this.t('validateTranslations.validatingLanguages', { languages: targetLanguages.join(', ') }));
+      console.log(this.t('validateTranslations.validatingLanguages', { langs: targetLanguages.join(', ') }));
       
       const results = {};
       
       // Validate each language
       for (const language of targetLanguages) {
-        console.log(this.t('validateTranslations.validatingLanguage', { language: language }));
+        console.log(this.t('validateTranslations.validatingLanguage', { lang: language }));
         
         const validation = await this.validateLanguage(language);
         results[language] = validation;
         
         // Display summary
         const { summary } = validation;
-        console.log(this.t('validateTranslations.filesCount', { filesCount: summary.validFiles }));
-        console.log(this.t('validateTranslations.keysCount', { keysCount: summary.totalKeys }));
-        console.log(this.t('validateTranslations.missingFilesCount', { missingFilesCount: summary.missingFiles.length }));
-        console.log(this.t('validateTranslations.syntaxErrorsCount', { syntaxErrorsCount: summary.syntaxErrors.length }));
-        console.log(this.t('validateTranslations.translationPercentage', { translationPercentage: summary.percentage, translated: summary.translatedKeys, total: summary.totalKeys }));
+        console.log(this.t('validateTranslations.filesCount', { count: summary.validFiles }));
+        console.log(this.t('validateTranslations.keysCount', { count: summary.totalKeys }));
+        console.log(this.t('validateTranslations.missingFilesCount', { count: summary.missingFiles.length }));
+        console.log(this.t('validateTranslations.syntaxErrorsCount', { count: summary.syntaxErrors.length }));
+        console.log(this.t('validateTranslations.translationPercentage', { percentage: summary.percentage, translated: summary.translatedKeys, total: summary.totalKeys }));
         console.log('');
       }
       
@@ -606,8 +606,8 @@ class I18nValidator {
       const hasWarnings = this.warnings.length > 0;
       
       console.log(this.t("validateTranslations.n_validation_summary"));
-      console.log(this.t("validateTranslations.total_errors", { totalErrors: this.errors.length }));
-      console.log(this.t("validateTranslations.total_warnings", { totalWarnings: this.warnings.length }));
+      console.log(this.t("validateTranslations.total_errors", { count: this.errors.length }));
+      console.log(this.t("validateTranslations.total_warnings", { count: this.warnings.length }));
       
       // Show errors
       if (hasErrors) {

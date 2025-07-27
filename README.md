@@ -1,56 +1,84 @@
-# i18N Management Toolkit
+# i18ntk - Enterprise i18n Management Toolkit
 
-**Version:** 1.6.3  
-**Last Updated:** 27/07/2025  
-**Maintainer:** Vladimir Noskov  
+**Version:** 1.0.5 – System cleanup and organizational improvements. Enhanced production readiness! 🎉
 
-A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects. This toolkit provides automated translation management, validation, analysis, and maintenance tools to ensure your application supports multiple languages effectively with advanced debugging capabilities and robust testing suite.
+[![1.0.5](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-## 📦 Installation
+**i18ntk** (i18n Toolkit) is a comprehensive, enterprise-grade internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
 
-### Global Installation (Recommended)
+## 🚀 Quick Start
 
+### Installation
+
+#### Global Installation (Recommended)
 ```bash
 npm install -g i18ntk
 ```
 
-This will install the toolkit globally, making all commands available in your terminal.
-
-### Local Installation
-
+#### Local Installation
 ```bash
 npm install i18ntk --save-dev
 ```
 
-When installed locally, you can run commands using npx:
-
+#### Using Yarn
 ```bash
-npx i18ntk-manage
-npx i18ntk-init
-# etc.
+yarn global add i18ntk
+# or locally
+yarn add -D i18ntk
 ```
 
-## 🆕 What's New in 1.6.3 - STABLE RELEASE READY
+### Get Started in 30 Seconds
 
-- **🧹 Translation File Cleanup:** Removed 42 extra keys from translation files (18 from Spanish, 24 from Japanese) for cleaner, more maintainable codebase.
-- **✅ 100% Translation Coverage:** Maintained complete 573/573 key coverage across all 7 supported languages with zero extra keys.
-- **🔍 Dynamic Translation Verification:** Verified all dynamic translation patterns (`{language}`, `{fileName}`, `{fileSize}`, etc.) are working correctly.
-- **🛠️ Enhanced Quality Assurance:** All 25 tests passing with 100% translation coverage and zero inconsistencies.
-- **📦 NPM Release Ready:** Package is fully optimized and ready for stable npm/yarn distribution.
-- **🚀 Production Grade:** Enterprise-ready with comprehensive documentation and robust testing suite.
-- **🔧 Advanced Debugging Tools:** Comprehensive debug utilities in `dev/debug/` directory with console translation tools.
-- **🏗️ Enhanced Project Structure:** Organized documentation in `docs/` with API references, configuration guides, and release notes.
-- **🛡️ Security Features:** Admin authentication system with encrypted PIN protection and session management.
-- **📊 Comprehensive Reporting:** Analysis, validation, usage, sizing, and summary reports in `i18ntk-reports/` directory.
+```bash
+# 1. Install globally
+npm install -g i18ntk
 
-### 📊 Language Coverage Status
-- 🇺🇸 **English**: 573/573 keys (100%)
-- 🇩🇪 **German**: 573/573 keys (100%) - Added 173 keys
-- 🇪🇸 **Spanish**: 573/573 keys (100%) - Added 173 keys
-- 🇫🇷 **French**: 573/573 keys (100%) - Added 173 keys
-- 🇯🇵 **Japanese**: 573/573 keys (100%) - Added 173 keys
-- 🇷🇺 **Russian**: 573/573 keys (100%) - Added 173 keys
-- 🇨🇳 **Chinese**: 573/573 keys (100%) - Added 173 keys
+# 2. Initialize in your project
+i18ntk-init
+
+# 3. Start managing translations
+i18ntk-manage
+
+# 4. Run complete analysis
+i18ntk-complete
+```
+
+### Available Commands
+
+Once installed globally, you have access to the main CLI command:
+
+```bash
+i18ntk            # 🎛️  Main management interface (interactive menu)
+i18ntk --help     # ❓ Show help and available options
+i18ntk --version  # 📋 Show version information
+```
+
+**Note:** Console UI translation support is at approximately 95%. Some hardcoded English text remains and will be addressed in upcoming updates, but this doesn't affect core functionality.
+
+## ✨ What's New in v1.0.5
+
+### 🧹 System Cleanup and Organization
+
+#### 🔧 Major Improvements
+- **Cleaned Translation Files**: Removed test-specific translation files from user locale directories
+- **Fixed Code Issues**: Removed hardcoded validationStep and reportGenerator keys from i18ntk-complete.js
+- **Better Organization**: Moved npm test reports to dev/debug/reports directory
+- **Enhanced Cleanliness**: Prevented pollution of user systems with non-applicable translation files
+- **Syntax Fixes**: Resolved syntax errors after key removal operations
+
+#### 🎯 Production Readiness
+- **Essential Files Only**: Ensured only essential file (common.json) remain in locales
+- **Clean System**: Enhanced system cleanliness and prevented test artifacts in production
+- **Better Structure**: Improved project organization with proper separation of concerns
+- **Documentation Updates**: Updated documentation to reflect cleanup and organizational improvements
+
+#### 🛡️ Quality Assurance
+- **Test Isolation**: Test-specific files no longer pollute user installations
+- **Clean Initialization**: Only necessary translation files are created during project setup
+- **Improved Reliability**: Enhanced system stability through better file management
+- **Production Safety**: Eliminated risk of test artifacts affecting production deployments
 
 ## 📚 Documentation
 
@@ -66,26 +94,6 @@ npx i18ntk-init
 
 **📝 [Changelog](./CHANGELOG.md)** - Version history and release notes
 
-## 🆕 Major Release (v1.5.0) - Stable Release
-
-### 🌟 New Features
-- **🌐 100% Console Translation Support**: All console output is now fully internationalized in all supported languages
-- **🔒 Enhanced Admin PIN Security**: Upgraded encryption with session-based authentication and timeout management
-- **⭐ PIN Display Security**: Admin PINs are properly masked with asterisks (****) in all interfaces
-- **🔐 Session Management**: PIN authentication persists until session timeout or application exit
-- **🛡️ Improved Security**: Replaced deprecated crypto functions with modern secure alternatives
-
-### 🐛 Critical Bug Fixes
-- **Fixed crypto deprecation warnings**: Updated to use `createCipheriv` and `createDecipheriv`
-- **Fixed PIN display issues**: Proper masking and secure display of admin PINs
-- **Fixed readline interface**: Resolved all interactive input issues with proper session handling
-- **Fixed authentication flow**: Streamlined admin PIN verification and session management
-
-### 🔧 Stability Improvements
-- **Enhanced security architecture**: Modern encryption standards and secure PIN storage
-- **Better session handling**: Automatic timeout and re-authentication when needed
-- **Improved error handling**: Graceful degradation and user-friendly error messages
-- **Robust authentication**: Reliable PIN verification with proper session state management
 
 ## 🌟 Features
 
@@ -168,7 +176,7 @@ i18n-management-toolkit/
 │   ├── release-notes/      # Release documentation
 │   │   ├── RELEASE_NOTES_v1.6.0.md    # v1.6.0 release notes
 │   │   ├── RELEASE_NOTES_v1.6.1.md    # v1.6.1 release notes
-│   │   └── RELEASE_NOTES_v1.6.3.md    # v1.6.3 release notes
+│   │   └── RELEASE_NOTES_v1.0.0.md    # v1.0.0 release notes
 │   ├── reports/            # Report documentation
 │   │   ├── ANALYSIS_README.md         # Analysis reports
 │   │   ├── SIZING_README.md           # Sizing reports
@@ -214,42 +222,6 @@ i18n-management-toolkit/
 └── README.md               # This file
 ```
 
-## 🚀 Quick Start
-
-### 1. Installation
-```bash
-npm install -g i18n-management-toolkit
-# or for local project
-npm install
-```
-
-### 2. Initialize i18n Setup
-```bash
-npm run i18ntk:init
-# or directly
-node main/i18ntk-init.js
-```
-
-### 3. Run Main Management Interface
-```bash
-npm run i18ntk
-# or directly
-node main/i18ntk-manage.js
-```
-
-### 4. Automated Workflow (Recommended)
-```bash
-npm run i18ntk:autorun
-# or directly
-node main/i18ntk-autorun.js
-```
-
-### New Features
-
-- **🔧 Debug Tools**: Access comprehensive debugging tools via option 13 in the main menu
-- **⚙️ Advanced Settings**: Enhanced settings interface with validation and helper text
-- **🔒 Admin PIN Protection**: Secure sensitive settings with encrypted PIN authentication
-- **📁 Better Organization**: UI internationalization moved to main folder for cleaner structure
 
 ### 📋 TODO
 
@@ -292,8 +264,6 @@ node main/i18ntk-autorun.js
   }
 }
 ```
-
-- **🗑️ Delete Reports and Backups (New)**: Add option to delete backups alongside reports with selection options: by folder, keep last 3, or delete all.
 
 > **📖 For detailed setup and usage instructions, see [Documentation](./docs/README.md)**
 
@@ -445,7 +415,7 @@ node dev/tests/test-features.js
 
 ---
 
-**Version 1.6.3 – Documentation and version consistency updates, improved reporting, bug fixes, and enhanced internationalisation support.**
+**Version:** 1.0.5 – System cleanup and organizational improvements. Enhanced production readiness! 🎉
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

@@ -1,12 +1,19 @@
 # I18N Management Toolkit - API Reference
 
-**Version:** 1.6.3  
-**Last Updated:** 27/07/2025  
+**Version:** 1.0.4  
+**Last Updated:** 27/01/2025  
 **Maintainer:** Vladimir Noskov  
 
 ## 📋 Overview
 
 This document provides a comprehensive API reference for the I18N Management Toolkit, including all available commands, configuration options, and programmatic interfaces.
+
+### 🔧 Latest Updates (v1.0.4)
+- **Fixed**: Translation system initialization issues
+- **Enhanced**: Dynamic value replacement in all outputs
+- **Improved**: Security configuration validation
+- **Added**: Auto-loading translation support
+- **Resolved**: All "Translation not found" errors
 
 ## 🚀 Command Line Interface (CLI)
 
@@ -374,4 +381,4 @@ const manager = new I18nManager(config);
 
 ---
 
-**Note:** This API reference is maintained for version 1.6.3. For the latest updates, please refer to the [Changelog](../../CHANGELOG.md).
+**Note:** This API reference is maintained for version 1.0.0. For the latest updates, please refer to the [Changelog](../../CHANGELOG.md).

@@ -13,6 +13,7 @@ function getConfig() {
 // Global translations object
 let translations = {};
 let currentLanguage = 'en';
+let isInitialized = false;
 
 /**
  * Load translations from the ui-locales directory
@@ -28,6 +29,7 @@ function loadTranslations(language = 'en') {
     if (fs.existsSync(translationFile)) {
       const content = fs.readFileSync(translationFile, 'utf8');
       translations = JSON.parse(content);
+      isInitialized = true;
     } else {
       console.warn(`Translation file not found: ${translationFile}`);
       translations = {};
@@ -45,6 +47,12 @@ function loadTranslations(language = 'en') {
  * @returns {string} - Translated string or the key if translation not found
  */
 function t(key, params = {}) {
+  // Auto-initialize translations if not already loaded
+  if (!isInitialized) {
+    loadTranslations('en');
+    isInitialized = true;
+  }
+  
   // Split the key into parts (e.g., 'module.subkey' -> ['module', 'subkey'])
   const keyParts = key.split('.');
   let value = translations;

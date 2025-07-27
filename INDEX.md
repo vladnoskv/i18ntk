@@ -1,6 +1,6 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.6.3  
+**Version:** 1.0.0  
 **Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
@@ -39,7 +39,7 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Translation Bug Report v1.5.0](./reports/TRANSLATION_BUG_REPORT_v1.5.0.md)** - Translation-related bug reports
 
 ### 📋 Release Notes
-- **[Release Notes v1.6.3](./release-notes/RELEASE_NOTES_v1.6.3.md)** - Latest release notes
+- **[Release Notes v1.0.0](./release-notes/RELEASE_NOTES_v1.0.0.md)** - First stable release notes
 - **[Release Notes v1.6.1](./release-notes/RELEASE_NOTES_v1.6.1.md)** - Previous release notes
 - **[Release Notes v1.6.0](./release-notes/RELEASE_NOTES_v1.6.0.md)** - Previous release notes
 
@@ -64,7 +64,7 @@ This documentation index provides comprehensive guidance for the I18N Management
 1. Check [Summary Reports](./reports/SUMMARY_README.md) for project overview
 2. Review [Analysis Reports](./reports/ANALYSIS_README.md) for translation status
 3. Monitor [Validation Reports](./reports/VALIDATION_README.md) for quality assurance
-4. Review [Release Notes](./release-notes/RELEASE_NOTES_v1.6.3.md) for latest updates
+4. Review [Release Notes](./release-notes/RELEASE_NOTES_v1.0.0.md) for latest updates
 5. Check [TODO & Roadmap](./TODO_ROADMAP.md) for future development plans
 
 ## 📋 Available Commands
@@ -90,17 +90,18 @@ npm run i18ntk:settings          # Manage settings
 
 ## 🔄 Version Management
 
-**Current Version:** 1.5.2  
+**Current Version:** 1.0.0  
 **Release Date:** 27/07/2025  
-**Previous Version:** 1.5.0 
+**Previous Versions:** 0.x.x-dev series 
 
 ### Version History
-- **1.5.2** - Documentation and version consistency updates, improved reporting, and bug fixes, finalised console translations in all languages and fixed hidden missing translation keys.
-- **1.5.1** - **🚀 Performance Improvements**: Enhanced performance for large projects, reduced memory usage, and faster execution times. Reorganize project structure and update configurations. Fixed bugs and missing translations introduced in v1.5.0.
-- **1.5.0** - **🌐 100% Console Translation Support**: Complete internationalization of all console output in all supported languages (en, es, fr, de, ru, ja, zh)
-- **1.4.7** - Focuses on **stability and reliability improvements**
-- **1.4.6** - Documentation restructure, path fixes, enhanced organization
-- **1.4.3** - Previous stable release
+- **1.0.0** - 🎉 **First Stable Release** - Complete CLI suite with enterprise-grade features, comprehensive documentation, and production-ready capabilities
+- **0.6.3-dev** - Development release with enhanced features and improvements
+- **0.6.1-dev** - Development release with bug fixes and optimizations
+- **0.6.0-dev** - Development release with major feature additions
+- **0.5.2-dev** - Development release with documentation and reporting improvements
+- **0.5.1-dev** - Development release with performance improvements and project restructuring
+- **0.5.0-dev** - Development release with console translation support
 - See [Changelog](../CHANGELOG.md) for complete version history
 
 ## 🤝 Contributing
@@ -118,4 +119,4 @@ For contribution guidelines, please refer to:
 
 ---
 
-**Note:** This documentation is automatically maintained and updated with each release. Last updated on 27/07/2025 for version 1.5.2.
+**Note:** This documentation is automatically maintained and updated with each release. Last updated on 27/07/2025 for version 1.0.0.
