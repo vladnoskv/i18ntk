@@ -1,24 +1,24 @@
-TRANSLATION ANALYSIS REPORT FOR RU
-Generated: 2025-07-26T06:53:57.153Z
-Status: 0/0 translated (0%)
-Files analyzed: 0/5
-Keys needing translation: 0
+📊 翻译分析报告
+📅 生成时间
+状态: 0/0 已翻译 (0%)
+已分析文件: 0/5
+需要翻译的键: 0
 
-FILE BREAKDOWN:
+文件详细信息:
 ==================================================
 
 📄 auth.json
-   ❌ ❌ Analysis failed: Failed to parse source file JSON
+   ❌ ❌ 分析失败: Failed to parse source file JSON
 
 📄 common.json
-   ❌ ❌ Analysis failed: Failed to parse source file JSON
+   ❌ ❌ 分析失败: Failed to parse source file JSON
 
 📄 pagination.json
-   ❌ ❌ Analysis failed: Failed to parse source file JSON
+   ❌ ❌ 分析失败: Failed to parse source file JSON
 
 📄 reportGenerator.json
-   ❌ ❌ Analysis failed: Failed to parse source file JSON
+   ❌ ❌ 分析失败: Failed to parse source file JSON
 
 📄 validationStep.json
-   ❌ ❌ Analysis failed: Failed to parse source file JSON
+   ❌ ❌ 分析失败: Failed to parse source file JSON
 

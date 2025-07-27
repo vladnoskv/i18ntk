@@ -440,7 +440,7 @@ class I18nCompletionTool {
           });
           
           if (changes.length > 3) {
-            console.log(`... and ${changes.length - 3} more`);
+            console.log(this.t("complete.andMore", { count: changes.length - 3 }));
           }
         } else {
           console.log(this.t("operations.complete.noChangesNeeded", { language }));
@@ -459,9 +459,9 @@ class I18nCompletionTool {
         console.log(this.t("operations.complete.separator"));
         console.log(this.t("operations.complete.nextStep1"));
         console.log('   node i18ntk-usage.js --output-report');
-        console.log(this.t("operations.complete.nextStep2"));
+        console.log(this.t("complete.nextStep2"));
         console.log('   node i18ntk-validate.js');
-        console.log(this.t("operations.complete.nextStep3"));
+        console.log(this.t("complete.nextStep3"));
         console.log('   node i18ntk-analyze.js');
         console.log('\n' + this.t("operations.complete.allKeysAvailable"));
       } else {
@@ -471,7 +471,7 @@ class I18nCompletionTool {
       // Only prompt when run from the menu (i.e., when a callback or menu context is present)
       if (typeof this.prompt === "function" && args.fromMenu) {
         console.log(this.ui.t('operations.completed'));
-        await this.prompt('Press Enter to continue...');
+        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
       }
       
     } catch (error) {

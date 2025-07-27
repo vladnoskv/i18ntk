@@ -1,23 +1,51 @@
 {
-  "timestamp": "2025-07-26T06:53:57.793Z",
+  "timestamp": "2025-07-27T03:52:12.756Z",
   "summary": {
-    "successful": 1,
-    "failed": 1,
-    "requiredFailed": 1
+    "successful": 6,
+    "failed": 0,
+    "requiredFailed": 0
   },
   "steps": [
     {
       "step": "Analyze Translations",
       "command": "node main/i18ntk-analyze.js --no-prompt",
       "status": "success",
-      "duration": 112,
+      "duration": 133,
       "required": true
     },
     {
       "step": "Validate Translations",
       "command": "node main/i18ntk-validate.js --no-prompt",
-      "status": "failed",
-      "error": "Command failed: node main/i18ntk-validate.js --no-prompt",
+      "status": "success",
+      "duration": 128,
+      "required": true
+    },
+    {
+      "step": "Check Usage",
+      "command": "node main/i18ntk-usage.js --no-prompt",
+      "status": "success",
+      "duration": 326,
+      "required": false
+    },
+    {
+      "step": "Complete Translations",
+      "command": "node main/i18ntk-complete.js --no-prompt",
+      "status": "success",
+      "duration": 311,
+      "required": false
+    },
+    {
+      "step": "Analyze Sizing",
+      "command": "node main/i18ntk-sizing.js --no-prompt",
+      "status": "success",
+      "duration": 131,
+      "required": false
+    },
+    {
+      "step": "Generate Summary",
+      "command": "node main/i18ntk-summary.js --no-prompt",
+      "status": "success",
+      "duration": 176,
       "required": true
     }
   ]

@@ -83,13 +83,13 @@ class AutoRunner {
 
         for (const file of requiredFiles) {
             if (!fs.existsSync(file)) {
-                console.log(`❌ Missing required file/directory: ${file}`);
-                console.log('🔧 Please run initialization first: node i18ntk-init.js');
+                console.log(this.ui.t('hardcodedTexts.missingRequiredFile', { file }));
+                console.log(this.ui.t('hardcodedTexts.runInitializationFirst'));
                 return false;
             }
         }
 
-        console.log('✅ Initialization check passed');
+        console.log(this.ui.t('hardcodedTexts.initializationCheckPassed'));
         return true;
     }
 
@@ -101,12 +101,12 @@ class AutoRunner {
         const showOutput = isStandalone && !quiet;
         
         if (showOutput) {
-            console.log(`\n🔄 Running: ${step.name}`);
-            console.log(`   Command: ${step.command}`);
+            console.log(`\n${this.ui.t('hardcodedTexts.runningStep', { stepName: step.name })}`);
+            console.log(`${this.ui.t('hardcodedTexts.commandLabel', { command: step.command })}`);
             console.log('-'.repeat(50));
         } else {
             // Show minimal output when called from menu
-            console.log(`🔄 ${step.name}...`);
+            console.log(this.ui.t('hardcodedTexts.stepRunning', { stepName: step.name }));
         }
 
         try {
@@ -121,9 +121,9 @@ class AutoRunner {
             const duration = Date.now() - startTime;
             
             if (showOutput) {
-                console.log(`✅ ${step.name} completed in ${duration}ms`);
+                console.log(this.ui.t('hardcodedTexts.stepCompletedWithTime', { stepName: step.name, duration }));
             } else {
-                console.log(`✅ ${step.name} completed`);
+                console.log(this.ui.t('hardcodedTexts.stepCompleted', { stepName: step.name }));
             }
             
             this.results.push({
@@ -138,10 +138,10 @@ class AutoRunner {
             
         } catch (error) {
             if (showOutput) {
-                console.log(`❌ ${step.name} failed:`);
-                console.log(`   Error: ${error.message}`);
+                console.log(this.ui.t('hardcodedTexts.stepFailed', { stepName: step.name }));
+                console.log(this.ui.t('hardcodedTexts.errorLabel', { error: error.message }));
             } else {
-                console.log(`❌ ${step.name} failed: ${error.message}`);
+                console.log(this.ui.t('hardcodedTexts.stepFailedWithError', { stepName: step.name, error: error.message }));
             }
             
             this.results.push({
@@ -153,10 +153,10 @@ class AutoRunner {
             });
             
             if (step.required) {
-                console.log(`🛑 Required step failed. Stopping execution.`);
+                console.log(this.ui.t('hardcodedTexts.requiredStepFailed'));
                 return false;
             } else {
-                console.log(`⚠️  Optional step failed. Continuing...`);
+                console.log(this.ui.t('hardcodedTexts.optionalStepFailed'));
                 return true;
             }
         }
@@ -171,7 +171,7 @@ class AutoRunner {
         const showOutput = isStandalone && !quiet;
         
         if (showOutput) {
-            console.log('🚀 Starting Auto-Run Workflow');
+            console.log(this.ui.t('hardcodedTexts.startingAutoRunWorkflow'));
             console.log('=' .repeat(60));
         }
         
@@ -181,13 +181,13 @@ class AutoRunner {
         }
         
         if (showOutput) {
-            console.log(`\n📋 Workflow includes ${this.steps.length} steps:`);
+            console.log(`\n${this.ui.t('hardcodedTexts.workflowIncludesSteps', { count: this.steps.length })}`);
             this.steps.forEach((step, index) => {
-                const required = step.required ? '(Required)' : '(Optional)';
+                const required = step.required ? this.ui.t('hardcodedTexts.stepRequired') : this.ui.t('hardcodedTexts.stepOptional');
                 console.log(`   ${index + 1}. ${step.name} ${required}`);
             });
             
-            console.log('\n⏱️  Starting execution...');
+            console.log(`\n${this.ui.t('hardcodedTexts.startingExecution')}`);
         }
         
         // Run each step
@@ -196,9 +196,9 @@ class AutoRunner {
             
             if (!success && step.required) {
                 if (showOutput) {
-                    console.log('\n🛑 Workflow stopped due to required step failure.');
+                    console.log(`\n${this.ui.t('hardcodedTexts.workflowStopped')}`);
                 } else {
-                    console.log('🛑 Workflow stopped due to required step failure.');
+                    console.log(this.ui.t('hardcodedTexts.workflowStopped'));
                 }
                 this.generateReport(quiet);
                 process.exit(1);
@@ -209,7 +209,7 @@ class AutoRunner {
         }
         
         if (showOutput) {
-            console.log('\n🎉 Workflow completed!');
+            console.log(`\n${this.ui.t('hardcodedTexts.workflowCompleted')}`);
         }
         
         this.generateReport(quiet);
@@ -217,7 +217,7 @@ class AutoRunner {
         // Only show success message and prompt when run standalone
         if (isStandalone) {
             console.log(this.ui.t('operations.completed'));
-            await this.prompt('Press Enter to continue...');
+            await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
         }
     }
 
@@ -225,7 +225,7 @@ class AutoRunner {
      * Run specific steps only
      */
     async runSteps(stepNumbers) {
-        console.log('🎯 Running Selected Steps');
+        console.log(this.ui.t('hardcodedTexts.runningSelectedSteps'));
         console.log('=' .repeat(60));
         
         if (!this.checkInitialization()) {
@@ -239,7 +239,7 @@ class AutoRunner {
                 await this.runCommand(step);
                 await new Promise(resolve => setTimeout(resolve, 1000));
             } else {
-                console.log(`❌ Invalid step number: ${stepNum}`);
+                console.log(this.ui.t('hardcodedTexts.invalidStepNumber', { stepNum }));
             }
         }
         
@@ -249,7 +249,7 @@ class AutoRunner {
         // Don't show when run as part of autorun workflow
         if (require.main === module) {
             console.log(this.ui.t('operations.completed'));
-            await this.prompt('Press Enter to continue...');
+            await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
         }
     }
 
@@ -261,7 +261,7 @@ class AutoRunner {
         const showOutput = isStandalone && !quiet;
         
         if (showOutput) {
-            console.log('\n📊 EXECUTION REPORT');
+            console.log(`\n${this.ui.t('hardcodedTexts.executionReport')}`);
             console.log('=' .repeat(60));
         }
         
@@ -270,11 +270,11 @@ class AutoRunner {
         const requiredFailed = this.results.filter(r => r.status === 'failed' && r.required).length;
         
         if (showOutput) {
-            console.log(`✅ Successful: ${successful}`);
-            console.log(`❌ Failed: ${failed}`);
-            console.log(`🔴 Required Failed: ${requiredFailed}`);
+            console.log(this.ui.t('hardcodedTexts.successfulSteps', { count: successful }));
+            console.log(this.ui.t('hardcodedTexts.failedSteps', { count: failed }));
+            console.log(this.ui.t('hardcodedTexts.requiredFailedSteps', { count: requiredFailed }));
             
-            console.log('\n📋 Step Details:');
+            console.log(`\n${this.ui.t('hardcodedTexts.stepDetails')}`);
             this.results.forEach((result, index) => {
                 const status = result.status === 'success' ? '✅' : '❌';
                 const required = result.required ? '[REQ]' : '[OPT]';
@@ -282,7 +282,7 @@ class AutoRunner {
                 
                 console.log(`   ${status} ${required} ${result.step}${duration}`);
                 if (result.error) {
-                    console.log(`       Error: ${result.error}`);
+                    console.log(this.ui.t('hardcodedTexts.errorDetails', { error: result.error }));
                 }
             });
         }
@@ -298,11 +298,11 @@ class AutoRunner {
         fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
         
         if (showOutput) {
-            console.log(`\n💾 Report saved to: ${reportPath}`);
+            console.log(`\n${this.ui.t('hardcodedTexts.reportSavedTo', { path: reportPath })}`);
             
             // Overall status
-            const overallStatus = requiredFailed === 0 ? '🟢 SUCCESS' : '🔴 FAILED';
-            console.log(`\n📊 Overall Status: ${overallStatus}`);
+            const overallStatus = requiredFailed === 0 ? this.ui.t('hardcodedTexts.overallStatusSuccess') : this.ui.t('hardcodedTexts.overallStatusFailed');
+            console.log(`\n${this.ui.t('hardcodedTexts.overallStatus', { status: overallStatus })}`);
             console.log('=' .repeat(60));
         }
     }
@@ -322,51 +322,51 @@ class AutoRunner {
             rl.question(prompt, resolve);
         });
 
-        console.log('\n🔧 Custom Settings Configuration\n');
-        console.log('Press Enter to use default values or type new values:\n');
+        console.log(`\n${this.ui.t('hardcodedTexts.customSettingsConfiguration')}\n`);
+        console.log(`${this.ui.t('hardcodedTexts.pressEnterForDefaults')}\n`);
 
         try {
             const currentSettings = this.settingsManager.getSettings();
             const newSettings = { ...currentSettings };
 
             // Source directory
-      const sourceDir = await question(`Source directory [${currentSettings.sourceDir || './locales'}]: `);
+      const sourceDir = await question(this.ui.t('hardcodedTexts.sourceDirPrompt', { default: currentSettings.sourceDir || './locales' }));
       if (sourceDir.trim()) {
         newSettings.sourceDir = sourceDir.trim();
       }
 
       // Source language
-      const sourceLang = await question(`Source language [${currentSettings.sourceLanguage || 'en'}]: `);
+      const sourceLang = await question(this.ui.t('hardcodedTexts.sourceLangPrompt', { default: currentSettings.sourceLanguage || 'en' }));
       if (sourceLang.trim()) {
         newSettings.sourceLanguage = sourceLang.trim();
       }
 
       // Target languages
       const defaultLangs = currentSettings.defaultLanguages || ['de', 'es', 'fr', 'ru'];
-      const targetLangs = await question(`Target languages (comma-separated) [${defaultLangs.join(', ')}]: `);
+      const targetLangs = await question(this.ui.t('hardcodedTexts.targetLangsPrompt', { default: defaultLangs.join(', ') }));
       if (targetLangs.trim()) {
         newSettings.defaultLanguages = targetLangs.split(',').map(lang => lang.trim());
       }
 
       // Translation marker
-      const marker = await question(`Translation marker [${currentSettings.processing?.notTranslatedMarker || 'NOT_TRANSLATED'}]: `);
+      const marker = await question(this.ui.t('hardcodedTexts.translationMarkerPrompt', { default: currentSettings.processing?.notTranslatedMarker || 'NOT_TRANSLATED' }));
       if (marker.trim()) {
         if (!newSettings.processing) newSettings.processing = {};
         newSettings.processing.notTranslatedMarker = marker.trim();
       }
 
       // Output directory
-      const outputDir = await question(`Output directory [${currentSettings.outputDir || './i18ntk-reports'}]: `);
+      const outputDir = await question(this.ui.t('hardcodedTexts.outputDirPrompt', { default: currentSettings.outputDir || './i18ntk-reports' }));
       if (outputDir.trim()) {
         newSettings.outputDir = outputDir.trim();
       }
 
             // Save settings
             this.settingsManager.saveSettings(newSettings);
-            console.log('\n✅ Settings updated successfully!\n');
+            console.log(`\n${this.ui.t('hardcodedTexts.settingsUpdatedSuccessfully')}\n`);
 
         } catch (error) {
-            console.error('❌ Error configuring settings:', error.message);
+            console.error(this.ui.t('hardcodedTexts.errorConfiguringSettings'), error.message);
         } finally {
             rl.close();
         }
@@ -376,22 +376,22 @@ class AutoRunner {
      * Show help information
      */
     showHelp() {
-        console.log('🤖 I18N Auto-Run Script');
+        console.log(this.ui.t('hardcodedTexts.autoRunScriptTitle'));
         console.log('=' .repeat(40));
-        console.log('\nUsage:');
-        console.log('  node auto-run.js                    # Run all steps');
-        console.log('  node auto-run.js --config           # Configure settings first');
-        console.log('  node auto-run.js --steps 1,2,3      # Run specific steps');
-        console.log('  node auto-run.js --help             # Show this help');
-        console.log('\nAvailable Steps:');
+        console.log(`\n${this.ui.t('hardcodedTexts.usageTitle')}`);
+        console.log(`  ${this.ui.t('hardcodedTexts.runAllSteps')}`);
+        console.log(`  ${this.ui.t('hardcodedTexts.configureSettingsFirst')}`);
+        console.log(`  ${this.ui.t('hardcodedTexts.runSpecificSteps')}`);
+        console.log(`  ${this.ui.t('hardcodedTexts.showHelp')}`);
+        console.log(`\n${this.ui.t('hardcodedTexts.availableSteps')}`);
         this.steps.forEach((step, index) => {
-            const required = step.required ? '(Required)' : '(Optional)';
+            const required = step.required ? this.ui.t('hardcodedTexts.stepRequired') : this.ui.t('hardcodedTexts.stepOptional');
             console.log(`  ${index + 1}. ${step.name} ${required}`);
         });
-        console.log('\nExamples:');
-        console.log('  node auto-run.js --config           # Configure settings first');
-        console.log('  node auto-run.js --steps 1,2        # Run only analyze and validate');
-        console.log('  node auto-run.js --steps 6          # Run only summary report');
+        console.log(`\n${this.ui.t('hardcodedTexts.examplesTitle')}`);
+        console.log(`  ${this.ui.t('hardcodedTexts.configExample')}`);
+        console.log(`  ${this.ui.t('hardcodedTexts.stepsExample1')}`);
+        console.log(`  ${this.ui.t('hardcodedTexts.stepsExample2')}`);
     }
 }
 
@@ -430,28 +430,28 @@ if (require.main === module) {
             break;
         case 'config':
             runner.promptForSettings().then(() => {
-                console.log('\n🚀 Configuration complete! You can now run the auto-runner with:');
-                console.log('  node auto-run.js\n');
+                console.log(`\n${runner.ui.t('hardcodedTexts.configurationComplete')}`);
+                console.log(`${runner.ui.t('hardcodedTexts.runAutoRunCommand')}\n`);
             }).catch(error => {
-                console.error('❌ Configuration failed:', error.message);
+                console.error(runner.ui.t('hardcodedTexts.configurationFailed'), error.message);
                 process.exit(1);
             });
             break;
         case 'steps':
             if (args.steps.length === 0) {
-                console.log('❌ No valid step numbers provided');
+                console.log(runner.ui.t('hardcodedTexts.noValidStepNumbers'));
                 runner.showHelp();
                 process.exit(1);
             }
             runner.runSteps(args.steps).catch(error => {
-                console.error('❌ Auto-run failed:', error.message);
+                console.error(runner.ui.t('hardcodedTexts.autoRunFailed'), error.message);
                 process.exit(1);
             });
             break;
         case 'all':
         default:
             runner.runAll().catch(error => {
-                console.error('❌ Auto-run failed:', error.message);
+                console.error(runner.ui.t('hardcodedTexts.autoRunFailed'), error.message);
                 process.exit(1);
             });
             break;

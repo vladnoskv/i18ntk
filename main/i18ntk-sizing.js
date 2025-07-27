@@ -14,7 +14,7 @@
  * - Size optimization recommendations
  * 
  * Usage:
- *   node 06-analyze-sizing.js [options]
+ *   i18ntk sizing [options]
  *   
  * Options:
  *   --source-dir <dir>     Source directory containing translation files (default: ./locales)
@@ -26,9 +26,9 @@
  *   --help                 Show this help message
  * 
  * Examples:
- *   node 06-analyze-sizing.js --output-report
- *   node 06-analyze-sizing.js --languages=en,de,fr --format=json
- *   node 06-analyze-sizing.js --threshold=30 --output-report
+ *   i18ntk sizing --output-report
+ *   i18ntk sizing --languages=en,de,fr --format=json
+ *   i18ntk sizing --threshold=30 --output-report
  */
 
 const fs = require('fs');

@@ -1,22 +1,52 @@
 # I18N Management Toolkit
 
-**Version:** 1.5.2  
+**Version:** 1.6.3  
 **Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
 A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/Node.js projects. This toolkit provides automated translation management, validation, analysis, and maintenance tools to ensure your application supports multiple languages effectively.
 
-## 🆕 What's New in 1.5.2
+## 📦 Installation
 
-- **Documentation and Version Consistency Updates:** All documentation, versioning, and references are now fully synchronized and up-to-date across the toolkit.
-- **Improved Reporting:** Enhanced analytics and reporting features for translation completeness, usage, and validation.
-- **Bug Fixes:** Numerous stability and reliability improvements, including fixes for edge cases in validation and reporting.
-- **Internationalisation Enhancements:** UI and console output now support seven languages (en, es, fr, de, ru, ja, zh) with improved translation coverage and accuracy.
-- **Performance Optimizations:** Faster processing for large projects and improved memory usage.
-- **Security Improvements:** Hardened admin authentication, encrypted PIN storage, and improved session management.
-- **Expanded Debug Tools:** More comprehensive debugging and analysis utilities, including new scripts and improved error reporting.
-- **UI-Locales Structure Refactor (Planned):** Preparation for a new multi-language object format for UI translations.
-- **Delete Reports and Backups (Planned):** Upcoming option to delete backups and reports with flexible selection.
+### Global Installation (Recommended)
+
+```bash
+npm install -g i18ntk
+```
+
+This will install the toolkit globally, making all commands available in your terminal.
+
+### Local Installation
+
+```bash
+npm install i18ntk --save-dev
+```
+
+When installed locally, you can run commands using npx:
+
+```bash
+npx i18ntk-manage
+npx i18ntk-init
+# etc.
+```
+
+## 🆕 What's New in 1.6.3 - STABLE RELEASE READY
+
+- **🧹 Translation File Cleanup:** Removed 42 extra keys from translation files (18 from Spanish, 24 from Japanese) for cleaner, more maintainable codebase.
+- **✅ 100% Translation Coverage:** Maintained complete 573/573 key coverage across all 7 supported languages with zero extra keys.
+- **🔍 Dynamic Translation Verification:** Verified all dynamic translation patterns (`{language}`, `{fileName}`, `{fileSize}`, etc.) are working correctly.
+- **🛠️ Enhanced Quality Assurance:** All 25 tests passing with 100% translation coverage and zero inconsistencies.
+- **📦 NPM Release Ready:** Package is fully optimized and ready for stable npm/yarn distribution.
+- **🚀 Production Grade:** Enterprise-ready with comprehensive documentation and robust testing suite.
+
+### 📊 Language Coverage Status
+- 🇺🇸 **English**: 573/573 keys (100%)
+- 🇩🇪 **German**: 573/573 keys (100%) - Added 173 keys
+- 🇪🇸 **Spanish**: 573/573 keys (100%) - Added 173 keys
+- 🇫🇷 **French**: 573/573 keys (100%) - Added 173 keys
+- 🇯🇵 **Japanese**: 573/573 keys (100%) - Added 173 keys
+- 🇷🇺 **Russian**: 573/573 keys (100%) - Added 173 keys
+- 🇨🇳 **Chinese**: 573/573 keys (100%) - Added 173 keys
 
 ## 📚 Documentation
 

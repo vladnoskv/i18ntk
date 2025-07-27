@@ -1,7 +1,7 @@
 # I18N Management Toolkit - API Reference
 
-**Version:** 1.4.6  
-**Last Updated:** 26/07/2025  
+**Version:** 1.6.3  
+**Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
 ## 📋 Overview
@@ -374,4 +374,4 @@ const manager = new I18nManager(config);
 
 ---
 
-**Note:** This API reference is maintained for version 1.4.6. For the latest updates, please refer to the [Changelog](../../CHANGELOG.md).
+**Note:** This API reference is maintained for version 1.6.3. For the latest updates, please refer to the [Changelog](../../CHANGELOG.md).

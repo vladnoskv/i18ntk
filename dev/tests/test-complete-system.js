@@ -45,7 +45,8 @@ class SystemTester {
         console.log('\n📝 Testing UI Translations...');
         
         try {
-            const uiI18n = require('./ui-i18n');
+            const UIi18n = require('../../main/ui-i18n');
+            const uiI18n = new UIi18n();
             
             // Test critical translation keys
             const criticalKeys = [
@@ -111,13 +112,13 @@ class SystemTester {
         console.log('\n🔧 Testing Main Scripts...');
         
         const scripts = [
-            { name: 'Init', command: 'node 01-init-i18n.js --help' },
-            { name: 'Analyze', command: 'node 02-analyze-translations.js --help' },
-            { name: 'Validate', command: 'node 03-validate-translations.js --help' },
-            { name: 'Usage Check', command: 'node 04-check-usage.js --help' },
-            { name: 'Complete', command: 'node 05-complete-translations.js --help' },
-            { name: 'Sizing', command: 'node 06-analyze-sizing.js --help' },
-            { name: 'Summary', command: 'node 07-summary-report.js --help' }
+            { name: 'Init', command: 'node main/i18ntk-init.js --help' },
+            { name: 'Analyze', command: 'node main/i18ntk-analyze.js --help' },
+            { name: 'Validate', command: 'node main/i18ntk-validate.js --help' },
+            { name: 'Usage Check', command: 'node main/i18ntk-usage.js --help' },
+            { name: 'Complete', command: 'node main/i18ntk-complete.js --help' },
+            { name: 'Sizing', command: 'node main/i18ntk-sizing.js --help' },
+            { name: 'Summary', command: 'node main/i18ntk-summary.js --help' }
         ];
         
         for (const script of scripts) {
@@ -170,7 +171,7 @@ class SystemTester {
                 
                 if (missing.length > 0) {
                     this.logWarning(`${file}: ${missing.length} missing keys`);
-                    missing.slice(0, 5).forEach(key => {
+                    missing.forEach(key => {
                         this.missingTranslations.push(`${file}:${key}`);
                     });
                 }

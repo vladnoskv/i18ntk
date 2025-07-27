@@ -306,7 +306,7 @@ class I18nFeatureTester {
     
     for (const command of commands) {
       try {
-        const result = await this.runCommand('node', ['00-manage-i18n.js', ...command]);
+        const result = await this.runCommand('node', ['main/i18ntk-manage.js', ...command]);
         
         if (result.code === 0) {
           this.log(`Command '${command.join(' ')}' executed successfully`, 'success');
@@ -372,13 +372,13 @@ class I18nFeatureTester {
     this.log('Testing file structure...', 'test');
     
     const requiredFiles = [
-      '00-manage-i18n.js',
-      '01-init-i18n.js',
-      '02-analyze-translations.js',
-      '03-validate-translations.js',
-      '04-check-usage.js',
-      '06-analyze-sizing.js',
-      'ui-i18n.js'
+      'main/i18ntk-manage.js',
+      'main/i18ntk-init.js',
+      'main/i18ntk-analyze.js',
+      'main/i18ntk-validate.js',
+      'main/i18ntk-usage.js',
+      'main/i18ntk-sizing.js',
+      'main/ui-i18n.js'
     ];
     
     const requiredDirs = [

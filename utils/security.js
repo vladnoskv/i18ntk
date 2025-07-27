@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const SettingsManager = require('../settings/settings-manager');
+const { t } = require('./i18n-helper');
 
 /**
  * Security utility module for i18nTK
@@ -241,7 +242,7 @@ class SecurityUtils {
       if (allowedArgs.includes(key)) {
         validatedArgs[key] = value;
       } else {
-        console.warn(`Security: Unknown command argument: ${key}`);
+        console.warn(`${t('hardcodedTexts.securityUnknownCommandArg')}: ${key}`);
       }
     }
     
@@ -268,7 +269,7 @@ class SecurityUtils {
 
     for (const [key, value] of Object.entries(config)) {
       if (!allowedKeys.includes(key)) {
-        console.warn(`Security: Unknown config key: ${key}`);
+        console.warn(`${t('hardcodedTexts.securityUnknownConfigKey')}: ${key}`);
         continue;
       }
 

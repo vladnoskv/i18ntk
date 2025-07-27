@@ -16,7 +16,7 @@ const { performance } = require('perf_hooks');
 const settingsManager = require('../../settings/settings-manager');
 
 // Import the i18n helper
-const { loadTranslations, t } = require('./utils/i18n-helper');
+const { loadTranslations, t } = require('../../utils/i18n-helper');
 const UIi18n = require('../../main/ui-i18n');
 
 // Get configuration from settings manager

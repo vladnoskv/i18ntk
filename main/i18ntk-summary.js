@@ -80,24 +80,22 @@ class I18nSummaryReporter {
 
   // Show help information
   showHelp() {
-    console.log(`
-🔧 I18N SUMMARY REPORT GENERATOR
-`);
-    console.log('Analyzes i18n folder structure and generates comprehensive reports\n');
-    console.log('Usage: node 07-summary-report.js [options]\n');
-    console.log('Options:');
-    console.log('  -s, --source-dir <path>    Path to i18n locales directory');
-    console.log('  -o, --output <file>        Output file for the report');
-    console.log('  -v, --verbose              Show detailed output');
-    console.log('      --keep-reports         Keep all existing report files');
-    console.log('      --delete-reports       Delete old report files after generation');
-    console.log('  -h, --help                 Show this help message\n');
-    console.log('Examples:');
-    console.log('  node 07-summary-report.js');
-console.log('  node 07-summary-report.js --source-dir ./src/i18n/locales');
-console.log('  node 07-summary-report.js --output summary.txt --verbose');
-console.log('  node 07-summary-report.js --output summary.txt --delete-reports');
-console.log('  node 07-summary-report.js --keep-reports\n');
+    console.log(`\n${this.t('summary.helpTitle')}\n`);
+    console.log(this.t('summary.helpDescription') + '\n');
+    console.log(this.t('summary.helpUsage') + '\n');
+    console.log(this.t('summary.helpOptions'));
+    console.log(this.t('summary.helpSourceDir'));
+    console.log(this.t('summary.helpOutput'));
+    console.log(this.t('summary.helpVerbose'));
+    console.log(this.t('summary.helpKeepReports'));
+    console.log(this.t('summary.helpDeleteReports'));
+    console.log(this.t('summary.helpHelp') + '\n');
+    console.log(this.t('summary.helpExamples'));
+    console.log(this.t('summary.helpExample1'));
+    console.log(this.t('summary.helpExample2'));
+    console.log(this.t('summary.helpExample3'));
+    console.log(this.t('summary.helpExample4'));
+    console.log(this.t('summary.helpExample5') + '\n');
   }
 
   // Auto-detect i18n directory
@@ -173,7 +171,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
     try {
       const content = await SecurityUtils.safeReadFile(filePath, this.config.sourceDir);
       if (!content) {
-        console.warn(`⚠️  Could not read file: ${filePath}`);
+        console.warn(this.t('summary.couldNotReadFile', { filePath }));
         return [];
       }
       
@@ -190,7 +188,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
             const data = eval(`(${objStr})`);
             return this.extractKeysFromObject(data);
           } catch (e) {
-            console.warn(`⚠️  Could not parse JS/TS file: ${filePath}`);
+            console.warn(this.t('summary.couldNotParseJSFile', { filePath }));
             return [];
           }
         }
@@ -198,7 +196,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       
       return [];
     } catch (error) {
-      console.warn(`⚠️  Error reading file ${filePath}: ${error.message}`);
+      console.warn(this.t('summary.errorReadingFile', { filePath, error: error.message }));
       return [];
     }
   }
@@ -290,7 +288,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
     this.stats.languages = this.getAvailableLanguages();
     
     if (this.stats.languages.length === 0) {
-      console.log('❌ No language directories found!');
+      console.log(this.t('summary.noLanguageDirectoriesFound'));
       return;
     }
     
@@ -351,7 +349,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       }
       
       this.stats.totalKeys += totalKeysForLanguage;
-      console.log(`   📝 ${totalKeysForLanguage} keys in ${files.length} files`);
+      console.log(this.t('summary.keysInFiles', {keys: totalKeysForLanguage, files: files.length}));
     }
     
     // Find inconsistent keys across languages
@@ -360,7 +358,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
 
   // Find keys that are inconsistent across languages
   findInconsistentKeys() {
-    console.log('🔍 Checking for inconsistent keys across languages...');
+    console.log(this.t('summary.checkingInconsistentKeys'));
     
     const referenceLanguage = this.stats.languages[0];
     const referenceKeys = this.stats.keysByLanguage[referenceLanguage];
@@ -445,11 +443,11 @@ console.log('  node 07-summary-report.js --keep-reports\n');
         this.stats.duplicateKeys.length > 0 || 
         this.stats.inconsistentKeys.length > 0) {
       
-      report.push('ISSUES FOUND');
+      report.push(this.t('summary.issuesFound'));
       report.push('='.repeat(30));
       
       if (this.stats.missingFiles.length > 0) {
-        report.push('❌ Missing Files:');
+        report.push(this.t('summary.missingFiles'));
         for (const item of this.stats.missingFiles) {
           report.push(`   ${item.language}: ${item.files.join(', ')}`);
         }
@@ -457,7 +455,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       }
       
       if (this.stats.emptyFiles.length > 0) {
-        report.push('📭 Empty Files:');
+        report.push(this.t('summary.emptyFiles'));
         for (const item of this.stats.emptyFiles) {
           report.push(`   ${item.language}/${item.file}`);
         }
@@ -465,7 +463,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       }
       
       if (this.stats.malformedFiles.length > 0) {
-        report.push('💥 Malformed Files:');
+        report.push(this.t('summary.malformedFiles'));
         for (const item of this.stats.malformedFiles) {
           report.push(`   ${item.language}/${item.file}`);
         }
@@ -473,7 +471,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       }
       
       if (this.stats.duplicateKeys.length > 0) {
-        report.push('🔄 Duplicate Keys:');
+        report.push(this.t('summary.duplicateKeys'));
         for (const item of this.stats.duplicateKeys) {
           report.push(`   ${item.language}/${item.file}: ${item.duplicates.join(', ')}`);
         }
@@ -481,7 +479,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       }
       
       if (this.stats.inconsistentKeys.length > 0) {
-        report.push(this.t('summary.checkingInconsistentKeys'));
+        report.push(this.t('summary.inconsistentKeys'));
         for (const item of this.stats.inconsistentKeys) {
           report.push(`   ${item.language}/${item.file}:`);
           if (item.missing.length > 0) {
@@ -501,6 +499,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
     }
     // Recommendations
     report.push(this.t('summary.recommendations'));
+    report.push('='.repeat(30));
     if (this.stats.missingFiles.length > 0) {
       report.push(this.t('summary.createMissingFiles'));
     }
@@ -548,18 +547,18 @@ console.log('  node 07-summary-report.js --keep-reports\n');
     }
     
     if (!this.config.sourceDir) {
-      console.error('❌ Could not find i18n directory. Please specify with --source-dir');
+      console.error(this.t('summary.couldNotFindI18nDirectory'));
       process.exit(1);
     }
     
     if (!fs.existsSync(this.config.sourceDir)) {
-      console.error(`❌ Source directory does not exist: ${this.config.sourceDir}`);
+      console.error(this.t('summary.sourceDirectoryDoesNotExist', { sourceDir: this.config.sourceDir }));
       process.exit(1);
     }
     
-    console.log('🔧 I18N SUMMARY REPORT GENERATOR');
+    console.log(this.t('summary.i18nSummaryReportGenerator'));
     console.log('============================================================');
-    console.log(`📁 Source directory: ${this.config.sourceDir}`);
+    console.log(this.t('summary.sourceDirectory', {dir: this.config.sourceDir}));
     
     if (args.verbose) {
       console.log(`🔧 Configuration:`);
@@ -573,7 +572,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       await this.analyzeStructure();
       
       // Generate report
-      console.log('\n📄 Generating summary report...');
+      console.log(this.t('summary.generatingSummaryReport'));
       const report = this.generateReport();
       
       // Output report
@@ -597,7 +596,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       
       // Handle report file management
       if (args.deleteReports && !args.keepReports) {
-        console.log('\n🗑️  Cleaning up report files...');
+        console.log(this.t('summary.cleaningUpReportFiles'));
         try {
           const reportsDir = path.join(this.config.sourceDir, 'scripts', 'i18n', 'reports');
           if (fs.existsSync(reportsDir)) {
@@ -613,30 +612,30 @@ console.log('  node 07-summary-report.js --keep-reports\n');
                 fs.unlinkSync(path.join(reportsDir, file));
                 deletedCount++;
               } catch (error) {
-                console.log(`⚠️  Could not delete ${file}: ${error.message}`);
+                console.log(this.t('summary.couldNotDelete', { file, error: error.message }));
               }
             }
             
             if (deletedCount > 0) {
-              console.log(`✅ Deleted ${deletedCount} old report files.`);
+              console.log(this.t('summary.deletedOldReportFiles', { count: deletedCount }));
             } else {
-              console.log('📄 No old report files to delete.');
+              console.log(this.t('summary.noOldReportFilesToDelete'));
             }
           }
         } catch (error) {
-          console.log(`⚠️  Error cleaning up reports: ${error.message}`);
+          console.log(this.t('summary.errorCleaningUpReports', { error: error.message }));
         }
       } else if (args.keepReports) {
-        console.log('\n📁 Report files preserved as requested.');
+        console.log(this.t('summary.reportFilesPreserved'));
       }
       
       // Summary
       console.log('\n============================================================');
-      console.log('📊 ANALYSIS COMPLETE');
+      console.log(this.t('summary.analysisComplete'));
       console.log('============================================================');
-      console.log(`✅ Analyzed ${this.stats.languages.length} languages`);
-      console.log(`✅ Processed ${this.stats.totalFiles} files`);
-      console.log(`✅ Found ${this.stats.totalKeys} translation keys`);
+      console.log(this.t('summary.analyzedLanguages', { count: this.stats.languages.length }));
+      console.log(this.t('summary.processedFiles', { count: this.stats.totalFiles }));
+      console.log(this.t('summary.foundTranslationKeys', { count: this.stats.totalKeys }));
       
       const totalIssues = this.stats.missingFiles.length + 
                          this.stats.emptyFiles.length + 
@@ -651,7 +650,7 @@ console.log('  node 07-summary-report.js --keep-reports\n');
       }
       
     } catch (error) {
-      console.error('❌ Error during analysis:', error.message);
+      console.error(this.t('summary.errorDuringAnalysis', { error: error.message }));
       if (args.verbose) {
         console.error(error.stack);
       }

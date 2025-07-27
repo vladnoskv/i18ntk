@@ -791,7 +791,7 @@ class SettingsCLI {
         console.log(`  • I18N_REPORTS_DIR: Override reports directory\n`);
         
         console.log(`${colors.cyan}Command Line Usage:${colors.reset}`);
-        console.log(`  • node 00-manage-i18n.js --command=settings`);
+        console.log(`  • i18ntk manage --command=settings`);
         console.log(`  • node settings-cli.js (direct access)`);
         console.log(`  • All scripts support --config flag for custom config files\n`);
         

@@ -1,0 +1,31 @@
+# Development files and directories
+/node_modules
+/dev/debug/logs
+/dev/debug/reports
+/dev/debug/ui-locales
+/i18ntk-reports
+/EXPORT
+
+# Test files
+/dev/tests/test-report.json
+
+# Backup files
+/settings/backups
+
+# Editor and OS files
+.DS_Store
+.vscode
+.idea
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
