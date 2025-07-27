@@ -1,6 +1,6 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.5.2  
+**Version:** 1.6.3  
 **Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
