@@ -627,6 +627,12 @@
       "debugCommand": "debug     - Run debug analysis"
   },
   "complete": {
+    "title": "Complete Missing Translations",
+    "sourceDir": "Source directory: {sourceDir}",
+    "configLoadedSuccessfully": "✅ Configuration loaded successfully",
+    "configLoadingFailed": "❌ Configuration loading failed",
+    "addingMissingKeys": "🔍 Adding missing keys to language files...",
+    "summaryTitle": "📊 Translation Completion Summary",
     "nextStep1": "1. Check usage analysis:",
     "nextStep2": "2. Validate translations:",
     "nextStep3": "3. Analyze completeness:",

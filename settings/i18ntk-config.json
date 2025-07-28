@@ -7,9 +7,7 @@
     "de",
     "es",
     "fr",
-    "ru",
-    "zh",
-    "ja"
+    "ru"
   ],
   "outputDir": "./i18ntk-reports",
   "reportLanguage": "auto",
@@ -34,7 +32,11 @@
     "excludeFiles": [
       ".DS_Store",
       "Thumbs.db",
-      "*.tmp"
+      "*.tmp",
+      "auth.json",
+      "pagination.json",
+      "reportGenerator.json",
+      "validationStep.json"
     ],
     "excludeDirs": [
       "node_modules",
@@ -78,12 +80,31 @@
     "timeout": 30000
   },
   "security": {
-    "adminPinEnabled": "1111",
+    "adminPinEnabled": false,
     "adminPinPromptOnInit": false,
     "keepAuthenticatedUntilExit": true,
     "sessionTimeout": 30,
     "maxFailedAttempts": 3,
-    "lockoutDuration": 15
+    "lockoutDuration": 15,
+    "enablePathValidation": true,
+    "maxFileSize": 10485760,
+    "allowedExtensions": [
+      ".json",
+      ".js",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".vue",
+      ".svelte"
+    ],
+    "notTranslatedMarker": "[NOT TRANSLATED]",
+    "excludeFiles": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build"
+    ],
+    "strictMode": false
   },
   "debug": {
     "enabled": false,

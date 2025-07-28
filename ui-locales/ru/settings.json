@@ -1,0 +1,195 @@
+{
+  "title": "⚠️ TRANSLATION NEEDED ⚠️",
+  "separator": "⚠️ TRANSLATION NEEDED ⚠️",
+  "mainMenu": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "uiSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "directorySettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "processingSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "advancedSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "viewAllSettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "viewAllSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "importExport": "⚠️ TRANSLATION NEEDED ⚠️",
+    "importExportDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "resetToDefaults": "⚠️ TRANSLATION NEEDED ⚠️",
+    "resetToDefaultsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "reportBug": "⚠️ TRANSLATION NEEDED ⚠️",
+    "reportBugDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "saveChanges": "⚠️ TRANSLATION NEEDED ⚠️",
+    "saveChangesDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "help": "⚠️ TRANSLATION NEEDED ⚠️",
+    "helpDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "quit": "⚠️ TRANSLATION NEEDED ⚠️",
+    "quitDesc": "⚠️ TRANSLATION NEEDED ⚠️",
+    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "categories": {
+    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "fields": {
+    "language": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "theme": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "dateFormat": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "notifications": {
+      "enabled": {
+        "label": "⚠️ TRANSLATION NEEDED ⚠️",
+        "description": "⚠️ TRANSLATION NEEDED ⚠️",
+        "current": "⚠️ TRANSLATION NEEDED ⚠️",
+        "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      }
+    },
+    "sourceDir": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "sourceLanguage": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "outputDir": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "batchSize": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "maxConcurrentFiles": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "sizingThreshold": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "strictMode": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "enableAuditLog": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    },
+    "backupBeforeChanges": {
+      "label": "⚠️ TRANSLATION NEEDED ⚠️",
+      "description": "⚠️ TRANSLATION NEEDED ⚠️",
+      "current": "⚠️ TRANSLATION NEEDED ⚠️",
+      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    }
+  },
+  "actions": {
+    "editSetting": "⚠️ TRANSLATION NEEDED ⚠️",
+    "settingUpdated": "⚠️ TRANSLATION NEEDED ⚠️",
+    "invalidValue": "⚠️ TRANSLATION NEEDED ⚠️",
+    "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
+    "backToMenu": "⚠️ TRANSLATION NEEDED ⚠️",
+    "saveSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
+    "saveFailed": "⚠️ TRANSLATION NEEDED ⚠️",
+    "resetConfirm": "⚠️ TRANSLATION NEEDED ⚠️",
+    "resetSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
+    "importSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
+    "exportSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
+    "fileNotFound": "⚠️ TRANSLATION NEEDED ⚠️",
+    "invalidFormat": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "themes": {
+    "light": "⚠️ TRANSLATION NEEDED ⚠️",
+    "dark": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "languages": {
+    "en": "⚠️ TRANSLATION NEEDED ⚠️",
+    "de": "⚠️ TRANSLATION NEEDED ⚠️",
+    "es": "⚠️ TRANSLATION NEEDED ⚠️",
+    "fr": "⚠️ TRANSLATION NEEDED ⚠️",
+    "ru": "⚠️ TRANSLATION NEEDED ⚠️",
+    "ja": "⚠️ TRANSLATION NEEDED ⚠️",
+    "zh": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "help": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "navigation": "⚠️ TRANSLATION NEEDED ⚠️",
+    "editing": "⚠️ TRANSLATION NEEDED ⚠️",
+    "saving": "⚠️ TRANSLATION NEEDED ⚠️",
+    "reset": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "viewAll": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "importExport": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "export": "⚠️ TRANSLATION NEEDED ⚠️",
+    "import": "⚠️ TRANSLATION NEEDED ⚠️",
+    "backup": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
+  "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
+  "current": "⚠️ TRANSLATION NEEDED ⚠️",
+  "back": "⚠️ TRANSLATION NEEDED ⚠️",
+  "selectSettingPrompt": "⚠️ TRANSLATION NEEDED ⚠️",
+  "invalidOption": "⚠️ TRANSLATION NEEDED ⚠️",
+  "editing": "⚠️ TRANSLATION NEEDED ⚠️",
+  "enterNewValue": "⚠️ TRANSLATION NEEDED ⚠️",
+  "validOptions": "⚠️ TRANSLATION NEEDED ⚠️",
+  "updatedSuccessfully": "⚠️ TRANSLATION NEEDED ⚠️",
+  "noHelp": "⚠️ TRANSLATION NEEDED ⚠️",
+  "admin": {
+    "accessDenied": "⚠️ TRANSLATION NEEDED ⚠️",
+    "setupPin": "⚠️ TRANSLATION NEEDED ⚠️",
+    "setupFailed": "⚠️ TRANSLATION NEEDED ⚠️",
+    "pinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
+    "options": "⚠️ TRANSLATION NEEDED ⚠️",
+    "changePin": "⚠️ TRANSLATION NEEDED ⚠️",
+    "removePin": "⚠️ TRANSLATION NEEDED ⚠️",
+    "cancel": "⚠️ TRANSLATION NEEDED ⚠️",
+    "verifyCurrentPin": "⚠️ TRANSLATION NEEDED ⚠️",
+    "settingNewPin": "⚠️ TRANSLATION NEEDED ⚠️",
+    "verifyToRemove": "⚠️ TRANSLATION NEEDED ⚠️",
+    "noPinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
+    "pinBenefits": "⚠️ TRANSLATION NEEDED ⚠️",
+    "benefitSecurity": "⚠️ TRANSLATION NEEDED ⚠️",
+    "benefitAdvanced": "⚠️ TRANSLATION NEEDED ⚠️",
+    "benefitDebug": "⚠️ TRANSLATION NEEDED ⚠️",
+    "benefitReset": "⚠️ TRANSLATION NEEDED ⚠️",
+    "setupCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
+    "operationCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
+    "startingSettings": "⚠️ TRANSLATION NEEDED ⚠️"
+  }
+}

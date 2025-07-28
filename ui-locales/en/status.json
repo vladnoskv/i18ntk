@@ -1,0 +1,10 @@
+{
+    "title": "Status",
+    "nextStep1": "1. Check usage analysis:",
+    "nextStep2": "2. Validate translations:",
+    "nextStep3": "3. Analyze completeness:",
+    "nextStep4": "4. Complete missing translations:",
+    "nextStep5": "5. Generate summary report:",
+    "nextStep6": "6. Review and finalize translations:",
+    "completed": "7. Completed successfully!"
+}

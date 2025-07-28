@@ -53,6 +53,13 @@ class SettingsCLI {
     }
 
     /**
+     * Translation helper function
+     */
+    t(key, params = {}) {
+        return uiI18n.t(key, params);
+    }
+
+    /**
      * Initialize the CLI interface
      */
     async init() {
@@ -115,20 +122,20 @@ class SettingsCLI {
      */
     async showMainMenu() {
         const options = [
-            { key: '1', label: 'UI Settings', description: 'Language, theme, and interface options' },
-            { key: '2', label: 'Directory Settings', description: 'Source and output directory paths' },
-            { key: '3', label: 'Processing Settings', description: 'Batch size, concurrency, and performance' },
-            { key: '4', label: 'Advanced Settings', description: 'Validation, logging, and expert options' },
-            { key: '5', label: 'View All Settings', description: 'Display current configuration' },
-            { key: '6', label: 'Import/Export', description: 'Backup and restore settings' },
-            { key: '7', label: 'Reset to Defaults', description: 'Restore factory settings' },
-            { key: '8', label: 'Report Bug', description: 'Submit an issue report on GitHub' },
-            { key: 's', label: 'Save Changes', description: 'Save current settings to file' },
-            { key: 'h', label: 'Help', description: 'Show detailed help information' },
-            { key: 'q', label: 'Quit', description: 'Exit settings (with save prompt if needed)' }
+            { key: '1', label: this.t('settings.mainMenu.uiSettings'), description: this.t('settings.mainMenu.uiSettingsDesc') },
+            { key: '2', label: this.t('settings.mainMenu.directorySettings'), description: this.t('settings.mainMenu.directorySettingsDesc') },
+            { key: '3', label: this.t('settings.mainMenu.processingSettings'), description: this.t('settings.mainMenu.processingSettingsDesc') },
+            { key: '4', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
+            { key: '5', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
+            { key: '6', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
+            { key: '7', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
+            { key: '8', label: this.t('settings.mainMenu.reportBug'), description: this.t('settings.mainMenu.reportBugDesc') },
+            { key: 's', label: this.t('settings.mainMenu.saveChanges'), description: this.t('settings.mainMenu.saveChangesDesc') },
+            { key: 'h', label: this.t('settings.mainMenu.help'), description: this.t('settings.mainMenu.helpDesc') },
+            { key: 'q', label: this.t('settings.mainMenu.quit'), description: this.t('settings.mainMenu.quitDesc') }
         ];
 
-        console.log(`${colors.bright}Main Menu:${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.mainMenu.title')}${colors.reset}\n`);
         
         options.forEach(option => {
             const keyColor = option.key.match(/[0-9]/) ? colors.cyan : colors.yellow;
@@ -137,7 +144,7 @@ class SettingsCLI {
         });
 
         console.log();
-        const choice = await this.prompt('Select an option: ');
+        const choice = await this.prompt(this.t('settings.mainMenu.selectOption'));
         await this.handleMainMenuChoice(choice.toLowerCase());
     }
 
@@ -196,13 +203,13 @@ class SettingsCLI {
     async showUISettings() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}UI Settings${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.categories.uiSettings')}${colors.reset}\n`);
 
         const uiSettings = {
-            'language': 'Interface Language', // Fix: use root language instead of ui.language
-            'theme': 'Color Theme',
-            'dateFormat': 'Date Format',
-            'notifications.enabled': 'Show Notifications'
+            'language': this.t('settings.fields.language.label'),
+            'theme': this.t('settings.fields.theme.label'),
+            'dateFormat': this.t('settings.fields.dateFormat.label'),
+            'notifications.enabled': this.t('settings.fields.notifications.enabled.label')
         };
 
         await this.showSettingsCategory(uiSettings);
@@ -214,12 +221,11 @@ class SettingsCLI {
     async showDirectorySettings() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Directory Settings${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.categories.directorySettings')}${colors.reset}\n`);
 
         const dirSettings = {
-            'directories.locales': 'Locales Directory',
-            'directories.reports': 'Reports Directory',
-            'directories.backup': 'Backup Directory'
+            'sourceDir': this.t('settings.fields.sourceDir.label'),
+            'outputDir': this.t('settings.fields.outputDir.label')
         };
 
         await this.showSettingsCategory(dirSettings);
@@ -231,13 +237,12 @@ class SettingsCLI {
     async showProcessingSettings() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Processing Settings${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.categories.processingSettings')}${colors.reset}\n`);
 
         const processSettings = {
-            'processing.batchSize': 'Batch Size',
-            'processing.concurrentFiles': 'Concurrent Files',
-            'processing.sizingThreshold': 'Sizing Threshold (KB)',
-            'processing.autoSave': 'Auto-save Interval (minutes)'
+            'advanced.batchSize': this.t('settings.fields.batchSize.label'),
+            'advanced.maxConcurrentFiles': this.t('settings.fields.maxConcurrentFiles.label'),
+            'advanced.sizingThreshold': this.t('settings.fields.sizingThreshold.label')
         };
 
         await this.showSettingsCategory(processSettings);
@@ -249,16 +254,12 @@ class SettingsCLI {
     async showAdvancedSettings() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Advanced Settings${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.categories.advancedSettings')}${colors.reset}\n`);
 
         const advancedSettings = {
-            'advanced.strictMode': 'Strict Validation Mode',
-            'debug.enabled': 'Debug Mode',
-            'debug.verboseLogging': 'Verbose Logging',
-            'security.adminPinEnabled': 'Admin PIN Protection',
-            'security.sessionTimeout': 'Session Timeout (minutes)',
-            'advanced.backupBeforeChanges': 'Auto Backup',
-            '_setupPin': 'Setup/Change Admin PIN'
+            'advanced.strictMode': this.t('settings.fields.strictMode.label'),
+            'advanced.enableAuditLog': this.t('settings.fields.enableAuditLog.label'),
+            'advanced.backupBeforeChanges': this.t('settings.fields.backupBeforeChanges.label')
         };
 
         await this.showSettingsCategory(advancedSettings);
@@ -275,13 +276,13 @@ class SettingsCLI {
             const value = this.getNestedValue(this.settings, key);
             const displayValue = this.formatValue(value);
             console.log(`  ${colors.cyan}${index + 1}${colors.reset}) ${categorySettings[key]}`);
-            console.log(`     ${colors.dim}Current: ${colors.reset}${displayValue}`);
+            console.log(`     ${colors.dim}${this.t('settings.current')}: ${colors.reset}${displayValue}`);
         });
 
-        console.log(`\n  ${colors.yellow}b${colors.reset}) Back to main menu`);
+        console.log(`\n  ${colors.yellow}b${colors.reset}) ${this.t('settings.back')}`);
         console.log();
 
-        const choice = await this.prompt('Select setting to edit (or b for back): ');
+        const choice = await this.prompt(this.t('settings.selectSettingPrompt'));
         
         if (choice.toLowerCase() === 'b') {
             return;
@@ -293,7 +294,7 @@ class SettingsCLI {
             await this.editSetting(key, categorySettings[key]);
             await this.showSettingsCategory(categorySettings);
         } else {
-            this.error('Invalid option.');
+            this.error(this.t('common.invalidOption'));
             await this.pause();
             await this.showSettingsCategory(categorySettings);
         }
@@ -318,26 +319,8 @@ class SettingsCLI {
      * Get helper text for a setting
      */
     getHelperText(key) {
-        const helperTexts = {
-            'language': 'Select the interface language for the toolkit. Changes take effect immediately.',
-            'theme': 'Choose the color theme for the interface. Options: light, dark, auto.',
-            'dateFormat': 'Set the date format for reports and logs. Examples: YYYY-MM-DD, DD/MM/YYYY, MM-DD-YYYY.',
-            'notifications.enabled': 'Enable or disable system notifications. Enter: true or false.',
-            'directories.locales': 'Path to the directory containing translation files.',
-            'directories.reports': 'Path where analysis reports will be saved.',
-            'directories.backup': 'Path for backup files. Leave empty for default.',
-            'processing.batchSize': 'Number of files to process simultaneously. Range: 1-100.',
-            'processing.concurrentFiles': 'Maximum concurrent file operations. Range: 1-20.',
-            'processing.sizingThreshold': 'File size threshold in KB for warnings. Range: 1-10000.',
-            'processing.autoSave': 'Auto-save interval in minutes. 0 to disable. Range: 0-60.',
-            'advanced.strictMode': '🔒 Enable strict validation mode. Requires admin PIN.',
-            'debug.enabled': '🔒 Enable debug mode for troubleshooting. Requires admin PIN.',
-            'debug.verboseLogging': '🔒 Enable detailed logging. Requires admin PIN.',
-            'security.adminPinEnabled': '🔒 Enable admin PIN protection. Requires admin PIN.',
-            'security.sessionTimeout': '🔒 Session timeout in minutes. Requires admin PIN.',
-            'advanced.backupBeforeChanges': '🔒 Auto-backup before changes. Requires admin PIN.'
-        };
-        return helperTexts[key] || 'No additional information available.';
+        const helperKey = key.replace(/\./g, '_');
+        return this.t(`settings.fields.${helperKey}.help`) || this.t('settings.noHelp');
     }
 
     /**
@@ -422,7 +405,7 @@ class SettingsCLI {
             console.log(`\n🔒 Admin authentication required for: ${label}`);
             const authenticated = await this.adminPin.verifyPin();
             if (!authenticated) {
-                console.log('❌ Access denied. Returning to menu.');
+                console.log(this.t('settings.admin.accessDenied'));
                 await this.pause();
                 return;
             }
@@ -432,7 +415,7 @@ class SettingsCLI {
         const currentValue = this.getNestedValue(this.settings, key);
         const schema = this.getSettingSchema(key);
         
-        console.log(`\n${colors.bright}Editing: ${label}${colors.reset}`);
+        console.log(`\n${colors.bright}${this.t('settings.editing')}: ${label}${colors.reset}`);
         
         // Show helper text
         const helperText = this.getHelperText(key);
@@ -441,23 +424,27 @@ class SettingsCLI {
         // Show current value with special handling for admin PIN
         if (key === 'security.adminPinEnabled') {
             const pinDisplay = this.adminPin.getPinDisplay();
-            console.log(`Current value: ${this.formatValue(currentValue)} (PIN: ${pinDisplay})`);
+            console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue)} (${this.t('settings.pin')}: ${pinDisplay})`);
         } else {
-            console.log(`Current value: ${this.formatValue(currentValue)}`);
+            console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue)}`);
         }
         
         // Show valid options
         const validOptions = this.getValidOptions(key, schema);
         if (validOptions) {
-            console.log(`\n${colors.cyan}Valid options:${colors.reset}`);
+            console.log(`\n${colors.cyan}${this.t('settings.validOptions')}:${colors.reset}`);
             validOptions.forEach((option, index) => {
-                const marker = option.toLowerCase() === String(currentValue).toLowerCase() ? ' ← current' : '';
+                const marker = option.toLowerCase() === String(currentValue).toLowerCase() ? ` ← ${this.t('settings.current')}` : '';
                 console.log(`  ${index + 1}) ${option}${colors.dim}${marker}${colors.reset}`);
             });
         }
         
         console.log();
-        const newValue = await this.prompt(`Enter new value (or press Enter to keep current): `);
+        const newValue = await this.prompt(this.t('settings.enterNewValue'));
+        
+        if (newValue.trim() === '') {
+            return;
+        }
         
         if (newValue.trim() === '') {
             return;
@@ -481,10 +468,10 @@ class SettingsCLI {
         
         // Special handling for admin PIN setup
         if (key === 'security.adminPinEnabled' && convertedValue === true && !this.adminPin.isPinSet()) {
-            console.log('\n🔐 Setting up admin PIN...');
+            console.log(this.t('settings.admin.setupPin'));
             const pinSetup = await this.adminPin.setupPin();
             if (!pinSetup) {
-                console.log('❌ Failed to set up admin PIN. Setting not changed.');
+                console.log(this.t('settings.admin.setupFailed'));
                 await this.pause();
                 return;
             }
@@ -502,7 +489,7 @@ class SettingsCLI {
             }
         }
         
-        this.success(`${label} updated successfully.`);
+        this.success(this.t('settings.updatedSuccessfully', { setting: label }));
         await this.pause();
     }
 
@@ -515,21 +502,21 @@ class SettingsCLI {
         console.log(`${colors.bright}Admin PIN Setup${colors.reset}\n`);
         
         if (this.adminPin.isPinSet()) {
-            console.log('📌 Admin PIN is currently configured.');
-            console.log('\nOptions:');
-            console.log('  1) Change existing PIN');
-            console.log('  2) Remove PIN protection');
-            console.log('  3) Cancel');
+            console.log(this.t('settings.admin.pinConfigured'));
+    console.log('\n' + this.t('settings.admin.options'));
+            console.log('  ' + this.t('settings.admin.changePin'));
+    console.log('  ' + this.t('settings.admin.removePin'));
+    console.log('  ' + this.t('settings.admin.cancel'));
             console.log();
             
             const choice = await this.prompt('Select option: ');
             
             switch (choice) {
                 case '1':
-                    console.log('\n🔐 Verify current PIN first:');
+                    console.log(this.t('settings.admin.verifyCurrentPin'));
                     const verified = await this.adminPin.verifyPin();
                     if (verified) {
-                        console.log('\n🔄 Setting up new PIN...');
+                        console.log(this.t('settings.admin.settingNewPin'));
                         const success = await this.adminPin.setupPin();
                         if (success) {
                             this.success('Admin PIN updated successfully!');
@@ -539,7 +526,7 @@ class SettingsCLI {
                     }
                     break;
                 case '2':
-                    console.log('\n🔐 Verify current PIN to remove protection:');
+                    console.log(this.t('settings.admin.verifyToRemove'));
                     const verifiedForRemoval = await this.adminPin.verifyPin();
                     if (verifiedForRemoval) {
                         // Remove PIN file
@@ -552,18 +539,18 @@ class SettingsCLI {
                     }
                     break;
                 case '3':
-                    console.log('Operation cancelled.');
+                    console.log(this.t('settings.admin.operationCancelled'));
                     break;
                 default:
                     this.error('Invalid option.');
             }
         } else {
-            console.log('🔓 No admin PIN is currently configured.');
-            console.log('\nSetting up admin PIN will add security for:');
-            console.log('  • Changing security settings');
-            console.log('  • Modifying advanced configurations');
-            console.log('  • Accessing debug tools');
-            console.log('  • Resetting settings');
+            console.log(this.t('settings.admin.noPinConfigured'));
+    console.log('\n' + this.t('settings.admin.pinBenefits'));
+    console.log('  ' + this.t('settings.admin.benefitSecurity'));
+    console.log('  ' + this.t('settings.admin.benefitAdvanced'));
+    console.log('  ' + this.t('settings.admin.benefitDebug'));
+    console.log('  ' + this.t('settings.admin.benefitReset'));
             console.log();
             
             const response = await this.prompt('Would you like to set up an admin PIN? (y/N): ');
@@ -579,7 +566,7 @@ class SettingsCLI {
                     this.error('Failed to configure admin PIN.');
                 }
             } else {
-                console.log('⏭️  Admin PIN setup cancelled.');
+                console.log(this.t('settings.admin.setupCancelled'));
             }
         }
         
@@ -592,11 +579,11 @@ class SettingsCLI {
     async showAllSettings() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Current Settings${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.viewAll.title')}${colors.reset}\n`);
         
         this.displaySettingsTree(this.settings, '');
         
-        console.log(`\nPress Enter to continue...`);
+        console.log(`\n${this.t('settings.pressEnter')}...`);
         await this.prompt('');
     }
 
@@ -621,14 +608,14 @@ class SettingsCLI {
     async showImportExport() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Import/Export Settings${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.importExport.title')}${colors.reset}\n`);
         
-        console.log(`  ${colors.cyan}1${colors.reset}) Export current settings`);
-        console.log(`  ${colors.cyan}2${colors.reset}) Import settings from file`);
-        console.log(`  ${colors.cyan}3${colors.reset}) Create backup`);
-        console.log(`  ${colors.yellow}b${colors.reset}) Back to main menu\n`);
+        console.log(`  ${colors.cyan}1${colors.reset}) ${this.t('settings.importExport.export')}`);
+        console.log(`  ${colors.cyan}2${colors.reset}) ${this.t('settings.importExport.import')}`);
+        console.log(`  ${colors.cyan}3${colors.reset}) ${this.t('settings.importExport.backup')}`);
+        console.log(`  ${colors.yellow}b${colors.reset}) ${this.t('settings.back')}\n`);
         
-        const choice = await this.prompt('Select option: ');
+        const choice = await this.prompt(this.t('settings.selectOption'));
         
         switch (choice) {
             case '1':
@@ -643,7 +630,7 @@ class SettingsCLI {
             case 'b':
                 return;
             default:
-                this.error('Invalid option.');
+                this.error(this.t('common.invalidOption'));
                 await this.pause();
                 await this.showImportExport();
         }
@@ -997,7 +984,7 @@ class SettingsCLI {
      */
     async run() {
         try {
-            console.log('🎛️  Starting Settings CLI...');
+            console.log(this.t('settings.startingSettings'));
             await this.start();
         } catch (error) {
             console.error('❌ Settings CLI Error:', error.message);

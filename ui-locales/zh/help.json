@@ -1,0 +1,88 @@
+{
+  "title": "⚠️ TRANSLATION NEEDED ⚠️",
+  "usage": "⚠️ TRANSLATION NEEDED ⚠️",
+  "interactiveMode": "⚠️ TRANSLATION NEEDED ⚠️",
+  "showHelp": "⚠️ TRANSLATION NEEDED ⚠️",
+  "availableCommands": "⚠️ TRANSLATION NEEDED ⚠️",
+  "help": {
+    "initProject": "⚠️ TRANSLATION NEEDED ⚠️",
+    "analyzeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "validateTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "checkUsage": "⚠️ TRANSLATION NEEDED ⚠️",
+    "initCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "analyzeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "validateCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "usageCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "sizingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "completeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "summaryCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "debugCommand": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "initProject": "⚠️ TRANSLATION NEEDED ⚠️",
+  "analyzeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
+  "validateTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
+  "checkUsage": "⚠️ TRANSLATION NEEDED ⚠️",
+  "initCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "analyzeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "validateCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "usageCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "sizingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "completeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "summaryCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "debugCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "menu": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "description": "⚠️ TRANSLATION NEEDED ⚠️",
+    "exit": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "commands": {
+    "init": "⚠️ TRANSLATION NEEDED ⚠️",
+    "analyze": "⚠️ TRANSLATION NEEDED ⚠️",
+    "validate": "⚠️ TRANSLATION NEEDED ⚠️",
+    "usage": "⚠️ TRANSLATION NEEDED ⚠️",
+    "sizing": "⚠️ TRANSLATION NEEDED ⚠️",
+    "complete": "⚠️ TRANSLATION NEEDED ⚠️",
+    "summary": "⚠️ TRANSLATION NEEDED ⚠️",
+    "debug": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "options": {
+    "sourceDir": "⚠️ TRANSLATION NEEDED ⚠️",
+    "output": "⚠️ TRANSLATION NEEDED ⚠️",
+    "verbose": "⚠️ TRANSLATION NEEDED ⚠️",
+    "keepReports": "⚠️ TRANSLATION NEEDED ⚠️",
+    "deleteReports": "⚠️ TRANSLATION NEEDED ⚠️",
+    "help": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "examples": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "example1": "⚠️ TRANSLATION NEEDED ⚠️",
+    "example2": "⚠️ TRANSLATION NEEDED ⚠️",
+    "example3": "⚠️ TRANSLATION NEEDED ⚠️",
+    "example4": "⚠️ TRANSLATION NEEDED ⚠️",
+    "example5": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "features": {
+    "initProject": "⚠️ TRANSLATION NEEDED ⚠️",
+    "analyzeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "validateTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "checkUsage": "⚠️ TRANSLATION NEEDED ⚠️",
+    "completeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "showSizing": "⚠️ TRANSLATION NEEDED ⚠️",
+    "runWorkflow": "⚠️ TRANSLATION NEEDED ⚠️",
+    "showStatus": "⚠️ TRANSLATION NEEDED ⚠️",
+    "deleteReports": "⚠️ TRANSLATION NEEDED ⚠️",
+    "changeLanguage": "⚠️ TRANSLATION NEEDED ⚠️",
+    "settings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "showHelp": "⚠️ TRANSLATION NEEDED ⚠️",
+    "debugTools": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "messages": {
+    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
+    "invalidOption": "⚠️ TRANSLATION NEEDED ⚠️",
+    "operationCompleted": "⚠️ TRANSLATION NEEDED ⚠️",
+    "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
+    "goodbye": "⚠️ TRANSLATION NEEDED ⚠️",
+    "unknownCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+    "nonInteractive": "⚠️ TRANSLATION NEEDED ⚠️"
+  }
+}

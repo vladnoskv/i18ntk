@@ -1,0 +1,28 @@
+{
+  "test_complete_system": {
+    "starting_test": "⚠️ TRANSLATION NEEDED ⚠️",
+    "separator": "⚠️ TRANSLATION NEEDED ⚠️",
+    "testing_ui_translations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "testing_settings_manager": "⚠️ TRANSLATION NEEDED ⚠️",
+    "testing_main_scripts": "⚠️ TRANSLATION NEEDED ⚠️",
+    "checking_translation_consistency": "⚠️ TRANSLATION NEEDED ⚠️",
+    "non_critical_missing_keys": "⚠️ TRANSLATION NEEDED ⚠️",
+    "extra_keys": "⚠️ TRANSLATION NEEDED ⚠️",
+    "generating_report": "⚠️ TRANSLATION NEEDED ⚠️",
+    "final_test_report_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "passed": "⚠️ TRANSLATION NEEDED ⚠️",
+    "failed": "⚠️ TRANSLATION NEEDED ⚠️",
+    "warnings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "missing_translations_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "missing_translation_key": "⚠️ TRANSLATION NEEDED ⚠️",
+    "missing_translations_more": "⚠️ TRANSLATION NEEDED ⚠️",
+    "errors_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "error_message": "⚠️ TRANSLATION NEEDED ⚠️",
+    "overall_status": "⚠️ TRANSLATION NEEDED ⚠️",
+    "success_message": "⚠️ TRANSLATION NEEDED ⚠️",
+    "failure_message": "⚠️ TRANSLATION NEEDED ⚠️",
+    "failure_error_message": "⚠️ TRANSLATION NEEDED ⚠️",
+    "warning_message": "⚠️ TRANSLATION NEEDED ⚠️",
+    "test_runner_failed": "⚠️ TRANSLATION NEEDED ⚠️"
+  }
+}

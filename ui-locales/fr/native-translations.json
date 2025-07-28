@@ -1,0 +1,22 @@
+{
+  "native_translations": {
+    "exact_translation_found": "⚠️ TRANSLATION NEEDED ⚠️",
+    "no_exact_translation": "⚠️ TRANSLATION NEEDED ⚠️",
+    "similar_key": "⚠️ TRANSLATION NEEDED ⚠️",
+    "processing_language_files": "⚠️ TRANSLATION NEEDED ⚠️",
+    "file_not_found": "⚠️ TRANSLATION NEEDED ⚠️",
+    "processing_translations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "backup_created": "⚠️ TRANSLATION NEEDED ⚠️",
+    "error_parsing_json": "⚠️ TRANSLATION NEEDED ⚠️",
+    "existing_keys_found": "⚠️ TRANSLATION NEEDED ⚠️",
+    "error_writing_json": "⚠️ TRANSLATION NEEDED ⚠️",
+    "translations_replaced": "⚠️ TRANSLATION NEEDED ⚠️",
+    "translation_replacement_complete": "⚠️ TRANSLATION NEEDED ⚠️",
+    "total_replacements": "⚠️ TRANSLATION NEEDED ⚠️",
+    "dry_run_mode": "⚠️ TRANSLATION NEEDED ⚠️",
+    "tool_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "tool_separator": "⚠️ TRANSLATION NEEDED ⚠️",
+    "dry_run_warning": "⚠️ TRANSLATION NEEDED ⚠️",
+    "error_during_replacement": "⚠️ TRANSLATION NEEDED ⚠️"
+  }
+}

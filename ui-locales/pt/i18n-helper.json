@@ -1,0 +1,9 @@
+{
+  "i18n_helper": {
+    "translation_file_not_found": "⚠️ TRANSLATION NEEDED ⚠️",
+    "error_loading_translations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "translation_not_found": "⚠️ TRANSLATION NEEDED ⚠️",
+    "translation_key_not_string": "⚠️ TRANSLATION NEEDED ⚠️",
+    "error_reading_locales_directory": "⚠️ TRANSLATION NEEDED ⚠️"
+  }
+}

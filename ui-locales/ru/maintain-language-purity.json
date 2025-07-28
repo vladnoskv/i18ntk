@@ -1,0 +1,19 @@
+{
+  "maintainLanguagePurity": {
+    "workflow_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "step1_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "step2_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "step3_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "step4_title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "workflow_error": "⚠️ TRANSLATION NEEDED ⚠️",
+    "running_initial_validation": "⚠️ TRANSLATION NEEDED ⚠️",
+    "initial_assessment_complete": "⚠️ TRANSLATION NEEDED ⚠️",
+    "initial_assessment_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "detecting_fixing_mismatches": "⚠️ TRANSLATION NEEDED ⚠️",
+    "detection_complete_applying_fixes": "⚠️ TRANSLATION NEEDED ⚠️",
+    "mismatch_fixes_complete": "⚠️ TRANSLATION NEEDED ⚠️",
+    "mismatch_fixes_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "applying_automatic_translations": "⚠️ TRANSLATION NEEDED ⚠️",
+    "translation_preview_complete": "⚠️ TRANSLATION NEEDED ⚠️"
+  }
+}

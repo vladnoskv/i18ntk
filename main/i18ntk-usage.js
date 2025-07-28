@@ -1074,32 +1074,7 @@ class I18nUsageAnalyzer {
       await this.analyzeTranslationCompleteness();
       
       // Display results
-      console.log(this.t('usage.checkUsage.title'));
-      console.log(this.t("usage.checkUsage.message"));
-      
-      console.log(this.t("usage.checkUsage.source_directory_thissourcedir", { sourceDir: this.sourceDir }));
-      console.log(this.t("usage.checkUsage.i18n_directory_thisi18ndir", { i18nDir: this.i18nDir }));
-      
-      // Validate directories
-      await SecurityUtils.validatePath(this.sourceDir);
-      await SecurityUtils.validatePath(this.i18nDir);
-      
-      if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(`Source directory not found: ${this.sourceDir}`);
-      }
-      
-      if (!fs.existsSync(this.i18nDir)) {
-        throw new Error(`I18n directory not found: ${this.i18nDir}`);
-      }
-      
-      // Load available keys
-      await this.loadAvailableKeys();
-      
-      // Analyze usage
-      await this.analyzeUsage();
-      
-      // NEW: Analyze translation completeness
-      await this.analyzeTranslationCompleteness();
+
       
       // Generate analysis results
       const unusedKeys = this.findUnusedKeys();

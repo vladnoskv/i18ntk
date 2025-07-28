@@ -1,5 +1,4 @@
 {
-  "complete": {
   "configLoadedSuccessfully": "Configuration loaded successfully",
   "configLoadingFailed": "Configuration loading failed",
   "title": "🌍 I18N TRANSLATION COMPLETION",
@@ -31,5 +30,5 @@
   "reportNotFound": "📋 Usage report not found. Using common keys...",
   "foundMissingKeys": "📋 Found {count} missing keys from usage analysis",
   "couldNotParse": "❌ Could not parse usage report. Using common keys..."
-  }
+
 }

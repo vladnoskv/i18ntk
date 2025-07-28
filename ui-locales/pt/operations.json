@@ -1,0 +1,68 @@
+{
+  "completed": "⚠️ TRANSLATION NEEDED ⚠️",
+  "deleteReportsTitle": "⚠️ TRANSLATION NEEDED ⚠️",
+  "scanningForFiles": "⚠️ TRANSLATION NEEDED ⚠️",
+  "noFilesFoundToDelete": "⚠️ TRANSLATION NEEDED ⚠️",
+  "availableDirectories": "⚠️ TRANSLATION NEEDED ⚠️",
+  "allDirectories": "⚠️ TRANSLATION NEEDED ⚠️",
+  "cancelOption": "⚠️ TRANSLATION NEEDED ⚠️",
+  "invalidSelection": "⚠️ TRANSLATION NEEDED ⚠️",
+  "foundFilesInSelectedDirectories": "⚠️ TRANSLATION NEEDED ⚠️",
+  "deletionOptions": "⚠️ TRANSLATION NEEDED ⚠️",
+  "deleteAllFiles": "⚠️ TRANSLATION NEEDED ⚠️",
+  "keepLast3Files": "⚠️ TRANSLATION NEEDED ⚠️",
+  "keepLast5Files": "⚠️ TRANSLATION NEEDED ⚠️",
+  "noFilesToDelete": "⚠️ TRANSLATION NEEDED ⚠️",
+  "filesToDeleteCount": "⚠️ TRANSLATION NEEDED ⚠️",
+  "filesToKeepCount": "⚠️ TRANSLATION NEEDED ⚠️",
+  "confirmDeletion": "⚠️ TRANSLATION NEEDED ⚠️",
+  "deletedFile": "⚠️ TRANSLATION NEEDED ⚠️",
+  "failedToDeleteFile": "⚠️ TRANSLATION NEEDED ⚠️",
+  "cancelled": "⚠️ TRANSLATION NEEDED ⚠️",
+  "init": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "usage": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "analyze": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "validate": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "settings": {
+    "title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "separator": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "complete": {
+    "deletingOldReport": "⚠️ TRANSLATION NEEDED ⚠️",
+    "generatingFreshAnalysis": "⚠️ TRANSLATION NEEDED ⚠️",
+    "couldNotGenerate": "⚠️ TRANSLATION NEEDED ⚠️",
+    "reportNotFound": "⚠️ TRANSLATION NEEDED ⚠️",
+    "foundMissingKeys": "⚠️ TRANSLATION NEEDED ⚠️",
+    "couldNotParse": "⚠️ TRANSLATION NEEDED ⚠️",
+    "title": "⚠️ TRANSLATION NEEDED ⚠️",
+    "separator": "⚠️ TRANSLATION NEEDED ⚠️",
+    "sourceDir": "⚠️ TRANSLATION NEEDED ⚠️",
+    "sourceLanguage": "⚠️ TRANSLATION NEEDED ⚠️",
+    "dryRunMode": "⚠️ TRANSLATION NEEDED ⚠️",
+    "languages": "⚠️ TRANSLATION NEEDED ⚠️",
+    "addingMissingKeys": "⚠️ TRANSLATION NEEDED ⚠️",
+    "processing": "⚠️ TRANSLATION NEEDED ⚠️",
+    "addedKeys": "⚠️ TRANSLATION NEEDED ⚠️",
+    "changeDetails": "⚠️ TRANSLATION NEEDED ⚠️",
+    "noChangesNeeded": "⚠️ TRANSLATION NEEDED ⚠️",
+    "summaryTitle": "⚠️ TRANSLATION NEEDED ⚠️",
+    "totalChanges": "⚠️ TRANSLATION NEEDED ⚠️",
+    "languagesProcessed": "⚠️ TRANSLATION NEEDED ⚠️",
+    "missingKeysAdded": "⚠️ TRANSLATION NEEDED ⚠️",
+    "nextStepsTitle": "⚠️ TRANSLATION NEEDED ⚠️",
+    "nextStep1": "⚠️ TRANSLATION NEEDED ⚠️",
+    "nextStep2": "⚠️ TRANSLATION NEEDED ⚠️",
+    "nextStep3": "⚠️ TRANSLATION NEEDED ⚠️",
+    "allKeysAvailable": "⚠️ TRANSLATION NEEDED ⚠️",
+    "runWithoutDryRun": "⚠️ TRANSLATION NEEDED ⚠️",
+    "pressEnterToContinue": "⚠️ TRANSLATION NEEDED ⚠️"
+  }
+}

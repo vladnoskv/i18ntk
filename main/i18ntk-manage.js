@@ -193,7 +193,8 @@ class I18nManager {
       // Handle help immediately without dependency checks
       if (args.includes('--help') || args.includes('-h')) {
         this.showHelp();
-        return;
+        this.safeClose();
+        process.exit(0);
       }
 
       // Handle debug flag
@@ -255,6 +256,11 @@ class I18nManager {
     console.log(this.ui.t('help.summaryCommand'));
     console.log(this.ui.t('help.debugCommand'));
 
+    // Ensure proper exit for direct command execution
+    if (process.argv.includes('--help') || process.argv.includes('-h')) {
+      this.safeClose();
+      process.exit(0);
+    }
   }
 
 
@@ -371,11 +377,6 @@ class I18nManager {
                 if (isManagerExecution && !this.isNonInteractiveMode()) {
                   await this.prompt(this.ui.t('usage.pressEnterToReturnToMenu'));
                   await this.showInteractiveMenu();
-                } else if (isDirectCommand && !this.isNonInteractiveMode()) {
-                  await this.prompt(this.ui.t('usage.pressEnterToContinue'));
-                  console.log(this.ui.t('workflow.exitingCompleted'));
-                  this.safeClose();
-                  process.exit(0);
                 } else {
                   console.log(this.ui.t('workflow.exitingCompleted'));
                   this.safeClose();
@@ -397,14 +398,8 @@ class I18nManager {
           // Interactive menu execution - return to menu
           await this.prompt(this.ui.t('menu.returnToMainMenu'));
           await this.showInteractiveMenu();
-        } else if (isDirectCommand && !this.isNonInteractiveMode()) {
-          // Direct command execution - show "enter to continue" and exit
-          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
-          console.log(this.ui.t('workflow.exitingCompleted'));
-          this.safeClose();
-          process.exit(0);
         } else {
-          // Non-interactive mode or workflow execution - exit immediately
+          // Direct commands, non-interactive mode, or workflow execution - exit immediately
           console.log(this.ui.t('workflow.exitingCompleted'));
           this.safeClose();
           process.exit(0);
@@ -529,7 +524,7 @@ class I18nManager {
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {
             try {
-              await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
+              await this.prompt('\n' + this.ui.t('debug.pressEnterToContinue'));
               await this.showInteractiveMenu();
             } catch (error) {
               console.log(this.ui.t('menu.returning'));
@@ -545,7 +540,7 @@ class I18nManager {
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {
             try {
-              await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
+              await this.prompt('\n' + this.ui.t('debug.pressEnterToContinue'));
               await this.showInteractiveMenu();
             } catch (error) {
               console.log(this.ui.t('menu.returning'));
@@ -586,17 +581,17 @@ class I18nManager {
 
   // Debug Tools Menu
   async showDebugMenu() {
-    console.log(`\n${this.ui.t('menu.options.debug')}`);
-    console.log(this.ui.t('menu.separator'));
-    console.log(`1. ${this.ui.t('detect_language_mismatches.mainDebuggerSystemDiagnostics')}`);
-    console.log(`2. ${this.ui.t('testConsoleI18n.consoleTranslationsCheck')}`);
-    console.log(`3. ${this.ui.t('detect_language_mismatches.exportMissingKeys')}`);
-    console.log(`4. ${this.ui.t('detect_language_mismatches.replaceHardcodedConsole')}`);
-    console.log(`5. ${this.ui.t('detect_language_mismatches.consoleKeyChecker')}`);
-    console.log(`6. ${this.ui.t('detect_language_mismatches.debugLogs')}`);
-    console.log(`0. ${this.ui.t('detect_language_mismatches.backToMainMenu')}`);
+    console.log(`\n${this.ui.t('debug.title')}`);
+    console.log(this.ui.t('debug.separator'));
+    console.log(`1. ${this.ui.t('debug.mainDebuggerSystemDiagnostics')}`);
+    console.log(`2. ${this.ui.t('debug.consoleTranslationsCheck')}`);
+    console.log(`3. ${this.ui.t('debug.exportMissingKeys')}`);
+    console.log(`4. ${this.ui.t('debug.replaceHardcodedConsole')}`);
+    console.log(`5. ${this.ui.t('debug.consoleKeyChecker')}`);
+    console.log(`6. ${this.ui.t('debug.debugLogs')}`);
+    console.log(`0. ${this.ui.t('debug.backToMainMenu')}`);
     
-    const choice = await this.prompt('\n' + this.ui.t('menu.selectDebugToolPrompt'));
+    const choice = await this.prompt('\n' + this.ui.t('debug.selectOption'));
     
     switch (choice.trim()) {
       case '1':
@@ -621,14 +616,14 @@ class I18nManager {
         await this.showInteractiveMenu();
         return;
       default:
-        console.log(this.ui.t('detect_language_mismatches.invalidChoiceSelectRange'));
+        console.log(this.ui.t('debug.invalidChoiceSelectRange'));
         await this.showDebugMenu();
     }
   }
 
   // Run a debug tool
   async runDebugTool(toolName, displayName) {
-  console.log(this.ui.t('detect_language_mismatches.runningDebugTool', { displayName }));
+  console.log(this.ui.t('debug.runningDebugTool', { displayName }));
     try {
       const toolPath = path.join(__dirname, '..', 'dev', 'debug', toolName);
       if (fs.existsSync(toolPath)) {
@@ -640,7 +635,7 @@ class I18nManager {
         });
         console.log(output);
       } else {
-      console.log(this.ui.t('detect_language_mismatches.debugToolNotFound', { toolName }));
+      console.log(this.ui.t('debug.debugToolNotFound', { toolName }));
       }
     } catch (error) {
       console.error(this.ui.t('errors.errorRunningDebugTool', { displayName, error: error.message }));
@@ -652,7 +647,7 @@ class I18nManager {
 
   // View debug logs
   async viewDebugLogs() {
-    console.log(`\n${this.ui.t('detect_language_mismatches.recentDebugLogs')}`);
+    console.log(`\n${this.ui.t('debug.recentDebugLogs')}`);
     console.log('============================================================');
     
     try {
@@ -674,21 +669,21 @@ class I18nManager {
             console.log(`${index + 1}. ${file} (${stats.mtime.toLocaleString()})`);
           });
           
-          const choice = await this.prompt('\n' + this.ui.t('menu.selectLogPrompt', { count: files.length }));
+          const choice = await this.prompt('\n' + this.ui.t('debug.selectLogPrompt', { count: files.length }));
           const fileIndex = parseInt(choice) - 1;
           
           if (fileIndex >= 0 && fileIndex < files.length) {
             const logContent = fs.readFileSync(path.join(logsDir, files[fileIndex]), 'utf8');
-            console.log(`\n📄 Content of ${files[fileIndex]}:`);
+            console.log(`\n${this.ui.t('debug.contentOf', { filename: files[fileIndex] })}:`);
             console.log('============================================================');
             console.log(logContent.slice(-2000)); // Show last 2000 characters
             console.log('============================================================');
           }
         } else {
-          console.log(this.ui.t('detect_language_mismatches.noDebugLogsFound'));
+          console.log(this.ui.t('debug.noDebugLogsFound'));
         }
       } else {
-        console.log(this.ui.t('detect_language_mismatches.debugLogsDirectoryNotFound'));
+        console.log(this.ui.t('debug.debugLogsDirectoryNotFound'));
       }
     } catch (error) {
       console.error(this.ui.t('errors.errorReadingDebugLogs', { error: error.message }));

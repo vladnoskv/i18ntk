@@ -293,12 +293,12 @@ class I18nCompletionTool {
       fs.unlinkSync(usageReportPath);
     }
     
-    // Generate fresh usage analysis report
+    // Generate fresh usage analysis report (quietly)
     console.log(this.t("operations.complete.generatingFreshAnalysis"));
     const { execSync } = require('child_process');
     try {
       execSync('node main/i18ntk-usage.js --output-report', { 
-        stdio: 'inherit',
+        stdio: 'pipe', // Suppress output to avoid double display
         cwd: process.cwd()
       });
     } catch (error) {

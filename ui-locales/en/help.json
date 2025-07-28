@@ -1,16 +1,42 @@
 {
-  "title": "📊 I18N MANAGEMENT HELP",
-  "usage": "Usage: node i18ntk-manage.js [options]",
-  "interactiveMode": "💡 Use: node i18ntk-manage.js --command=<command> for direct execution",
-  "showHelp": "📖 Use: node i18ntk-manage.js --help for available commands",
-  "availableCommands": "📖 Available Commands:",
+  "title": "📊 I18N MANAGEMENT HELP\n\n",
+  "usage": "Usage: node i18ntk-manage.js [options]\n",
+  "interactiveMode": "\n💡 Use: node i18ntk-manage.js --command=<command> for direct execution\n",
+  "showHelp": "\n📖 Use: node i18ntk-manage.js --help for available commands\n",
+  "availableCommands": "\n📖 Available Commands:\n",
+  "help": {
+    "initProject": "🚀 Initialize new languages",
+    "analyzeTranslations": "🔍 Analyze translations",
+    "validateTranslations": "✅ Validate translations",
+    "checkUsage": "📊 Check key usage",
+    "initCommand": "  init      - Initialize new languages",
+    "analyzeCommand": "  analyze   - Analyze translations",
+    "validateCommand": "  validate  - Validate translations",
+    "usageCommand": "  usage     - Check key usage",
+    "sizingCommand": "  sizing    - Analyze sizing",
+    "completeCommand": "  complete  - Complete translations (100% coverage)",
+    "summaryCommand": "  summary   - Show project status",
+    "debugCommand": "  debug     - Debug translation issues"
+  },
+  "initProject": "🚀 Initialize new languages",
+  "analyzeTranslations": "🔍 Analyze translations",
+  "validateTranslations": "✅ Validate translations",
+  "checkUsage": "📊 Check key usage",
+  "initCommand": "  init      - Initialize new languages",
+  "analyzeCommand": "  analyze   - Analyze translations",
+  "validateCommand": "  validate  - Validate translations",
+  "usageCommand": "  usage     - Check key usage",
+  "sizingCommand": "  sizing    - Analyze sizing",
+  "completeCommand": "  complete  - Complete translations (100% coverage)",
+  "summaryCommand": "  summary   - Show project status",
+  "debugCommand": "  debug     - Debug translation issues",
   "menu": {
-    "title": "🌐 I18N MANAGEMENT MENU",
-    "description": "Interactive menu for managing internationalization",
-    "exit": "🚪 Exit"
+    "title": "\n🌐 I18N MANAGEMENT MENU\n",
+    "description": "Interactive menu for managing internationalization\n",
+    "exit": "\n🚪 Exit"
   },
   "commands": {
-    "init": "  init      - Initialize new languages",
+    "init": "\n  init      - Initialize new languages",
     "analyze": "  analyze   - Analyze translations",
     "validate": "  validate  - Validate translations",
     "usage": "  usage     - Check key usage",
@@ -20,7 +46,7 @@
     "debug": "  debug     - Debug translation issues"
   },
   "options": {
-    "sourceDir": "  --source-dir <dir>     Source directory to analyze",
+    "sourceDir": "\n  --source-dir <dir>     Source directory to analyze",
     "output": "  --output <file>        Output file for the report",
     "verbose": "  --verbose, -v           Show detailed information",
     "keepReports": "  --keep-reports          Keep existing reports",
@@ -28,7 +54,7 @@
     "help": "  --help, -h              Show this help"
   },
   "examples": {
-    "title": "Examples:",
+    "title": "\nExamples:\n",
     "example1": "  node i18ntk-manage.js",
     "example2": "  node i18ntk-manage.js --source-dir ./locales",
     "example3": "  node i18ntk-manage.js --output summary-report.txt",
