@@ -1,5 +1,5 @@
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const settingsManager = require('../settings/settings-manager');
 
 // Get configuration from settings manager
@@ -23,23 +23,54 @@ function loadTranslations(language = 'en') {
   currentLanguage = language;
   const config = getConfig();
   const localesDir = path.resolve(config.uiLocalesDir);
-  const translationFile = path.join(localesDir, `${language}.json`);
   
   try {
-    if (fs.existsSync(translationFile)) {
-      const content = fs.readFileSync(translationFile, 'utf8');
-      translations = JSON.parse(content);
+    const langDir = path.join(localesDir, language);
+    translations = {}; // Reset translations for the new language
+    
+
+    if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+      
+      const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
+
+      for (const file of files) {
+        const filePath = path.join(langDir, file);
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          const fileTranslations = JSON.parse(content);
+          
+          // Merge translations, using the filename (without .json) as the top-level key
+          const moduleName = path.basename(file, '.json');
+          translations[moduleName] = deepMerge(translations[moduleName] || {}, fileTranslations);
+         } catch (parseError) {
+          console.error(`Error parsing translation file ${filePath}: ${parseError.message}`);
+        }
+      }
       isInitialized = true;
-    } else {
-      console.warn(`Translation file not found: ${translationFile}`);
-      translations = {};
+    }
+    else {
+      // Fallback to old single file if new modular structure not found
+      const oldTranslationFile = path.join(localesDir, `${language}.json`);
+      
+      if (fs.existsSync(oldTranslationFile)) {
+        try {
+          const content = fs.readFileSync(oldTranslationFile, 'utf8');
+          translations = JSON.parse(content);
+          isInitialized = true;
+        } catch (error) {
+          console.error(`Error parsing old translation file ${oldTranslationFile}: ${error.message}`);
+          translations = {};
+        }
+      } else {
+        console.warn(`Translation directory or file not found for language ${language}: ${langDir} or ${oldTranslationFile}`);
+        translations = {};
+      }
     }
   } catch (error) {
     console.error(`Error loading translations: ${error.message}`);
     translations = {};
   }
 }
-
 /**
  * Get a translated string by key
  * @param {string} key - Translation key (e.g., 'module.subkey')
@@ -56,16 +87,39 @@ function t(key, params = {}) {
   // Split the key into parts (e.g., 'module.subkey' -> ['module', 'subkey'])
   const keyParts = key.split('.');
   let value = translations;
-  
-  // Navigate through the nested object
-  for (const part of keyParts) {
+
+
+  // Try to find the key in the main translations object
+  for (let i = 0; i < keyParts.length; i++) {
+    const part = keyParts[i];
     if (value && typeof value === 'object' && part in value) {
       value = value[part];
     } else {
-      // Return the key if translation not found
-      console.warn(`Translation not found for key: ${key}`);
-      return key;
+      value = undefined; // Key not found in main path
+      break;
     }
+  }
+
+  // If not found, try to find it in hardcodedTexts
+
+  if (typeof value === 'undefined' && translations.hardcodedTexts) {
+    let hardcodedValue = translations.hardcodedTexts;
+    for (const part of keyParts) {
+      if (hardcodedValue && typeof hardcodedValue === 'object' && part in hardcodedValue) {
+        hardcodedValue = hardcodedValue[part];
+      } else {
+        hardcodedValue = undefined; // Key not found in hardcodedTexts path
+        break;
+      }
+    }
+    if (typeof hardcodedValue !== 'undefined') {
+      value = hardcodedValue;
+    }
+  }
+
+  if (typeof value === 'undefined') {
+    console.warn(`Translation not found for key: ${key}`);
+    return key;
   }
   
   // If we found a string, interpolate parameters
@@ -80,7 +134,7 @@ function t(key, params = {}) {
 
 /**
  * Interpolate parameters into a translation string
- * @param {string} template - Template string with {{param}} or {param} placeholders
+ * @param {string} template - Template string with {{param or {param} placeholders
  * @param {object} params - Parameters to interpolate
  * @returns {string} - Interpolated string
  */
@@ -119,8 +173,7 @@ function getAvailableLanguages() {
   try {
     if (fs.existsSync(localesDir)) {
       return fs.readdirSync(localesDir)
-        .filter(file => file.endsWith('.json'))
-        .map(file => path.basename(file, '.json'));
+        .filter(file => fs.statSync(path.join(localesDir, file)).isDirectory());
     }
   } catch (error) {
     console.error(`Error reading locales directory: ${error.message}`);
@@ -128,9 +181,29 @@ function getAvailableLanguages() {
   return ['en']; // Default fallback
 }
 
+/**
+ * Deep merges two objects.
+ * @param {object} target - The target object.
+ * @param {object} source - The source object.
+ * @returns {object} - The merged object.
+ */
+function deepMerge(target, source) {
+  for (const key in source) {
+    if (source.hasOwnProperty(key)) {
+      if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key]) &&
+          typeof target[key] === 'object' && target[key] !== null && !Array.isArray(target[key])) {
+        target[key] = deepMerge(target[key], source[key]);
+      } else {
+        target[key] = source[key];
+      }
+    }
+  }
+  return target;
+}
 module.exports = {
   loadTranslations,
   t,
   getCurrentLanguage,
-  getAvailableLanguages
+  getAvailableLanguages,
+  deepMerge
 };

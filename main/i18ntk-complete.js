@@ -33,10 +33,8 @@ async function getConfig() {
       throw new Error('Configuration validation failed: missing required fields');
     }
     
-    SecurityUtils.logSecurityEvent('Configuration loaded successfully', 'info');
     return config;
   } catch (error) {
-    SecurityUtils.logSecurityEvent('Configuration loading failed', 'error', { error: error.message });
     throw error;
   }
 }
@@ -69,10 +67,16 @@ class I18nCompletionTool {
   }
   
   async initialize() {
-    const baseConfig = await getConfig();
-    this.config = { ...baseConfig, ...this.config };
-    this.sourceDir = path.resolve(this.config.sourceDir);
-    this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+    try {
+      const baseConfig = await getConfig();
+      this.config = { ...baseConfig, ...this.config };
+      this.sourceDir = path.resolve(this.config.sourceDir);
+      this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+      SecurityUtils.logSecurityEvent(this.t('complete.configLoadedSuccessfully'), 'info');
+    } catch (error) {
+      SecurityUtils.logSecurityEvent(this.t('complete.configLoadingFailed'), 'error', { error: error.message });
+      throw error;
+    }
   }
 
   // Parse command line arguments
@@ -421,9 +425,9 @@ class I18nCompletionTool {
         console.log(this.t("operations.complete.separator"));
         console.log(this.t("operations.complete.nextStep1"));
         console.log('   node i18ntk-usage.js --output-report');
-        console.log(this.t("complete.nextStep2"));
+        console.log(this.t("operations.complete.nextStep2"));
         console.log('   node i18ntk-validate.js');
-        console.log(this.t("complete.nextStep3"));
+        console.log(this.t("operations.complete.nextStep3"));
         console.log('   node i18ntk-analyze.js');
         console.log('\n' + this.t("operations.complete.allKeysAvailable"));
       } else {
@@ -433,7 +437,7 @@ class I18nCompletionTool {
       // Only prompt when run from the menu (i.e., when a callback or menu context is present)
       if (typeof this.prompt === "function" && args.fromMenu) {
         console.log(this.ui.t('operations.completed'));
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+        await this.prompt(this.ui.t('operations.pressEnterToContinue'));
       }
       
     } catch (error) {

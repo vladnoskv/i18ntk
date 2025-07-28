@@ -47,25 +47,77 @@ class UIi18n {
             language = 'en';
         }
 
-        const translationFile = path.join(this.uiLocalesDir, `${language}.json`);
+        const langDir = path.join(this.uiLocalesDir, language);
+                this.translations = {}; // Reset translations for the new language
+                
+                const settings = require('../settings/settings-manager').getSettings();
+                const debugEnabled = settings.debug?.enabled || false;
+                
+                if (debugEnabled) {
+                    console.log(`UI: Attempting to load translations from: ${langDir}`);
+                }
         
-        try {
-            if (fs.existsSync(translationFile)) {
-                const content = fs.readFileSync(translationFile, 'utf8');
-                this.translations = JSON.parse(content);
-                this.currentLanguage = language;
+                try {
+                    if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+                        const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
+                        if (debugEnabled) {
+                            console.log(`UI: Found files in ${langDir}: ${files.join(', ')}`);
+                        }
+        
+                        for (const file of files) {
+                            const filePath = path.join(langDir, file);
+                            try {
+                                const content = fs.readFileSync(filePath, 'utf8');
+                                const fileTranslations = JSON.parse(content);
+                                const moduleName = path.basename(file, '.json');
+                                this.translations[moduleName] = this.deepMerge(this.translations[moduleName] || {}, fileTranslations);
+                                if (debugEnabled) {
+                                    console.log(`UI: Loaded ${filePath}, module: ${moduleName}`);
+                                }
+                            } catch (parseError) {
+                                console.error(`UI: Error parsing translation file ${filePath}: ${parseError.message}`);
+                            }
+                        }
+                        this.currentLanguage = language;
             } else {
-                console.warn(`⚠️  Translation file not found: ${translationFile}`);
-                if (language !== 'en') {
-                    this.loadLanguage('en'); // Fallback to English
+                // Fallback to old single file if new modular structure not found
+                const oldTranslationFile = path.join(this.uiLocalesDir, `${language}.json`);
+                if (fs.existsSync(oldTranslationFile)) {
+                    const content = fs.readFileSync(oldTranslationFile, 'utf8');
+                    this.translations = JSON.parse(content);
+                    this.currentLanguage = language;
+                } else {
+                    console.warn(`⚠️  Translation directory or file not found for language ${language}: ${langDir} or ${oldTranslationFile}`);
+                    if (language !== 'en') {
+                        this.loadLanguage('en'); // Fallback to English
+                    }
                 }
             }
         } catch (error) {
-            console.error(`❌ Error loading translation file for '${language}':`, error.message);
+           console.error(this.t('ui.errorLoadingTranslationFile', { language, error: error.message }));
             if (language !== 'en') {
                 this.loadLanguage('en'); // Fallback to English
             }
         }
+    }
+
+    /**
+     * Deep merge function for objects
+     * @param {object} target
+     * @param {object} source
+     * @returns {object}
+     */
+    deepMerge(target, source) {
+        for (const key in source) {
+            if (source.hasOwnProperty(key)) {
+                if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key]) && typeof target[key] === 'object' && target[key] !== null && !Array.isArray(target[key])) {
+                    target[key] = this.deepMerge(target[key] || {}, source[key]);
+                } else {
+                    target[key] = source[key];
+                }
+            }
+        }
+        return target;
     }
 
     /**
@@ -87,7 +139,7 @@ class UIi18n {
             settings.language = language;
             settingsManager.saveSettings(settings);
         } catch (error) {
-            console.error(`❌ Error saving language preference:`, error.message);
+           console.error(this.t('ui.errorSavingLanguagePreference', { error: error.message }));
         }
     }
 
@@ -140,6 +192,7 @@ class UIi18n {
                     }
                 }
                 console.warn(`⚠️  Translation key not found: ${keyPath}`);
+                // console.log(`UI: Key '${keyPath}' not found. Current translations object:`, JSON.stringify(this.translations, null, 2));
                 return keyPath; // Return the key path as fallback
             }
         }
@@ -255,12 +308,10 @@ class UIi18n {
 
         // Hardcoded texts that are not part of the i18n system but need to be displayed
         this.hardcodedTexts = {
-            autoDetectedI18nDirectory: '🔍 Auto-detected i18n directory: {path}',
-            executingCommand: 'Executing command: {command}',
-            unknownCommand: 'Unknown command: {command}',
-            errorExecutingCommand: '❌ Error executing command: {error}',
-            pressEnterToContinue: 'Press Enter to continue!',
-             pressEnterToReturnToMenu: 'Press Enter to return to main menu!'
+            autoDetectedI18nDirectory: this.t('ui.autoDetectedI18nDirectory'),
+            executingCommand: this.t('ui.executingCommand'),
+            unknownCommand: this.t('ui.unknownCommand'),
+            errorExecutingCommand: this.t('ui.errorExecutingCommand')
         
         };
         return displayNames[langCode] || langCode;
@@ -275,7 +326,7 @@ class UIi18n {
         const rl = global.activeReadlineInterface;
         
         if (!rl) {
-            console.error('❌ No active readline interface available');
+           console.error(this.t('ui.noActiveReadlineInterface'));
             return this.currentLanguage;
         }
 
@@ -288,7 +339,7 @@ class UIi18n {
             this.availableLanguages.forEach((lang, index) => {
                 const displayName = this.getLanguageDisplayName(lang);
                 const current = lang === this.currentLanguage ? ' ✓' : '';
-                console.log(`  ${index + 1}. ${displayName}${current}`);
+               console.log(this.t('language.languageOption', { index: index + 1, displayName, current }));
             });
             
             rl.question('\n' + this.t('language.prompt'), (answer) => {
@@ -321,7 +372,7 @@ class UIi18n {
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
             if (configuredLanguage !== this.currentLanguage) {
                 this.loadLanguage(configuredLanguage);
-                console.log(`🌍 UI language updated to: ${this.getLanguageDisplayName(configuredLanguage)}`);
+               console.log(this.t('ui.uiLanguageUpdated', { language: this.getLanguageDisplayName(configuredLanguage) }));
             }
         }
     }

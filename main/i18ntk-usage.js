@@ -123,8 +123,8 @@ async function getConfig() {
       ]
     };
     
-    console.log(`Detected source directory: ${config.sourceDir}`);
-    console.log(`Detected i18n directory: ${config.i18nDir}`);
+   console.log(t('usage.detectedSourceDirectory', { sourceDir: config.sourceDir }));
+   console.log(t('usage.detectedI18nDirectory', { i18nDir: config.i18nDir }));
     
     return config;
   } catch (error) {
@@ -197,9 +197,9 @@ class I18nUsageAnalyzer {
         throw new Error('Translation function not properly initialized');
       }
       
-      await SecurityUtils.logSecurityEvent('analyzer_initialized', { component: 'i18ntk-usage' });
+      await SecurityUtils.logSecurityEvent(this.t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
     } catch (error) {
-      await SecurityUtils.logSecurityEvent('analyzer_init_failed', { component: 'i18ntk-usage', error: error.message });
+      await SecurityUtils.logSecurityEvent(this.t('usage.analyzerInitFailed'), { component: 'i18ntk-usage', error: error.message });
       throw error;
     }
   }
@@ -254,10 +254,10 @@ class I18nUsageAnalyzer {
         }
       }
       
-      await SecurityUtils.logSecurityEvent('args_parsed', { component: 'i18ntk-usage', args: parsed });
+      await SecurityUtils.logSecurityEvent(this.t('usage.argsParsed'), { component: 'i18ntk-usage', args: parsed });
       return parsed;
     } catch (error) {
-      await SecurityUtils.logSecurityEvent('args_parse_failed', { component: 'i18ntk-usage', error: error.message });
+      await SecurityUtils.logSecurityEvent(this.t('usage.argsParseFailed'), { component: 'i18ntk-usage', error: error.message });
       throw error;
     }
   }
@@ -324,7 +324,7 @@ class I18nUsageAnalyzer {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent('translation_discovery_error', { 
+        await SecurityUtils.logSecurityEvent(this.t('usage.translationDiscoveryError'), { 
           component: 'i18ntk-usage', 
           directory: currentDir, 
           error: error.message 
@@ -387,7 +387,7 @@ class I18nUsageAnalyzer {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent('file_traversal_error', { 
+        await SecurityUtils.logSecurityEvent(this.t('usage.fileTraversalError'), { 
           component: 'i18ntk-usage', 
           directory: currentDir, 
           error: error.message 
@@ -468,7 +468,7 @@ class I18nUsageAnalyzer {
     } catch (error) {
       console.error(this.t('usage.analysisFailedError'), error.message);
       this.closeReadline();
-      await SecurityUtils.logSecurityEvent('usage_analysis_failed', { 
+      await SecurityUtils.logSecurityEvent(this.t('usage.usageAnalysisFailed'), { 
         component: 'i18ntk-usage', 
         error: error.message 
       });
@@ -503,13 +503,13 @@ class I18nUsageAnalyzer {
           const fileKeys = this.extractKeysFromObject(jsonData, '', fileInfo.namespace);
           fileKeys.forEach(key => keys.add(key));
           
-          console.log(`   📄 ${fileInfo.namespace}: ${fileKeys.length} keys`);
+         console.log(this.t('usage.fileInfo', { namespace: fileInfo.namespace, keys: fileKeys.length }));
         } catch (error) {
           console.warn(this.t("usage.checkUsage.failed_to_parse_filename_error", { 
             fileName: path.basename(fileInfo.filePath), 
             errorMessage: error.message 
           }));
-          await SecurityUtils.logSecurityEvent('translation_file_parse_error', {
+          await SecurityUtils.logSecurityEvent(this.t('usage.translationFileParseError'), {
             component: 'i18ntk-usage',
             file: fileInfo.filePath,
             error: error.message
@@ -517,7 +517,7 @@ class I18nUsageAnalyzer {
         }
       }
     } catch (error) {
-      await SecurityUtils.logSecurityEvent('translation_keys_load_error', {
+      await SecurityUtils.logSecurityEvent(this.t('usage.translationKeysLoadError'), {
         component: 'i18ntk-usage',
         error: error.message
       });
@@ -619,7 +619,7 @@ class I18nUsageAnalyzer {
       
       // If no files found, exit gracefully
       if (sourceFiles.length === 0) {
-        console.warn(this.t('hardcodedTexts.noSourceFilesFound'));
+        console.warn(this.t('usage.noSourceFilesFound'));
         return;
       }
       
@@ -644,7 +644,7 @@ class I18nUsageAnalyzer {
           
           // Progress indicator for large numbers of files
           if (sourceFiles.length > 10 && processedFiles % Math.ceil(sourceFiles.length / 10) === 0) {
-            console.log(t('hardcodedTexts.processedFiles', { processedFiles, totalFiles: sourceFiles.length }));
+            console.log(t('usage.processedFiles', { processedFiles, totalFiles: sourceFiles.length }));
           }
         } catch (fileError) {
           console.warn(`${this.t('usage.failedToProcessFile')} ${filePath}: ${fileError.message}`);
@@ -656,7 +656,7 @@ class I18nUsageAnalyzer {
       console.log(this.t("usage.checkUsage.total_key_usages_totalkeysfoun", { totalKeysFound }));
       
     } catch (error) {
-      console.error(`❌ Failed to analyze usage: ${error.message}`);
+     console.error(this.t('usage.failedToAnalyzeUsage', { error: error.message }));
       throw error;
     }
   }
@@ -672,11 +672,11 @@ class I18nUsageAnalyzer {
   // NEW: Analyze translation completeness across all languages
   async analyzeTranslationCompleteness() {
     try {
-      console.log('\n' + this.t('hardcodedTexts.analyzingTranslationCompleteness'));
+      console.log('\n' + this.t('usage.analyzingTranslationCompleteness'));
       
       // Check if i18n directory exists
       if (!fs.existsSync(this.i18nDir)) {
-        console.warn(this.t('hardcodedTexts.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
+        console.warn(this.t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         return;
       }
       
@@ -715,7 +715,7 @@ class I18nUsageAnalyzer {
       
       // If no languages found, exit gracefully
       if (languages.size === 0) {
-        console.warn(t('hardcodedTexts.noTranslationLanguagesFound'));
+        console.warn(t('usage.noTranslationLanguagesFound'));
         return;
       }
       
@@ -739,7 +739,7 @@ class I18nUsageAnalyzer {
               totalKeys += stats.total;
               translatedKeys += stats.translated;
             } catch (error) {
-              console.warn(t('hardcodedTexts.failedToAnalyzeFile', { filePath: fileInfo.filePath, error: error.message }));
+              console.warn(t('usage.failedToAnalyzeFile', { filePath: fileInfo.filePath, error: error.message }));
               continue;
             }
           }
@@ -750,12 +750,12 @@ class I18nUsageAnalyzer {
             notTranslated: totalKeys - translatedKeys
           });
         } catch (error) {
-          console.warn(t('hardcodedTexts.failedToAnalyzeLanguage', { language, error: error.message }));
+          console.warn(t('usage.failedToAnalyzeLanguage', { language, error: error.message }));
           continue;
         }
       }
     } catch (error) {
-      console.warn(t('hardcodedTexts.translationCompletenessAnalysisFailed', { error: error.message }));
+      console.warn(t('usage.translationCompletenessAnalysisFailed', { error: error.message }));
       // Don't throw error, just continue with the rest of the analysis
     }
   }

@@ -1,0 +1,28 @@
+{
+  "test_complete_system": {
+    "starting_test": "🧪 Starting Complete System Test\n",
+    "separator": "=",
+    "testing_ui_translations": "\n📝 Testing UI Translations...",
+    "testing_settings_manager": "\n⚙️  Testing Settings Manager...",
+    "testing_main_scripts": "\n🔧 Testing Main Scripts...",
+    "checking_translation_consistency": "\n🌐 Checking Translation Consistency...",
+    "non_critical_missing_keys": "ℹ️ {file}: {count} non-critical missing keys",
+    "extra_keys": "ℹ️ {file}: {count} extra keys",
+    "generating_report": "\n📊 Generating Report...",
+    "final_test_report_title": "📋 FINAL TEST REPORT",
+    "passed": "✅ Passed: {passed}",
+    "failed": "❌ Failed: {failed}",
+    "warnings": "⚠️  Warnings: {warnings}",
+    "missing_translations_title": "\n🔍 Missing Translations ({count}):",
+    "missing_translation_key": "   - {key}",
+    "missing_translations_more": "   ... and {count} more",
+    "errors_title": "\n❌ Errors:",
+    "error_message": "   - {error}",
+    "overall_status": "\n📊 Overall Status: {status}",
+    "success_message": "✅ {message}",
+    "failure_message": "❌ {message}",
+    "failure_error_message": "   {errorMessage}",
+    "warning_message": "⚠️  {message}",
+    "test_runner_failed": "❌ Test runner failed:"
+  }
+}

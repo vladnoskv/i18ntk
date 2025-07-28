@@ -292,10 +292,13 @@ class I18nAnalyzer {
     };
     
     for (const fileName of sourceFiles) {
-      const sourceFilePath = path.join(this.sourceLanguageDir, fileName);
-      const targetFilePath = path.join(languageDir, fileName);
+      const sourceFilePath = path.join(this.config.sourceLanguage, fileName);
+      const targetFilePath = path.join(language, fileName);
       
-      if (!fs.existsSync(sourceFilePath)) {
+      const sourceFullPath = path.join(this.sourceDir, sourceFilePath);
+      const targetFullPath = path.join(this.sourceDir, targetFilePath);
+      
+      if (!fs.existsSync(sourceFullPath)) {
         continue;
       }
       
@@ -309,7 +312,7 @@ class I18nAnalyzer {
           };
           continue;
         }
-        const sourceFileContent = SecurityUtils.safeReadFile(validatedSourcePath, this.sourceDir);
+        const sourceFileContent = SecurityUtils.safeReadFile(sourceFilePath, this.sourceDir);
         if (!sourceFileContent) {
           analysis.files[fileName] = {
             error: 'Failed to read source file securely'
@@ -330,7 +333,7 @@ class I18nAnalyzer {
         continue;
       }
       
-      if (!fs.existsSync(targetFilePath)) {
+      if (!fs.existsSync(targetFullPath)) {
         analysis.files[fileName] = {
           status: 'missing',
           sourceKeys: this.getAllKeys(sourceContent).size
@@ -346,7 +349,7 @@ class I18nAnalyzer {
           };
           continue;
         }
-        const targetFileContent = SecurityUtils.safeReadFile(validatedTargetPath, this.sourceDir);
+        const targetFileContent = SecurityUtils.safeReadFile(targetFilePath, this.sourceDir);
         if (!targetFileContent) {
           analysis.files[fileName] = {
             error: 'Failed to read target file securely'
@@ -402,45 +405,52 @@ class I18nAnalyzer {
     const { language } = analysis;
     const timestamp = new Date().toISOString();
     
-    let report = `${this.t('analyzeTranslations.reportTitle', { language: language.toUpperCase() })}\n`;
-    report += `${this.t('analyzeTranslations.generated', { timestamp })}\n`;
-    report += `${this.t('analyzeTranslations.status', { translated: analysis.summary.translatedKeys, total: analysis.summary.totalKeys, percentage: analysis.summary.percentage })}\n`;
-    report += `${this.t('analyzeTranslations.filesAnalyzed', { analyzed: analysis.summary.analyzedFiles, total: analysis.summary.totalFiles })}\n`;
-    report += `${this.t('analyzeTranslations.keysNeedingTranslation', { count: analysis.summary.missingKeys })}\n\n`;
+    let report = `${this.t('analyze.reportTitle', { language: language.toUpperCase() })}
+    `;
+    report += `${this.t('analyze.generated', { timestamp })}
+    `;
+    report += `${this.t('analyze.status', { translated: analysis.summary.translatedKeys, total: analysis.summary.totalKeys, percentage: analysis.summary.percentage })}
+    `;
+    report += `${this.t('analyze.filesAnalyzed', { analyzed: analysis.summary.analyzedFiles, total: analysis.summary.totalFiles })}
+    `;
+    report += `${this.t('analyze.keysNeedingTranslation', { count: analysis.summary.missingKeys })}
     
-    report += `${this.t('analyzeTranslations.fileBreakdown')}\n`;
+    `;
+    
+    report += `${this.t('analyze.fileBreakdown')}
+    `;
     report += `${'='.repeat(50)}\n\n`;
     
     Object.entries(analysis.files).forEach(([fileName, fileData]) => {
       report += `\uD83D\uDCC4 ${fileName}\n`;
       
       if (fileData.error) {
-        report += `   \u274C ${this.t('analyzeTranslations.error')}: ${fileData.error}\n\n`;
+        report += `   \u274C ${this.t('analyze.error')}: ${fileData.error}\n\n`;
         return;
       }
       
       if (fileData.status === 'missing') {
-        report += `   \u274C ${this.t('analyzeTranslations.statusFileMissing')}\n`;
-        report += `   \uD83D\uDCCA ${this.t('analyzeTranslations.sourceKeys', { count: fileData.sourceKeys })}\n\n`;
+        report += `   \u274C ${this.t('analyze.statusFileMissing')}\n`;
+        report += `   📊 ${this.t('analyze.sourceKeys', { count: fileData.sourceKeys })}\n\n`;
         return;
       }
       
       const { stats, structural, issues } = fileData;
       
-      report += `   \uD83D\uDCCA ${this.t('analyzeTranslations.translation', { translated: stats.translated, total: stats.total, percentage: stats.percentage })}\n`;
-      report += `   \uD83C\uDFD7️  ${this.t('analyzeTranslations.structure', { status: structural.isConsistent ? this.t('analyzeTranslations.consistent') : this.t('analyzeTranslations.inconsistent') })}\n`;
+      report += `   \uD83D\uDCCA ${this.t('analyze.translation', { translated: stats.translated, total: stats.total, percentage: stats.percentage })}\n`;
+      report += `   \uD83C\uDFD7️  ${this.t('analyze.structure', { status: structural.isConsistent ? this.t('analyze.consistent') : this.t('analyze.inconsistent') })}\n`;
       
       if (!structural.isConsistent) {
         if (structural.missingKeys.length > 0) {
-          report += `      ${this.t('analyzeTranslations.missingKeys', { count: structural.missingKeys.length })}\n`;
+          report += `      ${this.t('analyze.missingKeys', { count: structural.missingKeys.length })}\n`;
         }
         if (structural.extraKeys.length > 0) {
-          report += `      ${this.t('analyzeTranslations.extraKeys', { count: structural.extraKeys.length })}\n`;
+          report += `      ${this.t('analyze.extraKeys', { count: structural.extraKeys.length })}\n`;
         }
       }
       
       if (issues.length > 0) {
-        report += `   \u26A0️  ${this.t('analyzeTranslations.issues', { count: issues.length })}\n`;
+        report += `   ⚠️  ${this.t('analyze.issues', { count: issues.length })}\n`;
         
         const issueTypes = {
           not_translated: issues.filter(i => i.type === 'not_translated').length,
@@ -451,7 +461,7 @@ class I18nAnalyzer {
         
         Object.entries(issueTypes).forEach(([type, count]) => {
           if (count > 0) {
-            report += `      ${this.t('analyzeTranslations.issueType.' + type, { count })}\n`;
+            report += `      ${this.t('analyze.issueType.' + type, { count })}\n`;
           }
         });
       }
@@ -465,17 +475,17 @@ class I18nAnalyzer {
     );
     
     if (notTranslatedIssues.length > 0) {
-      report += `${this.t('analyzeTranslations.keysToTranslate')}\n`;
+      report += `${this.t('analyze.keysToTranslate')}\n`;
       report += `${'='.repeat(50)}\n\n`;
       
       notTranslatedIssues.slice(0, 50).forEach(issue => {
-        report += `${this.t('analyzeTranslations.key')}: ${issue.key}\n`;
-        report += `${this.t('analyzeTranslations.english')}: \"${issue.sourceValue}\"\n`;
-        report += `${language}: [${this.t('analyzeTranslations.needsTranslation')}]\n\n`;
+        report += `${this.t('analyze.key')}: ${issue.key}\n`;
+        report += `${this.t('analyze.english')}: "${issue.sourceValue}"\n`;
+        report += `${language}: [${this.t('analyze.needsTranslation')}]\n\n`;
       });
       
       if (notTranslatedIssues.length > 50) {
-        report += `${this.t('analyzeTranslations.andMoreKeys', { count: notTranslatedIssues.length - 50 })}\n\n`;
+        report += `${this.t('analyze.andMoreKeys', { count: notTranslatedIssues.length - 50 })}\n\n`;
       }
     }
     
@@ -501,7 +511,7 @@ class I18nAnalyzer {
 
   // Show help message
   showHelp() {
-    console.log(this.t('analyzeTranslations.help_message'));
+    console.log(this.t('analyze.help_message'));
   }
 
   // Main analyze method
@@ -509,7 +519,7 @@ class I18nAnalyzer {
     try {
       const results = []; // Add this line to declare the results array
       
-      console.log(this.t('analyzeTranslations.starting') || '🔍 Starting translation analysis...');
+      console.log(this.t('analyze.starting') || '🔍 Starting translation analysis...');
       
       // Ensure output directory exists
       if (!fs.existsSync(this.outputDir)) {
@@ -519,14 +529,14 @@ class I18nAnalyzer {
       const languages = this.getAvailableLanguages();
       
       if (languages.length === 0) {
-        console.log(this.t('analyzeTranslations.noLanguages') || '⚠️  No target languages found.');
+        console.log(this.t('analyze.noLanguages') || '⚠️  No target languages found.');
         return;
       }
       
-      console.log(this.t('analyzeTranslations.foundLanguages', { count: languages.length, languages: languages.join(', ') }) || `📋 Found ${languages.length} languages to analyze: ${languages.join(', ')}`);
+      console.log(this.t('analyze.foundLanguages', { count: languages.length, languages: languages.join(', ') }) || `📋 Found ${languages.length} languages to analyze: ${languages.join(', ')}`);
       
       for (const language of languages) {
-        console.log(this.t('analyzeTranslations.analyzing', { language }) || `\n🔄 Analyzing ${language}...`);
+        console.log(this.t('analyze.analyzing', { language }) || `\n🔄 Analyzing ${language}...`);
         
         const analysis = this.analyzeLanguage(language);
         const report = this.generateLanguageReport(analysis);
@@ -534,13 +544,12 @@ class I18nAnalyzer {
         // Save report
         const reportPath = await this.saveReport(language, report);
         
-        console.log(this.t('analyzeTranslations.completed', { language }) || `✅ Analysis completed for ${language}`);
-        console.log(this.t('analyzeTranslations.progress', { 
-          percentage: analysis.summary.percentage, 
-          translatedKeys: analysis.summary.translatedKeys, 
-          totalKeys: analysis.summary.totalKeys 
-        }) || `   Progress: ${analysis.summary.percentage}% (${analysis.summary.translatedKeys}/${analysis.summary.totalKeys} keys)`);
-        console.log(this.t('analyzeTranslations.reportSaved', { reportPath }) || `   Report saved: ${reportPath}`);
+        console.log(this.t('analyze.completed', { language }) || `✅ Analysis completed for ${language}`);
+        console.log(this.t('analyze.progress', { 
+          translated: results.length, 
+          total: languages.length 
+        }) || `   Progress: ${results.length}/${languages.length} languages processed`);
+        console.log(this.t('analyze.reportSaved', { reportPath }) || `   Report saved: ${reportPath}`);
         
         results.push({
           language,
@@ -550,14 +559,19 @@ class I18nAnalyzer {
       }
       
       // Summary
-      console.log(this.t('analyzeTranslations.summary') || '\n📊 ANALYSIS SUMMARY');
+      console.log(this.t('analyze.summary') || '\n📊 ANALYSIS SUMMARY');
       console.log('='.repeat(50));
       
       results.forEach(({ language, analysis }) => {
-        console.log(`${language}: ${analysis.summary.percentage}% complete (${analysis.summary.translatedKeys}/${analysis.summary.totalKeys} keys)`);
+        console.log(this.t('analyze.languageStats', { 
+          language, 
+          percentage: analysis.summary.percentage, 
+          translated: analysis.summary.translatedKeys, 
+          total: analysis.summary.totalKeys 
+        }) || `${language}: ${analysis.summary.percentage}% complete (${analysis.summary.translatedKeys}/${analysis.summary.totalKeys} keys)`);
       });
       
-      console.log(this.t('analyzeTranslations.finished') || '\n✅ Analysis completed successfully!');
+      console.log(this.t('analyze.finished') || '\n✅ Analysis completed successfully!');
       
       // Only prompt for input if running standalone (not from menu or workflow)
       if (require.main === module && !this.noPrompt) {
@@ -568,7 +582,7 @@ class I18nAnalyzer {
       return results;
       
     } catch (error) {
-      console.error(this.t('analyzeTranslations.error') || '❌ Analysis failed:', error.message);
+      console.error(this.t('analyze.error') || '❌ Analysis failed:', error.message);
       this.closeReadline();
       throw error;
     }

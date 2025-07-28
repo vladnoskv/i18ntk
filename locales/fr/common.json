@@ -1,0 +1,21 @@
+{
+  "offlineTitle": "NOT_TRANSLATED",
+  "offlineMessage": "NOT_TRANSLATED",
+  "tryReconnect": "NOT_TRANSLATED",
+  "common": "NOT_TRANSLATED",
+  "logout": "NOT_TRANSLATED",
+  "login": "NOT_TRANSLATED",
+  "amount": "NOT_TRANSLATED",
+  "timePeriods": {
+    "customRange": "NOT_TRANSLATED"
+  },
+  "unknownUser": "NOT_TRANSLATED",
+  "notSet": "NOT_TRANSLATED",
+  "announcement_id": "NOT_TRANSLATED",
+  "last_sign_in_at": "NOT_TRANSLATED",
+  "usage": {
+    "analysisResults": "NOT_TRANSLATED",
+    "availableKeysCount": "NOT_TRANSLATED",
+    "usedKeysCount": "NOT_TRANSLATED"
+  }
+}

@@ -603,7 +603,7 @@ class I18nInitializer {
     
     // Get source files
     const sourceFiles = this.getSourceFiles();
-    console.log('\n' + this.ui.t('init.foundSourceFiles', { count: sourceFiles.length, files: sourceFiles.join(', ') }));
+    console.log('\n' + this.ui.t('init.foundSourceFiles', { count: sourceFiles.length }));
     
     // Process each language
     const results = {};

@@ -374,13 +374,13 @@ class I18nSizingAnalyzer {
   // Display results in table format
   displayTable() {
     console.log(this.t("sizing.sizing_analysis_results"));
-    console.log("=".repeat(80));
+    console.log(this.t("sizing.separator"));
     
     // File sizes table
     console.log("\n" + this.t("sizing.file_sizes_title"));
-    console.log("-".repeat(80));
+    console.log(this.t("sizing.lineSeparator"));
     console.log(this.t("sizing.file_sizes_header"));
-    console.log("-".repeat(80));
+    console.log(this.t("sizing.lineSeparator"));
     
     Object.entries(this.stats.files).forEach(([lang, data]) => {
       console.log(this.t("sizing.file_size_row", { lang, sizeKB: data.sizeKB, lines: data.lines, characters: data.characters }));
@@ -388,20 +388,20 @@ class I18nSizingAnalyzer {
     
     // Language statistics
     console.log("\n" + this.t("sizing.language_statistics_title"));
-    console.log("-".repeat(80));
+    console.log(this.t("sizing.lineSeparator"));
     console.log(this.t("sizing.language_stats_header"));
-    console.log("-".repeat(80));
+    console.log(this.t("sizing.lineSeparator"));
     
     Object.entries(this.stats.languages).forEach(([lang, data]) => {
-      console.log(this.t("sizing.language_stats_row", { lang, totalKeys: data.totalKeys, totalCharacters: data.totalCharacters, averageKeyLength: data.averageKeyLength.toFixed(1), maxKeyLength: data.maxKeyLength, emptyKeys: data.emptyKeys }));
+      console.log(this.t("sizing.language_stats_row", { lang, totalKeys: data.totalKeys, totalCharacters: data.totalCharacters, averageKeyLength: data.averageKeyLength.toFixed(1), maxKeyLength: data.maxKeyLength, emptyKeys: data.emptyKeys, longKeys: data.longKeys }));
     });
     
     // Size variations
     if (this.stats.summary.sizeVariations) {
       console.log("\n" + this.t("sizing.size_variations_title"));
-      console.log("-".repeat(80));
+      console.log(this.t("sizing.lineSeparator"));
       console.log(this.t("sizing.size_variations_header"));
-      console.log("-".repeat(80));
+      console.log(this.t("sizing.lineSeparator"));
       
       Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
         const problematic = data.isProblematic ? this.t("sizing.problematic_yes") : this.t("sizing.problematic_no");
@@ -412,7 +412,7 @@ class I18nSizingAnalyzer {
     // Recommendations
     if (this.stats.summary.recommendations.length > 0) {
       console.log("\n" + this.t("sizing.recommendations_title"));
-      console.log("-".repeat(80));
+      console.log(this.t("sizing.lineSeparator"));
       this.stats.summary.recommendations.forEach((rec, index) => {
         console.log(`${index + 1}. ${rec}`);
       });
@@ -525,7 +525,7 @@ class I18nSizingAnalyzer {
       if (this.format === 'table') {
         this.displayTable();
       } else if (this.format === 'json') {
-        console.log(JSON.stringify(this.stats, null, 2));
+        console.log(this.t("sizing.analysisStats", { stats: JSON.stringify(this.stats, null, 2) }));
       }
       
       await this.generateReport();
@@ -549,7 +549,7 @@ class I18nSizingAnalyzer {
 if (require.main === module) {
   const analyzer = new I18nSizingAnalyzer();
   analyzer.analyze().catch(error => {
-    console.error('❌ Sizing analysis failed:', error.message);
+    console.error(this.t("sizing.fatalError", { error: error.message }));
     process.exit(1);
   });
 }

@@ -1,0 +1,11 @@
+{
+  "autoDetectedI18nDirectory": "Auto-detected i18n directory: {{path}}",
+  "executingCommand": "🔄 Executing command: {{command}}",
+  "unknownCommand": "❌ Unknown command: {{command}}",
+  "errorExecutingCommand": "❌ Error executing command: {{error}}",
+  "errorLoadingTranslationFile": "❌ Error loading translation file for '{{language}}': {{error}}",
+  "errorSavingLanguagePreference": "❌ Error saving language preference: {{error}}",
+  "noActiveReadlineInterface": "❌ No active readline interface available",
+  "uiLanguageUpdated": "🌍 UI language updated to: {{language}}",
+  "selectOptionPrompt": "Select an option:"
+}

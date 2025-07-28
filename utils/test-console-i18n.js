@@ -16,7 +16,7 @@ const { performance } = require('perf_hooks');
 const settingsManager = require('../settings/settings-manager');
 
 // Import the i18n helper
-const { loadTranslations, t } = require('./utils/i18n-helper');
+const i18n = require('./i18n-helper');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -94,7 +94,7 @@ class ConsoleI18nTester {
         const fileName = path.basename(item);
         if (this.targetFiles.length === 0 || this.targetFiles.includes(fileName)) {
           files.push(itemPath);
-          console.log(t('consoleI18nTester.found_target_file', { fileName }));
+          console.log(i18n.t('testConsoleI18n.found_target_file', { fileName }));
         }
       }
     }
@@ -192,10 +192,10 @@ class ConsoleI18nTester {
 
   // Analyze all files
   analyze() {
-    console.log(t('consoleI18nTester.scanning_files_for_console_statements'));
+    console.log(i18n.t('testConsoleI18n.scanning_files_for_console_statements'));
     
     const files = this.getAllFiles();
-    console.log(t('consoleI18nTester.found_javascript_files', { count: files.length }));
+    console.log(i18n.t('testConsoleI18n.found_javascript_files', { count: files.length }));
     
     for (const file of files) {
       this.extractConsoleStatements(file);
@@ -243,26 +243,26 @@ class ConsoleI18nTester {
   
   // Report the results of the analysis
   reportResults() {
-    console.log(t('consoleI18nTester.console_i18n_analysis_results'));
+    console.log(i18n.t('testConsoleI18n.console_i18n_analysis_results'));
     console.log(`${'='.repeat(60)}`);
-    console.log(t('consoleI18nTester.total_console_statements', { count: this.consoleStatements.length }));
-    console.log(t('consoleI18nTester.translated_statements', { count: this.translatedTexts.length }));
-    console.log(t('consoleI18nTester.hardcoded_statements', { count: this.hardcodedTexts.length }));
+    console.log(i18n.t('testConsoleI18n.total_console_statements', { count: this.consoleStatements.length }));
+    console.log(i18n.t('testConsoleI18n.translated_statements', { count: this.translatedTexts.length }));
+    console.log(i18n.t('testConsoleI18n.hardcoded_statements', { count: this.hardcodedTexts.length }));
     
     const translationPercentage = this.consoleStatements.length > 0 
       ? ((this.translatedTexts.length / this.consoleStatements.length) * 100).toFixed(2)
       : 0;
     
-    console.log(t('consoleI18nTester.translation_coverage', { percentage: translationPercentage }));
+    console.log(i18n.t('testConsoleI18n.translation_coverage', { percentage: translationPercentage }));
     
     // Report by file
-    console.log(t('consoleI18nTester.coverage_by_file'));
+    console.log(i18n.t('testConsoleI18n.coverage_by_file'));
     console.log('-------------------');
     
     this.fileStats.forEach((stats, fileName) => {
       const fileCoverage = stats.translated / stats.total * 100 || 0;
       const coverageEmoji = fileCoverage === 100 ? '🟢' : fileCoverage > 50 ? '🟡' : '🔴';
-      console.log(t('consoleI18nTester.file_coverage_stats', { 
+      console.log(i18n.t('testConsoleI18n.file_coverage_stats', { 
         emoji: coverageEmoji, 
         fileName, 
         coverage: fileCoverage.toFixed(2), 
@@ -272,7 +272,7 @@ class ConsoleI18nTester {
     });
     
     if (this.hardcodedTexts.length > 0) {
-      console.log(t('consoleI18nTester.hardcoded_console_statements'));
+      console.log(i18n.t('testConsoleI18n.hardcoded_console_statements'));
       console.log(`${'='.repeat(60)}`);
       
       // Group by file
@@ -286,24 +286,24 @@ class ConsoleI18nTester {
       
       // Display hardcoded statements by file
       Object.keys(byFile).sort().forEach(file => {
-        console.log(t('consoleI18nTester.file_header', { file }));
+        console.log(i18n.t('testConsoleI18n.file_header', { file }));
         byFile[file].forEach(item => {
-          console.log(t('consoleI18nTester.line_statement', { line: item.line, statement: item.statement.trim() }));
-          console.log(t('consoleI18nTester.suggested_key', { key: this.suggestTranslationKey(item.file, item.textContent) }));
-          console.log(t('consoleI18nTester.suggested_replacement', { replacement: this.suggestReplacement(item) }));
+          console.log(i18n.t('testConsoleI18n.line_statement', { line: item.line, statement: item.statement.trim() }));
+          console.log(i18n.t('testConsoleI18n.suggested_key', { key: this.suggestTranslationKey(item.file, item.textContent) }));
+          console.log(i18n.t('testConsoleI18n.suggested_replacement', { replacement: this.suggestReplacement(item) }));
         });
       });
       
-      console.log(t('consoleI18nTester.recommendations'));
+      console.log(i18n.t('testConsoleI18n.recommendations'));
       console.log(`${'='.repeat(60)}`);
-      console.log(t('consoleI18nTester.recommendation_1'));
-      console.log(t('consoleI18nTester.recommendation_2'));
-      console.log(t('consoleI18nTester.recommendation_3'));
-      console.log(t('consoleI18nTester.recommendation_4'));
+      console.log(i18n.t('testConsoleI18n.recommendation_1'));
+      console.log(i18n.t('testConsoleI18n.recommendation_2'));
+      console.log(i18n.t('testConsoleI18n.recommendation_3'));
+      console.log(i18n.t('testConsoleI18n.recommendation_4'));
       
-      console.log(t('consoleI18nTester.translation_keys_to_add'));
+      console.log(i18n.t('testConsoleI18n.translation_keys_to_add'));
       console.log('------------------------');
-      console.log(t('consoleI18nTester.add_keys_instruction'));
+      console.log(i18n.t('testConsoleI18n.add_keys_instruction'));
       console.log('{');
       
       // Group suggested keys by module
@@ -334,9 +334,9 @@ class ConsoleI18nTester {
       
       console.log('}');
     } else {
-      console.log(t('consoleI18nTester.perfect_translation_coverage'));
+      console.log(i18n.t('testConsoleI18n.perfect_translation_coverage'));
       console.log(`${'='.repeat(60)}`);
-      console.log(t('consoleI18nTester.all_statements_using_translation'));
+      console.log(i18n.t('testConsoleI18n.all_statements_using_translation'));
     }
   }
 }
@@ -344,12 +344,12 @@ class ConsoleI18nTester {
 // Main function to run the analysis
 function main() {
   // Initialize translations
-  loadTranslations();
+  i18n.loadTranslations();
   
-  console.log(t('consoleI18nTester.i18n_console_translation_checker'));
+  console.log(i18n.t('testConsoleI18n.i18n_console_translation_checker'));
   console.log('====================================');
-  console.log(t('consoleI18nTester.script_description_line1'));
-  console.log(t('consoleI18nTester.script_description_line2'));
+  console.log(i18n.t('testConsoleI18n.script_description_line1'));
+  console.log(i18n.t('testConsoleI18n.script_description_line2'));
   
   const startTime = performance.now();
   const tester = new ConsoleI18nTester();
@@ -385,15 +385,15 @@ function main() {
   };
   
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-  console.log(t('consoleI18nTester.analysis_completed_in_duration', { duration }));
-  console.log(t('consoleI18nTester.report_saved_to_path', { path: reportPath }));
+  console.log(i18n.t('testConsoleI18n.analysis_completed_in_duration', { duration }));
+  console.log(i18n.t('testConsoleI18n.report_saved_to_path', { path: reportPath }));
   
   // Exit with error code if hardcoded text found
   if (tester.hardcodedTexts.length > 0) {
-    console.log(t('consoleI18nTester.found_hardcoded_messages', { count: tester.hardcodedTexts.length }));
+    console.log(i18n.t('testConsoleI18n.found_hardcoded_messages', { count: tester.hardcodedTexts.length }));
     process.exit(1);
   } else {
-    console.log(t('consoleI18nTester.all_console_messages_use_translation'));
+    console.log(i18n.t('testConsoleI18n.all_console_messages_use_translation'));
     process.exit(0);
   }
 }

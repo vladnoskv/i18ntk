@@ -112,7 +112,7 @@ class I18nManager {
           
           if (hasLanguageDirs) {
             this.config.sourceDir = possiblePath;
-            console.log(this.ui.t('hardcodedTexts.autoDetectedI18nDirectory', { path: possiblePath }));
+            this.ui.t('init.autoDetectedI18nDirectory', { path: possiblePath });
             break;
           }
         } catch (error) {
@@ -153,7 +153,7 @@ class I18nManager {
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
       
       if (installedFrameworks.length > 0) {
-        console.log(`✅ Detected i18n framework(s): ${installedFrameworks.join(', ')}`);
+        this.ui.t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') });
         return true;
       } else {
         console.log(this.ui.t('init.suggestions.noFramework'));
@@ -196,6 +196,12 @@ class I18nManager {
         return;
       }
 
+      // Handle debug flag
+      if (args.includes('--debug')) {
+        // Enable debug mode for this session
+        process.env.I18NTK_DEBUG_MODE = 'true';
+      }
+
       // Check for --command= argument first
       const commandFlagArg = args.find(arg => arg.startsWith('--command='));
       if (commandFlagArg) {
@@ -206,15 +212,11 @@ class I18nManager {
       }
 
       if (commandToExecute) {
-        console.log(`🔄 Executing command: ${commandToExecute}`);
+        console.log(this.ui.t('ui.executingCommand', { command: commandToExecute }));
         await this.executeCommand(commandToExecute);
         this.safeClose();
         return;
       }
-
-      // If no direct command or an invalid one, proceed to interactive menu
-      console.log(this.ui.t('menu.title'));
-      console.log('='.repeat(40));
 
       // Check dependencies and exit if user chooses not to continue
       const shouldContinue = await this.checkI18nDependencies();
@@ -224,11 +226,11 @@ class I18nManager {
         process.exit(0);
       }
       
-      // Interactive mode
+      // Interactive mode - showInteractiveMenu will handle the title
       await this.showInteractiveMenu();
       
     } catch (error) {
-      console.error('❌ Error:', error.message);
+      console.error(this.ui.t('errors.genericError', { error: error.message }));
       process.exit(1);
     } finally {
       this.safeClose();
@@ -281,7 +283,7 @@ class I18nManager {
   }
 
   async executeCommand(command, options = {}) {
-    console.log(this.ui.t('hardcodedTexts.executingCommand', { command }));
+    console.log(this.ui.t('menu.executingCommand', { command }));
     
     // Enhanced context detection
     const executionContext = this.getExecutionContext(options);
@@ -300,7 +302,7 @@ class I18nManager {
       const authPassed = await this.checkAdminAuth();
       if (!authPassed) {
         if (!this.isNonInteractiveMode() && !isDirectCommand) {
-          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
         }
         return;
@@ -382,7 +384,7 @@ class I18nManager {
                 return;
                 break;
             default:
-                console.log(this.ui.t('hardcodedTexts.unknownCommand', { command }));
+                console.log(this.ui.t('menu.unknownCommand', { command }));
                 this.showHelp();
                 // No return here, let the completion logic handle the exit/menu return
                 break;
@@ -393,11 +395,11 @@ class I18nManager {
         
         if (isManagerExecution && !this.isNonInteractiveMode()) {
           // Interactive menu execution - return to menu
-          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToReturnToMenu'));
+          await this.prompt(this.ui.t('menu.returnToMainMenu'));
           await this.showInteractiveMenu();
         } else if (isDirectCommand && !this.isNonInteractiveMode()) {
           // Direct command execution - show "enter to continue" and exit
-          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           console.log(this.ui.t('workflow.exitingCompleted'));
           this.safeClose();
           process.exit(0);
@@ -409,15 +411,15 @@ class I18nManager {
         }
         
     } catch (error) {
-        console.error(this.ui.t('hardcodedTexts.errorExecutingCommand', { error: error.message }));
+        console.error(this.ui.t('errors.errorExecutingCommand', { error: error.message }));
         
         if (isManagerExecution && !this.isNonInteractiveMode()) {
           // Interactive menu execution - show error and return to menu
-          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
         } else if (isDirectCommand && !this.isNonInteractiveMode()) {
           // Direct command execution - show "enter to continue" and exit with error
-          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           this.safeClose();
           process.exit(1);
         } else {
@@ -435,16 +437,16 @@ class I18nManager {
       return true;
     }
 
-    console.log(this.ui.t('admin.authRequired'));
+    console.log(this.ui.t('adminCli.authRequired'));
     const pin = await this.prompt('Enter admin PIN: ');
     const isValid = await this.adminAuth.verifyPin(pin);
     
     if (!isValid) {
-      console.log(this.ui.t('admin.invalidPin'));
+      console.log(this.ui.t('adminCli.invalidPin'));
       return false;
     }
     
-    console.log(this.ui.t('admin.authSuccess'));
+    console.log(this.ui.t('adminCli.authSuccess'));
     return true;
   }
 
@@ -467,9 +469,9 @@ class I18nManager {
       console.log(`12. ${this.ui.t('menu.options.help')}`);
       console.log(`13. ${this.ui.t('menu.options.debug')}`);
       console.log(`0. ${this.ui.t('menu.options.exit')}`);
-      console.log('\n⚠️ Non-interactive mode detected. Menu displayed for reference only.');
-      console.log('💡 Use: node main/i18ntk-manage.js --command=<command> for direct execution.');
-      console.log('📖 Use: node main/i18ntk-manage.js --help for available commands.');
+      console.log('\n' + this.ui.t('menu.nonInteractiveModeWarning'));
+      console.log(this.ui.t('menu.useDirectExecution'));
+      console.log(this.ui.t('menu.useHelpForCommands'));
       this.safeClose();
       process.exit(0);
       return;
@@ -492,7 +494,7 @@ class I18nManager {
     console.log(`13. ${this.ui.t('menu.options.debug')}`);
     console.log(`0. ${this.ui.t('menu.options.exit')}`);
     
-    const choice = await this.prompt('\n' + this.ui.t('hardcodedTexts.selectOptionPrompt'));
+    const choice = await this.prompt('\n' + this.ui.t('menu.selectOptionPrompt'));
     
     switch (choice.trim()) {
       case '1':
@@ -527,7 +529,7 @@ class I18nManager {
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {
             try {
-              await this.prompt('\n' + this.ui.t('hardcodedTexts.pressEnterToContinue'));
+              await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
               await this.showInteractiveMenu();
             } catch (error) {
               console.log(this.ui.t('menu.returning'));
@@ -538,12 +540,12 @@ class I18nManager {
             process.exit(0);
           }
         } catch (error) {
-          console.error(this.ui.t('hardcodedTexts.errorGeneratingStatusSummary', { error: error.message }));
+          console.error(this.ui.t('errors.errorGeneratingStatusSummary', { error: error.message }));
           
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {
             try {
-              await this.prompt('\n' + this.ui.t('hardcodedTexts.pressEnterToContinue'));
+              await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
               await this.showInteractiveMenu();
             } catch (error) {
               console.log(this.ui.t('menu.returning'));
@@ -566,7 +568,7 @@ class I18nManager {
         break;
       case '12':
         this.showHelp();
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToReturnToMenu'));
+        await this.prompt(this.ui.t('menu.returnToMainMenu'));
         await this.showInteractiveMenu();
         break;
       case '13':
@@ -586,15 +588,15 @@ class I18nManager {
   async showDebugMenu() {
     console.log(`\n${this.ui.t('menu.options.debug')}`);
     console.log(this.ui.t('menu.separator'));
-    console.log(`1. ${this.ui.t('hardcodedTexts.mainDebuggerSystemDiagnostics')}`);
-    console.log(`2. ${this.ui.t('hardcodedTexts.consoleTranslationsCheck')}`);
-    console.log(`3. ${this.ui.t('hardcodedTexts.exportMissingKeys')}`);
-    console.log(`4. ${this.ui.t('hardcodedTexts.replaceHardcodedConsole')}`);
-    console.log(`5. ${this.ui.t('hardcodedTexts.consoleKeyChecker')}`);
-    console.log(`6. ${this.ui.t('hardcodedTexts.debugLogs')}`);
-    console.log(`0. ${this.ui.t('hardcodedTexts.backToMainMenu')}`);
+    console.log(`1. ${this.ui.t('detect_language_mismatches.mainDebuggerSystemDiagnostics')}`);
+    console.log(`2. ${this.ui.t('testConsoleI18n.consoleTranslationsCheck')}`);
+    console.log(`3. ${this.ui.t('detect_language_mismatches.exportMissingKeys')}`);
+    console.log(`4. ${this.ui.t('detect_language_mismatches.replaceHardcodedConsole')}`);
+    console.log(`5. ${this.ui.t('detect_language_mismatches.consoleKeyChecker')}`);
+    console.log(`6. ${this.ui.t('detect_language_mismatches.debugLogs')}`);
+    console.log(`0. ${this.ui.t('detect_language_mismatches.backToMainMenu')}`);
     
-    const choice = await this.prompt('\n' + this.ui.t('hardcodedTexts.selectDebugToolPrompt'));
+    const choice = await this.prompt('\n' + this.ui.t('menu.selectDebugToolPrompt'));
     
     switch (choice.trim()) {
       case '1':
@@ -619,14 +621,14 @@ class I18nManager {
         await this.showInteractiveMenu();
         return;
       default:
-        console.log(this.ui.t('hardcodedTexts.invalidChoiceSelectRange'));
+        console.log(this.ui.t('detect_language_mismatches.invalidChoiceSelectRange'));
         await this.showDebugMenu();
     }
   }
 
   // Run a debug tool
   async runDebugTool(toolName, displayName) {
-    console.log(this.ui.t('hardcodedTexts.runningDebugTool', { displayName }));
+  console.log(this.ui.t('detect_language_mismatches.runningDebugTool', { displayName }));
     try {
       const toolPath = path.join(__dirname, '..', 'dev', 'debug', toolName);
       if (fs.existsSync(toolPath)) {
@@ -638,19 +640,19 @@ class I18nManager {
         });
         console.log(output);
       } else {
-        console.log(this.ui.t('hardcodedTexts.debugToolNotFound', { toolName }));
+      console.log(this.ui.t('detect_language_mismatches.debugToolNotFound', { toolName }));
       }
     } catch (error) {
-      console.error(this.ui.t('hardcodedTexts.errorRunningDebugTool', { displayName, error: error.message }));
+      console.error(this.ui.t('errors.errorRunningDebugTool', { displayName, error: error.message }));
     }
     
-    await this.prompt('\n' + this.ui.t('hardcodedTexts.pressEnterToContinue'));
+    await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
     await this.showDebugMenu();
   }
 
   // View debug logs
   async viewDebugLogs() {
-    console.log(`\n${this.ui.t('hardcodedTexts.recentDebugLogs')}`);
+    console.log(`\n${this.ui.t('detect_language_mismatches.recentDebugLogs')}`);
     console.log('============================================================');
     
     try {
@@ -672,7 +674,7 @@ class I18nManager {
             console.log(`${index + 1}. ${file} (${stats.mtime.toLocaleString()})`);
           });
           
-          const choice = await this.prompt('\n' + this.ui.t('hardcodedTexts.selectLogPrompt', { count: files.length }));
+          const choice = await this.prompt('\n' + this.ui.t('menu.selectLogPrompt', { count: files.length }));
           const fileIndex = parseInt(choice) - 1;
           
           if (fileIndex >= 0 && fileIndex < files.length) {
@@ -683,22 +685,22 @@ class I18nManager {
             console.log('============================================================');
           }
         } else {
-          console.log(this.ui.t('hardcodedTexts.noDebugLogsFound'));
+          console.log(this.ui.t('detect_language_mismatches.noDebugLogsFound'));
         }
       } else {
-        console.log(this.ui.t('hardcodedTexts.debugLogsDirectoryNotFound'));
+        console.log(this.ui.t('detect_language_mismatches.debugLogsDirectoryNotFound'));
       }
     } catch (error) {
-      console.error(this.ui.t('hardcodedTexts.errorReadingDebugLogs', { error: error.message }));
+      console.error(this.ui.t('errors.errorReadingDebugLogs', { error: error.message }));
     }
     
-    await this.prompt('\n' + this.ui.t('hardcodedTexts.pressEnterToContinue'));
+    await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
       await this.showInteractiveMenu();
   }
 
   // Enhanced delete reports and logs functionality
   async deleteReports() {
-    console.log(`\n🗑️ Delete Reports & Logs`);
+    console.log(`\n${this.ui.t('operations.deleteReportsTitle')}`);
     console.log('============================================================');
     
     const targetDirs = [
@@ -710,7 +712,7 @@ class I18nManager {
     ];
     
     try {
-      console.log('🔍 Scanning for files to delete...');
+     console.log(this.ui.t('operations.scanningForFiles'));
       
       let availableDirs = [];
       
@@ -729,19 +731,19 @@ class I18nManager {
       }
       
       if (availableDirs.length === 0) {
-        console.log('✅ No files found to delete.');
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+       console.log(this.ui.t('operations.noFilesFoundToDelete'));
+        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
       
       // Show available directories
-      console.log('\n📁 Available directories:');
+      console.log(this.ui.t('operations.availableDirectories'));
       availableDirs.forEach((dir, index) => {
         console.log(`  ${index + 1}. ${dir.name} (${dir.count} files)`);
       });
-      console.log(`  ${availableDirs.length + 1}. All directories`);
-      console.log('  0. Cancel');
+     console.log(`  ${availableDirs.length + 1}. ${this.ui.t('operations.allDirectories')}`);
+     console.log(`  0. ${this.ui.t('operations.cancelOption')}`);
       
       const dirChoice = await this.prompt(`\nSelect directory to clean (0-${availableDirs.length + 1}): `);
       const dirIndex = parseInt(dirChoice) - 1;
@@ -750,7 +752,7 @@ class I18nManager {
       
       if (dirChoice.trim() === '0') {
         console.log('❌ Operation cancelled.');
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       } else if (dirIndex === availableDirs.length) {
@@ -758,8 +760,8 @@ class I18nManager {
       } else if (dirIndex >= 0 && dirIndex < availableDirs.length) {
         selectedDirs = [availableDirs[dirIndex]];
       } else {
-        console.log('❌ Invalid selection.');
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+       console.log(this.ui.t('operations.invalidSelection'));
+        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
@@ -770,16 +772,16 @@ class I18nManager {
         allFiles.push(...dir.files);
       });
       
-      console.log(`\n📊 Found ${allFiles.length} files in selected directories:`);
+      console.log(this.ui.t('operations.foundFilesInSelectedDirectories', { count: allFiles.length }));
       selectedDirs.forEach(dir => {
         console.log(`  📁 ${dir.name}: ${dir.count} files`);
       });
       
       // Show deletion options
-      console.log('\n🗑️ Deletion Options:');
-      console.log('  1. Delete all files');
-      console.log('  2. Keep last 3 files (by date)');
-      console.log('  3. Keep last 5 files (by date)');
+      console.log(this.ui.t('operations.deletionOptions'));
+      console.log(`  1. ${this.ui.t('operations.deleteAllFiles')}`);
+      console.log(`  2. ${this.ui.t('operations.keepLast3Files')}`);
+      console.log(`  3. ${this.ui.t('operations.keepLast5Files')}`);
       console.log('  0. Cancel');
       
       const option = await this.prompt('\nSelect option (0-3): ');
@@ -798,27 +800,27 @@ class I18nManager {
           break;
         case '0':
           console.log('❌ Operation cancelled.');
-          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
           return;
         default:
           console.log('❌ Invalid option.');
-          await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
           return;
       }
       
       if (filesToDelete.length === 0) {
-        console.log('✅ No files to delete.');
-        await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+       console.log(this.ui.t('operations.noFilesToDelete'));
+        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
       
-      console.log(`\n📋 Files to delete: ${filesToDelete.length}`);
-      console.log(`📋 Files to keep: ${allFiles.length - filesToDelete.length}`);
+      console.log(this.ui.t('operations.filesToDeleteCount', { count: filesToDelete.length }));
+      console.log(this.ui.t('operations.filesToKeepCount', { count: allFiles.length - filesToDelete.length }));
       
-      const confirm = await this.prompt('\n⚠️ Are you sure you want to delete these files? (y/N): ');
+     const confirm = await this.prompt(this.ui.t('operations.confirmDeletion'));
       
       if (confirm.toLowerCase() === 'y' || confirm.toLowerCase() === 'yes') {
         let deletedCount = 0;
@@ -826,10 +828,10 @@ class I18nManager {
         for (const fileInfo of filesToDelete) {
           try {
             fs.unlinkSync(fileInfo.path);
-            console.log(`✅ Deleted: ${path.basename(fileInfo.path)}`);
+           console.log(this.ui.t('operations.deletedFile', { filename: path.basename(fileInfo.path) }));
             deletedCount++;
           } catch (error) {
-            console.log(`❌ Failed to delete ${path.basename(fileInfo.path)}: ${error.message}`);
+          console.log(this.ui.t('operations.failedToDeleteFile', { filename: path.basename(fileInfo.path), error: error.message }));
           }
         }
         
@@ -842,7 +844,7 @@ class I18nManager {
       console.error(`❌ Error during deletion process: ${error.message}`);
     }
     
-    await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+    await this.prompt(this.ui.t('menu.pressEnterToContinue'));
     await this.showInteractiveMenu();
   }
   
@@ -886,7 +888,7 @@ class I18nManager {
       await settingsCLI.run();
     } catch (error) {
       console.error('❌ Error opening settings:', error.message);
-      await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+      await this.prompt(this.ui.t('menu.pressEnterToContinue'));
     }
     await this.showInteractiveMenu();
   }
@@ -928,7 +930,7 @@ class I18nManager {
       console.log(this.ui.t('language.invalidSelection'));
     }
     
-    await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+    await this.prompt(this.ui.t('menu.pressEnterToContinue'));
     await this.showInteractiveMenu();
   }
 

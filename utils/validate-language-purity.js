@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const i18n = require('./i18n-helper');
 
 class LanguagePurityValidator {
     constructor() {
@@ -19,16 +20,16 @@ class LanguagePurityValidator {
         // Language validation rules
         this.validationRules = {
             de: {
-                name: 'German',
+                name: i18n.t('validateLanguagePurity.language_german'),
                 allowedMarkers: [], // No markers should remain
                 forbiddenMarkers: ['[TRANSLATE]', '[DE]', '[NOT TRANSLATED]'],
                 forbiddenPhrases: [
-                    'debug tools', 'settings', 'configuration', 'invalid choice',
-                    'please select', 'back to main menu', 'error', 'warning',
-                    'success', 'failed', 'loading', 'saving', 'full system debug',
-                    'configuration debug', 'translation debug', 'performance debug',
-                    'admin pin setup', 'enter admin pin', 'confirm admin pin',
-                    'authentication failed', 'access denied', 'security log'
+                    i18n.t('validateLanguagePurity.phrase_debug_tools'), i18n.t('validateLanguagePurity.phrase_settings'), i18n.t('validateLanguagePurity.phrase_configuration'), i18n.t('validateLanguagePurity.phrase_invalid_choice'),
+                    i18n.t('validateLanguagePurity.phrase_please_select'), i18n.t('validateLanguagePurity.phrase_back_to_main_menu'), i18n.t('validateLanguagePurity.phrase_error'), i18n.t('validateLanguagePurity.phrase_warning'),
+                    i18n.t('validateLanguagePurity.phrase_success'), i18n.t('validateLanguagePurity.phrase_failed'), i18n.t('validateLanguagePurity.phrase_loading'), i18n.t('validateLanguagePurity.phrase_saving'), i18n.t('validateLanguagePurity.phrase_full_system_debug'),
+                    i18n.t('validateLanguagePurity.phrase_configuration_debug'), i18n.t('validateLanguagePurity.phrase_translation_debug'), i18n.t('validateLanguagePurity.phrase_performance_debug'),
+                    i18n.t('validateLanguagePurity.phrase_admin_pin_setup'), i18n.t('validateLanguagePurity.phrase_enter_admin_pin'), i18n.t('validateLanguagePurity.phrase_confirm_admin_pin'),
+                    i18n.t('validateLanguagePurity.phrase_authentication_failed'), i18n.t('validateLanguagePurity.phrase_access_denied'), i18n.t('validateLanguagePurity.phrase_security_log')
                 ],
                 requiredCharacteristics: {
                     // German-specific characteristics
@@ -38,16 +39,16 @@ class LanguagePurityValidator {
                 }
             },
             fr: {
-                name: 'French',
+                name: i18n.t('validateLanguagePurity.language_french'),
                 allowedMarkers: [],
                 forbiddenMarkers: ['[TRANSLATE]', '[FR]', '[NOT TRANSLATED]'],
                 forbiddenPhrases: [
-                    'debug tools', 'settings', 'configuration', 'invalid choice',
-                    'please select', 'back to main menu', 'error', 'warning',
-                    'success', 'failed', 'loading', 'saving', 'full system debug',
-                    'configuration debug', 'translation debug', 'performance debug',
-                    'admin pin setup', 'enter admin pin', 'confirm admin pin',
-                    'authentication failed', 'access denied', 'security log'
+                    i18n.t('validateLanguagePurity.phrase_debug_tools'), i18n.t('validateLanguagePurity.phrase_settings'), i18n.t('validateLanguagePurity.phrase_configuration'), i18n.t('validateLanguagePurity.phrase_invalid_choice'),
+                    i18n.t('validateLanguagePurity.phrase_please_select'), i18n.t('validateLanguagePurity.phrase_back_to_main_menu'), i18n.t('validateLanguagePurity.phrase_error'), i18n.t('validateLanguagePurity.phrase_warning'),
+                    i18n.t('validateLanguagePurity.phrase_success'), i18n.t('validateLanguagePurity.phrase_failed'), i18n.t('validateLanguagePurity.phrase_loading'), i18n.t('validateLanguagePurity.phrase_saving'), i18n.t('validateLanguagePurity.phrase_full_system_debug'),
+                    i18n.t('validateLanguagePurity.phrase_configuration_debug'), i18n.t('validateLanguagePurity.phrase_translation_debug'), i18n.t('validateLanguagePurity.phrase_performance_debug'),
+                    i18n.t('validateLanguagePurity.phrase_admin_pin_setup'), i18n.t('validateLanguagePurity.phrase_enter_admin_pin'), i18n.t('validateLanguagePurity.phrase_confirm_admin_pin'),
+                    i18n.t('validateLanguagePurity.phrase_authentication_failed'), i18n.t('validateLanguagePurity.phrase_access_denied'), i18n.t('validateLanguagePurity.phrase_security_log')
                 ],
                 requiredCharacteristics: {
                     // French-specific characteristics
@@ -57,16 +58,16 @@ class LanguagePurityValidator {
                 }
             },
             es: {
-                name: 'Spanish',
+                name: i18n.t('validateLanguagePurity.language_spanish'),
                 allowedMarkers: [],
                 forbiddenMarkers: ['[TRANSLATE]', '[ES]', '[NOT TRANSLATED]'],
                 forbiddenPhrases: [
-                    'debug tools', 'settings', 'configuration', 'invalid choice',
-                    'please select', 'back to main menu', 'error', 'warning',
-                    'success', 'failed', 'loading', 'saving', 'full system debug',
-                    'configuration debug', 'translation debug', 'performance debug',
-                    'admin pin setup', 'enter admin pin', 'confirm admin pin',
-                    'authentication failed', 'access denied', 'security log'
+                    i18n.t('validateLanguagePurity.phrase_debug_tools'), i18n.t('validateLanguagePurity.phrase_settings'), i18n.t('validateLanguagePurity.phrase_configuration'), i18n.t('validateLanguagePurity.phrase_invalid_choice'),
+                    i18n.t('validateLanguagePurity.phrase_please_select'), i18n.t('validateLanguagePurity.phrase_back_to_main_menu'), i18n.t('validateLanguagePurity.phrase_error'), i18n.t('validateLanguagePurity.phrase_warning'),
+                    i18n.t('validateLanguagePurity.phrase_success'), i18n.t('validateLanguagePurity.phrase_failed'), i18n.t('validateLanguagePurity.phrase_loading'), i18n.t('validateLanguagePurity.phrase_saving'), i18n.t('validateLanguagePurity.phrase_full_system_debug'),
+                    i18n.t('validateLanguagePurity.phrase_configuration_debug'), i18n.t('validateLanguagePurity.phrase_translation_debug'), i18n.t('validateLanguagePurity.phrase_performance_debug'),
+                    i18n.t('validateLanguagePurity.phrase_admin_pin_setup'), i18n.t('validateLanguagePurity.phrase_enter_admin_pin'), i18n.t('validateLanguagePurity.phrase_confirm_admin_pin'),
+                    i18n.t('validateLanguagePurity.phrase_authentication_failed'), i18n.t('validateLanguagePurity.phrase_access_denied'), i18n.t('validateLanguagePurity.phrase_security_log')
                 ],
                 requiredCharacteristics: {
                     // Spanish-specific characteristics
@@ -76,16 +77,16 @@ class LanguagePurityValidator {
                 }
             },
             ru: {
-                name: 'Russian',
+                name: i18n.t('validateLanguagePurity.language_russian'),
                 allowedMarkers: [],
                 forbiddenMarkers: ['[TRANSLATE]', '[RU]', '[NOT TRANSLATED]'],
                 forbiddenPhrases: [
-                    'debug tools', 'settings', 'configuration', 'invalid choice',
-                    'please select', 'back to main menu', 'error', 'warning',
-                    'success', 'failed', 'loading', 'saving', 'full system debug',
-                    'configuration debug', 'translation debug', 'performance debug',
-                    'admin pin setup', 'enter admin pin', 'confirm admin pin',
-                    'authentication failed', 'access denied', 'security log'
+                    i18n.t('validateLanguagePurity.phrase_debug_tools'), i18n.t('validateLanguagePurity.phrase_settings'), i18n.t('validateLanguagePurity.phrase_configuration'), i18n.t('validateLanguagePurity.phrase_invalid_choice'),
+                    i18n.t('validateLanguagePurity.phrase_please_select'), i18n.t('validateLanguagePurity.phrase_back_to_main_menu'), i18n.t('validateLanguagePurity.phrase_error'), i18n.t('validateLanguagePurity.phrase_warning'),
+                    i18n.t('validateLanguagePurity.phrase_success'), i18n.t('validateLanguagePurity.phrase_failed'), i18n.t('validateLanguagePurity.phrase_loading'), i18n.t('validateLanguagePurity.phrase_saving'), i18n.t('validateLanguagePurity.phrase_full_system_debug'),
+                    i18n.t('validateLanguagePurity.phrase_configuration_debug'), i18n.t('validateLanguagePurity.phrase_translation_debug'), i18n.t('validateLanguagePurity.phrase_performance_debug'),
+                    i18n.t('validateLanguagePurity.phrase_admin_pin_setup'), i18n.t('validateLanguagePurity.phrase_enter_admin_pin'), i18n.t('validateLanguagePurity.phrase_confirm_admin_pin'),
+                    i18n.t('validateLanguagePurity.phrase_authentication_failed'), i18n.t('validateLanguagePurity.phrase_access_denied'), i18n.t('validateLanguagePurity.phrase_security_log')
                 ],
                 requiredCharacteristics: {
                     // Russian-specific characteristics (Cyrillic)
@@ -93,16 +94,16 @@ class LanguagePurityValidator {
                 }
             },
             ja: {
-                name: 'Japanese',
+                name: i18n.t('validateLanguagePurity.language_japanese'),
                 allowedMarkers: [],
                 forbiddenMarkers: ['[TRANSLATE]', '[JA]', '[NOT TRANSLATED]'],
                 forbiddenPhrases: [
-                    'debug tools', 'settings', 'configuration', 'invalid choice',
-                    'please select', 'back to main menu', 'error', 'warning',
-                    'success', 'failed', 'loading', 'saving', 'full system debug',
-                    'configuration debug', 'translation debug', 'performance debug',
-                    'admin pin setup', 'enter admin pin', 'confirm admin pin',
-                    'authentication failed', 'access denied', 'security log'
+                    i18n.t('validateLanguagePurity.phrase_debug_tools'), i18n.t('validateLanguagePurity.phrase_settings'), i18n.t('validateLanguagePurity.phrase_configuration'), i18n.t('validateLanguagePurity.phrase_invalid_choice'),
+                    i18n.t('validateLanguagePurity.phrase_please_select'), i18n.t('validateLanguagePurity.phrase_back_to_main_menu'), i18n.t('validateLanguagePurity.phrase_error'), i18n.t('validateLanguagePurity.phrase_warning'),
+                    i18n.t('validateLanguagePurity.phrase_success'), i18n.t('validateLanguagePurity.phrase_failed'), i18n.t('validateLanguagePurity.phrase_loading'), i18n.t('validateLanguagePurity.phrase_saving'), i18n.t('validateLanguagePurity.phrase_full_system_debug'),
+                    i18n.t('validateLanguagePurity.phrase_configuration_debug'), i18n.t('validateLanguagePurity.phrase_translation_debug'), i18n.t('validateLanguagePurity.phrase_performance_debug'),
+                    i18n.t('validateLanguagePurity.phrase_admin_pin_setup'), i18n.t('validateLanguagePurity.phrase_enter_admin_pin'), i18n.t('validateLanguagePurity.phrase_confirm_admin_pin'),
+                    i18n.t('validateLanguagePurity.phrase_authentication_failed'), i18n.t('validateLanguagePurity.phrase_access_denied'), i18n.t('validateLanguagePurity.phrase_security_log')
                 ],
                 requiredCharacteristics: {
                     // Japanese-specific characteristics
@@ -110,16 +111,16 @@ class LanguagePurityValidator {
                 }
             },
             zh: {
-                name: 'Chinese',
+                name: i18n.t('validateLanguagePurity.language_chinese'),
                 allowedMarkers: [],
                 forbiddenMarkers: ['[TRANSLATE]', '[ZH]', '[NOT TRANSLATED]'],
                 forbiddenPhrases: [
-                    'debug tools', 'settings', 'configuration', 'invalid choice',
-                    'please select', 'back to main menu', 'error', 'warning',
-                    'success', 'failed', 'loading', 'saving', 'full system debug',
-                    'configuration debug', 'translation debug', 'performance debug',
-                    'admin pin setup', 'enter admin pin', 'confirm admin pin',
-                    'authentication failed', 'access denied', 'security log'
+                    i18n.t('validateLanguagePurity.phrase_debug_tools'), i18n.t('validateLanguagePurity.phrase_settings'), i18n.t('validateLanguagePurity.phrase_configuration'), i18n.t('validateLanguagePurity.phrase_invalid_choice'),
+                    i18n.t('validateLanguagePurity.phrase_please_select'), i18n.t('validateLanguagePurity.phrase_back_to_main_menu'), i18n.t('validateLanguagePurity.phrase_error'), i18n.t('validateLanguagePurity.phrase_warning'),
+                    i18n.t('validateLanguagePurity.phrase_success'), i18n.t('validateLanguagePurity.phrase_failed'), i18n.t('validateLanguagePurity.phrase_loading'), i18n.t('validateLanguagePurity.phrase_saving'), i18n.t('validateLanguagePurity.phrase_full_system_debug'),
+                    i18n.t('validateLanguagePurity.phrase_configuration_debug'), i18n.t('validateLanguagePurity.phrase_translation_debug'), i18n.t('validateLanguagePurity.phrase_performance_debug'),
+                    i18n.t('validateLanguagePurity.phrase_admin_pin_setup'), i18n.t('validateLanguagePurity.phrase_enter_admin_pin'), i18n.t('validateLanguagePurity.phrase_confirm_admin_pin'),
+                    i18n.t('validateLanguagePurity.phrase_authentication_failed'), i18n.t('validateLanguagePurity.phrase_access_denied'), i18n.t('validateLanguagePurity.phrase_security_log')
                 ],
                 requiredCharacteristics: {
                     // Chinese-specific characteristics
@@ -133,7 +134,7 @@ class LanguagePurityValidator {
      * Validate all locale files
      */
     async validateAll() {
-        console.log('🔍 Language Purity Validator');
+        console.log(i18n.t('validateLanguagePurity.validator_title'));
         console.log('=============================\n');
         
         const localeFiles = this.getLocaleFiles();
@@ -150,7 +151,7 @@ class LanguagePurityValidator {
                 continue; // Skip source language
             }
             
-            console.log(`📄 Validating ${file.language}.json (${this.validationRules[file.language]?.name || file.language})...`);
+            console.log(i18n.t('validateLanguagePurity.validating_file', { language: file.language, name: this.validationRules[file.language]?.name || file.language }));
             const fileResult = await this.validateFile(file);
             
             results.totalFiles++;
@@ -159,10 +160,10 @@ class LanguagePurityValidator {
             
             if (fileResult.isValid) {
                 results.validFiles++;
-                console.log(`   ✅ Valid - No language purity violations`);
+                console.log(i18n.t('validateLanguagePurity.valid_file_message'));
             } else {
                 results.invalidFiles++;
-                console.log(`   ❌ Invalid - ${fileResult.violations.length} violation(s) found`);
+                console.log(i18n.t('validateLanguagePurity.invalid_file_message', { count: fileResult.violations.length }));
                 this.exitCode = 1;
             }
         }
@@ -208,7 +209,7 @@ class LanguagePurityValidator {
             if (!rules) {
                 result.violations.push({
                     type: 'no_validation_rules',
-                    message: `No validation rules defined for language: ${file.language}`
+                    message: i18n.t('validateLanguagePurity.no_validation_rules', { language: file.language })
                 });
                 result.isValid = false;
                 return result;
@@ -221,7 +222,7 @@ class LanguagePurityValidator {
         } catch (error) {
             result.violations.push({
                 type: 'file_error',
-                message: `Error reading file: ${error.message}`
+                message: i18n.t('validateLanguagePurity.error_reading_file', { errorMessage: error.message })
             });
             result.isValid = false;
         }
@@ -280,7 +281,7 @@ class LanguagePurityValidator {
                     type: 'forbidden_marker',
                     key: keyPath,
                     value: text,
-                    issue: `Contains forbidden marker: ${marker}`,
+                    issue: i18n.t('validateLanguagePurity.issue_forbidden_marker', { marker }),
                     severity: 'error'
                 });
             }
@@ -293,7 +294,7 @@ class LanguagePurityValidator {
                     type: 'forbidden_phrase',
                     key: keyPath,
                     value: text,
-                    issue: `Contains English phrase: "${phrase}"`,
+                    issue: i18n.t('validateLanguagePurity.issue_english_phrase', { phrase }),
                     severity: 'error'
                 });
             }
@@ -315,9 +316,9 @@ class LanguagePurityValidator {
                 type: 'english_words',
                 key: keyPath,
                 value: text,
-                issue: `Contains English words: ${foundEnglishWords.join(', ')}`,
-                severity: 'warning'
-            });
+                issue: i18n.t('validateLanguagePurity.issue_english_words', { words: foundEnglishWords.join(', ') }),
+                    severity: 'warning'
+                });
         }
         
         // Language-specific validation
@@ -343,7 +344,7 @@ class LanguagePurityValidator {
                     type: 'missing_cyrillic',
                     key: keyPath,
                     value: text,
-                    issue: 'Long text should contain Cyrillic characters for Russian',
+                    issue: i18n.t('validateLanguagePurity.issue_missing_cyrillic'),
                     severity: 'warning'
                 });
             }
@@ -357,7 +358,7 @@ class LanguagePurityValidator {
                     type: 'missing_japanese',
                     key: keyPath,
                     value: text,
-                    issue: 'Long text should contain Japanese characters',
+                    issue: i18n.t('validateLanguagePurity.issue_missing_japanese'),
                     severity: 'warning'
                 });
             }
@@ -371,7 +372,7 @@ class LanguagePurityValidator {
                     type: 'missing_chinese',
                     key: keyPath,
                     value: text,
-                    issue: 'Long text should contain Chinese characters',
+                    issue: i18n.t('validateLanguagePurity.issue_missing_chinese'),
                     severity: 'warning'
                 });
             }
@@ -384,17 +385,17 @@ class LanguagePurityValidator {
      * Generate validation summary
      */
     generateSummary(results) {
-        console.log('\n📊 VALIDATION SUMMARY');
+        console.log(i18n.t('validateLanguagePurity.summary_title'));
         console.log('======================\n');
         
-        console.log(`📋 Overall Results:`);
-        console.log(`   Total files validated: ${results.totalFiles}`);
-        console.log(`   Valid files: ${results.validFiles}`);
-        console.log(`   Invalid files: ${results.invalidFiles}`);
-        console.log(`   Total violations: ${results.totalViolations}\n`);
+        console.log(i18n.t('validateLanguagePurity.overall_results_header'));
+        console.log(i18n.t('validateLanguagePurity.total_files_validated', { count: results.totalFiles }));
+        console.log(i18n.t('validateLanguagePurity.valid_files', { count: results.validFiles }));
+        console.log(i18n.t('validateLanguagePurity.invalid_files', { count: results.invalidFiles }));
+        console.log(i18n.t('validateLanguagePurity.total_violations', { count: results.totalViolations }));
         
         if (results.invalidFiles > 0) {
-            console.log('❌ VIOLATIONS BY FILE:\n');
+            console.log(i18n.t('validateLanguagePurity.violations_by_file_header'));
             
             for (const [language, fileResult] of Object.entries(results.fileResults)) {
                 if (!fileResult.isValid) {

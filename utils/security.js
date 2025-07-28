@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const SettingsManager = require('../settings/settings-manager');
-const { t } = require('./i18n-helper');
+const i18n = require('./i18n-helper');
 
 /**
  * Security utility module for i18nTK
@@ -19,10 +19,7 @@ class SecurityUtils {
   static validatePath(filePath, basePath = process.cwd()) {
     try {
       if (!filePath || typeof filePath !== 'string') {
-        SecurityUtils.logSecurityEvent('path_validation_failed', {
-          inputPath: filePath,
-          reason: 'Invalid input type'
-        });
+        SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationFailed'), 'error', { inputPath: filePath, reason: i18n.t('security.invalidInputType') });
         return null;
       }
 
@@ -35,25 +32,15 @@ class SecurityUtils {
       // Check if the resolved path is within the base path
       const relativePath = path.relative(basePath, resolvedPath);
       if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
-        SecurityUtils.logSecurityEvent('path_traversal_attempt', {
-          inputPath: filePath,
-          resolvedPath,
-          basePath
-        });
+        SecurityUtils.logSecurityEvent(i18n.t('security.pathTraversalAttempt'), 'warning', { inputPath: filePath, resolvedPath, basePath });
         return null;
       }
       
-      SecurityUtils.logSecurityEvent('path_validated', {
-        inputPath: filePath,
-        resolvedPath
-      });
+      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidated'), 'info', { inputPath: filePath, resolvedPath });
       
       return resolvedPath;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('path_validation_error', {
-        inputPath: filePath,
-        error: error.message
-      });
+      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationError'), 'error', { inputPath: filePath, error: error.message });
       return null;
     }
   }
@@ -78,13 +65,13 @@ class SecurityUtils {
       // Read file with size limit (10MB max)
       const stats = await fs.promises.stat(validatedPath);
       if (stats.size > 10 * 1024 * 1024) {
-        console.warn(`Security: File too large: ${validatedPath}`);
+        console.warn(i18n.t('security.file_too_large', { filePath: validatedPath }));
         return null;
       }
       
       return await fs.promises.readFile(validatedPath, encoding);
     } catch (error) {
-      console.warn(`Security: File read error: ${error.message}`);
+      console.warn(i18n.t('security.file_read_error', { errorMessage: error.message }));
       return null;
     }
   }
@@ -109,13 +96,13 @@ class SecurityUtils {
       // Read file with size limit (10MB max)
       const stats = fs.statSync(validatedPath);
       if (stats.size > 10 * 1024 * 1024) {
-        console.warn(`Security: File too large: ${validatedPath}`);
+        console.warn(i18n.t('security.file_too_large', { filePath: validatedPath }));
         return null;
       }
       
       return fs.readFileSync(validatedPath, encoding);
     } catch (error) {
-      console.warn(`Security: File read error: ${error.message}`);
+      console.warn(i18n.t('security.file_read_error', { errorMessage: error.message }));
       return null;
     }
   }
@@ -137,7 +124,7 @@ class SecurityUtils {
     try {
       // Validate content size (10MB max)
       if (typeof content === 'string' && content.length > 10 * 1024 * 1024) {
-        console.warn(`Security: Content too large for file: ${validatedPath}`);
+        console.warn(i18n.t('security.content_too_large_for_file', { filePath: validatedPath }));
         return false;
       }
       
@@ -149,7 +136,7 @@ class SecurityUtils {
       await fs.promises.writeFile(validatedPath, content, { encoding, mode: 0o644 });
       return true;
     } catch (error) {
-      console.warn(`Security: File write error: ${error.message}`);
+      console.warn(i18n.t('security.file_write_error', { errorMessage: error.message }));
       return false;
     }
   }
@@ -166,14 +153,14 @@ class SecurityUtils {
     }
 
     if (jsonString.length > maxSize) {
-      console.warn('Security: JSON string too large');
+      console.warn(i18n.t('security.json_string_too_large'));
       return null;
     }
 
     try {
       return JSON.parse(jsonString);
     } catch (error) {
-      console.warn(`Security: JSON parse error: ${error.message}`);
+      console.warn(i18n.t('security.json_parse_error', { errorMessage: error.message }));
       return null;
     }
   }
@@ -218,7 +205,7 @@ class SecurityUtils {
 
     // Check against allowed characters
     if (!allowedChars.test(sanitized)) {
-      console.warn('Security: Input contains disallowed characters');
+      console.warn(i18n.t('security.inputDisallowedCharacters'));
       // Remove disallowed characters
       sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:;"']/g, '');
     }
@@ -242,7 +229,7 @@ class SecurityUtils {
       if (allowedArgs.includes(key)) {
         validatedArgs[key] = value;
       } else {
-        console.warn(`${t('hardcodedTexts.securityUnknownCommandArg')}: ${key}`);
+        console.warn(i18n.t('security.unknown_command_argument', { key }));
       }
     }
     
@@ -270,7 +257,7 @@ class SecurityUtils {
 
     for (const [key, value] of Object.entries(config)) {
       if (!allowedKeys.includes(key)) {
-        console.warn(`${t('hardcodedTexts.securityUnknownConfigKey')}: ${key}`);
+        console.warn(i18n.t('security.unknown_config_key', { key }));
         continue;
       }
 
@@ -376,7 +363,7 @@ class SecurityUtils {
       // Fallback: if settings can't be loaded, don't show security logs to maintain clean UI
       // Only log critical security events in this case
       if (event.includes('CRITICAL') || event.includes('BREACH') || event.includes('ATTACK')) {
-        console.log(`[SECURITY ALERT] ${timestamp}: ${event}`, details);
+        console.log(i18n.t('security.security_alert', { timestamp, event }), details);
       }
     }
   }

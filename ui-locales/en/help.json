@@ -1,0 +1,62 @@
+{
+  "title": "📊 I18N MANAGEMENT HELP",
+  "usage": "Usage: node i18ntk-manage.js [options]",
+  "interactiveMode": "💡 Use: node i18ntk-manage.js --command=<command> for direct execution",
+  "showHelp": "📖 Use: node i18ntk-manage.js --help for available commands",
+  "availableCommands": "📖 Available Commands:",
+  "menu": {
+    "title": "🌐 I18N MANAGEMENT MENU",
+    "description": "Interactive menu for managing internationalization",
+    "exit": "🚪 Exit"
+  },
+  "commands": {
+    "init": "  init      - Initialize new languages",
+    "analyze": "  analyze   - Analyze translations",
+    "validate": "  validate  - Validate translations",
+    "usage": "  usage     - Check key usage",
+    "sizing": "  sizing    - Analyze sizing",
+    "complete": "  complete  - Complete translations (100% coverage)",
+    "summary": "  summary   - Show project status",
+    "debug": "  debug     - Debug translation issues"
+  },
+  "options": {
+    "sourceDir": "  --source-dir <dir>     Source directory to analyze",
+    "output": "  --output <file>        Output file for the report",
+    "verbose": "  --verbose, -v           Show detailed information",
+    "keepReports": "  --keep-reports          Keep existing reports",
+    "deleteReports": "  --delete-reports        Delete existing reports",
+    "help": "  --help, -h              Show this help"
+  },
+  "examples": {
+    "title": "Examples:",
+    "example1": "  node i18ntk-manage.js",
+    "example2": "  node i18ntk-manage.js --source-dir ./locales",
+    "example3": "  node i18ntk-manage.js --output summary-report.txt",
+    "example4": "  node i18ntk-manage.js --verbose",
+    "example5": "  node i18ntk-manage.js --source-dir ./locales --output report.json"
+  },
+  "features": {
+    "initProject": "🚀 Initialize new languages",
+    "analyzeTranslations": "🔍 Analyze translations",
+    "validateTranslations": "✅ Validate translations",
+    "checkUsage": "📊 Check key usage",
+    "completeTranslations": "🎯 Complete translations (100% coverage)",
+    "showSizing": "📏 Analyze sizing",
+    "runWorkflow": "🔄 Run full workflow",
+    "showStatus": "📋 Show project status",
+    "deleteReports": "🗑️  Delete all reports",
+    "changeLanguage": "🌍 Change UI language",
+    "settings": "⚙️  Settings",
+    "showHelp": "❓ Help",
+    "debugTools": "🔧 Debug Tools"
+  },
+  "messages": {
+    "selectOption": "Select an option:",
+    "invalidOption": "❌ Invalid option. Please try again.",
+    "operationCompleted": "✅ Operation completed successfully!",
+    "pressEnter": "Press Enter to continue...",
+    "goodbye": "👋 Goodbye!",
+    "unknownCommand": "Unknown command: {{command}}",
+    "nonInteractive": "⚠️ Non-interactive mode detected. Menu displayed for reference only."
+  }
+}

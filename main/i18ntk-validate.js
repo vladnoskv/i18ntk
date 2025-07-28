@@ -23,9 +23,9 @@ const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
 // Get configuration from settings manager
-async function getConfig() {
+async function getConfig(t) {
   try {
-    SecurityUtils.logSecurityEvent('config_access', 'info', 'Accessing configuration for validation');
+    SecurityUtils.logSecurityEvent(t('validate.configAccess'), 'info', 'Accessing configuration for validation');
     const settings = settingsManager.getSettings();
     const config = {
       sourceDir: settings.directories?.sourceDir || settings.sourceDir || './locales',
@@ -38,11 +38,11 @@ async function getConfig() {
     
     // Validate configuration
     SecurityUtils.validateConfig(config);
-    SecurityUtils.logSecurityEvent('config_validated', 'info', 'Configuration validated successfully');
+    SecurityUtils.logSecurityEvent(t('validate.configValidated'), 'info', 'Configuration validated successfully');
     
     return config;
   } catch (error) {
-    SecurityUtils.logSecurityEvent('config_error', 'error', `Configuration error: ${error.message}`);
+    SecurityUtils.logSecurityEvent(t('validate.configError'), 'error', `Configuration error: ${error.message}`);
     throw error;
   }
 }
@@ -57,9 +57,15 @@ class I18nValidator {
   
   async initialize() {
     try {
-      SecurityUtils.logSecurityEvent('validator_init', 'info', 'Initializing I18n validator');
+      // Initialize i18n with UI language first
+      const tempConfig = await getConfig(t);
+      const uiLanguage = SecurityUtils.sanitizeInput(tempConfig.uiLanguage || 'en');
+      loadTranslations(uiLanguage);
+      this.t = t; // Assign the translation function
       
-      const defaultConfig = await getConfig();
+      SecurityUtils.logSecurityEvent(this.t('validate.validatorInit'), 'info', 'Initializing I18n validator');
+      
+      const defaultConfig = await getConfig(this.t);
       this.config = { ...defaultConfig, ...this.config };
       
       // Validate configuration values
@@ -76,19 +82,14 @@ class I18nValidator {
       this.sourceDir = resolvedSourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
-      // Initialize i18n with UI language - FIX: Properly initialize translation function
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
-      loadTranslations(uiLanguage);
-      this.t = t; // Assign the translation function
-      
       // Verify translation function is working
       if (typeof this.t !== 'function') {
         throw new Error('Translation function not properly initialized');
       }
       
-      SecurityUtils.logSecurityEvent('validator_initialized', 'info', 'I18n validator initialized successfully');
+      SecurityUtils.logSecurityEvent(this.t('validate.validatorInitialized'), 'info', 'I18n validator initialized successfully');
     } catch (error) {
-      SecurityUtils.logSecurityEvent('validator_init_error', 'error', `Validator initialization error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.validatorInitError'), 'error', `Validator initialization error: ${error.message}`);
       throw error;
     }
   }
@@ -96,7 +97,7 @@ class I18nValidator {
   // Parse command line arguments
   parseArgs() {
     try {
-      SecurityUtils.logSecurityEvent('args_parsing', 'info', 'Parsing command line arguments');
+      SecurityUtils.logSecurityEvent(this.t('validate.argsParsing'), 'info', 'Parsing command line arguments');
       
       const args = process.argv.slice(2);
       const parsed = {};
@@ -132,10 +133,10 @@ class I18nValidator {
         }
       });
       
-      SecurityUtils.logSecurityEvent('args_parsed', 'info', 'Command line arguments parsed successfully');
+      SecurityUtils.logSecurityEvent(this.t('validate.argsParsed'), 'info', 'Command line arguments parsed successfully');
       return parsed;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('args_parse_error', 'error', `Argument parsing error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.argsParseError'), 'error', `Argument parsing error: ${error.message}`);
       throw error;
     }
   }
@@ -153,7 +154,7 @@ class I18nValidator {
   // Get all available languages
   getAvailableLanguages() {
     try {
-      SecurityUtils.logSecurityEvent('languages_scan', 'info', 'Scanning available languages');
+      SecurityUtils.logSecurityEvent(this.t('validate.languagesScan'), 'info', 'Scanning available languages');
       
       if (!fs.existsSync(this.sourceDir)) {
         throw new Error(`Source directory not found: ${this.sourceDir}`);
@@ -165,10 +166,10 @@ class I18nValidator {
           return fs.statSync(itemPath).isDirectory() && item !== this.config.sourceLanguage;
         });
       
-      SecurityUtils.logSecurityEvent('languages_found', 'info', `Found ${languages.length} languages`);
+      SecurityUtils.logSecurityEvent(this.t('validate.languagesFound'), 'info', `Found ${languages.length} languages`);
       return languages;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('languages_scan_error', 'error', `Language scanning error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.languagesScanError'), 'error', `Language scanning error: ${error.message}`);
       throw error;
     }
   }
@@ -189,10 +190,10 @@ class I18nValidator {
                  !this.config.excludeFiles.includes(file);
         });
       
-      SecurityUtils.logSecurityEvent('files_scan', 'info', `Found ${files.length} files in ${sanitizedLanguage}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.filesScan'), 'info', `Found ${files.length} files in ${sanitizedLanguage}`);
       return files;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('files_scan_error', 'error', `File scanning error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.filesScanError'), 'error', `File scanning error: ${error.message}`);
       throw error;
     }
   }
@@ -236,10 +237,10 @@ class I18nValidator {
       const content = fs.readFileSync(filePath, 'utf8');
       const parsed = SecurityUtils.safeParseJSON(content);
       
-      SecurityUtils.logSecurityEvent('json_validated', 'info', `JSON syntax validated: ${filePath}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.jsonValidated'), 'info', `JSON syntax validated: ${filePath}`);
       return { valid: true, data: parsed };
     } catch (error) {
-      SecurityUtils.logSecurityEvent('json_validation_error', 'error', `JSON validation error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.jsonValidationError'), 'error', `JSON validation error: ${error.message}`);
       return { 
         valid: false, 
         error: error.message,
@@ -282,7 +283,7 @@ class I18nValidator {
   }
 
   // Validate translation completeness
-  validateTranslations(obj, language, fileName, prefix = '') {
+  validateTranslation(obj, language, fileName, prefix = '') {
     let totalKeys = 0;
     let translatedKeys = 0;
     let issues = [];
@@ -291,7 +292,7 @@ class I18nValidator {
       const fullKey = prefix ? `${prefix}.${key}` : key;
       
       if (value && typeof value === 'object' && !Array.isArray(value)) {
-        const nested = this.validateTranslations(value, language, fileName, fullKey);
+        const nested = this.validateTranslation(value, language, fileName, fullKey);
         totalKeys += nested.totalKeys;
         translatedKeys += nested.translatedKeys;
         issues.push(...nested.issues);
@@ -334,7 +335,7 @@ class I18nValidator {
   // Validate a single language
   async validateLanguage(language) {
     try {
-      SecurityUtils.logSecurityEvent('language_validation', 'info', `Validating language: ${language}`);
+      SecurityUtils.logSecurityEvent(this.t('validate.languageValidation'), 'info', `Validating language: ${language}`);
       
       const sanitizedLanguage = SecurityUtils.sanitizeInput(language);
       const languageDir = path.join(this.sourceDir, sanitizedLanguage);
@@ -419,7 +420,7 @@ class I18nValidator {
       const structural = this.validateStructure(sourceContent, targetContent, language, fileName);
       
       // Validate translations
-      const translations = this.validateTranslations(targetContent, language, fileName);
+      const translations = this.validateTranslation(targetContent, language, fileName);
       
       // Store file validation results
       validation.files[fileName] = {
@@ -453,7 +454,7 @@ class I18nValidator {
     
     return validation;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('language_validation_error', 'error', {
+      SecurityUtils.logSecurityEvent(this.t('validate.languageValidationError'), 'error', {
         language: language,
         error: error.message,
         timestamp: new Date().toISOString()
@@ -496,14 +497,14 @@ class I18nValidator {
 
   // Show help message
   showHelp() {
-    console.log(this.t('validateTranslations.help_message'));
+    console.log(t('validate.help_message'));
   }
 
   // Main validation process
   async validate() {
     try {
-      console.log(this.t('validateTranslations.title'));
-      console.log(this.t("validateTranslations.message"));
+      console.log(this.t('validate.title'));
+      console.log(this.t('validate.message'));
       
       // Delete old validation report if it exists
       const reportPath = path.join(process.cwd(), 'validation-report.txt');
@@ -511,9 +512,9 @@ class I18nValidator {
       
       if (fs.existsSync(reportPath)) {
         fs.unlinkSync(reportPath);
-        console.log(this.t('validateTranslations.deletedOldReport'));
+        console.log(this.t('validate.deletedOldReport'));
         
-        SecurityUtils.logSecurityEvent('file_deleted', 'info', {
+        SecurityUtils.logSecurityEvent(this.t('validate.fileDeleted'), 'info', {
           path: reportPath,
           timestamp: new Date().toISOString()
         });
@@ -537,9 +538,9 @@ class I18nValidator {
         this.config.strictMode = true;
       }
       
-      console.log(this.t('validateTranslations.sourceDirectory', { dir: this.sourceDir }));
-      console.log(this.t("validateTranslations.source_language_thisconfigsour", { sourceLanguage: this.config.sourceLanguage }));
-      console.log(this.t('validateTranslations.strictMode', { mode: this.config.strictMode ? 'ON' : 'OFF' }));
+      console.log(this.t('validate.sourceDirectory', { dir: this.sourceDir }));
+      console.log(this.t('validate.sourceLanguage', { sourceLanguage: this.config.sourceLanguage }));
+      console.log(this.t('validate.strictMode', { mode: this.config.strictMode ? 'ON' : 'OFF' }));
       
       // Validate source language directory exists
       SecurityUtils.validatePath(this.sourceLanguageDir);
@@ -550,7 +551,7 @@ class I18nValidator {
           { sourceLanguage: this.config.sourceLanguage }
         );
         
-        SecurityUtils.logSecurityEvent('validation_error', 'error', {
+        SecurityUtils.logSecurityEvent(this.t('validate.validationError'), 'error', {
           error: 'Source language directory not found',
           path: this.sourceLanguageDir,
           timestamp: new Date().toISOString()
@@ -563,7 +564,7 @@ class I18nValidator {
       const availableLanguages = this.getAvailableLanguages();
       
       if (availableLanguages.length === 0) {
-        console.log(this.t('validateTranslations.noTargetLanguages'));
+        console.log(this.t('validate.noTargetLanguages'));
         return { success: true, message: 'No languages to validate' };
       }
       
@@ -580,76 +581,86 @@ class I18nValidator {
         throw new Error('Specified language not found');
       }
       
-      console.log(this.t('validateTranslations.validatingLanguages', { langs: targetLanguages.join(', ') }));
+      console.log(this.t('validate.validatingLanguages', { langs: targetLanguages.join(', ') }));
+      console.log('');
       
       const results = {};
       
       // Validate each language
       for (const language of targetLanguages) {
-        console.log(this.t('validateTranslations.validatingLanguage', { lang: language }));
+        console.log(this.t('validate.validatingLanguage', { lang: language }));
         
         const validation = await this.validateLanguage(language);
         results[language] = validation;
         
-        // Display summary
+        // Display brief progress indicator
         const { summary } = validation;
-        console.log(this.t('validateTranslations.filesCount', { count: summary.validFiles }));
-        console.log(this.t('validateTranslations.keysCount', { count: summary.totalKeys }));
-        console.log(this.t('validateTranslations.missingFilesCount', { count: summary.missingFiles.length }));
-        console.log(this.t('validateTranslations.syntaxErrorsCount', { count: summary.syntaxErrors.length }));
-        console.log(this.t('validateTranslations.translationPercentage', { percentage: summary.percentage, translated: summary.translatedKeys, total: summary.totalKeys }));
-        console.log('');
+        const status = summary.syntaxErrors.length > 0 ? '❌' : 
+                      summary.missingFiles.length > 0 ? '⚠️' : '✅';
+        console.log(`   ${status} ${language}: ${summary.percentage}% (${summary.translatedKeys}/${summary.totalKeys} keys)`);
       }
+      
+      console.log('');
+      console.log(this.t('validate.separator'));
       
       // Overall summary
       const hasErrors = this.errors.length > 0;
       const hasWarnings = this.warnings.length > 0;
       
-      console.log(this.t("validateTranslations.n_validation_summary"));
-      console.log(this.t("validateTranslations.total_errors", { count: this.errors.length }));
-      console.log(this.t("validateTranslations.total_warnings", { count: this.warnings.length }));
+      console.log(this.t('validate.validationSummary'));
+      console.log(this.t('validate.totalErrors', { count: this.errors.length }));
+      console.log(this.t('validate.totalWarnings', { count: this.warnings.length }));
       
       // Show errors
       if (hasErrors) {
-        console.log(this.t("validateTranslations.n_errors"));
-        this.errors.forEach((error, index) => {
-          console.log(`${index + 1}. ${error.message}`);
-          if (error.details && Object.keys(error.details).length > 0) {
-            console.log(`   Details: ${JSON.stringify(error.details, null, 2)}`);
-          }
-        });
         console.log('');
+        console.log(this.t('validate.separator'));
+        console.log(this.t('validate.errorsSection'));
+        console.log('');
+        this.errors.forEach((error, index) => {
+          console.log(`  ❌ ${error.message}`);
+          if (error.details && Object.keys(error.details).length > 0) {
+            console.log(`     📄 Details: ${JSON.stringify(error.details, null, 2)}`);
+          }
+          console.log('');
+        });
       }
       
       // Show warnings
       if (hasWarnings) {
-        console.log(this.t("validateTranslations.n_warnings"));
-        this.warnings.forEach((warning, index) => {
-          console.log(`${index + 1}. ${warning.message}`);
-          if (warning.details && Object.keys(warning.details).length > 0) {
-            console.log(`   Details: ${JSON.stringify(warning.details, null, 2)}`);
-          }
-        });
         console.log('');
+        console.log(this.t('validate.separator'));
+        console.log(this.t('validate.warningsSection'));
+        console.log('');
+        this.warnings.forEach((warning, index) => {
+          console.log(`  ⚠️  ${warning.message}`);
+          if (warning.details && Object.keys(warning.details).length > 0) {
+            console.log(`     📄 Details: ${JSON.stringify(warning.details, null, 2)}`);
+          }
+          console.log('');
+        });
       }
       
       // Recommendations
-      console.log(this.t("validateTranslations.n_recommendations"));
-      console.log(this.t("validateTranslations.message"));
+      console.log('');
+      console.log(this.t('validate.separator'));
+      console.log(this.t('validate.recommendationsSection'));
       
       if (hasErrors) {
-        console.log(this.t("validateTranslations.fix_errors_first"));
-        console.log(this.t("validateTranslations.1_resolve_missing_files_and_sy"));
-        console.log(this.t("validateTranslations.2_fix_structural_inconsistenci"));
-        console.log(this.t("validateTranslations.3_complete_missing_translation"));
-        console.log(this.t("validateTranslations.4_rerun_validation"));
+        console.log('');
+        console.log(this.t('validate.resolveMissingFilesAndSyntaxErrors'));
+        console.log(this.t('validate.fixStructuralInconsistencies'));
+        console.log(this.t('validate.completeMissingTranslations'));
+        console.log(this.t('validate.rerunValidation'));
       } else if (hasWarnings) {
-        console.log(this.t("validateTranslations.address_warnings"));
-        console.log(this.t("validateTranslations.review_warnings"));
-        console.log(this.t("validateTranslations.2_consider_running_with_strict"));
+        console.log('');
+        console.log(this.t('validate.addressWarnings'));
+        console.log(this.t('validate.reviewWarnings'));
+        console.log(this.t('validate.considerRunningWithStrict'));
       } else {
-        console.log(this.t("validateTranslations.all_validations_passed"));
-        console.log(this.t("validateTranslations.consider_running_usage_analysi"));
+        console.log('');
+        console.log(this.t('validate.allValidationsPassed'));
+        console.log(this.t('validate.considerRunningUsageAnalysis'));
       }
       
       // Exit with appropriate code
@@ -663,7 +674,7 @@ class I18nValidator {
       };
       
     } catch (error) {
-      console.error(this.t("validateTranslations.validation_failed", { error: error.message }));
+      console.error(this.t("validate.validation_failed", { error: error.message }));
       return {
         success: false,
         error: error.message
@@ -676,19 +687,19 @@ class I18nValidator {
    */
   async run() {
     try {
-      console.log('🔍 Starting validation process...');
-      SecurityUtils.logSecurityEvent('run_started', 'info', 'Starting validation run');
-
       await this.initialize();
+      console.log(this.t('validate.startingValidationProcess'));
+      SecurityUtils.logSecurityEvent(this.t('validate.runStarted'), 'info', 'Starting validation run');
+
       const result = await this.validate();
 
-      console.log('✅ Validation process completed successfully');
-      SecurityUtils.logSecurityEvent('run_completed', 'info', 'Validation run completed successfully');
+      console.log(this.t('validate.validationProcessCompletedSuccessfully'));
+      SecurityUtils.logSecurityEvent(this.t('validate.runCompleted'), 'info', 'Validation run completed successfully');
       return result;
     } catch (error) {
-      console.error('❌ Validation Error:', error.message);
-      console.error('Stack trace:', error.stack);
-      SecurityUtils.logSecurityEvent('run_error', 'error', `Validation run failed: ${error.message}`);
+      console.error(this.t('validate.validationError', { error: error.message }));
+      console.error(this.t('validate.stackTrace', { stack: error.stack }));
+      SecurityUtils.logSecurityEvent(this.t('validate.runError'), 'error', `Validation run failed: ${error.message}`);
       throw error;
     }
   }
@@ -699,7 +710,12 @@ module.exports = I18nValidator;
 if (require.main === module) {
   (async () => {
     try {
-      SecurityUtils.logSecurityEvent('script_execution', 'info', {
+      // Initialize translations for CLI usage
+      const settings = settingsManager.getSettings();
+      const uiLanguage = settings.language || 'en';
+      loadTranslations(uiLanguage);
+      
+      SecurityUtils.logSecurityEvent(t('validate.scriptExecution'), 'info', {
         script: 'i18ntk-validate.js',
         timestamp: new Date().toISOString()
       });
@@ -732,14 +748,14 @@ if (require.main === module) {
       if (AdminCLI.requiresAuth('validate')) {
         const authenticated = await AdminCLI.authenticate();
         if (!authenticated) {
-          console.log('❌ Authentication failed. Access denied.');
+          console.log(t('validate.authenticationFailed'));
           process.exit(1);
         }
       }
 
       const result = await validator.validate();
 
-      SecurityUtils.logSecurityEvent('validation_completed', 'info', {
+      SecurityUtils.logSecurityEvent(t('validate.validationCompleted'), 'info', {
         success: result.success,
         errors: result.errors || 0,
         warnings: result.warnings || 0,
@@ -748,9 +764,9 @@ if (require.main === module) {
 
       process.exit(result.success ? 0 : 1);
     } catch (error) {
-      console.error('❌ Fatal validation error:', error.message);
-      console.error('Stack trace:', error.stack);
-      SecurityUtils.logSecurityEvent('validation_error', 'error', {
+      console.error(t('validate.fatalValidationError', { error: error.message }));
+      console.error(t('validate.stackTrace', { stack: error.stack }));
+      SecurityUtils.logSecurityEvent(t('validate.validationError'), 'error', {
         error: error.message,
         stack: error.stack,
         timestamp: new Date().toISOString()

@@ -83,13 +83,13 @@ class AutoRunner {
 
         for (const file of requiredFiles) {
             if (!fs.existsSync(file)) {
-                console.log(this.ui.t('hardcodedTexts.missingRequiredFile', { file }));
-                console.log(this.ui.t('hardcodedTexts.runInitializationFirst'));
+                console.log(this.ui.t('autorun.missingRequiredFile', { file }));
+                console.log(this.ui.t('autorun.runInitializationFirst'));
                 return false;
             }
         }
 
-        console.log(this.ui.t('hardcodedTexts.initializationCheckPassed'));
+        console.log(this.ui.t('autorun.initializationCheckPassed'));
         return true;
     }
 
@@ -101,12 +101,12 @@ class AutoRunner {
         const showOutput = isStandalone && !quiet;
         
         if (showOutput) {
-            console.log(`\n${this.ui.t('hardcodedTexts.runningStep', { stepName: step.name })}`);
-            console.log(`${this.ui.t('hardcodedTexts.commandLabel', { command: step.command })}`);
+            console.log(`\n${this.ui.t('autorun.runningStep', { stepName: step.name })}`);
+            console.log(`${this.ui.t('autorun.commandLabel', { command: step.command })}`);
             console.log('-'.repeat(50));
         } else {
             // Show minimal output when called from menu
-            console.log(this.ui.t('hardcodedTexts.stepRunning', { stepName: step.name }));
+            console.log(this.ui.t('autorun.stepRunning', { stepName: step.name }));
         }
 
         try {
@@ -121,9 +121,9 @@ class AutoRunner {
             const duration = Date.now() - startTime;
             
             if (showOutput) {
-                console.log(this.ui.t('hardcodedTexts.stepCompletedWithTime', { stepName: step.name, duration }));
+                console.log(this.ui.t('autorun.stepCompletedWithTime', { stepName: step.name, duration }));
             } else {
-                console.log(this.ui.t('hardcodedTexts.stepCompleted', { stepName: step.name }));
+                console.log(this.ui.t('autorun.stepCompleted', { stepName: step.name }));
             }
             
             this.results.push({
@@ -138,10 +138,10 @@ class AutoRunner {
             
         } catch (error) {
             if (showOutput) {
-                console.log(this.ui.t('hardcodedTexts.stepFailed', { stepName: step.name }));
-                console.log(this.ui.t('hardcodedTexts.errorLabel', { error: error.message }));
+                console.log(this.ui.t('autorun.stepFailed', { stepName: step.name }));
+                console.log(this.ui.t('autorun.errorLabel', { error: error.message }));
             } else {
-                console.log(this.ui.t('hardcodedTexts.stepFailedWithError', { stepName: step.name, error: error.message }));
+                console.log(this.ui.t('autorun.stepFailedWithError', { stepName: step.name, error: error.message }));
             }
             
             this.results.push({
@@ -153,10 +153,10 @@ class AutoRunner {
             });
             
             if (step.required) {
-                console.log(this.ui.t('hardcodedTexts.requiredStepFailed'));
+                console.log(this.ui.t('autorun.requiredStepFailed'));
                 return false;
             } else {
-                console.log(this.ui.t('hardcodedTexts.optionalStepFailed'));
+                console.log(this.ui.t('autorun.optionalStepFailed'));
                 return true;
             }
         }
@@ -174,7 +174,7 @@ class AutoRunner {
         process.env.I18NTK_WORKFLOW_MODE = 'true';
         
         if (showOutput) {
-            console.log(this.ui.t('hardcodedTexts.startingAutoRunWorkflow'));
+            console.log(this.ui.t('autorun.startingAutoRunWorkflow'));
             console.log('=' .repeat(60));
         }
         
@@ -184,13 +184,13 @@ class AutoRunner {
         }
         
         if (showOutput) {
-            console.log(`\n${this.ui.t('hardcodedTexts.workflowIncludesSteps', { count: this.steps.length })}`);
+            console.log(`\n${this.ui.t('autorun.workflowIncludesSteps', { count: this.steps.length })}`);
             this.steps.forEach((step, index) => {
-                const required = step.required ? this.ui.t('hardcodedTexts.stepRequired') : this.ui.t('hardcodedTexts.stepOptional');
+                const required = step.required ? this.ui.t('autorun.stepRequired') : this.ui.t('autorun.stepOptional');
                 console.log(`   ${index + 1}. ${step.name} ${required}`);
             });
             
-            console.log(`\n${this.ui.t('hardcodedTexts.startingExecution')}`);
+            console.log(`\n${this.ui.t('autorun.startingExecution')}`);
         }
         
         // Run each step
@@ -199,9 +199,9 @@ class AutoRunner {
             
             if (!success && step.required) {
                 if (showOutput) {
-                    console.log(`\n${this.ui.t('hardcodedTexts.workflowStopped')}`);
+                    console.log(`\n${this.ui.t('autorun.workflowStopped')}`);
                 } else {
-                    console.log(this.ui.t('hardcodedTexts.workflowStopped'));
+                    console.log(this.ui.t('autorun.workflowStopped'));
                 }
                 this.generateReport(quiet);
                 process.exit(1);
@@ -212,7 +212,7 @@ class AutoRunner {
         }
         
         if (showOutput) {
-            console.log(`\n${this.ui.t('hardcodedTexts.workflowCompleted')}`);
+            console.log(`\n${this.ui.t('autorun.workflowCompleted')}`);
         }
         
         this.generateReport(quiet);
@@ -220,7 +220,7 @@ class AutoRunner {
         // Only show success message and prompt when run standalone
         if (isStandalone) {
             console.log(this.ui.t('operations.completed'));
-            await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+            await this.prompt(this.ui.t('autorun.pressEnterToContinue'));
         }
     }
 
@@ -231,7 +231,7 @@ class AutoRunner {
         // Set workflow mode environment variable
         process.env.I18NTK_WORKFLOW_MODE = 'true';
         
-        console.log(this.ui.t('hardcodedTexts.runningSelectedSteps'));
+        console.log(this.ui.t('autorun.runningSelectedSteps'));
         console.log('=' .repeat(60));
         
         if (!this.checkInitialization()) {
@@ -245,7 +245,7 @@ class AutoRunner {
                 await this.runCommand(step);
                 await new Promise(resolve => setTimeout(resolve, 1000));
             } else {
-                console.log(this.ui.t('hardcodedTexts.invalidStepNumber', { stepNum }));
+                console.log(this.ui.t('autorun.invalidStepNumber', { stepNum }));
             }
         }
         
@@ -255,7 +255,7 @@ class AutoRunner {
         // Don't show when run as part of autorun workflow
         if (require.main === module) {
             console.log(this.ui.t('operations.completed'));
-            await this.prompt(this.ui.t('hardcodedTexts.pressEnterToContinue'));
+            await this.prompt(this.ui.t('autorun.pressEnterToContinue'));
         }
     }
 
@@ -267,7 +267,7 @@ class AutoRunner {
         const showOutput = isStandalone && !quiet;
         
         if (showOutput) {
-            console.log(`\n${this.ui.t('hardcodedTexts.executionReport')}`);
+            console.log(`\n${this.ui.t('autorun.executionReport')}`);
             console.log('=' .repeat(60));
         }
         
@@ -276,11 +276,11 @@ class AutoRunner {
         const requiredFailed = this.results.filter(r => r.status === 'failed' && r.required).length;
         
         if (showOutput) {
-            console.log(this.ui.t('hardcodedTexts.successfulSteps', { count: successful }));
-            console.log(this.ui.t('hardcodedTexts.failedSteps', { count: failed }));
-            console.log(this.ui.t('hardcodedTexts.requiredFailedSteps', { count: requiredFailed }));
+            console.log(this.ui.t('autorun.successfulSteps', { count: successful }));
+            console.log(this.ui.t('autorun.failedSteps', { count: failed }));
+            console.log(this.ui.t('autorun.requiredFailedSteps', { count: requiredFailed }));
             
-            console.log(`\n${this.ui.t('hardcodedTexts.stepDetails')}`);
+            console.log(`\n${this.ui.t('autorun.stepDetails')}`);
             this.results.forEach((result, index) => {
                 const status = result.status === 'success' ? '✅' : '❌';
                 const required = result.required ? '[REQ]' : '[OPT]';
@@ -288,7 +288,7 @@ class AutoRunner {
                 
                 console.log(`   ${status} ${required} ${result.step}${duration}`);
                 if (result.error) {
-                    console.log(this.ui.t('hardcodedTexts.errorDetails', { error: result.error }));
+                    console.log(this.ui.t('autorun.errorDetails', { error: result.error }));
                 }
             });
         }
@@ -304,11 +304,11 @@ class AutoRunner {
         fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
         
         if (showOutput) {
-            console.log(`\n${this.ui.t('hardcodedTexts.reportSavedTo', { path: reportPath })}`);
+            console.log(`\n${this.ui.t('autorun.reportSavedTo', { path: reportPath })}`);
             
             // Overall status
-            const overallStatus = requiredFailed === 0 ? this.ui.t('hardcodedTexts.overallStatusSuccess') : this.ui.t('hardcodedTexts.overallStatusFailed');
-            console.log(`\n${this.ui.t('hardcodedTexts.overallStatus', { status: overallStatus })}`);
+            const overallStatus = requiredFailed === 0 ? this.ui.t('autorun.overallStatusSuccess') : this.ui.t('autorun.overallStatusFailed');
+            console.log(`\n${this.ui.t('autorun.overallStatus', { status: overallStatus })}`);
             console.log('=' .repeat(60));
         }
     }
@@ -328,51 +328,51 @@ class AutoRunner {
             rl.question(prompt, resolve);
         });
 
-        console.log(`\n${this.ui.t('hardcodedTexts.customSettingsConfiguration')}\n`);
-        console.log(`${this.ui.t('hardcodedTexts.pressEnterForDefaults')}\n`);
+        console.log(`\n${this.ui.t('autorun.customSettingsConfiguration')}\n`);
+        console.log(`${this.ui.t('autorun.pressEnterForDefaults')}\n`);
 
         try {
             const currentSettings = this.settingsManager.getSettings();
             const newSettings = { ...currentSettings };
 
             // Source directory
-      const sourceDir = await question(this.ui.t('hardcodedTexts.sourceDirPrompt', { default: currentSettings.sourceDir || './locales' }));
+      const sourceDir = await question(this.ui.t('autorun.sourceDirPrompt', { default: currentSettings.sourceDir || './locales' }));
       if (sourceDir.trim()) {
         newSettings.sourceDir = sourceDir.trim();
       }
 
       // Source language
-      const sourceLang = await question(this.ui.t('hardcodedTexts.sourceLangPrompt', { default: currentSettings.sourceLanguage || 'en' }));
+      const sourceLang = await question(this.ui.t('autorun.sourceLangPrompt', { default: currentSettings.sourceLanguage || 'en' }));
       if (sourceLang.trim()) {
         newSettings.sourceLanguage = sourceLang.trim();
       }
 
       // Target languages
       const defaultLangs = currentSettings.defaultLanguages || ['de', 'es', 'fr', 'ru'];
-      const targetLangs = await question(this.ui.t('hardcodedTexts.targetLangsPrompt', { default: defaultLangs.join(', ') }));
+      const targetLangs = await question(this.ui.t('autorun.targetLangsPrompt', { default: defaultLangs.join(', ') }));
       if (targetLangs.trim()) {
         newSettings.defaultLanguages = targetLangs.split(',').map(lang => lang.trim());
       }
 
       // Translation marker
-      const marker = await question(this.ui.t('hardcodedTexts.translationMarkerPrompt', { default: currentSettings.processing?.notTranslatedMarker || 'NOT_TRANSLATED' }));
+      const marker = await question(this.ui.t('autorun.translationMarkerPrompt', { default: currentSettings.processing?.notTranslatedMarker || 'NOT_TRANSLATED' }));
       if (marker.trim()) {
         if (!newSettings.processing) newSettings.processing = {};
         newSettings.processing.notTranslatedMarker = marker.trim();
       }
 
       // Output directory
-      const outputDir = await question(this.ui.t('hardcodedTexts.outputDirPrompt', { default: currentSettings.outputDir || './i18ntk-reports' }));
+      const outputDir = await question(this.ui.t('autorun.outputDirPrompt', { default: currentSettings.outputDir || './i18ntk-reports' }));
       if (outputDir.trim()) {
         newSettings.outputDir = outputDir.trim();
       }
 
             // Save settings
             this.settingsManager.saveSettings(newSettings);
-            console.log(`\n${this.ui.t('hardcodedTexts.settingsUpdatedSuccessfully')}\n`);
+            console.log(`\n${this.ui.t('autorun.settingsUpdatedSuccessfully')}\n`);
 
         } catch (error) {
-            console.error(this.ui.t('hardcodedTexts.errorConfiguringSettings'), error.message);
+            console.error(this.ui.t('autorun.errorConfiguringSettings'), error.message);
         } finally {
             rl.close();
         }
@@ -382,22 +382,22 @@ class AutoRunner {
      * Show help information
      */
     showHelp() {
-        console.log(this.ui.t('hardcodedTexts.autoRunScriptTitle'));
+        console.log(this.ui.t('autorun.autoRunScriptTitle'));
         console.log('=' .repeat(40));
-        console.log(`\n${this.ui.t('hardcodedTexts.usageTitle')}`);
-        console.log(`  ${this.ui.t('hardcodedTexts.runAllSteps')}`);
-        console.log(`  ${this.ui.t('hardcodedTexts.configureSettingsFirst')}`);
-        console.log(`  ${this.ui.t('hardcodedTexts.runSpecificSteps')}`);
-        console.log(`  ${this.ui.t('hardcodedTexts.showHelp')}`);
-        console.log(`\n${this.ui.t('hardcodedTexts.availableSteps')}`);
+        console.log(`\n${this.ui.t('autorun.usageTitle')}`);
+        console.log(`  ${this.ui.t('autorun.runAllSteps')}`);
+        console.log(`  ${this.ui.t('autorun.configureSettingsFirst')}`);
+        console.log(`  ${this.ui.t('autorun.runSpecificSteps')}`);
+        console.log(`  ${this.ui.t('autorun.showHelp')}`);
+        console.log(`\n${this.ui.t('autorun.availableSteps')}`);
         this.steps.forEach((step, index) => {
-            const required = step.required ? this.ui.t('hardcodedTexts.stepRequired') : this.ui.t('hardcodedTexts.stepOptional');
+            const required = step.required ? this.ui.t('autorun.stepRequired') : this.ui.t('autorun.stepOptional');
             console.log(`  ${index + 1}. ${step.name} ${required}`);
         });
-        console.log(`\n${this.ui.t('hardcodedTexts.examplesTitle')}`);
-        console.log(`  ${this.ui.t('hardcodedTexts.configExample')}`);
-        console.log(`  ${this.ui.t('hardcodedTexts.stepsExample1')}`);
-        console.log(`  ${this.ui.t('hardcodedTexts.stepsExample2')}`);
+        console.log(`\n${this.ui.t('autorun.examplesTitle')}`);
+        console.log(`  ${this.ui.t('autorun.configExample')}`);
+        console.log(`  ${this.ui.t('autorun.stepsExample1')}`);
+        console.log(`  ${this.ui.t('autorun.stepsExample2')}`);
     }
 }
 
@@ -436,28 +436,28 @@ if (require.main === module) {
             break;
         case 'config':
             runner.promptForSettings().then(() => {
-                console.log(`\n${runner.ui.t('hardcodedTexts.configurationComplete')}`);
-                console.log(`${runner.ui.t('hardcodedTexts.runAutoRunCommand')}\n`);
+                console.log(`\n${runner.ui.t('autorun.configurationComplete')}`);
+                console.log(`${runner.ui.t('autorun.runAutoRunCommand')}\n`);
             }).catch(error => {
-                console.error(runner.ui.t('hardcodedTexts.configurationFailed'), error.message);
+                console.error(runner.ui.t('autorun.configurationFailed'), error.message);
                 process.exit(1);
             });
             break;
         case 'steps':
             if (args.steps.length === 0) {
-                console.log(runner.ui.t('hardcodedTexts.noValidStepNumbers'));
+                console.log(runner.ui.t('autorun.noValidStepNumbers'));
                 runner.showHelp();
                 process.exit(1);
             }
             runner.runSteps(args.steps).catch(error => {
-                console.error(runner.ui.t('hardcodedTexts.autoRunFailed'), error.message);
+                console.error(runner.ui.t('autorun.autoRunFailed'), error.message);
                 process.exit(1);
             });
             break;
         case 'all':
         default:
             runner.runAll().catch(error => {
-                console.error(runner.ui.t('hardcodedTexts.autoRunFailed'), error.message);
+                console.error(runner.ui.t('autorun.autoRunFailed'), error.message);
                 process.exit(1);
             });
             break;

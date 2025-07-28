@@ -1,0 +1,16 @@
+{
+  "title": "Workflow Management",
+  "description": "Manage i18n workflows.",
+  "select_workflow_file": "Select a workflow file to run:",
+  "no_workflow_files": "No workflow files found in the workflows directory.",
+  "invalid_selection": "Invalid selection. Please enter a number corresponding to a workflow file.",
+  "workflow_execution_started": "Starting workflow: {workflowName}",
+  "workflow_execution_completed": "Workflow completed: {workflowName}",
+  "workflow_execution_failed": "Workflow failed: {workflowName} - {error}",
+  "workflow_cancelled": "Workflow execution cancelled.",
+  "press_enter_to_continue": "Press Enter to continue!",
+  "starting": "🚀 Starting workflow...",
+  "completed": "✅ Workflow completed successfully!",
+  "checkReports": "📄 Check reports for details.",
+  "exitingCompleted": "📝 Workflow completed. Exiting..."
+}

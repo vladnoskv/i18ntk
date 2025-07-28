@@ -1,4 +1,5 @@
 const readline = require('readline');
+const i18n = require('./i18n-helper');
 const AdminAuth = require('./admin-auth');
 const SecurityUtils = require('./security');
 
@@ -119,29 +120,29 @@ class AdminCLI {
    */
   async setupAdminPin() {
     try {
-      console.log('\n🔐 Setting up Admin PIN Protection');
-      console.log('This will require a 4-digit PIN for administrative operations.');
+      console.log(i18n.t('adminCli.setupPinProtectionTitle'));
+      console.log(i18n.t('adminCli.setupPinProtectionDescription'));
       
-      const confirm = await this.promptConfirm('Do you want to enable admin PIN protection?');
+      const confirm = await this.promptConfirm(i18n.t('adminCli.enablePinProtectionPrompt'));
       if (!confirm) {
-        console.log('Admin PIN protection setup cancelled.');
+        console.log(i18n.t('adminCli.setupCancelled'));
         this.closeReadline();
         return false;
       }
 
       let pin1, pin2;
       do {
-        pin1 = await this.promptPin('Enter a 4-digit PIN: ');
+        pin1 = await this.promptPin(i18n.t('adminCli.enterPinPrompt'));
         
         if (!/^\d{4}$/.test(pin1)) {
-          console.log('❌ PIN must be exactly 4 digits. Please try again.');
+          console.log(i18n.t('adminCli.pinFormatError'));
           continue;
         }
         
-        pin2 = await this.promptPin('Confirm PIN: ');
+        pin2 = await this.promptPin(i18n.t('adminCli.confirmPinPrompt'));
         
         if (pin1 !== pin2) {
-          console.log('❌ PINs do not match. Please try again.');
+          console.log(i18n.t('adminCli.pinMismatchError'));
         }
       } while (pin1 !== pin2 || !/^\d{4}$/.test(pin1));
 
@@ -149,17 +150,17 @@ class AdminCLI {
       const success = await this.adminAuth.setupPin(pin1);
       
       if (success) {
-        console.log('✅ Admin PIN protection enabled successfully!');
-        console.log('⚠️  Remember your PIN - it cannot be recovered if lost.');
-        SecurityUtils.logSecurityEvent('admin_pin_setup_cli', 'info', 'Admin PIN setup completed via CLI');
+        console.log(i18n.t('adminCli.pinProtectionEnabledSuccess'));
+        console.log(i18n.t('adminCli.pinRecoveryWarning'));
+        SecurityUtils.logSecurityEvent(i18n.t('adminCli.adminPinSetupCli'), 'info', 'Admin PIN setup completed via CLI');
       } else {
-        console.log('❌ Failed to setup admin PIN protection.');
+        console.log(i18n.t('adminCli.setupPinProtectionFailed'));
       }
       
       this.closeReadline();
       return success;
     } catch (error) {
-      console.error('❌ Error setting up admin PIN:', error.message);
+      console.error(i18n.t('adminCli.errorSettingUpPin', { message: error.message }));
       this.closeReadline();
       return false;
     }
@@ -177,7 +178,7 @@ class AdminCLI {
         return true; // No authentication required
       }
 
-      console.log(`\n🔐 Admin authentication required for: ${operation}`);
+      console.log(i18n.t('adminCli.authRequiredForOperation', { operation }));
       
       let attempts = 0;
       const maxAttempts = 3;
@@ -186,7 +187,7 @@ class AdminCLI {
         const pin = await this.promptPin('Enter admin PIN: ');
         
         if (!/^\d{4}$/.test(pin)) {
-          console.log('❌ Invalid PIN format. PIN must be 4 digits.');
+          console.log(i18n.t('adminCli.invalidPinFormat'));
           attempts++;
           continue;
         }
@@ -194,24 +195,24 @@ class AdminCLI {
         const isValid = await this.adminAuth.verifyPin(pin);
         
         if (isValid) {
-          console.log('✅ Authentication successful!');
+          console.log(i18n.t('adminCli.authenticationSuccess'));
           this.closeReadline();
           return true;
         } else {
           attempts++;
           const remaining = maxAttempts - attempts;
           if (remaining > 0) {
-            console.log(`❌ Invalid PIN. ${remaining} attempts remaining.`);
+            console.log(i18n.t('adminCli.invalidPinAttemptsRemaining', { remaining }));
           }
         }
       }
       
-      console.log('❌ Authentication failed. Access denied.');
-      SecurityUtils.logSecurityEvent('admin_auth_failed_cli', 'warning', `Admin authentication failed after ${maxAttempts} attempts`);
+      console.log(i18n.t('adminCli.authenticationFailedAccessDenied'));
+      SecurityUtils.logSecurityEvent(i18n.t('adminCli.adminAuthFailedCli'), 'warning', `Admin authentication failed after ${maxAttempts} attempts`);
       this.closeReadline();
       return false;
     } catch (error) {
-      console.error('❌ Authentication error:', error.message);
+      console.error(i18n.t('adminCli.authenticationError', { message: error.message }));
       this.closeReadline();
       return false;
     }
@@ -226,11 +227,11 @@ class AdminCLI {
       
       const authRequired = await this.adminAuth.isAuthRequired();
       if (!authRequired) {
-        console.log('Admin PIN protection is not currently enabled.');
+        console.log(i18n.t('adminCli.pinProtectionNotEnabled'));
         return true;
       }
 
-      console.log('\n🔓 Disabling Admin PIN Protection');
+      console.log(i18n.t('adminCli.disablingPinProtectionTitle'));
       
       // Require authentication to disable
       const authenticated = await this.authenticateAdmin('disable admin protection');
@@ -238,9 +239,9 @@ class AdminCLI {
         return false;
       }
       
-      const confirm = await this.promptConfirm('Are you sure you want to disable admin PIN protection?');
+      const confirm = await this.promptConfirm(i18n.t('adminCli.confirmDisablePinProtection'));
       if (!confirm) {
-        console.log('Operation cancelled.');
+        console.log(i18n.t('adminCli.operationCancelled'));
         this.closeReadline();
         return false;
       }
@@ -248,16 +249,16 @@ class AdminCLI {
       const success = await this.adminAuth.disableAuth();
       
       if (success) {
-        console.log('✅ Admin PIN protection disabled.');
-        SecurityUtils.logSecurityEvent('admin_auth_disabled_cli', 'info', 'Admin PIN protection disabled via CLI');
+        console.log(i18n.t('adminCli.pinProtectionDisabledSuccess'));
+        SecurityUtils.logSecurityEvent(i18n.t('adminCli.adminAuthDisabledCli'), 'info', 'Admin PIN protection disabled via CLI');
       } else {
-        console.log('❌ Failed to disable admin PIN protection.');
+        console.log(i18n.t('adminCli.disablePinProtectionFailed'));
       }
       
       this.closeReadline();
       return success;
     } catch (error) {
-      console.error('❌ Error disabling admin protection:', error.message);
+      console.error(i18n.t('adminCli.errorDisablingPinProtection', { message: error.message }));
       this.closeReadline();
       return false;
     }
@@ -272,22 +273,22 @@ class AdminCLI {
       
       const authRequired = await this.adminAuth.isAuthRequired();
       
-      console.log('\n🔐 Admin Protection Status');
+      console.log(i18n.t('adminCli.adminProtectionStatusTitle'));
       console.log('=' .repeat(30));
       
       if (authRequired) {
-        console.log('Status: ✅ ENABLED');
-        console.log('Protection: 4-digit PIN required for admin operations');
-        console.log('Lockout: 3 failed attempts = 15 minute lockout');
+        console.log(i18n.t('adminCli.statusEnabled'));
+        console.log(i18n.t('adminCli.protectionDetails'));
+        console.log(i18n.t('adminCli.lockoutDetails'));
       } else {
-        console.log('Status: ❌ DISABLED');
-        console.log('Protection: No authentication required');
-        console.log('Risk: Administrative operations are unprotected');
+        console.log(i18n.t('adminCli.statusDisabled'));
+        console.log(i18n.t('adminCli.noAuthRequired'));
+        console.log(i18n.t('adminCli.unprotectedRisk'));
       }
       
       return authRequired;
     } catch (error) {
-      console.error('❌ Error checking admin status:', error.message);
+      console.error(i18n.t('adminCli.errorCheckingAdminStatus', { message: error.message }));
       return false;
     }
   }

@@ -1,0 +1,22 @@
+{
+  "pathValidationFailed": "path_validation_failed",
+  "invalidInputType": "invalid_input_type",
+  "pathTraversalAttempt": "path_traversal_attempt",
+  "pathValidated": "✅ Path validated successfully",
+  "pathValidationError": "path_validation_error",
+  "fileTooLarge": "Security: File too large: {filePath}",
+  "fileReadError": "Security: File read error: {errorMessage}",
+  "contentTooLargeForFile": "Security: Content too large for file: {filePath}",
+  "fileWriteError": "Security: File write error: {errorMessage}",
+  "jsonStringTooLarge": "Security: JSON string too large",
+  "jsonParseError": "Security: JSON parse error: {errorMessage}",
+  "inputContainsDisallowedCharacters": "Security: Input contains disallowed characters",
+  "unknownCommandArgument": "Security: Unknown command argument: {key}",
+  "unknownConfigKey": "Security: Unknown config key: {key}",
+  "securityAlert": "[SECURITY ALERT] {timestamp}: {event}",
+  "contentTooLarge": "Security: Content too large for file: {validatedPath}",
+  "inputDisallowedCharacters": "Security: Input contains disallowed characters",
+  "unknownCommandArg": "Unknown command argument",
+  "logMessage": "[SECURITY {level}] {timestamp}: {event}",
+  "alertMessage": "[SECURITY ALERT] {timestamp}: {event}"
+}

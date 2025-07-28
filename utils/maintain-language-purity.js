@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const i18n = require('./i18n-helper');
 
 class LanguagePurityMaintainer {
     constructor() {
@@ -22,7 +23,7 @@ class LanguagePurityMaintainer {
      * Run the complete language purity maintenance workflow
      */
     async runCompleteWorkflow() {
-        console.log('🚀 Language Purity Maintenance Workflow');
+        console.log(i18n.t('maintainLanguagePurity.workflow_title'));
         console.log('==========================================\n');
         
         const results = {
@@ -38,28 +39,28 @@ class LanguagePurityMaintainer {
         
         try {
             // Step 1: Initial Assessment
-            console.log('📊 STEP 1: Initial Language Purity Assessment');
+            console.log(i18n.t('maintainLanguagePurity.step1_title'));
             console.log('==============================================\n');
             const initialAssessment = await this.runInitialAssessment();
             results.steps.push(initialAssessment);
             results.summary.initialViolations = initialAssessment.totalViolations;
             
             // Step 2: Detect and Fix Language Mismatches
-            console.log('\n🔧 STEP 2: Detect and Auto-Fix Language Mismatches');
+            console.log(i18n.t('maintainLanguagePurity.step2_title'));
             console.log('===================================================\n');
             const mismatchFixes = await this.fixLanguageMismatches();
             results.steps.push(mismatchFixes);
             results.summary.totalFixesApplied += mismatchFixes.fixesApplied;
             
             // Step 3: Apply Automatic Translations
-            console.log('\n🌐 STEP 3: Apply Automatic Translations');
+            console.log(i18n.t('maintainLanguagePurity.step3_title'));
             console.log('========================================\n');
             const translationFixes = await this.applyAutomaticTranslations();
             results.steps.push(translationFixes);
             results.summary.totalFixesApplied += translationFixes.fixesApplied;
             
             // Step 4: Final Assessment
-            console.log('\n✅ STEP 4: Final Language Purity Assessment');
+            console.log(i18n.t('maintainLanguagePurity.step4_title'));
             console.log('============================================\n');
             const finalAssessment = await this.runFinalAssessment();
             results.steps.push(finalAssessment);
@@ -75,7 +76,7 @@ class LanguagePurityMaintainer {
             this.generateWorkflowReport(results);
             
         } catch (error) {
-            console.error('❌ Workflow Error:', error.message);
+            console.error(i18n.t('maintainLanguagePurity.workflow_error', { errorMessage: error.message }));
             throw error;
         }
         
@@ -86,7 +87,7 @@ class LanguagePurityMaintainer {
      * Run initial language purity assessment
      */
     async runInitialAssessment() {
-        console.log('Running initial language purity validation...');
+        console.log(i18n.t('maintainLanguagePurity.running_initial_validation'));
         
         try {
             const output = execSync('node validate-language-purity.js', {
@@ -99,7 +100,7 @@ class LanguagePurityMaintainer {
             const violationMatch = output.match(/Total violations: (\d+)/);
             const totalViolations = violationMatch ? parseInt(violationMatch[1]) : 0;
             
-            console.log(`✅ Initial assessment complete: ${totalViolations} violations found\n`);
+            console.log(i18n.t('maintainLanguagePurity.initial_assessment_complete', { count: totalViolations }));
             
             return {
                 step: 'initial_assessment',
@@ -108,7 +109,7 @@ class LanguagePurityMaintainer {
                 output: output.substring(0, 1000) // Truncate for report
             };
         } catch (error) {
-            console.log(`⚠️  Initial assessment completed with warnings\n`);
+            console.log(i18n.t('maintainLanguagePurity.initial_assessment_warnings'));
             
             // Even if exit code is non-zero, we can still extract useful info
             const output = error.stdout || error.message;
@@ -128,7 +129,7 @@ class LanguagePurityMaintainer {
      * Fix language mismatches (remove prefixes, etc.)
      */
     async fixLanguageMismatches() {
-        console.log('Detecting and fixing language mismatches...');
+        console.log(i18n.t('maintainLanguagePurity.detecting_fixing_mismatches'));
         
         try {
             // First, run detection to see what needs fixing
@@ -137,7 +138,7 @@ class LanguagePurityMaintainer {
                 encoding: 'utf8'
             });
             
-            console.log('Detection complete. Applying auto-fixes...');
+            console.log(i18n.t('maintainLanguagePurity.detection_complete_applying_fixes'));
             
             // Apply auto-fixes
             const fixOutput = execSync('node detect-language-mismatches.js --auto-fix --apply', {
@@ -149,7 +150,7 @@ class LanguagePurityMaintainer {
             const fixMatch = fixOutput.match(/(\d+) total fixes applied/);
             const fixesApplied = fixMatch ? parseInt(fixMatch[1]) : 0;
             
-            console.log(`✅ Language mismatch fixes complete: ${fixesApplied} fixes applied\n`);
+            console.log(i18n.t('maintainLanguagePurity.mismatch_fixes_complete', { count: fixesApplied }));
             
             return {
                 step: 'language_mismatch_fixes',
@@ -158,7 +159,7 @@ class LanguagePurityMaintainer {
                 output: fixOutput.substring(0, 1000)
             };
         } catch (error) {
-            console.log(`⚠️  Language mismatch fixes completed with warnings\n`);
+            console.log(i18n.t('maintainLanguagePurity.mismatch_fixes_warnings'));
             
             const output = error.stdout || error.message;
             const fixMatch = output.match(/(\d+) total fixes applied/);
@@ -177,7 +178,7 @@ class LanguagePurityMaintainer {
      * Apply automatic translations
      */
     async applyAutomaticTranslations() {
-        console.log('Applying automatic translations...');
+        console.log(i18n.t('maintainLanguagePurity.applying_automatic_translations'));
         
         try {
             // First, check what can be translated
@@ -186,7 +187,7 @@ class LanguagePurityMaintainer {
                 encoding: 'utf8'
             });
             
-            console.log('Translation preview complete. Applying translations...');
+            console.log(i18n.t('maintainLanguagePurity.translation_preview_complete'));
             
             // Apply translations
             const applyOutput = execSync('node translate-mismatches.js --apply', {

@@ -557,14 +557,14 @@ class I18nSummaryReporter {
     }
     
     console.log(this.t('summary.i18nSummaryReportGenerator'));
-    console.log('============================================================');
+    console.log(this.t('summary.separator'));
     console.log(this.t('summary.sourceDirectory', {dir: this.config.sourceDir}));
     
     if (args.verbose) {
-      console.log(`🔧 Configuration:`);
-      console.log(`   Source language: ${this.config.sourceLanguage}`);
-      console.log(`   Supported extensions: ${this.config.supportedExtensions.join(', ')}`);
-      console.log(`   Excluded files: ${this.config.excludeFiles.join(', ')}`);
+      console.log(this.t('summary.configurationTitle'));
+      console.log(this.t('summary.sourceLanguage', { sourceLanguage: this.config.sourceLanguage }));
+      console.log(this.t('summary.supportedExtensions', { extensions: this.config.supportedExtensions.join(', ') }));
+      console.log(this.t('summary.excludedFiles', { files: this.config.excludeFiles.join(', ') }));
     }
     
     try {
@@ -591,7 +591,7 @@ class I18nSummaryReporter {
           console.log(this.t('summary.reportSaveFailed', { reportPath: outputPath }));
         }
       } else {
-        console.log('\n' + report);
+        console.log(this.t('summary.reportContent', { report }));
       }
       
       // Handle report file management
@@ -630,9 +630,9 @@ class I18nSummaryReporter {
       }
       
       // Summary
-      console.log('\n============================================================');
+      console.log(this.t('summary.separator'));
       console.log(this.t('summary.analysisComplete'));
-      console.log('============================================================');
+      console.log(this.t('summary.separator'));
       console.log(this.t('summary.analyzedLanguages', { count: this.stats.languages.length }));
       console.log(this.t('summary.processedFiles', { count: this.stats.totalFiles }));
       console.log(this.t('summary.foundTranslationKeys', { count: this.stats.totalKeys }));
@@ -663,7 +663,7 @@ class I18nSummaryReporter {
 if (require.main === module) {
   const reporter = new I18nSummaryReporter();
   reporter.run().catch(error => {
-    console.error('❌ Fatal error:', error.message);
+    console.error(this.t('summary.fatalError', { error: error.message }));
     process.exit(1);
   });
 }

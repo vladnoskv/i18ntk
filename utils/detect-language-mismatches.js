@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const i18n = require('./i18n-helper');
 
 class LanguageMismatchDetector {
     constructor() {
@@ -28,25 +29,25 @@ class LanguageMismatchDetector {
         
         // Common English words that shouldn't appear in foreign translations
         this.englishIndicators = [
-            'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
-            'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after',
-            'above', 'below', 'between', 'among', 'under', 'over', 'inside', 'outside',
-            'this', 'that', 'these', 'those', 'here', 'there', 'where', 'when', 'why',
-            'how', 'what', 'which', 'who', 'whom', 'whose', 'all', 'any', 'some',
-            'many', 'much', 'few', 'little', 'more', 'most', 'less', 'least',
-            'good', 'better', 'best', 'bad', 'worse', 'worst', 'big', 'bigger',
-            'biggest', 'small', 'smaller', 'smallest', 'new', 'newer', 'newest',
-            'old', 'older', 'oldest', 'first', 'second', 'third', 'last', 'next',
-            'previous', 'same', 'different', 'other', 'another', 'each', 'every',
-            'both', 'either', 'neither', 'one', 'two', 'three', 'four', 'five',
-            'Error', 'Warning', 'Success', 'Failed', 'Loading', 'Saving', 'Delete',
-            'Create', 'Update', 'Add', 'Remove', 'Edit', 'View', 'Show', 'Hide',
-            'Open', 'Close', 'Start', 'Stop', 'Run', 'Execute', 'Process', 'Generate',
-            'Analysis', 'Report', 'Summary', 'Details', 'Configuration', 'Settings',
-            'Options', 'Preferences', 'Tools', 'Debug', 'Test', 'Validate',
-            'Check', 'Verify', 'Confirm', 'Cancel', 'Continue', 'Finish', 'Complete',
-            'Please', 'try', 'again', 'Invalid', 'choice', 'Select', 'option',
-            'Back', 'Main', 'Menu', 'File', 'files', 'found', 'not', 'available'
+            i18n.t('detectLanguageMismatches.word_the'), i18n.t('detectLanguageMismatches.word_and'), i18n.t('detectLanguageMismatches.word_or'), i18n.t('detectLanguageMismatches.word_but'), i18n.t('detectLanguageMismatches.word_in'), i18n.t('detectLanguageMismatches.word_on'), i18n.t('detectLanguageMismatches.word_at'), i18n.t('detectLanguageMismatches.word_to'), i18n.t('detectLanguageMismatches.word_for'), i18n.t('detectLanguageMismatches.word_of'), i18n.t('detectLanguageMismatches.word_with'), i18n.t('detectLanguageMismatches.word_by'),
+            i18n.t('detectLanguageMismatches.word_from'), i18n.t('detectLanguageMismatches.word_up'), i18n.t('detectLanguageMismatches.word_about'), i18n.t('detectLanguageMismatches.word_into'), i18n.t('detectLanguageMismatches.word_through'), i18n.t('detectLanguageMismatches.word_during'), i18n.t('detectLanguageMismatches.word_before'), i18n.t('detectLanguageMismatches.word_after'),
+            i18n.t('detectLanguageMismatches.word_above'), i18n.t('detectLanguageMismatches.word_below'), i18n.t('detectLanguageMismatches.word_between'), i18n.t('detectLanguageMismatches.word_among'), i18n.t('detectLanguageMismatches.word_under'), i18n.t('detectLanguageMismatches.word_over'), i18n.t('detectLanguageMismatches.word_inside'), i18n.t('detectLanguageMismatches.word_outside'),
+            i18n.t('detectLanguageMismatches.word_this'), i18n.t('detectLanguageMismatches.word_that'), i18n.t('detectLanguageMismatches.word_these'), i18n.t('detectLanguageMismatches.word_those'), i18n.t('detectLanguageMismatches.word_here'), i18n.t('detectLanguageMismatches.word_there'), i18n.t('detectLanguageMismatches.word_where'), i18n.t('detectLanguageMismatches.word_when'), i18n.t('detectLanguageMismatches.word_why'),
+            i18n.t('detectLanguageMismatches.word_how'), i18n.t('detectLanguageMismatches.word_what'), i18n.t('detectLanguageMismatches.word_which'), i18n.t('detectLanguageMismatches.word_who'), i18n.t('detectLanguageMismatches.word_whom'), i18n.t('detectLanguageMismatches.word_whose'), i18n.t('detectLanguageMismatches.word_all'), i18n.t('detectLanguageMismatches.word_any'), i18n.t('detectLanguageMismatches.word_some'),
+            i18n.t('detectLanguageMismatches.word_many'), i18n.t('detectLanguageMismatches.word_much'), i18n.t('detectLanguageMismatches.word_few'), i18n.t('detectLanguageMismatches.word_little'), i18n.t('detectLanguageMismatches.word_more'), i18n.t('detectLanguageMismatches.word_most'), i18n.t('detectLanguageMismatches.word_less'), i18n.t('detectLanguageMismatches.word_least'),
+            i18n.t('detectLanguageMismatches.word_good'), i18n.t('detectLanguageMismatches.word_better'), i18n.t('detectLanguageMismatches.word_best'), i18n.t('detectLanguageMismatches.word_bad'), i18n.t('detectLanguageMismatches.word_worse'), i18n.t('detectLanguageMismatches.word_worst'), i18n.t('detectLanguageMismatches.word_big'), i18n.t('detectLanguageMismatches.word_bigger'),
+            i18n.t('detectLanguageMismatches.word_biggest'), i18n.t('detectLanguageMismatches.word_small'), i18n.t('detectLanguageMismatches.word_smaller'), i18n.t('detectLanguageMismatches.word_smallest'), i18n.t('detectLanguageMismatches.word_new'), i18n.t('detectLanguageMismatches.word_newer'), i18n.t('detectLanguageMismatches.word_newest'),
+            i18n.t('detectLanguageMismatches.word_old'), i18n.t('detectLanguageMismatches.word_older'), i18n.t('detectLanguageMismatches.word_oldest'), i18n.t('detectLanguageMismatches.word_first'), i18n.t('detectLanguageMismatches.word_second'), i18n.t('detectLanguageMismatches.word_third'), i18n.t('detectLanguageMismatches.word_last'), i18n.t('detectLanguageMismatches.word_next'),
+            i18n.t('detectLanguageMismatches.word_previous'), i18n.t('detectLanguageMismatches.word_same'), i18n.t('detectLanguageMismatches.word_different'), i18n.t('detectLanguageMismatches.word_other'), i18n.t('detectLanguageMismatches.word_another'), i18n.t('detectLanguageMismatches.word_each'), i18n.t('detectLanguageMismatches.word_every'),
+            i18n.t('detectLanguageMismatches.word_both'), i18n.t('detectLanguageMismatches.word_either'), i18n.t('detectLanguageMismatches.word_neither'), i18n.t('detectLanguageMismatches.word_one'), i18n.t('detectLanguageMismatches.word_two'), i18n.t('detectLanguageMismatches.word_three'), i18n.t('detectLanguageMismatches.word_four'), i18n.t('detectLanguageMismatches.word_five'),
+            i18n.t('detectLanguageMismatches.word_error'), i18n.t('detectLanguageMismatches.word_warning'), i18n.t('detectLanguageMismatches.word_success'), i18n.t('detectLanguageMismatches.word_failed'), i18n.t('detectLanguageMismatches.word_loading'), i18n.t('detectLanguageMismatches.word_saving'), i18n.t('detectLanguageMismatches.word_delete'),
+            i18n.t('detectLanguageMismatches.word_create'), i18n.t('detectLanguageMismatches.word_update'), i18n.t('detectLanguageMismatches.word_add'), i18n.t('detectLanguageMismatches.word_remove'), i18n.t('detectLanguageMismatches.word_edit'), i18n.t('detectLanguageMismatches.word_view'), i18n.t('detectLanguageMismatches.word_show'), i18n.t('detectLanguageMismatches.word_hide'),
+            i18n.t('detectLanguageMismatches.word_open'), i18n.t('detectLanguageMismatches.word_close'), i18n.t('detectLanguageMismatches.word_start'), i18n.t('detectLanguageMismatches.word_stop'), i18n.t('detectLanguageMismatches.word_run'), i18n.t('detectLanguageMismatches.word_execute'), i18n.t('detectLanguageMismatches.word_process'), i18n.t('detectLanguageMismatches.word_generate'),
+            i18n.t('detectLanguageMismatches.word_analysis'), i18n.t('detectLanguageMismatches.word_report'), i18n.t('detectLanguageMismatches.word_summary'), i18n.t('detectLanguageMismatches.word_details'), i18n.t('detectLanguageMismatches.word_configuration'), i18n.t('detectLanguageMismatches.word_settings'),
+            i18n.t('detectLanguageMismatches.word_options'), i18n.t('detectLanguageMismatches.word_preferences'), i18n.t('detectLanguageMismatches.word_tools'), i18n.t('detectLanguageMismatches.word_debug'), i18n.t('detectLanguageMismatches.word_test'), i18n.t('detectLanguageMismatches.word_validate'),
+            i18n.t('detectLanguageMismatches.word_check'), i18n.t('detectLanguageMismatches.word_verify'), i18n.t('detectLanguageMismatches.word_confirm'), i18n.t('detectLanguageMismatches.word_cancel'), i18n.t('detectLanguageMismatches.word_continue'), i18n.t('detectLanguageMismatches.word_finish'), i18n.t('detectLanguageMismatches.word_complete'),
+            i18n.t('detectLanguageMismatches.word_please'), i18n.t('detectLanguageMismatches.word_try'), i18n.t('detectLanguageMismatches.word_again'), i18n.t('detectLanguageMismatches.word_invalid'), i18n.t('detectLanguageMismatches.word_choice'), i18n.t('detectLanguageMismatches.word_select'), i18n.t('detectLanguageMismatches.word_option'),
+            i18n.t('detectLanguageMismatches.word_back'), i18n.t('detectLanguageMismatches.word_main'), i18n.t('detectLanguageMismatches.word_menu'), i18n.t('detectLanguageMismatches.word_file'), i18n.t('detectLanguageMismatches.word_files'), i18n.t('detectLanguageMismatches.word_found'), i18n.t('detectLanguageMismatches.word_not'), i18n.t('detectLanguageMismatches.word_available')
         ];
         
         // Language-specific patterns
@@ -88,7 +89,7 @@ class LanguageMismatchDetector {
      * Main detection method
      */
     async detectMismatches() {
-        console.log('🔍 Language Mismatch Detection Tool');
+        console.log(i18n.t('detectLanguageMismatches.tool_title'));
         console.log('=====================================\n');
         
         const localeFiles = this.getLocaleFiles();
@@ -98,7 +99,7 @@ class LanguageMismatchDetector {
                 continue; // Skip source language
             }
             
-            console.log(`📄 Analyzing ${file.language}.json...`);
+            console.log(i18n.t('detectLanguageMismatches.analyzing_file', { language: file.language }));
             await this.analyzeFile(file);
         }
         
@@ -145,7 +146,7 @@ class LanguageMismatchDetector {
             }
             
         } catch (error) {
-            console.error(`❌ Error analyzing ${file.filename}: ${error.message}`);
+            console.error(i18n.t('detectLanguageMismatches.error_analyzing_file', { filename: file.filename, errorMessage: error.message }));
         }
     }
 
@@ -195,7 +196,7 @@ class LanguageMismatchDetector {
         if (text.includes('[TRANSLATE]')) {
             issues.push({
                 type: 'untranslated_marker',
-                description: 'Contains [TRANSLATE] marker - needs translation'
+                description: i18n.t('detectLanguageMismatches.issue_untranslated_marker')
             });
         }
         
