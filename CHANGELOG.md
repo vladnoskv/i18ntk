@@ -2,9 +2,9 @@
 
 All notable changes to the I18N Management Toolkit are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.1.2 (2024-07-27) - **PATCH RELEASE** 🩹
+**Current Version:** 1.1.3 (2025-07-29) - **FEATURE REFEACTOR RELEASE** 🩹
 
-## [1.1.3] - 2024-12-19
+## [1.1.3] - 2025-07-29
 
 ### 🌐 Translation System Enhancement
 - **Added**: Translation keys for workflow step names in `autorun.json` files across all supported languages
@@ -21,7 +21,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **CLI**: `i18ntk-autorun.js --help` and `--config` commands show translated step names
 - **Internationalization**: Complete translation coverage for all user-facing text
 
-## [1.1.2] - 2024-07-27
+## [1.1.2] - 2025-07-27
 
 ### 🚀 Enhanced CLI Experience
 - **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu for specified commands.
@@ -34,7 +34,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **Direct Commands**: Verified that `i18ntk usage` and other direct commands now execute as expected without launching the interactive menu.
 
 
-## [1.1.1] - 2025-01-28
+## [1.1.1] - 2025-07-27
 
 ### 🐛 Bug Fixes & Improvements
 - **Fixed**: Interactive menu 'Help' option (option 12) now correctly waits for user input before returning to the main menu.
@@ -45,7 +45,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **Interactive Help**: Confirmed that the "Press Enter to return to menu." prompt is now correctly displayed and waits for user input after showing help.
 - **Locale File Exclusion**: Verified that specified internal JSON files are no longer processed as user locales, ensuring a cleaner and more accurate translation environment.
 
-## [1.1.0] - 2025-01-27
+## [1.1.0] - 2025-07-27
 
 ### 🚀 Enhanced CLI Experience
 - **Fixed**: `i18ntk --version` and `i18ntk -v` now properly display version information instead of loading the management menu
@@ -86,7 +86,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **Documentation**: All version references updated and consistent across the project
 - **Status**: Ready for production with enhanced CLI experience, improved stability, and better automation support
 
-## [1.0.5] - 2025-01-27
+## [1.0.5] - 2025-07-27
 
 ### 🧹 System Cleanup and Organization
 - **Cleaned**: Removed test-specific translation files (validationStep.json, reportGenerator.json) from user locale directories
@@ -113,7 +113,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **System**: Ready for production deployment with enhanced cleanliness
 - **Status**: Fully functional with improved organizational structure
 
-## [1.0.4] - 2025-01-27
+## [1.0.4] - 2025-07-27
 
 ### 🔧 Critical Translation System Fixes
 - **Fixed**: Translation system initialization issues causing "Translation not found" errors
