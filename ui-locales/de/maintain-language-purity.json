@@ -1,19 +1,19 @@
 {
   "maintainLanguagePurity": {
-    "workflow_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step1_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step2_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step3_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step4_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "workflow_error": "⚠️ TRANSLATION NEEDED ⚠️",
-    "running_initial_validation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detecting_fixing_mismatches": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detection_complete_applying_fixes": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "applying_automatic_translations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "translation_preview_complete": "⚠️ TRANSLATION NEEDED ⚠️"
+    "workflow_title": "🚀 Language Purity Maintenance Workflow",
+    "step1_title": "📊 STEP 1: Initial Language Purity Assessment",
+    "step2_title": "\n🔧 STEP 2: Detect and Auto-Fix Language Mismatches",
+    "step3_title": "\n🌐 STEP 3: Apply Automatic Translations",
+    "step4_title": "\n✅ STEP 4: Final Language Purity Assessment",
+    "workflow_error": "❌ Workflow Error: {errorMessage}",
+    "running_initial_validation": "Running initial language purity validation...",
+    "initial_assessment_complete": "✅ Initial assessment complete: {count} violations found\n",
+    "initial_assessment_warnings": "⚠️  Initial assessment completed with warnings\n",
+    "detecting_fixing_mismatches": "Detecting and fixing language mismatches...",
+    "detection_complete_applying_fixes": "Detection complete. Applying auto-fixes...",
+    "mismatch_fixes_complete": "✅ Language mismatch fixes complete: {count} fixes applied\n",
+    "mismatch_fixes_warnings": "⚠️  Language mismatch fixes completed with warnings\n",
+    "applying_automatic_translations": "Applying automatic translations...",
+    "translation_preview_complete": "Translation preview complete. Applying translations..."
   }
 }

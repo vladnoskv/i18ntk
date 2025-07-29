@@ -348,23 +348,29 @@ class I18nSizingAnalyzer {
     // Check for large size variations
     Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
       if (data.isProblematic) {
-        if (data.percentageDifference > 0) {
-          recommendations.push(`Consider reviewing ${lang} translations - they are ${data.percentageDifference}% longer than baseline`);
-        } else {
-          recommendations.push(`Consider reviewing ${lang} translations - they are ${Math.abs(data.percentageDifference)}% shorter than baseline`);
-        }
+        const comparison = data.percentageDifference > 0 ? 'longer' : 'shorter';
+        const absPercentage = Math.abs(data.percentageDifference);
+        recommendations.push(this.t('sizing.considerReviewingTranslations', { 
+          lang, 
+          percentageDifference: absPercentage, 
+          comparison 
+        }));
       }
     });
     
     // Check for problematic keys
     if (this.stats.summary.problematicKeys.length > 0) {
-      recommendations.push(`${this.stats.summary.problematicKeys.length} keys have significant size variations across languages`);
+      recommendations.push(this.t('sizing.keysHaveSignificantSizeVariations', { count: this.stats.summary.problematicKeys.length }));
     }
     
     // Check for very long translations
     Object.entries(this.stats.languages).forEach(([lang, data]) => {
       if (data.longKeys > 0) {
-        recommendations.push(`${lang} has ${data.longKeys} translations longer than 100 characters - consider breaking them down`);
+        recommendations.push(this.t('sizing.longTranslationsDetected', { 
+          lang, 
+          longKeys: data.longKeys, 
+          threshold: 100 
+        }));
       }
     });
     

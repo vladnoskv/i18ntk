@@ -4,6 +4,23 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 **Current Version:** 1.1.2 (2024-07-27) - **PATCH RELEASE** 🩹
 
+## [1.1.3] - 2024-12-19
+
+### 🌐 Translation System Enhancement
+- **Added**: Translation keys for workflow step names in `autorun.json` files across all supported languages
+- **Improved**: Replaced hardcoded step names in `i18ntk-autorun.js` with internationalized translation keys
+- **Fixed**: Initialization timing issue in `i18ntk-autorun.js` to ensure translations load before step names are displayed
+- **Enhanced**: Added German, Spanish, French, Japanese, and Chinese translations for workflow step names
+
+### 🐛 Bug Fixes
+- **Fixed**: "Translation key not found" warnings when displaying workflow step names
+- **Improved**: Consistent internationalization across all CLI commands and workflows
+
+### ✅ Validation Results
+- **Translations**: All workflow step names now properly display in selected UI language
+- **CLI**: `i18ntk-autorun.js --help` and `--config` commands show translated step names
+- **Internationalization**: Complete translation coverage for all user-facing text
+
 ## [1.1.2] - 2024-07-27
 
 ### 🚀 Enhanced CLI Experience

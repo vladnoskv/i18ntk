@@ -56,5 +56,11 @@
   "runAutoRunCommand": "⚠️ TRANSLATION NEEDED ⚠️",
   "configurationFailed": "⚠️ TRANSLATION NEEDED ⚠️",
   "noValidStepNumbers": "⚠️ TRANSLATION NEEDED ⚠️",
-  "autoRunFailed": "⚠️ TRANSLATION NEEDED ⚠️"
+  "autoRunFailed": "⚠️ TRANSLATION NEEDED ⚠️",
+  "stepAnalyzeTranslations": "Analyser les traductions",
+  "stepValidateTranslations": "Valider les traductions",
+  "stepCheckUsage": "Vérifier l'utilisation",
+  "stepCompleteTranslations": "Compléter les traductions",
+  "stepAnalyzeSizing": "Analyser la taille",
+  "stepGenerateSummary": "Générer le résumé"
 }

@@ -1,195 +1,195 @@
 {
-  "title": "⚠️ TRANSLATION NEEDED ⚠️",
-  "separator": "⚠️ TRANSLATION NEEDED ⚠️",
+  "title": "⚙️ Settings Management",
+  "separator": "============================================================",
   "mainMenu": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "uiSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "viewAllSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "viewAllSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importExport": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importExportDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetToDefaults": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetToDefaultsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reportBug": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reportBugDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveChanges": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveChangesDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "help": "⚠️ TRANSLATION NEEDED ⚠️",
-    "helpDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "quit": "⚠️ TRANSLATION NEEDED ⚠️",
-    "quitDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "Main Menu:",
+    "uiSettings": "UI Settings",
+    "uiSettingsDesc": "Language, theme, and interface options",
+    "directorySettings": "Directory Settings",
+    "directorySettingsDesc": "Source and output directory paths",
+    "processingSettings": "Processing Settings",
+    "processingSettingsDesc": "Batch size, concurrency, and performance",
+    "advancedSettings": "Advanced Settings",
+    "advancedSettingsDesc": "Validation, logging, and expert options",
+    "viewAllSettings": "View All Settings",
+    "viewAllSettingsDesc": "Display current configuration",
+    "importExport": "Import/Export",
+    "importExportDesc": "Backup and restore settings",
+    "resetToDefaults": "Reset to Defaults",
+    "resetToDefaultsDesc": "Restore factory settings",
+    "reportBug": "Report Bug",
+    "reportBugDesc": "Submit an issue report on GitHub",
+    "saveChanges": "Save Changes",
+    "saveChangesDesc": "Save current settings to file",
+    "help": "Hilfe",
+    "helpDesc": "Show detailed help information",
+    "quit": "Beenden",
+    "quitDesc": "Exit settings (with save prompt if needed)",
+    "selectOption": "Select an option: "
   },
   "categories": {
-    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️"
+    "uiSettings": "UI Settings",
+    "directorySettings": "Directory Settings",
+    "processingSettings": "Processing Settings",
+    "advancedSettings": "Advanced Settings"
   },
   "fields": {
     "language": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Interface Language",
+      "description": "Language for the user interface",
+      "current": "Current: {value}",
+      "help": "Select your preferred interface language"
     },
     "theme": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Color Theme",
+      "description": "UI theme preference",
+      "current": "Current: {value}",
+      "help": "Choose between light and dark themes"
     },
     "dateFormat": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Date Format",
+      "description": "Format for displaying dates",
+      "current": "Current: {value}",
+      "help": "Choose how dates are displayed in reports"
     },
     "notifications": {
       "enabled": {
-        "label": "⚠️ TRANSLATION NEEDED ⚠️",
-        "description": "⚠️ TRANSLATION NEEDED ⚠️",
-        "current": "⚠️ TRANSLATION NEEDED ⚠️",
-        "help": "⚠️ TRANSLATION NEEDED ⚠️"
+        "label": "Enable Notifications",
+        "description": "Show desktop notifications",
+        "current": "Current: {value}",
+        "help": "Enable desktop notifications for completed operations"
       }
     },
     "sourceDir": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Source Directory",
+      "description": "Directory containing translation files",
+      "current": "Current: {value}",
+      "help": "Path to directory with source translation files"
     },
     "sourceLanguage": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Source Language",
+      "description": "Primary language for translations",
+      "current": "Current: {value}",
+      "help": "The primary language used as source for translations"
     },
     "outputDir": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Output Directory",
+      "description": "Directory for generated reports",
+      "current": "Current: {value}",
+      "help": "Where reports and processed files will be saved"
     },
     "batchSize": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Batch Size",
+      "description": "Number of items processed per batch",
+      "current": "Current: {value}",
+      "help": "How many files to process in each batch"
     },
     "maxConcurrentFiles": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Max Concurrent Files",
+      "description": "Maximum files processed simultaneously",
+      "current": "Current: {value}",
+      "help": "Maximum number of files to process at the same time"
     },
     "sizingThreshold": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Sizing Threshold (%)",
+      "description": "Threshold for size variation warnings",
+      "current": "Current: {value}%",
+      "help": "Percentage threshold for detecting size mismatches"
     },
     "strictMode": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Strict Validation Mode",
+      "description": "Enable strict validation mode",
+      "current": "Current: {value}",
+      "help": "Enable strict validation for translation files"
     },
     "enableAuditLog": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Enable Audit Log",
+      "description": "Track all translation changes",
+      "current": "Current: {value}",
+      "help": "Log all changes made to translation files"
     },
     "backupBeforeChanges": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "Auto Backup",
+      "description": "Create backups before modifications",
+      "current": "Current: {value}",
+      "help": "Automatically create backups before making changes"
     }
   },
   "actions": {
-    "editSetting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "settingUpdated": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalidValue": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-    "backToMenu": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveFailed": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetConfirm": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "exportSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "fileNotFound": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalidFormat": "⚠️ TRANSLATION NEEDED ⚠️"
+    "editSetting": "Edit {setting}: ",
+    "settingUpdated": "✅ {setting} updated successfully!",
+    "invalidValue": "❌ Invalid value. Please try again.",
+    "pressEnter": "Press Enter to continue...",
+    "backToMenu": "Back to main menu",
+    "saveSuccess": "✅ Settings saved successfully!",
+    "saveFailed": "❌ Failed to save settings: {error}",
+    "resetConfirm": "Are you sure you want to reset all settings to defaults? (y/N): ",
+    "resetSuccess": "✅ Settings reset to defaults successfully!",
+    "importSuccess": "✅ Settings imported successfully!",
+    "exportSuccess": "✅ Settings exported successfully!",
+    "fileNotFound": "❌ File not found: {path}",
+    "invalidFormat": "❌ Invalid settings file format"
   },
   "themes": {
-    "light": "⚠️ TRANSLATION NEEDED ⚠️",
-    "dark": "⚠️ TRANSLATION NEEDED ⚠️"
+    "light": "Light",
+    "dark": "Dark"
   },
   "languages": {
-    "en": "⚠️ TRANSLATION NEEDED ⚠️",
-    "de": "⚠️ TRANSLATION NEEDED ⚠️",
-    "es": "⚠️ TRANSLATION NEEDED ⚠️",
-    "fr": "⚠️ TRANSLATION NEEDED ⚠️",
-    "ru": "⚠️ TRANSLATION NEEDED ⚠️",
-    "ja": "⚠️ TRANSLATION NEEDED ⚠️",
-    "zh": "⚠️ TRANSLATION NEEDED ⚠️"
+    "en": "English",
+    "de": "German",
+    "es": "Spanish",
+    "fr": "French",
+    "ru": "Russian",
+    "ja": "Japanese",
+    "zh": "Chinese"
   },
   "help": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "navigation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "editing": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saving": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reset": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "Settings Help",
+    "navigation": "Use number keys to select options, 'b' to go back",
+    "editing": "Enter new values when prompted, or press Enter to keep current",
+    "saving": "Use 's' to save changes before quitting",
+    "reset": "Use option 7 to reset all settings to defaults"
   },
   "viewAll": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "View All Settings"
   },
   "importExport": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "export": "⚠️ TRANSLATION NEEDED ⚠️",
-    "import": "⚠️ TRANSLATION NEEDED ⚠️",
-    "backup": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "Import/Export Settings",
+    "export": "Export Settings",
+    "import": "Import Settings",
+    "backup": "Create Backup"
   },
-  "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
-  "current": "⚠️ TRANSLATION NEEDED ⚠️",
-  "back": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectSettingPrompt": "⚠️ TRANSLATION NEEDED ⚠️",
-  "invalidOption": "⚠️ TRANSLATION NEEDED ⚠️",
-  "editing": "⚠️ TRANSLATION NEEDED ⚠️",
-  "enterNewValue": "⚠️ TRANSLATION NEEDED ⚠️",
-  "validOptions": "⚠️ TRANSLATION NEEDED ⚠️",
-  "updatedSuccessfully": "⚠️ TRANSLATION NEEDED ⚠️",
-  "noHelp": "⚠️ TRANSLATION NEEDED ⚠️",
+  "pressEnter": "Press Enter to continue...",
+  "selectOption": "Select an option: ",
+  "current": "Aktuell",
+  "back": "Back to main menu",
+  "selectSettingPrompt": "Select setting to edit (or b for back): ",
+  "invalidOption": "Invalid option.",
+  "editing": "Bearbeitenen",
+  "enterNewValue": "Enter new value (or press Enter to keep current):",
+  "validOptions": "Valid options",
+  "updatedSuccessfully": "updated successfully!",
+  "noHelp": "No help available for this setting",
   "admin": {
-    "accessDenied": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupFailed": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
-    "options": "⚠️ TRANSLATION NEEDED ⚠️",
-    "changePin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "removePin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "cancel": "⚠️ TRANSLATION NEEDED ⚠️",
-    "verifyCurrentPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "settingNewPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "verifyToRemove": "⚠️ TRANSLATION NEEDED ⚠️",
-    "noPinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pinBenefits": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitSecurity": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitAdvanced": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitDebug": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitReset": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
-    "operationCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
-    "startingSettings": "⚠️ TRANSLATION NEEDED ⚠️"
+    "accessDenied": "❌ Access denied. Returning to menu.",
+    "setupPin": "🔐 Setting up admin PIN...",
+    "setupFailed": "❌ Failed to set up admin PIN. Setting not changed.",
+    "pinConfigured": "📌 Admin PIN is currently configured.",
+    "options": "Options:",
+    "changePin": "1) Change existing PIN",
+    "removePin": "2) Remove PIN protection",
+    "cancel": "3) Cancel",
+    "verifyCurrentPin": "\n🔐 Verify current PIN first:",
+    "settingNewPin": "\n🔄 Setting up new PIN...",
+    "verifyToRemove": "\n🔐 Verify current PIN to remove protection:",
+    "noPinConfigured": "🔓 No admin PIN is currently configured.",
+    "pinBenefits": "Setting up admin PIN will add security for:",
+    "benefitSecurity": "• Changing security settings",
+    "benefitAdvanced": "• Modifying advanced configurations",
+    "benefitDebug": "• Zugriffen debug tools",
+    "benefitReset": "• Resetting settings",
+    "setupCancelled": "⏭️  Admin PIN setup cancelled.",
+    "operationCancelled": "❌ Operation cancelled.",
+    "startingSettings": "🎛️  Starting Settings CLI..."
   }
 }

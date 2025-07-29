@@ -56,5 +56,11 @@
   "runAutoRunCommand": "Now you can run the auto-run command.",
   "configurationFailed": "Configuration failed: {error}",
   "noValidStepNumbers": "No valid step numbers provided.",
-  "autoRunFailed": "Auto-run failed: {error}"
+  "autoRunFailed": "Auto-run failed: {error}",
+  "stepAnalyzeTranslations": "Analyze Translations",
+  "stepValidateTranslations": "Validate Translations",
+  "stepCheckUsage": "Check Usage",
+  "stepCompleteTranslations": "Complete Translations",
+  "stepAnalyzeSizing": "Analyze Sizing",
+  "stepGenerateSummary": "Generate Summary"
 }

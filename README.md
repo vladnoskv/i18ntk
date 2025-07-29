@@ -1,8 +1,8 @@
 # i18ntk - Enterprise i18n Management Toolkit
 
-**Version:** 1.1.2 – Resolved `user-config.json` issue, enabled direct command execution, and enhanced CLI experience! 🚀
+**Version:** 1.1.3 – Enhanced translation system with complete internationalization for workflow step names! 🌐
 
-**Important Note on Versions:** We strongly recommend using the latest stable version (currently 1.1.2) of i18ntk. Older versions may contain known bugs and limitations that have been addressed in recent updates. For the most stable and feature-rich experience, please ensure you are always using the latest release.
+**Important Note on Versions:** We strongly recommend using the latest stable version (currently 1.1.3) of i18ntk. Older versions may contain known bugs and limitations that have been addressed in recent updates. For the most stable and feature-rich experience, please ensure you are always using the latest release.
 
 [![1.1.0](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -67,6 +67,15 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 **Note:** Console UI translation support is at approximately 95%. Some hardcoded English text remains and will be addressed in upcoming updates, but this doesn't affect core functionality.
 
 **Important:** Direct command execution (e.g., `npx i18ntk usage`) now bypasses the interactive menu, allowing for more streamlined workflows and scripting.
+
+## ✨ What's New in v1.1.3
+
+### 🌐 Complete Translation System Enhancement
+- **Added**: Full internationalization support for workflow step names in `i18ntk-autorun.js`
+- **Improved**: All workflow step names now display in the user's selected UI language
+- **Enhanced**: Added translation keys for: Analyze Translations, Validate Translations, Check Usage, Complete Translations, Analyze Sizing, Generate Summary
+- **Fixed**: Translation key loading timing issue ensuring consistent internationalization
+- **Updated**: Complete translation coverage in German, Spanish, French, Japanese, and Chinese
 
 ## ✨ What's New in v1.1.2
 

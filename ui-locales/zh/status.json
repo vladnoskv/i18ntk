@@ -1,10 +1,10 @@
 {
-  "title": "⚠️ TRANSLATION NEEDED ⚠️",
-  "nextStep1": "⚠️ TRANSLATION NEEDED ⚠️",
-  "nextStep2": "⚠️ TRANSLATION NEEDED ⚠️",
-  "nextStep3": "⚠️ TRANSLATION NEEDED ⚠️",
-  "nextStep4": "⚠️ TRANSLATION NEEDED ⚠️",
-  "nextStep5": "⚠️ TRANSLATION NEEDED ⚠️",
-  "nextStep6": "⚠️ TRANSLATION NEEDED ⚠️",
-  "completed": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "状态",
+    "nextStep1": "1. 检查使用情况分析：",
+    "nextStep2": "2. 验证翻译：",
+    "nextStep3": "3. 分析完整性：",
+    "nextStep4": "4. 完成缺失的翻译：",
+    "nextStep5": "5. 生成摘要报告：",
+    "nextStep6": "6. 审核并完成翻译：",
+    "completed": "7. 成功完成！"
 }

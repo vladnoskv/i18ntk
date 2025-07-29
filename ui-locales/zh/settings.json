@@ -1,195 +1,195 @@
 {
-  "title": "⚠️ TRANSLATION NEEDED ⚠️",
-  "separator": "⚠️ TRANSLATION NEEDED ⚠️",
+  "title": "⚙️ 设置管理",
+  "separator": "============================================================",
   "mainMenu": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "uiSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "viewAllSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "viewAllSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importExport": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importExportDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetToDefaults": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetToDefaultsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reportBug": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reportBugDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveChanges": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveChangesDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "help": "⚠️ TRANSLATION NEEDED ⚠️",
-    "helpDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "quit": "⚠️ TRANSLATION NEEDED ⚠️",
-    "quitDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "主菜单：",
+    "uiSettings": "界面设置",
+    "uiSettingsDesc": "语言、主题和界面选项",
+    "directorySettings": "目录设置",
+    "directorySettingsDesc": "源目录和输出目录路径",
+    "processingSettings": "处理设置",
+    "processingSettingsDesc": "批处理大小、并发和性能",
+    "advancedSettings": "高级设置",
+    "advancedSettingsDesc": "验证、日志和专家选项",
+    "viewAllSettings": "查看所有设置",
+    "viewAllSettingsDesc": "显示当前配置",
+    "importExport": "导入/导出",
+    "importExportDesc": "备份和恢复设置",
+    "resetToDefaults": "重置为默认值",
+    "resetToDefaultsDesc": "恢复出厂设置",
+    "reportBug": "报告错误",
+    "reportBugDesc": "在GitHub上提交问题报告",
+    "saveChanges": "保存更改",
+    "saveChangesDesc": "将当前设置保存到文件",
+    "help": "帮助",
+    "helpDesc": "显示详细帮助信息",
+    "quit": "退出",
+    "quitDesc": "退出设置（如有需要会提示保存）",
+    "selectOption": "选择一个选项："
   },
   "categories": {
-    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️"
+    "uiSettings": "界面设置",
+    "directorySettings": "目录设置",
+    "processingSettings": "处理设置",
+    "advancedSettings": "高级设置"
   },
   "fields": {
     "language": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "界面语言",
+      "description": "用户界面语言",
+      "current": "当前：{value}",
+      "help": "选择您喜欢的界面语言"
     },
     "theme": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "颜色主题",
+      "description": "UI主题偏好",
+      "current": "当前：{value}",
+      "help": "在浅色和深色主题之间选择"
     },
     "dateFormat": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "日期格式",
+      "description": "显示日期的格式",
+      "current": "当前：{value}",
+      "help": "选择报告中日期显示的方式"
     },
     "notifications": {
       "enabled": {
-        "label": "⚠️ TRANSLATION NEEDED ⚠️",
-        "description": "⚠️ TRANSLATION NEEDED ⚠️",
-        "current": "⚠️ TRANSLATION NEEDED ⚠️",
-        "help": "⚠️ TRANSLATION NEEDED ⚠️"
+        "label": "启用通知",
+        "description": "显示桌面通知",
+        "current": "当前：{value}",
+        "help": "启用已完成操作的桌面通知"
       }
     },
     "sourceDir": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "源目录",
+      "description": "包含翻译文件的目录",
+      "current": "当前：{value}",
+      "help": "源翻译文件目录路径"
     },
     "sourceLanguage": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "源语言",
+      "description": "翻译的主要语言",
+      "current": "当前：{value}",
+      "help": "用作翻译源的主要语言"
     },
     "outputDir": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "输出目录",
+      "description": "生成报告的目录",
+      "current": "当前：{value}",
+      "help": "报告和处理文件将保存的位置"
     },
     "batchSize": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "批处理大小",
+      "description": "每批处理的项目数量",
+      "current": "当前：{value}",
+      "help": "每批处理多少个文件"
     },
     "maxConcurrentFiles": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "最大并发文件数",
+      "description": "同时处理的最大文件数",
+      "current": "当前：{value}",
+      "help": "同时处理的最大文件数"
     },
     "sizingThreshold": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "大小阈值(%)",
+      "description": "大小变化警告的阈值",
+      "current": "当前：{value}%",
+      "help": "检测大小不匹配的百分比阈值"
     },
     "strictMode": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "严格验证模式",
+      "description": "启用严格验证模式",
+      "current": "当前：{value}",
+      "help": "启用翻译文件的严格验证"
     },
     "enableAuditLog": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "启用审计日志",
+      "description": "跟踪所有翻译更改",
+      "current": "当前：{value}",
+      "help": "记录对翻译文件所做的所有更改"
     },
     "backupBeforeChanges": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "自动备份",
+      "description": "修改前创建备份",
+      "current": "当前：{value}",
+      "help": "在更改前自动创建备份"
     }
   },
   "actions": {
-    "editSetting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "settingUpdated": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalidValue": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-    "backToMenu": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveFailed": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetConfirm": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "exportSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "fileNotFound": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalidFormat": "⚠️ TRANSLATION NEEDED ⚠️"
+    "editSetting": "编辑 {setting}：",
+    "settingUpdated": "✅ {setting} 更新成功！",
+    "invalidValue": "❌ 无效值。请重试。",
+    "pressEnter": "按Enter键继续...",
+    "backToMenu": "返回主菜单",
+    "saveSuccess": "✅ 设置保存成功！",
+    "saveFailed": "❌ 保存设置失败：{error}",
+    "resetConfirm": "您确定要将所有设置重置为默认值吗？(y/N)：",
+    "resetSuccess": "✅ 设置已成功重置为默认值！",
+    "importSuccess": "✅ 设置导入成功！",
+    "exportSuccess": "✅ 设置导出成功！",
+    "fileNotFound": "❌ 找不到文件：{path}",
+    "invalidFormat": "❌ 设置文件格式无效"
   },
   "themes": {
-    "light": "⚠️ TRANSLATION NEEDED ⚠️",
-    "dark": "⚠️ TRANSLATION NEEDED ⚠️"
+    "light": "浅色",
+    "dark": "深色"
   },
   "languages": {
-    "en": "⚠️ TRANSLATION NEEDED ⚠️",
-    "de": "⚠️ TRANSLATION NEEDED ⚠️",
-    "es": "⚠️ TRANSLATION NEEDED ⚠️",
-    "fr": "⚠️ TRANSLATION NEEDED ⚠️",
-    "ru": "⚠️ TRANSLATION NEEDED ⚠️",
-    "ja": "⚠️ TRANSLATION NEEDED ⚠️",
-    "zh": "⚠️ TRANSLATION NEEDED ⚠️"
+    "en": "英语",
+    "de": "德语",
+    "es": "西班牙语",
+    "fr": "法语",
+    "ru": "俄语",
+    "ja": "日语",
+    "zh": "中文"
   },
   "help": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "navigation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "editing": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saving": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reset": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "设置帮助",
+    "navigation": "使用数字键选择选项，'b'返回",
+    "editing": "出现提示时输入新值，或按Enter键保持当前值",
+    "saving": "使用's'在退出前保存更改",
+    "reset": "使用选项7将所有设置重置为默认值"
   },
   "viewAll": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "查看所有设置"
   },
   "importExport": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "export": "⚠️ TRANSLATION NEEDED ⚠️",
-    "import": "⚠️ TRANSLATION NEEDED ⚠️",
-    "backup": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "导入/导出设置",
+    "export": "导出设置",
+    "import": "导入设置",
+    "backup": "创建备份"
   },
-  "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
-  "current": "⚠️ TRANSLATION NEEDED ⚠️",
-  "back": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectSettingPrompt": "⚠️ TRANSLATION NEEDED ⚠️",
-  "invalidOption": "⚠️ TRANSLATION NEEDED ⚠️",
-  "editing": "⚠️ TRANSLATION NEEDED ⚠️",
-  "enterNewValue": "⚠️ TRANSLATION NEEDED ⚠️",
-  "validOptions": "⚠️ TRANSLATION NEEDED ⚠️",
-  "updatedSuccessfully": "⚠️ TRANSLATION NEEDED ⚠️",
-  "noHelp": "⚠️ TRANSLATION NEEDED ⚠️",
+  "pressEnter": "按Enter键继续...",
+  "selectOption": "选择一个选项：",
+  "current": "当前",
+  "back": "返回主菜单",
+  "selectSettingPrompt": "选择要编辑的设置（或b返回）：",
+  "invalidOption": "无效选项。",
+  "editing": "正在编辑",
+  "enterNewValue": "输入新值（或按Enter键保持当前值）：",
+  "validOptions": "有效选项",
+  "updatedSuccessfully": "更新成功！",
+  "noHelp": "此设置无帮助信息",
   "admin": {
-    "accessDenied": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupFailed": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
-    "options": "⚠️ TRANSLATION NEEDED ⚠️",
-    "changePin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "removePin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "cancel": "⚠️ TRANSLATION NEEDED ⚠️",
-    "verifyCurrentPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "settingNewPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "verifyToRemove": "⚠️ TRANSLATION NEEDED ⚠️",
-    "noPinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pinBenefits": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitSecurity": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitAdvanced": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitDebug": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitReset": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
-    "operationCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
-    "startingSettings": "⚠️ TRANSLATION NEEDED ⚠️"
+    "accessDenied": "❌ 拒绝访问。返回菜单。",
+    "setupPin": "🔐 正在设置管理员PIN...",
+    "setupFailed": "❌ 设置管理员PIN失败。设置未更改。",
+    "pinConfigured": "📌 管理员PIN当前已配置。",
+    "options": "选项：",
+    "changePin": "1) 更改现有PIN",
+    "removePin": "2) 移除PIN保护",
+    "cancel": "3) 取消",
+    "verifyCurrentPin": "\n🔐 首先验证当前PIN：",
+    "settingNewPin": "\n🔄 正在设置新PIN...",
+    "verifyToRemove": "\n🔐 验证当前PIN以移除保护：",
+    "noPinConfigured": "🔓 管理员PIN当前未配置。",
+    "pinBenefits": "设置管理员PIN将为以下操作增加安全性：",
+    "benefitSecurity": "• 更改安全设置",
+    "benefitAdvanced": "• 修改高级配置",
+    "benefitDebug": "• 访问调试工具",
+    "benefitReset": "• 重置设置",
+    "setupCancelled": "⏭️  管理员PIN设置已取消。",
+    "operationCancelled": "❌ 操作已取消。",
+    "startingSettings": "🎛️  正在启动设置CLI..."
   }
 }

@@ -1,0 +1,12 @@
+📊 TRANSLATION ANALYSIS REPORT
+    Generated: 2025-07-29T01:25:25.500Z
+    Status: 0/0 keys (0% translated)
+    Files analyzed: 0/1
+    Keys needing translation: 0
+    
+    📋 FILE BREAKDOWN
+    ==================================================
+
+📄 common.json
+   ❌ Error: Failed to parse source file JSON
+

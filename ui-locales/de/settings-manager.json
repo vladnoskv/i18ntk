@@ -1,11 +1,11 @@
 {
   "settings_manager": {
-    "error_loading_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_saving_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_setting_value": "⚠️ TRANSLATION NEEDED ⚠️",
-    "missing_required_setting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_source_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "default_languages_must_be_array": "⚠️ TRANSLATION NEEDED ⚠️"
+    "error_loading_settings": "❌ Error loading settings:",
+    "error_saving_settings": "❌ Error saving settings:",
+    "error_setting_value": "❌ Error setting value:",
+    "missing_required_setting": "❌ Missing required setting: {prop}",
+    "invalid_language": "❌ Invalid language: {language}",
+    "invalid_source_language": "❌ Invalid source language: {sourceLanguage}",
+    "default_languages_must_be_array": "❌ defaultLanguages must be an array"
   }
 }

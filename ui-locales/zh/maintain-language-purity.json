@@ -1,19 +1,19 @@
 {
   "maintainLanguagePurity": {
-    "workflow_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step1_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step2_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step3_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step4_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "workflow_error": "⚠️ TRANSLATION NEEDED ⚠️",
-    "running_initial_validation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detecting_fixing_mismatches": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detection_complete_applying_fixes": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "applying_automatic_translations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "translation_preview_complete": "⚠️ TRANSLATION NEEDED ⚠️"
+    "workflow_title": "🚀 语言纯度维护工作流",
+    "step1_title": "📊 步骤1：初始语言纯度评估",
+    "step2_title": "\n🔧 步骤2：检测并自动修复语言不匹配",
+    "step3_title": "\n🌐 步骤3：应用自动翻译",
+    "step4_title": "\n✅ 步骤4：最终语言纯度评估",
+    "workflow_error": "❌ 工作流错误：{errorMessage}",
+    "running_initial_validation": "正在运行初始语言纯度验证...",
+    "initial_assessment_complete": "✅ 初始评估完成：发现{count}个违规项\n",
+    "initial_assessment_warnings": "⚠️  初始评估完成，但有警告\n",
+    "detecting_fixing_mismatches": "正在检测并修复语言不匹配...",
+    "detection_complete_applying_fixes": "检测完成。正在应用自动修复...",
+    "mismatch_fixes_complete": "✅ 语言不匹配修复完成：已应用{count}个修复\n",
+    "mismatch_fixes_warnings": "⚠️  语言不匹配修复完成，但有警告\n",
+    "applying_automatic_translations": "正在应用自动翻译...",
+    "translation_preview_complete": "翻译预览完成。正在应用翻译..."
   }
 }

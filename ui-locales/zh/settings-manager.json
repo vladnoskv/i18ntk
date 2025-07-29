@@ -1,11 +1,11 @@
 {
   "settings_manager": {
-    "error_loading_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_saving_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_setting_value": "⚠️ TRANSLATION NEEDED ⚠️",
-    "missing_required_setting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_source_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "default_languages_must_be_array": "⚠️ TRANSLATION NEEDED ⚠️"
+    "error_loading_settings": "❌ 加载设置时出错：",
+    "error_saving_settings": "❌ 保存设置时出错：",
+    "error_setting_value": "❌ 设置值时出错：",
+    "missing_required_setting": "❌ 缺少必需设置：{prop}",
+    "invalid_language": "❌ 无效语言：{language}",
+    "invalid_source_language": "❌ 无效源语言：{sourceLanguage}",
+    "default_languages_must_be_array": "❌ defaultLanguages 必须是数组"
   }
 }

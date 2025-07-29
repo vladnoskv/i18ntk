@@ -1,7 +1,7 @@
 {
-  "errorExecutingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "genericError": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorGeneratingStatusSummary": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorRunningDebugTool": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorReadingDebugLogs": "⚠️ TRANSLATION NEEDED ⚠️"
+  "errorExecutingCommand": "Error executing command: {error}",
+  "genericError": "❌ Error: {{error}}",
+  "errorGeneratingStatusSummary": "Error generating status summary: {error}",
+  "errorRunningDebugTool": "Error running debug tool '{displayName}': {error}",
+  "errorReadingDebugLogs": "Error reading debug logs: {error}"
 }

@@ -23,6 +23,18 @@
     "failure_message": "❌ {message}",
     "failure_error_message": "   {errorMessage}",
     "warning_message": "⚠️  {message}",
-    "test_runner_failed": "❌ Test runner failed:"
+    "test_runner_failed": "❌ Test runner failed:",
+    "recommendations": {
+      "add_missing_translation_keys": "Add missing translation keys to maintain consistency",
+      "fix_failing_scripts": "Fix failing scripts before deployment",
+      "review_warning_messages": "Review and address warning messages",
+      "system_ready_for_deployment": "System is ready for deployment"
+    },
+    "hardcodedTexts": {
+      "addMissingTranslationKeys": "Add missing translation keys to maintain consistency",
+      "fixFailingScripts": "Fix failing scripts before deployment",
+      "reviewWarningMessages": "Review and address warning messages",
+      "systemReadyForDeployment": "System is ready for deployment"
+    }
   }
 }

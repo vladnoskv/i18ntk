@@ -16,6 +16,11 @@ class SystemTester {
             errors: []
         };
         this.missingTranslations = [];
+        
+        // Initialize UI i18n for translations
+        const UIi18n = require('../../main/i18ntk-ui');
+        this.ui = new UIi18n();
+        this.ui.loadLanguage('en'); // Load English as default
     }
 
     /**
@@ -220,19 +225,19 @@ class SystemTester {
         const recommendations = [];
         
         if (this.missingTranslations.length > 0) {
-            recommendations.push('Add missing translation keys to maintain consistency');
+            recommendations.push(this.ui.t('hardcodedTexts.addMissingTranslationKeys'));
         }
         
         if (this.results.failed > 0) {
-            recommendations.push('Fix failing scripts before deployment');
+            recommendations.push(this.ui.t('hardcodedTexts.fixFailingScripts'));
         }
         
         if (this.results.warnings > 5) {
-            recommendations.push('Review and address warning messages');
+            recommendations.push(this.ui.t('hardcodedTexts.reviewWarningMessages'));
         }
         
         if (recommendations.length === 0) {
-            recommendations.push('System is ready for deployment');
+            recommendations.push(this.ui.t('hardcodedTexts.systemReadyForDeployment'));
         }
         
         return recommendations;

@@ -1,11 +1,11 @@
 {
-  "autoDetectedI18nDirectory": "⚠️ TRANSLATION NEEDED ⚠️",
-  "executingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "unknownCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorExecutingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorLoadingTranslationFile": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorSavingLanguagePreference": "⚠️ TRANSLATION NEEDED ⚠️",
-  "noActiveReadlineInterface": "⚠️ TRANSLATION NEEDED ⚠️",
-  "uiLanguageUpdated": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOptionPrompt": "⚠️ TRANSLATION NEEDED ⚠️"
+  "autoDetectedI18nDirectory": "自动检测到i18n目录：{{path}}",
+  "executingCommand": "🔄 正在执行命令：{{command}}",
+  "unknownCommand": "❌ 未知命令：{{command}}",
+  "errorExecutingCommand": "❌ 执行命令时出错：{{error}}",
+  "errorLoadingTranslationFile": "❌ 加载'{{language}}'的翻译文件时出错：{{error}}",
+  "errorSavingLanguagePreference": "❌ 保存语言偏好设置时出错：{{error}}",
+  "noActiveReadlineInterface": "❌ 没有可用的活动读取界面",
+  "uiLanguageUpdated": "🌍 界面语言已更新为：{{language}}",
+  "selectOptionPrompt": "请选择一个选项："
 }
