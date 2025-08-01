@@ -135,156 +135,6 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 - **💾 Backup System**: Automatic configuration backups
 - **⚡ Reliability**: Advanced error handling and graceful degradation for non-interactive environments
 
-## 📁 Project Structure
-
-```
-i18n-management-toolkit/
-├── main/                    # Core i18ntk scripts
-│   ├── i18ntk-analyze.js   # Translation analysis
-│   ├── i18ntk-autorun.js   # Automated workflow execution
-│   ├── i18ntk-complete.js  # Complete missing translations
-│   ├── i18ntk-init.js      # Initialize i18n setup
-│   ├── i18ntk-manage.js    # Main management interface
-│   ├── i18ntk-sizing.js    # Generate sizing reports
-│   ├── i18ntk-summary.js   # Generate summary reports
-│   ├── i18ntk-usage.js     # Analyze translation usage
-│   ├── i18ntk-validate.js  # Validate translations
-│   └── i18ntk-ui.js        # UI internationalization
-├── utils/                   # Utility scripts and helpers
-│   ├── admin-auth.js       # Admin authentication
-│   ├── admin-cli.js        # Admin command-line interface
-│   ├── admin-pin.js        # PIN management
-│   ├── i18n-helper.js      # i18n utility functions
-│   ├── security.js         # Security utilities
-│   ├── detect-language-mismatches.js  # Language validation
-│   ├── maintain-language-purity.js    # Language purity tools
-│   ├── native-translations.js         # Native translation helpers
-│   ├── translate-mismatches.js        # Translation mismatch tools
-│   ├── validate-language-purity.js    # Language purity validation
-│   ├── test-complete-system.js        # System testing
-│   └── test-console-i18n.js           # Console i18n testing
-├── dev/                     # Development and debugging tools
-│   ├── debug/              # Debug utilities and analyzers
-│   │   ├── debugger.js     # Main debugger
-│   │   ├── console-translations.js    # Console translation tools
-│   │   ├── complete-console-translations.js  # Console completion
-│   │   ├── console-key-checker.js     # Console key validation
-│   │   ├── export-missing-keys.js     # Missing key export
-│   │   ├── find-extra-keys.js         # Extra key detection
-│   │   ├── normalize-locales.js       # Locale normalization
-│   │   ├── refactor-locales.js        # Locale refactoring
-│   │   ├── reorder-locales.js         # Locale reordering
-│   │   └── replace-hardcoded-console.js  # Console replacement
-│   └── tests/              # Test suite
-│       ├── test-complete-system.js    # Complete system tests
-│       ├── test-console-i18n.js       # Console i18n tests
-│       ├── test-features.js           # Feature tests
-│       └── test-report.json           # Test reports
-├── docs/                    # Comprehensive documentation
-│   ├── api/                # API documentation
-│   │   ├── API_REFERENCE.md           # Complete API reference
-│   │   ├── COMPONENTS.md              # Component documentation
-│   │   ├── CONFIGURATION.md           # Configuration guide
-│   │   └── NPM_PUBLISHING_GUIDE.md    # NPM publishing guide
-│   ├── debug/              # Debug documentation
-│   │   ├── DEBUG_README.md            # Debug overview
-│   │   └── DEBUG_TOOLS.md             # Debug tools guide
-│   ├── development/        # Development documentation
-│   │   ├── AGENTS.md                  # AI agent guidelines
-│   │   ├── DEVELOPMENT_RULES.md       # Development rules
-│   │   └── DEV_README.md              # Development overview
-│   ├── release-notes/      # Release documentation
-│   │   ├── RELEASE_NOTES_v1.6.0.md    # v1.6.0 release notes
-│   │   ├── RELEASE_NOTES_v1.6.1.md    # v1.6.1 release notes
-│   │   └── RELEASE_NOTES_v1.0.0.md    # v1.0.0 release notes
-│   ├── reports/            # Report documentation
-│   │   ├── ANALYSIS_README.md         # Analysis reports
-│   │   ├── SIZING_README.md           # Sizing reports
-│   │   ├── SUMMARY_README.md          # Summary reports
-│   │   ├── USAGE_README.md            # Usage reports
-│   │   └── VALIDATION_README.md       # Validation reports
-│   ├── INSTALLATION.md     # Installation guide
-│   ├── README.md           # Documentation overview
-│   └── TODO_ROADMAP.md     # Future roadmap
-├── scripts/                 # Utility scripts
-│   ├── fix-missing-translation-keys.js  # Translation key fixes
-│   └── verify-package.js               # Package verification
-├── settings/                # Configuration management
-│   ├── admin-config.json   # Admin configuration
-│   ├── i18ntk-config.json  # User configuration (main config file)
-│   ├── settings-cli.js     # Settings CLI
-│   ├── settings-manager.js # Settings management
-│   └── backups/            # Configuration backups
-├── locales/                 # Sample project translation files
-│   ├── en/                 # English translations
-│   ├── de/                 # German translations
-│   ├── es/                 # Spanish translations
-│   ├── fr/                 # French translations
-│   └── ru/                 # Russian translations
-├── ui-locales/             # Toolkit's UI translations (7 languages)
-│   ├── en.json             # English UI
-│   ├── de.json             # German UI
-│   ├── es.json             # Spanish UI
-│   ├── fr.json             # French UI
-│   ├── ja.json             # Japanese UI
-│   ├── ru.json             # Russian UI
-│   └── zh.json             # Chinese UI
-├── i18ntk-reports/         # Generated analysis reports
-│   ├── analysis/           # Translation analysis
-│   ├── validation/         # Validation reports
-│   ├── usage/              # Usage analysis
-│   ├── sizing/             # Sizing reports
-│   ├── summary/            # Summary reports
-│   └── workflow/           # Workflow reports
-├── package.json            # NPM package configuration
-├── CHANGELOG.md            # Version history
-├── INDEX.md                # Documentation index
-└── README.md               # This file
-```
-
-
-### 📋 TODO
-
-- **🔍 Enhanced Debug Tools**: Expand debugging capabilities with more comprehensive analysis tools
-- **📊 Advanced Reporting**: Improve report generation with more detailed analytics
-- **🚀 Performance Optimization**: Further optimize translation processing for large projects
-- **🌍 Additional Language Support**: Expand UI language support beyond current 6 languages
-- **📝 UI-Locales Structure Refactor (Planned)**: Refactor `ui-locales/*.json` to use a multi-language object format for each key, e.g.:
-
-```json
-{
-  "analyzeTranslations": {
-    "reportTitle": {
-      "en": "TRANSLATION ANALYSIS REPORT FOR {language}",
-      "de": "ÜBERSETZUNGSANALYSENBERICHT FÜR {language}",
-      "fr": "RAPPORT D'ANALYSE DE TRADUCTION POUR {language}",
-      "es": "INFORME DE ANÁLISIS DE TRADUCCIÓN PARA {language}",
-      "ru": "ОТЧЁТ О АНАЛИЗЕ ПЕРЕВОДА ДЛЯ {language}",
-      "ja": "{language} の翻訳分析レポート",
-      "zh": "{language} 翻译分析报告"
-    },
-    "generated": {
-      "en": "Generated: {timestamp}",
-      "de": "Erstellt: {timestamp}",
-      "fr": "Généré : {timestamp}",
-      "es": "Generado: {timestamp}",
-      "ru": "Сгенерировано: {timestamp}",
-      "ja": "生成日時: {timestamp}",
-      "zh": "生成时间: {timestamp}"
-    },
-    "status": {
-      "en": "Status: {translated}/{total} translated ({percentage}%)",
-      "de": "Status: {translated}/{total} übersetzt ({percentage}%)",
-      "fr": "Statut : {translated}/{total} traduit ({percentage}%)",
-      "es": "Estado: {translated}/{total} traducido ({percentage}%)",
-      "ru": "Статус: переведено {translated}/{total} ({percentage}%)",
-      "ja": "状況: {total}中{translated}件翻訳済み ({percentage}%)",
-      "zh": "状态：{translated}/{total} 已翻译 ({percentage}%)"
-    }
-  }
-}
-```
-
 > **📖 For detailed setup and usage instructions, see [Documentation](./docs/README.md)**
 
 ## 🛠️ Core Commands
@@ -304,36 +154,7 @@ i18n-management-toolkit/
 | `npm run i18ntk:summary` | Generate summary reports | `node main/i18ntk-summary.js` |
 | `npm run i18ntk:debug` | Debug and diagnostics | `node dev/debug/debugger.js` |
 
-### Utility Scripts
-
-| Script | Description | Usage |
-|--------|-------------|-------|
-| `settings-cli.js` | Configure toolkit settings | `node settings-cli.js` |
-| `utils/admin-cli.js` | Admin operations | `node utils/admin-cli.js` |
-
 > **📖 For complete command reference, see [API Documentation](./docs/api/API_REFERENCE.md)**
-
-## 🔧 Configuration
-
-### User Configuration (`i18ntk-config.json`)
-```json
-{
-  "localesPath": "./locales",
-  "supportedLanguages": ["en", "es", "fr", "de", "ru"],
-  "defaultLanguage": "en",
-  "excludePatterns": ["node_modules", ".git"],
-  "includePatterns": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
-}
-```
-
-### Admin Configuration (`admin-config.json`)
-```json
-{
-  "adminPasswordHash": "...",
-  "securityEnabled": true,
-  "backupEnabled": true
-}
-```
 
 ## 📊 Reports and Analysis
 
@@ -351,26 +172,9 @@ The toolkit generates comprehensive reports in the `i18ntk-reports/` directory:
 
 ## 🌍 Supported Languages
 
-The toolkit UI supports **7 languages** with complete internationalization:
+The toolkit UI supports **7 languages** with partial internationalization:
 
-| Language | Code | Status | Coverage |
-|----------|------|--------|----------|
-| 🇺🇸 English | `en` | ✅ Complete | 573/573 keys (100%) |
-| 🇩🇪 German | `de` | ✅ Complete | 573/573 keys (100%) |
-| 🇪🇸 Spanish | `es` | ✅ Complete | 573/573 keys (100%) |
-| 🇫🇷 French | `fr` | ✅ Complete | 573/573 keys (100%) |
-| 🇯🇵 Japanese | `ja` | ✅ Complete | 573/573 keys (100%) |
-| 🇷🇺 Russian | `ru` | ✅ Complete | 573/573 keys (100%) |
-| 🇨🇳 Chinese | `zh` | ✅ Complete | 573/573 keys (100%) |
-
-**Features:**
-- 100% console output internationalization
-- Complete UI element translation
-- Dynamic placeholder support (`{language}`, `{fileName}`, etc.)
-- Zero missing or extra translation keys
-- Verified translation patterns across all languages
-
-Contributions for additional languages are welcome!
+Requests for additional languages are welcome!
 
 ## 🧪 Development and Testing
 
@@ -379,36 +183,8 @@ Contributions for additional languages are welcome!
 # Main debug interface
 npm run i18ntk:debug
 
-# Check console translations
-node dev/debug/console-translations.js
-
-# Complete console translations
-node dev/debug/complete-console-translations.js
-
-# Replace hardcoded console messages
-node dev/debug/replace-hardcoded-console.js
-```
-
-### Testing
-```bash
-# Run complete system test
-node dev/tests/test-complete-system.js
-
-# Test console i18n
-node dev/tests/test-console-i18n.js
-
-# Test all features
-node dev/tests/test-features.js
-```
-
 > **📖 For comprehensive debug tools documentation, see [Debug Tools](./docs/debug/DEBUG_TOOLS.md)**
 
-## 🔒 Security Features
-
-- Admin authentication for sensitive operations
-- Secure password hashing
-- Configuration backup system
-- Input validation and sanitization
 
 ## 📝 Best Practices
 
@@ -435,7 +211,7 @@ node dev/tests/test-features.js
 
 ---
 
-**Version:** 1.1.0 – Enhanced CLI experience with proper version command and improved documentation! 🚀
+**Version:** 1.1.5 – Enhanced CLI experience with proper version command and improved documentation! 🚀
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
