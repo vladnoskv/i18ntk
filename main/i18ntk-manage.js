@@ -746,7 +746,7 @@ class I18nManager {
       let selectedDirs = [];
       
       if (dirChoice.trim() === '0') {
-        console.log('❌ Operation cancelled.');
+        console.log(this.ui.t('operations.cancelled'));
         await this.prompt(this.ui.t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
@@ -777,7 +777,7 @@ class I18nManager {
       console.log(`  1. ${this.ui.t('operations.deleteAllFiles')}`);
       console.log(`  2. ${this.ui.t('operations.keepLast3Files')}`);
       console.log(`  3. ${this.ui.t('operations.keepLast5Files')}`);
-      console.log('  0. Cancel');
+      console.log(`  0. ${this.ui.t('operations.cancelReportOption')}`);
       
       const option = await this.prompt('\nSelect option (0-3): ');
       
@@ -794,12 +794,12 @@ class I18nManager {
           filesToDelete = this.getFilesToDeleteKeepLast(allFiles, 5);
           break;
         case '0':
-          console.log('❌ Operation cancelled.');
+          console.log(this.ui.t('operations.cancelled'));
           await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
           return;
         default:
-          console.log('❌ Invalid option.');
+          console.log(this.ui.t('menu.invalidOption'));
           await this.prompt(this.ui.t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
           return;
@@ -832,7 +832,7 @@ class I18nManager {
         
         console.log(`\n🎉 Successfully deleted ${deletedCount} files!`);
       } else {
-        console.log('❌ Operation cancelled.');
+        console.log(this.ui.t('operations.cancelled'));
       }
       
     } catch (error) {

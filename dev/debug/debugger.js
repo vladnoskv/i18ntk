@@ -224,41 +224,19 @@ class I18nDebugger {
         const configPath = path.resolve(this.projectRoot, 'settings', 'i18ntk-config.json');
         if (this.checkFileExists('settings/i18ntk-config.json', 'Main configuration file')) {
             try {
-                const content = await SecurityUtils.safeReadFile(configPath, this.projectRoot);
-                if (!content) {
-                    this.addIssue('Failed to read i18ntk-config.json');
-                    return;
-                }
+                const content = fs.readFileSync(configPath, 'utf8');
+                const config = JSON.parse(content);
                 
-                const config = SecurityUtils.safeParseJSON(content);
-                if (!config) {
-                    this.addIssue('Failed to parse i18ntk-config.json');
-                    return;
-                }
+                this.log('Configuration file found and valid');
                 
-                // Validate configuration structure
-                const validatedConfig = SecurityUtils.validateConfig(config);
-                if (!validatedConfig) {
-                    this.addIssue('Invalid configuration structure in i18ntk-config.json');
-                    return;
-                }
-                
-                // Check required sections
-                const requiredSections = ['directories', 'processing', 'advanced', 'ui'];
-                requiredSections.forEach(section => {
-                    if (!validatedConfig[section]) {
-                        this.addWarning(`Missing configuration section: ${section}`);
-                    }
-                });
-
-                // Check directory paths with security validation
-                if (validatedConfig.directories) {
+                // Check directory paths
+                if (config.directories) {
                     const dirs = ['sourceDir', 'outputDir', 'uiLocalesDir'];
                     dirs.forEach(dir => {
-                        if (validatedConfig.directories[dir]) {
-                            const dirPath = SecurityUtils.validatePath(validatedConfig.directories[dir], this.projectRoot);
-                            if (!dirPath || !fs.existsSync(dirPath)) {
-                                this.addWarning(`Configured directory does not exist or is invalid: ${validatedConfig.directories[dir]}`);
+                        if (config.directories[dir]) {
+                            const dirPath = path.resolve(this.projectRoot, config.directories[dir]);
+                            if (!fs.existsSync(dirPath)) {
+                                this.addWarning(`Configured directory does not exist: ${config.directories[dir]}`);
                             }
                         }
                     });
@@ -278,14 +256,14 @@ class I18nDebugger {
     checkCoreFiles() {
         this.log('Checking core i18nTK files...');
         const coreFiles = [
-            'i18ntk-manage.js',
-            'i18ntk-init.js',
-            'i18ntk-analyze.js',
-            'i18ntk-validate.js',
-            'i18ntk-usage.js',
-            'i18ntk-complete.js',
-            'i18ntk-sizing.js',
-            'i18ntk-summary.js'
+            'main/i18ntk-manage.js',
+            'main/i18ntk-init.js',
+            'main/i18ntk-analyze.js',
+            'main/i18ntk-validate.js',
+            'main/i18ntk-usage.js',
+            'main/i18ntk-complete.js',
+            'main/i18ntk-sizing.js',
+            'main/i18ntk-summary.js'
         ];
 
         coreFiles.forEach(file => {

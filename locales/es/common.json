@@ -17,5 +17,7 @@
     "analysisResults": "NOT_TRANSLATED",
     "availableKeysCount": "NOT_TRANSLATED",
     "usedKeysCount": "NOT_TRANSLATED"
-  }
+  },
+  "success": "Éxito",
+  "error": "Error"
 }

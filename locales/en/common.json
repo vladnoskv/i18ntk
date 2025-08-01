@@ -17,5 +17,7 @@
     "analysisResults": "Analysis Results",
     "availableKeysCount": "Available Keys Count",
     "usedKeysCount": "Used Keys Count"
-  }
+  },
+  "success": "Success",
+  "error": "Error"
 }

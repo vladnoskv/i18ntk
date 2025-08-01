@@ -1,0 +1,15 @@
+{
+  "language": {
+    "title": "Configurações de idioma"
+  },
+  "menu": {
+    "title": "Menu principal",
+    "options": {
+      "exit": "Sair"
+    }
+  },
+  "common": {
+    "success": "Sucesso",
+    "error": "Erro"
+  }
+}

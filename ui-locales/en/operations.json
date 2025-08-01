@@ -6,6 +6,7 @@
   "availableDirectories": "📁 Available directories:",
   "allDirectories": "All directories",
   "cancelOption": "Cancel",
+  "cancelReportOption": "Cancel / Return to Menu",
   "invalidSelection": "❌ Invalid selection.",
   "foundFilesInSelectedDirectories": "📊 Found {count} files in selected directories:",
   "deletionOptions": "🗑️ Deletion Options:",

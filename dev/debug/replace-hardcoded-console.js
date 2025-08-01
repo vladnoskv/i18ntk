@@ -162,7 +162,7 @@ class HardcodedConsoleReplacer {
         
         this.replacements.set(
             /console\.log\('\s*0\. Cancel'\);/g,
-            "console.log(this.ui.t('delete.options.cancel'));"
+            "console.log(this.ui.t('common.options.cancel'));"
         );
         
         this.replacements.set(

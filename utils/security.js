@@ -252,7 +252,9 @@ class SecurityUtils {
       'filePattern', 'excludePatterns', 'reportFormat', 'logLevel',
       'i18nDir', 'sourceLanguage', 'excludeDirs', 'includeExtensions', 
       'translationPatterns', 'notTranslatedMarker', 'excludeFiles', 'strictMode',
-      'uiLanguage'
+      'uiLanguage', 'language', 'sizeLimit', 'defaultLanguages', 'reportLanguage',
+      'theme', 'autoSave', 'notifications', 'dateFormat', 'timeFormat', 'timezone',
+      'processing', 'advanced', 'security', 'debug'
     ];
 
     for (const [key, value] of Object.entries(config)) {

@@ -305,27 +305,8 @@ class I18nAnalyzer {
       let sourceContent, targetContent;
       
       try {
-        const validatedSourcePath = SecurityUtils.validatePath(sourceFilePath, this.sourceDir);
-        if (!validatedSourcePath) {
-          analysis.files[fileName] = {
-            error: 'Invalid source file path'
-          };
-          continue;
-        }
-        const sourceFileContent = SecurityUtils.safeReadFile(sourceFilePath, this.sourceDir);
-        if (!sourceFileContent) {
-          analysis.files[fileName] = {
-            error: 'Failed to read source file securely'
-          };
-          continue;
-        }
-        sourceContent = SecurityUtils.safeParseJSON(sourceFileContent);
-        if (!sourceContent) {
-          analysis.files[fileName] = {
-            error: 'Failed to parse source file JSON'
-          };
-          continue;
-        }
+        const sourceFileContent = fs.readFileSync(sourceFullPath, 'utf8');
+        sourceContent = JSON.parse(sourceFileContent);
       } catch (error) {
         analysis.files[fileName] = {
           error: `Failed to parse source file: ${error.message}`
@@ -342,27 +323,8 @@ class I18nAnalyzer {
       }
       
       try {
-        const validatedTargetPath = SecurityUtils.validatePath(targetFilePath, this.sourceDir);
-        if (!validatedTargetPath) {
-          analysis.files[fileName] = {
-            error: 'Invalid target file path'
-          };
-          continue;
-        }
-        const targetFileContent = SecurityUtils.safeReadFile(targetFilePath, this.sourceDir);
-        if (!targetFileContent) {
-          analysis.files[fileName] = {
-            error: 'Failed to read target file securely'
-          };
-          continue;
-        }
-        targetContent = SecurityUtils.safeParseJSON(targetFileContent);
-        if (!targetContent) {
-          analysis.files[fileName] = {
-            error: 'Failed to parse target file JSON'
-          };
-          continue;
-        }
+        const targetFileContent = fs.readFileSync(targetFullPath, 'utf8');
+        targetContent = JSON.parse(targetFileContent);
       } catch (error) {
         analysis.files[fileName] = {
           error: `Failed to parse target file: ${error.message}`

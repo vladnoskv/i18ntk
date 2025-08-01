@@ -1,0 +1,15 @@
+{
+  "language": {
+    "title": "言語設定"
+  },
+  "menu": {
+    "title": "メインメニュー",
+    "options": {
+      "exit": "終了"
+    }
+  },
+  "common": {
+    "success": "成功",
+    "error": "エラー"
+  }
+}

@@ -29,7 +29,7 @@ const path = require('path');
 
 class MissingKeysExporter {
     constructor() {
-        this.uiLocalesDir = path.join(__dirname, 'ui-locales');
+        this.uiLocalesDir = path.join(__dirname, '..', '..', 'ui-locales');
         this.outputDir = path.join(__dirname, 'reports', 'missing-keys');
         this.referenceLanguage = 'en';
         this.supportedLanguages = ['de', 'es', 'fr', 'ja', 'ru', 'zh'];
