@@ -2,9 +2,25 @@
 
 All notable changes to the I18N Management Toolkit are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.2.1 (2025-08-02) - **DIRECTORY PATH FIXES & CONFIGURATION IMPROVEMENTS** 🎯
+**Current Version:** 1.2.2 (2025-08-02) - **CRITICAL BUG FIX FOR CUSTOM LOCALE SUPPORT** 🚨
+
+## [1.2.2] - 2025-08-02
+
+### 🚨 Critical Bug Fix
+- **Fixed**: Resolved `settingsManager.setDirectories is not a function` error when adding custom locale support
+- **Fixed**: Corrected settings management to use proper `getSettings()` and `saveSettings()` methods instead of non-existent `setDirectories()`
+- **Enhanced**: Improved stability when configuring custom translation directories
+- **Fixed**: Directory configuration now properly persists across sessions
+
+### 🔧 Technical Details
+- **Issue**: Version 1.2.1 introduced a critical bug in custom directory configuration
+- **Root Cause**: Invalid method call to non-existent `settingsManager.setDirectories()` function
+- **Resolution**: Updated to use existing `settingsManager.getSettings()` and `settingsManager.saveSettings()` methods
+- **Impact**: All custom directory configuration features now work correctly
 
 ## [1.2.1] - 2025-08-02
+
+**⚠️ DEPRECATED:** This version contains a critical bug affecting custom locale directory configuration. Please upgrade to v1.2.2 immediately.
 
 ### 🎯 Directory Path Configuration Fixes
 - **Fixed**: Scripts now correctly respect directory settings from configuration instead of using hardcoded paths
@@ -22,6 +38,11 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **Enhanced**: `i18ntk-init.js` now detects existing translation directories and prompts users
 - **Fixed**: `i18ntk-usage.js` and `i18ntk-manage.js` now respect settings configuration over auto-detection
 - **Improved**: Settings-based directory configuration takes precedence over hardcoded defaults
+
+### 🚨 Known Issues in 1.2.1
+- **Critical**: `settingsManager.setDirectories is not a function` error prevents custom directory configuration
+- **Impact**: Users cannot add custom translation directories or configure existing ones
+- **Recommendation**: Immediate upgrade to v1.2.2 required for full functionality
 
 ## [1.2.0] - 2025-08-02
 

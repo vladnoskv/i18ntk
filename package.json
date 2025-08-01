@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "i18ntk (i18n Toolkit) - A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects with advanced analysis, validation, and automation features",
   "keywords": [
     "i18n",
@@ -124,7 +124,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.2.1",
+    "version": "1.2.2",
     "releaseDate": "02/08/2025",
     "lastUpdated": "02/08/2025",
     "maintainer": "Vladimir Noskov",

@@ -224,7 +224,9 @@ class I18nInitializer {
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
         
         // Save to settings
-        settingsManager.setDirectories({ sourceDir: selectedDir });
+        const currentSettings = settingsManager.getSettings();
+        currentSettings.sourceDir = selectedDir;
+        settingsManager.saveSettings(currentSettings);
         
         return true;
       }

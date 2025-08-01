@@ -220,7 +220,7 @@ npm run i18ntk:debug
 
 ---
 
-**Version:** 1.2.1 – Directory path fixes and configuration improvements! 🎯
+**Version:** 1.2.2 – Critical bug fix for custom locale support! 🎯
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.
