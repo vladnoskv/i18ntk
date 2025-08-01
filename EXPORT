@@ -25,6 +25,7 @@
     "validateOnSave": true,
     "sizingThreshold": 50,
     "sizingFormat": "table"
+    
   },
   "ui": {
     "language": "en",

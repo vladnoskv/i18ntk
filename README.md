@@ -1,14 +1,20 @@
 # i18ntk - Enterprise i18n Management Toolkit
 
-**Version:** 1.1.4 – **PRODUCTION READY** with complete core functionality and enhanced internationalization! 🌍
+**Version:** 1.1.5 – **PRODUCTION READY** with enhanced documentation and npm metadata cleanup! 🌍
 
-**Important Note on Versions:** We strongly recommend using the latest stable version (currently 1.1.4) of i18ntk. This version represents full production readiness with all core features working flawlessly. Internationalization completion is the only remaining task. Older versions may contain known bugs that have been resolved in v1.1.4.
+**⚠️ Important Notice:** All previous versions (< 1.1.5) are now deprecated due to critical bugs and issues. Please upgrade to v1.1.5 for the most stable experience. We recommend backing up your project before upgrading. 
 
-[![1.1.0](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
+**🎉 Thank You:** 200+ downloads in the first week! Thank you for your support and patience as we resolved the functional issues. My First Published Project. 
+
+[![1.1.5](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
 **i18ntk** (i18n Toolkit) is a comprehensive, enterprise-grade internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
+
+## ⚠️ Important Disclaimer
+
+**This is NOT an official i18n team product or affiliated with any i18n organization.** This toolkit was originally created as a personal project to help manage my own translation files, which was then enhanced with additional features, internationalization support, and made available to the community. It should work with any `en.json` translation files, even without i18n installed, and includes custom logic and settings that can be customized to fit your specific project needs. With simple code modifications or AI-assisted edits, you can easily adapt it to your project's requirements.
 
 ## 🚀 Quick Start
 
@@ -68,83 +74,29 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 
 **Important:** Direct command execution (e.g., `npx i18ntk usage`) now bypasses the interactive menu, allowing for more streamlined workflows and scripting.
 
-## ✨ What's New in v1.1.4
+## ✨ What's New in v1.1.5
 
-### 🌍 **PRODUCTION READY** - Core Plugin Complete
-- **Achieved**: All core functionality now works without issues
-- **Fixed**: JSON parsing errors in analysis reports ("Failed to parse source file JSON")
-- **Fixed**: Debug tools "Unknown config key" warnings and errors
-- **Fixed**: File path issues in debug tools causing missing file errors
-- **Enhanced**: Translation system stability and reliability
+### 🧹 Documentation & Metadata Cleanup
+- **Enhanced**: Updated all documentation to reflect current version and best practices
+- **Improved**: Cleaned up npm package metadata for better clarity
+- **Fixed**: Repository URLs and homepage links in package configuration
+- **Updated**: Installation instructions and version references throughout documentation
 
-### 🌐 Translation System Completion
-- **Added**: All missing translation keys to English locale files
-- **Improved**: Chinese translations for core UI elements (partial completion)
-- **Enhanced**: English fallback mechanism for incomplete translations
-- **Status**: Core functionality 100% translated, UI locales pending completion
+### 🐛 Previous Version Deprecation
+- **Status**: All versions < 1.1.5 are now deprecated due to critical bugs
+- **Recommendation**: Immediate upgrade to v1.1.5 for stable functionality
+- **Migration**: Major-breaking-changes upgrading from any 1.0.x version. Uninstall, and reinstall and rerun initilization.
 
-### 🐛 Critical Bug Fixes
-- **Fixed**: SecurityUtils.validateConfig missing configuration keys
-- **Fixed**: Analysis tool failing to parse JSON files
-- **Fixed**: Debug tools unable to locate core files
-- **Fixed**: Export Missing Keys tool failing to load reference files
+### 📁 Enhanced Project Organization
+- **Improved**: Configuration files now properly organized in `settings/` directory
+- **Enhanced**: All reports centralized in `i18ntk-reports/` directory for better organization
+- **Cleaned**: Removed duplicate configuration files from root directory
+- **Updated**: Documentation reflects new file structure and locations
 
-## ✨ What's New in v1.1.2
-
-### 🚀 Enhanced CLI Experience
-- **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu for specified commands.
-
-### 🐛 Bug Fixes & Improvements
-- **Fixed**: Resolved "Missing required file/directory: ./settings/user-config.json" error by removing outdated global `i18ntk` installation, ensuring the local, up-to-date version is used.
-
-## ✨ What's New in v1.1.1
-
-### 🐛 Bug Fixes & Improvements
-- **Fixed**: Interactive menu 'Help' option (option 12) now correctly waits for user input before returning to the main menu.
-- **Improved**: `executeCommand` function now properly handles the 'help' command within the interactive menu, ensuring a smooth user experience.
-- **Fixed**: Resolved issue where internal JSON files (`auth.json`, `pagination.json`, `reportGenerator.json`, `validationStep.json`) were incorrectly included in locale processing. These files are now properly excluded via `settings-manager.js`.
-
-### ✅ Validation Results
-- **Interactive Help**: Confirmed that the "Press Enter to return to menu." prompt is now correctly displayed and waits for user input after showing help.
-- **Locale File Exclusion**: Verified that specified internal JSON files are no longer processed as user locales, ensuring a cleaner and more accurate translation environment.
-
-## ✨ What's New in v1.1.0
-
-### 🚀 Enhanced CLI Experience
-
-#### 🔧 Major Improvements
-- **Fixed Version Command**: `i18ntk --version` and `i18ntk -v` now properly display version information instead of loading the management menu
-- **Detailed Version Info**: Version command shows comprehensive information including toolkit name, version, release date, maintainer, Node.js compatibility, license, and recent changes
-- **Improved Documentation**: Comprehensive README update with current standards and best practices
-- **Better CLI UX**: Enhanced command-line interface with proper argument handling
-- **Clean Output**: Version and help commands now execute cleanly without triggering other initialization processes
-
-#### 🔧 Critical Non-Interactive Mode Fixes
-- **Fixed Infinite Loop**: Resolved critical infinite loop issue when using piped input (e.g., `echo 0 | i18ntk-manage`)
-- **Enhanced Detection**: Added robust `isNonInteractiveMode()` method for reliable detection of non-interactive scenarios
-- **Graceful Exit**: Improved handling of non-interactive environments with proper user guidance
-- **Direct Command Support**: Fixed multiple menu display issues in direct command execution mode
-- **Automation Ready**: Better support for automated scripts and CI/CD pipelines
-- **Clean Execution**: Commands now execute without redundant menu displays or infinite loops
-
-#### 🎯 Documentation Excellence
-- **Updated Standards**: README follows current documentation standards and best practices
-- **Comprehensive Coverage**: All sections updated to reflect current functionality and features
-- **Better Organization**: Improved structure and navigation throughout documentation
-- **Version Consistency**: All version references updated to maintain consistency across the project
-
-#### 🛡️ Quality Improvements
-- **Proper CLI Behavior**: Commands now behave as expected without unintended side effects
-- **Enhanced Reliability**: Improved argument parsing and command execution flow
-- **Better User Experience**: Cleaner, more intuitive command-line interactions
-- **Production Ready**: Enhanced stability and professional CLI experience
-- **Automation Support**: Robust handling of various input scenarios including automated scripts and CI/CD environments
-
-### 🧹 Previous Improvements (v1.0.5)
-- **System Cleanup**: Removed test-specific translation files and fixed hardcoded keys
-- **Better Organization**: Moved test reports to proper directories
-- **Production Safety**: Eliminated test artifacts from production deployments
-- **Enhanced Stability**: Improved file management and error handling
+### 🎉 Community Milestone
+- **Achievement**: 200+ downloads in the first week
+- **Gratitude**: Thank you for your patience as we resolved functional issues
+- **Commitment**: Continued focus on stability and user experience
 
 ## 📚 Documentation
 
@@ -259,7 +211,7 @@ i18n-management-toolkit/
 │   └── verify-package.js               # Package verification
 ├── settings/                # Configuration management
 │   ├── admin-config.json   # Admin configuration
-│   ├── i18ntk-config.json  # User configuration
+│   ├── i18ntk-config.json  # User configuration (main config file)
 │   ├── settings-cli.js     # Settings CLI
 │   ├── settings-manager.js # Settings management
 │   └── backups/            # Configuration backups

@@ -236,7 +236,7 @@ class TranslationValidator {
     }
     
     // Save report
-    const reportPath = path.join(__dirname, '..', 'validation-report.json');
+    const reportPath = path.join(__dirname, '..', 'i18ntk-reports', 'validation-report.json');
     fs.writeFileSync(reportPath, JSON.stringify(this.results, null, 2));
     console.log(`\n📄 Full report saved to: ${reportPath}`);
   }

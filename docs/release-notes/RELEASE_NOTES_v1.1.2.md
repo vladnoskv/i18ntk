@@ -1,10 +1,12 @@
 **Release Date:** July 27, 2024
-**Version:** 1.1.2
+**Version:** 1.1.2 (DEPRECATED - Please upgrade to 1.1.5)
 **Type:** Patch Release 🩹
 
 ## Overview
 
-Version 1.1.2 is a patch release focused on enhancing the CLI experience by enabling direct command execution and resolving a critical bug related to `user-config.json` access post switch to use i18ntk-config.json instead.
+⚠️ **DEPRECATED VERSION** - This version contains known bugs. Please upgrade to v1.1.5 immediately.
+
+Version 1.1.2 was a patch release focused on enhancing the CLI experience by enabling direct command execution and resolving a critical bug related to `user-config.json` access post switch to use i18ntk-config.json instead.
 
 ## 🚀 Enhanced CLI Experience
 
@@ -40,7 +42,7 @@ Version 1.1.2 is a patch release focused on enhancing the CLI experience by enab
 
 ```bash
 # Install globally
-npm install -g i18ntk@1.1.2
+npm install -g i18ntk@1.1.5
 
 # Or update existing installation
 npm update -g i18ntk

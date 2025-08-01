@@ -37,7 +37,7 @@ project-root/
 │   ├── tests/            # Test scripts
 │   ├── debug/            # Debug tools
 │   └── scripts/          # Development utilities
-├── i18n-reports/         # Organized report structure
+├── i18ntk-reports/       # Organized report structure (all reports centralized here)
 │   ├── analysis/         # Analysis reports
 │   ├── validation/       # Validation reports
 │   ├── usage/            # Usage reports
@@ -45,7 +45,7 @@ project-root/
 │   └── summary/          # Summary reports
 ├── ui-locales/           # UI translation files
 ├── locales/              # Project translation files
-└── i18ntk-config.json    # Main configuration
+└── settings/i18ntk-config.json    # Main configuration (in settings folder)
 ```
 
 ### Testing Requirements

@@ -2,9 +2,37 @@
 
 All notable changes to the I18N Management Toolkit are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.1.4 (2025-08-01) - **INTERNATIONALIZATION COMPLETION RELEASE** 🌍
+**Current Version:** 1.1.5 (2025-08-02) - **DOCUMENTATION & METADATA CLEANUP RELEASE** 🧹
+
+## [1.1.5] - 2025-08-02
+
+### 🧹 Documentation & Metadata Enhancement
+- **Enhanced**: Updated all documentation files to reflect v1.1.5 standards
+- **Improved**: Cleaned up npm package metadata and repository links
+- **Fixed**: Repository URLs pointing to correct GitHub location
+- **Updated**: Installation instructions and version references throughout documentation
+- **Standardized**: All version strings now consistently reference v1.1.5
+
+### 🐛 Previous Version Deprecation
+- **Critical**: All versions < 1.1.5 are now deprecated due to critical bugs and functional issues
+- **Migration**: Zero-breaking-changes upgrade path from any 1.x version
+- **Recommendation**: Immediate upgrade to v1.1.5 for stable functionality
+- **Support**: No further updates or fixes will be provided for deprecated versions
+
+### 🎉 Community Appreciation
+- **Milestone**: 200+ downloads achieved in the first week
+- **Gratitude**: Thank you to the community for patience during bug resolution
+- **Commitment**: Continued focus on stability and user experience improvements
+
+### 📋 Package Metadata Updates
+- **Fixed**: Homepage URL updated to `https://github.com/vladnoskv/i18n-management-toolkit-main`
+- **Fixed**: Repository URL updated to `git+https://github.com/vladnoskv/i18n-management-toolkit-main.git`
+- **Enhanced**: Keywords and description refined for better discoverability
+- **Updated**: All internal version references to 1.1.5
 
 ## [1.1.4] - 2025-08-01
+
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
 
 ### 🌍 Core Plugin Functionality - **COMPLETE**
 - **Achieved**: All core functionality now works without issues
@@ -39,6 +67,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.1.3] - 2025-07-29
 
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+
 ### 🌐 Translation System Enhancement
 - **Added**: Translation keys for workflow step names in `autorun.json` files across all supported languages
 - **Improved**: Replaced hardcoded step names in `i18ntk-autorun.js` with internationalized translation keys
@@ -56,6 +86,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.1.2] - 2025-07-27
 
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+
 ### 🚀 Enhanced CLI Experience
 - **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu for specified commands.
 
@@ -69,6 +101,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.1.1] - 2025-07-27
 
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+
 ### 🐛 Bug Fixes & Improvements
 - **Fixed**: Interactive menu 'Help' option (option 12) now correctly waits for user input before returning to the main menu.
 - **Improved**: `executeCommand` function now properly handles the 'help' command within the interactive menu, ensuring a smooth user experience.
@@ -79,6 +113,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **Locale File Exclusion**: Verified that specified internal JSON files are no longer processed as user locales, ensuring a cleaner and more accurate translation environment.
 
 ## [1.1.0] - 2025-07-27
+
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
 
 ### 🚀 Enhanced CLI Experience
 - **Fixed**: `i18ntk --version` and `i18ntk -v` now properly display version information instead of loading the management menu
@@ -121,6 +157,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.0.5] - 2025-07-27
 
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+
 ### 🧹 System Cleanup and Organization
 - **Cleaned**: Removed test-specific translation files (validationStep.json, reportGenerator.json) from user locale directories
 - **Fixed**: Removed hardcoded validationStep and reportGenerator keys from i18ntk-complete.js
@@ -148,6 +186,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.0.4] - 2025-07-27
 
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+
 ### 🔧 Critical Translation System Fixes
 - **Fixed**: Translation system initialization issues causing "Translation not found" errors
 - **Fixed**: Dynamic value replacement in validation summary ({{langs}}, {{lang}}, {count}, {{percentage}})
@@ -172,6 +212,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.0.3] - 2025-07-27
 
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+
 ### 🔧 Patch Release
 - **Fixed**: CLI `--help` command hanging issue - now properly exits after displaying help
 - **Updated**: README.md to be more accurate, concise, and informative
@@ -179,6 +221,8 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 - **Note**: Translation keys `hardcodedTexts.noSourceFilesFound` and `hardcodedTexts.analyzingTranslationCompleteness` are present in all language files
 
 ## [1.0.2] - 2025-07-27
+
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
 
 ### 🔧 Patch Release
 - **Fixed**: Added missing `settings/` directory to package files
@@ -188,12 +232,16 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.0.1] - 2025-07-27
 
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+
 ### 🔧 Patch Release
 - **Fixed**: Added main `i18ntk` command to bin configuration for easier CLI access
 - **Improved**: Users can now run `i18ntk --version` and `i18ntk --help` directly
 - **Note**: All functionality remains the same, this is purely a usability improvement
 
 ## [1.0.0] - 2025-07-27 - 🎉 FIRST STABLE RELEASE
+
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
 
 ### 🚀 Welcome to i18ntk v1.0.0!
 

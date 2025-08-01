@@ -1,14 +1,18 @@
 # I18N Management Toolkit - API Reference
 
-**Version:** 1.1.2  
+**Version:** 1.1.5  
 **Last Updated:** 28/01/2025  
 **Maintainer:** Vladimir Noskov  
+
+## ⚠️ Important Disclaimer
+
+**This is NOT an official i18n team product or affiliated with any i18n organization.** This toolkit was originally created as a personal project to help manage my own translation files, which was then enhanced with additional features, internationalization support, and made available to the community. It should work with any `en.json` translation files, even without i18n installed, and includes custom logic and settings that can be customized to fit your specific project needs. With simple code modifications or AI-assisted edits, you can easily adapt it to your project's requirements.
 
 ## 📋 Overview
 
 This document provides a comprehensive API reference for the I18N Management Toolkit, including all available commands, configuration options, and programmatic interfaces.
 
-### 🔧 Latest Updates (v1.1.2)
+### 🔧 Latest Updates (v1.1.5)
 - **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu.
 - **Fixed**: Resolved "Missing required file/directory: ./settings/user-config.json" error by removing outdated global `i18ntk` installation.
 - **Updated**: All CLI command examples to use `npx i18ntk <command>` for consistency with recommended local usage.
@@ -382,4 +386,4 @@ const manager = new I18nManager(config);
 
 ---
 
-**Note:** This API reference is maintained for version 1.0.0. For the latest updates, please refer to the [Changelog](../../CHANGELOG.md).
+**Note:** This API reference is maintained for version 1.1.5. For the latest updates, please refer to the [Changelog](../../CHANGELOG.md).

@@ -1,8 +1,12 @@
 # I18N Management Toolkit - Documentation Hub
 
-**Version:** 1.1.2  
-**Last Updated:** July 27, 2024  
+**Version:** 1.1.5  
+**Last Updated:** August 2, 2025  
 **Maintainer:** Vladimir Noskov  
+
+## ⚠️ Important Disclaimer
+
+**This is NOT an official i18n team product or affiliated with any i18n organization.** This toolkit was originally created as a personal project to help manage my own translation files, which was then enhanced with additional features, internationalization support, and made available to the community. It should work with any `en.json` translation files, even without i18n installed, and includes custom logic and settings that can be customized to fit your specific project needs. With simple code modifications or AI-assisted edits, you can easily adapt it to your project's requirements.
 
 ## 📚 Welcome to the Documentation Hub
 
@@ -143,13 +147,14 @@ All languages maintain **100% translation coverage** with **573/573 keys** trans
 
 ## 📊 Quality Assurance
 
-### Current Status (v1.1.2)
+### Current Status (v1.1.5)
 ```
 ✅ Tests Passing: 25/25 (100%)
 ✅ Translation Coverage: 573/573 keys (100%)
 ✅ Translation Errors: 0 (fixed)
 ✅ Dynamic Value Replacement: Working
 ✅ Security Configuration: Valid
+✅ Documentation Updated: Complete
 📊 Overall Status: 🟢 READY
 ```
 
@@ -177,15 +182,14 @@ For enterprise support, custom integrations, or consulting services, please cont
 ## 🔄 Version History
 
 ### Recent Releases
-- **[v1.1.2](../CHANGELOG.md)** - Enhanced CLI Experience & Bug Fixes (Current)
-- **[v1.1.1](../CHANGELOG.md)** - Interactive Menu & Locale Exclusion Fixes
-- **[v1.1.0](../CHANGELOG.md)** - Enhanced CLI Experience & Non-Interactive Mode Fixes
-- **[v1.0.5](../CHANGELOG.md)** - System Cleanup and Organization
-- **[v1.0.4](../CHANGELOG.md)** - Critical Translation System Fixes
-- **[v1.0.3](../CHANGELOG.md)** - CLI and Packaging Fixes
-- **[v1.0.2](../CHANGELOG.md)** - Module Resolution Fixes
-- **[v1.0.1](../CHANGELOG.md)** - CLI Usability Improvements
-- **[v1.0.0](../CHANGELOG.md)** - First Stable Release
+- **[v1.1.5](../CHANGELOG.md)** - Documentation & Metadata Cleanup (Current)
+- **[v1.1.4](../CHANGELOG.md)** - Internationalization Completion **(DEPRECATED)**
+- **[v1.1.3](../CHANGELOG.md)** - Translation System Enhancement **(DEPRECATED)**
+- **[v1.1.2](../CHANGELOG.md)** - Enhanced CLI Experience **(DEPRECATED)**
+- **[v1.1.1](../CHANGELOG.md)** - Interactive Menu & Locale Fixes **(DEPRECATED)**
+- **[v1.1.0](../CHANGELOG.md)** - Enhanced CLI & Non-Interactive Mode **(DEPRECATED)**
+
+**⚠️ Note:** All versions < 1.1.5 are deprecated. Please upgrade immediately.
 
 ### Migration Guides
 - **[Upgrading to v1.0.0](../RELEASE_NOTES_v1.0.0.md#-migration-guide)** - Seamless upgrade from dev versions

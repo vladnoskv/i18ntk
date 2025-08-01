@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Configuration Guide
 
-**Version:** 1.1.2  
+**Version:** 1.1.5  
 **Last Updated:** 27/07/2025  
 **Maintainer:** Vladimir Noskov  
 
@@ -301,8 +301,8 @@ project-root/
 │   └── summary/
 ├── backups/                     # Configuration backups
 ├── docs/                        # Documentation
-├── i18ntk-config.json           # User configuration
-├── admin-config.json            # Admin configuration
+├── settings/i18ntk-config.json  # User configuration (main config file)
+├── settings/admin-config.json            # Admin configuration
 └── package.json
 ```
 

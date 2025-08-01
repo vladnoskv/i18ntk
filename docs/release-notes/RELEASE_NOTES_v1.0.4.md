@@ -1,4 +1,4 @@
-# Release Notes - i18ntk v1.0.4
+# Release Notes - i18ntk v1.0.4 (DEPRECATED - Use 1.1.5)
 
 **Release Date:** January 27, 2025  
 **Release Type:** Patch Release 🔧  
@@ -6,7 +6,9 @@
 
 ## 🎯 Overview
 
-Version 1.0.4 is a critical patch release that addresses significant translation system issues discovered in previous versions. This release focuses on fixing translation initialization problems, dynamic value replacement issues, and parameter naming inconsistencies that were causing "Translation not found" errors and incorrect template rendering.
+⚠️ **DEPRECATED VERSION** - This version contains known bugs. Please upgrade to v1.1.5 immediately.
+
+Version 1.0.4 was a critical patch release that addressed significant translation system issues discovered in previous versions.
 
 ## 🔧 Critical Translation System Fixes
 
@@ -70,8 +72,8 @@ Version 1.0.4 is a critical patch release that addresses significant translation
   - Improved security validation coverage
 
 ### Documentation
-- `package.json` - Updated version to 1.0.4
-- `CHANGELOG.md` - Added comprehensive v1.0.4 release notes
+- `package.json` - Updated version to 1.1.5
+- `CHANGELOG.md` - Added comprehensive v1.1.5 release notes
 - `README.md` - Updated to reflect latest fixes and improvements
 
 ## ✅ Quality Assurance
@@ -108,7 +110,7 @@ npm update i18ntk
 
 ### Verification
 ```bash
-i18ntk --version  # Should show 1.0.4
+i18ntk --version  # Should show 1.1.5
 i18ntk-validate --help  # Should exit properly without errors
 ```
 
@@ -124,7 +126,7 @@ i18ntk-validate --help  # Should exit properly without errors
 - Security warnings for valid configuration
 - Inconsistent translation system behavior
 
-### After v1.0.4
+### After v1.1.5
 - ✅ Clean console output without translation errors
 - ✅ Proper dynamic value replacement in all outputs
 - ✅ No security warnings for valid configurations
@@ -132,7 +134,7 @@ i18ntk-validate --help  # Should exit properly without errors
 
 ## 📋 Next Steps
 
-After upgrading to v1.0.4:
+After upgrading to v1.1.5:
 1. Run your existing i18n workflows to verify improvements
 2. Check that all dynamic values display correctly
 3. Confirm no translation errors in console output
@@ -140,7 +142,7 @@ After upgrading to v1.0.4:
 
 ## 🆘 Support
 
-If you encounter any issues with v1.0.4:
+If you encounter any issues with v1.1.5:
 - Check the [troubleshooting guide](../debug/DEBUG_TOOLS.md)
 - Review the [configuration documentation](../api/CONFIGURATION.md)
 - Report issues on [GitHub Issues](https://github.com/vladnoskv/i18n-management-toolkit/issues)

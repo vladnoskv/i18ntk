@@ -198,7 +198,7 @@ class TranslationTester {
     }
     
     // Create detailed report file
-    const reportPath = path.join(__dirname, '..', 'translation-test-report.json');
+    const reportPath = path.join(__dirname, '..', 'i18ntk-reports', 'translation-test-report.json');
     const report = {
       timestamp: new Date().toISOString(),
       languages: this.languages,

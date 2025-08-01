@@ -1,14 +1,18 @@
 # I18N Management Toolkit - Installation Guide
 
-**Version:** 1.1.2  
-**Release Date:** July 27, 2024  
-**Status:** Stable Release - Enhanced CLI & Local Usage  
+**Version:** 1.1.5  
+**Release Date:** August 2, 2025  
+**Status:** Stable Release - Documentation & Metadata Cleanup  
+
+## ⚠️ Important Disclaimer
+
+**This is NOT an official i18n team product or affiliated with any i18n organization.** This toolkit was originally created as a personal project to help manage my own translation files, which was then enhanced with additional features, internationalization support, and made available to the community. It should work with any `en.json` translation files, even without i18n installed, and includes custom logic and settings that can be customized to fit your specific project needs. With simple code modifications or AI-assisted edits, you can easily adapt it to your project's requirements.
 
 ## 📦 Installation Options
 
 ### 📁 Local Project Installation (Recommended)
 
-Install i18ntk globally to use it across all your projects:
+Install i18ntk locally for your project (recommended approach):
 
 #### NPM
 ```bash
@@ -209,7 +213,7 @@ When you run `i18ntk-init`, it automatically creates:
 
 ```
 your-project/
-├── i18ntk-config.json   # User preferences
+├── settings/i18ntk-config.json   # User preferences (main configuration file)
 ├── admin-config.json    # Admin settings (if needed)
 ├── locales/            # Translation files
 │   ├── en/
@@ -219,7 +223,7 @@ your-project/
 ```
 
 ### Manual Configuration
-If you prefer manual setup, create `i18ntk-config.json`:
+If you prefer manual setup, create `settings/i18ntk-config.json`:
 
 ```json
 {

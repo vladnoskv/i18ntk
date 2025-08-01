@@ -1,15 +1,17 @@
-# Release Notes - Version 1.0.0
+# Release Notes - Version 1.0.0 (DEPRECATED - Use 1.1.5)
 
 **Release Date:** July 27, 2025  
-**Version:** 1.0.0  
+**Version:** 1.0.0 (DEPRECATED - All versions below 1.1.5 contain bugs)  
 **Status:** 🎉 First Stable Release  
 **Distribution:** NPM/Yarn Ready  
 
 ---
 
-## 🎉 Welcome to i18ntk 1.0.0!
+## ⚠️ DEPRECATED VERSION
 
-Version 1.0.0 marks the **first stable release** of the I18N Management Toolkit (i18ntk), a comprehensive internationalization management system for JavaScript/TypeScript projects. This release represents months of development, testing, and refinement to deliver a production-ready CLI suite.
+**All versions below 1.1.5 are deprecated due to bugs. Please upgrade to 1.1.5 immediately.**
+
+Version 1.0.0 was the first stable release of the I18N Management Toolkit (i18ntk), a comprehensive internationalization management system for JavaScript/TypeScript projects.
 
 ## 🌟 What's New in 1.0.0
 
@@ -49,7 +51,7 @@ yarn global add i18ntk
 
 ### Verify Installation
 ```bash
-i18ntk --version  # Should show 1.0.0
+i18ntk --version  # Should show 1.1.5
 i18ntk --help     # Show available commands
 ```
 
@@ -118,11 +120,11 @@ If you were using development versions (0.5.0-dev through 0.6.3-dev), upgrading 
 # Uninstall old development version
 npm uninstall -g i18ntk
 
-# Install stable 1.0.0
+# Install stable 1.1.5
 npm install -g i18ntk
 
 # Verify installation
-i18ntk --version  # Should show 1.0.0
+i18ntk --version  # Should show 1.1.5
 ```
 
 **No breaking changes** - all commands and configurations remain compatible.
