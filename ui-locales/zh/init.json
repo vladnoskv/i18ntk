@@ -34,5 +34,9 @@
   "frameworks.i18next": "- i18next (i18next)",
   "frameworks.nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
   "frameworks.svelte": "- Svelte i18n (svelte-i18n)",
-  "selectOptionPrompt": "选择一个选项:"
+  "selectOptionPrompt": "选择选项:",
+  "existingDirectoriesFound": "📁 找到现有的翻译目录:",
+  "useExistingDirectoryPrompt": "使用现有目录？输入编号（或按回车键创建新目录）:",
+  "usingExistingDirectory": "✅ 使用现有目录: {dir}",
+  "usingExistingStructure": "✅ 使用现有翻译结构: {dir}"
 }

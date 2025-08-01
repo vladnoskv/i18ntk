@@ -2,7 +2,26 @@
 
 All notable changes to the I18N Management Toolkit are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.2.0 (2025-08-02) - **UI SIMPLIFICATION & ORGANIZATION RELEASE** 🧹
+**Current Version:** 1.2.1 (2025-08-02) - **DIRECTORY PATH FIXES & CONFIGURATION IMPROVEMENTS** 🎯
+
+## [1.2.1] - 2025-08-02
+
+### 🎯 Directory Path Configuration Fixes
+- **Fixed**: Scripts now correctly respect directory settings from configuration instead of using hardcoded paths
+- **Enhanced**: Added interactive prompt to detect existing translation directories before creating new ones
+- **Improved**: Users can now specify existing translation file locations during initialization
+- **Fixed**: Prevented creation of redundant `/locales` directories when existing files are already configured
+- **Enhanced**: All scripts now prioritize settings configuration over auto-detection
+
+### 🌐 Translation Updates
+- **Added**: New translation keys for directory detection prompts in all supported languages
+- **Enhanced**: English, German, Spanish, French, Russian, Japanese, and Chinese translations for new prompts
+- **Fixed**: Missing `analyze.issueType.same_as_source` translation key across all locale files
+
+### 🔧 Configuration Improvements
+- **Enhanced**: `i18ntk-init.js` now detects existing translation directories and prompts users
+- **Fixed**: `i18ntk-usage.js` and `i18ntk-manage.js` now respect settings configuration over auto-detection
+- **Improved**: Settings-based directory configuration takes precedence over hardcoded defaults
 
 ## [1.2.0] - 2025-08-02
 

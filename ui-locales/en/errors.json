@@ -3,5 +3,15 @@
   "genericError": "❌ Error: {{error}}",
   "errorGeneratingStatusSummary": "Error generating status summary: {error}",
   "errorRunningDebugTool": "Error running debug tool '{displayName}': {error}",
-  "errorReadingDebugLogs": "Error reading debug logs: {error}"
+  "errorReadingDebugLogs": "Error reading debug logs: {error}",
+  "errorAnalyzingLogFile": "Error analyzing log file: {error}",
+  "errorAnalyzingTranslationKeys": "Error analyzing translation keys: {error}",
+  "errorAnalyzingTranslationCompleteness": "Error analyzing translation completeness: {error}",
+  "errorAnalyzingTranslationFormat": "Error analyzing translation format: {error}",
+  "errorAnalyzingTranslationType": "Error analyzing translation type: {error}",
+  "errorAnalyzingTranslationStructure": "Error analyzing translation structure: {error}",
+  "errorAnalyzingTranslationFormatMismatch": "Error analyzing translation format mismatch: {error}",
+  "errorAnalyzingTranslationTypeMismatch": "Error analyzing translation type mismatch: {error}",
+  "errorAnalyzingTranslationStructureMismatch": "Error analyzing translation structure mismatch: {error}",
+  "errorAnalyzingTranslationSameAsSource": "Error analyzing translation same as source: {error}"
 }

@@ -29,85 +29,88 @@ const settingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
-// Enhanced configuration with multiple source directory detection
+// Enhanced configuration that prioritizes settings over auto-detection
 async function getConfig() {
   try {
     const settings = settingsManager.getSettings();
     
-    // Multiple possible source directories to check
-    const possibleSourceDirs = [
-      './main',     // Primary source directory for this project
-      './src',
-      './app', 
-      './components',
-      './pages',
-      './views',
-      './client',
-      './frontend',
-      './' // Current directory as fallback
-    ];
+    // Only use auto-detection if no settings are configured
+    let sourceDir = settings.directories?.sourceDir;
+    let i18nDir = settings.directories?.i18nDir;
     
-    // Auto-detect source directory
-    let detectedSourceDir = './src'; // Default
-    for (const dir of possibleSourceDirs) {
-      if (fs.existsSync(dir)) {
-        // Check if directory contains code files
-        try {
-          const files = fs.readdirSync(dir);
-          const hasCodeFiles = files.some(file => 
-            ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'].includes(path.extname(file))
-          );
-          if (hasCodeFiles) {
-            detectedSourceDir = dir;
-            break;
+    // Auto-detect only if settings don't specify directories
+    if (!sourceDir) {
+      const possibleSourceDirs = [
+        './main',     // Primary source directory for this project
+        './src',
+        './app', 
+        './components',
+        './pages',
+        './views',
+        './client',
+        './frontend',
+        './' // Current directory as fallback
+      ];
+      
+      for (const dir of possibleSourceDirs) {
+        if (fs.existsSync(dir)) {
+          try {
+            const files = fs.readdirSync(dir);
+            const hasCodeFiles = files.some(file => 
+              ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'].includes(path.extname(file))
+            );
+            if (hasCodeFiles) {
+              sourceDir = dir;
+              break;
+            }
+          } catch (error) {
+            // Continue checking
           }
-        } catch (error) {
-          // Continue checking
         }
       }
+      sourceDir = sourceDir || './src'; // Final fallback
     }
     
-    // Multiple possible i18n directories
-    const possibleI18nDirs = [
-      './locales',
-      './src/locales',
-      './src/i18n',
-      './src/i18n/locales', 
-      './app/locales',
-      './app/i18n',
-      './public/locales',
-      './assets/locales',
-      './translations',
-      './lang'
-    ];
-    
-    // Auto-detect i18n directory
-    let detectedI18nDir = './locales'; // Default
-    for (const dir of possibleI18nDirs) {
-      if (fs.existsSync(dir)) {
-        // Check if directory contains language subdirectories or JSON files
-        try {
-          const items = fs.readdirSync(dir);
-          const hasLanguageDirs = items.some(item => {
-            const itemPath = path.join(dir, item);
-            if (fs.statSync(itemPath).isDirectory()) {
-              return ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
+    if (!i18nDir) {
+      const possibleI18nDirs = [
+        './locales',
+        './src/locales',
+        './src/i18n',
+        './src/i18n/locales', 
+        './app/locales',
+        './app/i18n',
+        './public/locales',
+        './assets/locales',
+        './translations',
+        './lang'
+      ];
+      
+      for (const dir of possibleI18nDirs) {
+        if (fs.existsSync(dir)) {
+          try {
+            const items = fs.readdirSync(dir);
+            const hasLanguageDirs = items.some(item => {
+              const itemPath = path.join(dir, item);
+              if (fs.statSync(itemPath).isDirectory()) {
+                return ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
+              }
+              return item.endsWith('.json');
+            });
+            if (hasLanguageDirs) {
+              i18nDir = dir;
+              break;
             }
-            return item.endsWith('.json');
-          });
-          if (hasLanguageDirs) {
-            detectedI18nDir = dir;
-            break;
+          } catch (error) {
+            // Continue checking
           }
-        } catch (error) {
-          // Continue checking
         }
       }
+      i18nDir = i18nDir || './locales'; // Final fallback
     }
     
     const config = {
-      sourceDir: settings.directories?.sourceDir || detectedSourceDir,
-      i18nDir: settings.directories?.i18nDir || detectedI18nDir,
+      sourceDir: sourceDir,
+      i18nDir: i18nDir,
       sourceLanguage: settings.directories?.sourceLanguage || settings.sourceLanguage || 'en',
       outputDir: settings.directories?.outputDir || settings.outputDir || './i18ntk-reports',
       excludeDirs: settings.processing?.excludeDirs || [

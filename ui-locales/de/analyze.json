@@ -62,7 +62,8 @@
     "partial_translation": "Partial translations: {count}",
     "format_mismatch": "Format mismatches: {count}",
     "type_mismatch": "Type mismatches: {count}",
-    "structure_mismatch": "Structure mismatches: {count}"
+    "structure_mismatch": "Structure mismatches: {count}",
+    "same_as_source": "Gleich wie Quelle: {count}"
   },
   "keysToTranslate": "📋 KEYS TO TRANSLATE",
   "key": "Schlüssel",

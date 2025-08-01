@@ -1,0 +1,78 @@
+📊 TRANSLATION ANALYSIS REPORT
+    Generated: 2025-08-01T23:34:46.123Z
+    Status: 2/17 keys (12% translated)
+    Files analyzed: 1/1
+    Keys needing translation: 15
+    
+    📋 FILE BREAKDOWN
+    ==================================================
+
+📄 common.json
+   📊 📊 Translation: 2/17 (12%)
+   🏗️  🗂️  Structure: Consistent
+   ⚠️  ⚠️  Issues found: 15
+      Not translated: 15
+
+📋 KEYS TO TRANSLATE
+==================================================
+
+Key: offlineTitle
+English: "You are offline"
+ru: [NEEDS TRANSLATION]
+
+Key: offlineMessage
+English: "Please check your internet connection"
+ru: [NEEDS TRANSLATION]
+
+Key: tryReconnect
+English: "Try to reconnect"
+ru: [NEEDS TRANSLATION]
+
+Key: common
+English: "Common"
+ru: [NEEDS TRANSLATION]
+
+Key: logout
+English: "Logout"
+ru: [NEEDS TRANSLATION]
+
+Key: login
+English: "Login"
+ru: [NEEDS TRANSLATION]
+
+Key: amount
+English: "Amount"
+ru: [NEEDS TRANSLATION]
+
+Key: timePeriods.customRange
+English: "Custom Range"
+ru: [NEEDS TRANSLATION]
+
+Key: unknownUser
+English: "Unknown User"
+ru: [NEEDS TRANSLATION]
+
+Key: notSet
+English: "Not Set"
+ru: [NEEDS TRANSLATION]
+
+Key: announcement_id
+English: "Announcement ID"
+ru: [NEEDS TRANSLATION]
+
+Key: last_sign_in_at
+English: "Last Sign In"
+ru: [NEEDS TRANSLATION]
+
+Key: usage.analysisResults
+English: "Analysis Results"
+ru: [NEEDS TRANSLATION]
+
+Key: usage.availableKeysCount
+English: "Available Keys Count"
+ru: [NEEDS TRANSLATION]
+
+Key: usage.usedKeysCount
+English: "Used Keys Count"
+ru: [NEEDS TRANSLATION]
+

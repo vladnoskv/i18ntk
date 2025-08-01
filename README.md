@@ -220,7 +220,7 @@ npm run i18ntk:debug
 
 ---
 
-**Version:** 1.2.0 – Enhanced CLI experience with proper version command and improved documentation! 🚀
+**Version:** 1.2.1 – Directory path fixes and configuration improvements! 🎯
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

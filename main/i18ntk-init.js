@@ -164,8 +164,85 @@ class I18nInitializer {
     return parsed;
   }
 
+  // Detect existing translation directories and prompt user
+  async detectExistingDirectories() {
+    const possibleLocations = [
+      './locales',
+      './src/locales',
+      './src/i18n/locales',
+      './app/locales',
+      './public/locales',
+      './translations',
+      './lang',
+      './i18n/locales',
+      './assets/locales',
+      './client/locales',
+      './frontend/locales'
+    ];
+
+    const existingLocations = [];
+    
+    // Check for existing translation directories
+    for (const location of possibleLocations) {
+      if (fs.existsSync(location)) {
+        try {
+          const items = fs.readdirSync(location);
+          const hasLanguageDirs = items.some(item => {
+            const itemPath = path.join(location, item);
+            if (fs.statSync(itemPath).isDirectory()) {
+              return ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
+            }
+            return item.endsWith('.json');
+          });
+          if (hasLanguageDirs) {
+            existingLocations.push(location);
+          }
+        } catch (error) {
+          // Continue checking other locations
+        }
+      }
+    }
+
+    if (existingLocations.length > 0) {
+      console.log('\n' + this.ui.t('init.existingDirectoriesFound'));
+      console.log('=' .repeat(50));
+      
+      existingLocations.forEach((location, index) => {
+        console.log(`  ${index + 1}. ${location}`);
+      });
+      
+      const answer = await this.prompt('\n' + this.ui.t('init.useExistingDirectoryPrompt'));
+      const selectedIndex = parseInt(answer) - 1;
+      
+      if (selectedIndex >= 0 && selectedIndex < existingLocations.length) {
+        const selectedDir = existingLocations[selectedIndex];
+        console.log(this.ui.t('init.usingExistingDirectory', { dir: selectedDir }));
+        
+        // Update settings to use the existing directory
+        this.config.sourceDir = selectedDir;
+        this.sourceDir = path.resolve(selectedDir);
+        this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+        
+        // Save to settings
+        settingsManager.setDirectories({ sourceDir: selectedDir });
+        
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
   // Setup initial directory structure if needed
   async setupInitialStructure() {
+    // First, detect if there are existing translation directories
+    const usedExisting = await this.detectExistingDirectories();
+    
+    if (usedExisting) {
+      console.log(this.ui.t('init.usingExistingStructure', { dir: this.sourceDir }));
+      return;
+    }
+    
     // Validate paths
     const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
     const validatedSourceLanguageDir = SecurityUtils.validatePath(this.sourceLanguageDir, process.cwd());
@@ -175,14 +252,14 @@ class I18nInitializer {
       throw new Error('Invalid directory paths detected');
     }
     
-    // Create source directory if it doesn't exist
+    // Create source directory only if it doesn't exist and no existing was detected
     if (!fs.existsSync(validatedSourceDir)) {
       console.log(this.ui.t('init.creatingSourceDirectory', { dir: validatedSourceDir }));
       fs.mkdirSync(validatedSourceDir, { recursive: true });
       SecurityUtils.logSecurityEvent('Source directory created', 'info', { dir: validatedSourceDir });
     }
     
-    // Create source language directory if it doesn't exist
+    // Create source language directory only if it doesn't exist
     if (!fs.existsSync(validatedSourceLanguageDir)) {
       console.log(this.ui.t('init.creatingSourceLanguageDirectory', { dir: validatedSourceLanguageDir }));
       fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });

@@ -62,7 +62,8 @@
     "partial_translation": "⚠️ TRANSLATION NEEDED ⚠️",
     "format_mismatch": "⚠️ TRANSLATION NEEDED ⚠️",
     "type_mismatch": "⚠️ TRANSLATION NEEDED ⚠️",
-    "structure_mismatch": "⚠️ TRANSLATION NEEDED ⚠️"
+    "structure_mismatch": "⚠️ TRANSLATION NEEDED ⚠️",
+    "same_as_source": "Identique à la source: {count}"
   },
   "keysToTranslate": "⚠️ TRANSLATION NEEDED ⚠️",
   "key": "⚠️ TRANSLATION NEEDED ⚠️",

@@ -57,12 +57,13 @@
   "extraKeys": "⚠️ TRANSLATION NEEDED ⚠️",
   "issues": "⚠️ TRANSLATION NEEDED ⚠️",
   "issueType": {
-    "not_translated": "⚠️ TRANSLATION NEEDED ⚠️",
-    "empty_value": "⚠️ TRANSLATION NEEDED ⚠️",
-    "partial_translation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "format_mismatch": "⚠️ TRANSLATION NEEDED ⚠️",
-    "type_mismatch": "⚠️ TRANSLATION NEEDED ⚠️",
-    "structure_mismatch": "⚠️ TRANSLATION NEEDED ⚠️"
+    "not_translated": "Не переведено: {count}",
+    "empty_value": "Пустые значения: {count}",
+    "partial_translation": "Частичный перевод: {count}",
+    "format_mismatch": "Несоответствие формата: {count}",
+    "type_mismatch": "Несоответствие типа: {count}",
+    "structure_mismatch": "Несоответствие структуры: {count}",
+    "same_as_source": "Такой же как источник: {count}"
   },
   "keysToTranslate": "⚠️ TRANSLATION NEEDED ⚠️",
   "key": "⚠️ TRANSLATION NEEDED ⚠️",

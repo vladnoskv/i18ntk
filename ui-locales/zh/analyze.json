@@ -62,7 +62,8 @@
     "partial_translation": "部分翻译: {count}",
     "format_mismatch": "格式不匹配: {count}",
     "type_mismatch": "类型不匹配: {count}",
-    "structure_mismatch": "结构不匹配: {count}"
+    "structure_mismatch": "结构不匹配: {count}",
+    "same_as_source": "与源文件相同: {count}"
   },
   "keysToTranslate": "📋 待翻译键",
   "key": "键",

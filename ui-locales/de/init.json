@@ -34,5 +34,9 @@
   "frameworks.i18next": "- i18next (i18next)",
   "frameworks.nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
   "frameworks.svelte": "- Svelte i18n (svelte-i18n)",
-  "selectOptionPrompt": "Select an option:"
+  "selectOptionPrompt": "Select an option:",
+  "existingDirectoriesFound": "📁 Vorhandene Übersetzungsverzeichnisse gefunden:",
+  "useExistingDirectoryPrompt": "Vorhandenes Verzeichnis verwenden? Nummer eingeben (oder Enter für neues):",
+  "usingExistingDirectory": "✅ Vorhandenes Verzeichnis verwenden: {dir}",
+  "usingExistingStructure": "✅ Vorhandene Übersetzungsstruktur verwenden in: {dir}"
 }

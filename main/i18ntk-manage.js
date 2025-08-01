@@ -96,8 +96,17 @@ class I18nManager {
     }
   }
 
-  // Auto-detect i18n directory from common locations
+  // Auto-detect i18n directory from common locations only if not configured in settings
   detectI18nDirectory() {
+    const settings = settingsManager.getSettings();
+    
+    // Use settings configuration if available
+    if (settings.directories?.sourceDir) {
+      this.config.sourceDir = settings.directories.sourceDir;
+      return;
+    }
+    
+    // Only auto-detect if no settings are configured
     for (const possiblePath of this.config.possibleI18nPaths) {
       const resolvedPath = path.resolve(possiblePath);
       if (fs.existsSync(resolvedPath)) {

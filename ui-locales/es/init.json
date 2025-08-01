@@ -34,5 +34,9 @@
   "frameworks.i18next": "⚠️ TRANSLATION NEEDED ⚠️",
   "frameworks.nuxt": "⚠️ TRANSLATION NEEDED ⚠️",
   "frameworks.svelte": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOptionPrompt": "⚠️ TRANSLATION NEEDED ⚠️"
+  "selectOptionPrompt": "Seleccionar opción:",
+  "existingDirectoriesFound": "📁 Directorios de traducción existentes encontrados:",
+  "useExistingDirectoryPrompt": "¿Usar directorio existente? Ingresar número (o presionar Enter para crear nuevo):",
+  "usingExistingDirectory": "✅ Usando directorio existente: {dir}",
+  "usingExistingStructure": "✅ Usando estructura de traducción existente en: {dir}"
 }

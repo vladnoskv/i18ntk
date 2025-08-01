@@ -34,5 +34,9 @@
   "frameworks.i18next": "⚠️ TRANSLATION NEEDED ⚠️",
   "frameworks.nuxt": "⚠️ TRANSLATION NEEDED ⚠️",
   "frameworks.svelte": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOptionPrompt": "⚠️ TRANSLATION NEEDED ⚠️"
+  "selectOptionPrompt": "オプションを選択:",
+  "existingDirectoriesFound": "📁 既存の翻訳ディレクトリが見つかりました:",
+  "useExistingDirectoryPrompt": "既存のディレクトリを使用しますか？番号を入力（新規作成の場合はEnterを押してください）:",
+  "usingExistingDirectory": "✅ 既存のディレクトリを使用: {dir}",
+  "usingExistingStructure": "✅ 既存の翻訳構造を使用: {dir}"
 }

@@ -34,5 +34,9 @@
   "frameworks.i18next": "⚠️ TRANSLATION NEEDED ⚠️",
   "frameworks.nuxt": "⚠️ TRANSLATION NEEDED ⚠️",
   "frameworks.svelte": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOptionPrompt": "⚠️ TRANSLATION NEEDED ⚠️"
+  "selectOptionPrompt": "Выберите опцию:",
+  "existingDirectoriesFound": "📁 Найдены существующие каталоги переводов:",
+  "useExistingDirectoryPrompt": "Использовать существующий каталог? Введите номер (или нажмите Enter для создания нового):",
+  "usingExistingDirectory": "✅ Используется существующий каталог: {dir}",
+  "usingExistingStructure": "✅ Используется существующая структура переводов в: {dir}"
 }
