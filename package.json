@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "description": "i18ntk (i18n Toolkit) - A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects with advanced analysis, validation, and automation features",
   "keywords": [
     "i18n",
@@ -124,7 +124,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.1.5",
+    "version": "1.2.0",
     "releaseDate": "02/08/2025",
     "lastUpdated": "02/08/2025",
     "maintainer": "Vladimir Noskov",
@@ -136,11 +136,14 @@
       "🐛 Marked all previous versions as deprecated due to bugs",
       "🎉 Celebrated 200+ downloads milestone",
       "🔗 Fixed repository URLs to point to correct GitHub location",
-      "📋 Updated all version references to 1.1.5"
+      "📋 Updated all version references to 1.2.0",
+      "🌐 Temporarily disabled UI language switching to focus on English core functionality",
+      "📊 Centralized reports in i18ntk-reports/ directory",
+      "⚙️ Organized configuration files in settings/ directory"
     ],
-    "breakingChanges": [],
-    "deprecations": ["<1.1.5", "1.0.x"],
-    "nextVersion": "1.1.6",
+    "breakingChanges": ["Removed option 10 (Change UI language) from main menu"],
+    "deprecations": ["<1.2.0", "1.0.x", "1.1.x"],
+    "nextVersion": "1.2.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",

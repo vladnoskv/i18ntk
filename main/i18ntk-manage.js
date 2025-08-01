@@ -459,10 +459,9 @@ class I18nManager {
       console.log(`7. ${this.ui.t('menu.options.workflow')}`);
       console.log(`8. ${this.ui.t('menu.options.status')}`);
       console.log(`9. ${this.ui.t('menu.options.delete')}`);
-      console.log(`10. ${this.ui.t('menu.options.language')}`);
-      console.log(`11. ${this.ui.t('menu.options.settings')}`);
-      console.log(`12. ${this.ui.t('menu.options.help')}`);
-      console.log(`13. ${this.ui.t('menu.options.debug')}`);
+      console.log(`10. ${this.ui.t('menu.options.settings')}`);
+      console.log(`11. ${this.ui.t('menu.options.help')}`);
+      console.log(`12. ${this.ui.t('menu.options.debug')}`);
       console.log(`0. ${this.ui.t('menu.options.exit')}`);
       console.log('\n' + this.ui.t('menu.nonInteractiveModeWarning'));
       console.log(this.ui.t('menu.useDirectExecution'));
@@ -483,10 +482,9 @@ class I18nManager {
     console.log(`7. ${this.ui.t('menu.options.workflow')}`);
     console.log(`8. ${this.ui.t('menu.options.status')}`);
     console.log(`9. ${this.ui.t('menu.options.delete')}`);
-    console.log(`10. ${this.ui.t('menu.options.language')}`);
-    console.log(`11. ${this.ui.t('menu.options.settings')}`);
-    console.log(`12. ${this.ui.t('menu.options.help')}`);
-    console.log(`13. ${this.ui.t('menu.options.debug')}`);
+    console.log(`10. ${this.ui.t('menu.options.settings')}`);
+    console.log(`11. ${this.ui.t('menu.options.help')}`);
+    console.log(`12. ${this.ui.t('menu.options.debug')}`);
     console.log(`0. ${this.ui.t('menu.options.exit')}`);
     
     const choice = await this.prompt('\n' + this.ui.t('menu.selectOptionPrompt'));
@@ -556,17 +554,14 @@ class I18nManager {
         await this.deleteReports();
         break;
       case '10':
-        await this.changeLanguage();
-        break;
-      case '11':
         await this.showSettingsMenu();
         break;
-      case '12':
+      case '11':
         this.showHelp();
         await this.prompt(this.ui.t('menu.returnToMainMenu'));
         await this.showInteractiveMenu();
         break;
-      case '13':
+      case '12':
         await this.showDebugMenu();
         break;
       case '0':
@@ -888,46 +883,7 @@ class I18nManager {
     await this.showInteractiveMenu();
   }
 
-  // Add language change functionality
-  async changeLanguage() {
-    console.log(this.ui.t('language.changeTitle'));
-    console.log('=' .repeat(50));
-    
-    const languages = {
-      'en': '🇺🇸 English',
-      'de': '🇩🇪 Deutsch',
-      'es': '🇪🇸 Español', 
-      'fr': '🇫🇷 Français',
-      'ru': '🇷🇺 Русский',
-      'ja': '🇯🇵 日本語',
-      'zh': '🇨🇳 中文'
-    };
-    
-    console.log(this.ui.t('language.available'));
-    Object.entries(languages).forEach(([code, name], index) => {
-      console.log(`  ${index + 1}. ${code} - ${name}`);
-    });
-    
-    const choice = await this.prompt('\nSelect language (1-7): ');
-    const languageCodes = Object.keys(languages);
-    const selectedIndex = parseInt(choice) - 1;
-    
-    if (selectedIndex >= 0 && selectedIndex < languageCodes.length) {
-      const selectedLang = languageCodes[selectedIndex];
-      this.ui.loadLanguage(selectedLang);
-      
-      // Save to settings
-      const settingsManager = require('../settings/settings-manager');
-      settingsManager.setLanguage(selectedLang);
-      
-      console.log(`✅ Language changed to ${languages[selectedLang]}`);
-    } else {
-      console.log(this.ui.t('language.invalidSelection'));
-    }
-    
-    await this.prompt(this.ui.t('menu.pressEnterToContinue'));
-    await this.showInteractiveMenu();
-  }
+
 
   prompt(question) {
     return new Promise((resolve) => {

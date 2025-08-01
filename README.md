@@ -1,20 +1,29 @@
 # i18ntk - Enterprise i18n Management Toolkit
 
-**Version:** 1.1.5 – **PRODUCTION READY** with enhanced documentation and npm metadata cleanup! 🌍
+**Version:** 1.2 – **PRODUCTION READY** with enhanced documentation and npm metadata cleanup! 🌍
 
-**⚠️ Important Notice:** All previous versions (< 1.1.5) are now deprecated due to critical bugs and issues. Please upgrade to v1.1.5 for the most stable experience. We recommend backing up your project before upgrading. 
+**⚠️ Important Notice:** All previous versions (< 1.2) are now deprecated due to critical bugs and issues. Please upgrade to v1.1.5 for the most stable experience. We recommend backing up your project before upgrading. 
 
 **🎉 Thank You:** 200+ downloads in the first week! Thank you for your support and patience as we resolved the functional issues. My First Published Project. 
 
-[![1.1.5](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
+[![version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
+[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-**i18ntk** (i18n Toolkit) is a comprehensive, enterprise-grade internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
+**i18ntk** (i18n Toolkit) is a comprehensive, internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
 
 ## ⚠️ Important Disclaimer
 
-**This is NOT an official i18n team product or affiliated with any i18n organization.** This toolkit was originally created as a personal project to help manage my own translation files, which was then enhanced with additional features, internationalization support, and made available to the community. It should work with any `en.json` translation files, even without i18n installed, and includes custom logic and settings that can be customized to fit your specific project needs. With simple code modifications or AI-assisted edits, you can easily adapt it to your project's requirements.
+**Important: This is an independent, community-driven toolkit** - not affiliated with any official i18n organization or team. Originally developed as a personal solution for translation management, i18ntk has evolved into a feature-rich internationalization toolkit available to the broader development community. The toolkit is designed to be framework-agnostic and highly adaptable:
+
+- Works with any translation file format configured in the settings
+- Operates independently (no i18n framework required)
+- Provides extensive customization options
+- Easily extensible through code modifications or AI-assisted configuration
+- Flexible enough to accommodate diverse project requirements
+
+While maintaining its independence, i18ntk strives to follow i18n best practices and standards to ensure compatibility with existing workflows. Although we test thoroughly, we cannot guarantee 100% compatibility with all i18n frameworks or systems. Users are encouraged to test i18ntk with their specific setup and adjust settings as needed or find an alternative solution.
 
 ## 🚀 Quick Start
 
@@ -211,7 +220,7 @@ npm run i18ntk:debug
 
 ---
 
-**Version:** 1.1.5 – Enhanced CLI experience with proper version command and improved documentation! 🚀
+**Version:** 1.2.0 – Enhanced CLI experience with proper version command and improved documentation! 🚀
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

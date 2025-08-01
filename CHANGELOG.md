@@ -2,7 +2,36 @@
 
 All notable changes to the I18N Management Toolkit are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.1.5 (2025-08-02) - **DOCUMENTATION & METADATA CLEANUP RELEASE** 🧹
+**Current Version:** 1.2.0 (2025-08-02) - **UI SIMPLIFICATION & ORGANIZATION RELEASE** 🧹
+
+## [1.2.0] - 2025-08-02
+
+### 🧹 Code Cleanup & Simplification
+- **Removed**: UI language switching option (option 10) from main menu to focus on English core functionality
+- **Updated**: Menu numbering adjusted to reflect removal of option 10 (Settings now option 10, Help option 11, Debug option 12)
+- **Simplified**: User interface now defaults to English only for improved stability
+- **Enhanced**: Project organization with centralized reports in `i18ntk-reports/` directory
+- **Enhanced**: Configuration files now organized in `settings/` directory
+
+### 🌐 Translation Updates
+- **Added**: "Coming Soon" messages to German, Spanish, French, Russian, Japanese, and Chinese locale files for language switching feature
+- **Status**: All non-English locales updated to indicate language switching will be available in next update
+- **Focus**: English-only interface for v1.2.0 to ensure core functionality stability
+
+### 📊 Project Organization
+- **Centralized**: All reports now saved to `i18ntk-reports/` directory for better file management
+- **Organized**: Configuration files moved to `settings/` directory for cleaner project structure
+- **Cleaned**: Removed duplicate configuration files and streamlined project layout
+
+### 🔄 Version Updates
+- **Bumped**: Package version to 1.2.0 with breaking change notice for menu option removal
+- **Updated**: All documentation to reflect new project organization and version changes
+- **Enhanced**: Version info with new features and breaking changes documentation
+
+### 🛡️ Stability Improvements
+- **Fixed**: Menu option handling after removal of language switching
+- **Enhanced**: Non-interactive mode menu display updated to match new numbering
+- **Improved**: Overall system stability by reducing complexity
 
 ## [1.1.5] - 2025-08-02
 
@@ -32,7 +61,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.1.4] - 2025-08-01
 
-**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.2.0 for critical bug fixes and stability improvements.
 
 ### 🌍 Core Plugin Functionality - **COMPLETE**
 - **Achieved**: All core functionality now works without issues
@@ -67,7 +96,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.1.3] - 2025-07-29
 
-**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.2.0 for critical bug fixes and stability improvements.
 
 ### 🌐 Translation System Enhancement
 - **Added**: Translation keys for workflow step names in `autorun.json` files across all supported languages
@@ -86,7 +115,7 @@ All notable changes to the I18N Management Toolkit are documented here. This pro
 
 ## [1.1.2] - 2025-07-27
 
-**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.1.5 for critical bug fixes and stability improvements.
+**⚠️ DEPRECATED:** This version is deprecated. Please upgrade to v1.2.0 for critical bug fixes and stability improvements.
 
 ### 🚀 Enhanced CLI Experience
 - **Improved**: Enabled direct execution of commands (e.g., `i18ntk usage`, `i18ntk workflow`) from the command line, bypassing the interactive menu for specified commands.
