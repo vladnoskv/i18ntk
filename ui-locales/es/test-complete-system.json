@@ -23,6 +23,18 @@
     "failure_message": "⚠️ TRANSLATION NEEDED ⚠️",
     "failure_error_message": "⚠️ TRANSLATION NEEDED ⚠️",
     "warning_message": "⚠️ TRANSLATION NEEDED ⚠️",
-    "test_runner_failed": "⚠️ TRANSLATION NEEDED ⚠️"
+    "test_runner_failed": "⚠️ TRANSLATION NEEDED ⚠️",
+    "recommendations": {
+      "add_missing_translation_keys": "[ES] Add missing translation keys to maintain consistency",
+      "fix_failing_scripts": "[ES] Fix failing scripts before deployment",
+      "review_warning_messages": "[ES] Review and address warning messages",
+      "system_ready_for_deployment": "[ES] System is ready for deployment"
+    },
+    "hardcodedTexts": {
+      "addMissingTranslationKeys": "[ES] Add missing translation keys to maintain consistency",
+      "fixFailingScripts": "[ES] Fix failing scripts before deployment",
+      "reviewWarningMessages": "[ES] Review and address warning messages",
+      "systemReadyForDeployment": "[ES] System is ready for deployment"
+    }
   }
 }

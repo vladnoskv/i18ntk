@@ -1,4 +1,17 @@
 {
   "success": "成功",
-  "error": "错误"
+  "error": "错误",
+  "warning": "警告",
+  "info": "信息",
+  "debug": "调试",
+  "progress": "进度",
+  "remaining": "剩余",
+  "total": "总计",
+  "completed": "已完成",
+  "missing": "缺失",
+  "partial": "部分",
+  "sameAsSource": "与源相同",
+  "formatMismatch": "格式不匹配",
+  "typeMismatch": "类型不匹配",
+  "structureMismatch": "结构不匹配"
 }

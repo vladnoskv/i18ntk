@@ -25,7 +25,15 @@
     "helpDesc": "Show detailed help information",
     "quit": "Beenden",
     "quitDesc": "Exit settings (with save prompt if needed)",
-    "selectOption": "Select an option: "
+    "selectOption": "Select an option: ",
+    "updatePackage": "[DE] Update Package",
+    "updatePackageDesc": "[DE] Update the i18n-toolkit package via npm",
+    "unsavedChangesWarning": "[DE] ⚠️  You have unsaved changes",
+    "saveChangesBeforeQuit": "[DE] Do you want to save changes before quitting? (y/N): ",
+    "goodbyeMessage": "[DE] Thank you for using the i18n settings manager!",
+    "selectSettingPrompt": "[DE] Select a setting to edit (or 'b' to go back): ",
+    "enterNewValue": "[DE] Enter new value: ",
+    "updatedSuccessfully": "[DE] {{setting}} updated successfully!"
   },
   "categories": {
     "uiSettings": "UI Settings",
@@ -132,7 +140,8 @@
   },
   "themes": {
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "system": "[DE] System"
   },
   "languages": {
     "en": "English",
@@ -154,13 +163,19 @@
     "title": "View All Settings"
   },
   "importExport": {
-    "title": "Import/Export Settings",
-    "export": "Export Settings",
-    "import": "Import Settings",
-    "backup": "Create Backup"
+    "enterFilename": "[DE] Enter filename (or press Enter for default): ",
+    "exportSuccess": "[DE] Settings exported to {{file}}",
+    "exportFailed": "[DE] Failed to export settings: {{error}}",
+    "importFilename": "[DE] Enter filename to import: ",
+    "fileNotFound": "[DE] File not found.",
+    "invalidFormat": "[DE] Invalid settings file format.",
+    "confirmImport": "[DE] This will replace all current settings. Continue? (y/N): ",
+    "importSuccess": "[DE] Settings imported successfully.",
+    "importFailed": "[DE] Failed to import settings: {{error}}",
+    "backupSuccess": "[DE] Backup created: {{file}}",
+    "backupFailed": "[DE] Failed to create backup: {{error}}"
   },
   "pressEnter": "Press Enter to continue...",
-  "selectOption": "Select an option: ",
   "current": "Aktuell",
   "back": "Back to main menu",
   "selectSettingPrompt": "Select setting to edit (or b for back): ",
@@ -190,6 +205,42 @@
     "benefitReset": "• Resetting settings",
     "setupCancelled": "⏭️  Admin PIN setup cancelled.",
     "operationCancelled": "❌ Operation cancelled.",
-    "startingSettings": "🎛️  Starting Settings CLI..."
-  }
+    "startingSettings": "🎛️  Starting Settings CLI...",
+    "selectOption": "[DE] Select option: ",
+    "updateSuccess": "[DE] Admin PIN updated successfully!",
+    "updateFailed": "[DE] Failed to update admin PIN.",
+    "protectionRemoved": "[DE] Admin PIN protection removed.",
+    "configSuccess": "[DE] Admin PIN configured successfully!",
+    "configFailed": "[DE] Failed to configure admin PIN.",
+    "setupPinPrompt": "[DE] Would you like to set up an admin PIN? (y/N): ",
+    "pinUpdatedSuccess": "[DE] Admin PIN updated successfully!",
+    "pinUpdatedFailed": "[DE] Failed to update admin PIN.",
+    "pinRemoved": "[DE] Admin PIN protection removed.",
+    "pinConfiguredSuccess": "[DE] Admin PIN configured successfully!",
+    "pinConfiguredFailed": "[DE] Failed to configure admin PIN.",
+    "authRequired": "[DE] 🔒 Admin authentication required for: {{label}}",
+    "pinSetupTitle": "[DE] Admin PIN Setup",
+    "browserOpenFailed": "[DE] Could not automatically open browser.",
+    "manualVisit": "[DE] Please manually visit: {{url}}",
+    "browserOpened": "[DE] ✅ Browser opened successfully!"
+  },
+  "goodbyeMessage": "[DE] Thank you for using the i18ntk settings manager!",
+  "updatePackage": {
+    "title": "[DE] Update Package",
+    "description": "[DE] Update the i18n-toolkit package via npm",
+    "command": "[DE] npm update i18ntk -g",
+    "success": "[DE] Update completed successfully.",
+    "failed": "[DE] Update failed.",
+    "prompt": "[DE] Do you want to update the package now? (y/N): ",
+    "promptDesc": "[DE] Note: This will update the i18ntk package to the latest version.",
+    "confirm": "[DE] y",
+    "cancelled": "[DE] Update cancelled."
+  },
+  "resetConfirm": "[DE] Are you sure you want to continue? (y/N): ",
+  "resetSuccess": "[DE] Settings reset to defaults successfully.",
+  "resetFailed": "[DE] Failed to reset settings: {error}",
+  "saveSuccess": "[DE] Settings saved successfully.",
+  "saveFailed": "[DE] Failed to save settings.",
+  "initFailed": "[DE] Failed to initialize settings: {error}",
+  "invalidValueFormat": "[DE] Invalid value format."
 }

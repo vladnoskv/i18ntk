@@ -64,5 +64,16 @@
     "allKeysAvailable": "⚠️ TRANSLATION NEEDED ⚠️",
     "runWithoutDryRun": "⚠️ TRANSLATION NEEDED ⚠️",
     "pressEnterToContinue": "⚠️ TRANSLATION NEEDED ⚠️"
+  },
+  "cancelReportOption": "[JA] Cancel / Return to Menu",
+  "updatePackage": {
+    "title": "[JA] 📦 Update i18n-toolkit Package",
+    "description": "[JA] This will update the i18n-toolkit package to the latest version available on npm.",
+    "command": "[JA] Command to run",
+    "confirm": "[JA] Are you sure you want to proceed with the update? (y/N): ",
+    "updating": "[JA] Updating package... This may take a moment.",
+    "success": "[JA] ✅ i18n-toolkit updated successfully!",
+    "error": "[JA] ❌ Failed to update i18n-toolkit",
+    "cancelled": "[JA] ❌ Update cancelled."
   }
 }

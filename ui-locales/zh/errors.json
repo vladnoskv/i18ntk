@@ -3,5 +3,15 @@
   "genericError": "❌ 错误: {{error}}",
   "errorGeneratingStatusSummary": "生成状态摘要时出错: {error}",
   "errorRunningDebugTool": "运行调试工具'{displayName}'时出错: {error}",
-  "errorReadingDebugLogs": "读取调试日志时出错: {error}"
+  "errorReadingDebugLogs": "读取调试日志时出错: {error}",
+  "errorAnalyzingLogFile": "[ZH] Error analyzing log file: {error}",
+  "errorAnalyzingTranslationKeys": "[ZH] Error analyzing translation keys: {error}",
+  "errorAnalyzingTranslationCompleteness": "[ZH] Error analyzing translation completeness: {error}",
+  "errorAnalyzingTranslationFormat": "[ZH] Error analyzing translation format: {error}",
+  "errorAnalyzingTranslationType": "[ZH] Error analyzing translation type: {error}",
+  "errorAnalyzingTranslationStructure": "[ZH] Error analyzing translation structure: {error}",
+  "errorAnalyzingTranslationFormatMismatch": "[ZH] Error analyzing translation format mismatch: {error}",
+  "errorAnalyzingTranslationTypeMismatch": "[ZH] Error analyzing translation type mismatch: {error}",
+  "errorAnalyzingTranslationStructureMismatch": "[ZH] Error analyzing translation structure mismatch: {error}",
+  "errorAnalyzingTranslationSameAsSource": "[ZH] Error analyzing translation same as source: {error}"
 }

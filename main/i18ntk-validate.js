@@ -27,12 +27,16 @@ async function getConfig(t) {
   try {
     SecurityUtils.logSecurityEvent(t('validate.configAccess'), 'info', 'Accessing configuration for validation');
     const settings = settingsManager.getSettings();
+    
+    // Check for per-script directory override, fallback to global sourceDir
+    const sourceDir = settings.scriptDirectories?.validate || settings.sourceDir || './locales';
+    
     const config = {
-      sourceDir: settings.directories?.sourceDir || settings.sourceDir || './locales',
-      sourceLanguage: settings.directories?.sourceLanguage || settings.sourceLanguage || 'en',
-      notTranslatedMarker: settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
-      excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
-      strictMode: settings.processing?.strictMode || false,
+      sourceDir: sourceDir,
+      sourceLanguage: settings.sourceLanguage || 'en',
+      notTranslatedMarker: settings.notTranslatedMarker || settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
+      excludeFiles: settings.excludeFiles || settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
+      strictMode: settings.strictMode || settings.processing?.strictMode || false,
       uiLanguage: settings.language || 'en'
     };
     

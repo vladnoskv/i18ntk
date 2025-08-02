@@ -1,4 +1,17 @@
 {
   "success": "Успех",
-  "error": "Ошибка"
+  "error": "Ошибка",
+  "warning": "[RU] Warning",
+  "info": "[RU] Info",
+  "debug": "[RU] Debug",
+  "progress": "[RU] Progress",
+  "remaining": "[RU] Remaining",
+  "total": "[RU] Total",
+  "completed": "[RU] Completed",
+  "missing": "[RU] Missing",
+  "partial": "[RU] Partial",
+  "sameAsSource": "[RU] Same as source",
+  "formatMismatch": "[RU] Format mismatch",
+  "typeMismatch": "[RU] Type mismatch",
+  "structureMismatch": "[RU] Structure mismatch"
 }

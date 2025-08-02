@@ -3,5 +3,15 @@
   "genericError": "⚠️ TRANSLATION NEEDED ⚠️",
   "errorGeneratingStatusSummary": "⚠️ TRANSLATION NEEDED ⚠️",
   "errorRunningDebugTool": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorReadingDebugLogs": "⚠️ TRANSLATION NEEDED ⚠️"
+  "errorReadingDebugLogs": "⚠️ TRANSLATION NEEDED ⚠️",
+  "errorAnalyzingLogFile": "[RU] Error analyzing log file: {error}",
+  "errorAnalyzingTranslationKeys": "[RU] Error analyzing translation keys: {error}",
+  "errorAnalyzingTranslationCompleteness": "[RU] Error analyzing translation completeness: {error}",
+  "errorAnalyzingTranslationFormat": "[RU] Error analyzing translation format: {error}",
+  "errorAnalyzingTranslationType": "[RU] Error analyzing translation type: {error}",
+  "errorAnalyzingTranslationStructure": "[RU] Error analyzing translation structure: {error}",
+  "errorAnalyzingTranslationFormatMismatch": "[RU] Error analyzing translation format mismatch: {error}",
+  "errorAnalyzingTranslationTypeMismatch": "[RU] Error analyzing translation type mismatch: {error}",
+  "errorAnalyzingTranslationStructureMismatch": "[RU] Error analyzing translation structure mismatch: {error}",
+  "errorAnalyzingTranslationSameAsSource": "[RU] Error analyzing translation same as source: {error}"
 }

@@ -23,6 +23,18 @@
     "failure_message": "❌ {message}",
     "failure_error_message": "   {errorMessage}",
     "warning_message": "⚠️  {message}",
-    "test_runner_failed": "❌ 测试运行器失败："
+    "test_runner_failed": "❌ 测试运行器失败：",
+    "recommendations": {
+      "add_missing_translation_keys": "[ZH] Add missing translation keys to maintain consistency",
+      "fix_failing_scripts": "[ZH] Fix failing scripts before deployment",
+      "review_warning_messages": "[ZH] Review and address warning messages",
+      "system_ready_for_deployment": "[ZH] System is ready for deployment"
+    },
+    "hardcodedTexts": {
+      "addMissingTranslationKeys": "[ZH] Add missing translation keys to maintain consistency",
+      "fixFailingScripts": "[ZH] Fix failing scripts before deployment",
+      "reviewWarningMessages": "[ZH] Review and address warning messages",
+      "systemReadyForDeployment": "[ZH] System is ready for deployment"
+    }
   }
 }

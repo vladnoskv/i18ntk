@@ -34,9 +34,9 @@ async function getConfig() {
   try {
     const settings = settingsManager.getSettings();
     
-    // Only use auto-detection if no settings are configured
-    let sourceDir = settings.directories?.sourceDir;
-    let i18nDir = settings.directories?.i18nDir;
+    // Use per-script directory configuration if available, fallback to global settings
+    let sourceDir = settings.scriptDirectories?.usage || settings.sourceDir;
+    let i18nDir = settings.scriptDirectories?.usage || settings.i18nDir;
     
     // Auto-detect only if settings don't specify directories
     if (!sourceDir) {
@@ -111,8 +111,8 @@ async function getConfig() {
     const config = {
       sourceDir: sourceDir,
       i18nDir: i18nDir,
-      sourceLanguage: settings.directories?.sourceLanguage || settings.sourceLanguage || 'en',
-      outputDir: settings.directories?.outputDir || settings.outputDir || './i18ntk-reports',
+      sourceLanguage: settings.sourceLanguage || 'en',
+      outputDir: settings.outputDir || './i18ntk-reports',
       excludeDirs: settings.processing?.excludeDirs || [
         'node_modules', '.git', 'dist', 'build', '.next', '.nuxt', 
         'i18ntk-reports', 'reports', 'dev', 'utils', 'test', 'tests'

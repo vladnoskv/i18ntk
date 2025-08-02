@@ -4,6 +4,8 @@
   "sourceDirectoryLabel": "📁 Source Directory: {dir}",
   "sourceLanguageLabel": "🌍 Source Language: {language}",
   "detectedI18nFrameworks": "🔍 Detected i18n framework(s): {frameworks}",
+  "existingDirectoriesFound": "📁 Existing translation directories found:",
+  "useExistingDirectoryPrompt": "Do you want to use the existing directory? (y/n)",
   "autoDetectedI18nDirectory": "📂 Auto-detected i18n directory: {directory}",
   "initializingProject": "⚙️  Initializing project configuration...",
   "languageSelectionTitle": "🌐 Language Configuration",
@@ -35,9 +37,22 @@
   "frameworks.i18next": "- i18next (i18next)",
   "frameworks.nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
   "frameworks.svelte": "- Svelte i18n (svelte-i18n)",
-  "selectOptionPrompt": "Select an option:",
-  "existingDirectoriesFound": "📁 Existing translation directories found:",
-  "useExistingDirectoryPrompt": "Use existing directory? Enter number (or press Enter to create new):",
-  "usingExistingDirectory": "✅ Using existing directory: {dir}",
-  "usingExistingStructure": "✅ Using existing translation structure in: {dir}"
+  "continueWithoutI18nPrompt": "No i18n framework detected. Do you want to continue without one? (y/N): ",
+  "detectedI18nFramework": "Detected i18n framework: {frameworks}",
+  "existingDirectoryItem": "  {index}. {location}",
+  "usingExistingStructure": "Using existing structure: {dir}",
+  "creatingSourceDirectory": "Creating source directory: {dir}",
+  "creatingSourceLanguageDirectory": "Creating source language directory: {dir}",
+  "errors": {
+    "sourceDirectoryNotFound": "Source directory not found: {dir}",
+    "sourceLanguageDirectoryNotFound": "Source language directory not found: {dir}",
+    "noJsonFilesInSourceDirectory": "No JSON files found in source directory: {dir}",
+    "invalidFilePathDetected": "Invalid file path detected",
+    "initializationFailed": "Initialization failed: {error}"
+  },
+  "processingFile": "Processing {file} for {language}...",
+  "fileAlreadyExistsMerging": "File {file} already exists. Merging new keys.",
+  "createdNewFile": "Created new file: {file}",
+  "updatedFile": "Updated file: {file}",
+  "skippingExcludedFile": "Skipping {file} for {language} as it's excluded."
 }

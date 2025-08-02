@@ -30,5 +30,17 @@
   "no_translation_files_found": "未找到翻译文件",
   "analysis_completed": "分析在{{duration}}毫秒内完成",
   "analysis_failed": "分析失败: {{errorMessage}}",
-  "failed_to_parse_language_error": "无法解析{{language}}翻译: {{errorMessage}}"
+  "failed_to_parse_language_error": "无法解析{{language}}翻译: {{errorMessage}}",
+  "longTranslationsDetected": "[ZH] ${lang} has ${data.longKeys} translations longer than 100 characters - consider breaking them down",
+  "considerReviewingTranslations": "[ZH] Consider reviewing ${lang} translations - they are ${data.percentageDifference}% longer than baseline",
+  "recommendations": {
+    "keys_have_significant_size_variations": "[ZH] keys have significant size variations",
+    "consider_reviewing_translations": "[ZH] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
+    "long_translations_detected": "[ZH] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+  },
+  "hardcodedTexts": {
+    "keysHaveSignificantSizeVariations": "[ZH] keys have significant size variations",
+    "considerReviewingTranslations": "[ZH] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
+    "longTranslationsDetected": "[ZH] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+  }
 }

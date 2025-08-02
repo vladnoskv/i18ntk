@@ -20,5 +20,6 @@
   "inputDisallowedCharacters": "Security: Input contains disallowed characters",
   "unknownCommandArg": "Unknown command argument",
   "logMessage": "[SECURITY {level}] {timestamp}: {event}",
-  "alertMessage": "[SECURITY ALERT] {timestamp}: {event}"
+  "alertMessage": "[SECURITY ALERT] {timestamp}: {event}",
+  "securityWarning": "[DE] [SECURITY WARNING] {timestamp}: {event}"
 }

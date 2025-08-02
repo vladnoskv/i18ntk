@@ -1,10 +1,56 @@
 # Changelog
 
-All notable changes to the I18N Management Toolkit are documented here. This project follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.2.2 (2025-08-02) - **CRITICAL BUG FIX FOR CUSTOM LOCALE SUPPORT** 🚨
+**Current Version:** 1.3.0 (2025-08-02) - **SCRIPT DIRECTORY CONFIGURATION & PATH RESOLUTION FIXES** 🚀
+
+### 🆕 New Features
+- **Per-Script Directory Configuration**: Added support for custom directory overrides for each script type (analyze, complete, init, manage, sizing, summary, usage, validate)
+- **Enhanced Path Guidance**: Added current working directory display and relative path examples in CLI prompts
+- **Improved Internationalization**: Added comprehensive translation keys for all new configuration options
+
+### 🐛 Bug Fixes
+- **Fixed Path Resolution**: Corrected directory path resolution to properly use relative paths from project root instead of script directory
+- **Fixed Settings Loading**: Scripts now correctly follow configured directory settings instead of defaulting to hardcoded paths
+- **Translation Key Completeness**: Added missing translation keys for new configuration options
+
+### 📁 Configuration Improvements
+- **Custom Script Directories**: Each script can now have its own source directory configured independently
+- **Settings CLI Enhancement**: Added new menu option for configuring script-specific directories
+- **Backward Compatibility**: All existing configurations continue to work without changes
+
+### ⚠️ Deployment Notes
+- **Testing Recommended**: Test on a development branch before deploying to production
+- **No Breaking Changes**: Existing configurations remain compatible
+- **Path Resolution**: Relative paths now resolve correctly from project root directory
+
+**Previous Version:** 1.2.3 (2025-08-02) - **KEY USAGE & UPDATE FEATURE**
+
+## [1.2.3] - 2025-08-02
+**⚠️ DEPRECATED:**
+### 🚀 New Features
+- **Added**: Update package feature to settings CLI for easy `npm update i18ntk`
+- **Enhanced**: Key usage checking now correctly scans directories based on settings
+- **Improved**: Complete coverage scanning ensures all relevant files are processed
+
+### 🐛 Bug Fixes
+- **Fixed**: Key usage and complete coverage tools now respect configured `sourceDir` and `i18nDir`
+- **Fixed**: Removed any potential hardcoded directory paths in key scanning logic
+
+### 🔧 Technical Details
+- **Issue**: Key usage and complete coverage tools were not always respecting user-defined directory settings.
+- **Root Cause**: Inconsistent directory resolution logic in `i18ntk-usage.js` and `i18ntk-complete.js`.
+- **Resolution**: Ensured both tools consistently retrieve `sourceDir` and `i18nDir` from `settingsManager.getSettings()`.
+- **Impact**: Accurate key usage analysis and complete translation coverage based on user configuration.
 
 ## [1.2.2] - 2025-08-02
+
+**⚠️ DEPRECATED:** This version contains a critical bug affecting custom locale directory configuration. Please upgrade to v1.2.3 immediately.
+
+### 🚨 Critical Bug Fix
+- **Fixed**: Resolved `settingsManager.setDirectories is not a function` error when adding custom locale support
+- **Fixed**: Corrected settings management to use proper `getSettings()` and `saveSettings()` methods instead of non-existent `setDirectories()`
+- **Enhanced**: Improved stability when configuring custom translation directories
+- **Fixed**: Directory configuration now properly persists across sessions
 
 ### 🚨 Critical Bug Fix
 - **Fixed**: Resolved `settingsManager.setDirectories is not a function` error when adding custom locale support

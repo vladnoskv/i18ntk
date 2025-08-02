@@ -25,7 +25,15 @@
     "helpDesc": "⚠️ TRANSLATION NEEDED ⚠️",
     "quit": "⚠️ TRANSLATION NEEDED ⚠️",
     "quitDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️"
+    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
+    "updatePackage": "[PT] Update Package",
+    "updatePackageDesc": "[PT] Update the i18n-toolkit package via npm",
+    "unsavedChangesWarning": "[PT] ⚠️  You have unsaved changes",
+    "saveChangesBeforeQuit": "[PT] Do you want to save changes before quitting? (y/N): ",
+    "goodbyeMessage": "[PT] Thank you for using the i18n settings manager!",
+    "selectSettingPrompt": "[PT] Select a setting to edit (or 'b' to go back): ",
+    "enterNewValue": "[PT] Enter new value: ",
+    "updatedSuccessfully": "[PT] {{setting}} updated successfully!"
   },
   "categories": {
     "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
@@ -132,7 +140,8 @@
   },
   "themes": {
     "light": "⚠️ TRANSLATION NEEDED ⚠️",
-    "dark": "⚠️ TRANSLATION NEEDED ⚠️"
+    "dark": "⚠️ TRANSLATION NEEDED ⚠️",
+    "system": "[PT] System"
   },
   "languages": {
     "en": "⚠️ TRANSLATION NEEDED ⚠️",
@@ -154,13 +163,19 @@
     "title": "⚠️ TRANSLATION NEEDED ⚠️"
   },
   "importExport": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "export": "⚠️ TRANSLATION NEEDED ⚠️",
-    "import": "⚠️ TRANSLATION NEEDED ⚠️",
-    "backup": "⚠️ TRANSLATION NEEDED ⚠️"
+    "enterFilename": "[PT] Enter filename (or press Enter for default): ",
+    "exportSuccess": "[PT] Settings exported to {{file}}",
+    "exportFailed": "[PT] Failed to export settings: {{error}}",
+    "importFilename": "[PT] Enter filename to import: ",
+    "fileNotFound": "[PT] File not found.",
+    "invalidFormat": "[PT] Invalid settings file format.",
+    "confirmImport": "[PT] This will replace all current settings. Continue? (y/N): ",
+    "importSuccess": "[PT] Settings imported successfully.",
+    "importFailed": "[PT] Failed to import settings: {{error}}",
+    "backupSuccess": "[PT] Backup created: {{file}}",
+    "backupFailed": "[PT] Failed to create backup: {{error}}"
   },
   "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
   "current": "⚠️ TRANSLATION NEEDED ⚠️",
   "back": "⚠️ TRANSLATION NEEDED ⚠️",
   "selectSettingPrompt": "⚠️ TRANSLATION NEEDED ⚠️",
@@ -190,6 +205,42 @@
     "benefitReset": "⚠️ TRANSLATION NEEDED ⚠️",
     "setupCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
     "operationCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
-    "startingSettings": "⚠️ TRANSLATION NEEDED ⚠️"
-  }
+    "startingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
+    "selectOption": "[PT] Select option: ",
+    "updateSuccess": "[PT] Admin PIN updated successfully!",
+    "updateFailed": "[PT] Failed to update admin PIN.",
+    "protectionRemoved": "[PT] Admin PIN protection removed.",
+    "configSuccess": "[PT] Admin PIN configured successfully!",
+    "configFailed": "[PT] Failed to configure admin PIN.",
+    "setupPinPrompt": "[PT] Would you like to set up an admin PIN? (y/N): ",
+    "pinUpdatedSuccess": "[PT] Admin PIN updated successfully!",
+    "pinUpdatedFailed": "[PT] Failed to update admin PIN.",
+    "pinRemoved": "[PT] Admin PIN protection removed.",
+    "pinConfiguredSuccess": "[PT] Admin PIN configured successfully!",
+    "pinConfiguredFailed": "[PT] Failed to configure admin PIN.",
+    "authRequired": "[PT] 🔒 Admin authentication required for: {{label}}",
+    "pinSetupTitle": "[PT] Admin PIN Setup",
+    "browserOpenFailed": "[PT] Could not automatically open browser.",
+    "manualVisit": "[PT] Please manually visit: {{url}}",
+    "browserOpened": "[PT] ✅ Browser opened successfully!"
+  },
+  "goodbyeMessage": "[PT] Thank you for using the i18ntk settings manager!",
+  "updatePackage": {
+    "title": "[PT] Update Package",
+    "description": "[PT] Update the i18n-toolkit package via npm",
+    "command": "[PT] npm update i18ntk -g",
+    "success": "[PT] Update completed successfully.",
+    "failed": "[PT] Update failed.",
+    "prompt": "[PT] Do you want to update the package now? (y/N): ",
+    "promptDesc": "[PT] Note: This will update the i18ntk package to the latest version.",
+    "confirm": "[PT] y",
+    "cancelled": "[PT] Update cancelled."
+  },
+  "resetConfirm": "[PT] Are you sure you want to continue? (y/N): ",
+  "resetSuccess": "[PT] Settings reset to defaults successfully.",
+  "resetFailed": "[PT] Failed to reset settings: {error}",
+  "saveSuccess": "[PT] Settings saved successfully.",
+  "saveFailed": "[PT] Failed to save settings.",
+  "initFailed": "[PT] Failed to initialize settings: {error}",
+  "invalidValueFormat": "[PT] Invalid value format."
 }

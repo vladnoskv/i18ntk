@@ -20,5 +20,6 @@
   "inputDisallowedCharacters": "安全：输入包含不允许的字符",
   "unknownCommandArg": "未知命令参数",
   "logMessage": "[安全{level}] {timestamp}: {event}",
-  "alertMessage": "[安全警报] {timestamp}: {event}"
+  "alertMessage": "[安全警报] {timestamp}: {event}",
+  "securityWarning": "[ZH] [SECURITY WARNING] {timestamp}: {event}"
 }

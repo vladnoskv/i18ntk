@@ -1,4 +1,17 @@
 {
   "success": "成功",
-  "error": "エラー"
+  "error": "エラー",
+  "warning": "[JA] Warning",
+  "info": "[JA] Info",
+  "debug": "[JA] Debug",
+  "progress": "[JA] Progress",
+  "remaining": "[JA] Remaining",
+  "total": "[JA] Total",
+  "completed": "[JA] Completed",
+  "missing": "[JA] Missing",
+  "partial": "[JA] Partial",
+  "sameAsSource": "[JA] Same as source",
+  "formatMismatch": "[JA] Format mismatch",
+  "typeMismatch": "[JA] Type mismatch",
+  "structureMismatch": "[JA] Structure mismatch"
 }

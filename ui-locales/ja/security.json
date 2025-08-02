@@ -20,5 +20,6 @@
   "inputDisallowedCharacters": "⚠️ TRANSLATION NEEDED ⚠️",
   "unknownCommandArg": "⚠️ TRANSLATION NEEDED ⚠️",
   "logMessage": "⚠️ TRANSLATION NEEDED ⚠️",
-  "alertMessage": "⚠️ TRANSLATION NEEDED ⚠️"
+  "alertMessage": "⚠️ TRANSLATION NEEDED ⚠️",
+  "securityWarning": "[JA] [SECURITY WARNING] {timestamp}: {event}"
 }

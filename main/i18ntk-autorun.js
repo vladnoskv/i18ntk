@@ -53,9 +53,10 @@ class AutoRunner {
         const filePath = path.join(localesDir, lang, 'autorun.json');
           if (fs.existsSync(filePath)) {
             try {
-              translations[lang] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              translations[lang] = translations[lang] || {};
+              translations[lang].autorun = JSON.parse(fs.readFileSync(filePath, 'utf8'));
             } catch (error) {
-              console.warn(`Warning: Could not load ${lang} translations`);
+              console.warn(this.t('translationLoadWarning', lang).replace('{lang}', lang));
             }
           }
       });
@@ -69,7 +70,7 @@ class AutoRunner {
       try {
         return JSON.parse(fs.readFileSync(this.CONFIG_FILE, 'utf8'));
       } catch (error) {
-        console.error(`Error reading ${this.CONFIG_FILE}:`, error.message);
+        console.error(this.t('configReadError', this.getSystemLanguage()).replace('{file}', this.CONFIG_FILE), error.message);
         return this.DEFAULT_CONFIG;
       }
     }
@@ -81,16 +82,16 @@ class AutoRunner {
     return envLang.substring(0, 2).toLowerCase();
   }
 
-  translate(key, lang = 'en') {
+  t(key, lang = 'en') {
     const translations = this.loadTranslations();
     
-    if (translations[lang] && translations[lang][key]) {
-      return translations[lang][key];
+    if (translations[lang] && translations[lang].autorun && translations[lang].autorun[key]) {
+      return translations[lang].autorun[key];
     }
     
     // Fallback to English
-    if (translations['en'] && translations['en'][key]) {
-      return translations['en'][key];
+    if (translations['en'] && translations['en'].autorun && translations['en'].autorun[key]) {
+      return translations['en'].autorun[key];
     }
     
     // Return the key as fallback
@@ -99,24 +100,24 @@ class AutoRunner {
 
   displayHelp() {
     const lang = this.getSystemLanguage();
-    console.log(`\n${this.translate('autoRunScriptTitle', lang)}`);
-    console.log('='.repeat(50));
-    console.log(`\n${this.translate('usageTitle', lang)}:`);
-    console.log(`  ${this.translate('runAllSteps')}`);
-    console.log(`  ${this.translate('configureSettingsFirst')}`);
-    console.log(`  ${this.translate('runSpecificSteps')}`);
-    console.log(`  ${this.translate('showHelp')}`);
-    console.log(`\n${this.translate('examplesTitle', lang)}:`);
-    console.log(`  ${this.translate('configExample')}`);
-    console.log(`  ${this.translate('stepsExample1')}`);
-    console.log(`  ${this.translate('stepsExample2')}`);
+    console.log(`\n${this.t('autoRunScriptTitle', lang)}`);
+    console.log(this.t('separator', lang));
+    console.log(`\n${this.t('usageTitle', lang)}:`);
+    console.log(`  ${this.t('runAllSteps')}`);
+    console.log(`  ${this.t('configureSettingsFirst')}`);
+    console.log(`  ${this.t('runSpecificSteps')}`);
+    console.log(`  ${this.t('showHelp')}`);
+    console.log(`\n${this.t('examplesTitle', lang)}:`);
+    console.log(`  ${this.t('configExample')}`);
+    console.log(`  ${this.t('stepsExample1')}`);
+    console.log(`  ${this.t('stepsExample2')}`);
     console.log();
   }
 
   displayConfig() {
     const lang = this.getSystemLanguage();
-    console.log(`\n${this.translate('customSettingsConfiguration', lang)}`);
-    console.log('='.repeat(30));
+    console.log(`\n${this.t('customSettingsConfiguration', lang)}`);
+    console.log(this.t('separator', lang));
     
     const config = this.loadConfig();
     console.log(JSON.stringify(config, null, 2));
@@ -128,22 +129,22 @@ class AutoRunner {
     const scriptPath = path.join(__dirname, step.script);
     
     if (!fs.existsSync(scriptPath)) {
-      console.error(`${this.translate('stepFailed', lang)}: ${step.name}`);
-      console.error(`${this.translate('errorLabel', lang)}: ${this.translate('missingRequiredFile', lang).replace('{file}', step.script)}`);
+      console.error(`${this.t('stepFailed', lang)}: ${step.name}`);
+      console.error(`${this.t('errorLabel', lang)}: ${this.t('missingRequiredFile', lang).replace('{file}', step.script)}`);
       return false;
     }
 
-    console.log(`\n[${stepNumber}/${totalSteps}] ${this.translate('runningStep', lang).replace('{stepName}', step.name)}`);
-    console.log(`${this.translate('commandLabel', lang).replace('{command}', step.description)}`);
-    console.log('-'.repeat(50));
+    console.log(`\n[${stepNumber}/${totalSteps}] ${this.t('runningStep', lang).replace('{stepName}', step.name)}`);
+    console.log(`${this.t('commandLabel', lang).replace('{command}', step.description)}`);
+    console.log(this.t('separator', lang));
 
     try {
       execSync(`node "${scriptPath}"`, { stdio: 'inherit' });
-      console.log(`✅ ${this.translate('stepCompleted', lang).replace('{stepName}', step.name)}`);
+      console.log(`✅ ${this.t('stepCompleted', lang).replace('{stepName}', step.name)}`);
       return true;
     } catch (error) {
-      console.error(`❌ ${this.translate('stepFailed', lang).replace('{stepName}', step.name)}`);
-      console.error(`${this.translate('errorLabel', lang)}:`, error.message);
+      console.error(`❌ ${this.t('stepFailed', lang).replace('{stepName}', step.name)}`);
+      console.error(`${this.t('errorLabel', lang)}:`, error.message);
       return false;
     }
   }
@@ -153,9 +154,9 @@ class AutoRunner {
     const config = this.loadConfig();
 
     if (!quiet) {
-      console.log(`\n🚀 ${this.translate('startingAutoRunWorkflow', lang)}...`);
-      console.log('='.repeat(50));
-      console.log(`${this.translate('workflowIncludesSteps', lang).replace('{count}', config.steps.length)}`);
+      console.log(`\n${this.t('startingAutoRunWorkflow', lang)}`);
+    console.log(this.t('separator', lang));
+      console.log(`${this.t('workflowIncludesSteps', lang).replace('{count}', config.steps.length)}`);
     }
 
     let successCount = 0;
@@ -167,16 +168,16 @@ class AutoRunner {
         successCount++;
       } else {
         if (!quiet) {
-          console.error(`\n❌ ${this.translate('workflowStopped', lang)}`);
+          console.error(`\n${this.t('workflowStopped', lang)}`);
         }
         process.exit(1);
       }
     }
 
     if (!quiet) {
-      console.log(`\n✅ ${this.translate('workflowCompleted', lang)}`);
-      console.log(`${this.translate('successfulSteps', lang).replace('{count}', successCount)}`);
-      console.log(`${this.translate('failedSteps', lang).replace('{count}', config.steps.length - successCount)}`);
+      console.log(`\n${this.t('workflowCompleted', lang)}`);
+      console.log(`${this.t('successfulSteps', lang).replace('{count}', successCount)}`);
+      console.log(`${this.t('failedSteps', lang).replace('{count}', config.steps.length - successCount)}`);
     }
   }
 }

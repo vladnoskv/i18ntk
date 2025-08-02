@@ -17,6 +17,7 @@
     "debug": "🔧 Debug Tools",
     "exit": "🚪 Exit"
   },
+  "update": "📦 Update Package",
   "goodbye": "👋 Goodbye!",
   "invalidChoice": "❌ Invalid choice. Please select 0-13.",
   "returning": "🔄 Returning to main menu...",

@@ -68,7 +68,7 @@ class SettingsCLI {
             this.schema = settingsManager.getSettingsSchema();
             return true;
         } catch (error) {
-            this.error(`Failed to initialize settings: ${error.message}`);
+            this.error(this.t('settings.initFailed', { error: error.message }));
             return false;
         }
     }
@@ -113,7 +113,7 @@ class SettingsCLI {
         console.log(colors.reset);
         
         if (this.modified) {
-            console.log(`${colors.yellow}⚠️  You have unsaved changes${colors.reset}\n`);
+            console.log(`${colors.yellow}${this.t('settings.mainMenu.unsavedChangesWarning')}${colors.reset}\n`);
         }
     }
 
@@ -124,12 +124,14 @@ class SettingsCLI {
         const options = [
             { key: '1', label: this.t('settings.mainMenu.uiSettings'), description: this.t('settings.mainMenu.uiSettingsDesc') },
             { key: '2', label: this.t('settings.mainMenu.directorySettings'), description: this.t('settings.mainMenu.directorySettingsDesc') },
-            { key: '3', label: this.t('settings.mainMenu.processingSettings'), description: this.t('settings.mainMenu.processingSettingsDesc') },
-            { key: '4', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
-            { key: '5', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
-            { key: '6', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
-            { key: '7', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
-            { key: '8', label: this.t('settings.mainMenu.reportBug'), description: this.t('settings.mainMenu.reportBugDesc') },
+            { key: '3', label: this.t('settings.mainMenu.scriptDirectorySettings'), description: this.t('settings.mainMenu.scriptDirectorySettingsDesc') },
+            { key: '4', label: this.t('settings.mainMenu.processingSettings'), description: this.t('settings.mainMenu.processingSettingsDesc') },
+            { key: '5', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
+            { key: '6', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
+            { key: '7', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
+            { key: '8', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
+            { key: '9', label: this.t('settings.mainMenu.reportBug'), description: this.t('settings.mainMenu.reportBugDesc') },
+            { key: '0', label: this.t('settings.mainMenu.updatePackage'), description: this.t('settings.mainMenu.updatePackageDesc') },
             { key: 's', label: this.t('settings.mainMenu.saveChanges'), description: this.t('settings.mainMenu.saveChangesDesc') },
             { key: 'h', label: this.t('settings.mainMenu.help'), description: this.t('settings.mainMenu.helpDesc') },
             { key: 'q', label: this.t('settings.mainMenu.quit'), description: this.t('settings.mainMenu.quitDesc') }
@@ -160,22 +162,28 @@ class SettingsCLI {
                 await this.showDirectorySettings();
                 break;
             case '3':
-                await this.showProcessingSettings();
+                await this.showScriptDirectorySettings();
                 break;
             case '4':
-                await this.showAdvancedSettings();
+                await this.showProcessingSettings();
                 break;
             case '5':
-                await this.showAllSettings();
+                await this.showAdvancedSettings();
                 break;
             case '6':
-                await this.showImportExport();
+                await this.showAllSettings();
                 break;
             case '7':
-                await this.resetToDefaults();
+                await this.showImportExport();
                 break;
             case '8':
+                await this.resetToDefaults();
+                break;
+            case '9':
                 await this.reportBug();
+                break;
+            case '0':
+                await this.updatePackage();
                 break;
             case 's':
                 await this.saveSettings();
@@ -229,6 +237,30 @@ class SettingsCLI {
         };
 
         await this.showSettingsCategory(dirSettings);
+    }
+
+    /**
+     * Show script-specific directory settings menu
+     */
+    async showScriptDirectorySettings() {
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}${this.t('settings.categories.scriptDirectorySettings')}${colors.reset}\n`);
+        console.log(`📁 ${colors.cyan}${this.t('settings.currentDirectory')}: ${process.cwd()}${colors.reset}`);
+        console.log(`💡 ${colors.dim}${this.t('settings.relativePathHint')}${colors.reset}\n`);
+
+        const scriptDirSettings = {
+            'scriptDirectories.analyze': this.t('settings.fields.scriptDirectories.analyzeLabel'),
+            'scriptDirectories.complete': this.t('settings.fields.scriptDirectories.completeLabel'),
+            'scriptDirectories.init': this.t('settings.fields.scriptDirectories.initLabel'),
+            'scriptDirectories.manage': this.t('settings.fields.scriptDirectories.manageLabel'),
+            'scriptDirectories.sizing': this.t('settings.fields.scriptDirectories.sizingLabel'),
+            'scriptDirectories.summary': this.t('settings.fields.scriptDirectories.summaryLabel'),
+            'scriptDirectories.usage': this.t('settings.fields.scriptDirectories.usageLabel'),
+            'scriptDirectories.validate': this.t('settings.fields.scriptDirectories.validateLabel')
+        };
+
+        await this.showSettingsCategory(scriptDirSettings);
     }
 
     /**
@@ -402,7 +434,7 @@ class SettingsCLI {
         
         // Check if admin authentication is required
         if (this.requiresAdminAuth(key) && !this.adminAuthenticated) {
-            console.log(`\n🔒 Admin authentication required for: ${label}`);
+            console.log(`\n${this.t('settings.admin.authRequired', { label: label })}`);
             const authenticated = await this.adminPin.verifyPin();
             if (!authenticated) {
                 console.log(this.t('settings.admin.accessDenied'));
@@ -461,7 +493,7 @@ class SettingsCLI {
         // Convert the value
         const convertedValue = this.convertValue(newValue.trim(), schema);
         if (convertedValue === null) {
-            this.error('Invalid value format.');
+            this.error(this.t('settings.invalidValueFormat'));
             await this.pause();
             return;
         }
@@ -499,7 +531,7 @@ class SettingsCLI {
     async handlePinSetup() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Admin PIN Setup${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.admin.pinSetupTitle')}${colors.reset}\n`);
         
         if (this.adminPin.isPinSet()) {
             console.log(this.t('settings.admin.pinConfigured'));
@@ -509,7 +541,7 @@ class SettingsCLI {
     console.log('  ' + this.t('settings.admin.cancel'));
             console.log();
             
-            const choice = await this.prompt('Select option: ');
+            const choice = await this.prompt(this.t('settings.admin.selectOption'));
             
             switch (choice) {
                 case '1':
@@ -542,7 +574,7 @@ class SettingsCLI {
                     console.log(this.t('settings.admin.operationCancelled'));
                     break;
                 default:
-                    this.error('Invalid option.');
+                    this.error(this.t('common.invalidOption'));
             }
         } else {
             console.log(this.t('settings.admin.noPinConfigured'));
@@ -553,7 +585,7 @@ class SettingsCLI {
     console.log('  ' + this.t('settings.admin.benefitReset'));
             console.log();
             
-            const response = await this.prompt('Would you like to set up an admin PIN? (y/N): ');
+            const response = await this.prompt(this.t('settings.admin.setupPinPrompt'));
             
             if (response.toLowerCase() === 'y' || response.toLowerCase() === 'yes') {
                 const success = await this.adminPin.setupPin();
@@ -640,7 +672,7 @@ class SettingsCLI {
      * Export settings to a file
      */
     async exportSettings() {
-        const filename = await this.prompt('Enter filename (or press Enter for default): ');
+        const filename = await this.prompt(this.t('settings.importExport.exportFilenamePrompt'));
         const exportFile = filename.trim() || `i18n-settings-${new Date().toISOString().split('T')[0]}.json`;
         
         try {
@@ -657,7 +689,7 @@ class SettingsCLI {
      * Import settings from a file
      */
     async importSettings() {
-        const filename = await this.prompt('Enter filename to import: ');
+        const filename = await this.prompt(this.t('settings.importExport.importFilenamePrompt'));
         
         if (!filename.trim()) {
             return;
@@ -679,7 +711,7 @@ class SettingsCLI {
                 return;
             }
             
-            const confirm = await this.prompt('This will replace all current settings. Continue? (y/N): ');
+            const confirm = await this.prompt(this.t('settings.importExport.importConfirm'));
             if (confirm.toLowerCase() === 'y') {
                 this.settings = importedSettings;
                 this.modified = true;
@@ -712,12 +744,11 @@ class SettingsCLI {
     async resetToDefaults() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Reset to Defaults${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.resetToDefaultsTitle')}${colors.reset}\n`);
+        console.log(`${colors.yellow}${this.t('settings.resetWarning1')}${colors.reset}`);
+        console.log(`${colors.yellow}${this.t('settings.resetWarning2')}${colors.reset}\n`);
         
-        console.log(`${colors.yellow}⚠️  This will reset ALL settings to their default values.${colors.reset}`);
-        console.log(`${colors.yellow}⚠️  Any unsaved changes will be lost.${colors.reset}\n`);
-        
-        const confirm = await this.prompt('Are you sure you want to continue? (y/N): ');
+        const confirm = await this.prompt(this.t('settings.resetConfirm'));
         
         if (confirm.toLowerCase() === 'y') {
             try {
@@ -758,31 +789,30 @@ class SettingsCLI {
     async showHelp() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Help Information${colors.reset}\n`);
+        console.log(`${colors.bright}${this.t('settings.help.title')}${colors.reset}\n`);
+        console.log(`${colors.cyan}${this.t('settings.help.navigationTitle')}${colors.reset}`);
+        console.log(`${this.t('settings.help.navigation1')}`);
+        console.log(`${this.t('settings.help.navigation2')}`);
+        console.log(`${this.t('settings.help.navigation3')}`);
+        console.log(`${this.t('settings.help.navigation4')}\n`);
+
+        console.log(`${colors.cyan}${this.t('settings.help.categoriesTitle')}${colors.reset}`);
+        console.log(`${this.t('settings.help.categoryUI')}`);
+        console.log(`${this.t('settings.help.categoryDirectory')}`);
+        console.log(`${this.t('settings.help.categoryProcessing')}`);
+        console.log(`${this.t('settings.help.categoryAdvanced')}\n`);
+
+        console.log(`${colors.cyan}${this.t('settings.help.envVarsTitle')}${colors.reset}`);
+        console.log(`${this.t('settings.help.envVar1')}`);
+        console.log(`${this.t('settings.help.envVar2')}`);
+        console.log(`${this.t('settings.help.envVar3')}\n`);
+
+        console.log(`${colors.cyan}${this.t('settings.help.cliUsageTitle')}${colors.reset}`);
+        console.log(`${this.t('settings.help.cliUsage1')}`);
+        console.log(`${this.t('settings.help.cliUsage2')}`);
+        console.log(`${this.t('settings.help.cliUsage3')}\n`);
         
-        console.log(`${colors.cyan}Navigation:${colors.reset}`);
-        console.log(`  • Use number keys to select menu options`);
-        console.log(`  • Use 'b' to go back to previous menu`);
-        console.log(`  • Use 'q' to quit (with save prompt if needed)`);
-        console.log(`  • Use 's' to save changes at any time\n`);
-        
-        console.log(`${colors.cyan}Settings Categories:${colors.reset}`);
-        console.log(`  • UI Settings: Interface language, theme, and display options`);
-        console.log(`  • Directory Settings: Paths for locales, reports, and backups`);
-        console.log(`  • Processing Settings: Performance and batch processing options`);
-        console.log(`  • Advanced Settings: Validation, logging, and expert features\n`);
-        
-        console.log(`${colors.cyan}Environment Variables:${colors.reset}`);
-        console.log(`  • I18N_CONFIG_FILE: Custom config file path`);
-        console.log(`  • I18N_LOCALE_DIR: Override locales directory`);
-        console.log(`  • I18N_REPORTS_DIR: Override reports directory\n`);
-        
-        console.log(`${colors.cyan}Command Line Usage:${colors.reset}`);
-        console.log(`  • i18ntk manage --command=settings`);
-        console.log(`  • node settings-cli.js (direct access)`);
-        console.log(`  • All scripts support --config flag for custom config files\n`);
-        
-        console.log(`Press Enter to continue...`);
+        console.log(`${this.t('settings.pressEnter')}\n`);
         await this.prompt('');
     }
 
@@ -792,19 +822,12 @@ class SettingsCLI {
     async reportBug() {
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Report a Bug${colors.reset}\n`);
-        
-        console.log(`${colors.cyan}GitHub Issues Page:${colors.reset}`);
-        console.log(`https://github.com/vladnoskv/i18n-management-toolkit-main/issues\n`);
-        
-        console.log(`${colors.yellow}Before reporting a bug, please:${colors.reset}`);
-        console.log(`  • Check if the issue already exists`);
-        console.log(`  • Include steps to reproduce the problem`);
-        console.log(`  • Provide error messages and logs`);
-        console.log(`  • Mention your operating system and Node.js version\n`);
-        
-        console.log(`${colors.cyan}Opening GitHub issues page...${colors.reset}`);
-        
+        console.log(`${colors.bright}${this.t('settings.reportBug.title')}${colors.reset}\n`);
+        console.log(this.t('settings.reportBug.description'));
+        console.log(`
+${colors.dim}${this.t('settings.reportBug.link')}: https://github.com/vladnoskv/i18n-management-toolkit-main/issues${colors.reset}
+`);
+
         try {
             const { exec } = require('child_process');
             const url = 'https://github.com/vladnoskv/i18n-management-toolkit-main/issues';
@@ -825,18 +848,56 @@ class SettingsCLI {
             
             exec(command, (error) => {
                 if (error) {
-                    console.log(`${colors.yellow}Could not automatically open browser.${colors.reset}`);
-                    console.log(`Please manually visit: ${url}`);
+                    console.log(`${colors.yellow}${this.t('settings.reportBug.browserOpenFailed')}${colors.reset}`);
+                    console.log(`${this.t('settings.reportBug.manualVisit', { url: url })}`);
                 } else {
-                    console.log(`${colors.green}✅ Browser opened successfully!${colors.reset}`);
+                    console.log(`${colors.green}${this.t('settings.reportBug.browserOpened')}${colors.reset}`);
                 }
             });
         } catch (error) {
-            console.log(`${colors.yellow}Could not automatically open browser.${colors.reset}`);
-            console.log(`Please manually visit: https://github.com/vladnoskv/i18n-management-toolkit-main/issues`);
+            console.log(`${colors.yellow}${this.t('settings.reportBug.browserOpenFailed')}${colors.reset}`);
+            console.log(`${this.t('settings.reportBug.manualVisit', { url: 'https://github.com/vladnoskv/i18n-management-toolkit-main/issues' })}`);
         }
         
         await this.pause();
+    }
+
+    /**
+     * Update the i18n-toolkit package via npm
+     */
+    async updatePackage() {
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}${this.t('settings.updatePackage.title')}${colors.reset}\n`);
+        console.log(this.t('settings.updatePackage.description'));
+        console.log(`
+${colors.dim}${this.t('settings.updatePackage.command')}: npm update i18ntk -g${colors.reset}
+`);
+
+        const confirm = await this.prompt(this.t('settings.updatePackage.prompt'));
+
+        if (confirm.toLowerCase() === 'y') {
+            try {
+                const { exec } = require('child_process');
+                console.log(this.t('settings.updatePackage.updating'));
+                exec('npm update i18ntk -g', (error, stdout, stderr) => {
+                    if (error) {
+                        this.error(`${this.t('settings.updatePackage.error')}: ${error.message}`);
+                        console.error(stderr);
+                    } else {
+                        this.success(this.t('settings.updatePackage.success'));
+                        console.log(stdout);
+                    }
+                    this.pause();
+                });
+            } catch (error) {
+                this.error(`${this.t('settings.updatePackage.error')}: ${error.message}`);
+                this.pause();
+            }
+        } else {
+            this.warning(this.t('settings.updatePackage.cancelled'));
+            await this.pause();
+        }
     }
 
     /**
@@ -844,15 +905,15 @@ class SettingsCLI {
      */
     async quit() {
         if (this.modified) {
-            console.log(`\n${colors.yellow}⚠️  You have unsaved changes.${colors.reset}`);
-            const save = await this.prompt('Save before quitting? (Y/n): ');
-            
+            console.log(`\n${colors.yellow}${this.t('settings.mainMenu.unsavedChangesWarning')}${colors.reset}`);
+            const save = await this.prompt(this.t('settings.mainMenu.saveChangesBeforeQuit'));
+
             if (save.toLowerCase() !== 'n') {
                 await this.saveSettings();
             }
         }
-        
-        console.log(`\n${colors.green}Thank you for using the i18n settings manager!${colors.reset}`);
+
+        console.log(`\n${colors.green}${this.t('settings.goodbyeMessage')}${colors.reset}`);
         this.rl.close();
         process.exit(0);
     }

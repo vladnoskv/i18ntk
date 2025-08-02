@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Documentation Hub
 
-**Version:** 1.1.5  
+**Version:** 1.3.0  
 **Last Updated:** August 2, 2025  
 **Maintainer:** Vladimir Noskov  
 
@@ -8,11 +8,31 @@
 
 **This is NOT an official i18n team product or affiliated with any i18n organization.** This toolkit was originally created as a personal project to help manage my own translation files, which was then enhanced with additional features, internationalization support, and made available to the community. It should work with any `en.json` translation files, even without i18n installed, and includes custom logic and settings that can be customized to fit your specific project needs. With simple code modifications or AI-assisted edits, you can easily adapt it to your project's requirements.
 
+## 🆕 What's New in v1.3.0
+
+### Major Features
+- **🎯 Per-Script Directory Configuration** - Configure custom directories for each script type
+- **🔧 Fixed Path Resolution** - Analyzing logic now correctly follows settings
+- **🌍 Enhanced Internationalization** - Continued support for global applications
+- **⚙️ Custom Directory Overrides** - Override any script directory via CLI arguments
+- **📋 Improved Settings CLI** - Enhanced configuration management
+
+### Key Benefits
+- **Flexibility**: Use different directory structures for different script types
+- **Reliability**: Path resolution now works correctly with relative paths
+- **Backward Compatibility**: Existing configurations continue to work
+- **Migration Support**: Easy upgrade path from v1.2.x
+
+📖 **[See Script Directory Guide](./SCRIPT_DIRECTORY_GUIDE.md)** for detailed configuration instructions.
+
 ## 📚 Welcome to the Documentation Hub
 
 This is your central hub for all I18N Management Toolkit documentation. Whether you're just getting started or looking for advanced configuration options, you'll find everything you need here.
 
 ## 🚀 Quick Start
+
+### ⚠️ Deployment Warning
+**We do not recommend using on a deployment server without testing on a branch first to see the file changes and process.** Always test v1.3.0 configuration changes in a development environment before production deployment.
 
 ### New to i18ntk?
 Start with these essential documents:
@@ -92,11 +112,12 @@ docs/reports/
 
 ## 🎯 Common Use Cases
 
-### 🆕 Setting Up a New Project
+### 🆕 Setting Up a New Project (v1.3.0)
 1. **[Installation Guide](../INSTALLATION.md)** - Install i18ntk locally (recommended) or globally
-2. **[Initialization](./api/API_REFERENCE.md#i18ntk-init)** - Set up i18n structure (`npx i18ntk init`)
-3. **[Configuration](./api/CONFIGURATION.md#primary-configuration-files)** - Configure for your framework
-4. **[First Analysis](./api/API_REFERENCE.md#i18ntk-analyze)** - Analyze your translations (`npx i18ntk analyze`)
+2. **[Script Directory Guide](./SCRIPT_DIRECTORY_GUIDE.md)** - Configure custom directories for each script type
+3. **[Initialization](./api/API_REFERENCE.md#i18ntk-init)** - Set up i18n structure (`npx i18ntk init`)
+4. **[Configuration](./api/CONFIGURATION.md#primary-configuration-files)** - Configure for your framework
+5. **[First Analysis](./api/API_REFERENCE.md#i18ntk-analyze)** - Analyze your translations (`npx i18ntk analyze`)
 
 ### 🔍 Analyzing Existing Projects
 1. **[Usage Analysis](./api/API_REFERENCE.md#i18ntk-usage)** - Find unused/missing keys (`npx i18ntk usage`)
@@ -110,11 +131,12 @@ docs/reports/
 3. **[Debug Tools](./debug/DEBUG_TOOLS.md)** - Troubleshoot issues
 4. **[Quality Assurance](../README.md#-quality-assurance)** - Ensure 100% coverage
 
-### 🚀 Production Deployment
-1. **[Final Validation](./api/API_REFERENCE.md#i18ntk-validate)** - Pre-deployment checks (`npx i18ntk validate`)
-2. **[Performance Analysis](./api/API_REFERENCE.md#i18ntk-sizing)** - Optimize bundle size (`npx i18ntk sizing`)
-3. **[Testing](../README.md#-testing)** - Run comprehensive tests
-4. **[Documentation](./api/CONFIGURATION.md)** - Document your setup
+### 🚀 Production Deployment (v1.3.0)
+1. **[Script Directory Guide](./SCRIPT_DIRECTORY_GUIDE.md)** - Configure production directory paths
+2. **[Testing on Branch](./SCRIPT_DIRECTORY_GUIDE.md#testing-your-configuration)** - Test configuration on development branch
+3. **[Final Validation](./api/API_REFERENCE.md#i18ntk-validate)** - Pre-deployment checks (`npx i18ntk validate`)
+4. **[Performance Analysis](./api/API_REFERENCE.md#i18ntk-sizing)** - Optimize bundle size (`npx i18ntk sizing`)
+5. **[Deployment Verification](./SCRIPT_DIRECTORY_GUIDE.md#migration-guide)** - Verify all scripts work correctly
 
 ## 🌍 Language Support
 
@@ -182,14 +204,14 @@ For enterprise support, custom integrations, or consulting services, please cont
 ## 🔄 Version History
 
 ### Recent Releases
-- **[v1.1.5](../CHANGELOG.md)** - Documentation & Metadata Cleanup (Current)
-- **[v1.1.4](../CHANGELOG.md)** - Internationalization Completion **(DEPRECATED)**
-- **[v1.1.3](../CHANGELOG.md)** - Translation System Enhancement **(DEPRECATED)**
-- **[v1.1.2](../CHANGELOG.md)** - Enhanced CLI Experience **(DEPRECATED)**
-- **[v1.1.1](../CHANGELOG.md)** - Interactive Menu & Locale Fixes **(DEPRECATED)**
-- **[v1.1.0](../CHANGELOG.md)** - Enhanced CLI & Non-Interactive Mode **(DEPRECATED)**
+- **[v1.3.0](../CHANGELOG.md)** - Script Directory Configuration & Path Resolution Fixes (Current)
+- **[v1.2.3](../CHANGELOG.md)** - Documentation & Metadata Cleanup **(DEPRECATED)**
+- **[v1.1.5](../CHANGELOG.md)** - Internationalization Completion **(DEPRECATED)**
+- **[v1.1.4](../CHANGELOG.md)** - Translation System Enhancement **(DEPRECATED)**
+- **[v1.1.3](../CHANGELOG.md)** - Enhanced CLI Experience **(DEPRECATED)**
+- **[v1.1.2](../CHANGELOG.md)** - Interactive Menu & Locale Fixes **(DEPRECATED)**
 
-**⚠️ Note:** All versions < 1.1.5 are deprecated. Please upgrade immediately.
+**⚠️ Note:** All versions < 1.3.0 are deprecated. Please upgrade immediately.
 
 ### Migration Guides
 - **[Upgrading to v1.0.0](../RELEASE_NOTES_v1.0.0.md#-migration-guide)** - Seamless upgrade from dev versions

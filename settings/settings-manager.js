@@ -22,6 +22,18 @@ class SettingsManager {
             defaultLanguages: ['de', 'es', 'fr', 'ru'], // Default target languages | Example: ['de', 'es', 'fr', 'ru', 'ja', 'zh']
             outputDir: './i18ntk-reports', // Default: './i18ntk-reports' | Example: './reports/i18n'
             
+            // Per-Script Directory Configuration (optional overrides)
+            scriptDirectories: {
+                analyze: null,      // Custom sourceDir for i18ntk-analyze.js
+                init: null,         // Custom sourceDir for i18ntk-init.js
+                validate: null,     // Custom sourceDir for i18ntk-validate.js
+                complete: null,     // Custom sourceDir for i18ntk-complete.js
+                manage: null,       // Custom sourceDir for i18ntk-manage.js
+                summary: null,      // Custom sourceDir for i18ntk-summary.js
+                usage: null,        // Custom sourceDir for i18ntk-usage.js
+                sizing: null        // Custom sourceDir for i18ntk-sizing.js
+            },
+            
             // Report Settings
             reportLanguage: 'auto', // Default: 'auto' (matches UI language) | Options: 'auto', 'en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'
             
@@ -156,6 +168,13 @@ class SettingsManager {
         
         if (loadedSettings.advanced) {
             merged.advanced = { ...this.defaultConfig.advanced, ...loadedSettings.advanced };
+        }
+        
+        if (loadedSettings.scriptDirectories) {
+            merged.scriptDirectories = { 
+                ...this.defaultConfig.scriptDirectories, 
+                ...loadedSettings.scriptDirectories 
+            };
         }
         
         return merged;

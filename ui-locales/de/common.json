@@ -1,4 +1,17 @@
 {
   "success": "Erfolg",
-  "error": "Fehler"
+  "error": "Fehler",
+  "warning": "[DE] Warning",
+  "info": "[DE] Info",
+  "debug": "[DE] Debug",
+  "progress": "[DE] Progress",
+  "remaining": "[DE] Remaining",
+  "total": "[DE] Total",
+  "completed": "[DE] Completed",
+  "missing": "[DE] Missing",
+  "partial": "[DE] Partial",
+  "sameAsSource": "[DE] Same as source",
+  "formatMismatch": "[DE] Format mismatch",
+  "typeMismatch": "[DE] Type mismatch",
+  "structureMismatch": "[DE] Structure mismatch"
 }

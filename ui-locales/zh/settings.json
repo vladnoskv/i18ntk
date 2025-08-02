@@ -25,7 +25,15 @@
     "helpDesc": "显示详细帮助信息",
     "quit": "退出",
     "quitDesc": "退出设置（如有需要会提示保存）",
-    "selectOption": "选择一个选项："
+    "selectOption": "选择一个选项：",
+    "updatePackage": "[ZH] Update Package",
+    "updatePackageDesc": "[ZH] Update the i18n-toolkit package via npm",
+    "unsavedChangesWarning": "[ZH] ⚠️  You have unsaved changes",
+    "saveChangesBeforeQuit": "[ZH] Do you want to save changes before quitting? (y/N): ",
+    "goodbyeMessage": "[ZH] Thank you for using the i18n settings manager!",
+    "selectSettingPrompt": "[ZH] Select a setting to edit (or 'b' to go back): ",
+    "enterNewValue": "[ZH] Enter new value: ",
+    "updatedSuccessfully": "[ZH] {{setting}} updated successfully!"
   },
   "categories": {
     "uiSettings": "界面设置",
@@ -132,7 +140,8 @@
   },
   "themes": {
     "light": "浅色",
-    "dark": "深色"
+    "dark": "深色",
+    "system": "[ZH] System"
   },
   "languages": {
     "en": "英语",
@@ -154,13 +163,19 @@
     "title": "查看所有设置"
   },
   "importExport": {
-    "title": "导入/导出设置",
-    "export": "导出设置",
-    "import": "导入设置",
-    "backup": "创建备份"
+    "enterFilename": "[ZH] Enter filename (or press Enter for default): ",
+    "exportSuccess": "[ZH] Settings exported to {{file}}",
+    "exportFailed": "[ZH] Failed to export settings: {{error}}",
+    "importFilename": "[ZH] Enter filename to import: ",
+    "fileNotFound": "[ZH] File not found.",
+    "invalidFormat": "[ZH] Invalid settings file format.",
+    "confirmImport": "[ZH] This will replace all current settings. Continue? (y/N): ",
+    "importSuccess": "[ZH] Settings imported successfully.",
+    "importFailed": "[ZH] Failed to import settings: {{error}}",
+    "backupSuccess": "[ZH] Backup created: {{file}}",
+    "backupFailed": "[ZH] Failed to create backup: {{error}}"
   },
   "pressEnter": "按Enter键继续...",
-  "selectOption": "选择一个选项：",
   "current": "当前",
   "back": "返回主菜单",
   "selectSettingPrompt": "选择要编辑的设置（或b返回）：",
@@ -190,6 +205,42 @@
     "benefitReset": "• 重置设置",
     "setupCancelled": "⏭️  管理员PIN设置已取消。",
     "operationCancelled": "❌ 操作已取消。",
-    "startingSettings": "🎛️  正在启动设置CLI..."
-  }
+    "startingSettings": "🎛️  正在启动设置CLI...",
+    "selectOption": "[ZH] Select option: ",
+    "updateSuccess": "[ZH] Admin PIN updated successfully!",
+    "updateFailed": "[ZH] Failed to update admin PIN.",
+    "protectionRemoved": "[ZH] Admin PIN protection removed.",
+    "configSuccess": "[ZH] Admin PIN configured successfully!",
+    "configFailed": "[ZH] Failed to configure admin PIN.",
+    "setupPinPrompt": "[ZH] Would you like to set up an admin PIN? (y/N): ",
+    "pinUpdatedSuccess": "[ZH] Admin PIN updated successfully!",
+    "pinUpdatedFailed": "[ZH] Failed to update admin PIN.",
+    "pinRemoved": "[ZH] Admin PIN protection removed.",
+    "pinConfiguredSuccess": "[ZH] Admin PIN configured successfully!",
+    "pinConfiguredFailed": "[ZH] Failed to configure admin PIN.",
+    "authRequired": "[ZH] 🔒 Admin authentication required for: {{label}}",
+    "pinSetupTitle": "[ZH] Admin PIN Setup",
+    "browserOpenFailed": "[ZH] Could not automatically open browser.",
+    "manualVisit": "[ZH] Please manually visit: {{url}}",
+    "browserOpened": "[ZH] ✅ Browser opened successfully!"
+  },
+  "goodbyeMessage": "[ZH] Thank you for using the i18ntk settings manager!",
+  "updatePackage": {
+    "title": "[ZH] Update Package",
+    "description": "[ZH] Update the i18n-toolkit package via npm",
+    "command": "[ZH] npm update i18ntk -g",
+    "success": "[ZH] Update completed successfully.",
+    "failed": "[ZH] Update failed.",
+    "prompt": "[ZH] Do you want to update the package now? (y/N): ",
+    "promptDesc": "[ZH] Note: This will update the i18ntk package to the latest version.",
+    "confirm": "[ZH] y",
+    "cancelled": "[ZH] Update cancelled."
+  },
+  "resetConfirm": "[ZH] Are you sure you want to continue? (y/N): ",
+  "resetSuccess": "[ZH] Settings reset to defaults successfully.",
+  "resetFailed": "[ZH] Failed to reset settings: {error}",
+  "saveSuccess": "[ZH] Settings saved successfully.",
+  "saveFailed": "[ZH] Failed to save settings.",
+  "initFailed": "[ZH] Failed to initialize settings: {error}",
+  "invalidValueFormat": "[ZH] Invalid value format."
 }

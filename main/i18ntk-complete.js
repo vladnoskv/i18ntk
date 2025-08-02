@@ -21,11 +21,15 @@ const settingsManager = require('../settings/settings-manager');
 async function getConfig() {
   try {
     const settings = await settingsManager.getSettings();
+    
+    // Check for per-script directory override, fallback to global sourceDir
+    const sourceDir = settings.scriptDirectories?.complete || settings.sourceDir || './locales';
+    
     const config = {
-      sourceDir: settings.directories?.sourceDir || './locales',
-      sourceLanguage: settings.directories?.sourceLanguage || 'en',
-      notTranslatedMarker: settings.directories?.notTranslatedMarker || 'NOT_TRANSLATED',
-      excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
+      sourceDir: sourceDir,
+      sourceLanguage: settings.sourceLanguage || 'en',
+      notTranslatedMarker: settings.notTranslatedMarker || settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
+      excludeFiles: settings.excludeFiles || settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
     };
     
     // Basic validation for required fields
@@ -285,7 +289,7 @@ class I18nCompletionTool {
 
   // Get missing keys from usage analysis
   getMissingKeysFromUsage() {
-    const usageReportPath = path.join(process.cwd(), 'scripts', 'i18n', 'reports', 'usage-analysis.txt');
+    const usageReportPath = path.join(process.cwd(), 'reports', 'usage-analysis.txt');
     
     // Delete old report to ensure fresh data
     if (fs.existsSync(usageReportPath)) {

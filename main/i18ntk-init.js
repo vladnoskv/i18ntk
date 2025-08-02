@@ -23,12 +23,16 @@ const UIi18n = require('./i18ntk-ui');
 // Get configuration from settings manager
 function getConfig() {
   const settings = settingsManager.getSettings();
+  
+  // Check for per-script directory override, fallback to global sourceDir
+  const sourceDir = settings.scriptDirectories?.init || settings.sourceDir || './locales';
+  
   return {
-    sourceDir: settings.directories?.sourceDir || './locales',
-    sourceLanguage: settings.directories?.sourceLanguage || 'en',
-    defaultLanguages: settings.processing?.defaultLanguages || ['de', 'es', 'fr', 'ru'],
-    notTranslatedMarker: settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
-    excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
+    sourceDir: sourceDir,
+    sourceLanguage: settings.sourceLanguage || 'en',
+    defaultLanguages: settings.defaultLanguages || settings.processing?.defaultLanguages || ['de', 'es', 'fr', 'ru'],
+    notTranslatedMarker: settings.notTranslatedMarker || settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
+    excludeFiles: settings.excludeFiles || settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
     uiLanguage: settings.language || 'en'
   };
 }
@@ -205,7 +209,7 @@ class I18nInitializer {
 
     if (existingLocations.length > 0) {
       console.log('\n' + this.ui.t('init.existingDirectoriesFound'));
-      console.log('=' .repeat(50));
+      console.log(this.ui.t('common.separator'));
       
       existingLocations.forEach((location, index) => {
         console.log(`  ${index + 1}. ${location}`);
@@ -572,7 +576,7 @@ class I18nInitializer {
     const question = (query) => new Promise(resolve => rl.question(query, resolve));
     
     console.log('\n' + this.ui.t('init.languageSelectionTitle'));
-    console.log('=' .repeat(50));
+    console.log(this.ui.t('common.separator'));
     console.log(this.ui.t('language.available'));
     
     Object.entries(LANGUAGE_CONFIG).forEach(([code, config], index) => {
@@ -607,7 +611,7 @@ class I18nInitializer {
   async init() {
     try {
       console.log(this.ui.t('init.initializationTitle'));
-      console.log('=' .repeat(50));
+      console.log(this.ui.t('common.separator'));
       
       // Parse command line arguments
       const args = this.parseArgs();
@@ -638,7 +642,7 @@ class I18nInitializer {
       await this.initialize(hasI18n, args);
       
     } catch (error) {
-      console.error('❌ Initialization failed:', error.message);
+      console.error(this.ui.t('init.errors.initializationFailed', { error: error.message }));
       throw error;
     } finally {
       if (this.shouldCloseRL && this.rl) {
@@ -751,7 +755,7 @@ class I18nInitializer {
     // Summary report
     console.log('\n' + '=' .repeat(50));
     console.log(this.ui.t('init.initializationSummaryTitle'));
-    console.log('=' .repeat(50));
+    console.log(this.ui.t('common.separator'));
     
     Object.entries(results).forEach(([lang, data]) => {
       const langName = LANGUAGE_CONFIG[lang]?.name || 'Unknown';
@@ -782,8 +786,8 @@ module.exports = I18nInitializer;
 if (require.main === module) {
     const initializer = new I18nInitializer();
     initializer.init().catch(error => {
-        console.error('❌ Initialization failed:', error.message);
-        console.error('Stack trace:', error.stack);
+        console.error(this.ui.t('common.initializationFailed', { error: error.message }));
+        console.error(this.ui.t('common.stackTrace', { stack: error.stack }));
         process.exit(1);
     });
 }

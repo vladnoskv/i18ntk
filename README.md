@@ -1,21 +1,27 @@
-# i18ntk - Enterprise i18n Management Toolkit
-
-**Version:** 1.2 – **PRODUCTION READY** with enhanced documentation and npm metadata cleanup! 🌍
-
-**⚠️ Important Notice:** All previous versions (< 1.2) are now deprecated due to critical bugs and issues. Please upgrade to v1.1.5 for the most stable experience. We recommend backing up your project before upgrading. 
-
-**🎉 Thank You:** 200+ downloads in the first week! Thank you for your support and patience as we resolved the functional issues. My First Published Project. 
+# i18ntk -  i18n Management Toolkit
 
 [![version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-**i18ntk** (i18n Toolkit) is a comprehensive, internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
+**Version:** 1.3.0 – **i18ntk** (i18n Toolkit) is a comprehensive, internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
+
+## 🔧 Key Features
+
+- **Flexible Configuration**: Customize script directories and file formats in `settings.json`
+- **Path Resolution**: Automatically resolves relative paths based on project structure
+- **Comprehensive Commands**: Includes analyze, complete, manage, validate, and more
+- **Multi-Language Support**: UI available in 7 languages with partial internationalization
+- **Production-Ready**: Tested extensively in various environments
+
+**⚠️ Important Notice:** All previous versions (< 1.3.0) are now deprecated due to critical bugs and issues. Please upgrade to v1.3.0 for the most stable experience. We recommend backing up your project before upgrading and testing on a development branch first. 
+
+**🎉 Thank You:** 500+ downloads in the first week! Thank you for your support and patience as I resolve the functional issues. My First Published Package, please update to the latest version as any previous bugs were probably fixed. 
 
 ## ⚠️ Important Disclaimer
 
-**Important: This is an independent, community-driven toolkit** - not affiliated with any official i18n organization or team. Originally developed as a personal solution for translation management, i18ntk has evolved into a feature-rich internationalization toolkit available to the broader development community. The toolkit is designed to be framework-agnostic and highly adaptable:
+**Important: This is an independent, community-driven toolkit** generated with the help of AI tools therefore, bugs and errors are prone to happen, please report an issue if you find one. Also, this package is not affiliated with any official i18n organization or team. Originally developed as a personal solution for my own translation management, i18ntk has evolved into a feature-rich internationalization toolkit available to the broader development community. The toolkit is designed to be framework-agnostic and highly adaptable:
 
 - Works with any translation file format configured in the settings
 - Operates independently (no i18n framework required)
@@ -23,7 +29,8 @@
 - Easily extensible through code modifications or AI-assisted configuration
 - Flexible enough to accommodate diverse project requirements
 
-While maintaining its independence, i18ntk strives to follow i18n best practices and standards to ensure compatibility with existing workflows. Although we test thoroughly, we cannot guarantee 100% compatibility with all i18n frameworks or systems. Users are encouraged to test i18ntk with their specific setup and adjust settings as needed or find an alternative solution.
+While maintaining its independence, i18ntk strives to follow i18n best practices and standards to ensure compatibility with existing workflows. Although we test thoroughly, we cannot guarantee 100% compatibility with all i18n frameworks or systems and don't accept liability if there are any issues, we recommend running this toolkit on a fresh project. Users are encouraged to test i18ntk with their specific setup and adjust settings as needed or find an alternative solution. Thank you for trying i18ntk, if you have any issues or suggestions, please feel free to open an issue on the GitHub repository!
+
 
 ## 🚀 Quick Start
 
@@ -79,22 +86,35 @@ npx i18ntk --version  # 📋 Show detailed version information
 npx i18ntk -v         # 📋 Show detailed version information (short flag)
 ```
 
-**Note:** v1.1.4 is production-ready with full core functionality. Console UI translation support is at approximately 95% with English fallback for missing keys. Core features work flawlessly - only translation completion remains.
-
 **Important:** Direct command execution (e.g., `npx i18ntk usage`) now bypasses the interactive menu, allowing for more streamlined workflows and scripting.
 
-## ✨ What's New in v1.1.5
+## ✨ What's New in v1.3.0
 
-### 🧹 Documentation & Metadata Cleanup
-- **Enhanced**: Updated all documentation to reflect current version and best practices
-- **Improved**: Cleaned up npm package metadata for better clarity
-- **Fixed**: Repository URLs and homepage links in package configuration
-- **Updated**: Installation instructions and version references throughout documentation
+### 🆕 Script Directory Configuration
+- **New**: Added per-script directory configuration support for maximum flexibility
+- **Fixed**: Path resolution now correctly uses relative paths from project root
+- **Enhanced**: Added comprehensive internationalization for all new configuration options
+- **Improved**: Settings CLI now includes script directory configuration menu
+- **Added**: Current working directory display and path guidance in CLI prompts
 
 ### 🐛 Previous Version Deprecation
-- **Status**: All versions < 1.1.5 are now deprecated due to critical bugs
-- **Recommendation**: Immediate upgrade to v1.1.5 for stable functionality
+- **Status**: All versions < 1.3.0 are now deprecated due to critical bugs
+- **Recommendation**: Immediate upgrade to v1.3.0 for stable functionality
 - **Migration**: Major-breaking-changes upgrading from any 1.0.x version. Uninstall, and reinstall and rerun initilization.
+
+### ⬆️ Update Package Functionality
+- **New Feature**: Added `Update Package` option to the settings CLI for easy `npm update i18ntk` execution.
+- **Convenience**: Simplifies keeping the toolkit up-to-date directly from the interactive menu.
+
+### 🔍 Enhanced Directory Handling
+- **Improvement**: All scripts now correctly scan directories based on settings configurations
+- **Accuracy**: Path resolution fixed to respect relative paths from project root
+- **Bug Fix**: Resolved "Source directory not found" errors with proper path handling
+
+### 🎯 Improved Complete Coverage Scanning
+- **Enhancement**: Complete coverage scanning now accurately handles directory configurations.
+- **Reliability**: Ensures all relevant files are scanned for comprehensive analysis.
+- **Consistency**: Aligns with `i18ntk-usage.js` in respecting `sourceDir` and `i18nDir` settings.
 
 ### 📁 Enhanced Project Organization
 - **Improved**: Configuration files now properly organized in `settings/` directory
@@ -103,7 +123,7 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 - **Updated**: Documentation reflects new file structure and locations
 
 ### 🎉 Community Milestone
-- **Achievement**: 200+ downloads in the first week
+- **Achievement**: 500+ downloads in the first week
 - **Gratitude**: Thank you for your patience as we resolved functional issues
 - **Commitment**: Continued focus on stability and user experience
 
@@ -112,6 +132,8 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 **📖 [Complete Documentation](./docs/README.md)** - Visit our comprehensive documentation hub
 
 **🏠 [Documentation Index](./docs/INDEX.md)** - Quick navigation to all documentation
+
+**📁 [Script Directory Guide](./docs/SCRIPT_DIRECTORY_GUIDE.md)** - Configure custom directories for each script type (v1.3.0+)
 
 **📊 [Translation Status](./docs/TRANSLATION_STATUS.md)** - Current translation completion status
 
@@ -146,25 +168,6 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 
 > **📖 For detailed setup and usage instructions, see [Documentation](./docs/README.md)**
 
-## 🛠️ Core Commands
-
-### NPM Scripts (Recommended)
-
-| Command | Description | Direct Usage |
-|---------|-------------|-------------|
-| `npm run i18ntk` | Interactive management interface | `node main/i18ntk-manage.js` |
-| `npm run i18ntk:autorun` | Automated complete workflow | `node main/i18ntk-autorun.js` |
-| `npm run i18ntk:init` | Initialize i18n configuration | `node main/i18ntk-init.js` |
-| `npm run i18ntk:analyze` | Analyze translation completeness | `node main/i18ntk-analyze.js` |
-| `npm run i18ntk:validate` | Validate translation integrity | `node main/i18ntk-validate.js` |
-| `npm run i18ntk:complete` | Complete missing translations | `node main/i18ntk-complete.js` |
-| `npm run i18ntk:usage` | Analyze translation key usage | `node main/i18ntk-usage.js` |
-| `npm run i18ntk:sizing` | Generate sizing reports | `node main/i18ntk-sizing.js` |
-| `npm run i18ntk:summary` | Generate summary reports | `node main/i18ntk-summary.js` |
-| `npm run i18ntk:debug` | Debug and diagnostics | `node dev/debug/debugger.js` |
-
-> **📖 For complete command reference, see [API Documentation](./docs/api/API_REFERENCE.md)**
-
 ## 📊 Reports and Analysis
 
 The toolkit generates comprehensive reports in the `i18ntk-reports/` directory:
@@ -186,11 +189,6 @@ The toolkit UI supports **7 languages** with partial internationalization:
 Requests for additional languages are welcome!
 
 ## 🧪 Development and Testing
-
-### Debug Tools
-```bash
-# Main debug interface
-npm run i18ntk:debug
 
 > **📖 For comprehensive debug tools documentation, see [Debug Tools](./docs/debug/DEBUG_TOOLS.md)**
 
@@ -220,7 +218,10 @@ npm run i18ntk:debug
 
 ---
 
-**Version:** 1.2.2 – Critical bug fix for custom locale support! 🎯
+**Version:** 1.3.0  
+**Release Date:** 02/08/2025  
+**Previous Versions:** 1.2.x, 1.1.x, 1.0.x series 
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the `LICENSE` file for details.

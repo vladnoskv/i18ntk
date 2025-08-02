@@ -32,5 +32,14 @@
   "autoDetectedI18nDirectory": "Автоматически обнаруженный каталог i18n: {path}",
   "executingCommand": "Выполнение команды: {command}",
   "unknownCommand": "Неизвестная команда: {command}",
-  "languageOption": "  {{index}}. {{displayName}}{{current}}"
+  "languageOption": "  {{index}}. {{displayName}}{{current}}",
+  "update": "📦 Обновить пакет",
+  "debugTools": {
+    "1": "[RU] Log file analysis",
+    "2": "[RU] Translation key usage analysis",
+    "3": "[RU] Translation completeness analysis",
+    "4": "[RU] Translation format analysis",
+    "5": "[RU] Translation type analysis",
+    "6": "[RU] Translation structure analysis"
+  }
 }

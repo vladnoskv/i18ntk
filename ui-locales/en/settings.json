@@ -1,6 +1,8 @@
 {
   "title": "⚙️ Settings Management",
   "separator": "============================================================",
+  "goodbyeMessage": "Thank you for using the i18ntk settings manager!",
+  "relativePathHint": "Use relative paths from this directory (e.g., ./src/i18n/locales)",
   "mainMenu": {
     "title": "Main Menu:",
     "uiSettings": "UI Settings",
@@ -14,6 +16,8 @@
     "viewAllSettings": "View All Settings",
     "viewAllSettingsDesc": "Display current configuration",
     "importExport": "Import/Export",
+    "updatePackage": "Update Package",
+    "updatePackageDesc": "Update the i18n-toolkit package via npm",
     "importExportDesc": "Backup and restore settings",
     "resetToDefaults": "Reset to Defaults",
     "resetToDefaultsDesc": "Restore factory settings",
@@ -25,13 +29,95 @@
     "helpDesc": "Show detailed help information",
     "quit": "Quit",
     "quitDesc": "Exit settings (with save prompt if needed)",
-    "selectOption": "Select an option: "
+    "unsavedChangesWarning": "⚠️  You have unsaved changes",
+    "saveChangesBeforeQuit": "Do you want to save changes before quitting? (y/N): ",
+    "selectOption": "Select an option: ",
+    "goodbyeMessage": "Thank you for using the i18n settings manager!",
+    "selectSettingPrompt": "Select a setting to edit (or 'b' to go back): ",
+    "enterNewValue": "Enter new value: ",
+    "updatedSuccessfully": "{{setting}} updated successfully!",
+    "scriptDirectorySettings": "Script Directory Settings",
+    "scriptDirectoryDesc": "Specify custom directories for each script",
+    "scriptDirectorySettingsDesc": "You can set custom directories for each script. If not set, global settings will be used.",
+    "currentDirectory": "Current project directory" 
   },
+  "updatePackage": {
+    "title": "Update Package",
+    "description": "Update the i18n-toolkit package via npm",
+    "command": "npm update i18ntk -g",
+    "success": "Update completed successfully.",
+    "failed": "Update failed.",
+    "prompt": "Do you want to update the package now? (y/N): ",
+    "promptDesc": "Note: This will update the i18ntk package to the latest version.",
+    "confirm": "y",
+    "cancelled": "Update cancelled."
+  },
+  "admin": {
+    "selectOption": "Select option: ",
+    "updateSuccess": "Admin PIN updated successfully!",
+    "updateFailed": "Failed to update admin PIN.",
+    "protectionRemoved": "Admin PIN protection removed.",
+    "configSuccess": "Admin PIN configured successfully!",
+    "configFailed": "Failed to configure admin PIN.",
+    "setupPinPrompt": "Would you like to set up an admin PIN? (y/N): ",
+    "pinUpdatedSuccess": "Admin PIN updated successfully!",
+    "pinUpdatedFailed": "Failed to update admin PIN.",
+    "pinRemoved": "Admin PIN protection removed.",
+    "pinConfiguredSuccess": "Admin PIN configured successfully!",
+    "pinConfiguredFailed": "Failed to configure admin PIN.",
+    "accessDenied": "❌ Access denied. Returning to menu.",
+    "setupPin": "🔐 Setting up admin PIN...",
+    "setupFailed": "❌ Failed to set up admin PIN. Setting not changed.",
+    "pinConfigured": "📌 Admin PIN is currently configured.",
+    "options": "Options:",
+    "changePin": "1) Change existing PIN",
+    "removePin": "2) Remove PIN protection",
+    "cancel": "3) Cancel",
+    "verifyCurrentPin": "\n🔐 Verify current PIN first:",
+    "settingNewPin": "\n🔄 Setting up new PIN...",
+    "verifyToRemove": "\n🔐 Verify current PIN to remove protection:",
+    "noPinConfigured": "🔓 No admin PIN is currently configured.",
+    "pinBenefits": "Setting up admin PIN will add security for:",
+    "benefitSecurity": "• Changing security settings",
+    "benefitAdvanced": "• Modifying advanced configurations",
+    "benefitDebug": "• Accessing debug tools",
+    "benefitReset": "• Resetting settings",
+    "setupCancelled": "⏭️  Admin PIN setup cancelled.",
+    "operationCancelled": "❌ Operation cancelled.",
+    "startingSettings": "🎛️  Starting Settings CLI...",
+    "authRequired": "🔒 Admin authentication required for: {{label}}",
+    "pinSetupTitle": "Admin PIN Setup",
+    "browserOpenFailed": "Could not automatically open browser.",
+    "manualVisit": "Please manually visit: {{url}}",
+    "browserOpened": "✅ Browser opened successfully!"
+  },
+  "importExport": {
+    "enterFilename": "Enter filename (or press Enter for default): ",
+    "exportSuccess": "Settings exported to {{file}}",
+    "exportFailed": "Failed to export settings: {{error}}",
+    "importFilename": "Enter filename to import: ",
+    "fileNotFound": "File not found.",
+    "invalidFormat": "Invalid settings file format.",
+    "confirmImport": "This will replace all current settings. Continue? (y/N): ",
+    "importSuccess": "Settings imported successfully.",
+    "importFailed": "Failed to import settings: {{error}}",
+    "backupSuccess": "Backup created: {{file}}",
+    "backupFailed": "Failed to create backup: {{error}}"
+  },
+  "resetConfirm": "Are you sure you want to continue? (y/N): ",
+  "resetSuccess": "Settings reset to defaults successfully.",
+  "resetFailed": "Failed to reset settings: {error}",
+  "saveSuccess": "Settings saved successfully.",
+  "saveFailed": "Failed to save settings.",
+  "pressEnter": "Press Enter to continue...",
+  "initFailed": "Failed to initialize settings: {error}",
+  "invalidValueFormat": "Invalid value format.",
   "categories": {
     "uiSettings": "UI Settings",
     "directorySettings": "Directory Settings",
     "processingSettings": "Processing Settings",
-    "advancedSettings": "Advanced Settings"
+    "advancedSettings": "Advanced Settings",
+    "scriptDirectorySettings": "Script Directory Settings"
   },
   "fields": {
     "language": {
@@ -39,6 +125,17 @@
       "description": "Language for the user interface",
       "current": "Current: {value}",
       "help": "Select your preferred interface language"
+    },
+    "scriptDirectories": {
+        "analyzeLabel": "Analyze Script Directories",
+        "analyzeHelp": "Analyze script directories for issues",
+        "completeLabel": "Complete Setup Directories",
+        "initLabel": "Initialize Script Directories",
+        "manageLabel": "Manage Script Directories",
+        "sizingLabel": "Sizing Script Directories",
+        "summaryLabel": "Summary Report Directories",
+        "usageLabel": "Usage Report Directories",
+        "validateLabel": "Validate Script Directories"
     },
     "theme": {
       "label": "Color Theme",
@@ -113,6 +210,54 @@
       "description": "Create backups before modifications",
       "current": "Current: {value}",
       "help": "Automatically create backups before making changes"
+    },
+    "scriptDirectories_analyze": {
+      "label": "Analyze Script Directories",
+      "description": "Custom directories for analyze script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the analyze script. Leave empty to use global setting."
+    },
+    "scriptDirectories_complete": {
+      "label": "Complete Setup Directories",
+      "description": "Custom directories for complete setup script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the complete setup script. Leave empty to use global setting."
+    },
+    "scriptDirectories_init": {
+      "label": "Initialize Script Directories",
+      "description": "Custom directories for initialize script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the initialize script. Leave empty to use global setting."
+    },
+    "scriptDirectories_manage": {
+      "label": "Manage Script Directories",
+      "description": "Custom directories for manage script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the manage script. Leave empty to use global setting."
+    },
+    "scriptDirectories_sizing": {
+      "label": "Sizing Script Directories",
+      "description": "Custom directories for sizing script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the sizing script. Leave empty to use global setting."
+    },
+    "scriptDirectories_summary": {
+      "label": "Summary Report Directories",
+      "description": "Custom directories for summary report script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the summary report script. Leave empty to use global setting."
+    },
+    "scriptDirectories_usage": {
+      "label": "Usage Report Directories",
+      "description": "Custom directories for usage report script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the usage report script. Leave empty to use global setting."
+    },
+    "scriptDirectories_validate": {
+      "label": "Validate Script Directories",
+      "description": "Custom directories for validate script",
+      "current": "Current: {value}",
+      "help": "Specify custom source directory for the validate script. Leave empty to use global setting."
     }
   },
   "actions": {
@@ -132,7 +277,8 @@
   },
   "themes": {
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "system": "System"
   },
   "languages": {
     "en": "English",
@@ -153,14 +299,6 @@
   "viewAll": {
     "title": "View All Settings"
   },
-  "importExport": {
-    "title": "Import/Export Settings",
-    "export": "Export Settings",
-    "import": "Import Settings",
-    "backup": "Create Backup"
-  },
-  "pressEnter": "Press Enter to continue...",
-  "selectOption": "Select an option: ",
   "current": "Current",
   "back": "Back to main menu",
   "selectSettingPrompt": "Select setting to edit (or b for back): ",
@@ -169,27 +307,6 @@
   "enterNewValue": "Enter new value (or press Enter to keep current):",
   "validOptions": "Valid options",
   "updatedSuccessfully": "updated successfully!",
-  "noHelp": "No help available for this setting",
-  "admin": {
-    "accessDenied": "❌ Access denied. Returning to menu.",
-    "setupPin": "🔐 Setting up admin PIN...",
-    "setupFailed": "❌ Failed to set up admin PIN. Setting not changed.",
-    "pinConfigured": "📌 Admin PIN is currently configured.",
-    "options": "Options:",
-    "changePin": "1) Change existing PIN",
-    "removePin": "2) Remove PIN protection",
-    "cancel": "3) Cancel",
-    "verifyCurrentPin": "\n🔐 Verify current PIN first:",
-    "settingNewPin": "\n🔄 Setting up new PIN...",
-    "verifyToRemove": "\n🔐 Verify current PIN to remove protection:",
-    "noPinConfigured": "🔓 No admin PIN is currently configured.",
-    "pinBenefits": "Setting up admin PIN will add security for:",
-    "benefitSecurity": "• Changing security settings",
-    "benefitAdvanced": "• Modifying advanced configurations",
-    "benefitDebug": "• Accessing debug tools",
-    "benefitReset": "• Resetting settings",
-    "setupCancelled": "⏭️  Admin PIN setup cancelled.",
-    "operationCancelled": "❌ Operation cancelled.",
-    "startingSettings": "🎛️  Starting Settings CLI..."
+  "noHelp": "No help available for this setting"
   }
-}
+

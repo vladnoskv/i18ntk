@@ -9,11 +9,15 @@ const UIi18n = require('./i18ntk-ui');
 // Get configuration from settings manager
 function getConfig() {
   const settings = settingsManager.getSettings();
+  
+  // Check for per-script directory override, fallback to global sourceDir
+  const sourceDir = settings.scriptDirectories?.summary || settings.sourceDir || null;
+  
   return {
-    sourceLanguage: settings.directories?.sourceLanguage || 'en',
+    sourceLanguage: settings.sourceLanguage || 'en',
     excludeFiles: settings.processing?.excludeFiles || ['index.js', 'index.ts', '.DS_Store'],
     supportedExtensions: settings.processing?.supportedExtensions || ['.json', '.js', '.ts'],
-    sourceDir: settings.directories?.sourceDir || null,
+    sourceDir: sourceDir,
     uiLanguage: settings.language || 'en'
   };
 }

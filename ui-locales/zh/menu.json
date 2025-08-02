@@ -32,5 +32,14 @@
   "autoDetectedI18nDirectory": "自动检测到国际化目录：{path}",
   "executingCommand": "执行命令：{command}",
   "unknownCommand": "未知命令：{command}",
-  "languageOption": "  {{index}}. {{displayName}}{{current}}"
+  "languageOption": "  {{index}}. {{displayName}}{{current}}",
+  "update": "📦 更新包",
+  "debugTools": {
+    "1": "日志文件分析",
+    "2": "翻译键使用分析",
+    "3": "翻译完整性分析",
+    "4": "翻译格式分析",
+    "5": "翻译类型分析",
+    "6": "翻译结构分析"
+  }
 }

@@ -32,5 +32,14 @@
   "autoDetectedI18nDirectory": "⚠️ TRANSLATION NEEDED ⚠️",
   "executingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
   "unknownCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "languageOption": "⚠️ TRANSLATION NEEDED ⚠️"
+  "languageOption": "⚠️ TRANSLATION NEEDED ⚠️",
+  "update": "[ES] 📦 Update Package",
+  "debugTools": {
+    "1": "[ES] Log file analysis",
+    "2": "[ES] Translation key usage analysis",
+    "3": "[ES] Translation completeness analysis",
+    "4": "[ES] Translation format analysis",
+    "5": "[ES] Translation type analysis",
+    "6": "[ES] Translation structure analysis"
+  }
 }

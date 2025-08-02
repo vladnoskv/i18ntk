@@ -16,18 +16,23 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+const PROJECT_ROOT = process.cwd();
 const settingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 
 // Get configuration from settings manager
 function getConfig() {
   const settings = settingsManager.getSettings();
+  
+  // Check for per-script directory override, fallback to global sourceDir
+  const sourceDir = settings.scriptDirectories?.analyze || settings.sourceDir || './locales';
+  
   return {
-    sourceDir: settings.directories?.sourceDir || './locales',
-    sourceLanguage: settings.directories?.sourceLanguage || 'en',
-    notTranslatedMarker: settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
-    outputDir: settings.directories?.outputDir || './i18ntk-reports',
-    excludeFiles: settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
+    sourceDir: sourceDir,
+    sourceLanguage: settings.sourceLanguage || 'en',
+    notTranslatedMarker: settings.notTranslatedMarker || settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
+    outputDir: settings.outputDir || './i18ntk-reports',
+    excludeFiles: settings.excludeFiles || settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
     uiLanguage: settings.language || 'en'
   };
 }
@@ -572,7 +577,7 @@ class I18nAnalyzer {
       // Update config if source directory is provided
       if (args.sourceDir) {
         this.config.sourceDir = args.sourceDir;
-        this.sourceDir = path.resolve(this.config.sourceDir);
+        this.sourceDir = path.resolve(PROJECT_ROOT, this.config.sourceDir);
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       }
       

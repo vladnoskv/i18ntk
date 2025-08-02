@@ -6,5 +6,22 @@
   "nextStep4": "⚠️ TRANSLATION NEEDED ⚠️",
   "nextStep5": "⚠️ TRANSLATION NEEDED ⚠️",
   "nextStep6": "⚠️ TRANSLATION NEEDED ⚠️",
-  "completed": "⚠️ TRANSLATION NEEDED ⚠️"
+  "completed": "⚠️ TRANSLATION NEEDED ⚠️",
+  "generating": "[FR] Generating summary report...",
+  "review": "[FR] Reviewing translations...",
+  "finalizing": "[FR] Finalizing translations...",
+  "finalized": "[FR] Finalized successfully!",
+  "errors": "[FR] Errors:",
+  "warnings": "[FR] Warnings:",
+  "info": "[FR] Info:",
+  "progress": "[FR] Progress:",
+  "remaining": "[FR] Remaining:",
+  "total": "[FR] Total:",
+  "completedKeys": "[FR] Completed keys:",
+  "missingKeys": "[FR] Missing keys:",
+  "partialKeys": "[FR] Partial keys:",
+  "sameAsSource": "[FR] Same as source:",
+  "formatMismatch": "[FR] Format mismatch:",
+  "typeMismatch": "[FR] Type mismatch:",
+  "structureMismatch": "[FR] Structure mismatch:"
 }

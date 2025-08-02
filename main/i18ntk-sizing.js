@@ -41,8 +41,12 @@ const SecurityUtils = require('../utils/security');
 // Get configuration from settings manager
 function getConfig() {
   const settings = settingsManager.getSettings();
+  
+  // Check for per-script directory override, fallback to global sourceDir
+  const sourceDir = settings.scriptDirectories?.sizing || settings.sourceDir || './locales';
+  
   return {
-    sourceDir: settings.sourceDir || './locales',
+    sourceDir: sourceDir,
     outputDir: settings.outputDir || './i18ntk-reports',
     threshold: settings.processing?.sizingThreshold || 50,
     uiLanguage: settings.language || 'en'

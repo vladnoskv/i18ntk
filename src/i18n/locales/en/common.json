@@ -1,0 +1,13 @@
+{
+  "testReport": "Test Report",
+  "testReportGenerated": "Test report generated successfully.",
+  "testReportNotGenerated": "Test report not generated.",
+  "testReportGenerationFailed": "Test report generation failed.",
+  "offlineTitle": "You are offline",
+  "offlineMessage": "Please check your internet connection",
+  "tryReconnect": "Try to reconnect",
+  "common": "Common",
+  "logout": "Logout",
+  "login": "Login",
+  "amount": "Amount"
+}

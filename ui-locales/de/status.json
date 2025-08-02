@@ -6,5 +6,22 @@
   "nextStep4": "4. Complete missing translations:",
   "nextStep5": "5. Generate summary report:",
   "nextStep6": "6. Review and finalize translations:",
-  "completed": "7. Completed successfully!"
+  "completed": "7. Completed successfully!",
+  "generating": "[DE] Generating summary report...",
+  "review": "[DE] Reviewing translations...",
+  "finalizing": "[DE] Finalizing translations...",
+  "finalized": "[DE] Finalized successfully!",
+  "errors": "[DE] Errors:",
+  "warnings": "[DE] Warnings:",
+  "info": "[DE] Info:",
+  "progress": "[DE] Progress:",
+  "remaining": "[DE] Remaining:",
+  "total": "[DE] Total:",
+  "completedKeys": "[DE] Completed keys:",
+  "missingKeys": "[DE] Missing keys:",
+  "partialKeys": "[DE] Partial keys:",
+  "sameAsSource": "[DE] Same as source:",
+  "formatMismatch": "[DE] Format mismatch:",
+  "typeMismatch": "[DE] Type mismatch:",
+  "structureMismatch": "[DE] Structure mismatch:"
 }

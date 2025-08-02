@@ -1,7 +1,7 @@
 {
   "language": "en",
   "sizeLimit": null,
-  "sourceDir": "./locales",
+  "sourceDir": "./src/i18n/locales",
   "sourceLanguage": "en",
   "defaultLanguages": [
     "de",
@@ -10,6 +10,16 @@
     "ru"
   ],
   "outputDir": "./i18ntk-reports",
+  "scriptDirectories": {
+    "analyze": "/src/i18n/locales/test/",
+    "init": null,
+    "validate": null,
+    "complete": null,
+    "manage": null,
+    "summary": null,
+    "usage": null,
+    "sizing": null
+  },
   "reportLanguage": "auto",
   "theme": "light",
   "autoSave": true,

@@ -147,86 +147,192 @@ class SystemTester {
         console.log('\n🌐 Checking Translation Consistency...');
         
         try {
-            const localesDir = './ui-locales';
-            const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
-            
-            if (files.length === 0) {
-                this.logError('No translation files found');
+            const baseLocalesDir = './ui-locales';
+            const languages = fs.readdirSync(baseLocalesDir).filter(f => fs.statSync(path.join(baseLocalesDir, f)).isDirectory());
+
+            if (languages.length === 0) {
+                this.logError('No language directories found in ui-locales');
                 return;
             }
-            
+
             // Load English as reference
-            const enPath = path.join(localesDir, 'en.json');
-            if (!fs.existsSync(enPath)) {
-                this.logError('English translation file not found');
+            const enDir = path.join(baseLocalesDir, 'en');
+            if (!fs.existsSync(enDir)) {
+                this.logError('English language directory not found');
                 return;
             }
-            
-            const enData = JSON.parse(fs.readFileSync(enPath, 'utf8'));
+
+            const enFiles = fs.readdirSync(enDir).filter(f => f.endsWith('.json'));
+            let enData = {};
+            for (const file of enFiles) {
+                const filePath = path.join(enDir, file);
+                const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                enData = { ...enData, [file.replace('.json', '')]: content };
+            }
             const enKeys = this.getAllKeys(enData);
-            
+
             this.logSuccess(`Found ${enKeys.length} keys in English translations`);
-            
+
             // Check other languages
-            for (const file of files) {
-                if (file === 'en.json') continue;
-                
-                const filePath = path.join(localesDir, file);
-                const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                const keys = this.getAllKeys(data);
-                
-                // Get critical keys that must be present in all languages
-                const criticalKeys = [
-                    'language.title',
-                    'menu.title',
-                    'menu.options.exit',
-                    'common.success',
-                    'common.error'
-                ];
+            for (const lang of languages) {
+                if (lang === 'en') continue;
 
-                const missingCritical = criticalKeys.filter(key => !keys.includes(key));
-                const nonCriticalMissing = enKeys.filter(key => !criticalKeys.includes(key) && !keys.includes(key));
-                const extra = keys.filter(key => !enKeys.includes(key));
+                const langDir = path.join(baseLocalesDir, lang);
+                const langFiles = fs.readdirSync(langDir).filter(f => f.endsWith('.json'));
+                let langData = {};
+                for (const file of langFiles) {
+                    const filePath = path.join(langDir, file);
+                    const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                    langData = { ...langData, [file.replace('.json', '')]: content };
+                }
+                const langKeys = this.getAllKeys(langData);
 
-                this.translationConsistency[file] = {
-                    criticalKeysPresent: missingCritical.length === 0,
-                    missingCriticalKeys: missingCritical,
-                    nonCriticalMissingKeys: nonCriticalMissing,
-                    extraKeys: extra
-                };
+                // Compare keys
+                const missingInLang = enKeys.filter(key => !langKeys.includes(key));
+                const extraInLang = langKeys.filter(key => !enKeys.includes(key));
 
-                if (missingCritical.length > 0) {
-                    this.logWarning(`${file}: ${missingCritical.length} missing critical keys`);
-                    missingCritical.forEach(key => {
-                        this.missingTranslations.push(`${file}:${key}`);
-                    });
+                if (missingInLang.length > 0) {
+                    this.logError(`Missing keys in ${lang} translations: ${missingInLang.join(', ')}`);
+                    this.results.failed++;
+                    this.translationConsistency[lang] = { status: 'failed', missing: missingInLang, extra: extraInLang };
+                }
+                if (extraInLang.length > 0) {
+                    this.logError(`Extra keys in ${lang} translations: ${extraInLang.join(', ')}`);
+                    this.results.failed++;
+                    this.translationConsistency[lang] = { status: 'failed', missing: missingInLang, extra: extraInLang };
+                }
+
+                if (missingInLang.length === 0 && extraInLang.length === 0) {
+                    this.logSuccess(`Translation consistency OK for ${lang}`);
                 } else {
-                    this.logSuccess(`${file}: All critical keys present`);
-                }
-
-                if (nonCriticalMissing.length > 0) {
-                    console.log(`ℹ️ ${file}: ${nonCriticalMissing.length} non-critical missing keys`);
-                    nonCriticalMissing.slice(0, 5).forEach(key => {
-                        this.missingTranslations.push(`${file}:${key}`);
-                    });
-                }
-
-                if (extra.length > 0) {
-                    console.log(`ℹ️ ${file}: ${extra.length} extra keys`);
+                    this.logError(`Translation consistency check failed for ${lang}`);
                 }
             }
-            
+
+            if (Object.keys(this.translationConsistency).length === 0 || Object.values(this.translationConsistency).every(status => status.status === 'ok')) {
+                this.logSuccess('All translations are consistent');
+            } else {
+                this.logError('Translation consistency check failed');
+                this.results.failed++;
+            }
+
         } catch (error) {
-            this.logError('Translation consistency check failed', error);
+            this.logError(`Translation consistency check failed: ${error.message}`);
+            this.results.failed++;
         }
+    }
+
+    /**
+     * Get all keys from a nested object
+     * @param {object} obj
+     * @param {string} prefix
+     * @returns {string[]}
+     */
+    getAllKeys(obj, prefix = '') {
+        let keys = [];
+        for (const key in obj) {
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+                keys = keys.concat(this.getAllKeys(obj[key], prefix ? `${prefix}.${key}` : key));
+            } else {
+                keys.push(prefix ? `${prefix}.${key}` : key);
+            }
+        }
+        return keys;
+    }
+
+    /**
+     * Log a success message
+     * @param {string} message
+     */
+    logSuccess(message) {
+        console.log(`✅ ${message}`);
+        this.results.passed++;
+    }
+
+    /**
+     * Log an error message
+     * @param {string} message
+     */
+    logError(message) {
+        console.log(`❌ ${message}`);
+        this.results.errors.push(message);
+    }
+
+    /**
+     * Log a warning message
+     * @param {string} message
+     */
+    logWarning(message) {
+        console.log(`⚠️  ${message}`);
+        this.results.warnings++;
+    }
+
+    /**
+     * Run a shell command and return its output
+     * @param {string} command
+     * @returns {string}
+     */
+    runCommand(command) {
+        try {
+            return execSync(command, { encoding: 'utf8', stdio: 'pipe' });
+        } catch (error) {
+            this.logError(`Command failed: ${command}\n${error.stderr}`);
+            throw error;
+        }
+    }
+
+    /**
+     * Run the complete system test
+     */
+    async runTests() {
+        console.log('\n🧪 Starting Complete System Test\n');
+        console.log('============================================================\n');
+
+        // Test UI Translations
+        console.log('📝 Testing UI Translations...');
+        this.testUITranslations();
+
+        // Test Settings Manager
+        console.log('\n⚙️  Testing Settings Manager...');
+        this.testSettingsManager();
+
+        // Test Main Scripts
+        console.log('\n🔧 Testing Main Scripts...');
+        this.testAllScripts();
+
+        // Check Translation Consistency
+        await this.checkTranslationConsistency();
+
+        // Generate Report
+        console.log('\n📊 Generating Report...');
+        this.generateReport();
+
+        console.log('\n============================================================');
+        console.log('📋 FINAL TEST REPORT');
+        console.log('============================================================');
+        console.log(`✅ Passed: ${this.results.passed}`);
+        console.log(`❌ Failed: ${this.results.failed}`);
+        console.log(`⚠️  Warnings: ${this.results.warnings}`);
+
+        if (this.results.errors.length > 0) {
+            console.log('\n❌ Errors:');
+            this.results.errors.forEach(error => console.log(`   - ${error}`));
+        }
+
+        if (this.results.failed === 0) {
+            console.log('\n📊 Overall Status: 🟢 ALL TESTS PASSED');
+        } else {
+            console.log('\n📊 Overall Status: 🔴 NEEDS FIXES');
+        }
+        console.log('============================================================');
     }
 
     /**
      * Generate comprehensive report
      */
-    async generateReport() {
+    generateReport() {
         console.log('\n📊 Generating Report...');
-        
+
         const report = {
             timestamp: new Date().toISOString(),
             summary: {
@@ -239,13 +345,13 @@ class SystemTester {
             errors: this.results.errors,
             recommendations: this.generateRecommendations()
         };
-        
+
         // Ensure the reports directory exists
         const reportsDir = path.join(__dirname, '..', 'dev', 'debug', 'reports');
         if (!fs.existsSync(reportsDir)) {
             fs.mkdirSync(reportsDir, { recursive: true });
         }
-        
+
         const reportPath = path.join(reportsDir, 'test-report.json');
         fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
         this.logSuccess(`Report saved to ${reportPath}`);
@@ -256,120 +362,30 @@ class SystemTester {
      */
     generateRecommendations() {
         const recommendations = [];
-        
+
         if (this.missingTranslations.length > 0) {
-            recommendations.push(this.ui.t('hardcodedTexts.addMissingTranslationKeys'));
+            recommendations.push('Add missing translation keys');
         }
-        
+
         if (this.results.failed > 0) {
-            recommendations.push(this.ui.t('hardcodedTexts.fixFailingScripts'));
+            recommendations.push('Fix failing scripts');
         }
-        
+
         if (this.results.warnings > 5) {
-            recommendations.push(this.ui.t('hardcodedTexts.reviewWarningMessages'));
+            recommendations.push('Review warning messages');
         }
-        
+
         if (recommendations.length === 0) {
-            recommendations.push(this.ui.t('hardcodedTexts.systemReadyForDeployment'));
+            recommendations.push('System ready for deployment');
         }
-        
+
         return recommendations;
     }
-
-    /**
-     * Get all keys from nested object
-     */
-    getAllKeys(obj, prefix = '') {
-        let keys = [];
-        
-        for (const key in obj) {
-            const fullKey = prefix ? `${prefix}.${key}` : key;
-            
-            if (typeof obj[key] === 'object' && obj[key] !== null) {
-                if (Array.isArray(obj[key])) {
-                    // Handle array values
-                    keys.push(fullKey);
-                    
-                    // If array contains objects, extract their keys too
-                    obj[key].forEach((item, index) => {
-                        if (typeof item === 'object' && item !== null) {
-                            keys = keys.concat(this.getAllKeys(item, `${fullKey}[${index}]`));
-                        }
-                    });
-                } else {
-                    // Handle nested objects
-                    keys = keys.concat(this.getAllKeys(obj[key], fullKey));
-                }
-            } else {
-                keys.push(fullKey);
-            }
-        }
-        
-        return keys;
-    }
-
-    /**
-     * Print final report
-     */
-    printFinalReport() {
-        console.log('\n' + '=' .repeat(60));
-        console.log('📋 FINAL TEST REPORT');
-        console.log('=' .repeat(60));
-        
-        console.log(`✅ Passed: ${this.results.passed}`);
-        console.log(`❌ Failed: ${this.results.failed}`);
-        console.log(`⚠️  Warnings: ${this.results.warnings}`);
-        
-        if (this.missingTranslations.length > 0) {
-            console.log(`\n🔍 Missing Translations (${this.missingTranslations.length}):`);
-            this.missingTranslations.slice(0, 10).forEach(key => {
-                console.log(`   - ${key}`);
-            });
-            if (this.missingTranslations.length > 10) {
-                console.log(`   ... and ${this.missingTranslations.length - 10} more`);
-            }
-        }
-        
-        if (this.results.errors.length > 0) {
-            console.log(`\n❌ Errors:`);
-            this.results.errors.forEach(error => {
-                console.log(`   - ${error}`);
-            });
-        }
-        
-        const status = this.results.failed === 0 ? '🟢 READY' : '🔴 NEEDS FIXES';
-        console.log(`\n📊 Overall Status: ${status}`);
-        console.log('=' .repeat(60));
-    }
-
-    // Logging methods
-    logSuccess(message) {
-        console.log(`✅ ${message}`);
-        this.results.passed++;
-    }
-
-    logError(message, error = null) {
-        console.log(`❌ ${message}`);
-        if (error) {
-            console.log(`   ${error.message}`);
-        }
-        this.results.failed++;
-        this.results.errors.push(message);
-    }
-
-    logWarning(message) {
-        console.log(`⚠️  ${message}`);
-        this.results.warnings++;
-    }
 }
 
-// Run tests if called directly
-if (require.main === module) {
-    const tester = new SystemTester();
-    tester.runAllTests().catch(error => {
-        console.error('❌ Test runner failed:', error.message);
-        process.exit(1);
-    });
-}
+
+// Run the tests
+const tester = new SystemTester();
+tester.runTests();
 
 module.exports = SystemTester;

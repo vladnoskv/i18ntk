@@ -29,5 +29,18 @@
   "no_translation_files_found": "⚠️ TRANSLATION NEEDED ⚠️",
   "analysis_completed": "⚠️ TRANSLATION NEEDED ⚠️",
   "analysis_failed": "⚠️ TRANSLATION NEEDED ⚠️",
-  "failed_to_parse_language_error": "⚠️ TRANSLATION NEEDED ⚠️"
+  "failed_to_parse_language_error": "⚠️ TRANSLATION NEEDED ⚠️",
+  "keysHaveSignificantSizeVariations": "[ES] keys have significant size variations",
+  "longTranslationsDetected": "[ES] ${lang} has ${data.longKeys} translations longer than 100 characters - consider breaking them down",
+  "considerReviewingTranslations": "[ES] Consider reviewing ${lang} translations - they are ${data.percentageDifference}% longer than baseline",
+  "recommendations": {
+    "keys_have_significant_size_variations": "[ES] keys have significant size variations",
+    "consider_reviewing_translations": "[ES] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
+    "long_translations_detected": "[ES] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+  },
+  "hardcodedTexts": {
+    "keysHaveSignificantSizeVariations": "[ES] keys have significant size variations",
+    "considerReviewingTranslations": "[ES] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
+    "longTranslationsDetected": "[ES] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+  }
 }

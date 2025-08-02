@@ -1,4 +1,17 @@
 {
   "success": "Éxito",
-  "error": "Error"
+  "error": "Error",
+  "warning": "[ES] Warning",
+  "info": "[ES] Info",
+  "debug": "[ES] Debug",
+  "progress": "[ES] Progress",
+  "remaining": "[ES] Remaining",
+  "total": "[ES] Total",
+  "completed": "[ES] Completed",
+  "missing": "[ES] Missing",
+  "partial": "[ES] Partial",
+  "sameAsSource": "[ES] Same as source",
+  "formatMismatch": "[ES] Format mismatch",
+  "typeMismatch": "[ES] Type mismatch",
+  "structureMismatch": "[ES] Structure mismatch"
 }

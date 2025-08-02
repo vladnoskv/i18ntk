@@ -64,5 +64,16 @@
     "allKeysAvailable": "🎉 所有翻译键现在都已可用！",
     "runWithoutDryRun": "💡 运行不带 --dry-run 的命令以应用更改",
     "pressEnterToContinue": "按回车键继续..."
+  },
+  "cancelReportOption": "取消 / 返回菜单",
+  "updatePackage": {
+    "title": "📦 更新 i18n-toolkit 包",
+    "description": "这将把 i18n-toolkit 包更新到 npm 上可用的最新版本。",
+    "command": "要运行的命令",
+    "confirm": "您确定要继续更新吗？(y/N): ",
+    "updating": "正在更新包...这可能需要一些时间。",
+    "success": "✅ i18n-toolkit 更新成功！",
+    "error": "❌ 更新 i18n-toolkit 失败",
+    "cancelled": "❌ 更新已取消。"
   }
 }

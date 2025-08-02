@@ -1,0 +1,15 @@
+{
+
+    "scriptDirectories": {
+        "analyzeLabel": "Analyze Script Directories",
+        "analyzeHelp": "Analyze script directories for issues",
+        "completeLabel": "Complete Setup Directories",
+        "initLabel": "Initialize Script Directories",
+        "manageLabel": "Manage Script Directories",
+        "manageHelp": "Manage script directories",
+        "sizingLabel": "Sizing Script Directories",
+        "summaryLabel": "Summary Report Directories",
+        "usageLabel": "Usage Report Directories",
+        "validateLabel": "Validate Script Directories"
+    }
+}

@@ -100,9 +100,11 @@ class I18nManager {
   detectI18nDirectory() {
     const settings = settingsManager.getSettings();
     
-    // Use settings configuration if available
-    if (settings.directories?.sourceDir) {
-      this.config.sourceDir = settings.directories.sourceDir;
+    // Use per-script directory configuration if available, fallback to global sourceDir
+    const sourceDir = settings.scriptDirectories?.manage || settings.sourceDir;
+    
+    if (sourceDir) {
+      this.config.sourceDir = sourceDir;
       return;
     }
     

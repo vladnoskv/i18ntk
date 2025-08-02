@@ -29,5 +29,18 @@
   "no_translation_files_found": "No translation files found",
   "analysis_completed": "Analysis completed in {{duration}}ms",
   "analysis_failed": "Analysis failed: {{errorMessage}}",
-  "failed_to_parse_language_error": "Failed to parse {{language}} translations: {{errorMessage}}"
+  "failed_to_parse_language_error": "Failed to parse {{language}} translations: {{errorMessage}}",
+  "keysHaveSignificantSizeVariations": "[DE] keys have significant size variations",
+  "longTranslationsDetected": "[DE] ${lang} has ${data.longKeys} translations longer than 100 characters - consider breaking them down",
+  "considerReviewingTranslations": "[DE] Consider reviewing ${lang} translations - they are ${data.percentageDifference}% longer than baseline",
+  "recommendations": {
+    "keys_have_significant_size_variations": "[DE] keys have significant size variations",
+    "consider_reviewing_translations": "[DE] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
+    "long_translations_detected": "[DE] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+  },
+  "hardcodedTexts": {
+    "keysHaveSignificantSizeVariations": "[DE] keys have significant size variations",
+    "considerReviewingTranslations": "[DE] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
+    "longTranslationsDetected": "[DE] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+  }
 }
