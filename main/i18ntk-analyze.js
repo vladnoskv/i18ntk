@@ -487,6 +487,9 @@ class I18nAnalyzer {
       const results = []; // Add this line to declare the results array
       
       console.log(this.t('analyze.starting') || '🔍 Starting translation analysis...');
+      console.log(`📁 Source directory: ${path.resolve(this.sourceDir)}`);
+      console.log(`🌍 Source language: ${this.config.sourceLanguage}`);
+      console.log(`⚙️  Strict mode: ${this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF'}`);
       
       // Ensure output directory exists
       if (!fs.existsSync(this.outputDir)) {

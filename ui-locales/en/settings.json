@@ -3,6 +3,7 @@
   "separator": "============================================================",
   "goodbyeMessage": "Thank you for using the i18ntk settings manager!",
   "relativePathHint": "Use relative paths from this directory (e.g., ./src/i18n/locales)",
+  "currentDirectory": "Current project directory",
   "mainMenu": {
     "title": "Main Menu:",
     "uiSettings": "UI Settings",
@@ -301,12 +302,17 @@
   },
   "current": "Current",
   "back": "Back to main menu",
-  "selectSettingPrompt": "Select setting to edit (or b for back): ",
+  "selectSettingPrompt": "Select setting to edit (or b for back, r for reset): ",
   "invalidOption": "Invalid option.",
   "editing": "Editing",
-  "enterNewValue": "Enter new value (or press Enter to keep current):",
+  "enterNewValue": "Enter new value (or press Enter to keep current, type 'default' to use system default):",
   "validOptions": "Valid options",
   "updatedSuccessfully": "updated successfully!",
-  "noHelp": "No help available for this setting"
+  "noHelp": "No help available for this setting",
+  "resetScriptDirectories": "Reset to Default Values",
+  "resetScriptDirectoriesTitle": "Reset Script Directories to Defaults",
+  "resetScriptDirectoriesWarning1": "This will reset all script directory configurations to their system defaults.",
+  "resetScriptDirectoriesWarning2": "All custom directory paths will be cleared. This action cannot be undone.",
+  "resetScriptDirectoriesConfirm": "Are you sure you want to reset all script directories to defaults? (y/N): "
   }
 

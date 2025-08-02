@@ -1,7 +1,7 @@
 # I18N Management Toolkit - Documentation Hub
 
-**Version:** 1.3.0  
-**Last Updated:** August 2, 2025  
+**Version:** 1.3.1  
+**Last Updated:** December 2024  
 **Maintainer:** Vladimir Noskov  
 
 ## ⚠️ Important Disclaimer
@@ -204,7 +204,8 @@ For enterprise support, custom integrations, or consulting services, please cont
 ## 🔄 Version History
 
 ### Recent Releases
-- **[v1.3.0](../CHANGELOG.md)** - Script Directory Configuration & Path Resolution Fixes (Current)
+- **[v1.3.1](../CHANGELOG.md)** - Reset to default values option & Enhanced settings CLI (Current)
+- **[v1.3.0](../CHANGELOG.md)** - Script Directory Configuration & Path Resolution Fixes
 - **[v1.2.3](../CHANGELOG.md)** - Documentation & Metadata Cleanup **(DEPRECATED)**
 - **[v1.1.5](../CHANGELOG.md)** - Internationalization Completion **(DEPRECATED)**
 - **[v1.1.4](../CHANGELOG.md)** - Translation System Enhancement **(DEPRECATED)**

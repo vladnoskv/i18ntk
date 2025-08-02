@@ -242,5 +242,12 @@
   "saveSuccess": "[ZH] Settings saved successfully.",
   "saveFailed": "[ZH] Failed to save settings.",
   "initFailed": "[ZH] Failed to initialize settings: {error}",
-  "invalidValueFormat": "[ZH] Invalid value format."
+  "invalidValueFormat": "[ZH] Invalid value format.",
+  "selectSettingPrompt": "选择要编辑的设置（或b返回，r重置）：",
+  "enterNewValue": "输入新值（或按Enter键保持当前值，输入'default'使用系统默认值）：",
+  "resetScriptDirectories": "重置为默认值",
+  "resetScriptDirectoriesTitle": "将脚本目录重置为默认值",
+  "resetScriptDirectoriesWarning1": "这将把所有脚本目录配置重置为系统默认值。",
+  "resetScriptDirectoriesWarning2": "所有自定义目录路径将被清除。此操作无法撤消。",
+  "resetScriptDirectoriesConfirm": "您确定要将所有脚本目录重置为默认值吗？(y/N)："
 }

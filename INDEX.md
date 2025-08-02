@@ -1,6 +1,6 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.3.0  
+**Version:** 1.3.1  
 **Last Updated:** 02/08/2025  
 **Maintainer:** Vladimir Noskov  
 
@@ -49,9 +49,10 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Debug Documentation](./debug/DEBUG_README.md)** - Debug tools and troubleshooting
 - **[Debug Tools Overview](./debug/DEBUG_TOOLS.md)** - Available debug utilities
 
-## 🆕 What's New in v1.3.0
+## 🆕 What's New in v1.3.1
 
 ### Major Features
+- **🔄 Reset to Default Values** - New menu option to reset all directory configurations to defaults
 - **🎯 Per-Script Directory Configuration** - Configure custom directories for each script type
 - **🔧 Fixed Path Resolution** - Analyzing logic now correctly follows settings
 - **🌍 Enhanced Internationalization** - Continued support for global applications

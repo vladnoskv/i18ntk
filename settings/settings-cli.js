@@ -312,11 +312,23 @@ class SettingsCLI {
         });
 
         console.log(`\n  ${colors.yellow}b${colors.reset}) ${this.t('settings.back')}`);
+        
+        // Add reset option for script directories
+        const isScriptDirectory = Object.keys(categorySettings).some(key => key.startsWith('scriptDirectories.'));
+        if (isScriptDirectory) {
+            console.log(`  ${colors.red}r${colors.reset}) ${this.t('settings.resetScriptDirectories')}`);
+        }
         console.log();
 
         const choice = await this.prompt(this.t('settings.selectSettingPrompt'));
         
         if (choice.toLowerCase() === 'b') {
+            return;
+        }
+
+        if (choice.toLowerCase() === 'r' && isScriptDirectory) {
+            await this.resetScriptDirectories();
+            await this.showSettingsCategory(categorySettings);
             return;
         }
 
@@ -478,8 +490,19 @@ class SettingsCLI {
             return;
         }
         
-        if (newValue.trim() === '') {
-            return;
+        // Handle "default" keyword for script directory settings
+        if (newValue.trim().toLowerCase() === 'default') {
+            if (key.startsWith('scriptDirectories.')) {
+                this.setNestedValue(this.settings, key, null);
+                this.modified = true;
+                this.success(`${label} reset to system default.`);
+                await this.pause();
+                return;
+            } else {
+                this.error('"default" keyword is only supported for script directory settings.');
+                await this.pause();
+                return;
+            }
         }
         
         // Validate input
@@ -758,6 +781,46 @@ class SettingsCLI {
                 this.success('Settings reset to defaults successfully.');
             } catch (error) {
                 this.error(`Failed to reset settings: ${error.message}`);
+            }
+        }
+        
+        await this.pause();
+    }
+
+    /**
+     * Reset script directories to defaults
+     */
+    async resetScriptDirectories() {
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}${this.t('settings.resetScriptDirectoriesTitle')}${colors.reset}\n`);
+        console.log(`${colors.yellow}${this.t('settings.resetScriptDirectoriesWarning1')}${colors.reset}`);
+        console.log(`${colors.yellow}${this.t('settings.resetScriptDirectoriesWarning2')}${colors.reset}\n`);
+        
+        const confirm = await this.prompt(this.t('settings.resetScriptDirectoriesConfirm'));
+        
+        if (confirm.toLowerCase() === 'y') {
+            try {
+                // Reset all script directory settings to null (use system defaults)
+                const scriptDirKeys = [
+                    'scriptDirectories.analyze',
+                    'scriptDirectories.complete',
+                    'scriptDirectories.init',
+                    'scriptDirectories.manage',
+                    'scriptDirectories.sizing',
+                    'scriptDirectories.summary',
+                    'scriptDirectories.usage',
+                    'scriptDirectories.validate'
+                ];
+                
+                scriptDirKeys.forEach(key => {
+                    this.setNestedValue(this.settings, key, null);
+                });
+                
+                this.modified = true;
+                this.success('Script directories reset to system defaults successfully.');
+            } catch (error) {
+                this.error(`Failed to reset script directories: ${error.message}`);
             }
         }
         

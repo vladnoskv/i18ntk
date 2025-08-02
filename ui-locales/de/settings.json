@@ -242,5 +242,12 @@
   "saveSuccess": "[DE] Settings saved successfully.",
   "saveFailed": "[DE] Failed to save settings.",
   "initFailed": "[DE] Failed to initialize settings: {error}",
-  "invalidValueFormat": "[DE] Invalid value format."
+  "invalidValueFormat": "[DE] Invalid value format.",
+  "selectSettingPrompt": "Einstellung zum Bearbeiten auswählen (oder b für Zurück, r für Zurücksetzen): ",
+  "enterNewValue": "Neuen Wert eingeben (oder Enter drücken um aktuellen Wert zu behalten, 'default' eingeben um Systemstandard zu verwenden):",
+  "resetScriptDirectories": "Auf Standardwerte zurücksetzen",
+  "resetScriptDirectoriesTitle": "Skript-Verzeichnisse auf Standardwerte zurücksetzen",
+  "resetScriptDirectoriesWarning1": "Dies setzt alle Skript-Verzeichniskonfigurationen auf ihre Systemstandardwerte zurück.",
+  "resetScriptDirectoriesWarning2": "Alle benutzerdefinierten Verzeichnispfade werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "resetScriptDirectoriesConfirm": "Sind Sie sicher, dass Sie alle Skript-Verzeichnisse auf Standardwerte zurücksetzen möchten? (y/N): "
 }

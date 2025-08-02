@@ -1,7 +1,34 @@
 # Changelog
 
 
-**Current Version:** 1.3.0 (2025-08-02) - **SCRIPT DIRECTORY CONFIGURATION & PATH RESOLUTION FIXES** 🚀
+**Current Version:** 1.3.1 (2025-12-2024) - **RESET TO DEFAULT VALUES & ENHANCED SETTINGS CLI** 🔄
+
+### 🆕 New Features
+- **Reset to Default Values**: Added `r) Reset to Default Values` option to settings CLI menu for quick configuration reset
+- **Enhanced Settings CLI**: Improved user experience with clear reset confirmation prompts
+- **Safety Features**: Added confirmation prompt before resetting all directory configurations
+
+### 🔧 Configuration Improvements
+- **One-Click Reset**: Reset all 8 script directory configurations to system defaults
+- **Preserved Functionality**: All existing configurations remain intact until reset is confirmed
+- **Audit Logging**: Reset operations are logged for troubleshooting purposes
+
+### 📋 Menu Enhancement
+- **New Menu Option**: Added `r) Reset to Default Values` alongside existing `b) Back to main menu`
+- **Enhanced Default Handling**: Users can type "default" to restore individual settings to system defaults
+- **User-Specific Defaults**: Defaults adapt to actual project directory structure
+- **Clear Navigation**: Users can now reset configurations without navigating through individual settings
+- **Safe Defaults**: System defaults provide reliable starting points for new projects
+
+### 🔧 Script Output Improvements
+- **Enhanced Script Output**: Added clear display of source directory, source language, and strict mode status at the beginning of analyze and sizing script runs
+- **Absolute Path Display**: Scripts now show resolved absolute paths for better debugging and verification
+- **Improved Sizing Analysis**: Enhanced translation length difference warnings with more actionable guidance and specific recommendations
+- **Configuration Transparency**: Users can immediately see what configuration is being used for each script
+
+---
+
+**Previous Version:** 1.3.0 (2025-08-02) - **SCRIPT DIRECTORY CONFIGURATION & PATH RESOLUTION FIXES** 🚀
 
 ### 🆕 New Features
 - **Per-Script Directory Configuration**: Added support for custom directory overrides for each script type (analyze, complete, init, manage, sizing, summary, usage, validate)

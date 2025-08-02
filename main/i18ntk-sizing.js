@@ -354,27 +354,19 @@ class I18nSizingAnalyzer {
       if (data.isProblematic) {
         const comparison = data.percentageDifference > 0 ? 'longer' : 'shorter';
         const absPercentage = Math.abs(data.percentageDifference);
-        recommendations.push(this.t('sizing.considerReviewingTranslations', { 
-          lang, 
-          percentageDifference: absPercentage, 
-          comparison 
-        }));
+        recommendations.push(`Review ${lang} translations - they are ${absPercentage}% ${comparison} than baseline. Consider UI layout adjustments or translation optimization.`);
       }
     });
     
     // Check for problematic keys
     if (this.stats.summary.problematicKeys.length > 0) {
-      recommendations.push(this.t('sizing.keysHaveSignificantSizeVariations', { count: this.stats.summary.problematicKeys.length }));
+      recommendations.push(`${this.stats.summary.problematicKeys.length} keys have significant size variations. Check individual translations for potential layout issues.`);
     }
     
     // Check for very long translations
     Object.entries(this.stats.languages).forEach(([lang, data]) => {
       if (data.longKeys > 0) {
-        recommendations.push(this.t('sizing.longTranslationsDetected', { 
-          lang, 
-          longKeys: data.longKeys, 
-          threshold: 100 
-        }));
+        recommendations.push(`${lang} has ${data.longKeys} translations exceeding 100 characters. Consider breaking into shorter segments or reviewing for conciseness.`);
       }
     });
     
@@ -383,6 +375,10 @@ class I18nSizingAnalyzer {
 
   // Display results in table format
   displayTable() {
+    console.log(`📁 Source directory: ${path.resolve(this.sourceDir)}`);
+    console.log(`🌍 Source language: ${this.config?.sourceLanguage || 'en'}`);
+    console.log(`⚙️  Strict mode: OFF`);
+    console.log();
     console.log(this.t("sizing.sizing_analysis_results"));
     console.log(this.t("sizing.separator"));
     

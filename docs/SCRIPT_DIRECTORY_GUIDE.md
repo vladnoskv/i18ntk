@@ -1,8 +1,11 @@
 # Script Directory Configuration Guide
 
+**Version:** 1.3.1  
+**Last Updated:** December 2024
+
 ## Overview
 
-Starting with **i18ntk v1.3.0**, we've introduced powerful new features for managing script directories and fixed critical path resolution issues. This guide explains how to configure custom directories for each script type and take advantage of the improved path handling.
+Starting with **i18ntk v1.3.0**, we've introduced powerful new features for managing script directories and fixed critical path resolution issues. In **v1.3.1**, we've enhanced these features with reset functionality. This guide explains how to configure custom directories for each script type and take advantage of the improved path handling.
 
 ## 🆕 New Features in v1.3.0
 
@@ -36,7 +39,58 @@ node main/i18ntk-manage.js --command=settings
 node settings/settings-cli.js
 ```
 
-Navigate to **"Script Directory Configuration"** to configure individual directories for each script type.
+Navigate to **"Script Directory Configuration"** to configure individual directories for each script type. In v1.3.1, you can now reset any directory to its default value using the new reset option.
+
+#### Configuration Menu
+
+When running the settings CLI, you'll see this menu:
+
+```
+Enter new value (or press Enter to keep current): 
+  1) Analyze Script Directories 
+     Current: /src/i18n/locales/test/ 
+  2) Complete Setup Directories 
+     Current: (not set) 
+  3) Initialize Script Directories 
+     Current: (not set) 
+  4) Manage Script Directories 
+     Current: (not set) 
+  5) Sizing Script Directories 
+     Current: (not set) 
+  6) Summary Report Directories 
+     Current: (not set) 
+  7) Usage Report Directories 
+     Current: (not set) 
+  8) Validate Script Directories 
+     Current: (not set) 
+
+  b) Back to main menu
+  r) Reset to Default Values
+
+Select setting to edit (or b for back, r for reset): 
+```
+
+#### Reset to Default Values
+
+**New in v1.3.1**: You can now reset all directory configurations to their default values with a single option. When you select `r) Reset to Default Values`, the toolkit will:
+
+- Reset all custom directory paths to their system defaults
+- Clear any custom configurations you've set
+- Restore the original directory structure
+- Provide a confirmation prompt before proceeding
+
+#### Using Default Values
+
+Instead of leaving fields empty (which isn't possible after changes), you can now type `default` to restore individual settings to their default values. The defaults are based on your user directory settings:
+
+- **Type "default"**: Use system default directory paths
+- **Custom paths**: Any valid directory path will override defaults
+- **Global settings**: Defaults respect your global project directory configuration
+
+This approach provides:
+- **Granular control**: Reset individual directories without affecting others
+- **User-specific defaults**: Defaults adapt to your project structure
+- **Better UX**: Clear "default" keyword instead of ambiguous empty inputs
 
 ### Method 2: Manual Configuration
 

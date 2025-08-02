@@ -14,6 +14,7 @@
   "syntaxErrorsCount": "❌ Syntax errors: {count}",
   "translationPercentage": "🎯 Translation: {percentage}% ({translated}/{total} keys)",
   "validationSummary": "📊 VALIDATION SUMMARY",
+  "validation_failed": "❌ Validation failed: {error}",
   "totalErrors": "❌ Total errors: {count}",
   "totalWarnings": "⚠️  Total warnings: {count}",
   "errorsSection": "❌ ERRORS",

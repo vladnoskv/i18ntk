@@ -1,11 +1,10 @@
 # i18ntk -  i18n Management Toolkit
 
-[![version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk)
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-**Version:** 1.3.0 – **i18ntk** (i18n Toolkit) is a comprehensive, internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
+**Version:** 1.3.1 – **i18ntk** (i18n Toolkit) is a comprehensive, internationalization management toolkit for JavaScript/TypeScript projects. It provides a complete CLI suite with multi-language support and advanced analysis capabilities for managing translations efficiently.
 
 ## 🔧 Key Features
 
@@ -15,7 +14,7 @@
 - **Multi-Language Support**: UI available in 7 languages with partial internationalization
 - **Production-Ready**: Tested extensively in various environments
 
-**⚠️ Important Notice:** All previous versions (< 1.3.0) are now deprecated due to critical bugs and issues. Please upgrade to v1.3.0 for the most stable experience. We recommend backing up your project before upgrading and testing on a development branch first. 
+**⚠️ Important Notice:** All previous versions (< 1.3.1) are now deprecated due to critical bugs and issues. Please upgrade to v1.3.1 for the most stable experience. We recommend backing up your project before upgrading and testing on a development branch first. 
 
 **🎉 Thank You:** 500+ downloads in the first week! Thank you for your support and patience as I resolve the functional issues. My First Published Package, please update to the latest version as any previous bugs were probably fixed. 
 
@@ -88,7 +87,7 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 
 **Important:** Direct command execution (e.g., `npx i18ntk usage`) now bypasses the interactive menu, allowing for more streamlined workflows and scripting.
 
-## ✨ What's New in v1.3.0
+## ✨ What's New in v1.3.1
 
 ### 🆕 Script Directory Configuration
 - **New**: Added per-script directory configuration support for maximum flexibility
@@ -96,10 +95,11 @@ npx i18ntk -v         # 📋 Show detailed version information (short flag)
 - **Enhanced**: Added comprehensive internationalization for all new configuration options
 - **Improved**: Settings CLI now includes script directory configuration menu
 - **Added**: Current working directory display and path guidance in CLI prompts
+- **Reset to Defaults**: New menu option to reset all directory configurations to defaults
 
 ### 🐛 Previous Version Deprecation
-- **Status**: All versions < 1.3.0 are now deprecated due to critical bugs
-- **Recommendation**: Immediate upgrade to v1.3.0 for stable functionality
+- **Status**: All versions < 1.3.1 are now deprecated due to critical bugs
+- **Recommendation**: Immediate upgrade to v1.3.1 for stable functionality
 - **Migration**: Major-breaking-changes upgrading from any 1.0.x version. Uninstall, and reinstall and rerun initilization.
 
 ### ⬆️ Update Package Functionality
