@@ -21,7 +21,7 @@ class UIi18n {
         const config = getConfig();
         this.currentLanguage = 'en';
         this.translations = {};
-        this.availableLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
+        this.availableLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh', 'pt'];
         this.uiLocalesDir = path.resolve(config.uiLocalesDir);
         this.configFile = path.resolve(config.configFile);
 
@@ -303,7 +303,8 @@ class UIi18n {
             'fr': 'Français (French)',
             'ru': 'Русский (Russian)',
             'ja': '日本語 (Japanese)',
-            'zh': '中文 (Chinese)'
+            'zh': '中文 (Chinese)',
+            'pt': 'Português (Portuguese)'
          };
 
         // Hardcoded texts that are not part of the i18n system but need to be displayed

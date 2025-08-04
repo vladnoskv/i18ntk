@@ -179,7 +179,7 @@ class I18nUsageAnalyzer {
   
   // Prompt for user input
   async prompt(question) {
-    const rl = this.initReadline();
+    const rl = this.rl || this.initReadline();
     return new Promise((resolve) => {
       rl.question(question, resolve);
     });
@@ -253,8 +253,8 @@ class I18nUsageAnalyzer {
         } else if (key === 'help') {
           parsed.help = true;
         } else if (key === 'no-prompt') {
-          parsed.noPrompt = true;
-        }
+            parsed.noPrompt = true;
+          }
       }
       
       await SecurityUtils.logSecurityEvent(this.t('usage.argsParsed'), { component: 'i18ntk-usage', args: parsed });
@@ -402,9 +402,49 @@ class I18nUsageAnalyzer {
     return files;
   }
 
-  async run() {
+  async run(options = {}) {
+    const { fromMenu = false } = options;
+    
     try {
       await this.initialize();
+      
+      // Skip admin authentication when called from menu
+      if (!fromMenu) {
+        const isCalledDirectly = require.main === module;
+        if (isCalledDirectly && !args.noPrompt) {
+          // Only check admin authentication when running directly and not in no-prompt mode
+          const AdminAuth = require('../utils/admin-auth');
+          const adminAuth = new AdminAuth();
+          await adminAuth.initialize();
+          
+          const isRequired = await adminAuth.isAuthRequired();
+          if (isRequired) {
+            console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'analyze usage' }));
+            
+            // Create readline interface for PIN input
+            const readline = require('readline');
+            const rl = readline.createInterface({
+              input: process.stdin,
+              output: process.stdout
+            });
+            
+            const pin = await new Promise(resolve => {
+              rl.question('🔐 Enter admin PIN: ', resolve);
+            });
+            
+            const isValid = await adminAuth.verifyPin(pin);
+            rl.close();
+            
+            if (!isValid) {
+              console.log(this.t('adminCli.invalidPin'));
+              if (!fromMenu) process.exit(1);
+              return { success: false, error: 'Authentication failed' };
+            }
+            
+            console.log(this.t('adminCli.authenticationSuccess'));
+          }
+        }
+      }
       
       const args = await this.parseArgs();
       
@@ -463,7 +503,7 @@ class I18nUsageAnalyzer {
       
       console.log('\n' + this.t('usage.analysisCompletedSuccessfully'));
     
-      if (require.main === module) {
+      if (require.main === module && !args.noPrompt) {
         await this.prompt('\nPress Enter to continue...');
       }
       this.closeReadline();

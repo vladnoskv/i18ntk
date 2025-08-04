@@ -1,11 +1,11 @@
 {
-  "autoDetectedI18nDirectory": "⚠️ TRANSLATION NEEDED ⚠️",
-  "executingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "unknownCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorExecutingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorLoadingTranslationFile": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorSavingLanguagePreference": "⚠️ TRANSLATION NEEDED ⚠️",
-  "noActiveReadlineInterface": "⚠️ TRANSLATION NEEDED ⚠️",
-  "uiLanguageUpdated": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOptionPrompt": "⚠️ TRANSLATION NEEDED ⚠️"
+  "autoDetectedI18nDirectory": "自動検出されたi18nディレクトリ: {{path}}",
+  "executingCommand": "🔄 コマンドを実行中: {{command}}",
+  "unknownCommand": "❌ 不明なコマンド: {{command}}",
+  "errorExecutingCommand": "❌ コマンド実行エラー: {{error}}",
+  "errorLoadingTranslationFile": "❌ 翻訳ファイルの読み込みエラー '{{language}}': {{error}}",
+  "errorSavingLanguagePreference": "❌ 言語設定の保存エラー: {{error}}",
+  "noActiveReadlineInterface": "❌ アクティブなreadlineインターフェースがありません",
+  "uiLanguageUpdated": "🌍 UI言語が更新されました: {{language}}",
+  "selectOptionPrompt": "オプションを選択:"
 }

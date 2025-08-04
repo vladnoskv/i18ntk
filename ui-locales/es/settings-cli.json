@@ -1,5 +1,40 @@
 {
-  "settings_cli": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+  "settings": {
+    "mainMenu": {
+      "title": "Menú Principal:",
+      "uiSettings": "Configuración UI",
+      "uiSettingsDesc": "Idioma, tema y opciones de interfaz",
+      "directorySettings": "Configuración de Directorios", 
+      "directorySettingsDesc": "Rutas de directorios de origen y salida",
+      "scriptDirectorySettings": "Configuración de Directorios de Scripts",
+      "scriptDirectorySettingsDesc": "Rutas de directorios para operaciones individuales de scripts",
+      "processingSettings": "Configuración de Procesamiento",
+      "processingSettingsDesc": "Tamaño de lote, concurrencia y rendimiento",
+      "advancedSettings": "Configuración Avanzada",
+      "advancedSettingsDesc": "Validación, registro y opciones expertas",
+      "viewAllSettings": "Ver Todas las Configuraciones",
+      "viewAllSettingsDesc": "Mostrar configuración actual",
+      "importExport": "Importar/Exportar",
+      "importExportDesc": "Respaldar y restaurar configuraciones",
+      "resetToDefaults": "Restablecer a Valores Predeterminados",
+      "resetToDefaultsDesc": "Restaurar configuraciones de fábrica",
+      "reportBug": "Reportar Error",
+      "reportBugDesc": "Enviar un informe de error en GitHub",
+      "saveChanges": "Guardar Cambios",
+      "saveChangesDesc": "Guardar configuración actual en archivo",
+      "updatePackage": "Actualizar Paquete",
+      "updatePackageDesc": "Actualizar el paquete i18n-toolkit vía npm",
+      "help": "Ayuda",
+      "helpDesc": "Mostrar información de ayuda detallada",
+      "quit": "Salir",
+      "quitDesc": "Salir de configuraciones (con aviso de guardar si es necesario)",
+      "unsavedChangesWarning": "⚠️  Tiene cambios no guardados",
+      "saveChangesBeforeQuit": "¿Desea guardar los cambios antes de salir? (s/N): ",
+      "selectOption": "Seleccionar una opción: ",
+      "goodbyeMessage": "¡Gracias por usar el administrador de configuraciones i18n!"
+    },
+    "goodbyeMessage": "¡Gracias por usar el administrador de configuraciones i18n!",
+    "relativePathHint": "Use rutas relativas desde este directorio (ej. ./src/i18n/locales)",
+    "currentDirectory": "Directorio actual del proyecto"
   }
 }

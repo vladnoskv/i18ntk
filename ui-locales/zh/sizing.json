@@ -7,8 +7,19 @@
   "source_directory": "源目录: {{sourceDir}}",
   "found_languages": "找到语言: {{languages}}",
   "analyzing_file_sizes": "正在分析文件大小...",
+  "problematicKeysLabel": "问题键: {{problematicKeys}}",
   "analyzing_translation_content": "正在分析翻译内容...",
   "generating_size_comparisons": "正在生成大小比较...",
+  "sourceDirectoryLabel": "📁 源目录: {{sourceDir}}",
+  "sourceLanguageLabel": "🌍 源语言: {{sourceLanguage}}",
+  "strictModeLabel": "⚙️ 严格模式: {{mode}}",
+  "invalidSourceDirectoryError": "无效的源目录路径: {{sourceDir}}",
+  "sourceDirectoryNotFoundError": "未找到源目录: {{sourceDir}}",
+  "invalidOutputDirectoryError": "无效的输出目录路径: {{outputDir}}",
+  "invalidReportFileError": "无效的报告文件路径",
+  "failedToSaveReportError": "无法安全保存报告",
+  "invalidCsvFileError": "无效的CSV文件路径",
+  "failedToSaveCsvError": "无法安全保存CSV报告",
   "no_languages_found_for_comparison": "未找到用于比较的语言",
   "keysHaveSignificantSizeVariations": "键有显著的大小变化",
   "sizing_analysis_results": "国际化大小分析结果",
@@ -24,6 +35,7 @@
   "problematic_yes": "是",
   "problematic_no": "否",
   "recommendations_title": "建议",
+  "recommendation_item": "{{index}}. {{recommendation}}",
   "generating_detailed_report": "正在生成详细报告...",
   "report_saved_to": "报告已保存到: {{reportPath}}",
   "csv_report_saved_to": "CSV报告已保存到: {{csvPath}}",
@@ -31,16 +43,16 @@
   "analysis_completed": "分析在{{duration}}毫秒内完成",
   "analysis_failed": "分析失败: {{errorMessage}}",
   "failed_to_parse_language_error": "无法解析{{language}}翻译: {{errorMessage}}",
-  "longTranslationsDetected": "[ZH] ${lang} has ${data.longKeys} translations longer than 100 characters - consider breaking them down",
-  "considerReviewingTranslations": "[ZH] Consider reviewing ${lang} translations - they are ${data.percentageDifference}% longer than baseline",
+  "longTranslationsDetected": "${lang} 有 ${data.longKeys} 个翻译超过100个字符 - 考虑拆分它们",
+  "considerReviewingTranslations": "考虑检查 ${lang} 翻译 - 它们比基准长 ${data.percentageDifference}%",
   "recommendations": {
-    "keys_have_significant_size_variations": "[ZH] keys have significant size variations",
-    "consider_reviewing_translations": "[ZH] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
-    "long_translations_detected": "[ZH] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+    "keys_have_significant_size_variations": "键有显著的大小变化",
+    "consider_reviewing_translations": "考虑检查 {{lang}} 翻译 - 它们比基准 {{comparison}} {{percentageDifference}}%",
+    "long_translations_detected": "{{lang}} 有 {{longKeys}} 个翻译超过 {{threshold}} 个字符 - 考虑拆分它们"
   },
   "hardcodedTexts": {
-    "keysHaveSignificantSizeVariations": "[ZH] keys have significant size variations",
-    "considerReviewingTranslations": "[ZH] Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
-    "longTranslationsDetected": "[ZH] {{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
+    "keysHaveSignificantSizeVariations": "键有显著的大小变化",
+    "considerReviewingTranslations": "考虑检查 {{lang}} 翻译 - 它们比基准 {{comparison}} {{percentageDifference}}%",
+    "longTranslationsDetected": "{{lang}} 有 {{longKeys}} 个翻译超过 {{threshold}} 个字符 - 考虑拆分它们"
   }
 }

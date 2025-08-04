@@ -161,6 +161,8 @@ class I18nInitializer {
           parsed.sourceDir = value;
         } else if (key === 'source-language') {
           parsed.sourceLanguage = value;
+        } else if (key === 'no-prompt') {
+          parsed.noPrompt = true;
         }
       }
     });
@@ -774,9 +776,55 @@ class I18nInitializer {
     console.log(this.ui.t('init.nextStep3'));
   }
 
-  // Add run method for compatibility with manager
+  // Run the initialization process with admin authentication
   async run() {
-    return await this.init();
+    try {
+      // Parse command line arguments
+      const args = this.parseArgs();
+      
+      // Override config with command line arguments
+      if (args.languages) {
+        this.config.defaultLanguages = args.languages;
+      }
+      if (args.sourceDir) {
+        this.config.sourceDir = args.sourceDir;
+        this.sourceDir = path.resolve(this.config.sourceDir);
+        this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+      }
+      if (args.sourceLanguage) {
+        this.config.sourceLanguage = args.sourceLanguage;
+        this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+      }
+
+      // Check admin authentication for sensitive operations (only when called directly and not in no-prompt mode)
+      const AdminAuth = require('../utils/admin-auth');
+      const adminAuth = new AdminAuth();
+      await adminAuth.initialize();
+      
+      const isCalledDirectly = require.main === module;
+      const isRequired = await adminAuth.isAuthRequired();
+      if (isRequired && isCalledDirectly && !args.noPrompt) {
+        console.log('\n' + this.ui.t('adminCli.authRequiredForOperation', { operation: 'initialize i18n project' }));
+        const pin = await this.prompt('🔐 Enter admin PIN: ');
+        const isValid = await adminAuth.verifyPin(pin);
+        
+        if (!isValid) {
+          console.log(this.ui.t('adminCli.invalidPin'));
+          if (this.shouldCloseRL) {
+            this.rl.close();
+            global.activeReadlineInterface = null;
+          }
+          process.exit(1);
+        }
+        
+        console.log(this.ui.t('adminCli.authenticationSuccess'));
+      }
+
+      return await this.init();
+    } catch (error) {
+      console.error(this.ui.t('common.initializationFailed', { error: error.message }));
+      throw error;
+    }
   }
 }
 
@@ -785,7 +833,9 @@ module.exports = I18nInitializer;
 // Run if called directly
 if (require.main === module) {
     const initializer = new I18nInitializer();
-    initializer.init().catch(error => {
+    initializer.init().then(() => {
+        process.exit(0);
+    }).catch(error => {
         console.error(this.ui.t('common.initializationFailed', { error: error.message }));
         console.error(this.ui.t('common.stackTrace', { stack: error.stack }));
         process.exit(1);

@@ -1,22 +1,22 @@
 {
   "native_translations": {
     "exact_translation_found": "  ✅ {keyPath}: {value}",
-    "no_exact_translation": "  ⚠️ No exact translation for '{keyPath}', similar keys found:",
-    "similar_key": "    - {key} ({similarity}% match)",
-    "processing_language_files": "🔄 Processing {count} language files...\n",
-    "file_not_found": "⚠️ File not found: {file}",
-    "processing_translations": "🌍 Processing {code} translations...",
-    "backup_created": "📋 Backup created: {filename}",
-    "error_parsing_json": "❌ Error parsing {code}.json: {errorMessage}",
-    "existing_keys_found": "📊 {code}: Found {count} existing keys",
-    "error_writing_json": "❌ Error writing {code}.json: {errorMessage}",
-    "translations_replaced": "📊 {code}: {count} translations replaced",
-    "translation_replacement_complete": "\n✅ Translation replacement complete!",
-    "total_replacements": "📊 Total replacements: {count}",
-    "dry_run_mode": "\n⚠️ DRY RUN MODE - No files were modified",
-    "tool_title": "🌍 Native Translation Replacer v1.5.1",
+    "no_exact_translation": "  ⚠️ Keine exakte Übersetzung für '{keyPath}', ähnliche Schlüssel gefunden:",
+    "similar_key": "    - {key} ({similarity}% Übereinstimmung)",
+    "processing_language_files": "🔄 Verarbeite {count} Sprachdateien...\n",
+    "file_not_found": "⚠️ Datei nicht gefunden: {file}",
+    "processing_translations": "🌍 Verarbeite {code} Übersetzungen...",
+    "backup_created": "📋 Backup erstellt: {filename}",
+    "error_parsing_json": "❌ Fehler beim Parsen von {code}.json: {errorMessage}",
+    "existing_keys_found": "📊 {code}: {count} vorhandene Schlüssel gefunden",
+    "error_writing_json": "❌ Fehler beim Schreiben von {code}.json: {errorMessage}",
+    "translations_replaced": "📊 {code}: {count} Übersetzungen ersetzt",
+    "translation_replacement_complete": "\n✅ Übersetzungsersetzung abgeschlossen!",
+    "total_replacements": "📊 Gesamte Ersetzungen: {count}",
+    "dry_run_mode": "\n⚠️ TESTLAUF MODUS - Keine Dateien wurden geändert",
+    "tool_title": "🌍 Native Übersetzungsersetzer v1.5.1",
     "tool_separator": "======================================\n",
-    "dry_run_warning": "⚠️ Running in DRY RUN mode - no files will be modified\n",
-    "error_during_replacement": "❌ Error during translation replacement:"
+    "dry_run_warning": "⚠️ Läuft im TESTLAUF Modus - keine Dateien werden geändert\n",
+    "error_during_replacement": "❌ Fehler während der Übersetzungsersetzung:"
   }
 }

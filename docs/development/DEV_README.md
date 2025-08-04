@@ -1,37 +1,41 @@
-# Development Scripts and Tools
+# i18ntk Development Guide
 
-This folder contains development scripts, test files, and debugging tools to help maintain and improve the i18nTK toolkit.
+**Version:** 1.4.0 (04/08/2025)
 
-## 📁 Folder Structure
+## Overview
+
+Development resources and tools for contributing to i18ntk.
+
+## Structure
 
 ```
 dev/
-├── tests/           # Test scripts and test data
-├── debug/           # Debugging tools and utilities
-├── reports/         # Development reports and analysis
-└── scripts/         # Development helper scripts
+├── tests/           # Test scripts and data
+├── debug/           # Debugging utilities
+├── reports/         # Development reports
+└── scripts/         # Helper scripts
 ```
 
-## 🧪 Test Scripts
+## Test Scripts
 
-- **test-complete-system.js** - Complete system integration tests
-- **test-features.js** - Feature-specific tests
-- **test-console-i18n.js** - Console i18n functionality tests
+- `test-complete-system.js` - Full integration tests
+- `test-features.js` - Feature-specific tests
+- `test-console-i18n.js` - Console i18n tests
 
-## 🐛 Debug Tools
+## Debug Tools
 
-- **debugger.js** - Main debugging utility for identifying issues
-- **debug-config.js** - Configuration debugging helper
+- `debugger.js` - Main debugging utility
+- `debug-config.js` - Configuration helper
 
-## 📊 Reports
+## Reports
 
-Development reports are organized by type:
-- **analysis/** - Translation analysis reports
-- **validation/** - Validation reports
-- **usage/** - Usage analysis reports
-- **sizing/** - File sizing reports
-- **summary/** - Summary reports
+Organized by type:
+- `analysis/` - Translation analysis
+- `validation/` - Validation reports
+- `usage/` - Usage analysis
+- `sizing/` - File sizing
+- `summary/` - Project summaries
 
-## 🔧 Development Rules
+## Development
 
 See `DEVELOPMENT_RULES.md` for coding standards and best practices.

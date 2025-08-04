@@ -1,246 +1,375 @@
 {
-  "title": "⚠️ TRANSLATION NEEDED ⚠️",
-  "separator": "⚠️ TRANSLATION NEEDED ⚠️",
+  "title": "⚙️ 設定管理",
+  "separator": "============================================================",
+  "goodbyeMessage": "i18ntk 設定マネージャーをご利用いただきありがとうございます！",
+  "relativePathHint": "このディレクトリからの相対パスを使用（例：./src/i18n/locales）",
+  "currentDirectory": "現在のプロジェクトディレクトリ",
   "mainMenu": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "uiSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "viewAllSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "viewAllSettingsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importExport": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importExportDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetToDefaults": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetToDefaultsDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reportBug": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reportBugDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveChanges": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveChangesDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "help": "⚠️ TRANSLATION NEEDED ⚠️",
-    "helpDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "quit": "⚠️ TRANSLATION NEEDED ⚠️",
-    "quitDesc": "⚠️ TRANSLATION NEEDED ⚠️",
-    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
-    "updatePackage": "[JA] Update Package",
-    "updatePackageDesc": "[JA] Update the i18n-toolkit package via npm",
-    "unsavedChangesWarning": "[JA] ⚠️  You have unsaved changes",
-    "saveChangesBeforeQuit": "[JA] Do you want to save changes before quitting? (y/N): ",
-    "goodbyeMessage": "[JA] Thank you for using the i18n settings manager!",
-    "selectSettingPrompt": "[JA] Select a setting to edit (or 'b' to go back): ",
-    "enterNewValue": "[JA] Enter new value: ",
-    "updatedSuccessfully": "[JA] {{setting}} updated successfully!"
+    "title": "メインメニュー：",
+    "uiSettings": "UI 設定",
+    "uiSettingsDesc": "言語、テーマ、インターフェースのオプション",
+    "directorySettings": "ディレクトリ設定",
+    "directorySettingsDesc": "ソースおよび出力ディレクトリのパス",
+    "processingSettings": "処理設定",
+    "processingSettingsDesc": "バッチサイズ、並行処理、パフォーマンス",
+    "advancedSettings": "高度な設定",
+    "advancedSettingsDesc": "検証、ログ記録、上級オプション",
+    "viewAllSettings": "すべての設定を表示",
+    "viewAllSettingsDesc": "現在の構成を表示",
+    "importExport": "インポート/エクスポート",
+    "updatePackage": "パッケージを更新",
+    "updatePackageDesc": "npm 経由で i18n-toolkit パッケージを更新",
+    "importExportDesc": "設定のバックアップと復元",
+    "resetToDefaults": "デフォルトにリセット",
+    "resetToDefaultsDesc": "工場出荷時の設定に戻す",
+    "reportBug": "バグを報告",
+    "reportBugDesc": "GitHub に問題を報告する",
+    "saveChanges": "変更を保存",
+    "saveChangesDesc": "現在の設定をファイルに保存",
+    "help": "ヘルプ",
+    "helpDesc": "詳細なヘルプ情報を表示",
+    "quit": "終了",
+    "quitDesc": "設定を終了（必要なら保存の確認あり）",
+    "unsavedChangesWarning": "⚠️  保存されていない変更があります",
+    "saveChangesBeforeQuit": "終了前に変更を保存しますか？ (y/N): ",
+    "selectOption": "オプションを選択してください：",
+    "goodbyeMessage": "i18n 設定マネージャーをご利用いただきありがとうございます！",
+    "selectSettingPrompt": "編集する設定を選択してください（戻るには 'b'）：",
+    "enterNewValue": "新しい値を入力してください：",
+    "updatedSuccessfully": "{{setting}} が正常に更新されました！",
+    "scriptDirectorySettings": "スクリプトディレクトリ設定",
+    "scriptDirectoryDesc": "各スクリプトのカスタムディレクトリを指定",
+    "scriptDirectorySettingsDesc": "各スクリプトに対してカスタムディレクトリを設定できます。未設定の場合はグローバル設定が使用されます。",
+    "currentDirectory": "現在のプロジェクトディレクトリ",
+    "securitySettings": "セキュリティ設定",
+    "securitySettingsDesc": "Admin PIN と他のセキュリティオプション"
   },
+  "updatePackage": {
+    "title": "パッケージを更新",
+    "description": "npm 経由で i18n-toolkit パッケージを更新",
+    "command": "npm update i18ntk -g",
+    "success": "更新が正常に完了しました。",
+    "failed": "更新に失敗しました。",
+    "prompt": "今すぐパッケージを更新しますか？ (y/N): ",
+    "promptDesc": "注意: これにより i18ntk パッケージが最新バージョンに更新されます。",
+    "confirm": "y",
+    "cancelled": "更新がキャンセルされました。"
+  },
+  "admin": {
+    "selectOption": "オプションを選択してください：",
+    "updateSuccess": "管理者 PIN が正常に更新されました！",
+    "updateFailed": "管理者 PIN の更新に失敗しました。",
+    "protectionRemoved": "管理者 PIN 保護が解除されました。",
+    "configSuccess": "管理者 PIN が正常に設定されました！",
+    "configFailed": "管理者 PIN の設定に失敗しました。",
+    "setupPinPrompt": "管理者 PIN を設定しますか？ (y/N): ",
+    "pinUpdatedSuccess": "管理者 PIN が正常に更新されました！",
+    "pinUpdatedFailed": "管理者 PIN の更新に失敗しました。",
+    "pinRemoved": "管理者 PIN 保護が解除されました。",
+    "pinConfiguredSuccess": "管理者 PIN が正常に設定されました！",
+    "pinConfiguredFailed": "管理者 PIN の設定に失敗しました。",
+    "accessDenied": "❌ アクセスが拒否されました。メニューに戻ります。",
+    "setupPin": "🔐 管理者 PIN を設定しています...",
+    "setupFailed": "❌ 管理者 PIN の設定に失敗しました。設定は変更されていません。",
+    "pinConfigured": "📌 管理者 PIN は現在設定されています。",
+    "options": "オプション：",
+    "changePin": "1) 既存の PIN を変更",
+    "removePin": "2) PIN 保護を削除",
+    "cancel": "3) キャンセル",
+    "verifyCurrentPin": "\n🔐 まず現在の PIN を確認：",
+    "settingNewPin": "\n🔄 新しい PIN を設定しています...",
+    "verifyToRemove": "\n🔐 保護を解除するには現在の PIN を確認：",
+    "noPinConfigured": "🔓 現在、管理者 PIN は設定されていません。",
+    "pinBenefits": "管理者 PIN を設定すると次のセキュリティが強化されます：",
+    "benefitSecurity": "• セキュリティ設定の変更",
+    "benefitAdvanced": "• 高度な構成の変更",
+    "benefitDebug": "• デバッグツールへのアクセス",
+    "benefitReset": "• 設定のリセット",
+    "setupCancelled": "⏭️  管理者 PIN の設定がキャンセルされました。",
+    "operationCancelled": "❌ 操作がキャンセルされました。",
+    "startingSettings": "🎛️  設定 CLI を開始しています...",
+    "authRequired": "🔒 次の操作には管理者認証が必要です：{{label}}",
+    "pinSetupTitle": "管理者 PIN 設定",
+    "browserOpenFailed": "ブラウザを自動で開けませんでした。",
+    "manualVisit": "手動でアクセスしてください：{{url}}",
+    "browserOpened": "✅ ブラウザが正常に開きました！"
+  },
+  "importExport": {
+    "enterFilename": "ファイル名を入力してください（デフォルトを使うには Enter を押してください）：",
+    "exportSuccess": "設定が {{file}} にエクスポートされました",
+    "exportFailed": "設定のエクスポートに失敗しました：{{error}}",
+    "importFilename": "インポートするファイル名を入力してください：",
+    "fileNotFound": "ファイルが見つかりません。",
+    "invalidFormat": "設定ファイルの形式が無効です。",
+    "confirmImport": "これにより現在のすべての設定が置き換えられます。続行しますか？ (y/N): ",
+    "importSuccess": "設定が正常にインポートされました。",
+    "importFailed": "設定のインポートに失敗しました：{{error}}",
+    "backupSuccess": "バックアップが作成されました：{{file}}",
+    "backupFailed": "バックアップの作成に失敗しました：{{error}}"
+  },
+  "resetConfirm": "本当に続行しますか？ (y/N): ",
+  "resetSuccess": "設定が正常にデフォルトにリセットされました。",
+  "resetFailed": "設定のリセットに失敗しました：{error}",
+  "saveSuccess": "設定が正常に保存されました。",
+  "saveFailed": "設定の保存に失敗しました。",
+  "pressEnter": "続行するには Enter を押してください...",
+  "initFailed": "設定の初期化に失敗しました：{error}",
+  "invalidValueFormat": "無効な値の形式です。",
   "categories": {
-    "uiSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "directorySettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "processingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "advancedSettings": "⚠️ TRANSLATION NEEDED ⚠️"
+    "uiSettings": "UI 設定",
+    "directorySettings": "ディレクトリ設定",
+    "processingSettings": "処理設定",
+    "advancedSettings": "高度な設定",
+    "scriptDirectorySettings": "スクリプトディレクトリ設定"
   },
   "fields": {
     "language": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "インターフェース言語",
+      "description": "ユーザーインターフェースの言語",
+      "current": "現在：{value}",
+      "help": "優先するインターフェース言語を選択してください"
+    },
+    "scriptDirectories": {
+      "analyzeLabel": "スクリプトディレクトリを分析",
+      "analyzeHelp": "問題のあるスクリプトディレクトリを分析",
+      "completeLabel": "セットアップディレクトリを完了",
+      "initLabel": "スクリプトディレクトリを初期化",
+      "manageLabel": "スクリプトディレクトリを管理",
+      "sizingLabel": "スクリプトディレクトリのサイズ調整",
+      "summaryLabel": "サマリーレポートディレクトリ",
+      "usageLabel": "使用状況レポートディレクトリ",
+      "validateLabel": "スクリプトディレクトリを検証"
     },
     "theme": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "カラーテーマ",
+      "description": "UI テーマの設定",
+      "current": "現在：{value}",
+      "help": "ライトとダークのテーマを選択"
     },
     "dateFormat": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "日付形式",
+      "description": "日付表示の形式",
+      "current": "現在：{value}",
+      "help": "レポートで日付をどのように表示するか選択"
     },
     "notifications": {
       "enabled": {
-        "label": "⚠️ TRANSLATION NEEDED ⚠️",
-        "description": "⚠️ TRANSLATION NEEDED ⚠️",
-        "current": "⚠️ TRANSLATION NEEDED ⚠️",
-        "help": "⚠️ TRANSLATION NEEDED ⚠️"
+        "label": "通知を有効にする",
+        "description": "デスクトップ通知を表示",
+        "current": "現在：{value}",
+        "help": "完了した操作のデスクトップ通知を有効にする"
       }
     },
     "sourceDir": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "ソースディレクトリ",
+      "description": "翻訳ファイルを含むディレクトリ",
+      "current": "現在：{value}",
+      "help": "ソース翻訳ファイルがあるディレクトリのパス"
     },
     "sourceLanguage": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "ソース言語",
+      "description": "翻訳の元となる主要言語",
+      "current": "現在：{value}",
+      "help": "翻訳のソースとして使用される主要な言語"
     },
     "outputDir": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "出力ディレクトリ",
+      "description": "生成されたレポートのディレクトリ",
+      "current": "現在：{value}",
+      "help": "レポートおよび処理済みファイルの保存先"
     },
     "batchSize": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "バッチサイズ",
+      "description": "1 バッチあたり処理される項目数",
+      "current": "現在：{value}",
+      "help": "各バッチで処理するファイル数"
     },
     "maxConcurrentFiles": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "同時処理ファイル数の最大",
+      "description": "同時に処理されるファイルの最大数",
+      "current": "現在：{value}",
+      "help": "同時に処理するファイルの最大数"
     },
     "sizingThreshold": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "サイズしきい値 (%)",
+      "description": "サイズの変動警告のしきい値",
+      "current": "現在：{value}%",
+      "help": "サイズの不一致を検出するパーセンテージしきい値"
     },
     "strictMode": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "厳密な検証モード",
+      "description": "厳密な検証モードを有効にする",
+      "current": "現在：{value}",
+      "help": "翻訳ファイルに対して厳密な検証を有効にする"
     },
     "enableAuditLog": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "監査ログを有効にする",
+      "description": "すべての翻訳変更を追跡",
+      "current": "現在：{value}",
+      "help": "翻訳ファイルに行われた変更をすべて記録する"
     },
     "backupBeforeChanges": {
-      "label": "⚠️ TRANSLATION NEEDED ⚠️",
-      "description": "⚠️ TRANSLATION NEEDED ⚠️",
-      "current": "⚠️ TRANSLATION NEEDED ⚠️",
-      "help": "⚠️ TRANSLATION NEEDED ⚠️"
+      "label": "自動バックアップ",
+      "description": "変更前にバックアップを作成",
+      "current": "現在：{value}",
+      "help": "変更を加える前に自動的にバックアップを作成する"
+    },
+    "scriptDirectories_analyze": {
+      "label": "スクリプトディレクトリを分析",
+      "description": "分析スクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "分析スクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "scriptDirectories_complete": {
+      "label": "セットアップディレクトリを完了",
+      "description": "完全セットアップスクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "完全セットアップスクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "scriptDirectories_init": {
+      "label": "スクリプトディレクトリを初期化",
+      "description": "初期化スクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "初期化スクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "scriptDirectories_manage": {
+      "label": "スクリプトディレクトリを管理",
+      "description": "管理スクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "管理スクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "scriptDirectories_sizing": {
+      "label": "スクリプトディレクトリのサイズ調整",
+      "description": "サイズ調整スクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "サイズ調整スクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "scriptDirectories_summary": {
+      "label": "サマリーレポートディレクトリ",
+      "description": "サマリーレポートスクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "サマリーレポートスクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "scriptDirectories_usage": {
+      "label": "使用状況レポートディレクトリ",
+      "description": "使用状況レポートスクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "使用状況レポートスクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "scriptDirectories_validate": {
+      "label": "スクリプトディレクトリを検証",
+      "description": "検証スクリプト用のカスタムディレクトリ",
+      "current": "現在：{value}",
+      "help": "検証スクリプト用のカスタムソースディレクトリを指定します。空のままにするとグローバル設定が使用されます。"
+    },
+    "security_pinProtection_enabled": {
+      "label": "PIN保護",
+      "description": "機密設定のPIN認証を有効にする",
+      "current": "現在: {value}",
+      "help": "セキュリティおよび高度な設定の変更にPINを要求する"
+    },
+    "pinProtection_configure": {
+      "label": "PIN保護スクリプトの設定",
+      "description": "PIN保護が必要なスクリプトを設定する",
+      "help": "PIN認証を必要とする個別のスクリプトを選択する"
+    },
+    "pinProtection_debugMenu": {
+      "label": "デバッグツールメニュー",
+      "description": "デバッグツールメニューにPINを要求",
+      "current": "現在: {value}",
+      "help": "デバッグツールへのアクセスにPIN保護を有効にする"
+    },
+    "pinProtection_deleteReports": {
+      "label": "レポートの削除",
+      "description": "レポートの削除にPINを要求",
+      "current": "現在: {value}",
+      "help": "レポートの削除にPIN保護を有効にする"
+    },
+    "pinProtection_summaryReports": {
+      "label": "サマリーレポート",
+      "description": "サマリーレポートにPINを要求",
+      "current": "現在: {value}",
+      "help": "サマリーレポートの生成にPIN保護を有効にする"
+    },
+    "pinProtection_settingsMenu": {
+      "label": "設定メニュー",
+      "description": "設定メニューにPINを要求",
+      "current": "現在: {value}",
+      "help": "設定へのアクセスにPIN保護を有効にする"
+    },
+    "pinProtection_initScript": {
+      "label": "初期化スクリプト",
+      "description": "初期化スクリプトにPINを要求",
+      "current": "現在: {value}",
+      "help": "初期化スクリプトの実行にPIN保護を有効にする"
+    },
+    "pinProtection_resetDefaults": {
+      "label": "PIN保護をリセット",
+      "description": "すべてのPIN保護設定をデフォルトにリセット",
+      "help": "すべての個別スクリプトPIN保護をデフォルト値にリセット"
     }
   },
   "actions": {
-    "editSetting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "settingUpdated": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalidValue": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-    "backToMenu": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saveFailed": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetConfirm": "⚠️ TRANSLATION NEEDED ⚠️",
-    "resetSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "importSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "exportSuccess": "⚠️ TRANSLATION NEEDED ⚠️",
-    "fileNotFound": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalidFormat": "⚠️ TRANSLATION NEEDED ⚠️"
+    "editSetting": "{setting} を編集：",
+    "settingUpdated": "✅ {setting} が正常に更新されました！",
+    "invalidValue": "❌ 無効な値です。再度お試しください。",
+    "pressEnter": "続行するには Enter を押してください...",
+    "backToMenu": "メインメニューに戻る",
+    "saveSuccess": "✅ 設定が正常に保存されました！",
+    "saveFailed": "❌ 設定の保存に失敗しました：{error}",
+    "resetConfirm": "すべての設定をデフォルトにリセットしてもよろしいですか？ (y/N): ",
+    "resetSuccess": "✅ 設定が正常にデフォルトにリセットされました！",
+    "importSuccess": "✅ 設定が正常にインポートされました！",
+    "exportSuccess": "✅ 設定が正常にエクスポートされました！",
+    "fileNotFound": "❌ ファイルが見つかりません：{path}",
+    "invalidFormat": "❌ 設定ファイルの形式が無効です",
+    "pinProtectionUpdated": "✅ {script}のPIN保護が正常に更新されました！",
+    "pinProtectionReset": "✅ すべてのPIN保護設定がデフォルトにリセットされました！",
+    "pinProtectionConfigure": "個別スクリプトのPIN保護を設定",
+    "pinProtectionSelectScript": "PIN保護を切り替えるスクリプトを選択:",
+    "pinProtectionCurrentStatus": "現在のステータス: {status}",
+    "pinProtectionEnabled": "有効",
+    "pinProtectionDisabled": "無効",
+    "pinProtectionToggle": "PIN保護を切り替え",
+    "pinProtectionResetAll": "すべてをデフォルトにリセット",
+    "pinProtectionBack": "セキュリティ設定に戻る"
   },
   "themes": {
-    "light": "⚠️ TRANSLATION NEEDED ⚠️",
-    "dark": "⚠️ TRANSLATION NEEDED ⚠️",
-    "system": "[JA] System"
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
   },
   "languages": {
-    "en": "⚠️ TRANSLATION NEEDED ⚠️",
-    "de": "⚠️ TRANSLATION NEEDED ⚠️",
-    "es": "⚠️ TRANSLATION NEEDED ⚠️",
-    "fr": "⚠️ TRANSLATION NEEDED ⚠️",
-    "ru": "⚠️ TRANSLATION NEEDED ⚠️",
-    "ja": "⚠️ TRANSLATION NEEDED ⚠️",
-    "zh": "⚠️ TRANSLATION NEEDED ⚠️"
+    "en": "英語",
+    "de": "ドイツ語",
+    "es": "スペイン語",
+    "fr": "フランス語",
+    "ru": "ロシア語",
+    "ja": "日本語",
+    "zh": "中国語"
   },
   "help": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "navigation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "editing": "⚠️ TRANSLATION NEEDED ⚠️",
-    "saving": "⚠️ TRANSLATION NEEDED ⚠️",
-    "reset": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "設定ヘルプ",
+    "navigation": "数字キーでオプションを選択し、'b' で戻る",
+    "editing": "プロンプトが表示されたら新しい値を入力するか、現在の値を維持するには Enter を押す",
+    "saving": "終了前に 's' を使って変更を保存",
+    "reset": "すべての設定をデフォルトにリセットするにはオプション7を使用"
   },
   "viewAll": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "すべての設定を表示"
   },
-  "importExport": {
-    "enterFilename": "[JA] Enter filename (or press Enter for default): ",
-    "exportSuccess": "[JA] Settings exported to {{file}}",
-    "exportFailed": "[JA] Failed to export settings: {{error}}",
-    "importFilename": "[JA] Enter filename to import: ",
-    "fileNotFound": "[JA] File not found.",
-    "invalidFormat": "[JA] Invalid settings file format.",
-    "confirmImport": "[JA] This will replace all current settings. Continue? (y/N): ",
-    "importSuccess": "[JA] Settings imported successfully.",
-    "importFailed": "[JA] Failed to import settings: {{error}}",
-    "backupSuccess": "[JA] Backup created: {{file}}",
-    "backupFailed": "[JA] Failed to create backup: {{error}}"
-  },
-  "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-  "current": "⚠️ TRANSLATION NEEDED ⚠️",
-  "back": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectSettingPrompt": "⚠️ TRANSLATION NEEDED ⚠️",
-  "invalidOption": "⚠️ TRANSLATION NEEDED ⚠️",
-  "editing": "⚠️ TRANSLATION NEEDED ⚠️",
-  "enterNewValue": "⚠️ TRANSLATION NEEDED ⚠️",
-  "validOptions": "⚠️ TRANSLATION NEEDED ⚠️",
-  "updatedSuccessfully": "⚠️ TRANSLATION NEEDED ⚠️",
-  "noHelp": "⚠️ TRANSLATION NEEDED ⚠️",
-  "admin": {
-    "accessDenied": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupFailed": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
-    "options": "⚠️ TRANSLATION NEEDED ⚠️",
-    "changePin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "removePin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "cancel": "⚠️ TRANSLATION NEEDED ⚠️",
-    "verifyCurrentPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "settingNewPin": "⚠️ TRANSLATION NEEDED ⚠️",
-    "verifyToRemove": "⚠️ TRANSLATION NEEDED ⚠️",
-    "noPinConfigured": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pinBenefits": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitSecurity": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitAdvanced": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitDebug": "⚠️ TRANSLATION NEEDED ⚠️",
-    "benefitReset": "⚠️ TRANSLATION NEEDED ⚠️",
-    "setupCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
-    "operationCancelled": "⚠️ TRANSLATION NEEDED ⚠️",
-    "startingSettings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "selectOption": "[JA] Select option: ",
-    "updateSuccess": "[JA] Admin PIN updated successfully!",
-    "updateFailed": "[JA] Failed to update admin PIN.",
-    "protectionRemoved": "[JA] Admin PIN protection removed.",
-    "configSuccess": "[JA] Admin PIN configured successfully!",
-    "configFailed": "[JA] Failed to configure admin PIN.",
-    "setupPinPrompt": "[JA] Would you like to set up an admin PIN? (y/N): ",
-    "pinUpdatedSuccess": "[JA] Admin PIN updated successfully!",
-    "pinUpdatedFailed": "[JA] Failed to update admin PIN.",
-    "pinRemoved": "[JA] Admin PIN protection removed.",
-    "pinConfiguredSuccess": "[JA] Admin PIN configured successfully!",
-    "pinConfiguredFailed": "[JA] Failed to configure admin PIN.",
-    "authRequired": "[JA] 🔒 Admin authentication required for: {{label}}",
-    "pinSetupTitle": "[JA] Admin PIN Setup",
-    "browserOpenFailed": "[JA] Could not automatically open browser.",
-    "manualVisit": "[JA] Please manually visit: {{url}}",
-    "browserOpened": "[JA] ✅ Browser opened successfully!"
-  },
-  "goodbyeMessage": "[JA] Thank you for using the i18ntk settings manager!",
-  "updatePackage": {
-    "title": "[JA] Update Package",
-    "description": "[JA] Update the i18n-toolkit package via npm",
-    "command": "[JA] npm update i18ntk -g",
-    "success": "[JA] Update completed successfully.",
-    "failed": "[JA] Update failed.",
-    "prompt": "[JA] Do you want to update the package now? (y/N): ",
-    "promptDesc": "[JA] Note: This will update the i18ntk package to the latest version.",
-    "confirm": "[JA] y",
-    "cancelled": "[JA] Update cancelled."
-  },
-  "resetConfirm": "[JA] Are you sure you want to continue? (y/N): ",
-  "resetSuccess": "[JA] Settings reset to defaults successfully.",
-  "resetFailed": "[JA] Failed to reset settings: {error}",
-  "saveSuccess": "[JA] Settings saved successfully.",
-  "saveFailed": "[JA] Failed to save settings.",
-  "initFailed": "[JA] Failed to initialize settings: {error}",
-  "invalidValueFormat": "[JA] Invalid value format."
+  "current": "現在",
+  "back": "メインメニューに戻る",
+  "selectSettingPrompt": "編集する設定を選択してください（戻るには b、リセットには r）：",
+  "invalidOption": "無効なオプションです。",
+  "editing": "編集中",
+  "enterNewValue": "新しい値を入力してください（現在の値を保持するには Enter、システムデフォルトを使うには 'default' と入力）：",
+  "validOptions": "有効なオプション",
+  "updatedSuccessfully": "正常に更新されました！",
+  "noHelp": "この設定にはヘルプがありません",
+  "resetScriptDirectories": "デフォルト値にリセット",
+  "resetScriptDirectoriesTitle": "スクリプトディレクトリをデフォルトにリセット",
+  "resetScriptDirectoriesWarning1": "これによりすべてのスクリプトディレクトリ設定がシステムのデフォルトにリセットされます。",
+  "resetScriptDirectoriesWarning2": "すべてのカスタムディレクトリパスがクリアされます。この操作は元に戻せません。",
+  "resetScriptDirectoriesConfirm": "すべてのスクリプトディレクトリをデフォルトにリセットしますか？ (y/N): "
 }

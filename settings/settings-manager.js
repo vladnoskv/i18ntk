@@ -67,8 +67,8 @@ class SettingsManager {
             // Processing Settings
             processing: {
                 notTranslatedMarker: 'NOT_TRANSLATED', // Default marker for untranslated content
-                excludeFiles: ['.DS_Store', 'Thumbs.db', '*.tmp', 'auth.json', 'pagination.json', 'reportGenerator.json', 'validationStep.json'], // Files to ignore during processing
-                excludeDirs: ['node_modules', '.git', 'dist', 'build'], // Directories to ignore
+                excludeFiles: ['.DS_Store', 'Thumbs.db', '*.tmp',], // Files to ignore during processing
+                excludeDirs: ['node_modules', '.next', '.git', 'dist', 'build'], // Directories to ignore
                 includeExtensions: ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'], // File extensions to scan
                 strictMode: false, // Default: false | Enable strict validation (fails on warnings)
                 defaultLanguages: ['de', 'es', 'fr', 'ru'], // Languages to create when initializing
@@ -108,7 +108,24 @@ class SettingsManager {
                 allowedExtensions: ['.json', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
                 notTranslatedMarker: '[NOT TRANSLATED]',
                 excludeFiles: ['node_modules', '.git', 'dist', 'build'],
-                strictMode: false
+                strictMode: false,
+                // PIN Protection Configuration
+                pinProtection: {
+                    enabled: true, // Master switch for PIN protection
+                    protectedScripts: {
+                        debugMenu: true,
+                        deleteReports: true,
+                        summaryReports: true,
+                        settingsMenu: true,
+                        init: false,
+                        analyze: false,
+                        validate: false,
+                        complete: false,
+                        manage: false,
+                        sizing: false,
+                        usage: false
+                    }
+                }
             },
             
             // Debug & Development Settings
@@ -137,7 +154,7 @@ class SettingsManager {
                 return this.mergeWithDefaults(loadedSettings);
             }
         } catch (error) {
-            console.error('❌ Error loading settings:', error.message);
+            console.error('Error loading settings:', error.message);
         }
         return { ...this.defaultConfig };
     }
@@ -177,6 +194,17 @@ class SettingsManager {
             };
         }
         
+        if (loadedSettings.security?.pinProtection) {
+            merged.security.pinProtection = {
+                ...this.defaultConfig.security.pinProtection,
+                ...loadedSettings.security.pinProtection,
+                protectedScripts: {
+                    ...this.defaultConfig.security.pinProtection.protectedScripts,
+                    ...(loadedSettings.security.pinProtection.protectedScripts || {})
+                }
+            };
+        }
+        
         return merged;
     }
 
@@ -203,9 +231,9 @@ class SettingsManager {
             this.settings = settingsToSave;
             return true;
         } catch (error) {
-            console.error('❌ Error saving settings:', error.message);
-            return false;
-        }
+                console.error('Error saving settings:', error.message);
+                return false;
+            }
     }
 
     /**
@@ -266,7 +294,7 @@ class SettingsManager {
             
             return true;
         } catch (error) {
-            console.error('❌ Error setting value:', error.message);
+            console.error('Error setting value:', error.message);
             return false;
         }
     }
@@ -291,7 +319,7 @@ class SettingsManager {
             const required = ['language', 'sourceDir', 'sourceLanguage', 'defaultLanguages', 'outputDir'];
             for (const prop of required) {
                 if (!(prop in settings)) {
-                    console.error(`❌ Missing required setting: ${prop}`);
+                    console.error(`Missing required setting: ${prop}`);
                     return false;
                 }
             }
@@ -299,39 +327,39 @@ class SettingsManager {
             // Validate language codes
             const validLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
             if (!validLanguages.includes(settings.language)) {
-                console.error(`❌ Invalid language: ${settings.language}`);
+                console.error(`Invalid language: ${settings.language}`);
                 return false;
             }
             
             if (!validLanguages.includes(settings.sourceLanguage)) {
-                console.error(`❌ Invalid source language: ${settings.sourceLanguage}`);
+                console.error(`Invalid source language: ${settings.sourceLanguage}`);
                 return false;
             }
             
             // Validate arrays
             if (!Array.isArray(settings.defaultLanguages)) {
-                console.error('❌ defaultLanguages must be an array');
+                console.error('Default languages must be an array');
                 return false;
             }
             
             // Validate date format
             const validDateFormats = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD', 'DD.MM.YYYY'];
             if (settings.dateFormat && !validDateFormats.includes(settings.dateFormat)) {
-                console.error(`❌ Invalid dateFormat: ${settings.dateFormat}. Valid options: ${validDateFormats.join(', ')}`);
+                console.error(`Invalid date format: ${settings.dateFormat}. Valid formats: ${validDateFormats.join(', ')}`);
                 return false;
             }
             
             // Validate time format
             const validTimeFormats = ['24h', '12h'];
             if (settings.timeFormat && !validTimeFormats.includes(settings.timeFormat)) {
-                console.error(`❌ Invalid timeFormat: ${settings.timeFormat}. Valid options: ${validTimeFormats.join(', ')}`);
+                console.error(`Invalid time format: ${settings.timeFormat}. Valid formats: ${validTimeFormats.join(', ')}`);
                 return false;
             }
             
             // Validate notifications settings
             if (settings.notifications && typeof settings.notifications === 'object') {
                 if (settings.notifications.types && typeof settings.notifications.types !== 'object') {
-                    console.error('❌ notifications.types must be an object');
+                    console.error('Notifications types must be an object');
                     return false;
                 }
             }
@@ -341,17 +369,17 @@ class SettingsManager {
                 const processing = settings.processing;
                 
                 if (processing.excludeFiles && !Array.isArray(processing.excludeFiles)) {
-                    console.error('❌ processing.excludeFiles must be an array');
+                    console.error('Exclude files must be an array');
                     return false;
                 }
                 
                 if (processing.excludeDirs && !Array.isArray(processing.excludeDirs)) {
-                    console.error('❌ processing.excludeDirs must be an array');
+                    console.error('Exclude directories must be an array');
                     return false;
                 }
                 
                 if (processing.includeExtensions && !Array.isArray(processing.includeExtensions)) {
-                    console.error('❌ processing.includeExtensions must be an array');
+                    console.error('Include extensions must be an array');
                     return false;
                 }
             }
@@ -361,35 +389,35 @@ class SettingsManager {
                 const advanced = settings.advanced;
                 
                 if (advanced.batchSize && (typeof advanced.batchSize !== 'number' || advanced.batchSize < 1)) {
-                    console.error('❌ Invalid batchSize: must be a positive number');
+                    console.error('Invalid batch size: must be a positive number');
                     return false;
                 }
                 
                 if (advanced.maxConcurrentFiles && (typeof advanced.maxConcurrentFiles !== 'number' || advanced.maxConcurrentFiles < 1)) {
-                    console.error('❌ Invalid maxConcurrentFiles: must be a positive number');
+                    console.error('Invalid max concurrent files: must be a positive number');
                     return false;
                 }
                 
                 if (advanced.sizingThreshold && (typeof advanced.sizingThreshold !== 'number' || advanced.sizingThreshold < 0)) {
-                    console.error('❌ Invalid sizingThreshold: must be a non-negative number');
+                    console.error('Invalid sizing threshold: must be a non-negative number');
                     return false;
                 }
                 
                 if (advanced.timeout && (typeof advanced.timeout !== 'number' || advanced.timeout < 1000)) {
-                    console.error('❌ Invalid timeout: must be at least 1000ms');
+                    console.error('Invalid timeout: must be at least 1000ms');
                     return false;
                 }
                 
                 const validSizingFormats = ['table', 'json', 'csv'];
                 if (advanced.sizingFormat && !validSizingFormats.includes(advanced.sizingFormat)) {
-                    console.error(`❌ Invalid sizingFormat: ${advanced.sizingFormat}. Valid options: ${validSizingFormats.join(', ')}`);
+                    console.error(`Invalid sizing format: ${advanced.sizingFormat}. Valid formats: ${validSizingFormats.join(', ')}`);
                     return false;
                 }
             }
             
             return true;
         } catch (error) {
-            console.error('❌ Error validating settings:', error.message);
+            console.error('Error validating settings:', error.message);
             return false;
         }
     }
@@ -412,12 +440,12 @@ class SettingsManager {
             
             if (fs.existsSync(this.configFile)) {
                 fs.copyFileSync(this.configFile, backupFile);
-                console.log(`📁 Settings backup created: ${path.relative(process.cwd(), backupFile)}`);
+                console.log(`Backup created: ${path.relative(process.cwd(), backupFile)}`);
             }
             
             return true;
         } catch (error) {
-            console.error('❌ Error creating backup:', error.message);
+            console.error('Error creating backup:', error.message);
             return false;
         }
     }
@@ -434,7 +462,8 @@ class SettingsManager {
             { code: 'fr', name: 'Français (French)', flag: '🇫🇷' },
             { code: 'ru', name: 'Русский (Russian)', flag: '🇷🇺' },
             { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },
-            { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' }
+            { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' },
+            { code: 'pt', name: 'Português (Portuguese)', flag: '🇵🇹' }
         ];
     }
 
@@ -602,12 +631,12 @@ class SettingsManager {
         
         const availableLanguages = this.getAvailableLanguages().map(lang => lang.code);
         if (!availableLanguages.includes(language)) {
-            throw new Error(`Language '${language}' is not supported. Available: ${availableLanguages.join(', ')}`);
+            throw new Error(`Language not supported: ${language}. Available languages: ${availableLanguages.join(', ')}`);
         }
         
         this.settings.language = language;
         this.saveSettings();
-        console.log(`🌍 UI language set to: ${language}`);
+        console.log(`UI language set to: ${language}`);
     }
 }
 

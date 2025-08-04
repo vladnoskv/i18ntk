@@ -1,19 +1,21 @@
 {
   "maintainLanguagePurity": {
-    "workflow_title": "🚀 Language Purity Maintenance Workflow",
-    "step1_title": "📊 STEP 1: Initial Language Purity Assessment",
-    "step2_title": "\n🔧 STEP 2: Detect and Auto-Fix Language Mismatches",
-    "step3_title": "\n🌐 STEP 3: Apply Automatic Translations",
-    "step4_title": "\n✅ STEP 4: Final Language Purity Assessment",
-    "workflow_error": "❌ Workflow Error: {errorMessage}",
-    "running_initial_validation": "Running initial language purity validation...",
-    "initial_assessment_complete": "✅ Initial assessment complete: {count} violations found\n",
-    "initial_assessment_warnings": "⚠️  Initial assessment completed with warnings\n",
-    "detecting_fixing_mismatches": "Detecting and fixing language mismatches...",
-    "detection_complete_applying_fixes": "Detection complete. Applying auto-fixes...",
-    "mismatch_fixes_complete": "✅ Language mismatch fixes complete: {count} fixes applied\n",
-    "mismatch_fixes_warnings": "⚠️  Language mismatch fixes completed with warnings\n",
-    "applying_automatic_translations": "Applying automatic translations...",
-    "translation_preview_complete": "Translation preview complete. Applying translations..."
+    "workflow_title": "🚀 Workflow zur Sprachreinheits-Wartung",
+    "step1_title": "📊 SCHRITT 1: Initiale Sprachreinheits-Bewertung",
+    "step2_title": "\n🔧 SCHRITT 2: Sprachfehler erkennen und automatisch korrigieren",
+    "step3_title": "\n🌐 SCHRITT 3: Automatische Übersetzungen anwenden",
+    "step4_title": "\n✅ SCHRITT 4: Finale Sprachreinheits-Bewertung",
+    "workflow_error": "❌ Workflow-Fehler: {errorMessage}",
+    "running_initial_validation": "Initiale Sprachreinheits-Überprüfung wird ausgeführt...",
+    "initial_assessment_complete": "✅ Initiale Bewertung abgeschlossen: {count} Verstöße gefunden\n",
+    "initial_assessment_warnings": "⚠️  Initiale Bewertung mit Warnungen abgeschlossen\n",
+    "detecting_fixing_mismatches": "Sprachfehler werden erkannt und korrigiert...",
+    "detection_complete_applying_fixes": "Erkennung abgeschlossen. Auto-Korrekturen werden angewendet...",
+    "mismatch_fixes_complete": "✅ Sprachfehler-Korrekturen abgeschlossen: {count} Korrekturen angewendet\n",
+    "mismatch_fixes_warnings": "⚠️  Sprachfehler-Korrekturen mit Warnungen abgeschlossen\n",
+    "applying_automatic_translations": "Automatische Übersetzungen werden angewendet...",
+    "translation_preview_complete": "✅ Übersetzungs-Vorschau abgeschlossen. Übersetzungen werden angewendet...",
+    "final_assessment_complete": "✅ Finale Bewertung abgeschlossen: {count} Verstöße gefunden\n",
+    "final_assessment_warnings": "⚠️  Finale Bewertung mit Warnungen abgeschlossen\n"
   }
 }

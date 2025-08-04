@@ -47,6 +47,35 @@ class I18nSummaryReporter {
       malformedFiles: [],
       duplicateKeys: []
     };
+    this.rl = null;
+  }
+
+  // Initialize readline interface
+  initReadline() {
+    if (!this.rl) {
+      const readline = require('readline');
+      this.rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+    }
+    return this.rl;
+  }
+
+  // Prompt for user input
+  async prompt(question) {
+    const rl = this.rl || this.initReadline();
+    return new Promise((resolve) => {
+      rl.question(question, resolve);
+    });
+  }
+
+  // Close readline interface
+  closeReadline() {
+    if (this.rl) {
+      this.rl.close();
+      this.rl = null;
+    }
   }
 
   // Parse command line arguments
@@ -58,7 +87,8 @@ class I18nSummaryReporter {
       verbose: false,
       help: false,
       keepReports: false,
-      deleteReports: false
+      deleteReports: false,
+      noPrompt: false
     };
 
     for (let i = 0; i < args.length; i++) {
@@ -76,6 +106,8 @@ class I18nSummaryReporter {
         parsed.keepReports = true;
       } else if (arg === '--delete-reports') {
         parsed.deleteReports = true;
+      } else if (arg === '--no-prompt') {
+        parsed.noPrompt = true;
       }
     }
 
@@ -536,6 +568,38 @@ class I18nSummaryReporter {
 
   // Run the analysis and generate report
   async run() {
+    // Check admin authentication for sensitive operations (only when called directly)
+    const AdminAuth = require('../utils/admin-auth');
+    const adminAuth = new AdminAuth();
+    await adminAuth.initialize();
+    
+    const isCalledDirectly = require.main === module;
+    const isRequired = await adminAuth.isAuthRequired();
+    if (isRequired && isCalledDirectly) {
+      console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'generate summary' }));
+      
+      // Create readline interface for PIN input
+      const readline = require('readline');
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+      
+      const pin = await new Promise(resolve => {
+        rl.question('🔐 Enter admin PIN: ', resolve);
+      });
+      
+      const isValid = await adminAuth.verifyPin(pin);
+      rl.close();
+      
+      if (!isValid) {
+        console.log(this.t('adminCli.invalidPin'));
+        process.exit(1);
+      }
+      
+      console.log(this.t('adminCli.authenticationSuccess'));
+    }
+    
     const args = this.parseArgs();
     
     if (args.help) {
@@ -660,6 +724,7 @@ class I18nSummaryReporter {
       }
       process.exit(1);
     }
+    process.exit(0);
   }
 }
 

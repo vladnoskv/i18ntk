@@ -76,8 +76,8 @@ class AdminPinManager {
     /**
      * Set up a new admin PIN
      */
-    async setupPin() {
-        const rl = readline.createInterface({
+    async setupPin(externalRl = null) {
+        const rl = externalRl || readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
@@ -91,20 +91,23 @@ class AdminPinManager {
             console.log('  • Modifying advanced configurations');
             console.log('  • Accessing debug tools');
             console.log('  • Resetting settings');
+            console.log('\n💡 Note: You will see asterisks (*) as you type - these are just masking characters.');
+            console.log('   Only numbers 0-9 are accepted as PIN digits.');
             
-            const pin = await this.promptPin(rl, 'Enter new admin PIN (4-6 digits): ');
+            const pin = await this.promptPin(rl, 'Enter new admin PIN (4-6 digits): ', false);
             
             if (!this.validatePin(pin)) {
-                console.log('❌ Invalid PIN. Must be 4-6 digits.');
-                rl.close();
+                console.log('❌ Invalid PIN. Must be exactly 4-6 digits (numbers 0-9 only).');
+                console.log('   Example: 1234 or 567890');
+                if (!externalRl) rl.close();
                 return false;
             }
             
-            const confirmPin = await this.promptPin(rl, 'Confirm admin PIN: ');
+            const confirmPin = await this.promptPin(rl, 'Confirm admin PIN: ', false);
             
             if (pin !== confirmPin) {
                 console.log('❌ PINs do not match.');
-                rl.close();
+                if (!externalRl) rl.close();
                 return false;
             }
             
@@ -134,32 +137,32 @@ class AdminPinManager {
             console.log('✅ Admin PIN has been set successfully!');
             console.log('⚠️  Keep this PIN secure. It cannot be recovered if lost.');
             
-            rl.close();
+            if (!externalRl) rl.close();
             return true;
             
         } catch (error) {
             console.error('❌ Error setting up PIN:', error.message);
-            rl.close();
+            if (!externalRl) rl.close();
             return false;
         }
     }
 
     /**
-     * Prompt for PIN with hidden input
+     * Prompt for PIN with configurable display mode
      */
-    promptPin(rl, message) {
+    promptPin(rl, message, hideInput = true) {
         return new Promise((resolve) => {
             process.stdout.write(message);
             
-            // Hide input
-            process.stdin.setRawMode(true);
             let pin = '';
             
             const onData = (char) => {
                 const charStr = char.toString();
                 
                 if (charStr === '\r' || charStr === '\n') {
-                    process.stdin.setRawMode(false);
+                    if (hideInput) {
+                        process.stdin.setRawMode(false);
+                    }
                     process.stdin.removeListener('data', onData);
                     process.stdout.write('\n');
                     resolve(pin);
@@ -167,14 +170,27 @@ class AdminPinManager {
                     // Backspace
                     if (pin.length > 0) {
                         pin = pin.slice(0, -1);
-                        process.stdout.write('\b \b');
+                        if (hideInput) {
+                            process.stdout.write('\b \b');
+                        } else {
+                            process.stdout.write('\b \b');
+                        }
                     }
-                } else if (charStr >= '0' && charStr <= '9') {
+                } else if (/^[0-9]$/.test(charStr) && pin.length < 6) {
+                    // Only allow digits 0-9, max 6 digits
                     pin += charStr;
-                    process.stdout.write('*');
+                    if (hideInput) {
+                        process.stdout.write('*');
+                    } else {
+                        process.stdout.write(charStr);
+                    }
                 }
+                // Ignore all other characters
             };
             
+            if (hideInput) {
+                process.stdin.setRawMode(true);
+            }
             process.stdin.on('data', onData);
         });
     }
@@ -265,11 +281,11 @@ class AdminPinManager {
     /**
      * Verify admin PIN
      */
-    async verifyPin(forceSetup = false) {
+    async verifyPin(forceSetup = false, externalRl = null) {
         if (!this.isPinSet()) {
             if (forceSetup) {
                 console.log('⚠️  No admin PIN set. Setting up PIN...');
-                return await this.setupPin();
+                return await this.setupPin(externalRl);
             } else {
                 console.log('⚠️  No admin PIN configured. Access denied.');
                 console.log('💡 Use the admin settings to set up a PIN first.');
@@ -277,7 +293,7 @@ class AdminPinManager {
             }
         }
 
-        const rl = readline.createInterface({
+        const rl = externalRl || readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
@@ -288,7 +304,7 @@ class AdminPinManager {
             if (pinData.locked) {
                 console.log('🔒 Admin access is locked due to too many failed attempts.');
                 console.log('Please wait 5 minutes before trying again.');
-                rl.close();
+                if (!externalRl) rl.close();
                 return false;
             }
             
@@ -301,7 +317,7 @@ class AdminPinManager {
                 fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
                 console.log('✅ Admin access granted.');
-                rl.close();
+                if (!externalRl) rl.close();
                 return true;
             } else {
                 pinData.attempts = (pinData.attempts || 0) + 1;
@@ -318,13 +334,13 @@ class AdminPinManager {
                 fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
                 console.log(`❌ Incorrect PIN. ${3 - pinData.attempts} attempts remaining.`);
-                rl.close();
+                if (!externalRl) rl.close();
                 return false;
             }
             
         } catch (error) {
             console.error('❌ Error verifying PIN:', error.message);
-            rl.close();
+            if (!externalRl) rl.close();
             return false;
         }
     }

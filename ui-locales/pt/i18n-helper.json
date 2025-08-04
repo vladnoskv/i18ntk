@@ -1,9 +1,9 @@
 {
   "i18n_helper": {
-    "translation_file_not_found": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_loading_translations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "translation_not_found": "⚠️ TRANSLATION NEEDED ⚠️",
-    "translation_key_not_string": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_reading_locales_directory": "⚠️ TRANSLATION NEEDED ⚠️"
+    "translation_file_not_found": "Arquivo de tradução não encontrado: {translationFile}",
+    "error_loading_translations": "Erro ao carregar traduções: {errorMessage}",
+    "translation_not_found": "Tradução não encontrada para a chave: {key}",
+    "translation_key_not_string": "A chave de tradução não resolve para uma string: {key}",
+    "error_reading_locales_directory": "Erro ao ler o diretório de locales: {errorMessage}"
   }
 }

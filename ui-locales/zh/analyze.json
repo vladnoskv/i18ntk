@@ -3,6 +3,9 @@
   "source_directory": "📁 源目录: {sourceDir}",
   "i18n_directory": "🌐 I18n 目录: {i18nDir}",
   "loading_translation_files": "📋 正在加载翻译文件...",
+  "sourceDirectoryLabel": "📁 源目录: {{sourceDir}}",
+  "sourceLanguageLabel": "🌍 源语言: {{sourceLanguage}}",
+  "strictModeLabel": "⚙️ 严格模式: {{mode}}\n",
   "found_translation_files_count": "✅ 找到 {count} 个翻译文件",
   "analyzing_translations": "🔍 正在分析翻译...",
   "analysis_completed_successfully": "🎉 分析成功完成！",
@@ -50,12 +53,12 @@
   "statusFileMissing": "❌ 翻译文件缺失",
   "sourceKeys": "📊 源键: {count}",
   "translation": "📊 翻译: {translated}/{total} ({percentage}%)",
-  "structure": "🗂️  结构: {status}",
+  "structure": "🗂️ 结构: {status}",
   "consistent": "一致",
   "inconsistent": "不一致",
   "missingKeys": "缺失键: {count}",
   "extraKeys": "额外键: {count}",
-  "issues": "⚠️  发现问题: {count}",
+  "issues": "⚠️ 发现问题: {count}",
   "issueType": {
     "not_translated": "未翻译: {count}",
     "empty_value": "空值: {count}",
@@ -70,6 +73,6 @@
   "english": "英语",
   "needsTranslation": "需要翻译",
   "andMoreKeys": "...以及 {count} 个更多键。",
-  "noLanguages": "⚠️  未找到目标语言。",
+  "noLanguages": "⚠️ 未找到目标语言。",
   "languageStats": "{language}: {percentage}% 完成 ({translated}/{total} 个键)"
 }

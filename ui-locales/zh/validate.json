@@ -80,5 +80,6 @@
   "completedIndicator": "✅ 已完成",
   "errorIndicator": "❌ 错误",
   "warningIndicator": "⚠️  警告",
-  "infoIndicator": "ℹ️  信息"
+  "infoIndicator": "ℹ️  信息",
+  "validation_failed": "❌ 验证失败: {error}"
 }

@@ -90,7 +90,7 @@
     "timeout": 30000
   },
   "security": {
-    "adminPinEnabled": false,
+    "adminPinEnabled": "false",
     "adminPinPromptOnInit": false,
     "keepAuthenticatedUntilExit": true,
     "sessionTimeout": 30,
@@ -114,7 +114,23 @@
       "dist",
       "build"
     ],
-    "strictMode": false
+    "strictMode": false,
+    "pinProtection": {
+      "enabled": "false",
+      "protectedScripts": {
+        "debugMenu": false,
+        "deleteReports": false,
+        "summaryReports": false,
+        "settingsMenu": false,
+        "init": false,
+        "analyze": false,
+        "validate": false,
+        "complete": false,
+        "manage": false,
+        "sizing": false,
+        "usage": false
+      }
+    }
   },
   "debug": {
     "enabled": false,

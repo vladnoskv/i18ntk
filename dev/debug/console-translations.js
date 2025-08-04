@@ -28,7 +28,7 @@ class ConsoleTranslationsChecker {
      * Load and parse a JSON translation file
      */
     loadTranslationFile(language) {
-        const filePath = path.join(this.uiLocalesDir, `${language}.json`);
+        const filePath = path.join(this.uiLocalesDir, language, 'common.json');
         
         try {
             if (!fs.existsSync(filePath)) {
@@ -38,7 +38,7 @@ class ConsoleTranslationsChecker {
             const content = fs.readFileSync(filePath, 'utf8');
             return JSON.parse(content);
         } catch (error) {
-            this.results.issues.push(`❌ Error loading ${language}.json: ${error.message}`);
+            this.results.issues.push(`❌ Error loading ${language}/common.json: ${error.message}`);
             return null;
         }
     }

@@ -17,30 +17,31 @@ class AutoRunner {
         {
           "name": "initialize",
           "script": "i18ntk-init.js",
-          "description": "Initialize i18n project structure"
+          "description": "stepInitializeProject"
         },
         {
           "name": "analyze",
           "script": "i18ntk-analyze.js",
-          "description": "Analyze translation files"
+          "description": "stepAnalyzeTranslations"
         },
         {
           "name": "validate",
           "script": "i18ntk-validate.js",
-          "description": "Validate translations"
+          "description": "stepValidateTranslations"
         },
         {
           "name": "usage",
           "script": "i18ntk-usage.js",
-          "description": "Check usage statistics"
+          "description": "stepCheckUsage"
         },
         {
           "name": "summary",
           "script": "i18ntk-summary.js",
-          "description": "Generate summary report"
+          "description": "stepGenerateSummary"
         }
       ]
     };
+    this.translations = this.loadTranslations();
   }
 
   loadTranslations() {
@@ -50,15 +51,27 @@ class AutoRunner {
     if (fs.existsSync(localesDir)) {
       const languages = ['en', 'de', 'es', 'fr', 'ja', 'pt', 'ru', 'zh'];
       languages.forEach(lang => {
-        const filePath = path.join(localesDir, lang, 'autorun.json');
-          if (fs.existsSync(filePath)) {
-            try {
-              translations[lang] = translations[lang] || {};
-              translations[lang].autorun = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            } catch (error) {
-              console.warn(this.t('translationLoadWarning', lang).replace('{lang}', lang));
-            }
+        // Load autorun.json
+        const autorunPath = path.join(localesDir, lang, 'autorun.json');
+        if (fs.existsSync(autorunPath)) {
+          try {
+            translations[lang] = translations[lang] || {};
+            translations[lang].autorun = JSON.parse(fs.readFileSync(autorunPath, 'utf8'));
+          } catch (error) {
+            console.warn(`Warning: Failed to load translation file for language ${lang}: ${autorunPath}`);
           }
+        }
+        
+        // Load common.json
+        const commonPath = path.join(localesDir, lang, 'common.json');
+        if (fs.existsSync(commonPath)) {
+          try {
+            translations[lang] = translations[lang] || {};
+            translations[lang].common = JSON.parse(fs.readFileSync(commonPath, 'utf8'));
+          } catch (error) {
+            console.warn(`Warning: Failed to load translation file for language ${lang}: ${commonPath}`);
+          }
+        }
       });
     }
     
@@ -83,15 +96,24 @@ class AutoRunner {
   }
 
   t(key, lang = 'en') {
-    const translations = this.loadTranslations();
-    
-    if (translations[lang] && translations[lang].autorun && translations[lang].autorun[key]) {
-      return translations[lang].autorun[key];
+    // Check autorun.json first, then common.json
+    if (this.translations[lang]) {
+      if (this.translations[lang].autorun && this.translations[lang].autorun[key]) {
+        return this.translations[lang].autorun[key];
+      }
+      if (this.translations[lang].common && this.translations[lang].common[key]) {
+        return this.translations[lang].common[key];
+      }
     }
     
     // Fallback to English
-    if (translations['en'] && translations['en'].autorun && translations['en'].autorun[key]) {
-      return translations['en'].autorun[key];
+    if (this.translations['en']) {
+      if (this.translations['en'].autorun && this.translations['en'].autorun[key]) {
+        return this.translations['en'].autorun[key];
+      }
+      if (this.translations['en'].common && this.translations['en'].common[key]) {
+        return this.translations['en'].common[key];
+      }
     }
     
     // Return the key as fallback
@@ -135,15 +157,15 @@ class AutoRunner {
     }
 
     console.log(`\n[${stepNumber}/${totalSteps}] ${this.t('runningStep', lang).replace('{stepName}', step.name)}`);
-    console.log(`${this.t('commandLabel', lang).replace('{command}', step.description)}`);
+    console.log(`${this.t('commandLabel', lang).replace('{command}', this.t(step.description, lang))}`);
     console.log(this.t('separator', lang));
 
     try {
-      execSync(`node "${scriptPath}"`, { stdio: 'inherit' });
-      console.log(`✅ ${this.t('stepCompleted', lang).replace('{stepName}', step.name)}`);
+      execSync(`node "${scriptPath}" --no-prompt`, { stdio: 'inherit' });
+      console.log(`${this.t('stepCompletedIcon', lang)} ${this.t('stepCompleted', lang).replace('{stepName}', step.name)}`);
       return true;
     } catch (error) {
-      console.error(`❌ ${this.t('stepFailed', lang).replace('{stepName}', step.name)}`);
+      console.error(`${this.t('stepFailedIcon', lang)} ${this.t('stepFailed', lang).replace('{stepName}', step.name)}`);
       console.error(`${this.t('errorLabel', lang)}:`, error.message);
       return false;
     }
@@ -179,6 +201,7 @@ class AutoRunner {
       console.log(`${this.t('successfulSteps', lang).replace('{count}', successCount)}`);
       console.log(`${this.t('failedSteps', lang).replace('{count}', config.steps.length - successCount)}`);
     }
+    process.exit(0);
   }
 }
 
@@ -189,15 +212,16 @@ function main() {
 
   if (args.includes('--help') || args.includes('-h')) {
     runner.displayHelp();
-    return;
+    process.exit(0);
   }
 
   if (args.includes('--config') || args.includes('-c')) {
     runner.displayConfig();
-    return;
+    process.exit(0);
   }
 
   runner.runAll();
+  process.exit(0);
 }
 
 // Execute if called directly

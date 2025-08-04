@@ -144,16 +144,26 @@ class I18nDebugger {
             return;
         }
 
-        const localeFiles = fs.readdirSync(uiLocalesDir).filter(f => f.endsWith('.json'));
-        if (localeFiles.length === 0) {
+        const languages = ['en', 'de', 'es', 'fr', 'ja', 'ru', 'zh'];
+        const availableLanguages = [];
+        
+        for (const lang of languages) {
+            const langDir = path.join(uiLocalesDir, lang);
+            const commonFile = path.join(langDir, 'common.json');
+            if (fs.existsSync(commonFile)) {
+                availableLanguages.push(lang);
+            }
+        }
+        
+        if (availableLanguages.length === 0) {
             this.addIssue('No locale files found in ui-locales directory');
             return;
         }
 
         // Load English as reference
-        const enPath = path.join(uiLocalesDir, 'en.json');
+        const enPath = path.join(uiLocalesDir, 'en', 'common.json');
         if (!fs.existsSync(enPath)) {
-            this.addIssue('English locale file (en.json) not found');
+            this.addIssue('English locale file (en/common.json) not found');
             return;
         }
 
@@ -172,18 +182,18 @@ class I18nDebugger {
             
             const requiredKeys = this.extractAllKeys(enLocale);
 
-            for (const file of localeFiles) {
-                const filePath = path.join(uiLocalesDir, file);
+            for (const language of availableLanguages) {
+                const filePath = path.join(uiLocalesDir, language, 'common.json');
                 try {
                     const content = await SecurityUtils.safeReadFile(filePath, this.projectRoot);
                     if (!content) {
-                        this.addIssue(`Failed to read ${file}`);
+                        this.addIssue(`Failed to read ${language}/common.json`);
                         continue;
                     }
                     
                     const locale = SecurityUtils.safeParseJSON(content);
                     if (!locale) {
-                        this.addIssue(`Failed to parse ${file}`);
+                        this.addIssue(`Failed to parse ${language}/common.json`);
                         continue;
                     }
                     
@@ -191,11 +201,11 @@ class I18nDebugger {
                     
                     const missingKeys = requiredKeys.filter(key => !existingKeys.includes(key));
                     if (missingKeys.length > 0) {
-                        this.addIssue(`Missing translation keys in ${file}: ${missingKeys.join(', ')}`);
+                        this.addIssue(`Missing translation keys in ${language}/common.json: ${missingKeys.join(', ')}`);
                     }
                 } catch (error) {
-                    this.addIssue(`Error processing ${file}: ${error.message}`);
-                    SecurityUtils.logSecurityEvent('Translation file processing failed', 'error', { file, error: error.message });
+                    this.addIssue(`Error processing ${language}/common.json: ${error.message}`);
+                    SecurityUtils.logSecurityEvent('Translation file processing failed', 'error', { file: `${language}/common.json`, error: error.message });
                 }
             }
         } catch (error) {

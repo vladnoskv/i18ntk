@@ -27,5 +27,14 @@
   "loading": "Loading...",
   "separator": "==================================================",
   "initializationFailed": "❌ Initialization failed: {error}",
-  "stackTrace": "Stack trace: {stack}"
+  "stackTrace": "Stack trace: {stack}",
+  "pressEnterToContinue": "Press Enter to continue...",
+  "pressEnterToReturn": "Press Enter to return to main menu...",
+  "stepCompleted": "Step '{stepName}' completed.",
+  "stepFailed": "Step '{stepName}' failed.",
+  "runningStep": "Running step: {stepName}",
+  "command": "Command: {command}",
+  "startingWorkflow": "Starting workflow...",
+  "workflowCompleted": "Workflow completed.",
+  "checkReports": "Check reports for details."
 }

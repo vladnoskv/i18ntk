@@ -1,11 +1,11 @@
 {
-  "autoDetectedI18nDirectory": "⚠️ TRANSLATION NEEDED ⚠️",
-  "executingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "unknownCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorExecutingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorLoadingTranslationFile": "⚠️ TRANSLATION NEEDED ⚠️",
-  "errorSavingLanguagePreference": "⚠️ TRANSLATION NEEDED ⚠️",
-  "noActiveReadlineInterface": "⚠️ TRANSLATION NEEDED ⚠️",
-  "uiLanguageUpdated": "⚠️ TRANSLATION NEEDED ⚠️",
-  "selectOptionPrompt": "⚠️ TRANSLATION NEEDED ⚠️"
+  "autoDetectedI18nDirectory": "Répertoire i18n détecté automatiquement : {{path}}",
+  "executingCommand": "🔄 Exécution de la commande : {{command}}",
+  "unknownCommand": "❌ Commande inconnue : {{command}}",
+  "errorExecutingCommand": "❌ Erreur lors de l'exécution de la commande : {{error}}",
+  "errorLoadingTranslationFile": "❌ Erreur lors du chargement du fichier de traduction pour '{{language}}' : {{error}}",
+  "errorSavingLanguagePreference": "❌ Erreur lors de l'enregistrement de la préférence linguistique : {{error}}",
+  "noActiveReadlineInterface": "❌ Aucune interface readline active disponible",
+  "uiLanguageUpdated": "🌍 Langue de l'interface mise à jour vers : {{language}}",
+  "selectOptionPrompt": "Sélectionnez une option :"
 }

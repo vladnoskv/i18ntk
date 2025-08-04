@@ -1,11 +1,27 @@
 {
   "settings_manager": {
-    "error_loading_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_saving_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_setting_value": "⚠️ TRANSLATION NEEDED ⚠️",
-    "missing_required_setting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_source_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "default_languages_must_be_array": "⚠️ TRANSLATION NEEDED ⚠️"
+    "error_loading_settings": "❌ Ошибка загрузки настроек:",
+    "error_saving_settings": "❌ Ошибка сохранения настроек:",
+    "error_setting_value": "❌ Ошибка установки значения:",
+    "missing_required_setting": "❌ Отсутствует обязательная настройка: {prop}",
+    "invalid_language": "❌ Неверный язык: {language}",
+    "invalid_source_language": "❌ Неверный исходный язык: {sourceLanguage}",
+    "default_languages_must_be_array": "❌ defaultLanguages должно быть массивом",
+    "invalid_date_format": "❌ Неверный формат даты: {dateFormat}. Допустимые форматы: {validFormats}",
+    "invalid_time_format": "❌ Неверный формат времени: {timeFormat}. Допустимые форматы: {validFormats}",
+    "notifications_types_must_be_object": "❌ notifications.types должен быть объектом",
+    "exclude_files_must_be_array": "❌ excludeFiles должен быть массивом",
+    "exclude_dirs_must_be_array": "❌ excludeDirs должен быть массивом", 
+    "include_extensions_must_be_array": "❌ includeExtensions должен быть массивом",
+    "invalid_batch_size": "❌ Неверный размер пакета. Должно быть положительное число",
+    "invalid_max_concurrent_files": "❌ Неверное максимальное количество одновременных файлов. Должно быть положительное число",
+    "invalid_sizing_threshold": "❌ Неверный порог размера. Должно быть положительное число",
+    "invalid_timeout": "❌ Неверный таймаут. Должно быть не менее 1000мс",
+    "invalid_sizing_format": "❌ Неверный формат размера: {sizingFormat}. Допустимые форматы: {validFormats}",
+    "error_validating_settings": "❌ Ошибка проверки настроек:",
+    "backup_created": "📋 Создана резервная копия: {backupPath}",
+    "error_creating_backup": "❌ Ошибка создания резервной копии:",
+    "language_not_supported": "Язык '{language}' не поддерживается. Доступные: {availableLanguages}",
+    "ui_language_set": "🌍 Язык интерфейса установлен на: {language}"
   }
 }

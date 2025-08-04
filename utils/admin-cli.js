@@ -46,35 +46,35 @@ class AdminCLI {
       
       // Check if stdin is a TTY (interactive terminal)
       const stdin = process.stdin;
-      const isTTY = stdin.isTTY;
+      const isTTY = stdin && stdin.isTTY;
       
       if (isTTY) {
-         // Hide input for PIN in interactive mode
-         stdin.setRawMode(true);
-         stdin.resume();
-         stdin.setEncoding('utf8');
-       }
-       
-       if (isTTY) {
-         // Interactive mode with hidden input
-         let pin = '';
-         process.stdout.write(message);
+        // Interactive mode with hidden input
+        let pin = '';
+        process.stdout.write(message);
+        
+        // Ensure raw mode is properly set and cleaned up
+        stdin.setRawMode(true);
+        stdin.resume();
+        stdin.setEncoding('utf8');
+        
+        const cleanup = () => {
+          stdin.setRawMode(false);
+          stdin.pause();
+          stdin.removeAllListeners('data');
+        };
         
         const onData = (char) => {
           switch (char) {
             case '\n':
             case '\r':
             case '\u0004': // Ctrl+D
-              stdin.setRawMode(false);
-              stdin.pause();
-              stdin.removeListener('data', onData);
+              cleanup();
               process.stdout.write('\n');
               resolve(pin);
               break;
             case '\u0003': // Ctrl+C
-              stdin.setRawMode(false);
-              stdin.pause();
-              stdin.removeListener('data', onData);
+              cleanup();
               process.stdout.write('\n');
               process.exit(1);
               break;
@@ -85,7 +85,7 @@ class AdminCLI {
               }
               break;
             default:
-              if (char >= '0' && char <= '9' && pin.length < 4) {
+              if (char >= '0' && char <= '9' && pin.length < 6) {
                 pin += char;
                 process.stdout.write('*');
               }
@@ -96,7 +96,9 @@ class AdminCLI {
         stdin.on('data', onData);
       } else {
         // Non-interactive mode (piped input)
+        // Close readline after use to prevent hanging
         rl.question(message, (answer) => {
+          this.closeReadline();
           resolve(answer.trim());
         });
       }
@@ -134,17 +136,17 @@ class AdminCLI {
       do {
         pin1 = await this.promptPin(i18n.t('adminCli.enterPinPrompt'));
         
-        if (!/^\d{4}$/.test(pin1)) {
-          console.log(i18n.t('adminCli.pinFormatError'));
-          continue;
-        }
+        if (!/^\d{4,6}$/.test(pin1)) {
+               console.log(i18n.t('adminCli.pinFormatError'));
+               continue;
+             }
         
         pin2 = await this.promptPin(i18n.t('adminCli.confirmPinPrompt'));
         
         if (pin1 !== pin2) {
           console.log(i18n.t('adminCli.pinMismatchError'));
         }
-      } while (pin1 !== pin2 || !/^\d{4}$/.test(pin1));
+      } while (pin1 !== pin2 || !/^\d{4,6}$/.test(pin1));
 
       await this.adminAuth.initialize();
       const success = await this.adminAuth.setupPin(pin1);
@@ -186,7 +188,7 @@ class AdminCLI {
       while (attempts < maxAttempts) {
         const pin = await this.promptPin('Enter admin PIN: ');
         
-        if (!/^\d{4}$/.test(pin)) {
+        if (!/^\d{4,6}$/.test(pin)) {
           console.log(i18n.t('adminCli.invalidPinFormat'));
           attempts++;
           continue;

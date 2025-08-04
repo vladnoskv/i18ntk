@@ -1,11 +1,27 @@
 {
   "settings_manager": {
-    "error_loading_settings": "❌ Error loading settings:",
-    "error_saving_settings": "❌ Error saving settings:",
-    "error_setting_value": "❌ Error setting value:",
-    "missing_required_setting": "❌ Missing required setting: {prop}",
-    "invalid_language": "❌ Invalid language: {language}",
-    "invalid_source_language": "❌ Invalid source language: {sourceLanguage}",
-    "default_languages_must_be_array": "❌ defaultLanguages must be an array"
+    "error_loading_settings": "❌ Fehler beim Laden der Einstellungen:",
+    "error_saving_settings": "❌ Fehler beim Speichern der Einstellungen:",
+    "error_setting_value": "❌ Fehler beim Setzen des Werts:",
+    "missing_required_setting": "❌ Fehlende erforderliche Einstellung: {prop}",
+    "invalid_language": "❌ Ungültige Sprache: {language}",
+    "invalid_source_language": "❌ Ungültige Ausgangssprache: {sourceLanguage}",
+    "default_languages_must_be_array": "❌ defaultLanguages muss ein Array sein",
+    "invalid_date_format": "❌ Ungültiges Datumsformat: {dateFormat}. Gültige Formate: {validFormats}",
+    "invalid_time_format": "❌ Ungültiges Zeitformat: {timeFormat}. Gültige Formate: {validFormats}",
+    "notifications_types_must_be_object": "❌ notifications.types muss ein Objekt sein",
+    "exclude_files_must_be_array": "❌ excludeFiles muss ein Array sein",
+    "exclude_dirs_must_be_array": "❌ excludeDirs muss ein Array sein",
+    "include_extensions_must_be_array": "❌ includeExtensions muss ein Array sein",
+    "invalid_batch_size": "❌ Ungültige Stapelgröße. Muss eine positive Zahl sein",
+    "invalid_max_concurrent_files": "❌ Ungültige maximale gleichzeitige Dateien. Muss eine positive Zahl sein",
+    "invalid_sizing_threshold": "❌ Ungültige Größenschwelle. Muss eine positive Zahl sein",
+    "invalid_timeout": "❌ Ungültiges Timeout. Muss mindestens 1000ms betragen",
+    "invalid_sizing_format": "❌ Ungültiges Größenformat: {sizingFormat}. Gültige Formate: {validFormats}",
+    "error_validating_settings": "❌ Fehler bei der Einstellungsvalidierung:",
+    "backup_created": "📋 Backup erstellt: {backupPath}",
+    "error_creating_backup": "❌ Fehler beim Erstellen des Backups:",
+    "language_not_supported": "Sprache '{language}' wird nicht unterstützt. Verfügbar: {availableLanguages}",
+    "ui_language_set": "🌍 UI-Sprache eingestellt auf: {language}"
   }
 }

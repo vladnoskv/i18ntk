@@ -1,5 +1,40 @@
 {
-  "settings_cli": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️"
+  "settings": {
+    "mainMenu": {
+      "title": "Menu Principal :",
+      "uiSettings": "Paramètres UI",
+      "uiSettingsDesc": "Langue, thème et options d'interface",
+      "directorySettings": "Paramètres des Répertoires", 
+      "directorySettingsDesc": "Chemins des répertoires source et de sortie",
+      "scriptDirectorySettings": "Paramètres des Répertoires de Scripts",
+      "scriptDirectorySettingsDesc": "Chemins des répertoires pour les opérations de scripts individuels",
+      "processingSettings": "Paramètres de Traitement",
+      "processingSettingsDesc": "Taille du lot, concurrence et performance",
+      "advancedSettings": "Paramètres Avancés",
+      "advancedSettingsDesc": "Validation, journalisation et options expertes",
+      "viewAllSettings": "Voir Tous les Paramètres",
+      "viewAllSettingsDesc": "Afficher la configuration actuelle",
+      "importExport": "Importer/Exporter",
+      "importExportDesc": "Sauvegarder et restaurer les paramètres",
+      "resetToDefaults": "Réinitialiser aux Valeurs par Défaut",
+      "resetToDefaultsDesc": "Restaurer les paramètres d'usine",
+      "reportBug": "Signaler un Bug",
+      "reportBugDesc": "Soumettre un rapport de bug sur GitHub",
+      "saveChanges": "Enregistrer les Modifications",
+      "saveChangesDesc": "Enregistrer la configuration actuelle dans un fichier",
+      "updatePackage": "Mettre à Jour le Paquet",
+      "updatePackageDesc": "Mettre à jour le paquet i18n-toolkit via npm",
+      "help": "Aide",
+      "helpDesc": "Afficher des informations d'aide détaillées",
+      "quit": "Quitter",
+      "quitDesc": "Quitter les paramètres (avec avertissement de sauvegarde si nécessaire)",
+      "unsavedChangesWarning": "⚠️  Vous avez des modifications non enregistrées",
+      "saveChangesBeforeQuit": "Voulez-vous enregistrer les modifications avant de quitter ? (o/N) : ",
+      "selectOption": "Sélectionner une option : ",
+      "goodbyeMessage": "Merci d'avoir utilisé le gestionnaire de paramètres i18n !"
+    },
+    "goodbyeMessage": "Merci d'avoir utilisé le gestionnaire de paramètres i18n !",
+    "relativePathHint": "Utilisez des chemins relatifs depuis ce répertoire (ex. ./src/i18n/locales)",
+    "currentDirectory": "Répertoire actuel du projet"
   }
 }

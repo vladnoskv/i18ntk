@@ -313,9 +313,9 @@ class I18nManager {
       this.ui.refreshLanguageFromSettings();
     }
     
-    // Check admin authentication for sensitive commands
-    const sensitiveCommands = ['init', 'validate', 'complete', 'sizing', 'debug'];
-    if (sensitiveCommands.includes(command)) {
+    // Check admin authentication for all commands when PIN protection is enabled
+    const authRequiredCommands = ['init', 'analyze', 'validate', 'usage', 'complete', 'sizing', 'workflow', 'status', 'delete', 'settings', 'debug'];
+    if (authRequiredCommands.includes(command)) {
       const authPassed = await this.checkAdminAuth();
       if (!authPassed) {
         if (!this.isNonInteractiveMode() && !isDirectCommand) {
@@ -334,24 +334,24 @@ class I18nManager {
                 break;
             case 'analyze':
                 const analyzer = new I18nAnalyzer();
-                await analyzer.run();
+                await analyzer.run({fromMenu: isManagerExecution});
                 break;
             case 'validate':
                 const validator = new I18nValidator();
-                await validator.run();
+                await validator.run({fromMenu: isManagerExecution});
                 break;
             case 'usage':
                 const usageAnalyzer = new I18nUsageAnalyzer();
-                await usageAnalyzer.run();
+                await usageAnalyzer.run({fromMenu: isManagerExecution});
                 break;
             case 'sizing':
                 const sizingAnalyzer = new I18nSizingAnalyzer();
-                await sizingAnalyzer.run();
+                await sizingAnalyzer.run({fromMenu: isManagerExecution});
                 break;
             case 'complete':
                 const completeTool = require('./i18ntk-complete');
                 const tool = new completeTool();
-                await tool.run();
+                await tool.run({fromMenu: isManagerExecution});
                 break;
             case 'workflow':
                 console.log(this.ui.t('workflow.starting'));
@@ -366,7 +366,7 @@ class I18nManager {
                 // Check execution context for proper exit handling
                 if (isManagerExecution && !this.isNonInteractiveMode()) {
                     try {
-                        await this.prompt('\n📝 Press Enter to return to main menu...');
+                        await this.prompt(this.ui.t('usage.pressEnterToReturnToMenu'));
                         await this.showInteractiveMenu();
                     } catch (error) {
                         // If readline fails, just exit gracefully
@@ -523,6 +523,23 @@ class I18nManager {
         await this.executeCommand('workflow', {fromMenu: true});
         break;
       case '8':
+        // Check for PIN protection
+        const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
+        if (authRequired) {
+          console.log(`\n${this.ui.t('adminCli.protectedAccess')}`);
+          const pin = await this.prompt(this.ui.t('adminCli.enterPin') + ': ');
+          const isValid = await this.adminAuth.verifyPin(pin);
+          
+          if (!isValid) {
+            console.log(this.ui.t('adminCli.invalidPin'));
+            await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+            await this.showInteractiveMenu();
+            return;
+          }
+          
+          console.log(this.ui.t('adminCli.accessGranted'));
+        }
+        
         console.log(this.ui.t('status.generating'));
         try {
           const summaryTool = require('./i18ntk-summary');
@@ -587,6 +604,23 @@ class I18nManager {
 
   // Debug Tools Menu
   async showDebugMenu() {
+    // Check for PIN protection
+    const authRequired = await this.adminAuth.isAuthRequiredForScript('debugMenu');
+    if (authRequired) {
+      console.log(`\n${this.ui.t('adminPin.protectedAccess')}`);
+      const pin = await this.prompt(this.ui.t('adminPin.enterPin') + ': ');
+      const isValid = await this.adminAuth.verifyPin(pin);
+      
+      if (!isValid) {
+        console.log(this.ui.t('adminPin.invalidPin'));
+        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+        await this.showInteractiveMenu();
+        return;
+      }
+      
+      console.log(this.ui.t('adminPin.accessGranted'));
+    }
+
     console.log(`\n${this.ui.t('debug.title')}`);
     console.log(this.ui.t('debug.separator'));
     console.log(`1. ${this.ui.t('debug.mainDebuggerSystemDiagnostics')}`);
@@ -701,6 +735,23 @@ class I18nManager {
 
   // Enhanced delete reports and logs functionality
   async deleteReports() {
+    // Check for PIN protection
+    const authRequired = await this.adminAuth.isAuthRequiredForScript('deleteReports');
+    if (authRequired) {
+      console.log(`\n${this.ui.t('adminPin.protectedAccess')}`);
+      const pin = await this.prompt(this.ui.t('adminPin.enterPin') + ': ');
+      const isValid = await this.adminAuth.verifyPin(pin);
+      
+      if (!isValid) {
+        console.log(this.ui.t('adminPin.invalidPin'));
+        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+        await this.showInteractiveMenu();
+        return;
+      }
+      
+      console.log(this.ui.t('adminPin.accessGranted'));
+    }
+
     console.log(`\n${this.ui.t('operations.deleteReportsTitle')}`);
     console.log('============================================================');
     
@@ -884,6 +935,23 @@ class I18nManager {
   // Settings Menu
   async showSettingsMenu() {
     try {
+      // Check for PIN protection
+      const authRequired = await this.adminAuth.isAuthRequiredForScript('settingsMenu');
+      if (authRequired) {
+        console.log(`\n${this.ui.t('adminPin.protectedAccess')}`);
+        const pin = await this.prompt(this.ui.t('adminPin.enterPin') + ': ');
+        const isValid = await this.adminAuth.verifyPin(pin);
+        
+        if (!isValid) {
+          console.log(this.ui.t('adminPin.invalidPin'));
+          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+          await this.showInteractiveMenu();
+          return;
+        }
+        
+        console.log(this.ui.t('adminPin.accessGranted'));
+      }
+
       const SettingsCLI = require('../settings/settings-cli');
       const settingsCLI = new SettingsCLI();
       await settingsCLI.run();
@@ -947,26 +1015,26 @@ if (require.main === module) {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       const versionInfo = packageJson.versionInfo || {};
       
-      console.log(`\n🌍 i18ntk - Enterprise i18n Management Toolkit`);
-      console.log(`📦 Version: ${packageJson.version}`);
-      console.log(`📅 Release Date: ${versionInfo.releaseDate || 'N/A'}`);
-      console.log(`👤 Maintainer: ${versionInfo.maintainer || packageJson.author}`);
-      console.log(`🔧 Node.js: ${versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0'}`);
-      console.log(`📄 License: ${packageJson.license}`);
+      console.log(`\n${this.ui.t('ui.toolkitTitle')}`);
+      console.log(`${this.ui.t('ui.versionInfo', { version: packageJson.version })}`);
+      console.log(`${this.ui.t('ui.releaseDate', { date: versionInfo.releaseDate || 'N/A' })}`);
+      console.log(`${this.ui.t('ui.maintainer', { maintainer: versionInfo.maintainer || packageJson.author })}`);
+      console.log(`${this.ui.t('ui.nodeVersion', { version: versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0' })}`);
+      console.log(`${this.ui.t('ui.license', { license: packageJson.license })}`);
       
       if (versionInfo.majorChanges && versionInfo.majorChanges.length > 0) {
-        console.log(`\n✨ What's New in v${packageJson.version}:`);
+        console.log(`\n${this.ui.t('ui.whatsNew', { version: packageJson.version })}`);
         versionInfo.majorChanges.forEach(change => {
-          console.log(`   ${change}`);
+          console.log(`${this.ui.t('ui.changeItem', { change: change })}`);
         });
       }
       
-      console.log(`\n📚 Documentation: ${packageJson.homepage || 'https://github.com/vladnoskv/i18n-management-toolkit#readme'}`);
-      console.log(`🐛 Issues: ${packageJson.bugs?.url || 'https://github.com/vladnoskv/i18n-management-toolkit/issues'}`)
+      console.log(`\n${this.ui.t('ui.documentation', { url: packageJson.homepage || 'https://github.com/vladnoskv/i18n-management-toolkit#readme' })}`);
+      console.log(`${this.ui.t('ui.issues', { url: packageJson.bugs?.url || 'https://github.com/vladnoskv/i18n-management-toolkit/issues' })}`)
       
     } catch (error) {
-      console.log(`\ni18ntk version information unavailable`);
-      console.log(`Error: ${error.message}`);
+      console.log(`\n${this.ui.t('ui.versionInfoUnavailable')}`);
+      console.log(`${this.ui.t('ui.versionInfoError', { error: error.message })}`);
     }
     process.exit(0);
   }

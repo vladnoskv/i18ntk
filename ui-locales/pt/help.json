@@ -1,88 +1,221 @@
 {
-  "title": "⚠️ TRANSLATION NEEDED ⚠️",
-  "usage": "⚠️ TRANSLATION NEEDED ⚠️",
-  "interactiveMode": "⚠️ TRANSLATION NEEDED ⚠️",
-  "showHelp": "⚠️ TRANSLATION NEEDED ⚠️",
-  "availableCommands": "⚠️ TRANSLATION NEEDED ⚠️",
+  "title": "🆘 Ajuda - i18n Translation Toolkit",
+  "usage": "Uso: i18ntk [comando] [opções]",
+  "interactiveMode": "Modo Interativo: i18ntk (sem argumentos)",
+  "showHelp": "Mostrar ajuda: i18ntk help",
+  "availableCommands": "Comandos Disponíveis:",
   "help": {
-    "initProject": "⚠️ TRANSLATION NEEDED ⚠️",
-    "analyzeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "validateTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "checkUsage": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "analyzeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "validateCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "usageCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "sizingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "completeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "summaryCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "debugCommand": "⚠️ TRANSLATION NEEDED ⚠️"
+    "initProject": "🚀 Inicializar novos idiomas",
+    "analyzeTranslations": "🔍 Analisar traduções",
+    "validateTranslations": "✅ Validar traduções",
+    "checkUsage": "📊 Verificar uso de chaves",
+    "initCommand": "  init      - Inicializar novos idiomas",
+    "analyzeCommand": "  analyze   - Analisar traduções",
+    "validateCommand": "  validate  - Validar traduções", 
+    "usageCommand": "  usage     - Verificar uso de chaves",
+    "sizingCommand": "  sizing    - Analisar dimensionamento",
+    "completeCommand": "  complete  - Completar traduções (100% de cobertura)",
+    "summaryCommand": "  summary   - Mostrar status do projeto",
+    "debugCommand": "  debug     - Depurar problemas de tradução"
   },
-  "initProject": "⚠️ TRANSLATION NEEDED ⚠️",
-  "analyzeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
-  "validateTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
-  "checkUsage": "⚠️ TRANSLATION NEEDED ⚠️",
-  "initCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "analyzeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "validateCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "usageCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "sizingCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "completeCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "summaryCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-  "debugCommand": "⚠️ TRANSLATION NEEDED ⚠️",
+  "initProject": "🚀 Inicializar novos idiomas",
+  "analyzeTranslations": "🔍 Analisar traduções",
+  "validateTranslations": "✅ Validar traduções",
+  "checkUsage": "📊 Verificar uso de chaves",
+  "initCommand": "  init      - Inicializar novos idiomas",
+  "analyzeCommand": "  analyze   - Analisar traduções",
+  "validateCommand": "  validate  - Validar traduções",
+  "usageCommand": "  usage     - Verificar uso de chaves",
+  "sizingCommand": "  sizing    - Analisar dimensionamento",
+  "completeCommand": "  complete  - Completar traduções (100% de cobertura)",
+  "summaryCommand": "  summary   - Mostrar status do projeto",
+  "debugCommand": "  debug     - Depurar problemas de tradução",
   "menu": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "description": "⚠️ TRANSLATION NEEDED ⚠️",
-    "exit": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "Menu Principal",
+    "description": "Selecione uma opção para começar:",
+    "options": {
+      "analyze": "🔍 Analisar Traduções",
+      "validate": "✅ Validar Traduções",
+      "summary": "📊 Relatório de Resumo",
+      "usage": "📈 Análise de Uso",
+      "complete": "🎯 Verificar Completude",
+      "sizing": "📏 Análise de Tamanho",
+      "workflow": "⚡ Fluxo de Trabalho Completo",
+      "settings": "⚙️ Configurações",
+      "help": "❓ Ajuda",
+      "quit": "👋 Sair"
+    }
   },
   "commands": {
-    "init": "⚠️ TRANSLATION NEEDED ⚠️",
-    "analyze": "⚠️ TRANSLATION NEEDED ⚠️",
-    "validate": "⚠️ TRANSLATION NEEDED ⚠️",
-    "usage": "⚠️ TRANSLATION NEEDED ⚠️",
-    "sizing": "⚠️ TRANSLATION NEEDED ⚠️",
-    "complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "summary": "⚠️ TRANSLATION NEEDED ⚠️",
-    "debug": "⚠️ TRANSLATION NEEDED ⚠️"
+    "help": {
+      "description": "Mostrar informações de ajuda detalhadas",
+      "usage": "i18ntk help [comando]",
+      "examples": [
+        "i18ntk help",
+        "i18ntk help analyze"
+      ]
+    },
+    "init": {
+      "description": "Inicializar um novo projeto de tradução",
+      "usage": "i18ntk init [diretório]",
+      "examples": [
+        "i18ntk init",
+        "i18ntk init ./meu-projeto"
+      ]
+    },
+    "analyze": {
+      "description": "Analisar arquivos de tradução para problemas",
+      "usage": "i18ntk analyze [opções] [diretório]",
+      "examples": [
+        "i18ntk analyze",
+        "i18ntk analyze --fix",
+        "i18ntk analyze ./src/i18n"
+      ]
+    },
+    "validate": {
+      "description": "Validar estrutura e integridade dos arquivos",
+      "usage": "i18ntk validate [diretório]",
+      "examples": [
+        "i18ntk validate",
+        "i18ntk validate ./locales"
+      ]
+    },
+    "summary": {
+      "description": "Gerar relatório de resumo das traduções",
+      "usage": "i18ntk summary [opções] [diretório]",
+      "examples": [
+        "i18ntk summary",
+        "i18ntk summary --format json",
+        "i18ntk summary ./locales"
+      ]
+    },
+    "usage": {
+      "description": "Analisar uso de chaves de tradução",
+      "usage": "i18ntk usage [opções] [diretório]",
+      "examples": [
+        "i18ntk usage",
+        "i18ntk usage --unused",
+        "i18ntk usage ./src"
+      ]
+    },
+    "complete": {
+      "description": "Verificar completude das traduções",
+      "usage": "i18ntk complete [opções] [diretório]",
+      "examples": [
+        "i18ntk complete",
+        "i18ntk complete --missing",
+        "i18ntk complete ./locales"
+      ]
+    },
+    "sizing": {
+      "description": "Analisar tamanhos de arquivos de tradução",
+      "usage": "i18ntk sizing [diretório]",
+      "examples": [
+        "i18ntk sizing",
+        "i18ntk sizing ./locales"
+      ]
+    },
+    "debug": {
+      "description": "Ferramentas de debug para desenvolvedores",
+      "usage": "i18ntk debug [opção]",
+      "examples": [
+        "i18ntk debug --info",
+        "i18ntk debug --console"
+      ]
+    },
+    "workflow": {
+      "description": "Executar fluxo de trabalho completo",
+      "usage": "i18ntk workflow [opções]",
+      "examples": [
+        "i18ntk workflow",
+        "i18ntk workflow --auto-fix"
+      ]
+    }
   },
   "options": {
-    "sourceDir": "⚠️ TRANSLATION NEEDED ⚠️",
-    "output": "⚠️ TRANSLATION NEEDED ⚠️",
-    "verbose": "⚠️ TRANSLATION NEEDED ⚠️",
-    "keepReports": "⚠️ TRANSLATION NEEDED ⚠️",
-    "deleteReports": "⚠️ TRANSLATION NEEDED ⚠️",
-    "help": "⚠️ TRANSLATION NEEDED ⚠️"
+    "global": {
+      "source": "Diretório de origem dos arquivos de tradução",
+      "output": "Diretório de saída para relatórios",
+      "format": "Formato do relatório (json, html, csv)",
+      "verbose": "Saída detalhada",
+      "quiet": "Modo silencioso"
+    },
+    "analyze": {
+      "fix": "Corrigir problemas automaticamente",
+      "strict": "Modo de validação estrito",
+      "report": "Gerar relatório detalhado"
+    },
+    "validate": {
+      "strict": "Validação estrita",
+      "format": "Validar formato JSON",
+      "structure": "Validar estrutura do arquivo"
+    },
+    "summary": {
+      "detailed": "Incluir estatísticas detalhadas",
+      "languages": "Listar idiomas suportados",
+      "keys": "Contar chaves de tradução"
+    },
+    "usage": {
+      "unused": "Mostrar chaves não utilizadas",
+      "orphaned": "Mostrar chaves órfãs",
+      "files": "Analisar arquivos de código"
+    },
+    "complete": {
+      "missing": "Mostrar traduções ausentes",
+      "percentage": "Calcular percentual de completude",
+      "gaps": "Identificar lacunas"
+    }
   },
   "examples": {
-    "title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "example1": "⚠️ TRANSLATION NEEDED ⚠️",
-    "example2": "⚠️ TRANSLATION NEEDED ⚠️",
-    "example3": "⚠️ TRANSLATION NEEDED ⚠️",
-    "example4": "⚠️ TRANSLATION NEEDED ⚠️",
-    "example5": "⚠️ TRANSLATION NEEDED ⚠️"
+    "basic": {
+      "title": "Uso Básico",
+      "description": "Começar com análise simples",
+      "command": "i18ntk analyze"
+    },
+    "project": {
+      "title": "Análise de Projeto",
+      "description": "Analisar diretório específico do projeto",
+      "command": "i18ntk analyze ./src/i18n"
+    },
+    "fix": {
+      "title": "Correção Automática",
+      "description": "Corrigir problemas automaticamente",
+      "command": "i18ntk analyze --fix"
+    },
+    "report": {
+      "title": "Relatório Completo",
+      "description": "Gerar relatório HTML detalhado",
+      "command": "i18ntk summary --format html"
+    },
+    "workflow": {
+      "title": "Fluxo de Trabalho Completo",
+      "description": "Executar todas as verificações",
+      "command": "i18ntk workflow"
+    }
   },
   "features": {
-    "initProject": "⚠️ TRANSLATION NEEDED ⚠️",
-    "analyzeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "validateTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "checkUsage": "⚠️ TRANSLATION NEEDED ⚠️",
-    "completeTranslations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "showSizing": "⚠️ TRANSLATION NEEDED ⚠️",
-    "runWorkflow": "⚠️ TRANSLATION NEEDED ⚠️",
-    "showStatus": "⚠️ TRANSLATION NEEDED ⚠️",
-    "deleteReports": "⚠️ TRANSLATION NEEDED ⚠️",
-    "changeLanguage": "⚠️ TRANSLATION NEEDED ⚠️",
-    "settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "showHelp": "⚠️ TRANSLATION NEEDED ⚠️",
-    "debugTools": "⚠️ TRANSLATION NEEDED ⚠️"
+    "title": "Recursos Principais",
+    "list": [
+      "✅ Análise automática de arquivos de tradução",
+      "🔍 Detecção de chaves ausentes e órfãs",
+      "📊 Relatórios detalhados em múltiplos formatos",
+      "⚡ Correção automática de problemas comuns",
+      "🎯 Verificação de completude de tradução",
+      "📏 Análise de tamanho de arquivos",
+      "🔧 Validação de estrutura JSON",
+      "📈 Análise de uso de chaves"
+    ]
   },
   "messages": {
-    "selectOption": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalidOption": "⚠️ TRANSLATION NEEDED ⚠️",
-    "operationCompleted": "⚠️ TRANSLATION NEEDED ⚠️",
-    "pressEnter": "⚠️ TRANSLATION NEEDED ⚠️",
-    "goodbye": "⚠️ TRANSLATION NEEDED ⚠️",
-    "unknownCommand": "⚠️ TRANSLATION NEEDED ⚠️",
-    "nonInteractive": "⚠️ TRANSLATION NEEDED ⚠️"
+    "noCommand": "Por favor, especifique um comando ou use 'i18ntk help' para ver comandos disponíveis.",
+    "invalidCommand": "Comando inválido: {command}",
+    "noHelp": "Nenhuma ajuda disponível para: {command}",
+    "gettingStarted": "Comece com: i18ntk analyze",
+    "interactive": "Use 'i18ntk' para modo interativo",
+    "moreInfo": "Use 'i18ntk help [comando]' para informações detalhadas",
+    "examples": "Exemplos de uso:",
+    "options": "Opções disponíveis:",
+    "commonIssues": "Problemas comuns:",
+    "support": "Precisa de ajuda? Abra um issue em: https://github.com/"
   }
 }

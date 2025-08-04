@@ -1,11 +1,27 @@
 {
   "settings_manager": {
-    "error_loading_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_saving_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_setting_value": "⚠️ TRANSLATION NEEDED ⚠️",
-    "missing_required_setting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_source_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "default_languages_must_be_array": "⚠️ TRANSLATION NEEDED ⚠️"
+    "error_loading_settings": "❌ 設定の読み込みエラー：",
+    "error_saving_settings": "❌ 設定の保存エラー：",
+    "error_setting_value": "❌ 値の設定エラー：",
+    "missing_required_setting": "❌ 必須設定がありません：{prop}",
+    "invalid_language": "❌ 無効な言語：{language}",
+    "invalid_source_language": "❌ 無効なソース言語：{sourceLanguage}",
+    "default_languages_must_be_array": "❌ defaultLanguages は配列でなければなりません",
+    "invalid_date_format": "❌ 無効な日付形式：{dateFormat}。有効な形式：{validFormats}",
+    "invalid_time_format": "❌ 無効な時刻形式：{timeFormat}。有効な形式：{validFormats}",
+    "notifications_types_must_be_object": "❌ notifications.types はオブジェクトでなければなりません",
+    "exclude_files_must_be_array": "❌ excludeFiles は配列でなければなりません",
+    "exclude_dirs_must_be_array": "❌ excludeDirs は配列でなければなりません",
+    "include_extensions_must_be_array": "❌ includeExtensions は配列でなければなりません",
+    "invalid_batch_size": "❌ 無効なバッチサイズです。正の数である必要があります",
+    "invalid_max_concurrent_files": "❌ 無効な同時処理ファイル数です。正の数である必要があります",
+    "invalid_sizing_threshold": "❌ 無効なサイズしきい値です。正の数である必要があります",
+    "invalid_timeout": "❌ 無効なタイムアウトです。最低でも1000msである必要があります",
+    "invalid_sizing_format": "❌ 無効なサイズ形式：{sizingFormat}。有効な形式：{validFormats}",
+    "error_validating_settings": "❌ 設定の検証エラー：",
+    "backup_created": "📋 バックアップを作成しました：{backupPath}",
+    "error_creating_backup": "❌ バックアップ作成エラー：",
+    "language_not_supported": "言語 '{language}' はサポートされていません。利用可能：{availableLanguages}",
+    "ui_language_set": "🌍 UI 言語を設定しました：{language}"
   }
 }

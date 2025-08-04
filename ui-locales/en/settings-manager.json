@@ -6,6 +6,22 @@
     "missing_required_setting": "❌ Missing required setting: {prop}",
     "invalid_language": "❌ Invalid language: {language}",
     "invalid_source_language": "❌ Invalid source language: {sourceLanguage}",
-    "default_languages_must_be_array": "❌ defaultLanguages must be an array"
+    "default_languages_must_be_array": "❌ defaultLanguages must be an array",
+    "invalid_date_format": "❌ Invalid date format: {dateFormat}. Valid formats: {validFormats}",
+    "invalid_time_format": "❌ Invalid time format: {timeFormat}. Valid formats: {validFormats}",
+    "notifications_types_must_be_object": "❌ notifications.types must be an object",
+    "exclude_files_must_be_array": "❌ excludeFiles must be an array",
+    "exclude_dirs_must_be_array": "❌ excludeDirs must be an array",
+    "include_extensions_must_be_array": "❌ includeExtensions must be an array",
+    "invalid_batch_size": "❌ Invalid batch size. Must be a positive number",
+    "invalid_max_concurrent_files": "❌ Invalid max concurrent files. Must be a positive number",
+    "invalid_sizing_threshold": "❌ Invalid sizing threshold. Must be a positive number",
+    "invalid_timeout": "❌ Invalid timeout. Must be at least 1000ms",
+    "invalid_sizing_format": "❌ Invalid sizing format: {sizingFormat}. Valid formats: {validFormats}", 
+    "error_validating_settings": "❌ Error validating settings:",
+    "backup_created": "📋 Backup created: {backupPath}",
+    "error_creating_backup": "❌ Error creating backup:",
+    "language_not_supported": "Language '{language}' is not supported. Available: {availableLanguages}",
+    "ui_language_set": "🌍 UI language set to: {language}"
   }
 }

@@ -10,7 +10,7 @@ const SettingsManager = require('../settings/settings-manager');
  */
 class AdminAuth {
   constructor() {
-    this.configPath = path.join(process.cwd(), '.i18n-admin-config.json');
+    this.configPath = path.join(process.cwd(), 'settings', '.i18n-admin-config.json');
     this.settingsManager = SettingsManager;
     
     // Get settings from SettingsManager
@@ -23,35 +23,50 @@ class AdminAuth {
     this.activeSessions = new Map();
     this.failedAttempts = new Map();
     this.lockouts = new Map();
+    this.currentSession = null;
+    this.sessionStartTime = null;
     
     // Clean up expired sessions every 5 minutes
     this.cleanupInterval = setInterval(this.cleanupExpiredSessions.bind(this), 5 * 60 * 1000);
+    
+    // Handle process exit to ensure session cleanup
+    this.setupProcessHandlers();
   }
 
   /**
-   * Initialize admin authentication system
-   */
-  async initialize() {
-    try {
-      if (!fs.existsSync(this.configPath)) {
-        // Create default config if it doesn't exist
-        const defaultConfig = {
-          enabled: false,
-          pinHash: null,
-          salt: null,
-          createdAt: new Date().toISOString(),
-          lastModified: new Date().toISOString()
-        };
-        await this.saveConfig(defaultConfig);
-      }
-      
-      SecurityUtils.logSecurityEvent('admin_auth_initialized', 'info', 'Admin authentication system initialized');
-      return true;
-    } catch (error) {
-      SecurityUtils.logSecurityEvent('admin_auth_init_error', 'error', `Failed to initialize admin auth: ${error.message}`);
-      return false;
+     * Initialize admin authentication system
+     */
+    async initialize() {
+        try {
+            if (!fs.existsSync(this.configPath)) {
+                // Create default config if it doesn't exist
+                const defaultConfig = {
+                    enabled: false,
+                    pinHash: null,
+                    salt: null,
+                    createdAt: new Date().toISOString(),
+                    lastModified: new Date().toISOString()
+                };
+                await this.saveConfig(defaultConfig);
+            }
+            
+            SecurityUtils.logSecurityEvent('admin_auth_initialized', 'info', 'Admin authentication system initialized');
+            return true;
+        } catch (error) {
+            SecurityUtils.logSecurityEvent('admin_auth_init_error', 'error', `Failed to initialize admin auth: ${error.message}`);
+            return false;
+        }
     }
-  }
+
+    /**
+     * Cleanup resources and stop intervals
+     */
+    async cleanup() {
+        if (this.cleanupInterval) {
+            clearInterval(this.cleanupInterval);
+            this.cleanupInterval = null;
+        }
+    }
 
   /**
    * Load admin configuration
@@ -90,9 +105,9 @@ class AdminAuth {
    */
   async setupPin(pin) {
     try {
-      // Validate PIN format (4 digits)
-      if (!/^\d{4}$/.test(pin)) {
-        throw new Error('PIN must be exactly 4 digits');
+      // Validate PIN format (4-6 digits)
+      if (!/^\d{4,6}$/.test(pin)) {
+        throw new Error('PIN must be 4-6 digits');
       }
 
       // Generate salt and hash
@@ -143,7 +158,7 @@ class AdminAuth {
       }
 
       // Validate PIN format
-      if (!/^\d{4}$/.test(pin)) {
+      if (!/^\d{4,6}$/.test(pin)) {
         this.recordFailedAttempt(clientId);
         SecurityUtils.logSecurityEvent('admin_auth_invalid_format', 'warning', 'Invalid PIN format attempted');
         return false;
@@ -169,6 +184,14 @@ class AdminAuth {
   }
 
   /**
+   * Check if admin PIN is configured
+   */
+  async isPinConfigured() {
+    const config = await this.loadConfig();
+    return config && config.enabled && config.pinHash;
+  }
+
+  /**
    * Check if authentication is required
    */
   async isAuthRequired() {
@@ -182,6 +205,161 @@ class AdminAuth {
   }
 
   /**
+   * Check if authentication is required for a specific script
+   */
+  async isAuthRequiredForScript(scriptName) {
+    // Check if admin PIN is enabled globally
+    if (!this.settingsManager.isAdminPinEnabled()) {
+      return false;
+    }
+
+    // Check if admin PIN is actually configured
+    const config = await this.loadConfig();
+    if (!config || !config.enabled || !config.pinHash) {
+      return false; // Don't require PIN if admin PIN is not configured
+    }
+
+    // Check if PIN protection is enabled
+    const pinProtection = this.settingsManager.getSetting('security.pinProtection');
+    if (!pinProtection || !pinProtection.enabled) {
+      return false; // Don't require PIN if protection is disabled
+    }
+
+    // Check if this specific script requires protection
+    const protectedScripts = pinProtection.protectedScripts || {};
+    return protectedScripts[scriptName] !== false; // Default to true if not explicitly set
+  }
+
+  /**
+   * Setup process handlers for session cleanup
+   */
+  setupProcessHandlers() {
+    const cleanup = () => {
+      this.clearCurrentSession();
+      if (this.cleanupInterval) {
+        clearInterval(this.cleanupInterval);
+      }
+    };
+
+    // Handle various exit scenarios
+    process.on('exit', cleanup);
+    process.on('SIGINT', () => {
+      cleanup();
+      process.exit(0);
+    });
+    process.on('SIGTERM', () => {
+      cleanup();
+      process.exit(0);
+    });
+    process.on('uncaughtException', (error) => {
+      SecurityUtils.logSecurityEvent('uncaught_exception', 'error', error.message);
+      cleanup();
+      process.exit(1);
+    });
+  }
+
+  /**
+   * Create a new authenticated session
+   */
+  async createSession(sessionId = null) {
+    if (!sessionId) {
+      sessionId = this.generateSessionId();
+    }
+    
+    const session = {
+      id: sessionId,
+      created: new Date().toISOString(),
+      lastActivity: new Date().toISOString(),
+      expires: new Date(Date.now() + this.sessionTimeout).toISOString()
+    };
+    
+    this.activeSessions.set(sessionId, session);
+    this.currentSession = session;
+    this.sessionStartTime = new Date();
+    
+    SecurityUtils.logSecurityEvent('session_created', 'info', `Session ${sessionId} created`);
+    return sessionId;
+  }
+
+  /**
+   * Validate current session
+   */
+  async validateSession(sessionId) {
+    if (!sessionId || !this.currentSession) {
+      return false;
+    }
+    
+    if (sessionId !== this.currentSession.id) {
+      return false;
+    }
+    
+    const session = this.activeSessions.get(sessionId);
+    if (!session) {
+      this.clearCurrentSession();
+      return false;
+    }
+    
+    const now = new Date();
+    const expires = new Date(session.expires);
+    
+    if (now > expires) {
+      this.activeSessions.delete(sessionId);
+      this.clearCurrentSession();
+      SecurityUtils.logSecurityEvent('session_expired', 'info', `Session ${sessionId} expired`);
+      return false;
+    }
+    
+    // Update last activity
+    session.lastActivity = now.toISOString();
+    session.expires = new Date(now.getTime() + this.sessionTimeout).toISOString();
+    this.activeSessions.set(sessionId, session);
+    
+    return true;
+  }
+
+  /**
+   * Clear current session
+   */
+  clearCurrentSession() {
+    if (this.currentSession) {
+      this.activeSessions.delete(this.currentSession.id);
+      SecurityUtils.logSecurityEvent('session_cleared', 'info', `Session ${this.currentSession.id} cleared`);
+    }
+    this.currentSession = null;
+    this.sessionStartTime = null;
+  }
+
+  /**
+   * Check if currently authenticated
+   */
+  isCurrentlyAuthenticated() {
+    return this.currentSession !== null;
+  }
+
+  /**
+   * Get current session info
+   */
+  getCurrentSessionInfo() {
+    if (!this.currentSession) {
+      return null;
+    }
+    
+    return {
+      sessionId: this.currentSession.id,
+      started: this.sessionStartTime,
+      expires: new Date(this.currentSession.expires),
+      duration: Date.now() - this.sessionStartTime.getTime()
+    };
+  }
+
+  /**
+   * Generate secure session ID
+   */
+  generateSessionId() {
+    return crypto.randomBytes(16).toString('hex');
+  }
+
+  /**
    * Disable admin authentication
    */
   async disableAuth() {
@@ -189,6 +367,8 @@ class AdminAuth {
       const config = await this.loadConfig();
       if (config) {
         config.enabled = false;
+        config.pinHash = null;
+        config.salt = null;
         config.lastModified = new Date().toISOString();
         const success = await this.saveConfig(config);
         if (success) {

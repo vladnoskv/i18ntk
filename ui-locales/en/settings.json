@@ -4,6 +4,7 @@
   "goodbyeMessage": "Thank you for using the i18ntk settings manager!",
   "relativePathHint": "Use relative paths from this directory (e.g., ./src/i18n/locales)",
   "currentDirectory": "Current project directory",
+  "pin": "PIN:",
   "mainMenu": {
     "title": "Main Menu:",
     "uiSettings": "UI Settings",
@@ -40,7 +41,9 @@
     "scriptDirectorySettings": "Script Directory Settings",
     "scriptDirectoryDesc": "Specify custom directories for each script",
     "scriptDirectorySettingsDesc": "You can set custom directories for each script. If not set, global settings will be used.",
-    "currentDirectory": "Current project directory" 
+    "currentDirectory": "Current project directory",
+    "securitySettings": "Security Settings",
+    "securitySettingsDesc": "Admin PIN and other security options"
   },
   "updatePackage": {
     "title": "Update Package",
@@ -113,12 +116,68 @@
   "pressEnter": "Press Enter to continue...",
   "initFailed": "Failed to initialize settings: {error}",
   "invalidValueFormat": "Invalid value format.",
+  "help": {
+    "title": "Settings Help",
+    "navigationTitle": "Navigation",
+    "navigation1": "1. General Settings - Configure UI language, theme, and basic preferences",
+    "navigation2": "2. Directory Settings - Set source and output directories for translation files",
+    "navigation3": "3. Processing Settings - Configure batch size, concurrency, and performance options",
+    "navigation4": "4. Advanced Settings - Access validation, logging, and expert configuration options",
+    "categoriesTitle": "Settings Categories",
+    "categoryUI": "• UI Settings: Interface language, color theme, and display preferences",
+    "categoryDirectory": "• Directory Settings: Source files location and output report directories",
+    "categoryProcessing": "• Processing Settings: Batch processing, file limits, and performance tuning",
+    "categoryAdvanced": "• Advanced Settings: Debug mode, audit logging, and security options",
+    "envVarsTitle": "Environment Variables",
+    "envVar1": "• I18N_SOURCE_DIR: Override default source directory path",
+    "envVar2": "• I18N_OUTPUT_DIR: Override default output directory path",
+    "envVar3": "• I18N_DEBUG: Enable debug mode (true/false)",
+    "cliUsageTitle": "CLI Usage Examples",
+    "cliUsage1": "• npx i18ntk --settings: Open interactive settings menu",
+    "cliUsage2": "• npx i18ntk --settings --lang de: Open settings in German",
+    "cliUsage3": "• npx i18ntk --reset-settings: Reset all settings to defaults",
+    "navigation": "Use number keys to select options, 'b' to go back",
+    "editing": "Enter new values when prompted, or press Enter to keep current",
+    "saving": "Use 's' to save changes before quitting",
+    "reset": "Use option 7 to reset all settings to defaults"
+  },
   "categories": {
     "uiSettings": "UI Settings",
     "directorySettings": "Directory Settings",
     "processingSettings": "Processing Settings",
     "advancedSettings": "Advanced Settings",
-    "scriptDirectorySettings": "Script Directory Settings"
+    "scriptDirectorySettings": "Script Directory Settings",
+    "securitySettings": "Security Settings"
+  },
+  "security": {
+    "title": "🔐 Security Settings",
+    "description": "Configure admin PIN protection and security options",
+    "currentPin": "Current PIN:",
+    "pinConfigured": "✅ Configured",
+    "pinNotConfigured": "❌ Not configured",
+    "pinDisplay": "PIN Display:",
+    "menu": {
+      "enableDisable": "1) Enable/Disable Admin PIN",
+      "setupChange": "2) Setup/Change Admin PIN",
+      "sessionTimeout": "3) Session Timeout",
+      "maxAttempts": "4) Max Failed Attempts",
+      "lockoutDuration": "5) Lockout Duration",
+      "back": "b) Back to Main Menu"
+    },
+    "prompts": {
+      "enablePin": "Enable admin PIN protection? (y/N): ",
+      "disablePin": "Disable admin PIN protection? (y/N): ",
+      "enterTimeout": "Enter session timeout (minutes): ",
+      "enterMaxAttempts": "Enter max failed attempts: ",
+      "enterLockoutDuration": "Enter lockout duration (minutes): "
+    },
+    "messages": {
+      "pinEnabled": "Admin PIN protection enabled",
+      "pinDisabled": "Admin PIN protection disabled",
+      "timeoutUpdated": "Session timeout updated to {{minutes}} minutes",
+      "maxAttemptsUpdated": "Max failed attempts updated to {{attempts}}",
+      "lockoutDurationUpdated": "Lockout duration updated to {{minutes}} minutes"
+    }
   },
   "fields": {
     "language": {
@@ -212,6 +271,30 @@
       "current": "Current: {value}",
       "help": "Automatically create backups before making changes"
     },
+    "adminPinEnabled": {
+      "label": "Admin PIN Protection",
+      "description": "Enable admin PIN authentication for sensitive settings",
+      "current": "Current: {value}",
+      "help": "Require admin PIN for changing security and advanced settings"
+    },
+    "sessionTimeout": {
+      "label": "Session Timeout",
+      "description": "Admin session timeout in minutes",
+      "current": "Current: {value} minutes",
+      "help": "How long admin sessions remain active before requiring re-authentication"
+    },
+    "maxFailedAttempts": {
+      "label": "Max Failed Attempts",
+      "description": "Maximum failed PIN attempts before lockout",
+      "current": "Current: {value} attempts",
+      "help": "Number of failed PIN attempts allowed before temporary lockout"
+    },
+    "lockoutDuration": {
+      "label": "Lockout Duration",
+      "description": "Duration of lockout after failed attempts",
+      "current": "Current: {value} minutes",
+      "help": "How long the system remains locked after max failed attempts"
+    },
     "scriptDirectories_analyze": {
       "label": "Analyze Script Directories",
       "description": "Custom directories for analyze script",
@@ -259,6 +342,58 @@
       "description": "Custom directories for validate script",
       "current": "Current: {value}",
       "help": "Specify custom source directory for the validate script. Leave empty to use global setting."
+    },
+    "security_adminPinEnabled": {
+      "label": "Admin PIN Protection",
+      "description": "Enable admin PIN authentication for sensitive settings",
+      "current": "Current: {value}",
+      "help": "Require admin PIN for changing security and advanced settings"
+    },
+    "security_pinProtection_enabled": {
+      "label": "PIN Protection",
+      "description": "Enable PIN protection for sensitive settings",
+      "current": "Current: {value}",
+      "help": "Require PIN for changing security and advanced settings"
+    },
+    "pinProtection_configure": {
+      "label": "Configure PIN Protected Scripts",
+      "description": "Configure which scripts require PIN protection",
+      "help": "Select individual scripts that require PIN authentication"
+    },
+    "pinProtection_debugMenu": {
+      "label": "Debug Tools Menu",
+      "description": "Require PIN for Debug Tools Menu",
+      "current": "Current: {value}",
+      "help": "Enable PIN protection for accessing debug tools"
+    },
+    "pinProtection_deleteReports": {
+      "label": "Delete Reports",
+      "description": "Require PIN for Delete Reports",
+      "current": "Current: {value}",
+      "help": "Enable PIN protection for deleting reports"
+    },
+    "pinProtection_summaryReports": {
+      "label": "Summary Reports",
+      "description": "Require PIN for Summary Reports",
+      "current": "Current: {value}",
+      "help": "Enable PIN protection for generating summary reports"
+    },
+    "pinProtection_settingsMenu": {
+      "label": "Settings Menu",
+      "description": "Require PIN for Settings Menu",
+      "current": "Current: {value}",
+      "help": "Enable PIN protection for accessing settings"
+    },
+    "pinProtection_initScript": {
+      "label": "Initialize Script",
+      "description": "Require PIN for Initialize Script",
+      "current": "Current: {value}",
+      "help": "Enable PIN protection for running the initialize script"
+    },
+    "pinProtection_resetDefaults": {
+      "label": "Reset PIN Protection",
+      "description": "Reset all PIN protection settings to defaults",
+      "help": "Reset all individual script PIN protections to default values"
     }
   },
   "actions": {
@@ -274,7 +409,17 @@
     "importSuccess": "✅ Settings imported successfully!",
     "exportSuccess": "✅ Settings exported successfully!",
     "fileNotFound": "❌ File not found: {path}",
-    "invalidFormat": "❌ Invalid settings file format"
+    "invalidFormat": "❌ Invalid settings file format",
+    "pinProtectionUpdated": "✅ PIN protection for {script} updated successfully!",
+    "pinProtectionReset": "✅ All PIN protection settings reset to defaults!",
+    "pinProtectionConfigure": "Configure PIN protection for individual scripts",
+    "pinProtectionSelectScript": "Select a script to toggle PIN protection:",
+    "pinProtectionCurrentStatus": "Current status: {status}",
+    "pinProtectionEnabled": "Enabled",
+    "pinProtectionDisabled": "Disabled",
+    "pinProtectionToggle": "Toggle PIN Protection",
+    "pinProtectionResetAll": "Reset All to Defaults",
+    "pinProtectionBack": "Back to Security Settings"
   },
   "themes": {
     "light": "Light",
@@ -289,13 +434,6 @@
     "ru": "Russian",
     "ja": "Japanese",
     "zh": "Chinese"
-  },
-  "help": {
-    "title": "Settings Help",
-    "navigation": "Use number keys to select options, 'b' to go back",
-    "editing": "Enter new values when prompted, or press Enter to keep current",
-    "saving": "Use 's' to save changes before quitting",
-    "reset": "Use option 7 to reset all settings to defaults"
   },
   "viewAll": {
     "title": "View All Settings"
@@ -314,5 +452,5 @@
   "resetScriptDirectoriesWarning1": "This will reset all script directory configurations to their system defaults.",
   "resetScriptDirectoriesWarning2": "All custom directory paths will be cleared. This action cannot be undone.",
   "resetScriptDirectoriesConfirm": "Are you sure you want to reset all script directories to defaults? (y/N): "
-  }
+}
 

@@ -5,9 +5,10 @@
 /dev/debug/ui-locales
 /i18ntk-reports
 /EXPORT
+/test-temp
 
 # Test files
-/dev/tests/test-report.json
+/dev/tests/test-report-final.json
 
 # Backup files
 /settings/backups

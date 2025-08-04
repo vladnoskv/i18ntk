@@ -38,5 +38,22 @@
   "existingDirectoriesFound": "📁 找到现有的翻译目录:",
   "useExistingDirectoryPrompt": "使用现有目录？输入编号（或按回车键创建新目录）:",
   "usingExistingDirectory": "✅ 使用现有目录: {dir}",
-  "usingExistingStructure": "✅ 使用现有翻译结构: {dir}"
+  "usingExistingStructure": "✅ 使用现有翻译结构: {dir}",
+  "continueWithoutI18nPrompt": "未检测到i18n框架。您想在没有框架的情况下继续吗？(y/N): ",
+  "detectedI18nFramework": "检测到i18n框架: {frameworks}",
+  "existingDirectoryItem": "   {index}. {location}",
+  "creatingSourceDirectory": "正在创建源目录: {dir}",
+  "creatingSourceLanguageDirectory": "正在创建源语言目录: {dir}",
+  "errors": {
+    "sourceDirectoryNotFound": "未找到源目录: {dir}",
+    "sourceLanguageDirectoryNotFound": "未找到源语言目录: {dir}",
+    "noJsonFilesInSourceDirectory": "在源目录中未找到JSON文件: {dir}",
+    "invalidFilePathDetected": "检测到无效文件路径",
+    "initializationFailed": "初始化失败: {error}"
+  },
+  "processingFile": "正在为{language}处理{file}...",
+  "fileAlreadyExistsMerging": "文件{file}已存在。正在合并新键。",
+  "createdNewFile": "已创建新文件: {file}",
+  "updatedFile": "已更新文件: {file}",
+  "skippingExcludedFile": "由于{language}被排除，正在跳过{file}。"
 }

@@ -62,6 +62,7 @@ class I18nSizingAnalyzer {
     this.threshold = options.threshold || config.threshold; // Size difference threshold in percentage
     this.format = options.format || 'table';
     this.outputReport = options.outputReport || false;
+    this.rl = null;
     
     // Initialize i18n with UI language from config
     const uiLanguage = options.uiLanguage || config.uiLanguage || 'en';
@@ -76,15 +77,43 @@ class I18nSizingAnalyzer {
     };
   }
 
+  // Initialize readline interface
+  initReadline() {
+    if (!this.rl) {
+      const readline = require('readline');
+      this.rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+    }
+    return this.rl;
+  }
+
+  // Prompt for user input
+  async prompt(question) {
+    const rl = this.rl || this.initReadline();
+    return new Promise((resolve) => {
+      rl.question(question, resolve);
+    });
+  }
+
+  // Close readline interface
+  closeReadline() {
+    if (this.rl) {
+      this.rl.close();
+      this.rl = null;
+    }
+  }
+
   // Get available language files
   getLanguageFiles() {
     const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
     if (!validatedSourceDir) {
-      throw new Error(`Invalid source directory path: ${this.sourceDir}`);
+      throw new Error(this.t("sizing.invalidSourceDirectoryError", { sourceDir: this.sourceDir }));
     }
 
     if (!fs.existsSync(validatedSourceDir)) {
-      throw new Error(`Source directory not found: ${validatedSourceDir}`);
+      throw new Error(this.t("sizing.sourceDirectoryNotFoundError", { sourceDir: validatedSourceDir }));
     }
 
     const files = [];
@@ -352,21 +381,21 @@ class I18nSizingAnalyzer {
     // Check for large size variations
     Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
       if (data.isProblematic) {
-        const comparison = data.percentageDifference > 0 ? 'longer' : 'shorter';
+        const comparison = data.percentageDifference > 0 ? this.t("sizing.longer") : this.t("sizing.shorter");
         const absPercentage = Math.abs(data.percentageDifference);
-        recommendations.push(`Review ${lang} translations - they are ${absPercentage}% ${comparison} than baseline. Consider UI layout adjustments or translation optimization.`);
+        recommendations.push(this.t("sizing.review_translations", { lang, absPercentage, comparison }));
       }
     });
     
     // Check for problematic keys
     if (this.stats.summary.problematicKeys.length > 0) {
-      recommendations.push(`${this.stats.summary.problematicKeys.length} keys have significant size variations. Check individual translations for potential layout issues.`);
+      recommendations.push(this.t("sizing.problematic_keys", { count: this.stats.summary.problematicKeys.length }));
     }
     
     // Check for very long translations
     Object.entries(this.stats.languages).forEach(([lang, data]) => {
       if (data.longKeys > 0) {
-        recommendations.push(`${lang} has ${data.longKeys} translations exceeding 100 characters. Consider breaking into shorter segments or reviewing for conciseness.`);
+        recommendations.push(this.t("sizing.long_translations", { lang, count: data.longKeys }));
       }
     });
     
@@ -375,9 +404,9 @@ class I18nSizingAnalyzer {
 
   // Display results in table format
   displayTable() {
-    console.log(`📁 Source directory: ${path.resolve(this.sourceDir)}`);
-    console.log(`🌍 Source language: ${this.config?.sourceLanguage || 'en'}`);
-    console.log(`⚙️  Strict mode: OFF`);
+    console.log(this.t("sizing.sourceDirectoryLabel", { sourceDir: path.resolve(this.sourceDir) }));
+    console.log(this.t("sizing.sourceLanguageLabel", { sourceLanguage: this.config?.sourceLanguage || 'en' }));
+    console.log(this.t("sizing.strictModeLabel", { mode: 'OFF' }));
     console.log();
     console.log(this.t("sizing.sizing_analysis_results"));
     console.log(this.t("sizing.separator"));
@@ -420,7 +449,7 @@ class I18nSizingAnalyzer {
       console.log("\n" + this.t("sizing.recommendations_title"));
       console.log(this.t("sizing.lineSeparator"));
       this.stats.summary.recommendations.forEach((rec, index) => {
-        console.log(`${index + 1}. ${rec}`);
+        console.log(this.t("sizing.recommendation_item", { index: index + 1, recommendation: rec }));
       });
     }
   }
@@ -433,7 +462,7 @@ class I18nSizingAnalyzer {
     
     const validatedOutputDir = SecurityUtils.validatePath(this.outputDir, process.cwd());
     if (!validatedOutputDir) {
-      throw new Error(`Invalid output directory path: ${this.outputDir}`);
+      throw new Error(this.t("sizing.invalidOutputDirectoryError", { outputDir: this.outputDir }));
     }
 
     // Ensure output directory exists
@@ -445,7 +474,7 @@ class I18nSizingAnalyzer {
     const reportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.json`), process.cwd());
     
     if (!reportPath) {
-      throw new Error('Invalid report file path');
+      throw new Error(this.t("sizing.invalidReportFileError"));
     }
     
     const report = {
@@ -468,7 +497,7 @@ class I18nSizingAnalyzer {
       console.log(this.t("sizing.report_saved_to", { reportPath }));
       SecurityUtils.logSecurityEvent('Sizing report saved', 'info', { reportPath });
     } else {
-      throw new Error('Failed to save report securely');
+      throw new Error(this.t("sizing.failedToSaveReportError"));
     }
     
     // Generate CSV if requested
@@ -481,12 +510,12 @@ class I18nSizingAnalyzer {
   async generateCSVReport(timestamp) {
     const validatedOutputDir = SecurityUtils.validatePath(this.outputDir, process.cwd());
     if (!validatedOutputDir) {
-      throw new Error(`Invalid output directory path: ${this.outputDir}`);
+      throw new Error(this.t("sizing.invalidOutputDirectoryError", { outputDir: this.outputDir }));
     }
 
     const csvPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.csv`), process.cwd());
     if (!csvPath) {
-      throw new Error('Invalid CSV file path');
+      throw new Error(this.t("sizing.invalidCsvFileError"));
     }
     
     let csvContent = 'Language,File Size (KB),Lines,Characters,Total Keys,Avg Key Length,Max Key Length,Empty Keys,Long Keys\n';
@@ -503,7 +532,7 @@ class I18nSizingAnalyzer {
       console.log(this.t("sizing.csv_report_saved_to", { csvPath }));
       SecurityUtils.logSecurityEvent('CSV report saved', 'info', { csvPath });
     } else {
-      throw new Error('Failed to save CSV report securely');
+      throw new Error(this.t("sizing.failedToSaveCsvError"));
     }
   }
 
@@ -546,7 +575,34 @@ class I18nSizingAnalyzer {
   }
 
   // Add run method for compatibility with manager
-  async run() {
+  async run(options = {}) {
+    const { fromMenu = false } = options;
+    
+    // Skip admin authentication when called from menu
+    if (!fromMenu) {
+      const args = this.parseArgs();
+      const AdminAuth = require('../utils/admin-auth');
+      const adminAuth = new AdminAuth();
+      await adminAuth.initialize();
+      
+      const isCalledDirectly = require.main === module;
+      const isRequired = await adminAuth.isAuthRequired();
+      if (isRequired && isCalledDirectly && !args.noPrompt) {
+        console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'analyze sizing' }));
+        
+        const pin = await this.prompt('🔐 Enter admin PIN: ');
+        const isValid = await adminAuth.verifyPin(pin);
+        
+        if (!isValid) {
+          console.log(this.t('adminCli.invalidPin'));
+          if (!fromMenu) process.exit(1);
+          return { success: false, error: 'Authentication failed' };
+        }
+        
+        console.log(this.t('adminCli.authenticationSuccess'));
+      }
+    }
+    
     return await this.analyze();
   }
 }
@@ -554,7 +610,9 @@ class I18nSizingAnalyzer {
 // Update the execution block at the end
 if (require.main === module) {
   const analyzer = new I18nSizingAnalyzer();
-  analyzer.analyze().catch(error => {
+  analyzer.analyze().then(() => {
+    process.exit(0);
+  }).catch(error => {
     console.error(this.t("sizing.fatalError", { error: error.message }));
     process.exit(1);
   });

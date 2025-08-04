@@ -25,16 +25,16 @@
     "warning_message": "⚠️  {message}",
     "test_runner_failed": "❌ 测试运行器失败：",
     "recommendations": {
-      "add_missing_translation_keys": "[ZH] Add missing translation keys to maintain consistency",
-      "fix_failing_scripts": "[ZH] Fix failing scripts before deployment",
-      "review_warning_messages": "[ZH] Review and address warning messages",
-      "system_ready_for_deployment": "[ZH] System is ready for deployment"
+      "add_missing_translation_keys": "添加缺失的翻译键以保持一致性",
+      "fix_failing_scripts": "修复失败的脚本后再部署",
+      "review_warning_messages": "检查并处理警告消息",
+      "system_ready_for_deployment": "系统已准备好部署"
     },
     "hardcodedTexts": {
-      "addMissingTranslationKeys": "[ZH] Add missing translation keys to maintain consistency",
-      "fixFailingScripts": "[ZH] Fix failing scripts before deployment",
-      "reviewWarningMessages": "[ZH] Review and address warning messages",
-      "systemReadyForDeployment": "[ZH] System is ready for deployment"
+      "addMissingTranslationKeys": "添加缺失的翻译键以保持一致性",
+      "fixFailingScripts": "修复失败的脚本后再部署",
+      "reviewWarningMessages": "检查并处理警告消息",
+      "systemReadyForDeployment": "系统已准备好部署"
     }
   }
 }

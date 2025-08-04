@@ -1,19 +1,19 @@
 {
   "maintainLanguagePurity": {
-    "workflow_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step1_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step2_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step3_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step4_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "workflow_error": "⚠️ TRANSLATION NEEDED ⚠️",
-    "running_initial_validation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detecting_fixing_mismatches": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detection_complete_applying_fixes": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "applying_automatic_translations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "translation_preview_complete": "⚠️ TRANSLATION NEEDED ⚠️"
+    "workflow_title": "🚀 Flux de travail de maintien de la pureté linguistique",
+    "step1_title": "📊 ÉTAPE 1 : Évaluation initiale de la pureté linguistique",
+    "step2_title": "\n🔧 ÉTAPE 2 : Détecter et corriger automatiquement les incohérences linguistiques",
+    "step3_title": "\n🌐 ÉTAPE 3 : Appliquer les traductions automatiques",
+    "step4_title": "\n✅ ÉTAPE 4 : Évaluation finale de la pureté linguistique",
+    "workflow_error": "❌ Erreur de flux de travail : {errorMessage}",
+    "running_initial_validation": "Exécution de la validation initiale de la pureté linguistique...",
+    "initial_assessment_complete": "✅ Évaluation initiale terminée : {count} violations trouvées\n",
+    "initial_assessment_warnings": "⚠️  Évaluation initiale terminée avec des avertissements\n",
+    "detecting_fixing_mismatches": "Détection et correction des incohérences linguistiques...",
+    "detection_complete_applying_fixes": "Détection terminée. Application des corrections automatiques...",
+    "mismatch_fixes_complete": "✅ Corrections des incohérences linguistiques terminées : {count} corrections appliquées\n",
+    "mismatch_fixes_warnings": "⚠️  Corrections des incohérences linguistiques terminées avec des avertissements\n",
+    "applying_automatic_translations": "Application des traductions automatiques...",
+    "translation_preview_complete": "Aperçu de la traduction terminé. Application des traductions..."
   }
 }

@@ -178,7 +178,7 @@ class ConsoleKeyChecker {
      * Load source language keys
      */
     loadSourceKeys() {
-        const sourceFile = path.join(this.uiLocalesDir, `${this.sourceLanguage}.json`);
+        const sourceFile = path.join(this.uiLocalesDir, this.sourceLanguage, 'common.json');
         
         if (!fs.existsSync(sourceFile)) {
             throw new Error(`Source language file not found: ${sourceFile}`);
@@ -192,7 +192,7 @@ class ConsoleKeyChecker {
      * Check a single language file for missing keys
      */
     checkLanguageFile(languageCode, sourceKeys) {
-        const languageFile = path.join(this.uiLocalesDir, `${languageCode}.json`);
+        const languageFile = path.join(this.uiLocalesDir, languageCode, 'common.json');
         
         if (!fs.existsSync(languageFile)) {
             console.log(`⚠️ Language file not found: ${languageFile}`);

@@ -1,19 +1,19 @@
 {
   "maintainLanguagePurity": {
-    "workflow_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step1_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step2_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step3_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step4_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "workflow_error": "⚠️ TRANSLATION NEEDED ⚠️",
-    "running_initial_validation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detecting_fixing_mismatches": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detection_complete_applying_fixes": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "applying_automatic_translations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "translation_preview_complete": "⚠️ TRANSLATION NEEDED ⚠️"
+    "workflow_title": "🚀 Fluxo de Trabalho de Manutenção da Pureza Linguística",
+    "step1_title": "📊 ETAPA 1: Avaliação Inicial da Pureza Linguística",
+    "step2_title": "\n🔧 ETAPA 2: Detectar e Corrigir Automaticamente Incompatibilidades de Idioma",
+    "step3_title": "\n🌐 ETAPA 3: Aplicar Traduções Automáticas",
+    "step4_title": "\n✅ ETAPA 4: Avaliação Final da Pureza Linguística",
+    "workflow_error": "❌ Erro no Fluxo de Trabalho: {errorMessage}",
+    "running_initial_validation": "Executando validação inicial da pureza linguística...",
+    "initial_assessment_complete": "✅ Avaliação inicial concluída: {count} violações encontradas\n",
+    "initial_assessment_warnings": "⚠️  Avaliação inicial concluída com avisos\n",
+    "detecting_fixing_mismatches": "Detectando e corrigindo incompatibilidades de idioma...",
+    "detection_complete_applying_fixes": "Detecção concluída. Aplicando correções automáticas...",
+    "mismatch_fixes_complete": "✅ Correções de incompatibilidade de idioma concluídas: {count} correções aplicadas\n",
+    "mismatch_fixes_warnings": "⚠️  Correções de incompatibilidade de idioma concluídas com avisos\n",
+    "applying_automatic_translations": "Aplicando traduções automáticas...",
+    "translation_preview_complete": "Visualização da tradução concluída. Aplicando traduções..."
   }
 }

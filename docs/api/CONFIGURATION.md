@@ -34,7 +34,7 @@ This guide provides comprehensive information about configuring the I18N Managem
   },
   "languages": {
     "default": "en",
-    "supported": ["en", "es", "fr", "de", "ru"],
+    "supported": ["en", "es", "fr", "de", "ru", "pt", "ja", "zh"],
     "fallback": "en"
   },
   "features": {
@@ -149,13 +149,38 @@ This guide provides comprehensive information about configuring the I18N Managem
 | `I18N_SOURCE_DIR` | Source directory path | `./src` | `./app/src` |
 | `I18N_LOCALES_DIR` | Locales directory path | `./locales` | `./public/locales` |
 | `I18N_DEFAULT_LANG` | Default language code | `en` | `en-US` |
-| `I18N_SUPPORTED_LANGS` | Supported languages (comma-separated) | `en,es,fr,de` | `en,es,fr,de,ru,ja` |
+| `I18N_SUPPORTED_LANGS` | Supported languages (comma-separated) | `en,es,fr,de,pt,ja,ru,zh` | `en,es,fr,de,pt,ja,ru,zh` |
 | `I18N_FRAMEWORK` | i18n framework | `react-i18next` | `vue-i18n` |
 | `I18N_STRICT_MODE` | Enable strict validation | `false` | `true` |
 | `I18N_AUTO_BACKUP` | Enable automatic backups | `true` | `false` |
 | `I18N_REPORT_FORMAT` | Default report format | `html` | `json` |
 | `I18N_UI_LANGUAGE` | UI language | `en` | `es` |
 | `I18N_VERBOSE` | Enable verbose output | `false` | `true` |
+
+### UI Language Configuration
+
+The toolkit now supports **runtime UI language switching** through the interactive menu. Configure your preferred UI language settings:
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|----------|
+| `I18N_UI_LANGUAGE` | Default UI language | `en` | `pt` |
+
+**Supported UI Languages:**
+- `en` - English (default)
+- `de` - German  
+- `es` - Spanish
+- `fr` - French
+- `pt` - Portuguese *(new in v1.3.1)*
+- `ja` - Japanese
+- `ru` - Russian
+- `zh` - Chinese
+
+**Runtime Language Switching:**
+Access the language switcher via the interactive menu:
+1. Run `npx i18ntk` 
+2. Select **10. ⚙️ Settings**
+3. Choose **Change UI Language**
+4. Select from the 8 available languages
 
 ### Translation Service Variables
 

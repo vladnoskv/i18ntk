@@ -74,7 +74,7 @@ class I18nAnalyzer {
   
   // Prompt for user input
   async prompt(question) {
-    const rl = this.initReadline();
+    const rl = this.rl || this.initReadline();
     return new Promise((resolve) => {
       rl.question(question, resolve);
     });
@@ -487,9 +487,9 @@ class I18nAnalyzer {
       const results = []; // Add this line to declare the results array
       
       console.log(this.t('analyze.starting') || '🔍 Starting translation analysis...');
-      console.log(`📁 Source directory: ${path.resolve(this.sourceDir)}`);
-      console.log(`🌍 Source language: ${this.config.sourceLanguage}`);
-      console.log(`⚙️  Strict mode: ${this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF'}`);
+      console.log(this.t('analyze.sourceDirectoryLabel', { sourceDir: path.resolve(this.sourceDir) }));
+      console.log(this.t('analyze.sourceLanguageLabel', { sourceLanguage: this.config.sourceLanguage }));
+      console.log(this.t('analyze.strictModeLabel', { mode: this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF' }));
       
       // Ensure output directory exists
       if (!fs.existsSync(this.outputDir)) {
@@ -543,7 +543,7 @@ class I18nAnalyzer {
       
       console.log(this.t('analyze.finished') || '\n✅ Analysis completed successfully!');
       
-      // Only prompt for input if running standalone (not from menu or workflow)
+      // Only prompt for input if running standalone and not in no-prompt mode
       if (require.main === module && !this.noPrompt) {
         await this.prompt('\nPress Enter to continue...');
       }
@@ -559,7 +559,7 @@ class I18nAnalyzer {
   }
 
   // Main analysis process
-  async run() {
+  async run(options = {}) {
     try {
       const args = this.parseArgs();
       
@@ -568,8 +568,37 @@ class I18nAnalyzer {
         return;
       }
       
-      // Set noPrompt flag
-      this.noPrompt = args.noPrompt;
+      // Check if called from menu system
+      const fromMenu = options.fromMenu || false;
+      
+      // Skip admin authentication when called from menu system (i18ntk-manage.js) or when --no-prompt is used
+      // Authentication is handled by the menu system
+      const isCalledDirectly = require.main === module;
+      if (isCalledDirectly && !args.noPrompt && !fromMenu) {
+        // Only check admin authentication when running directly and not in no-prompt mode
+        const AdminAuth = require('../utils/admin-auth');
+        const adminAuth = new AdminAuth();
+        await adminAuth.initialize();
+        
+        const isRequired = await adminAuth.isAuthRequired();
+        if (isRequired) {
+          console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'analyze translations' }));
+          const pin = await this.prompt('🔐 Enter admin PIN: ');
+          const isValid = await adminAuth.verifyPin(pin);
+          
+          if (!isValid) {
+            console.log(this.t('adminCli.invalidPin'));
+            this.closeReadline();
+            if (!fromMenu) process.exit(1);
+            return;
+          }
+          
+          console.log(this.t('adminCli.authenticationSuccess'));
+        }
+      }
+      
+      // Set noPrompt flag - skip prompts when called from menu
+      this.noPrompt = args.noPrompt || fromMenu;
       
       // Handle UI language change
       if (args.uiLanguage) {
@@ -590,9 +619,17 @@ class I18nAnalyzer {
       }
       
       await this.analyze();
+      
+      // Only exit if not called from menu
+      if (!fromMenu && require.main === module) {
+        process.exit(0);
+      }
     } catch (error) {
+      console.error(this.t('analyze.error') || '❌ Analysis failed:', error.message);
       this.closeReadline();
-      throw error;
+      if (!fromMenu && require.main === module) {
+        process.exit(1);
+      }
     }
   }
 }

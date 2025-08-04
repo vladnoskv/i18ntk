@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const settingsManager = require('./settings-manager');
 const UIi18n = require('../main/i18ntk-ui');
-const AdminPinManager = require('../utils/admin-pin');
+const AdminAuth = require('../utils/admin-auth');
 const uiI18n = new UIi18n();
 
 // ANSI color codes for terminal output
@@ -48,7 +48,8 @@ class SettingsCLI {
         this.settings = null;
         this.schema = null;
         this.modified = false;
-        this.adminPin = new AdminPinManager();
+        this.adminAuth = new AdminAuth();
+        this.settingsManager = settingsManager;
         this.adminAuthenticated = false;
     }
 
@@ -121,17 +122,26 @@ class SettingsCLI {
      * Show the main menu
      */
     async showMainMenu() {
+        // Check if admin PIN is configured for display purposes
+        await this.adminAuth.initialize();
+        const config = await this.adminAuth.loadConfig();
+        const pinSet = config && config.enabled === true && !!config.pinHash;
+        const pinStatus = pinSet ? 
+            `${colors.green}✅${colors.reset}` : 
+            `${colors.red}❌${colors.reset}`;
+
         const options = [
             { key: '1', label: this.t('settings.mainMenu.uiSettings'), description: this.t('settings.mainMenu.uiSettingsDesc') },
             { key: '2', label: this.t('settings.mainMenu.directorySettings'), description: this.t('settings.mainMenu.directorySettingsDesc') },
             { key: '3', label: this.t('settings.mainMenu.scriptDirectorySettings'), description: this.t('settings.mainMenu.scriptDirectorySettingsDesc') },
             { key: '4', label: this.t('settings.mainMenu.processingSettings'), description: this.t('settings.mainMenu.processingSettingsDesc') },
-            { key: '5', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
-            { key: '6', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
-            { key: '7', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
-            { key: '8', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
-            { key: '9', label: this.t('settings.mainMenu.reportBug'), description: this.t('settings.mainMenu.reportBugDesc') },
-            { key: '0', label: this.t('settings.mainMenu.updatePackage'), description: this.t('settings.mainMenu.updatePackageDesc') },
+            { key: '5', label: this.t('settings.mainMenu.securitySettings'), description: `${this.t('settings.mainMenu.securitySettingsDesc')} ${pinStatus}` },
+            { key: '6', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
+            { key: '7', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
+            { key: '8', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
+            { key: '9', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
+            { key: '0', label: this.t('settings.mainMenu.reportBug'), description: this.t('settings.mainMenu.reportBugDesc') },
+            { key: 'u', label: this.t('settings.mainMenu.updatePackage'), description: this.t('settings.mainMenu.updatePackageDesc') },
             { key: 's', label: this.t('settings.mainMenu.saveChanges'), description: this.t('settings.mainMenu.saveChangesDesc') },
             { key: 'h', label: this.t('settings.mainMenu.help'), description: this.t('settings.mainMenu.helpDesc') },
             { key: 'q', label: this.t('settings.mainMenu.quit'), description: this.t('settings.mainMenu.quitDesc') }
@@ -168,21 +178,24 @@ class SettingsCLI {
                 await this.showProcessingSettings();
                 break;
             case '5':
-                await this.showAdvancedSettings();
+                await this.showSecuritySettings();
                 break;
             case '6':
-                await this.showAllSettings();
+                await this.showAdvancedSettings();
                 break;
             case '7':
-                await this.showImportExport();
+                await this.showAllSettings();
                 break;
             case '8':
-                await this.resetToDefaults();
+                await this.showImportExport();
                 break;
             case '9':
-                await this.reportBug();
+                await this.resetToDefaults();
                 break;
             case '0':
+                await this.reportBug();
+                break;
+            case 'u':
                 await this.updatePackage();
                 break;
             case 's':
@@ -283,6 +296,34 @@ class SettingsCLI {
     /**
      * Show advanced settings menu
      */
+    async showSecuritySettings() {
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}${this.t('settings.security.title')}${colors.reset}\n`);
+
+        const config = await this.adminAuth.loadConfig();
+        const pinSet = config && config.enabled === true && !!config.pinHash;
+        const pinDisplay = pinSet ? '(set)' : '(not set)';
+        const pinStatus = pinSet ? 
+            `${colors.green}${this.t('settings.security.pinConfigured')}${colors.reset}` : 
+            `${colors.red}${this.t('settings.security.pinNotConfigured')}${colors.reset}`;
+
+        console.log(`${this.t('settings.security.currentPin')}: ${pinStatus}`);
+        console.log(`${this.t('settings.security.pinDisplay')}: ${colors.dim}${pinDisplay}${colors.reset}\n`);
+
+        const securitySettings = {
+            'security.adminPinEnabled': this.t('settings.fields.adminPinEnabled.label'),
+            '_setupPin': 'Setup/Change Admin PIN',
+            'security.sessionTimeout': 'Session Timeout (minutes)',
+            'security.maxFailedAttempts': 'Max Failed Attempts',
+            'security.lockoutDuration': 'Lockout Duration (minutes)',
+            'security.pinProtection.enabled': 'PIN Protection Master Switch',
+            '_configurePinProtection': 'Configure PIN Protected Scripts'
+        };
+
+        await this.showSettingsCategory(securitySettings);
+    }
+
     async showAdvancedSettings() {
         this.clearScreen();
         this.showHeader();
@@ -304,12 +345,21 @@ class SettingsCLI {
         const keys = Object.keys(categorySettings);
         
         // Display current values
-        keys.forEach((key, index) => {
-            const value = this.getNestedValue(this.settings, key);
-            const displayValue = this.formatValue(value);
+        for (let index = 0; index < keys.length; index++) {
+            const key = keys[index];
+            let value = this.getNestedValue(this.settings, key);
+            let displayValue = this.formatValue(value);
+            
+            // Special handling for _setupPin to show actual PIN status
+            if (key === '_setupPin') {
+                const config = await this.adminAuth.loadConfig();
+                const pinSet = config && config.enabled === true && !!config.pinHash;
+                displayValue = pinSet ? '(set)' : '(not set)';
+            }
+            
             console.log(`  ${colors.cyan}${index + 1}${colors.reset}) ${categorySettings[key]}`);
             console.log(`     ${colors.dim}${this.t('settings.current')}: ${colors.reset}${displayValue}`);
-        });
+        }
 
         console.log(`\n  ${colors.yellow}b${colors.reset}) ${this.t('settings.back')}`);
         
@@ -320,7 +370,10 @@ class SettingsCLI {
         }
         console.log();
 
-        const choice = await this.prompt(this.t('settings.selectSettingPrompt'));
+        const prompt = isScriptDirectory 
+            ? 'Select setting to edit (or b for back, r for reset): '
+            : 'Select setting to edit (or b for back): ';
+        const choice = await this.prompt(prompt);
         
         if (choice.toLowerCase() === 'b') {
             return;
@@ -351,6 +404,9 @@ class SettingsCLI {
         const adminProtectedSettings = [
             'security.adminPinEnabled',
             'security.sessionTimeout',
+            'security.maxFailedAttempts',
+            'security.lockoutDuration',
+            'security.pinProtection.enabled',
             'advanced.strictMode',
             'debug.enabled',
             'debug.verboseLogging',
@@ -384,6 +440,7 @@ class SettingsCLI {
             'debug.enabled': ['true', 'false'],
             'debug.verboseLogging': ['true', 'false'],
             'security.adminPinEnabled': ['true', 'false'],
+            'security.pinProtection.enabled': ['true', 'false'],
             'advanced.backupBeforeChanges': ['true', 'false']
         };
         
@@ -402,32 +459,36 @@ class SettingsCLI {
             }
         }
         
-        // Numeric validations
-        if (key.includes('batchSize')) {
-            const num = parseInt(value);
-            if (isNaN(num) || num < 1 || num > 100) {
-                return { valid: false, message: 'Batch size must be between 1 and 100.' };
+        // Numeric validations with proper ranges
+        const validations = {
+            'batchSize': { min: 1, max: 100, type: 'int' },
+            'concurrentFiles': { min: 1, max: 20, type: 'int' },
+            'sizingThreshold': { min: 1, max: 10000, type: 'int', unit: 'KB' },
+            'autoSave': { min: 0, max: 60, type: 'int', unit: 'minutes' },
+            'sessionTimeout': { min: 0, max: 60, type: 'int', unit: 'minutes' },
+            'maxFailedAttempts': { min: 1, max: 10, type: 'int' },
+            'lockoutDuration': { min: 1, max: 60, type: 'int', unit: 'minutes' },
+            'backupRetention': { min: 1, max: 30, type: 'int', unit: 'days' },
+            'logRetention': { min: 1, max: 90, type: 'int', unit: 'days' }
+        };
+        
+        for (const [field, rules] of Object.entries(validations)) {
+            if (key.includes(field)) {
+                const num = parseInt(value);
+                if (isNaN(num) || num < rules.min || num > rules.max) {
+                    const unit = rules.unit ? ` ${rules.unit}` : '';
+                    return { 
+                        valid: false, 
+                        message: `${field} must be between ${rules.min} and ${rules.max}${unit}.` 
+                    };
+                }
             }
         }
         
-        if (key.includes('concurrentFiles')) {
-            const num = parseInt(value);
-            if (isNaN(num) || num < 1 || num > 20) {
-                return { valid: false, message: 'Concurrent files must be between 1 and 20.' };
-            }
-        }
-        
-        if (key.includes('sizingThreshold')) {
-            const num = parseInt(value);
-            if (isNaN(num) || num < 1 || num > 10000) {
-                return { valid: false, message: 'Sizing threshold must be between 1 and 10000 KB.' };
-            }
-        }
-        
-        if (key.includes('autoSave') || key.includes('sessionTimeout')) {
-            const num = parseInt(value);
-            if (isNaN(num) || num < 0 || num > 60) {
-                return { valid: false, message: 'Value must be between 0 and 60 minutes.' };
+        // String validations
+        if (key.includes('path') || key.includes('directory')) {
+            if (value.includes('..') || value.includes('\\') || value.includes('//')) {
+                return { valid: false, message: 'Invalid path format. Use forward slashes and avoid relative paths.' };
             }
         }
         
@@ -443,17 +504,39 @@ class SettingsCLI {
             await this.handlePinSetup();
             return;
         }
+
+        // Special handling for PIN protection configuration
+        if (key === '_configurePinProtection') {
+            await this.configurePinProtection();
+            return;
+        }
         
         // Check if admin authentication is required
         if (this.requiresAdminAuth(key) && !this.adminAuthenticated) {
-            console.log(`\n${this.t('settings.admin.authRequired', { label: label })}`);
-            const authenticated = await this.adminPin.verifyPin();
-            if (!authenticated) {
-                console.log(this.t('settings.admin.accessDenied'));
-                await this.pause();
-                return;
+            // Check if admin PIN is actually enabled and configured
+            const adminPinEnabled = this.settingsManager.isAdminPinEnabled();
+            const config = await this.adminAuth.loadConfig();
+            const pinConfigured = adminPinEnabled && config && config.enabled === true && !!config.pinHash;
+            
+            if (pinConfigured) {
+                console.log(`\n${this.t('settings.admin.authRequired', { label: label })}`);
+                const pin = await this.promptPin('Enter admin PIN: ');
+                if (!pin) {
+                    console.log(this.t('settings.admin.accessDenied'));
+                    await this.pause();
+                    return;
+                }
+                const authenticated = await this.adminAuth.verifyPin(pin);
+                if (!authenticated) {
+                    console.log(this.t('settings.admin.accessDenied'));
+                    await this.pause();
+                    return;
+                }
+                this.adminAuthenticated = true;
+            } else {
+                // PIN not enabled or not configured, allow access
+                this.adminAuthenticated = true;
             }
-            this.adminAuthenticated = true;
         }
         
         const currentValue = this.getNestedValue(this.settings, key);
@@ -467,7 +550,9 @@ class SettingsCLI {
         
         // Show current value with special handling for admin PIN
         if (key === 'security.adminPinEnabled') {
-            const pinDisplay = this.adminPin.getPinDisplay();
+            const config = await this.adminAuth.loadConfig();
+            const pinSet = config && config.enabled === true && !!config.pinHash;
+            const pinDisplay = pinSet ? '****' : '(not set)';
             console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue)} (${this.t('settings.pin')}: ${pinDisplay})`);
         } else {
             console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue)}`);
@@ -522,13 +607,24 @@ class SettingsCLI {
         }
         
         // Special handling for admin PIN setup
-        if (key === 'security.adminPinEnabled' && convertedValue === true && !this.adminPin.isPinSet()) {
-            console.log(this.t('settings.admin.setupPin'));
-            const pinSetup = await this.adminPin.setupPin();
-            if (!pinSetup) {
-                console.log(this.t('settings.admin.setupFailed'));
-                await this.pause();
-                return;
+        if (key === 'security.adminPinEnabled' && convertedValue === true) {
+            const config = await this.adminAuth.loadConfig();
+            const pinSet = config && config.enabled && config.pinHash;
+            if (!pinSet) {
+                console.log(this.t('settings.admin.setupPin'));
+                const pin = await this.promptPin('Enter new admin PIN (4-6 digits): ');
+                if (pin) {
+                    const pinSetup = await this.adminAuth.setupPin(pin);
+                    if (!pinSetup) {
+                        console.log(this.t('settings.admin.setupFailed'));
+                        await this.pause();
+                        return;
+                    }
+                } else {
+                    console.log('PIN setup cancelled.');
+                    await this.pause();
+                    return;
+                }
             }
         }
         
@@ -549,6 +645,23 @@ class SettingsCLI {
     }
 
     /**
+     * Prompt for PIN input with masking
+     */
+    async promptPin(prompt) {
+        return new Promise((resolve) => {
+            this.rl.question(prompt, (input) => {
+                const pin = input.trim();
+                if (/^\d{4,6}$/.test(pin)) {
+                    resolve(pin);
+                } else {
+                    console.log('❌ PIN must be 4-6 digits.');
+                    resolve(null);
+                }
+            });
+        });
+    }
+
+    /**
      * Handle PIN setup/change
      */
     async handlePinSetup() {
@@ -556,7 +669,10 @@ class SettingsCLI {
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.admin.pinSetupTitle')}${colors.reset}\n`);
         
-        if (this.adminPin.isPinSet()) {
+        const config = await this.adminAuth.loadConfig();
+        const pinSet = config && config.enabled === true && !!config.pinHash;
+        
+        if (pinSet) {
             console.log(this.t('settings.admin.pinConfigured'));
     console.log('\n' + this.t('settings.admin.options'));
             console.log('  ' + this.t('settings.admin.changePin'));
@@ -569,28 +685,38 @@ class SettingsCLI {
             switch (choice) {
                 case '1':
                     console.log(this.t('settings.admin.verifyCurrentPin'));
-                    const verified = await this.adminPin.verifyPin();
-                    if (verified) {
-                        console.log(this.t('settings.admin.settingNewPin'));
-                        const success = await this.adminPin.setupPin();
-                        if (success) {
-                            this.success('Admin PIN updated successfully!');
-                        } else {
-                            this.error('Failed to update admin PIN.');
+                    const currentPin = await this.promptPin('Enter current PIN: ');
+                    if (currentPin && await this.adminAuth.verifyPin(currentPin)) {
+                        const newPin = await this.promptPin('Enter new PIN: ');
+                        if (newPin) {
+                            const confirmPin = await this.promptPin('Confirm new PIN: ');
+                            if (newPin === confirmPin) {
+                                const success = await this.adminAuth.setupPin(newPin);
+                                if (success) {
+                                    this.success('Admin PIN updated successfully!');
+                                } else {
+                                    this.error('Failed to update admin PIN.');
+                                }
+                            } else {
+                                this.error('PINs do not match.');
+                            }
                         }
+                    } else {
+                        this.error('Invalid current PIN.');
                     }
                     break;
                 case '2':
                     console.log(this.t('settings.admin.verifyToRemove'));
-                    const verifiedForRemoval = await this.adminPin.verifyPin();
-                    if (verifiedForRemoval) {
-                        // Remove PIN file
-                        const fs = require('fs');
-                        const pinFile = this.adminPin.pinFile;
-                        if (fs.existsSync(pinFile)) {
-                            fs.unlinkSync(pinFile);
+                    const removePin = await this.promptPin('Enter PIN to confirm removal: ');
+                    if (removePin && await this.adminAuth.verifyPin(removePin)) {
+                        const success = await this.adminAuth.disableAuth();
+                        if (success) {
                             this.success('Admin PIN protection removed.');
+                        } else {
+                            this.error('Failed to remove PIN protection.');
                         }
+                    } else {
+                        this.error('Invalid PIN.');
                     }
                     break;
                 case '3':
@@ -611,14 +737,22 @@ class SettingsCLI {
             const response = await this.prompt(this.t('settings.admin.setupPinPrompt'));
             
             if (response.toLowerCase() === 'y' || response.toLowerCase() === 'yes') {
-                const success = await this.adminPin.setupPin();
-                if (success) {
-                    this.success('Admin PIN configured successfully!');
-                    // Enable admin PIN protection in settings
-                    this.setNestedValue(this.settings, 'security.adminPinEnabled', true);
-                    this.modified = true;
-                } else {
-                    this.error('Failed to configure admin PIN.');
+                const pin = await this.promptPin('Enter new admin PIN (4-6 digits): ');
+                if (pin) {
+                    const confirmPin = await this.promptPin('Confirm PIN: ');
+                    if (pin === confirmPin) {
+                        const success = await this.adminAuth.setupPin(pin);
+                        if (success) {
+                            this.success('Admin PIN configured successfully!');
+                            // Enable admin PIN protection in settings
+                            this.setNestedValue(this.settings, 'security.adminPinEnabled', true);
+                            this.modified = true;
+                        } else {
+                            this.error('Failed to configure admin PIN.');
+                        }
+                    } else {
+                        this.error('PINs do not match.');
+                    }
                 }
             } else {
                 console.log(this.t('settings.admin.setupCancelled'));
@@ -626,6 +760,115 @@ class SettingsCLI {
         }
         
         await this.pause();
+    }
+
+    /**
+     * Configure PIN protection for individual scripts
+     */
+    async configurePinProtection() {
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}Configure PIN Protection${colors.reset}\n`);
+        
+        // Check if admin PIN is configured
+        const adminPinConfigured = await this.adminAuth.isPinConfigured();
+        if (!adminPinConfigured) {
+            console.log(`${colors.red}Admin PIN is not configured.${colors.reset}`);
+            console.log(`${colors.yellow}Please configure an Admin PIN first in Security Settings.${colors.reset}\n`);
+            
+            const proceed = await this.prompt('Press Enter to continue...');
+            return;
+        }
+        
+        // Check if PIN protection is enabled globally
+        if (!this.settingsManager.isAdminPinEnabled()) {
+            console.log(`${colors.red}PIN Protection is currently disabled.${colors.reset}`);
+            console.log(`${colors.yellow}Please enable PIN Protection in Security Settings.${colors.reset}\n`);
+            
+            const proceed = await this.prompt('Press Enter to continue...');
+            return;
+        }
+        
+        const pinProtection = this.getNestedValue(this.settings, 'security.pinProtection') || {};
+        const protectedScripts = pinProtection.protectedScripts || {};
+        
+        console.log(`${colors.dim}Select which scripts require PIN protection:${colors.reset}\n`);
+        
+        const scriptOptions = [
+            { key: '1', label: 'Debug Tools Menu', setting: 'debugMenu', current: protectedScripts.debugMenu },
+            { key: '2', label: 'Delete Reports', setting: 'deleteReports', current: protectedScripts.deleteReports },
+            { key: '3', label: 'Summary Reports', setting: 'summaryReports', current: protectedScripts.summaryReports },
+            { key: '4', label: 'Settings Menu', setting: 'settingsMenu', current: protectedScripts.settingsMenu },
+            { key: '5', label: 'Init Script', setting: 'init', current: protectedScripts.init },
+            { key: '6', label: 'Analyze Script', setting: 'analyze', current: protectedScripts.analyze },
+            { key: '7', label: 'Validate Script', setting: 'validate', current: protectedScripts.validate },
+            { key: '8', label: 'Complete Script', setting: 'complete', current: protectedScripts.complete },
+            { key: '9', label: 'Manage Script', setting: 'manage', current: protectedScripts.manage },
+            { key: '10', label: 'Sizing Script', setting: 'sizing', current: protectedScripts.sizing },
+            { key: '11', label: 'Usage Script', setting: 'usage', current: protectedScripts.usage }
+        ];
+
+        // Display current settings
+        scriptOptions.forEach(option => {
+            const status = option.current ? `${colors.green}Protected${colors.reset}` : `${colors.red}Not Protected${colors.reset}`;
+            console.log(`  ${colors.cyan}${option.key}${colors.reset}) ${option.label}: ${status}`);
+        });
+
+        console.log(`\n  ${colors.yellow}r${colors.reset}) Reset to defaults`);
+        console.log(`  ${colors.yellow}b${colors.reset}) Back to security settings`);
+        console.log();
+
+        const choice = await this.prompt('Select script to toggle protection (or r/b): ');
+        
+        if (choice.toLowerCase() === 'b') {
+            return;
+        }
+
+        if (choice.toLowerCase() === 'r') {
+            // Reset to defaults
+            const defaultConfig = {
+                enabled: true,
+                protectedScripts: {
+                    debugMenu: true,
+                    deleteReports: true,
+                    summaryReports: true,
+                    settingsMenu: true,
+                    init: false,
+                    analyze: false,
+                    validate: false,
+                    complete: false,
+                    manage: false,
+                    sizing: false,
+                    usage: false
+                }
+            };
+            
+            this.setNestedValue(this.settings, 'security.pinProtection', defaultConfig);
+            this.modified = true;
+            this.success('PIN protection settings reset to defaults.');
+            await this.pause();
+            await this.configurePinProtection();
+            return;
+        }
+
+        const index = parseInt(choice) - 1;
+        if (index >= 0 && index < scriptOptions.length) {
+            const option = scriptOptions[index];
+            const newValue = !protectedScripts[option.setting];
+            
+            this.setNestedValue(this.settings, `security.pinProtection.protectedScripts.${option.setting}`, newValue);
+            this.modified = true;
+            
+            const status = newValue ? 'enabled' : 'disabled';
+            this.success(`PIN protection ${status} for ${option.label}.`);
+            
+            await this.pause();
+            await this.configurePinProtection();
+        } else {
+            this.error('Invalid option.');
+            await this.pause();
+            await this.configurePinProtection();
+        }
     }
 
     /**

@@ -1,11 +1,27 @@
 {
   "settings_manager": {
-    "error_loading_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_saving_settings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "error_setting_value": "⚠️ TRANSLATION NEEDED ⚠️",
-    "missing_required_setting": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "invalid_source_language": "⚠️ TRANSLATION NEEDED ⚠️",
-    "default_languages_must_be_array": "⚠️ TRANSLATION NEEDED ⚠️"
+    "error_loading_settings": "❌ Error cargando configuraciones:",
+    "error_saving_settings": "❌ Error guardando configuraciones:",
+    "error_setting_value": "❌ Error estableciendo valor:",
+    "missing_required_setting": "❌ Falta configuración requerida: {prop}",
+    "invalid_language": "❌ Idioma inválido: {language}",
+    "invalid_source_language": "❌ Idioma fuente inválido: {sourceLanguage}",
+    "default_languages_must_be_array": "❌ defaultLanguages debe ser un arreglo",
+    "invalid_date_format": "❌ Formato de fecha inválido: {dateFormat}. Formatos válidos: {validFormats}",
+    "invalid_time_format": "❌ Formato de hora inválido: {timeFormat}. Formatos válidos: {validFormats}",
+    "notifications_types_must_be_object": "❌ notifications.types debe ser un objeto",
+    "exclude_files_must_be_array": "❌ excludeFiles debe ser un arreglo",
+    "exclude_dirs_must_be_array": "❌ excludeDirs debe ser un arreglo",
+    "include_extensions_must_be_array": "❌ includeExtensions debe ser un arreglo",
+    "invalid_batch_size": "❌ Tamaño de lote inválido. Debe ser un número positivo",
+    "invalid_max_concurrent_files": "❌ Máximo de archivos concurrentes inválido. Debe ser un número positivo",
+    "invalid_sizing_threshold": "❌ Umbral de dimensionamiento inválido. Debe ser un número positivo",
+    "invalid_timeout": "❌ Tiempo de espera inválido. Debe ser al menos 1000ms",
+    "invalid_sizing_format": "❌ Formato de dimensionamiento inválido: {sizingFormat}. Formatos válidos: {validFormats}", 
+    "error_validating_settings": "❌ Error validando configuraciones:",
+    "backup_created": "📋 Respaldo creado: {backupPath}",
+    "error_creating_backup": "❌ Error creando respaldo:",
+    "language_not_supported": "El idioma '{language}' no está soportado. Disponibles: {availableLanguages}",
+    "ui_language_set": "🌍 Idioma de interfaz establecido a: {language}"
   }
 }

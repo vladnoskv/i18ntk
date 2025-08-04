@@ -94,7 +94,7 @@
   "usageReportNotTranslatedKeys": "未翻译的键：{count}",
   "usageReportTranslationCompleteness": "🌍 翻译完整性",
   "usageReportLanguageCompleteness": "{language}：{completeness}% ({translated}/{total})",
-  "usageReportNotTranslatedInLanguage": "   未翻译：{count} 个键", 
+  "usageReportNotTranslatedInLanguage": "   未翻译：{count} 个键",
   "usageReportTranslationFilesDiscovered": "📁 翻译文件",
   "usageReportFileInfo": "{relativePath} (命名空间：{namespace}，类型：{type})",
   "usageReportUnusedTranslationKeys": "🗑️ 未使用的翻译键",

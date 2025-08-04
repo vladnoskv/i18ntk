@@ -56,7 +56,7 @@
     "summaryTitle": "📊 完成摘要",
     "totalChanges": "📝 总更改数：{totalChanges}",
     "languagesProcessed": "🌐 已处理的语言：{languagesProcessed}",
-  "missingKeysAdded": "➕ 已添加的缺失键：{missingKeysAdded}",
+    "missingKeysAdded": "➕ 已添加的缺失键：{missingKeysAdded}",
     "nextStepsTitle": "📋 后续步骤",
     "nextStep1": "1. 运行用法分析：",
     "nextStep2": "2. 验证翻译：",

@@ -63,6 +63,7 @@ class I18nCompletionTool {
     this.config = config;
     this.sourceDir = null;
     this.sourceLanguageDir = null;
+    this.rl = null;
     
     // Initialize UI i18n for console messages
     const UIi18n = require('./i18ntk-ui');
@@ -80,6 +81,34 @@ class I18nCompletionTool {
     } catch (error) {
       SecurityUtils.logSecurityEvent(this.t('complete.configLoadingFailed'), 'error', { error: error.message });
       throw error;
+    }
+  }
+
+  // Initialize readline interface
+  initReadline() {
+    if (!this.rl) {
+      const readline = require('readline');
+      this.rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+    }
+    return this.rl;
+  }
+
+  // Prompt for user input
+  async prompt(question) {
+    const rl = this.rl || this.initReadline();
+    return new Promise((resolve) => {
+      rl.question(question, resolve);
+    });
+  }
+
+  // Close readline interface
+  closeReadline() {
+    if (this.rl) {
+      this.rl.close();
+      this.rl = null;
     }
   }
 
@@ -356,16 +385,43 @@ class I18nCompletionTool {
   }
 
   // Run the completion process
-  async run() {
+  async run(options = {}) {
+    const { fromMenu = false } = options;
+    
     SecurityUtils.logSecurityEvent('I18n completion tool started', 'info', { 
       version: '1.3.7',
       nodeVersion: process.version,
       platform: process.platform
     });
     
-    await this.initialize();
-    
     const args = this.parseArgs();
+    
+    // Skip admin authentication when called from menu
+    if (!fromMenu) {
+      // Check admin authentication for sensitive operations (only when called directly and not in no-prompt mode)
+      const AdminAuth = require('../utils/admin-auth');
+      const adminAuth = new AdminAuth();
+      await adminAuth.initialize();
+      
+      const isCalledDirectly = require.main === module;
+      const isRequired = await adminAuth.isAuthRequired();
+      if (isRequired && isCalledDirectly && !args.noPrompt) {
+        console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'complete translations' }));
+        
+        const pin = await this.prompt('🔐 Enter admin PIN: ');
+        const isValid = await adminAuth.verifyPin(pin);
+        
+        if (!isValid) {
+          console.log(this.t('adminCli.invalidPin'));
+          if (!fromMenu) process.exit(1);
+          return { success: false, error: 'Authentication failed' };
+        }
+        
+        console.log(this.t('adminCli.authenticationSuccess'));
+      }
+    }
+    
+    await this.initialize();
     
     if (args.sourceDir) {
       this.config.sourceDir = args.sourceDir;
@@ -454,7 +510,9 @@ class I18nCompletionTool {
 // Run if called directly
 if (require.main === module) {
   const tool = new I18nCompletionTool();
-  tool.run().catch(error => {
+  tool.run().then(() => {
+    process.exit(0);
+  }).catch(error => {
     console.error('Fatal error:', error.message);
     SecurityUtils.logSecurityEvent('I18n completion tool failed', 'error', { error: error.message });
     process.exit(1);

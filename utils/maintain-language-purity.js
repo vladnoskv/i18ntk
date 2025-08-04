@@ -267,52 +267,56 @@ class LanguagePurityMaintainer {
      * Generate comprehensive workflow report
      */
     generateWorkflowReport(results) {
-        console.log('📋 WORKFLOW SUMMARY');
-        console.log('===================\n');
+        console.log(this.t('workflow.summary.title'));
+        console.log(this.t('workflow.summary.separator'));
         
-        console.log(`🕐 Workflow completed at: ${results.timestamp}`);
-        console.log(`📊 Initial violations: ${results.summary.initialViolations}`);
-        console.log(`📉 Final violations: ${results.summary.finalViolations}`);
-        console.log(`🔧 Total fixes applied: ${results.summary.totalFixesApplied}`);
-        console.log(`📈 Improvement: ${results.summary.improvementPercentage}%\n`);
+        console.log(this.t('workflow.summary.completedAt', { timestamp: results.timestamp }));
+        console.log(this.t('workflow.summary.initialViolations', { count: results.summary.initialViolations }));
+        console.log(this.t('workflow.summary.finalViolations', { count: results.summary.finalViolations }));
+        console.log(this.t('workflow.summary.totalFixes', { count: results.summary.totalFixesApplied }));
+        console.log(this.t('workflow.summary.improvement', { percentage: results.summary.improvementPercentage }));
         
         // Step-by-step results
-        console.log('📝 STEP RESULTS:\n');
+        console.log(this.t('workflow.summary.stepResults'));
         results.steps.forEach((step, index) => {
-            const status = step.success ? '✅' : '⚠️';
-            console.log(`${index + 1}. ${status} ${step.step.replace(/_/g, ' ').toUpperCase()}`);
+            const status = step.success ? this.t('workflow.summary.success') : this.t('workflow.summary.warning');
+            console.log(this.t('workflow.summary.stepDetail', { 
+                number: index + 1, 
+                status, 
+                stepName: step.step.replace(/_/g, ' ').toUpperCase() 
+            }));
             
             if (step.totalViolations !== undefined) {
-                console.log(`   Violations: ${step.totalViolations}`);
+                console.log(this.t('workflow.summary.violations', { count: step.totalViolations }));
             }
             if (step.fixesApplied !== undefined) {
-                console.log(`   Fixes applied: ${step.fixesApplied}`);
+                console.log(this.t('workflow.summary.fixesApplied', { count: step.fixesApplied }));
             }
             console.log('');
         });
         
         // Recommendations
-        console.log('💡 NEXT STEPS:\n');
+        console.log(this.t('workflow.summary.nextSteps'));
         
         if (results.summary.finalViolations === 0) {
-            console.log('🎉 Congratulations! All locale files now have perfect language purity!');
-            console.log('✅ Consider integrating the validator into your CI/CD pipeline');
-            console.log('✅ Set up automated checks for new translations\n');
+            console.log(this.t('workflow.summary.congratulations'));
+            console.log(this.t('workflow.summary.cicdIntegration'));
+            console.log(this.t('workflow.summary.automatedChecks'));
         } else if (results.summary.improvementPercentage >= 80) {
-            console.log('🎯 Great progress! Most issues have been resolved.');
-            console.log('🔍 Review remaining violations manually');
-            console.log('🌐 Consider adding more translation mappings for edge cases');
-            console.log('✅ Integrate validator into CI/CD pipeline\n');
+            console.log(this.t('workflow.summary.greatProgress'));
+            console.log(this.t('workflow.summary.manualReview'));
+            console.log(this.t('workflow.summary.addMappings'));
+            console.log(this.t('workflow.summary.cicdIntegration'));
         } else if (results.summary.improvementPercentage >= 50) {
-            console.log('📈 Good progress made, but more work needed.');
-            console.log('🔧 Expand automatic translation mappings');
-            console.log('👥 Consider manual review of complex translations');
-            console.log('🔄 Run workflow again after adding more mappings\n');
+            console.log(this.t('workflow.summary.goodProgress'));
+            console.log(this.t('workflow.summary.expandMappings'));
+            console.log(this.t('workflow.summary.professionalReview'));
+            console.log(this.t('workflow.summary.runAgain'));
         } else {
-            console.log('⚠️  Limited progress. Manual intervention may be needed.');
-            console.log('🔍 Review translation mappings and add missing ones');
-            console.log('👥 Consider professional translation services');
-            console.log('🔧 Check for systematic issues in locale files\n');
+            console.log(this.t('workflow.summary.limitedProgress'));
+            console.log(this.t('workflow.summary.reviewMappings'));
+            console.log(this.t('workflow.summary.professionalServices'));
+            console.log(this.t('workflow.summary.checkIssues'));
         }
         
         // Save detailed report

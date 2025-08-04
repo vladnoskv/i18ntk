@@ -316,7 +316,7 @@ ${'='.repeat(50)}`);
         this.ensureOutputDir();
         
         // Load reference language
-        const referencePath = path.join(this.uiLocalesDir, `${this.referenceLanguage}.json`);
+        const referencePath = path.join(this.uiLocalesDir, this.referenceLanguage, 'common.json');
         const referenceData = this.loadJsonFile(referencePath);
         
         if (!referenceData) {
@@ -349,7 +349,7 @@ ${'='.repeat(50)}`);
                 console.log(`🔍 Analyzing ${language}...`);
             }
             
-            const languagePath = path.join(this.uiLocalesDir, `${language}.json`);
+            const languagePath = path.join(this.uiLocalesDir, language, 'common.json');
             const languageData = this.loadJsonFile(languagePath);
             
             if (!languageData) {

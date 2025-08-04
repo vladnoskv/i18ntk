@@ -1,19 +1,19 @@
 {
   "maintainLanguagePurity": {
-    "workflow_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step1_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step2_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step3_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "step4_title": "⚠️ TRANSLATION NEEDED ⚠️",
-    "workflow_error": "⚠️ TRANSLATION NEEDED ⚠️",
-    "running_initial_validation": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "initial_assessment_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detecting_fixing_mismatches": "⚠️ TRANSLATION NEEDED ⚠️",
-    "detection_complete_applying_fixes": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_complete": "⚠️ TRANSLATION NEEDED ⚠️",
-    "mismatch_fixes_warnings": "⚠️ TRANSLATION NEEDED ⚠️",
-    "applying_automatic_translations": "⚠️ TRANSLATION NEEDED ⚠️",
-    "translation_preview_complete": "⚠️ TRANSLATION NEEDED ⚠️"
+    "workflow_title": "🚀 Flujo de Trabajo de Mantenimiento de Pureza de Idioma",
+    "step1_title": "📊 PASO 1: Evaluación Inicial de Pureza de Idioma",
+    "step2_title": "\n🔧 PASO 2: Detectar y Corregir Automáticamente Desajustes de Idioma",
+    "step3_title": "\n🌐 PASO 3: Aplicar Traducciones Automáticas",
+    "step4_title": "\n✅ PASO 4: Evaluación Final de Pureza de Idioma",
+    "workflow_error": "❌ Error de Flujo de Trabajo: {errorMessage}",
+    "running_initial_validation": "Ejecutando validación inicial de pureza de idioma...",
+    "initial_assessment_complete": "✅ Evaluación inicial completa: {count} violaciones encontradas\n",
+    "initial_assessment_warnings": "⚠️  Evaluación inicial completada con advertencias\n",
+    "detecting_fixing_mismatches": "Detectando y corrigiendo desajustes de idioma...",
+    "detection_complete_applying_fixes": "Detección completa. Aplicando correcciones automáticas...",
+    "mismatch_fixes_complete": "✅ Correcciones de desajustes de idioma completas: {count} correcciones aplicadas\n",
+    "mismatch_fixes_warnings": "⚠️  Correcciones de desajustes de idioma completadas con advertencias\n",
+    "applying_automatic_translations": "Aplicando traducciones automáticas...",
+    "translation_preview_complete": "Vista previa de traducción completa. Aplicando traducciones..."
   }
 }

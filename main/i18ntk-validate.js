@@ -57,6 +57,7 @@ class I18nValidator {
     this.errors = [];
     this.warnings = [];
     this.t = null;
+    this.rl = null;
   }
   
   async initialize() {
@@ -98,6 +99,35 @@ class I18nValidator {
     }
   }
 
+  initReadline() {
+    const readline = require('readline');
+    return readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+  }
+
+  prompt(question) {
+    return new Promise((resolve) => {
+      const rl = this.rl || this.initReadline();
+      if (!this.rl) this.rl = rl;
+      
+      rl.question(question, (answer) => {
+        if (!this.rl) {
+          rl.close();
+        }
+        resolve(answer);
+      });
+    });
+  }
+
+  closeReadline() {
+    if (this.rl) {
+      this.rl.close();
+      this.rl = null;
+    }
+  }
+
   // Parse command line arguments
   parseArgs() {
     try {
@@ -130,6 +160,8 @@ class I18nValidator {
             parsed.disableAdmin = true;
           } else if (sanitizedKey === 'admin-status') {
             parsed.adminStatus = true;
+          } else if (sanitizedKey === 'no-prompt') {
+            parsed.noPrompt = true;
           } else if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(sanitizedKey)) {
             // Support shorthand language flags like --de, --fr, etc.
             parsed.uiLanguage = sanitizedKey;
@@ -689,9 +721,39 @@ class I18nValidator {
   /**
    * Run method for compatibility with manager
    */
-  async run() {
+  async run(options = {}) {
+    const { fromMenu = false } = options;
+    
     try {
       await this.initialize();
+      
+      // Skip admin authentication when called from menu
+      if (!fromMenu) {
+        // Check admin authentication for sensitive operations (only when called directly and not in no-prompt mode)
+        const AdminAuth = require('../utils/admin-auth');
+        const adminAuth = new AdminAuth();
+        await adminAuth.initialize();
+        
+        const isCalledDirectly = require.main === module;
+        const isRequired = await adminAuth.isAuthRequired();
+        if (isRequired && isCalledDirectly && !args.noPrompt) {
+          console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'validate translations' }));
+          
+          const pin = await this.prompt('🔐 Enter admin PIN: ');
+          
+          const isValid = await adminAuth.verifyPin(pin);
+          this.closeReadline();
+          
+          if (!isValid) {
+            console.log(this.t('adminCli.invalidPin'));
+            if (!fromMenu) process.exit(1);
+            return { success: false, error: 'Authentication failed' };
+          }
+          
+          console.log(this.t('adminCli.authenticationSuccess'));
+        }
+      }
+      
       console.log(this.t('validate.startingValidationProcess'));
       SecurityUtils.logSecurityEvent(this.t('validate.runStarted'), 'info', 'Starting validation run');
 
