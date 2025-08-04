@@ -7,6 +7,8 @@
   "source_directory": "Répertoire source : {{sourceDir}}",
   "found_languages": "Langues trouvées : {{languages}}",
   "sourceDirectoryLabel": "📁 Répertoire source : {{sourceDir}}",
+  "problematic_keys": "Clés problématiques : {{problematicKeys}}",
+  "long_translations": "Traductions longues : {{longTranslations}}",
   "problematicKeysLabel": "Clés problématiques : {{problematicKeys}}",
   "sourceLanguageLabel": "🌍 Langue source : {{sourceLanguage}}",
   "strictModeLabel": "⚙️  Mode strict : {{mode}}",

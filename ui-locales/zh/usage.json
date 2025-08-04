@@ -20,6 +20,7 @@
   "detectedI18nDirectory": "检测到 I18n 目录: {{i18nDir}}",
   "fileInfo": "   📄 {namespace}: {keys} 个键",
   "failedToAnalyzeUsage": "❌ 使用分析失败: {error}",
+  "failedToAnalyzeFile": "❌ 文件分析失败: {error}",
   "analyzerInitialized": "分析器已初始化",
   "analyzerInitFailed": "分析器初始化失败: {error}",
   "argsParsed": "参数已解析",

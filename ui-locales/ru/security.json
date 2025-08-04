@@ -21,5 +21,6 @@
   "unknownCommandArg": "Неизвестный аргумент команды",
   "logMessage": "[БЕЗОПАСНОСТЬ {level}] {timestamp}: {event}",
   "alertMessage": "[БЕЗОПАСНОСТЬ ТРЕВОГА] {timestamp}: {event}",
-  "securityWarning": "[БЕЗОПАСНОСТЬ ПРЕДУПРЕЖДЕНИЕ] {timestamp}: {event}"
+  "securityWarning": "[БЕЗОПАСНОСТЬ ПРЕДУПРЕЖДЕНИЕ] {timestamp}: {event}",
+  "json_parse_error": "Безопасность: Ошибка разбора JSON: {errorMessage}"
 }

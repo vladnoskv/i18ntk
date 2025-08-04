@@ -8,6 +8,7 @@
   "autoDetectedI18nDirectory": "📂 Directorio i18n detectado automáticamente: {directory}",
   "initializingProject": "⚙️  Inicializando configuración del proyecto...",
   "languageSelectionTitle": "🌐 Configuración de Idioma",
+  "createdSampleTranslationFile": "✅ Archivo de traducción de ejemplo creado: {file}",
   "available": "Disponible",
   "defaultLanguages": "📝 Idiomas predeterminados: {languages}",
   "enterLanguageCodes": "🎯 Ingresa códigos de idioma objetivo (separados por comas, ej. de, es, fr, ru):",

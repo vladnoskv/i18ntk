@@ -1,23 +1,20 @@
 {
-  "offlineTitle": "You are offline",
-  "offlineMessage": "Please check your internet connection",
-  "tryReconnect": "Try to reconnect",
-  "common": "Common",
-  "logout": "Logout",
-  "login": "Login",
-  "amount": "Amount",
-  "timePeriods": {
-    "customRange": "Custom Range"
+  "common": {
+    "welcome": "Welcome",
+    "hello": "Hello",
+    "goodbye": "Goodbye",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading..."
   },
-  "unknownUser": "Unknown User",
-  "notSet": "Not Set",
-  "announcement_id": "Announcement ID",
-  "last_sign_in_at": "Last Sign In",
-  "usage": {
-    "analysisResults": "Analysis Results",
-    "availableKeysCount": "Available Keys Count",
-    "usedKeysCount": "Used Keys Count"
-  },
-  "success": "Success",
-  "error": "Error"
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "settings": "Settings"
+  }
 }

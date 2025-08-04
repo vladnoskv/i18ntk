@@ -12,6 +12,7 @@
   "analyzing_file_sizes": "Analysiere Dateigrößen...",
   "analyzing_translation_content": "Analysiere Übersetzungsinhalt...",
   "generating_size_comparisons": "Generiere Größenvergleiche...",
+  "problematic_keys": "Problematische Schlüssel:",
   "problematicKeysLabel": "Problematische Schlüssel: {{problematicKeys}}",
   "no_languages_found_for_comparison": "Keine Sprachen für Vergleich gefunden",
   "sizing_analysis_results": "I18n Größenanalyse Ergebnisse",

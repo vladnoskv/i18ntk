@@ -6,6 +6,7 @@
   "autoDetectedI18nDirectory": "📂 自动检测到i18n目录: {directory}",
   "initializingProject": "⚙️  正在初始化项目配置...",
   "languageSelectionTitle": "🌐 语言配置",
+  "createdSampleTranslationFile": "✅ 已创建示例翻译文件: {file}",
   "available": "可用",
   "defaultLanguages": "📝 默认语言: {languages}",
   "enterLanguageCodes": "🎯 输入目标语言代码(逗号分隔，例如: de, es, fr, ru):",

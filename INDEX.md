@@ -1,6 +1,6 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.4.0  
+**Version:** 1.4.1  
 **Last Updated:** 04/08/2025  
 **Maintainer:** Vladimir Noskov  
 
@@ -49,7 +49,7 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Debug Documentation](./debug/DEBUG_README.md)** - Debug tools and troubleshooting
 - **[Debug Tools Overview](./debug/DEBUG_TOOLS.md)** - Available debug utilities
 
-## 🆕 What's New in v1.4.0
+## 🆕 What's New in v1.4.1
 
 ### Major Features
 - **🔐 Advanced PIN Protection** - Configurable authentication per script with AES-256-GCM encryption
@@ -114,12 +114,12 @@ npm run i18ntk:settings          # Manage settings
 
 ## 🔄 Version Management
 
-**Current Version:** 1.4.0  
+**Current Version:** 1.4.1  
 **Release Date:** 04/08/2025  
 **Previous Versions:** 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
 
 ### Version History
-- **1.4.0** - 🔐 **Advanced PIN Protection & Security** - Configurable script-level PIN protection, AES-256-GCM encryption, session management, complete internationalization
+- **1.4.1** - 🔧 **Debug Tools Streamlining & Package Optimization** - Streamlined debug menu, removed development tools from production builds, improved package structure for production deployment
 - **1.3.0** - 🎯 **Script Directory Configuration & Path Resolution** - Per-script directory configuration, fixed path resolution, enhanced internationalization support
 - **1.2.3** - Documentation & metadata cleanup
 - **1.1.5** - Internationalization completion

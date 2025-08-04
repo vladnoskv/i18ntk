@@ -473,6 +473,7 @@ class I18nManager {
       console.log(`10. ${this.ui.t('menu.options.settings')}`);
       console.log(`11. ${this.ui.t('menu.options.help')}`);
       console.log(`12. ${this.ui.t('menu.options.debug')}`);
+      console.log(`13. ${this.ui.t('menu.options.language')}`);
       console.log(`0. ${this.ui.t('menu.options.exit')}`);
       console.log('\n' + this.ui.t('menu.nonInteractiveModeWarning'));
       console.log(this.ui.t('menu.useDirectExecution'));
@@ -496,6 +497,7 @@ class I18nManager {
     console.log(`10. ${this.ui.t('menu.options.settings')}`);
     console.log(`11. ${this.ui.t('menu.options.help')}`);
     console.log(`12. ${this.ui.t('menu.options.debug')}`);
+    console.log(`13. ${this.ui.t('menu.options.language')}`);
     console.log(`0. ${this.ui.t('menu.options.exit')}`);
     
     const choice = await this.prompt('\n' + this.ui.t('menu.selectOptionPrompt'));
@@ -592,6 +594,9 @@ class I18nManager {
       case '12':
         await this.showDebugMenu();
         break;
+      case '13':
+        await this.showLanguageMenu();
+        break;
       case '0':
         console.log(this.ui.t('menu.goodbye'));
         this.safeClose();
@@ -599,6 +604,45 @@ class I18nManager {
       default:
         console.log(this.ui.t('menu.invalidChoice'));
         await this.showInteractiveMenu();
+    }
+  }
+
+  // Language Menu
+  async showLanguageMenu() {
+    console.log(`\n${this.ui.t('language.title')}`);
+    console.log(this.ui.t('language.separator'));
+    console.log(this.ui.t('language.current', { language: this.ui.getLanguageDisplayName(this.ui.getCurrentLanguage()) }));
+    console.log('\n' + this.ui.t('language.available'));
+    
+    this.ui.availableLanguages.forEach((lang, index) => {
+      const displayName = this.ui.getLanguageDisplayName(lang);
+      const current = lang === this.ui.getCurrentLanguage() ? ' ✓' : '';
+      console.log(this.ui.t('language.languageOption', { index: index + 1, displayName, current }));
+    });
+    
+    console.log(`0. ${this.ui.t('language.backToMainMenu')}`);
+    
+    const choice = await this.prompt('\n' + this.ui.t('language.prompt'));
+    const choiceNum = parseInt(choice);
+    
+    if (choiceNum === 0) {
+      await this.showInteractiveMenu();
+      return;
+    } else if (choiceNum >= 1 && choiceNum <= this.ui.availableLanguages.length) {
+      const selectedLang = this.ui.availableLanguages[choiceNum - 1];
+      this.ui.changeLanguage(selectedLang);
+      console.log(this.ui.t('language.changed', { language: this.ui.getLanguageDisplayName(selectedLang) }));
+      
+      // Refresh the UI with new language
+      this.ui.refreshLanguageFromSettings();
+      
+      // Return to main menu with new language
+      await this.prompt('\n' + this.ui.t('language.pressEnterToContinue'));
+      await this.showInteractiveMenu();
+    } else {
+      console.log(this.ui.t('language.invalid'));
+      await this.prompt('\n' + this.ui.t('language.pressEnterToContinue'));
+      await this.showLanguageMenu();
     }
   }
 
@@ -623,13 +667,9 @@ class I18nManager {
 
     console.log(`\n${this.ui.t('debug.title')}`);
     console.log(this.ui.t('debug.separator'));
-    console.log(`1. ${this.ui.t('debug.mainDebuggerSystemDiagnostics')}`);
-    console.log(`2. ${this.ui.t('debug.consoleTranslationsCheck')}`);
-    console.log(`3. ${this.ui.t('debug.exportMissingKeys')}`);
-    console.log(`4. ${this.ui.t('debug.replaceHardcodedConsole')}`);
-    console.log(`5. ${this.ui.t('debug.consoleKeyChecker')}`);
-    console.log(`6. ${this.ui.t('debug.debugLogs')}`);
-    console.log(`0. ${this.ui.t('debug.backToMainMenu')}`);
+    console.log(this.ui.t('debug.mainDebuggerSystemDiagnostics'));
+    console.log(this.ui.t('debug.debugLogs'));
+    console.log(this.ui.t('debug.backToMainMenu'));
     
     const choice = await this.prompt('\n' + this.ui.t('debug.selectOption'));
     
@@ -638,18 +678,6 @@ class I18nManager {
         await this.runDebugTool('debugger.js', 'Main Debugger');
         break;
       case '2':
-        await this.runDebugTool('console-translations.js', 'Console Translations');
-        break;
-      case '3':
-        await this.runDebugTool('export-missing-keys.js', 'Export Missing Keys');
-        break;
-      case '4':
-        await this.runDebugTool('replace-hardcoded-console.js', 'Replace Hardcoded Console');
-        break;
-      case '5':
-        await this.runDebugTool('console-key-checker.js', 'Console Key Checker');
-        break;
-      case '6':
         await this.viewDebugLogs();
         break;
       case '0':

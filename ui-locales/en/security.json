@@ -21,5 +21,6 @@
   "unknownCommandArg": "Unknown command argument",
   "logMessage": "[SECURITY {level}] {timestamp}: {event}",
   "alertMessage": "[SECURITY ALERT] {timestamp}: {event}",
-  "securityWarning": "[SECURITY WARNING] {timestamp}: {event}"
+  "securityWarning": "[SECURITY WARNING] {timestamp}: {event}",
+  "json_parse_error": "Security: JSON parse error: {errorMessage}"
 }

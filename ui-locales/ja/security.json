@@ -21,5 +21,6 @@
   "unknownCommandArg": "不明なコマンド引数",
   "logMessage": "[セキュリティ {level}] {timestamp}: {event}",
   "alertMessage": "[セキュリティ警報] {timestamp}: {event}",
-  "securityWarning": "[セキュリティ警告] {timestamp}: {event}"
+  "securityWarning": "[セキュリティ警告] {timestamp}: {event}",
+  "json_parse_error": "セキュリティ: JSON 解析エラー: {errorMessage}"
 }

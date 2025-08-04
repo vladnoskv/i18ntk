@@ -21,5 +21,6 @@
   "unknownCommandArg": "未知命令参数",
   "logMessage": "[安全{level}] {timestamp}: {event}",
   "alertMessage": "[安全警报] {timestamp}: {event}",
-  "securityWarning": "[安全警告] {timestamp}: {event}"
+  "securityWarning": "[安全警告] {timestamp}: {event}",
+  "json_parse_error": "安全：JSON解析错误：{errorMessage}"
 }

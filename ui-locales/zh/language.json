@@ -1,4 +1,13 @@
 {
-  "available": "可用语言",
-  "changeTitle": "更改语言"
+  "title": "🌍 更改语言",
+  "separator": "============================================================",
+  "current": "当前语言: {language}",
+  "available": "可用语言:",
+  "languageOption": "{index}. {displayName}{current}",
+  "backToMainMenu": "返回主菜单",
+  "prompt": "请选择语言 (0-8):",
+  "cancelled": "语言更改已取消。",
+  "invalid": "无效选择。请重试。",
+  "changed": "语言已更改为: {language}",
+  "pressEnterToContinue": "按 Enter 键继续..."
 }

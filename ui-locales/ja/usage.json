@@ -20,6 +20,7 @@
   "detectedI18nDirectory": "検出された I18n ディレクトリ: {{i18nDir}}",
   "fileInfo": "   📄 {namespace}: {keys} 件のキー",
   "failedToAnalyzeUsage": "❌ 使用状況の解析に失敗しました: {error}",
+  "failedToAnalyzeFile": "❌ ファイルの解析に失敗しました: {error}",
   "analyzerInitialized": "アナライザが初期化されました",
   "analyzerInitFailed": "アナライザの初期化に失敗しました: {error}",
   "argsParsed": "引数を解析しました",

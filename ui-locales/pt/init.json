@@ -5,6 +5,7 @@
   "detectedI18nFrameworks": "🔍 Framework(s) i18n detectado(s): {frameworks}",
   "existingDirectoriesFound": "📁 Diretórios de tradução existentes encontrados:",
   "useExistingDirectoryPrompt": "Deseja usar o diretório existente? (s/n)",
+  "createdSampleTranslationFile": "✅ Arquivo de tradução de exemplo criado: {file}",
   "autoDetectedI18nDirectory": "📂 Diretório i18n detectado automaticamente: {directory}",
   "initializingProject": "⚙️  Inicializando configuração do projeto...",
   "languageSelectionTitle": "🌐 Configuração de Idioma",

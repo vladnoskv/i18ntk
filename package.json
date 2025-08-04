@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "i18ntk (i18n Toolkit) - A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects with advanced analysis, validation, and automation features",
   "keywords": [
     "i18n",
@@ -37,7 +37,7 @@
     "url": "https://github.com/sponsors/vladnoskv"
   },
   "license": "MIT",
-  "author": "Vladimir Noskov <vladnoskv@gmail.com> (https://github.com/vladnoskv)",
+  "author": "Vladimir Noskov <vladno@hotmail.co.uk> (https://github.com/vladnoskv)",
   "type": "commonjs",
   "main": "main/i18ntk-manage.js",
   "bin": {
@@ -50,8 +50,7 @@
     "i18ntk-complete": "main/i18ntk-complete.js",
     "i18ntk-sizing": "main/i18ntk-sizing.js",
     "i18ntk-summary": "main/i18ntk-summary.js",
-    "i18ntk-autorun": "main/i18ntk-autorun.js",
-    "i18ntk-debug": "dev/debug/debugger.js"
+    "i18ntk-autorun": "main/i18ntk-autorun.js"
   },
   "directories": {
     "doc": "docs"
@@ -64,7 +63,6 @@
     "settings/",
     "ui-locales/",
     "locales/",
-    "docs/",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -125,8 +123,8 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.4.0",
-    "releaseDate": "04/08/2025",
+    "version": "1.4.1",
+    "releaseDate": "05/08/2025",
     "lastUpdated": "04/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",

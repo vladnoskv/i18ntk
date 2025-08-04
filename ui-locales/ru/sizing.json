@@ -10,6 +10,8 @@
   "invalidOutputDirectoryError": "Неверный путь к выходной директории: {{outputDir}}",
   "invalidReportFileError": "Неверный путь к файлу отчета",
   "problematicKeysLabel": "Проблемные ключи: {{problematicKeys}}",
+  "problematic_keys": "Проблемные ключи: {{problematicKeys}}",
+  "long_translations": "Длинные переводы: {{longTranslations}}",
   "failedToSaveReportError": "Не удалось безопасно сохранить отчет",
   "invalidCsvFileError": "Неверный путь к CSV файлу",
   "failedToSaveCsvError": "Не удалось безопасно сохранить CSV отчет",

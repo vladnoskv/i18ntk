@@ -8,6 +8,7 @@
   "useExistingDirectoryPrompt": "Do you want to use the existing directory? (y/n)",
   "autoDetectedI18nDirectory": "📂 Auto-detected i18n directory: {directory}",
   "initializingProject": "⚙️  Initializing project configuration...",
+  "createdSampleTranslationFile": "✅ Created sample translation file: {file}",
   "languageSelectionTitle": "🌐 Language Configuration",
   "available": "Available",
   "defaultLanguages": "📝 Default languages: {languages}",

@@ -6,6 +6,8 @@
 /i18ntk-reports
 /EXPORT
 /test-temp
+/docs
+/dev
 
 # Test files
 /dev/tests/test-report-final.json

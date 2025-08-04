@@ -1,6 +1,6 @@
 # i18ntk API Reference
 
-**Version:** 1.4.0 (04/08/2025)
+**Version:** 1.4.1 (05/08/2025)
 
 ## Overview
 

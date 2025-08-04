@@ -2,7 +2,59 @@
 
 All notable changes to the i18n Management Toolkit will be documented in this file.
 
-**Current Version:** 1.4.0
+**Current Version:** 1.4.1
+
+## [1.4.1] - 04/08/2025
+
+### 🎯 Enhanced User Experience & Package Optimization
+
+#### User Interface Improvements
+- **Change UI Language** - Added direct access to language switching from main menu
+- **Streamlined debug tools** - Hidden development-only debug scripts from production package
+- **Cleaner package distribution** - Reduced package size by excluding development documentation
+
+#### Debug Tools Streamlining
+- **Commented out development debug tools** from production builds:
+  - Console Translations Check
+  - Export Missing Translation Keys
+  - Replace Hardcoded Console Strings
+  - Console Key Checker
+- **Simplified debug menu** to show only essential tools:
+  - System Diagnostics
+  - Debug Logs
+  - Back to Main Menu
+- **Updated menu numbering** for improved user experience
+- **Maintained backward compatibility** - Tools remain available for future reactivation
+
+#### Package Optimization
+- **Excluded /docs directory** from npm package distribution
+- **Hidden development debug tools** - Tools only available in development environment
+- **Reduced package size by 15.7%** - from 1.78 MB to 1.5 MB unpacked, removing 46 files from the package.
+- **Compressed package**: 316.5 kB (optimized for npm distribution)
+- **Production-ready package** - Works seamlessly without /dev folder in production builds
+
+### 📚 Documentation Enhancement
+- **Completely rewritten README.md** as comprehensive single source of truth
+- **Added extensive troubleshooting section** with common issues and solutions
+- **Included CI/CD integration examples** for GitHub Actions, GitLab CI, and Docker
+- **Added detailed configuration examples** for all major frameworks
+- **Enhanced FAQ section** covering 15+ common questions
+- **Added performance metrics** and project health indicators
+
+### 🛠️ Developer Experience Improvements
+- **Streamlined installation process** with multiple methods documented
+- **Enhanced command documentation** with usage examples
+- **Added framework-specific integration guides**
+- **Improved error handling** and user feedback
+- **Added backup and recovery procedures**
+
+### 🔍 Quality Assurance
+- **Verified package integrity** with comprehensive testing
+- **Ensured version consistency** across all documentation
+- **Updated all version references** to 1.4.1
+- **Confirmed backward compatibility** with existing configurations
+
+---
 
 ## [1.4.0] - 04/08/2025
 

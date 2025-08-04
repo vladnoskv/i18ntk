@@ -7,6 +7,8 @@
   "source_directory": "Directorio fuente: {{sourceDir}}",
   "found_languages": "Idiomas encontrados: {{languages}}",
   "analyzing_file_sizes": "Analizando tamaños de archivos...",
+  "problematic_keys": "Claves problemáticas: {{problematicKeys}}",
+  "long_translations": "Traducciones largas: {{longTranslations}}",
   "problematicKeysLabel": "Claves problemáticas: {{problematicKeys}}",
   "analyzing_translation_content": "Analizando contenido de traducción...",
   "generating_size_comparisons": "Generando comparaciones de tamaño...",

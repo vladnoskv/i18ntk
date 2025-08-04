@@ -11,6 +11,8 @@
   "invalidReportFileError": "Caminho do arquivo de relatório inválido",
   "failedToSaveReportError": "Falha ao salvar relatório com segurança",
   "invalidCsvFileError": "Caminho do arquivo CSV inválido",
+  "problematic_keys": "Chaves problemáticas: {{problematicKeys}}",
+  "long_translations": "Traduções longas: {{longTranslations}}",
   "problematicKeysLabel": "Chaves problemáticas: {{problematicKeys}}",
   "failedToSaveCsvError": "Falha ao salvar relatório CSV com segurança",
   "fatalError": "❌ Análise de dimensionamento falhou: {{error}}",

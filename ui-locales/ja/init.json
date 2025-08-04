@@ -7,6 +7,7 @@
   "useExistingDirectoryPrompt": "既存のディレクトリを使用しますか？ (y/n)",
   "autoDetectedI18nDirectory": "📂 自動検出された i18n ディレクトリ：{directory}",
   "initializingProject": "⚙️  プロジェクト構成を初期化中...",
+  "createdSampleTranslationFile": "✅ サンプル翻訳ファイルを作成しました：{file}",
   "languageSelectionTitle": "🌐 言語設定",
   "available": "利用可能",
   "defaultLanguages": "📝 デフォルトの言語：{languages}",

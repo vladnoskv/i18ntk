@@ -13,8 +13,16 @@ const SecurityUtils = require('../../utils/security');
 class I18nDebugger {
     constructor(projectRoot = null) {
         // Validate and sanitize project root path
-        const defaultRoot = path.resolve(__dirname, '../..');
-        const validatedRoot = SecurityUtils.validatePath(projectRoot || defaultRoot, process.cwd());
+        let defaultRoot;
+        
+        if (projectRoot) {
+            defaultRoot = projectRoot;
+        } else {
+            // Find the actual project root by walking up from current directory
+            defaultRoot = this.findProjectRoot();
+        }
+        
+        const validatedRoot = SecurityUtils.validatePath(defaultRoot, process.cwd());
         if (!validatedRoot) {
             throw new Error('Invalid project root path provided');
         }
@@ -36,6 +44,53 @@ class I18nDebugger {
         const logMessage = `[${timestamp}] [${level}] ${message}`;
         console.log(logMessage);
         fs.appendFileSync(this.logFile, logMessage + '\n');
+    }
+
+    findProjectRoot() {
+        // Start from the current working directory and walk up to find project root
+        let currentDir = process.cwd();
+        
+        // First, check if we're running from within node_modules/i18ntk
+        const nodeModulesPattern = /[\/\\]node_modules[\/\\]i18ntk/;
+        if (nodeModulesPattern.test(currentDir)) {
+            // We're running from the i18ntk package, find the actual project root
+            let projectDir = currentDir;
+            while (projectDir !== path.dirname(projectDir)) {
+                if (fs.existsSync(path.join(projectDir, 'package.json')) && 
+                    !projectDir.includes('node_modules')) {
+                    return projectDir;
+                }
+                projectDir = path.dirname(projectDir);
+            }
+        }
+        
+        // Walk up the directory tree to find package.json
+        while (currentDir !== path.dirname(currentDir)) {
+            const packageJsonPath = path.join(currentDir, 'package.json');
+            
+            if (fs.existsSync(packageJsonPath)) {
+                try {
+                    const packageContent = fs.readFileSync(packageJsonPath, 'utf8');
+                    const packageData = JSON.parse(packageContent);
+                    
+                    // Skip if this is the i18ntk package itself
+                    if (packageData.name === 'i18ntk' && currentDir.includes('node_modules')) {
+                        currentDir = path.dirname(currentDir);
+                        continue;
+                    }
+                    
+                    // Found a valid project package.json
+                    return currentDir;
+                } catch (error) {
+                    // Invalid package.json, continue searching
+                }
+            }
+            
+            currentDir = path.dirname(currentDir);
+        }
+        
+        // Fallback to the original behavior if no project root found
+        return path.resolve(__dirname, '../..');
     }
 
     addIssue(issue) {
@@ -287,10 +342,33 @@ class I18nDebugger {
             const packageJson = JSON.parse(fs.readFileSync(path.resolve(this.projectRoot, 'package.json'), 'utf8'));
             const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
             
-            // Check if node_modules exists
+            // Check if node_modules exists in project root
             const nodeModulesPath = path.resolve(this.projectRoot, 'node_modules');
             if (!fs.existsSync(nodeModulesPath)) {
-                this.addWarning('node_modules directory not found. Run npm install.');
+                // Also check parent directories for node_modules (monorepo support)
+                let currentDir = this.projectRoot;
+                let foundNodeModules = false;
+                
+                while (currentDir !== path.dirname(currentDir)) {
+                    const parentNodeModules = path.join(currentDir, 'node_modules');
+                    if (fs.existsSync(parentNodeModules)) {
+                        this.log(`Found node_modules in: ${parentNodeModules}`);
+                        foundNodeModules = true;
+                        break;
+                    }
+                    currentDir = path.dirname(currentDir);
+                }
+                
+                if (!foundNodeModules) {
+                    const depCount = Object.keys(dependencies).length;
+                    if (depCount > 0) {
+                        this.addWarning(`node_modules directory not found in project or parent directories. Run 'npm install' in ${this.projectRoot}`);
+                    } else {
+                        this.log('No dependencies found in package.json');
+                    }
+                }
+            } else {
+                this.log(`Found node_modules in: ${nodeModulesPath}`);
             }
 
             this.log(`Found ${Object.keys(dependencies).length} dependencies`);
@@ -357,6 +435,8 @@ class I18nDebugger {
     async run() {
         this.log('Starting i18nTK Debug Analysis...');
         this.log(`Project Root: ${this.projectRoot}`);
+        this.log(`Working Directory: ${process.cwd()}`);
+        this.log(`Debug Tool Directory: ${__dirname}`);
         
         SecurityUtils.logSecurityEvent('Debug analysis started', 'info', { projectRoot: this.projectRoot });
         

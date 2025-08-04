@@ -21,5 +21,6 @@
   "unknownCommandArg": "Argumento de comando desconhecido",
   "logMessage": "[SEGURANÇA {level}] {timestamp}: {event}",
   "alertMessage": "[ALERTA DE SEGURANÇA] {timestamp}: {event}",
-  "securityWarning": "[AVISO DE SEGURANÇA] {timestamp}: {event}"
+  "securityWarning": "[AVISO DE SEGURANÇA] {timestamp}: {event}",
+  "json_parse_error": "Segurança: Erro ao analisar JSON: {errorMessage}"
 }

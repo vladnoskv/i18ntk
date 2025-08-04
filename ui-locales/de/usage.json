@@ -20,6 +20,7 @@
   "detectedI18nDirectory": "Erkanntes I18n-Verzeichnis: {{i18nDir}}",
   "fileInfo": "   📄 {namespace}: {keys} Schlüssel",
   "failedToAnalyzeUsage": "❌ Nutzungsanalyse fehlgeschlagen: {error}",
+  "failedToAnalyzeFile": "❌ Dateianalysem fehlgeschlagen: {error}",
   "analyzerInitialized": "Analysator initialisiert",
   "analyzerInitFailed": "Analysator-Initialisierung fehlgeschlagen: {error}",
   "argsParsed": "Argumente geparst",

@@ -8,6 +8,8 @@
   "found_languages": "找到语言: {{languages}}",
   "analyzing_file_sizes": "正在分析文件大小...",
   "problematicKeysLabel": "问题键: {{problematicKeys}}",
+  "problematic_keys": "问题键: {{problematicKeys}}",
+  "long_translations": "长翻译: {{longTranslations}}",
   "analyzing_translation_content": "正在分析翻译内容...",
   "generating_size_comparisons": "正在生成大小比较...",
   "sourceDirectoryLabel": "📁 源目录: {{sourceDir}}",

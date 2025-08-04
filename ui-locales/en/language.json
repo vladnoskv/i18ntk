@@ -1,4 +1,13 @@
 {
-  "available": "Available Languages",
-  "changeTitle": "Change Language"
+  "title": "🌍 Change Language",
+  "separator": "============================================================",
+  "current": "Current language: {language}",
+  "available": "Available Languages:",
+  "languageOption": "{index}. {displayName}{current}",
+  "backToMainMenu": "Back to Main Menu",
+  "prompt": "Select a language (0-8):",
+  "cancelled": "Language change cancelled.",
+  "invalid": "Invalid choice. Please try again.",
+  "changed": "Language changed to: {language}",
+  "pressEnterToContinue": "Press Enter to continue..."
 }
