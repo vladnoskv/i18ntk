@@ -1,7 +1,7 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.3.1  
-**Last Updated:** 02/08/2025  
+**Version:** 1.4.0  
+**Last Updated:** 04/08/2025  
 **Maintainer:** Vladimir Noskov  
 
 ## 📚 Documentation Overview
@@ -49,14 +49,14 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Debug Documentation](./debug/DEBUG_README.md)** - Debug tools and troubleshooting
 - **[Debug Tools Overview](./debug/DEBUG_TOOLS.md)** - Available debug utilities
 
-## 🆕 What's New in v1.3.1
+## 🆕 What's New in v1.4.0
 
 ### Major Features
-- **🔄 Reset to Default Values** - New menu option to reset all directory configurations to defaults
+- **🔐 Advanced PIN Protection** - Configurable authentication per script with AES-256-GCM encryption
+- **🛡️ Enhanced Security** - Session-based authentication with 30-minute timeout
+- **🌍 Complete Internationalization** - 8 languages with 100% coverage, including Portuguese
 - **🎯 Per-Script Directory Configuration** - Configure custom directories for each script type
 - **🔧 Fixed Path Resolution** - Analyzing logic now correctly follows settings
-- **🌍 Enhanced Internationalization** - Continued support for global applications
-- **⚙️ Custom Directory Overrides** - Override any script directory via CLI arguments
 
 ### Key Benefits
 - **Flexibility**: Use different directory structures for different script types
@@ -66,12 +66,13 @@ This documentation index provides comprehensive guidance for the I18N Management
 
 ## 🚀 Quick Navigation
 
-### For New Users (v1.3.0)
+### For New Users (v1.4.0)
 1. Start with the [Main README](../README.md) for project overview
 2. Check [Script Directory Guide](./docs/SCRIPT_DIRECTORY_GUIDE.md) for custom directory configuration
 3. Follow the [Installation Guide](./INSTALLATION.md) for detailed setup instructions
-4. Review [Configuration Guide](./api/CONFIGURATION.md) for project setup
-5. Check [API Documentation](./api/API_REFERENCE.md) for available commands
+4. Review [PIN Protection Guide](./docs/PIN_PROTECTION_GUIDE.md) for security features
+5. Check [Configuration Guide](./api/CONFIGURATION.md) for project setup
+6. Check [API Documentation](./api/API_REFERENCE.md) for available commands
 
 ### For Developers
 1. Read [Development Rules](./development/DEVELOPMENT_RULES.md) for coding standards
@@ -91,7 +92,7 @@ This documentation index provides comprehensive guidance for the I18N Management
 ### ⚠️ Deployment Warning
 **We do not recommend using on a deployment server without testing on a branch first to see the file changes and process.** Always test v1.3.0 configuration changes in a development environment.
 
-### Core Commands (v1.3.0)
+### Core Commands (v1.4.0)
 ```bash
 npm run i18ntk                    # Interactive management menu
 npm run i18ntk:init              # Initialize i18n structure
@@ -113,11 +114,12 @@ npm run i18ntk:settings          # Manage settings
 
 ## 🔄 Version Management
 
-**Current Version:** 1.3.0  
-**Release Date:** 02/08/2025  
-**Previous Versions:** 1.2.x, 1.1.x, 1.0.x series 
+**Current Version:** 1.4.0  
+**Release Date:** 04/08/2025  
+**Previous Versions:** 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
 
 ### Version History
+- **1.4.0** - 🔐 **Advanced PIN Protection & Security** - Configurable script-level PIN protection, AES-256-GCM encryption, session management, complete internationalization
 - **1.3.0** - 🎯 **Script Directory Configuration & Path Resolution** - Per-script directory configuration, fixed path resolution, enhanced internationalization support
 - **1.2.3** - Documentation & metadata cleanup
 - **1.1.5** - Internationalization completion
