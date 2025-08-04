@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 
-**Version:** 1.4.1 (04/08/2025) - i18n internationalization toolkit for JavaScript/TypeScript projects.
+**Version:** 1.4.2 (08/08/2025) - i18n internationalization toolkit for JavaScript/TypeScript projects.
 
 ## 🚀 Quick Start
 
@@ -32,7 +32,13 @@ npx i18ntk analyze
 npx i18ntk summary
 ```
 
-## ✨ What's New in v1.4.1
+## ✨ What's New in v1.4.2
+
+### 🚨 Critical Bug Fix
+- **Fixed MODULE_NOT_FOUND Error**: Resolved critical issue in v1.4.1 where `npx i18ntk` would fail with missing debug scripts
+- **Relocated Debug Tools**: Moved debug scripts from `/dev/debug/` to `/scripts/debug/` to ensure proper npm package inclusion
+- **Updated All References**: Fixed all internal path references to work with new debug script location
+- **Immediate Update Recommended**: Do not use v1.4.1 and any v1.4.1 users should update to v1.4.2 immediately. Apologies for the issue, due to the local testing environments, the bug was missed in testing.
 
 ### 🔧 Debug Tools Streamlining & Package Optimization
 - **Reduced Package Size**: Removed development debug tools from production builds, significantly reducing package footprint

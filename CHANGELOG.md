@@ -2,7 +2,15 @@
 
 All notable changes to the i18n Management Toolkit will be documented in this file.
 
-**Current Version:** 1.4.1
+**Current Version:** 1.4.2
+
+## [1.4.2] - 04/08/2025
+
+### Fixed
+- **CRITICAL**: Fixed `MODULE_NOT_FOUND` error when running `npx i18ntk` due to missing debug scripts in npm package
+- Relocated debug scripts from `/dev/debug/` to `/scripts/debug/` to ensure all required files are included in the npm package
+- Updated all internal path references to reflect the new debug script location
+- Resolved compatibility issues caused by the removal of `/dev` directory from npm package
 
 ## [1.4.1] - 04/08/2025
 

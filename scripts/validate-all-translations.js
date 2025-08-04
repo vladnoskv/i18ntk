@@ -69,8 +69,8 @@ class TranslationValidator {
     console.log('\n🔧 Validating Debug Tools...');
     
     const debugTools = [
-      'dev/debug/debugger.js',
-      'dev/debug/language-debug.js'
+      'scripts/debug/debugger.js',
+      'scripts/debug/language-debug.js'
     ];
 
     for (const tool of debugTools) {

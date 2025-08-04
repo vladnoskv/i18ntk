@@ -26,7 +26,7 @@ npm run i18ntk:debug -- --performance   # Performance analysis
 
 #### Key Validation
 ```bash
-node dev/debug/console-key-checker.js
+node scripts/debug/console-key-checker.js
 ```
 
 **Features:**
@@ -37,7 +37,7 @@ node dev/debug/console-key-checker.js
 
 #### Translation Manager
 ```bash
-node dev/debug/console-translations.js
+node scripts/debug/console-translations.js
 ```
 
 **Features:**
@@ -48,7 +48,7 @@ node dev/debug/console-translations.js
 
 #### Complete Coverage
 ```bash
-node dev/debug/complete-console-translations.js
+node scripts/debug/complete-console-translations.js
 ```
 
 **Features:**
@@ -61,7 +61,7 @@ node dev/debug/complete-console-translations.js
 
 #### Replace Hardcoded Messages
 ```bash
-node dev/debug/replace-hardcoded-console.js
+node scripts/debug/replace-hardcoded-console.js
 ```
 
 **Transforms:**
@@ -77,9 +77,9 @@ console.log(this.ui.t('analysis.complete'));
 
 #### Export Missing Keys
 ```bash
-node dev/debug/export-missing-keys.js --format=csv --output=missing-keys.csv
-node dev/debug/export-missing-keys.js --format=json --language=es
-node dev/debug/export-missing-keys.js --format=xliff --all-languages
+node scripts/debug/export-missing-keys.js --format=csv --output=missing-keys.csv
+node scripts/debug/export-missing-keys.js --format=json --language=es
+node scripts/debug/export-missing-keys.js --format=xliff --all-languages
 ```
 
 **Supported formats:**
@@ -121,9 +121,9 @@ console.log(`Unused: ${results.unused.length}`);
 | Command | Purpose |
 |---------|---------|
 | `npm run i18ntk:debug` | Full system diagnostics |
-| `node dev/debug/console-key-checker.js` | Validate console keys |
-| `node dev/debug/complete-console-translations.js` | Ensure 100% coverage |
-| `node dev/debug/export-missing-keys.js --format=csv` | Export missing keys |
+| `node scripts/debug/console-key-checker.js` | Validate console keys |
+| `node scripts/debug/complete-console-translations.js` | Ensure 100% coverage |
+| `node scripts/debug/export-missing-keys.js --format=csv` | Export missing keys |
 
 ## Output Examples
 

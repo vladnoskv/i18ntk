@@ -13,8 +13,8 @@ class PrepublishCleaner {
     constructor() {
         this.projectRoot = path.join(__dirname, '..');
         this.directories = [
-            'dev/debug/logs',
-            'dev/debug/reports',
+            'scripts/debug/logs',
+            'scripts/debug/reports',
             'settings/backups',
             'i18ntk-reports',
             'reports'

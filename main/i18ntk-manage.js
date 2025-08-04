@@ -32,7 +32,7 @@ const I18nValidator = require('./i18ntk-validate');
 const I18nUsageAnalyzer = require('./i18ntk-usage');
 const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const SettingsCLI = require('../settings/settings-cli');
-const I18nDebugger = require('../dev/debug/debugger');
+const I18nDebugger = require('../scripts/debug/debugger');
 
 // Enhanced default configuration with multiple path detection
 const DEFAULT_CONFIG = {
@@ -693,7 +693,7 @@ class I18nManager {
   async runDebugTool(toolName, displayName) {
   console.log(this.ui.t('debug.runningDebugTool', { displayName }));
     try {
-      const toolPath = path.join(__dirname, '..', 'dev', 'debug', toolName);
+      const toolPath = path.join(__dirname, '..', 'scripts', 'debug', toolName);
       if (fs.existsSync(toolPath)) {
         const { execSync } = require('child_process');
         const output = execSync(`node "${toolPath}"`, { 
@@ -719,7 +719,7 @@ class I18nManager {
     console.log('============================================================');
     
     try {
-      const logsDir = path.join(__dirname, '..', 'dev', 'debug', 'logs');
+      const logsDir = path.join(__dirname, '..', 'scripts', 'debug', 'logs');
       if (fs.existsSync(logsDir)) {
         const files = fs.readdirSync(logsDir)
           .filter(file => file.endsWith('.log') || file.endsWith('.txt'))
@@ -786,8 +786,8 @@ class I18nManager {
     const targetDirs = [
       { path: path.join(process.cwd(), 'i18ntk-reports'), name: 'Reports', type: 'reports' },
       { path: path.join(process.cwd(), 'reports'), name: 'Legacy Reports', type: 'reports' },
-      { path: path.join(process.cwd(), 'dev', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
-      { path: path.join(process.cwd(), 'dev', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
+      { path: path.join(process.cwd(), 'scripts', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
+      { path: path.join(process.cwd(), 'scripts', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
       { path: path.join(process.cwd(), 'settings', 'backups'), name: 'Backups', type: 'backups' }
     ];
     

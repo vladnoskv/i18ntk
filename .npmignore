@@ -1,8 +1,8 @@
 # Development files and directories
 /node_modules
-/dev/debug/logs
-/dev/debug/reports
-/dev/debug/ui-locales
+/scripts/debug/logs
+/scripts/debug/reports
+/scripts/debug/ui-locales
 /i18ntk-reports
 /EXPORT
 /test-temp

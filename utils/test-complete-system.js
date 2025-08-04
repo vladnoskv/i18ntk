@@ -347,7 +347,7 @@ class SystemTester {
         };
 
         // Ensure the reports directory exists
-        const reportsDir = path.join(__dirname, '..', 'dev', 'debug', 'reports');
+        const reportsDir = path.join(__dirname, '..', 'scripts', 'debug', 'reports');
         if (!fs.existsSync(reportsDir)) {
             fs.mkdirSync(reportsDir, { recursive: true });
         }
