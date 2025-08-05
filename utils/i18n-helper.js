@@ -25,44 +25,43 @@ function loadTranslations(language = 'en') {
   const localesDir = path.resolve(config.uiLocalesDir);
   
   try {
-    const langDir = path.join(localesDir, language);
     translations = {}; // Reset translations for the new language
     
-
-    if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
-      
-      const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
-
-      for (const file of files) {
-        const filePath = path.join(langDir, file);
-        try {
-          const content = fs.readFileSync(filePath, 'utf8');
-          const fileTranslations = JSON.parse(content);
-          
-          // Merge translations, using the filename (without .json) as the top-level key
-          const moduleName = path.basename(file, '.json');
-          translations[moduleName] = deepMerge(translations[moduleName] || {}, fileTranslations);
-         } catch (parseError) {
-          console.error(`Error parsing translation file ${filePath}: ${parseError.message}`);
-        }
+    // Primary: Use monolith JSON file (en.json, de.json, etc.)
+    const monolithTranslationFile = path.join(localesDir, `${language}.json`);
+    
+    if (fs.existsSync(monolithTranslationFile)) {
+      try {
+        const content = fs.readFileSync(monolithTranslationFile, 'utf8');
+        translations = JSON.parse(content);
+        isInitialized = true;
+      } catch (error) {
+        console.error(`Error parsing monolith translation file ${monolithTranslationFile}: ${error.message}`);
+        translations = {};
       }
-      isInitialized = true;
-    }
-    else {
-      // Fallback to old single file if new modular structure not found
-      const oldTranslationFile = path.join(localesDir, `${language}.json`);
+    } else {
+      // Fallback: Use folder-based structure if monolith file doesn't exist
+      const langDir = path.join(localesDir, language);
       
-      if (fs.existsSync(oldTranslationFile)) {
-        try {
-          const content = fs.readFileSync(oldTranslationFile, 'utf8');
-          translations = JSON.parse(content);
-          isInitialized = true;
-        } catch (error) {
-          console.error(`Error parsing old translation file ${oldTranslationFile}: ${error.message}`);
-          translations = {};
+      if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+        const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
+
+        for (const file of files) {
+          const filePath = path.join(langDir, file);
+          try {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const fileTranslations = JSON.parse(content);
+            
+            // Merge translations, using the filename (without .json) as the top-level key
+            const moduleName = path.basename(file, '.json');
+            translations[moduleName] = deepMerge(translations[moduleName] || {}, fileTranslations);
+          } catch (parseError) {
+            console.error(`Error parsing translation file ${filePath}: ${parseError.message}`);
+          }
         }
+        isInitialized = true;
       } else {
-        console.warn(`Translation directory or file not found for language ${language}: ${langDir} or ${oldTranslationFile}`);
+        console.warn(`Translation file or directory not found for language ${language}: ${monolithTranslationFile} or ${langDir}`);
         translations = {};
       }
     }
@@ -200,10 +199,33 @@ function deepMerge(target, source) {
   }
   return target;
 }
+
+/**
+ * Refresh language from settings manager
+ * This ensures translations stay in sync with settings changes
+ */
+function refreshLanguageFromSettings() {
+  const settings = settingsManager.getSettings();
+  const configuredLanguage = settings.language || 'en';
+  
+  if (configuredLanguage !== currentLanguage) {
+    loadTranslations(configuredLanguage);
+  }
+}
+
+/**
+ * Refresh translations (alias for refreshLanguageFromSettings)
+ */
+function refreshTranslations() {
+  refreshLanguageFromSettings();
+}
+
 module.exports = {
   loadTranslations,
   t,
   getCurrentLanguage,
   getAvailableLanguages,
-  deepMerge
+  deepMerge,
+  refreshTranslations,
+  refreshLanguageFromSettings
 };

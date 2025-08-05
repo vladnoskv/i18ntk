@@ -1,9 +1,0 @@
-{
-  "i18n_helper": {
-    "translation_file_not_found": "翻訳ファイルが見つかりません: {translationFile}",
-    "error_loading_translations": "翻訳の読み込み中にエラーが発生しました: {errorMessage}",
-    "translation_not_found": "キーの翻訳が見つかりません: {key}",
-    "translation_key_not_string": "翻訳キーが文字列ではありません: {key}",
-    "error_reading_locales_directory": "ロケールディレクトリの読み取り中にエラーが発生しました: {errorMessage}"
-  }
-}

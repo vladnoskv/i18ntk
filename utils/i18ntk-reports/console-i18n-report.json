@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-08-05T01:38:48.413Z",
+  "duration": "0.01",
+  "summary": {
+    "total": 0,
+    "translated": 0,
+    "hardcoded": 0,
+    "coverage": 0
+  },
+  "fileStats": {},
+  "hardcodedTexts": []
+}

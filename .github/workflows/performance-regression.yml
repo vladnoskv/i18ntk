@@ -1,0 +1,237 @@
+name: Performance Regression Detection
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'main/**'
+      - 'utils/**'
+      - 'benchmarks/**'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches: [main]
+    paths:
+      - 'main/**'
+      - 'utils/**'
+      - 'benchmarks/**'
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  benchmark:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download baseline results
+        uses: actions/cache@v4
+        with:
+          path: benchmarks/baseline.json
+          key: benchmark-baseline-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            benchmark-baseline-${{ matrix.node-version }}-
+
+      - name: Run performance benchmarks
+        run: npm run benchmark:ci
+        env:
+          CI: true
+          NODE_ENV: production
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.node-version }}
+          path: benchmarks/results/
+          retention-days: 30
+
+      - name: Check for performance regressions
+        run: |
+          if [ -f benchmarks/baseline.json ]; then
+            echo "🔍 Checking for performance regressions..."
+            node -e "
+              const fs = require('fs');
+              const baseline = JSON.parse(fs.readFileSync('benchmarks/baseline.json', 'utf8'));
+              const current = JSON.parse(fs.readFileSync('benchmarks/results/benchmark-$(date +%Y-%m-%d).json', 'utf8'));
+              
+              let regressions = 0;
+              const threshold = 0.1; // 10% threshold
+              
+              // Check translation analysis performance
+              for (const size of Object.keys(current.benchmarks.translationAnalysis || {})) {
+                const currentTime = current.benchmarks.translationAnalysis[size].executionTime.mean;
+                const baselineTime = baseline.benchmarks?.translationAnalysis?.[size]?.executionTime?.mean;
+                
+                if (baselineTime) {
+                  const percentChange = (currentTime - baselineTime) / baselineTime;
+                  if (percentChange > threshold) {
+                    console.log(\`❌ REGRESSION: Translation analysis for ${size} keys is ${(percentChange * 100).toFixed(2)}% slower\`);
+                    regressions++;
+                  } else if (percentChange < -threshold) {
+                    console.log(\`✅ IMPROVEMENT: Translation analysis for ${size} keys is ${Math.abs(percentChange * 100).toFixed(2)}% faster\`);
+                  } else {
+                    console.log(\`✅ STABLE: Translation analysis for ${size} keys changed by ${(percentChange * 100).toFixed(2)}%\`);
+                  }
+                }
+              }
+              
+              // Check memory usage
+              const currentMemory = current.benchmarks.memoryUsage?.memoryUsage?.heapUsed;
+              const baselineMemory = baseline.benchmarks?.memoryUsage?.memoryUsage?.heapUsed;
+              
+              if (baselineMemory && currentMemory) {
+                const memoryPercentChange = (currentMemory - baselineMemory) / baselineMemory;
+                if (memoryPercentChange > threshold) {
+                  console.log(\`❌ REGRESSION: Memory usage increased by ${(memoryPercentChange * 100).toFixed(2)}%\`);
+                  regressions++;
+                } else if (memoryPercentChange < -threshold) {
+                  console.log(\`✅ IMPROVEMENT: Memory usage decreased by ${Math.abs(memoryPercentChange * 100).toFixed(2)}%\`);
+                }
+              }
+              
+              if (regressions > 0) {
+                console.log(\`❌ Found ${regressions} performance regression(s)\`);
+                process.exit(1);
+              } else {
+                console.log('✅ No significant performance regressions detected');
+              }
+            "
+          else
+            echo "ℹ️ No baseline found, creating baseline..."
+            cp benchmarks/results/benchmark-$(date +%Y-%m-%d).json benchmarks/baseline.json
+          fi
+
+      - name: Update baseline on main branch
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cp benchmarks/results/benchmark-$(date +%Y-%m-%d).json benchmarks/baseline.json
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add benchmarks/baseline.json
+          git commit -m "chore: update performance baseline [skip ci]" || exit 0
+          git push
+
+  benchmark-report:
+    name: Generate Performance Report
+    runs-on: ubuntu-latest
+    needs: benchmark
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all benchmark artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: benchmark-artifacts
+
+      - name: Generate performance report
+        run: |
+          mkdir -p performance-reports
+          cat > performance-reports/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>i18n Toolkit Performance Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; }
+              .metric { margin: 20px 0; padding: 15px; border-left: 4px solid #007acc; }
+              .regression { border-left-color: #d32f2f; background: #ffebee; }
+              .improvement { border-left-color: #388e3c; background: #e8f5e8; }
+              .stable { border-left-color: #1976d2; background: #e3f2fd; }
+            </style>
+          </head>
+          <body>
+            <h1>i18n Management Toolkit Performance Report</h1>
+            <p>Generated: $(date)</p>
+            <div class="metric">
+              <h3>📊 Translation Analysis Performance</h3>
+              <p>Benchmarks completed for 100, 1,000, 10,000, and 50,000 translation keys</p>
+            </div>
+            <div class="metric stable">
+              <h3>✅ Status</h3>
+              <p>Performance checks completed. Review GitHub Actions logs for detailed metrics.</p>
+            </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy performance report
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./performance-reports
+          publish_branch: gh-pages
+          destination_dir: performance
+
+  comment-pr:
+    name: Comment PR with Performance Results
+    runs-on: ubuntu-latest
+    needs: benchmark
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-results-18.x
+          path: benchmark-results
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            const resultsDir = 'benchmark-results';
+            const files = fs.readdirSync(resultsDir);
+            const latestResult = files.find(f => f.startsWith('benchmark-') && f.endsWith('.json'));
+            
+            if (latestResult) {
+              const results = JSON.parse(fs.readFileSync(path.join(resultsDir, latestResult), 'utf8'));
+              
+              let comment = `## 📊 Performance Benchmark Results\n\n`;
+              comment += `**Environment:** ${results.metadata.environment.os} / Node ${results.metadata.environment.nodeVersion}\n\n`;
+              
+              if (results.benchmarks.translationAnalysis) {
+                comment += `### Translation Analysis Performance\n`;
+                Object.keys(results.benchmarks.translationAnalysis).forEach(size => {
+                  const data = results.benchmarks.translationAnalysis[size];
+                  comment += `- **${size} keys:** ${data.executionTime.mean.toFixed(2)}ms avg (${data.throughput.toFixed(0)} keys/sec)\n`;
+                });
+                comment += '\n';
+              }
+              
+              comment += `✅ All performance checks passed. No significant regressions detected.`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }

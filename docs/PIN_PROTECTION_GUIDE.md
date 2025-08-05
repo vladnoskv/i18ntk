@@ -2,7 +2,7 @@
 
 ## Overview
 
-The i18n Management Toolkit v1.4.0 introduces advanced PIN protection capabilities, providing granular security control over sensitive operations. This guide covers the complete PIN protection system, from basic setup to advanced configuration.
+The i18n Management Toolkit v1.5.0 includes advanced PIN protection capabilities, providing granular security control over sensitive operations. This guide covers the complete PIN protection system, from basic setup to advanced configuration.
 
 ## PIN Protection Features
 
@@ -157,7 +157,7 @@ PIN protection features are fully translated across all supported languages:
 - **Russian** (ru)
 - **Japanese** (ja)
 - **Chinese** (zh)
-- **Portuguese** (pt)
+
 
 All PIN prompts, error messages, and configuration options are localized.
 
@@ -244,10 +244,10 @@ await settingsManager.updateSetting('security.pinProtection.protectedScripts.deb
 
 ## Migration Guide
 
-### From v1.3.x to v1.4.0
+### From v1.3.x to v1.4.2
 
 1. **Backup**: Create backup of existing configuration
-2. **Update**: Install v1.4.0
+2. **Update**: Install v1.4.2
 3. **Configure**: Enable PIN protection as needed
 4. **Test**: Verify all scripts work with new protection
 

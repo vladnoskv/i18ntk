@@ -197,7 +197,7 @@ class I18nUsageAnalyzer {
       
       // Verify translation function
       if (typeof this.t !== 'function') {
-        throw new Error('Translation function not properly initialized');
+        throw new Error(this.t('validate.translationFunctionNotInitialized') || 'Translation function not properly initialized');
       }
       
       await SecurityUtils.logSecurityEvent(this.t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
@@ -429,7 +429,7 @@ class I18nUsageAnalyzer {
             });
             
             const pin = await new Promise(resolve => {
-              rl.question('🔐 Enter admin PIN: ', resolve);
+              rl.question(this.t('adminCli.enterPin'), resolve);
             });
             
             const isValid = await adminAuth.verifyPin(pin);
@@ -465,8 +465,8 @@ class I18nUsageAnalyzer {
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
       }
       
-      console.log(this.t('usage.checkUsage.source_directory_thissourcedir', { sourceDir: this.sourceDir }));
-      console.log(this.t('usage.checkUsage.i18n_directory_thisi18ndir', { i18nDir: this.i18nDir }));
+      console.log(this.t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir }));
+      console.log(this.t('usage.detectedI18nDirectory', { i18nDir: this.i18nDir }));
       
       // Load available translation keys first
       await this.loadAvailableKeys();
@@ -654,7 +654,7 @@ class I18nUsageAnalyzer {
       
       // Check if source directory exists
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(`Source directory not found: ${this.sourceDir}`);
+        throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
       const sourceFiles = await this.getAllFiles(this.sourceDir);
@@ -1100,11 +1100,11 @@ class I18nUsageAnalyzer {
       await SecurityUtils.validatePath(this.i18nDir);
       
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(`Source directory not found: ${this.sourceDir}`);
+        throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
       if (!fs.existsSync(this.i18nDir)) {
-        throw new Error(`I18n directory not found: ${this.i18nDir}`);
+        throw new Error(this.t('validate.i18nDirectoryNotFound', { i18nDir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
       }
       
       // Load available keys

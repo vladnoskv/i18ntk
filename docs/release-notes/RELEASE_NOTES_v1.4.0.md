@@ -6,23 +6,12 @@
 
 ## 🌟 Major Highlights
 
-### 🇵🇹 Portuguese Language Support - **NEW!**
-- **Complete Portuguese (Português) translation support** - our 8th language!
-- **100% coverage** across all UI components, error messages, and help content
-- **Professional translations** for all 1,551+ translation keys
-- **Native Portuguese UI experience** with culturally appropriate terminology
-
 ### 🔄 UI Language Switching - **RESTORED**
 - **Re-enabled** the "Change UI Language" option in the main menu
 - **Full 8-language support** including the new Portuguese option
 - **Seamless runtime switching** between all supported languages
 - **Enhanced language selection menu** with flags and native names
 
-### 🧪 Test Framework Improvements
-- **Fixed translation detection** for Portuguese language files
-- **Enhanced validation system** now properly recognizes Portuguese translations
-- **Improved consistency checking** across all 8 supported languages
-- **Comprehensive test coverage** for the new Portuguese locale
 
 ## 📊 Language Support Matrix
 
@@ -35,7 +24,6 @@
 | Russian | ru | ✅ Complete | 100% |
 | Japanese | ja | ✅ Complete | 100% |
 | Chinese | zh | ✅ Complete | 100% |
-| **Portuguese** | **pt** | **🆕 NEW** | **100%** |
 
 ## 🔧 Technical Improvements
 
@@ -112,4 +100,4 @@ i18ntk --language=pt
 
 ---
 
-**Happy internationalizing with Portuguese support! 🇧🇷🇵🇹**
+**Happy internationalizing with Portuguese support! 🇧🇷🇵�**

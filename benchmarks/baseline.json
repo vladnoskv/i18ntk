@@ -1,0 +1,124 @@
+{
+  "metadata": {
+    "environment": {
+      "os": "win32 10.0.19045",
+      "nodeVersion": "v22.14.0",
+      "npmVersion": "unknown",
+      "cpu": "Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz",
+      "cpuCount": 8,
+      "memory": {
+        "total": "15.95 GB",
+        "free": "5.68 GB"
+      },
+      "architecture": "x64"
+    },
+    "configuration": {
+      "benchmarkVersion": "1.0.0",
+      "datasetSizes": [100, 1000, 10000, 50000],
+      "iterations": 3,
+      "warmupIterations": 1
+    },
+    "version": "1.5.0",
+    "baselineDate": "2025-08-05"
+  },
+  "benchmarks": {
+    "translationAnalysis": {
+      "100": {
+        "executionTime": {
+          "mean": 57.79556666666667,
+          "min": 56.11390000000003,
+          "max": 59.70150000000001,
+          "stdDev": 1.4731915678402243
+        },
+        "memory": {
+          "mean": 329965.3333333333,
+          "min": -182680,
+          "max": 591112,
+          "stdDev": 362516.38980634
+        },
+        "throughput": 1730.236517564496
+      },
+      "1000": {
+        "executionTime": {
+          "mean": 515.0901333333335,
+          "min": 511.48680000000013,
+          "max": 520.4179000000001,
+          "stdDev": 3.8445970350899397
+        },
+        "memory": {
+          "mean": 11048,
+          "min": -765888,
+          "max": 1252696,
+          "stdDev": 887182.1584740457
+        },
+        "throughput": 1941.4077950370363
+      },
+      "10000": {
+        "executionTime": {
+          "mean": 5221.7448,
+          "min": 5205.3999,
+          "max": 5234.1214,
+          "stdDev": 12.056580339659547
+        },
+        "memory": {
+          "mean": -298493.3333333333,
+          "min": -5166720,
+          "max": 5165328,
+          "stdDev": 4239013.542779133
+        },
+        "throughput": 1915.068695046146
+      },
+      "50000": {
+        "executionTime": {
+          "mean": 30290.3428,
+          "min": 30066.377099999998,
+          "max": 30554.90710000001,
+          "stdDev": 201.49702225504308
+        },
+        "memory": {
+          "mean": 1062712,
+          "min": -10632,
+          "max": 3203056,
+          "stdDev": 1513453.972504835
+        },
+        "throughput": 1650.6911239050094
+      }
+    },
+    "configurationValidation": {
+      "minimal": {
+        "executionTime": {
+          "mean": 16.136900000002544,
+          "min": 15.261500000022352,
+          "max": 17.746099999989383,
+          "stdDev": 1.1393437058138207
+        }
+      },
+      "standard": {
+        "executionTime": {
+          "mean": 13.796800000001289,
+          "min": 10.285400000022491,
+          "max": 15.843399999983376,
+          "stdDev": 2.4942694695219636
+        }
+      },
+      "full": {
+        "executionTime": {
+          "mean": 25.065466666671757,
+          "min": 16.851699999999255,
+          "max": 39.95350000000326,
+          "stdDev": 10.546173633544468
+        }
+      }
+    },
+    "memoryUsage": {
+      "largeDatasetSize": 25000,
+      "memoryUsage": {
+        "heapUsed": -27176808,
+        "heapTotal": 2084864,
+        "external": 0,
+        "rss": -17383424
+      },
+      "executionTime": 13811.287400000001
+    }
+  }
+}

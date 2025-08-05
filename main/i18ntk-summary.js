@@ -176,14 +176,22 @@ class I18nSummaryReporter {
       return [];
     }
 
-    return fs.readdirSync(this.config.sourceDir)
+    // Check for monolith JSON files (en.json, es.json, etc.)
+    const files = fs.readdirSync(this.config.sourceDir);
+    const languages = files
+      .filter(file => file.endsWith('.json'))
+      .map(file => path.basename(file, '.json'));
+    
+    // Also check for directory-based structure for backward compatibility
+    const directories = fs.readdirSync(this.config.sourceDir)
       .filter(item => {
         const itemPath = path.join(this.config.sourceDir, item);
         return fs.statSync(itemPath).isDirectory() && 
                !item.startsWith('.') &&
                item !== 'node_modules';
-      })
-      .sort();
+      });
+    
+    return [...new Set([...languages, ...directories])].sort();
   }
 
   // Get all translation files for a language
@@ -567,7 +575,10 @@ class I18nSummaryReporter {
   }
 
   // Run the analysis and generate report
-  async run() {
+  async run(options = {}) {
+    const args = this.parseArgs();
+    const { fromMenu = false, noPrompt = false } = options;
+    
     // Check admin authentication for sensitive operations (only when called directly)
     const AdminAuth = require('../utils/admin-auth');
     const adminAuth = new AdminAuth();
@@ -575,7 +586,7 @@ class I18nSummaryReporter {
     
     const isCalledDirectly = require.main === module;
     const isRequired = await adminAuth.isAuthRequired();
-    if (isRequired && isCalledDirectly) {
+    if (isRequired && isCalledDirectly && !noPrompt && !fromMenu && !args.noPrompt) {
       console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'generate summary' }));
       
       // Create readline interface for PIN input
@@ -586,7 +597,7 @@ class I18nSummaryReporter {
       });
       
       const pin = await new Promise(resolve => {
-        rl.question('🔐 Enter admin PIN: ', resolve);
+        rl.question(this.t('adminCli.enterPin'), resolve);
       });
       
       const isValid = await adminAuth.verifyPin(pin);
@@ -599,8 +610,6 @@ class I18nSummaryReporter {
       
       console.log(this.t('adminCli.authenticationSuccess'));
     }
-    
-    const args = this.parseArgs();
     
     if (args.help) {
       this.showHelp();

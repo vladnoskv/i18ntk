@@ -16,5 +16,11 @@
     "about": "About",
     "contact": "Contact",
     "settings": "Settings"
-  }
+  },
+  "offlineTitle": "You are offline",
+  "offlineMessage": "Please check your internet connection",
+  "tryReconnect": "Try to reconnect",
+  "logout": "Logout",
+  "login": "Login",
+  "amount": "Amount"
 }

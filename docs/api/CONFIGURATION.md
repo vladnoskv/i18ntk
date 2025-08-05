@@ -24,7 +24,7 @@ This guide provides comprehensive information about configuring the I18N Managem
   "project": {
     "name": "My Project",
     "type": "react",
-    "framework": "react-i18next"
+    "framework": "framework-agnostic"
   },
   "directories": {
     "source": "./src",
@@ -34,7 +34,7 @@ This guide provides comprehensive information about configuring the I18N Managem
   },
   "languages": {
     "default": "en",
-    "supported": ["en", "es", "fr", "de", "ru", "pt", "ja", "zh"],
+    "supported": ["en", "es", "fr", "de", "ru", "ja", "zh"],
     "fallback": "en"
   },
   "features": {
@@ -149,8 +149,8 @@ This guide provides comprehensive information about configuring the I18N Managem
 | `I18N_SOURCE_DIR` | Source directory path | `./src` | `./app/src` |
 | `I18N_LOCALES_DIR` | Locales directory path | `./locales` | `./public/locales` |
 | `I18N_DEFAULT_LANG` | Default language code | `en` | `en-US` |
-| `I18N_SUPPORTED_LANGS` | Supported languages (comma-separated) | `en,es,fr,de,pt,ja,ru,zh` | `en,es,fr,de,pt,ja,ru,zh` |
-| `I18N_FRAMEWORK` | i18n framework | `react-i18next` | `vue-i18n` |
+| `I18N_SUPPORTED_LANGS` | Supported languages (comma-separated) | `en,es,fr,de,ja,ru,zh` | `en,es,fr,de,ja,ru,zh` |
+| `I18N_FRAMEWORK` | i18n framework | `framework-agnostic` | `react-i18next`, `vue-i18n`, `angular`, `nextjs`, `vanilla` |
 | `I18N_STRICT_MODE` | Enable strict validation | `false` | `true` |
 | `I18N_AUTO_BACKUP` | Enable automatic backups | `true` | `false` |
 | `I18N_REPORT_FORMAT` | Default report format | `html` | `json` |
@@ -170,7 +170,7 @@ The toolkit now supports **runtime UI language switching** through the interacti
 - `de` - German  
 - `es` - Spanish
 - `fr` - French
-- `pt` - Portuguese *(new in v1.3.1)*
+
 - `ja` - Japanese
 - `ru` - Russian
 - `zh` - Chinese
@@ -672,5 +672,117 @@ npm run i18ntk:settings -- --import ./config-backup.json
 ```
 
 ---
+
+## 🎯 Zero Dependencies Architecture
+
+### Framework Compatibility
+The i18n Management Toolkit now operates with **zero runtime dependencies**, making it compatible with any i18n framework or vanilla JavaScript.
+
+#### Supported Frameworks
+- **React** - Compatible with react-i18next, react-intl, or custom solutions
+- **Vue** - Works with vue-i18n or custom implementations
+- **Angular** - Compatible with ngx-translate or custom i18n
+- **Next.js** - Works with next-i18next or built-in i18n routing
+- **Vanilla JavaScript** - Direct usage without framework dependencies
+- **Svelte** - Compatible with svelte-i18n or custom solutions
+
+#### Configuration Benefits
+- **Universal compatibility** - Same configuration works across all frameworks
+- **No framework-specific setup** - Simplified configuration process
+- **Migration-friendly** - Easy to switch between frameworks
+- **Future-proof** - Compatible with new frameworks and libraries
+
+### Zero Dependencies Configuration
+
+#### Framework-Agnostic Settings
+```json
+{
+  "project": {
+    "name": "My Universal Project",
+    "type": "universal",
+    "framework": "framework-agnostic"
+  }
+}
+```
+
+#### Framework-Specific Examples
+
+**React Configuration:**
+```json
+{
+  "directories": {
+    "source": "./src",
+    "locales": "./public/locales"
+  },
+  "project": {
+    "type": "react",
+    "framework": "framework-agnostic"
+  }
+}
+```
+
+**Vue Configuration:**
+```json
+{
+  "directories": {
+    "source": "./src",
+    "locales": "./src/locales"
+  },
+  "project": {
+    "type": "vue",
+    "framework": "framework-agnostic"
+  }
+}
+```
+
+**Next.js Configuration:**
+```json
+{
+  "directories": {
+    "source": "./app",
+    "locales": "./locales"
+  },
+  "project": {
+    "type": "nextjs",
+    "framework": "framework-agnostic"
+  }
+}
+```
+
+**Vanilla JavaScript:**
+```json
+{
+  "directories": {
+    "source": "./js",
+    "locales": "./locales"
+  },
+  "project": {
+    "type": "vanilla",
+    "framework": "framework-agnostic"
+  }
+}
+```
+
+### Performance Optimizations
+
+#### Zero Dependencies Benefits
+- **15.7% package size reduction** - From 1.78MB to 1.5MB unpacked
+- **Faster installation** - No additional packages to download
+- **Enhanced security** - Reduced attack surface
+- **Simplified maintenance** - No dependency conflicts
+
+#### Benchmarking Integration
+The toolkit includes performance benchmarking capabilities:
+
+```bash
+# Run performance benchmarks
+npm run benchmark
+
+# Run CI performance tests
+npm run benchmark:ci
+
+# Update performance baselines
+npm run benchmark:baseline
+```
 
 **Note:** This configuration guide is maintained for version 1.4.6. For the latest configuration options, refer to the [API Reference](./API_REFERENCE.md) and [Components Documentation](./COMPONENTS.md).

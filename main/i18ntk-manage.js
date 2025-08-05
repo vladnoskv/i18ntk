@@ -27,7 +27,7 @@ const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const settingsManager = require('../settings/settings-manager');
 const I18nInitializer = require('./i18ntk-init');
-const I18nAnalyzer = require('./i18ntk-analyze');
+const { I18nAnalyzer } = require('./i18ntk-analyze');
 const I18nValidator = require('./i18ntk-validate');
 const I18nUsageAnalyzer = require('./i18ntk-usage');
 const I18nSizingAnalyzer = require('./i18ntk-sizing');
@@ -185,7 +185,7 @@ class I18nManager {
    * Prompt user to continue without i18n framework
    */
   async promptContinueWithoutI18n() {
-    const answer = await this.prompt('\n🤔 Continue without i18n framework? (y/N): ');
+    const answer = await this.prompt('\n🤔 ' + this.ui.t('init.continueWithoutI18nPrompt'));
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
   }
 
@@ -233,7 +233,7 @@ class I18nManager {
       // Check dependencies and exit if user chooses not to continue
       const shouldContinue = await this.checkI18nDependencies();
       if (!shouldContinue) {
-        console.log(this.ui.t('init.errors.noFramework'));
+        console.log(this.ui.t('init.errorsNoFramework'));
         console.log(this.ui.t('init.suggestions.installFramework'));
         process.exit(0);
       }
@@ -444,7 +444,7 @@ class I18nManager {
     }
 
     console.log(this.ui.t('adminCli.authRequired'));
-    const pin = await this.prompt('Enter admin PIN: ');
+    const pin = await this.prompt(this.ui.t('adminCli.enterPin'));
     const isValid = await this.adminAuth.verifyPin(pin);
     
     if (!isValid) {
@@ -542,12 +542,12 @@ class I18nManager {
           console.log(this.ui.t('adminCli.accessGranted'));
         }
         
-        console.log(this.ui.t('status.generating'));
+        console.log(this.ui.t('summary.status.generating'));
         try {
           const summaryTool = require('./i18ntk-summary');
           const summary = new summaryTool();
           await summary.run();
-          console.log(this.ui.t('status.completed'));
+          console.log(this.ui.t('summary.status.completed'));
           
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {
@@ -706,7 +706,8 @@ class I18nManager {
       console.log(this.ui.t('debug.debugToolNotFound', { toolName }));
       }
     } catch (error) {
-      console.error(this.ui.t('errors.errorRunningDebugTool', { displayName, error: error.message }));
+      console.error(this.ui.t('debug.errorRunningDebugTool', { displayName, error: error.message }));
+
     }
     
     await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));

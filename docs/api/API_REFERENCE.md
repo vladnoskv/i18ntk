@@ -1,6 +1,6 @@
 # i18ntk API Reference
 
-**Version:** 1.4.1 (05/08/2025)
+**Version:** 1.4.2 (05/08/2025)
 
 ## Overview
 
@@ -132,7 +132,7 @@ npx i18ntk settings --reset --export settings.json
 ```json
 {
   "defaultLanguage": "en",
-  "supportedLanguages": ["en", "es", "fr", "de", "pt", "ja", "ru", "zh"],
+  "supportedLanguages": ["en", "es", "fr", "de", "ja", "ru", "zh"],
   "sourceDirectory": "./src",
   "localesDirectory": "./locales",
   "framework": "react-i18next",
@@ -250,7 +250,7 @@ Generated in `i18ntk-reports/`:
 - German (de)
 - Spanish (es)
 - French (fr)
-- Portuguese (pt)
+
 - Japanese (ja)
 - Russian (ru)
 - Chinese (zh)

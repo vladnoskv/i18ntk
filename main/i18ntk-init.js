@@ -44,7 +44,6 @@ const LANGUAGE_CONFIG = {
   'fr': { name: 'French', nativeName: 'Français' },
   'ru': { name: 'Russian', nativeName: 'Русский' },
   'it': { name: 'Italian', nativeName: 'Italiano' },
-  'pt': { name: 'Portuguese', nativeName: 'Português' },
   'ja': { name: 'Japanese', nativeName: '日本語' },
   'ko': { name: 'Korean', nativeName: '한국어' },
   'zh': { name: 'Chinese', nativeName: '中文' },
@@ -257,7 +256,7 @@ class I18nInitializer {
     
     if (!validatedSourceDir || !validatedSourceLanguageDir) {
       SecurityUtils.logSecurityEvent('Invalid directory paths in setupInitialStructure', 'error', { sourceDir: this.sourceDir, sourceLanguageDir: this.sourceLanguageDir });
-      throw new Error('Invalid directory paths detected');
+      throw new Error(this.t('validate.invalidDirectoryPaths') || 'Invalid directory paths detected');
     }
     
     // Create source directory only if it doesn't exist and no existing was detected
@@ -324,7 +323,7 @@ class I18nInitializer {
     
     if (!validatedSampleFilePath) {
       SecurityUtils.logSecurityEvent('Invalid sample file path', 'error', { path: sampleFilePath });
-      throw new Error('Invalid sample file path');
+      throw new Error(this.t('validate.invalidSampleFilePath') || 'Invalid sample file path');
     }
     
     const success = await SecurityUtils.safeWriteFile(validatedSampleFilePath, JSON.stringify(sampleTranslations, null, 2), process.cwd());
@@ -334,18 +333,18 @@ class I18nInitializer {
       SecurityUtils.logSecurityEvent('Sample translation file created', 'info', { file: validatedSampleFilePath });
     } else {
       SecurityUtils.logSecurityEvent('Failed to create sample translation file', 'error', { file: validatedSampleFilePath });
-      throw new Error('Failed to create sample translation file');
+      throw new Error(this.t('validate.failedToCreateSampleTranslationFile') || 'Failed to create sample translation file');
     }
   }
   
   // Check if source directory and language exist
   validateSource() {
     if (!fs.existsSync(this.sourceDir)) {
-      throw new Error(`Source directory not found: ${this.sourceDir}`);
+      throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
     }
     
     if (!fs.existsSync(this.sourceLanguageDir)) {
-      throw new Error(`Source language directory not found: ${this.sourceLanguageDir}`);
+      throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || `Source language directory not found: ${this.sourceLanguageDir}`);
     }
     
     return true;
@@ -360,7 +359,7 @@ class I18nInitializer {
       });
     
     if (files.length === 0) {
-      throw new Error(`No JSON files found in source directory: ${this.sourceLanguageDir}`);
+      throw new Error(this.t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
     }
     
     return files;
@@ -398,7 +397,7 @@ class I18nInitializer {
     
     if (!validatedTargetDir || !validatedTargetFile) {
       SecurityUtils.logSecurityEvent('Invalid path detected in createLanguageFile', 'error', { targetDir, targetFile });
-      throw new Error('Invalid file path detected');
+      throw new Error(this.t('validate.invalidFilePathDetected') || 'Invalid file path detected');
     }
     
     // Create target directory if it doesn't exist
@@ -431,7 +430,7 @@ class I18nInitializer {
     
     if (!success) {
       SecurityUtils.logSecurityEvent('Failed to write language file', 'error', { file: validatedTargetFile });
-      throw new Error(`Failed to write file: ${validatedTargetFile}`);
+      throw new Error(this.t('validate.failedToWriteFile', { filePath: validatedTargetFile }) || `Failed to write file: ${validatedTargetFile}`);
     }
     
     SecurityUtils.logSecurityEvent('Language file created/updated', 'info', { file: validatedTargetFile, language: targetLanguage });
@@ -805,7 +804,7 @@ class I18nInitializer {
       const isRequired = await adminAuth.isAuthRequired();
       if (isRequired && isCalledDirectly && !args.noPrompt) {
         console.log('\n' + this.ui.t('adminCli.authRequiredForOperation', { operation: 'initialize i18n project' }));
-        const pin = await this.prompt('🔐 Enter admin PIN: ');
+        const pin = await this.prompt(this.t('adminCli.enterPin'));
         const isValid = await adminAuth.verifyPin(pin);
         
         if (!isValid) {

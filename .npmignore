@@ -8,9 +8,12 @@
 /test-temp
 /docs
 /dev
+/benchmarks
 
 # Test files
 /dev/tests/test-report-final.json
+*.test.js
+*.spec.js
 
 # Backup files
 /settings/backups
@@ -35,4 +38,43 @@ yarn-error.log*
 
 # NPM files
 npm
+
+# Documentation and changelogs (GitHub-only)
+SECURITY.md
+CONTRIBUTING.md
+INDEX.md
+/docs/screenshots
+/docs/development
+/docs/debug
+/docs/release-notes
+
+# Development configuration files
+.commitlintrc.json
+.releaserc.json
+.husky/
+.github/
+
+# Development scripts and tools
+scripts/debug/
+scripts/test-runner.js
+scripts/verify-package.js
+
+# Additional development files
+*.log
+*.tmp
+*.temp
+.cache/
+.nyc_output/
+coverage/
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+no?
  

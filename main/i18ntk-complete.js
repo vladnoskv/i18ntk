@@ -23,7 +23,7 @@ async function getConfig() {
     const settings = await settingsManager.getSettings();
     
     // Check for per-script directory override, fallback to global sourceDir
-    const sourceDir = settings.scriptDirectories?.complete || settings.sourceDir || './locales';
+    const sourceDir = settings.scriptDirectories?.complete || settings.sourceDir || './ui-locales';
     
     const config = {
       sourceDir: sourceDir,
@@ -34,7 +34,7 @@ async function getConfig() {
     
     // Basic validation for required fields
     if (!config.sourceDir || !config.sourceLanguage) {
-      throw new Error('Configuration validation failed: missing required fields');
+      throw new Error(this.t('complete.configurationValidationFailed') || 'Configuration validation failed: missing required fields');
     }
     
     return config;
@@ -138,14 +138,23 @@ class I18nCompletionTool {
   // Get all available languages
   getAvailableLanguages() {
     if (!fs.existsSync(this.sourceDir)) {
-      throw new Error(`Source directory not found: ${this.sourceDir}`);
+      throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
     }
     
-    return fs.readdirSync(this.sourceDir)
+    // Check for monolith JSON files (en.json, es.json, etc.)
+    const files = fs.readdirSync(this.sourceDir);
+    const languages = files
+      .filter(file => file.endsWith('.json'))
+      .map(file => path.basename(file, '.json'));
+    
+    // Also check for directory-based structure for backward compatibility
+    const directories = fs.readdirSync(this.sourceDir)
       .filter(item => {
         const itemPath = path.join(this.sourceDir, item);
         return fs.statSync(itemPath).isDirectory();
       });
+    
+    return [...new Set([...languages, ...directories])];
   }
 
   // Get all JSON files from a language directory
@@ -408,7 +417,7 @@ class I18nCompletionTool {
       if (isRequired && isCalledDirectly && !args.noPrompt) {
         console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'complete translations' }));
         
-        const pin = await this.prompt('🔐 Enter admin PIN: ');
+        const pin = await this.prompt(this.t('adminCli.enterPin'));
         const isValid = await adminAuth.verifyPin(pin);
         
         if (!isValid) {
@@ -496,12 +505,12 @@ class I18nCompletionTool {
       
       // Only prompt when run from the menu (i.e., when a callback or menu context is present)
       if (typeof this.prompt === "function" && args.fromMenu) {
-        console.log(this.ui.t('operations.completed'));
-        await this.prompt(this.ui.t('operations.pressEnterToContinue'));
+        console.log(this.t('operations.completed'));
+        await this.prompt(this.t('operations.pressEnterToContinue'));
       }
       
     } catch (error) {
-      console.error('Error during completion:', error.message);
+      console.error(this.t('operations.complete.errorDuringCompletion', { error: error.message }));
       process.exit(1);
     }
   }
@@ -513,7 +522,9 @@ if (require.main === module) {
   tool.run().then(() => {
     process.exit(0);
   }).catch(error => {
-    console.error('Fatal error:', error.message);
+    const UIi18n = require('./i18ntk-ui');
+    const ui = new UIi18n();
+    console.error(this.t('operations.complete.fatalError', { error: error.message }));
     SecurityUtils.logSecurityEvent('I18n completion tool failed', 'error', { error: error.message });
     process.exit(1);
   });

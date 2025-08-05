@@ -169,7 +169,7 @@ class SystemTester {
             const localesDir = './ui-locales';
             
             // Check if directories exist for each language
-            const languages = ['en', 'de', 'fr', 'es', 'ru', 'ja', 'zh', 'pt'];
+            const languages = ['en', 'de', 'fr', 'es', 'ru', 'ja', 'zh'];
             const missingDirs = languages.filter(lang => !fs.existsSync(path.join(localesDir, lang)));
             
             if (missingDirs.length > 0) {

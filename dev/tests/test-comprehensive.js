@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Comprehensive Test Suite for i18n Management Toolkit v1.4.0
+ * Comprehensive Test Suite for i18n Management Toolkit v1.4.2
  * Tests all functionality, edge cases, and configuration options
  */
 
@@ -23,7 +23,7 @@ class ComprehensiveTester {
     }
 
     async runAllTests() {
-        console.log('🧪 Starting Comprehensive Test Suite for v1.4.0\n');
+        console.log('🧪 Starting Comprehensive Test Suite for v1.4.2\n');
         console.log('='.repeat(80));
 
         try {
@@ -34,7 +34,7 @@ class ComprehensiveTester {
             await this.testAdminPinComprehensive();
             await this.testAllConfigurationOptions();
             await this.testEdgeCases();
-            await this.testPortugueseIntegration();
+
             await this.testSecurityFeatures();
             await this.testFileOperations();
             await this.testErrorHandling();
@@ -109,7 +109,7 @@ class ComprehensiveTester {
         // Create various test files for different scenarios
         const testFiles = [
             { name: 'test-en.json', content: { "hello": "Hello World", "settings": { "theme": "dark" } } },
-            { name: 'test-pt.json', content: { "hello": "Olá Mundo", "settings": { "theme": "escuro" } } },
+
             { name: 'test-invalid.json', content: 'invalid json content' },
             { name: 'test-large.json', content: this.generateLargeJson() },
             { name: 'test-empty.json', content: {} },
@@ -256,29 +256,7 @@ class ComprehensiveTester {
         console.log('✅ Nested structure validated');
     }
 
-    async testPortugueseIntegration() {
-        console.log('\n🇧🇷 Testing Portuguese Integration...');
-        
-        // Test 1: Portuguese language files
-        const ptDir = path.join(__dirname, '..', '..', 'ui-locales', 'pt');
-        this.assertTrue(fs.existsSync(ptDir), 'Portuguese locale directory should exist');
-        
-        const ptFiles = fs.readdirSync(ptDir);
-        const requiredFiles = ['ui.json', 'common.json', 'errors.json', 'settings.json', 'menu.json'];
-        
-        requiredFiles.forEach(file => {
-            this.assertTrue(ptFiles.includes(file), `Portuguese file ${file} should exist`);
-        });
 
-        // Test 2: Portuguese translations
-        const ptMenu = require(path.join(ptDir, 'menu.json'));
-        this.assertDefined(ptMenu.title, 'Portuguese menu title should be defined');
-        
-        const ptCommon = require(path.join(ptDir, 'common.json'));
-        this.assertDefined(ptCommon.success, 'Portuguese success message should be defined');
-        
-        console.log('✅ Portuguese integration tested');
-    }
 
     async testSecurityFeatures() {
         console.log('\n🔒 Testing Security Features...');
@@ -589,12 +567,12 @@ class ComprehensiveTester {
         }
         
         const status = this.results.failed === 0 ? 'READY' : 'NEEDS FIXES';
-        console.log(`\n🎯 Overall Status: ${status} for v1.4.0`);
+        console.log(`\n🎯 Overall Status: ${status} for v1.4.2`);
         console.log('='.repeat(80));
         
         // Save report to file
         const report = {
-            version: '1.4.0',
+            version: '1.4.2',
             timestamp: new Date().toISOString(),
             results: this.results,
             duration: duration,

@@ -105,6 +105,11 @@ class SettingsCLI {
      * Show the main header
      */
     showHeader() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         const title = uiI18n.t('operations.settings.title') || 'Settings Management';
         const separator = uiI18n.t('operations.settings.separator') || '============================================================';
         
@@ -222,6 +227,11 @@ class SettingsCLI {
      * Show UI settings menu
      */
     async showUISettings() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.categories.uiSettings')}${colors.reset}\n`);
@@ -240,6 +250,11 @@ class SettingsCLI {
      * Show directory settings menu
      */
     async showDirectorySettings() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.categories.directorySettings')}${colors.reset}\n`);
@@ -256,6 +271,11 @@ class SettingsCLI {
      * Show script-specific directory settings menu
      */
     async showScriptDirectorySettings() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.categories.scriptDirectorySettings')}${colors.reset}\n`);
@@ -280,6 +300,11 @@ class SettingsCLI {
      * Show processing settings menu
      */
     async showProcessingSettings() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.categories.processingSettings')}${colors.reset}\n`);
@@ -297,6 +322,11 @@ class SettingsCLI {
      * Show advanced settings menu
      */
     async showSecuritySettings() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.security.title')}${colors.reset}\n`);
@@ -325,6 +355,11 @@ class SettingsCLI {
     }
 
     async showAdvancedSettings() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.categories.advancedSettings')}${colors.reset}\n`);
@@ -342,6 +377,11 @@ class SettingsCLI {
      * Show settings category with edit options
      */
     async showSettingsCategory(categorySettings) {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
         const keys = Object.keys(categorySettings);
         
         // Display current values
@@ -520,7 +560,7 @@ class SettingsCLI {
             
             if (pinConfigured) {
                 console.log(`\n${this.t('settings.admin.authRequired', { label: label })}`);
-                const pin = await this.promptPin('Enter admin PIN: ');
+                const pin = await this.promptPin(this.t('adminCli.enterPin'));
                 if (!pin) {
                     console.log(this.t('settings.admin.accessDenied'));
                     await this.pause();
@@ -638,6 +678,13 @@ class SettingsCLI {
             if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
                 uiI18n.refreshLanguageFromSettings();
             }
+            
+            // Refresh i18n-helper translations
+            const { refreshLanguageFromSettings } = require('../utils/i18n-helper');
+            refreshLanguageFromSettings();
+            
+            // Force reload settings to ensure consistency
+            this.settings = settingsManager.getSettings();
         }
         
         this.success(this.t('settings.updatedSuccessfully', { setting: label }));
@@ -1366,6 +1413,43 @@ module.exports = SettingsCLI;
 
 // If run directly, start the CLI
 if (require.main === module) {
+    const args = process.argv.slice(2);
+    
+    // Handle --help flag
+    if (args.includes('--help') || args.includes('-h')) {
+        console.log(`
+🌍 i18n Toolkit Settings CLI
+
+Usage: node settings/settings-cli.js [options]
+
+Options:
+  --help, -h    Show this help message
+
+Interactive Commands:
+  1) UI Settings          - Configure language, theme, and UI preferences
+  2) Directory Settings    - Set source and output directories
+  3) Script Directories   - Configure script-specific paths
+  4) Processing Settings  - Batch size, concurrency, thresholds
+  5) Security Settings    - Admin PIN, session management
+  6) Advanced Settings   - Strict mode, audit logging, backups
+  7) View All Settings   - Display current configuration
+  8) Import/Export       - Backup and restore settings
+  9) Reset to Defaults   - Restore factory settings
+  0) Report Bug          - Generate bug report
+  u) Update Package      - Update i18n toolkit
+  s) Save Changes        - Save current configuration
+  h) Help               - Show available commands
+  q) Quit               - Exit settings CLI
+
+Examples:
+  node settings/settings-cli.js
+  npm run i18ntk:settings
+
+Note: Use arrow keys and Enter to navigate the interactive menu.
+`);
+        process.exit(0);
+    }
+    
     const cli = new SettingsCLI();
     cli.start().catch(error => {
         console.error('❌ Failed to start settings CLI:', error.message);

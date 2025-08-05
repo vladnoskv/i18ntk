@@ -1,41 +1,46 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 const path = require('path');
+const { loadTranslations, t } = require('../utils/i18n-helper');
 
-const enDir = path.join(__dirname, '..', 'ui-locales', 'en');
-const targetLanguages = ['de', 'fr', 'es', 'ru', 'ja', 'zh', 'pt'];
+// Load translations
+loadTranslations('en');
 
-// Create directories for all languages if they don't exist
-targetLanguages.forEach(lang => {
-  const langDir = path.join(__dirname, '..', 'ui-locales', lang);
+// Configuration
+const SOURCE_DIR = path.join(__dirname, '..', 'ui-locales');
+const TARGET_LANGUAGES = ['de', 'fr', 'es', 'ru', 'ja', 'zh'];
+
+function createLanguageTemplate(lang) {
+  const langDir = path.join(SOURCE_DIR, lang);
+  
   if (!fs.existsSync(langDir)) {
     fs.mkdirSync(langDir, { recursive: true });
-    console.log(`Created directory: ${langDir}`);
+    console.log(t('exportTranslations.createdDirectory', { dir: langDir }));
   }
-});
-
-// Export all English files to other languages
-const enFiles = fs.readdirSync(enDir).filter(f => f.endsWith('.json'));
-console.log(`Found ${enFiles.length} English translation files:`);
-enFiles.forEach(file => {
-  console.log(`  - ${file}`);
-});
-
-// Create template files for each language
-targetLanguages.forEach(lang => {
+  
+  const enDir = path.join(SOURCE_DIR, 'en');
+  const enFiles = fs.readdirSync(enDir).filter(file => file.endsWith('.json'));
+  
+  console.log(t('exportTranslations.foundFiles', { count: enFiles.length }));
   enFiles.forEach(file => {
-    const sourcePath = path.join(enDir, file);
-    const targetPath = path.join(__dirname, '..', 'ui-locales', lang, file);
+    console.log(`  - ${file}`);
+  });
+  
+  enFiles.forEach(file => {
+    const sourceFile = path.join(enDir, file);
+    const targetFile = path.join(langDir, file);
     
-    if (!fs.existsSync(targetPath)) {
-      const sourceContent = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+    if (!fs.existsSync(targetFile)) {
+      const sourceContent = JSON.parse(fs.readFileSync(sourceFile, 'utf8'));
       const templateContent = createTemplateFromEnglish(sourceContent);
-      fs.writeFileSync(targetPath, JSON.stringify(templateContent, null, 2));
-      console.log(`Created template: ${lang}/${file}`);
+      fs.writeFileSync(targetFile, JSON.stringify(templateContent, null, 2));
+      console.log(t('exportTranslations.createdTemplate', { lang, file }));
     } else {
-      console.log(`Skipped existing: ${lang}/${file}`);
+      console.log(t('exportTranslations.skippedExisting', { lang, file }));
     }
   });
-});
+}
 
 function createTemplateFromEnglish(obj) {
   if (typeof obj === 'string') {
@@ -50,8 +55,30 @@ function createTemplateFromEnglish(obj) {
   return obj;
 }
 
-console.log('Export completed successfully!');
-console.log(`\nSummary:`);
-console.log(`- Languages: ${targetLanguages.length}`);
-console.log(`- Files per language: ${enFiles.length}`);
-console.log(`- Total files created: ${targetLanguages.length * enFiles.length}`);
+function main() {
+  console.log(`\n${t('exportTranslations.title')}\n`);
+  console.log(t('exportTranslations.creatingTemplates', { count: TARGET_LANGUAGES.length }));
+  console.log();
+  
+  TARGET_LANGUAGES.forEach(lang => {
+    createLanguageTemplate(lang);
+  });
+  
+  const enFiles = fs.readdirSync(path.join(SOURCE_DIR, 'en')).filter(file => file.endsWith('.json'));
+  
+  console.log(`\n${t('exportTranslations.summary')}`);
+  console.log(t('exportTranslations.summaryLanguages', { count: TARGET_LANGUAGES.length }));
+  console.log(t('exportTranslations.summaryFilesPerLanguage', { count: enFiles.length }));
+  console.log(t('exportTranslations.summaryTotalFiles', { count: TARGET_LANGUAGES.length * enFiles.length }));
+  
+  console.log(`\n${t('exportTranslations.success')}`);
+  console.log(t('exportTranslations.location', { dir: SOURCE_DIR }));
+  console.log(t('exportTranslations.nextSteps'));
+  console.log();
+}
+
+if (require.main === module) {
+  main();
+}
+
+module.exports = { createLanguageTemplate };

@@ -222,7 +222,7 @@ class SecurityUtils {
     const validatedArgs = {};
     const allowedArgs = [
       'source-dir', 'i18n-dir', 'output-dir', 'output-report', 
-      'help', 'language', 'strict-mode', 'exclude-files'
+      'help', 'language', 'strict-mode', 'exclude-files', 'no-prompt'
     ];
     
     for (const [key, value] of Object.entries(args)) {

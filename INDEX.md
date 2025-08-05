@@ -1,7 +1,7 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.4.1  
-**Last Updated:** 04/08/2025  
+**Version:** 1.5.0  
+**Last Updated:** 08/08/2025  
 **Maintainer:** Vladimir Noskov  
 
 ## 📚 Documentation Overview
@@ -15,7 +15,6 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Installation Guide](./INSTALLATION.md)** - Detailed installation instructions
 - **[Script Directory Guide](./docs/SCRIPT_DIRECTORY_GUIDE.md)** - Configure custom directories for each script type (v1.3.0+)
 - **[Documentation Overview](./README.md)** - Documentation structure and overview
-- **[TODO & Roadmap](./TODO_ROADMAP.md)** - Future development plans and roadmap
 - **[Changelog](../CHANGELOG.md)** - Version history and release notes
 - **[License](../LICENSE)** - MIT License information
 
@@ -49,12 +48,13 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Debug Documentation](./debug/DEBUG_README.md)** - Debug tools and troubleshooting
 - **[Debug Tools Overview](./debug/DEBUG_TOOLS.md)** - Available debug utilities
 
-## 🆕 What's New in v1.4.1
+## 🆕 What's New in v1.5.0
 
 ### Major Features
+- **🚨 Critical Bug Fix** - Fixed MODULE_NOT_FOUND error in v1.4.1
 - **🔐 Advanced PIN Protection** - Configurable authentication per script with AES-256-GCM encryption
 - **🛡️ Enhanced Security** - Session-based authentication with 30-minute timeout
-- **🌍 Complete Internationalization** - 8 languages with 100% coverage, including Portuguese
+- **🌍 Complete Internationalization** - 7 languages with 100% coverage
 - **🎯 Per-Script Directory Configuration** - Configure custom directories for each script type
 - **🔧 Fixed Path Resolution** - Analyzing logic now correctly follows settings
 
@@ -114,11 +114,12 @@ npm run i18ntk:settings          # Manage settings
 
 ## 🔄 Version Management
 
-**Current Version:** 1.4.1  
-**Release Date:** 04/08/2025  
-**Previous Versions:** 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
+**Current Version:** 1.5.0  
+**Release Date:** 08/08/2025  
+**Previous Versions:** 1.4.1, 1.4.0, 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
 
 ### Version History
+- **1.4.2** - 🚨 **Critical Bug Fix** - Fixed MODULE_NOT_FOUND error, relocated debug tools for proper npm package inclusion
 - **1.4.1** - 🔧 **Debug Tools Streamlining & Package Optimization** - Streamlined debug menu, removed development tools from production builds, improved package structure for production deployment
 - **1.3.0** - 🎯 **Script Directory Configuration & Path Resolution** - Per-script directory configuration, fixed path resolution, enhanced internationalization support
 - **1.2.3** - Documentation & metadata cleanup
@@ -141,4 +142,4 @@ For contribution guidelines, please refer to:
 
 ---
 
-**Note:** This documentation is automatically maintained and updated with each release. Last updated on 27/07/2025 for version 1.0.0.
+**Note:** This documentation is automatically maintained and updated with each release. Last updated on 12/19/2024 for version 1.5.0.

@@ -355,7 +355,8 @@ class I18nSizingAnalyzer {
         if (Math.abs(diff) > this.threshold) {
           variations.push({
             language: lang,
-            difference: diff.toFixed(2),
+            characterDifference: data.length - baseLang.length,
+            percentageDifference: diff.toFixed(2),
             baseLength: baseLang.length,
             currentLength: data.length
           });
@@ -389,7 +390,8 @@ class I18nSizingAnalyzer {
     
     // Check for problematic keys
     if (this.stats.summary.problematicKeys.length > 0) {
-      recommendations.push(this.t("sizing.problematic_keys", { count: this.stats.summary.problematicKeys.length }));
+      const problematicKeyNames = this.stats.summary.problematicKeys.map(item => item.key).join(', ');
+      recommendations.push(this.t("sizing.problematic_keys", { count: this.stats.summary.problematicKeys.length, problematicKeys: problematicKeyNames }));
     }
     
     // Check for very long translations
@@ -441,6 +443,19 @@ class I18nSizingAnalyzer {
       Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
         const problematic = data.isProblematic ? this.t("sizing.problematic_yes") : this.t("sizing.problematic_no");
         console.log(this.t("sizing.size_variation_row", { lang, characterDifference: data.characterDifference, percentageDifference: data.percentageDifference, problematic }));
+      });
+    }
+    
+    // Problematic keys details
+    if (this.stats.summary.problematicKeys.length > 0) {
+      console.log("\n" + this.t("sizing.problematicKeysLabel", { problematicKeys: this.stats.summary.problematicKeys.map(item => item.key).join(', ') }));
+      console.log(this.t("sizing.lineSeparator"));
+      this.stats.summary.problematicKeys.forEach((item, index) => {
+        console.log(this.t("sizing.problematic_key_detail", { 
+          index: index + 1, 
+          key: item.key,
+          variations: item.variations.map(v => `${v.language}: ${v.characterDifference} chars (${v.percentageDifference}%)`).join(', ')
+        }));
       });
     }
     
@@ -590,7 +605,7 @@ class I18nSizingAnalyzer {
       if (isRequired && isCalledDirectly && !args.noPrompt) {
         console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'analyze sizing' }));
         
-        const pin = await this.prompt('🔐 Enter admin PIN: ');
+        const pin = await this.prompt(this.t('adminCli.enterPin'));
         const isValid = await adminAuth.verifyPin(pin);
         
         if (!isValid) {

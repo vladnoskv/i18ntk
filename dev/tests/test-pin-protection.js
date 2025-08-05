@@ -45,7 +45,7 @@ async function testPinProtection() {
   
   console.log('\n🧪 To test PIN protection:');
   console.log('1. Run: node main/i18ntk-manage.js');
-  console.log('2. If PIN is set, you will be prompted: "🔐 Enter admin PIN:"');
+  console.log('2. If PIN is set, you will be prompted with the admin PIN prompt');
   console.log('3. Enter correct PIN to proceed, or wrong PIN to exit');
 }
 

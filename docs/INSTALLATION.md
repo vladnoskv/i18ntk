@@ -1,6 +1,6 @@
 # Installation Guide
 
-**Version:** 1.4.0 (04/08/2025) - Stable Release with Advanced PIN Protection
+**Version:** 1.4.2 (05/08/2025) - Stable Release with Critical Bug Fixes
 
 ## Quick Start
 
@@ -80,7 +80,7 @@ Create `i18ntk-config.json` in your project root:
   "sourceDirectory": "./src",
   "localesDirectory": "./locales",
   "defaultLanguage": "en",
-  "supportedLanguages": ["en", "es", "fr", "de", "pt", "ja", "ru", "zh"]
+  "supportedLanguages": ["en", "es", "fr", "de", "ja", "ru", "zh"]
 }
 ```
 

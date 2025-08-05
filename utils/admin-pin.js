@@ -7,6 +7,15 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const i18n = require('./i18n-helper');
+
+// Use environment variables for configuration
+const SALT_LENGTH = 32;
+const KEY_LENGTH = 32;
+const MEMORY_COST = 2 ** 16; // 64MB
+const TIME_COST = 3;
+const PARALLELISM = 1;
+const ALGORITHM = 'argon2id';
 
 class AdminPinManager {
     constructor() {
@@ -24,38 +33,52 @@ class AdminPinManager {
     }
 
     /**
-     * Generate a random key for encryption
+     * Generate a random key for encryption (AES-256-GCM)
+     * Returns a 32-byte (256-bit) key for AES-256-GCM
      */
     generateKey() {
-        return crypto.randomBytes(this.keyLength);
+        return crypto.randomBytes(32);
     }
 
     /**
-     * Encrypt the PIN
+     * Generate secure random IV for AES-256-GCM
+     * GCM requires 96-bit (12-byte) IV for optimal security
+     */
+    generateIV() {
+        return crypto.randomBytes(12);
+    }
+
+    /**
+     * Encrypt the PIN using AES-256-GCM with proper authentication
      */
     encryptPin(pin, key) {
-        const iv = crypto.randomBytes(this.ivLength);
-        const cipher = crypto.createCipheriv(this.algorithm, key, iv);
+        const iv = this.generateIV();
+        const cipher = crypto.createCipherGCM('aes-256-gcm', key);
+        cipher.setAAD(Buffer.from('admin-pin-v1')); // Additional authenticated data
         
         let encrypted = cipher.update(pin, 'utf8', 'hex');
         encrypted += cipher.final('hex');
         
-        const tag = cipher.getAuthTag();
+        const authTag = cipher.getAuthTag();
         
         return {
             encrypted,
             iv: iv.toString('hex'),
-            tag: tag.toString('hex')
+            authTag: authTag.toString('hex')
         };
     }
 
     /**
-     * Decrypt the PIN
+     * Decrypt the PIN using AES-256-GCM with authentication verification
      */
     decryptPin(encryptedData, key) {
         try {
-            const decipher = crypto.createDecipheriv(this.algorithm, key, Buffer.from(encryptedData.iv, 'hex'));
-            decipher.setAuthTag(Buffer.from(encryptedData.tag, 'hex'));
+            const iv = Buffer.from(encryptedData.iv, 'hex');
+            const authTag = Buffer.from(encryptedData.authTag || encryptedData.tag, 'hex');
+            
+            const decipher = crypto.createDecipherGCM('aes-256-gcm', key);
+            decipher.setAuthTag(authTag);
+            decipher.setAAD(Buffer.from('admin-pin-v1'));
             
             let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
             decrypted += decipher.final('utf8');
@@ -67,14 +90,55 @@ class AdminPinManager {
     }
 
     /**
-     * Hash PIN for verification
+     * Hash PIN using secure password hashing
+     * Uses crypto.scrypt as a secure alternative to argon2
      */
-    hashPin(pin) {
-        return crypto.createHash('sha256').update(pin).digest('hex');
+    async hashPin(pin, salt = null) {
+        if (!salt) {
+            salt = crypto.randomBytes(32);
+        } else if (typeof salt === 'string') {
+            salt = Buffer.from(salt, 'hex');
+        }
+
+        try {
+            // Use scrypt (Node.js built-in, more secure than pbkdf2)
+            const hash = crypto.scryptSync(pin, salt, 32, {
+                N: 16384, // CPU/memory cost parameter
+                r: 8,     // block size parameter
+                p: 1      // parallelization parameter
+            });
+            return {
+                hash: hash.toString('hex'),
+                salt: salt.toString('hex'),
+                algorithm: 'scrypt'
+            };
+        } catch (error) {
+            // Fallback to pbkdf2
+            const hash = crypto.pbkdf2Sync(pin, salt, 100000, 32, 'sha256');
+            return {
+                hash: hash.toString('hex'),
+                salt: salt.toString('hex'),
+                algorithm: 'pbkdf2'
+            };
+        }
     }
 
     /**
-     * Set up a new admin PIN
+     * Check if PIN is weak/common
+     */
+    isWeakPin(pin) {
+        const weakPins = [
+            '1234', '0000', '1111', '2222', '3333', '4444', '5555',
+            '6666', '7777', '8888', '9999', '123456', '654321',
+            '000000', '111111', '121212', '112233', '12345',
+        ];
+        
+        return weakPins.includes(pin) || 
+               /^(.)\1+$/.test(pin);     // All same characters
+    }
+
+    /**
+     * Set up a new admin PIN with security checks
      */
     async setupPin(externalRl = null) {
         const rl = externalRl || readline.createInterface({
@@ -83,30 +147,42 @@ class AdminPinManager {
         });
 
         try {
-            console.log('\n🔐 Admin PIN Setup');
-            console.log('============================================================');
-            console.log('Create a 4-6 digit PIN for admin access to sensitive settings.');
-            console.log('This PIN will be required for:');
-            console.log('  • Changing security settings');
-            console.log('  • Modifying advanced configurations');
-            console.log('  • Accessing debug tools');
-            console.log('  • Resetting settings');
-            console.log('\n💡 Note: You will see asterisks (*) as you type - these are just masking characters.');
-            console.log('   Only numbers 0-9 are accepted as PIN digits.');
+            console.log('\n' + i18n.t('adminPin.setup_title'));
+            console.log(i18n.t('adminPin.setup_separator'));
+            console.log(i18n.t('adminPin.setup_description'));
+            console.log(i18n.t('adminPin.required_for_title'));
+            console.log(i18n.t('adminPin.required_for_1'));
+            console.log(i18n.t('adminPin.required_for_2'));
+            console.log(i18n.t('adminPin.required_for_3'));
+            console.log(i18n.t('adminPin.required_for_4'));
+            console.log('\n' + i18n.t('adminPin.setup_note'));
+            console.log(i18n.t('adminPin.setup_digits_only'));
             
-            const pin = await this.promptPin(rl, 'Enter new admin PIN (4-6 digits): ', false);
+            const pin = await this.promptPin(rl, i18n.t('adminPin.enter_new_pin'), false);
             
             if (!this.validatePin(pin)) {
-                console.log('❌ Invalid PIN. Must be exactly 4-6 digits (numbers 0-9 only).');
-                console.log('   Example: 1234 or 567890');
+                console.log(i18n.t('adminPin.invalid_pin_length'));
+                console.log(i18n.t('adminPin.invalid_pin_example'));
                 if (!externalRl) rl.close();
                 return false;
             }
+
+            if (this.isWeakPin(pin)) {
+                console.log(i18n.t('adminPin.weak_pin_warning'));
+                console.log(i18n.t('adminPin.weak_pin_suggestion'));
+                const proceed = await new Promise(resolve => {
+                    rl.question(i18n.t('adminPin.use_anyway_prompt'), resolve);
+                });
+                if (proceed.toLowerCase() !== 'yes') {
+                    if (!externalRl) rl.close();
+                    return false;
+                }
+            }
             
-            const confirmPin = await this.promptPin(rl, 'Confirm admin PIN: ', false);
+            const confirmPin = await this.promptPin(rl, i18n.t('adminPin.confirm_pin'), false);
             
             if (pin !== confirmPin) {
-                console.log('❌ PINs do not match.');
+                console.log(i18n.t('adminPin.pins_do_not_match'));
                 if (!externalRl) rl.close();
                 return false;
             }
@@ -114,14 +190,17 @@ class AdminPinManager {
             // Generate encryption key and encrypt PIN
             const key = this.generateKey();
             const encryptedPin = this.encryptPin(pin, key);
-            const hashedPin = this.hashPin(pin);
+            const hashedPin = await this.hashPin(pin);
             
             // Store encrypted data
             const pinData = {
-                hash: hashedPin,
+                hash: hashedPin.hash,
+                salt: hashedPin.salt,
+                algorithm: hashedPin.algorithm,
                 encrypted: encryptedPin,
                 key: key.toString('hex'),
                 created: new Date().toISOString(),
+                lastChanged: new Date().toISOString(),
                 attempts: 0,
                 locked: false
             };
@@ -134,14 +213,14 @@ class AdminPinManager {
             
             fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
             
-            console.log('✅ Admin PIN has been set successfully!');
-            console.log('⚠️  Keep this PIN secure. It cannot be recovered if lost.');
+            console.log(i18n.t('adminPin.setup_success'));
+            console.log(i18n.t('adminPin.setup_warning'));
             
             if (!externalRl) rl.close();
             return true;
             
         } catch (error) {
-            console.error('❌ Error setting up PIN:', error.message);
+            console.error(i18n.t('adminPin.setup_error'), error.message);
             if (!externalRl) rl.close();
             return false;
         }
@@ -224,7 +303,7 @@ class AdminPinManager {
         // Set new timeout
         this.sessionTimer = setTimeout(() => {
             this.endSession();
-            console.log('\n⏰ Admin session expired due to inactivity.');
+            console.log(i18n.t('adminPin.session_expired'));
         }, this.sessionTimeout);
     }
     
@@ -279,16 +358,40 @@ class AdminPinManager {
     }
 
     /**
-     * Verify admin PIN
+     * Constant-time comparison for PIN verification
+     * Prevents timing attacks
+     */
+    constantTimeCompare(a, b) {
+        if (typeof a !== 'string' || typeof b !== 'string') {
+            return false;
+        }
+        if (a.length !== b.length) {
+            return false;
+        }
+        
+        try {
+            return crypto.timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
+        } catch (error) {
+            // Fallback to manual constant-time comparison
+            let result = 0;
+            for (let i = 0; i < a.length; i++) {
+                result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+            }
+            return result === 0;
+        }
+    }
+
+    /**
+     * Verify admin PIN with secure hashing and constant-time comparison
      */
     async verifyPin(forceSetup = false, externalRl = null) {
         if (!this.isPinSet()) {
             if (forceSetup) {
-                console.log('⚠️  No admin PIN set. Setting up PIN...');
+                console.log(i18n.t('adminPin.no_pin_set_setting_up'));
                 return await this.setupPin(externalRl);
             } else {
-                console.log('⚠️  No admin PIN configured. Access denied.');
-                console.log('💡 Use the admin settings to set up a PIN first.');
+                console.log(i18n.t('adminPin.no_pin_configured_access_denied'));
+                console.log(i18n.t('adminPin.use_admin_settings_to_set_pin'));
                 return false;
             }
         }
@@ -302,21 +405,37 @@ class AdminPinManager {
             const pinData = JSON.parse(fs.readFileSync(this.pinFile, 'utf8'));
             
             if (pinData.locked) {
-                console.log('🔒 Admin access is locked due to too many failed attempts.');
-                console.log('Please wait 5 minutes before trying again.');
+                console.log(i18n.t('adminPin.locked_out'));
+                console.log(i18n.t('adminPin.wait_before_retry'));
                 if (!externalRl) rl.close();
                 return false;
             }
             
-            const enteredPin = await this.promptPin(rl, '🔐 Enter admin PIN: ');
-            const hashedEnteredPin = this.hashPin(enteredPin);
+            const enteredPin = await this.promptPin(rl, i18n.t('adminCli.enterPin'));
             
-            if (hashedEnteredPin === pinData.hash) {
+            // Recompute hash with stored salt
+            const salt = Buffer.from(pinData.salt, 'hex');
+            let computedHash;
+            
+            if (pinData.algorithm === 'scrypt') {
+                computedHash = crypto.scryptSync(enteredPin, salt, 32, {
+                    N: 16384,
+                    r: 8,
+                    p: 1
+                });
+            } else {
+                computedHash = crypto.pbkdf2Sync(enteredPin, salt, 100000, 32, 'sha256');
+            }
+            
+            const computedHashHex = computedHash.toString('hex');
+            
+            // Use constant-time comparison
+            if (this.constantTimeCompare(computedHashHex, pinData.hash)) {
                 // Reset attempts on successful login
                 pinData.attempts = 0;
                 fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
-                console.log('✅ Admin access granted.');
+                console.log(i18n.t('adminPin.access_granted'));
                 if (!externalRl) rl.close();
                 return true;
             } else {
@@ -333,13 +452,13 @@ class AdminPinManager {
                 
                 fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
-                console.log(`❌ Incorrect PIN. ${3 - pinData.attempts} attempts remaining.`);
+                console.log(i18n.t('adminPin.incorrect_pin', { attempts: 3 - pinData.attempts }));
                 if (!externalRl) rl.close();
                 return false;
             }
             
         } catch (error) {
-            console.error('❌ Error verifying PIN:', error.message);
+            console.error(i18n.t('adminPin.verify_pin_error'), error.message);
             if (!externalRl) rl.close();
             return false;
         }
@@ -350,7 +469,7 @@ class AdminPinManager {
      */
     async promptOptionalSetup() {
         if (this.isPinSet()) {
-            console.log('✅ Admin PIN is already configured.');
+            console.log(i18n.t('adminPin.already_configured'));
             return true;
         }
 
@@ -360,17 +479,17 @@ class AdminPinManager {
         });
 
         try {
-            console.log('\n🔐 Admin PIN Setup (Optional)');
-            console.log('============================================================');
-            console.log('Admin PIN protection adds security for sensitive operations like:');
-            console.log('  • Changing security settings');
-            console.log('  • Modifying advanced configurations');
-            console.log('  • Accessing debug tools');
-            console.log('  • Resetting settings');
+            console.log(i18n.t('adminPin.optional_setup_title'));
+            console.log(i18n.t('adminPin.setup_separator'));
+            console.log(i18n.t('adminPin.optional_setup_description'));
+            console.log(i18n.t('adminPin.required_for_1'));
+            console.log(i18n.t('adminPin.required_for_2'));
+            console.log(i18n.t('adminPin.required_for_3'));
+            console.log(i18n.t('adminPin.required_for_4'));
             console.log('');
             
             const response = await new Promise(resolve => {
-                rl.question('Would you like to set up an admin PIN? (y/N): ', resolve);
+                rl.question(i18n.t('adminPin.setup_prompt'), resolve);
             });
             
             rl.close();
@@ -378,12 +497,12 @@ class AdminPinManager {
             if (response.toLowerCase() === 'y' || response.toLowerCase() === 'yes') {
                 return await this.setupPin();
             } else {
-                console.log('⏭️  Skipping admin PIN setup. You can set it up later in settings.');
+                console.log(i18n.t('adminPin.skipping_setup'));
                 return false;
             }
         } catch (error) {
             rl.close();
-            console.error('❌ Error during PIN setup prompt:', error.message);
+            console.error(i18n.t('adminPin.setup_prompt_error'), error.message);
             return false;
         }
     }
@@ -393,7 +512,7 @@ class AdminPinManager {
      */
     getPinDisplay() {
         if (!this.isPinSet()) {
-            return 'Not Set';
+            return i18n.t('adminPin.not_set');
         }
         
         try {
@@ -408,7 +527,7 @@ class AdminPinManager {
             // Ignore errors, return default
         }
         
-        return '####';
+        return i18n.t('adminPin.pin_display_mask');
     }
 
     /**

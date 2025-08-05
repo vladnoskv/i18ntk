@@ -40,7 +40,8 @@ class AdminCLI {
   /**
    * Prompt for PIN input (hidden)
    */
-  async promptPin(message = 'Enter admin PIN: ') {
+  async promptPin(message = null) {
+    if (!message) message = i18n.t('adminCli.enterPin');
     return new Promise((resolve) => {
       const rl = this.initReadline();
       
@@ -186,7 +187,7 @@ class AdminCLI {
       const maxAttempts = 3;
       
       while (attempts < maxAttempts) {
-        const pin = await this.promptPin('Enter admin PIN: ');
+        const pin = await this.promptPin();
         
         if (!/^\d{4,6}$/.test(pin)) {
           console.log(i18n.t('adminCli.invalidPinFormat'));

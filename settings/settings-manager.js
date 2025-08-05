@@ -231,9 +231,11 @@ class SettingsManager {
             this.settings = settingsToSave;
             return true;
         } catch (error) {
-                console.error('Error saving settings:', error.message);
-                return false;
-            }
+            const { loadTranslations, t } = require('../utils/i18n-helper');
+            loadTranslations('en');
+            console.error(t('settings.saveError'), error.message);
+            return false;
+        }
     }
 
     /**
@@ -458,12 +460,11 @@ class SettingsManager {
         return [
             { code: 'en', name: 'English', flag: '🇺🇸' },
             { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪' },
-            { code: 'es', name: 'Español (Spanish)', flag: '🇪���8' },
+            { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸' },
             { code: 'fr', name: 'Français (French)', flag: '🇫🇷' },
             { code: 'ru', name: 'Русский (Russian)', flag: '🇷🇺' },
             { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },
-            { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' },
-            { code: 'pt', name: 'Português (Portuguese)', flag: '🇵🇹' }
+            { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' }
         ];
     }
 
@@ -636,7 +637,10 @@ class SettingsManager {
         
         this.settings.language = language;
         this.saveSettings();
-        console.log(`UI language set to: ${language}`);
+        
+        const { loadTranslations, t } = require('../utils/i18n-helper');
+        loadTranslations(language);
+        console.log(t('settings.languageSet', { language }));
     }
 }
 

@@ -75,11 +75,11 @@ class I18nValidator {
       
       // Validate configuration values
       if (!this.config.sourceDir) {
-        throw new Error('Source directory not configured');
+        throw new Error(this.t('validate.sourceDirNotConfigured') || 'Source directory not configured');
       }
       
       if (!this.config.sourceLanguage) {
-        throw new Error('Source language not configured');
+        throw new Error(this.t('validate.sourceLanguageNotConfigured') || 'Source language not configured');
       }
       
       // Validate and resolve paths
@@ -89,7 +89,7 @@ class I18nValidator {
       
       // Verify translation function is working
       if (typeof this.t !== 'function') {
-        throw new Error('Translation function not properly initialized');
+        throw new Error(this.t('validate.translationFunctionNotInitialized') || 'Translation function not properly initialized');
       }
       
       SecurityUtils.logSecurityEvent(this.t('validate.validatorInitialized'), 'info', 'I18n validator initialized successfully');
@@ -193,7 +193,7 @@ class I18nValidator {
       SecurityUtils.logSecurityEvent(this.t('validate.languagesScan'), 'info', 'Scanning available languages');
       
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(`Source directory not found: ${this.sourceDir}`);
+        throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
       const languages = fs.readdirSync(this.sourceDir)
@@ -593,7 +593,7 @@ class I18nValidator {
           timestamp: new Date().toISOString()
         });
         
-        throw new Error('Source language directory not found');
+        throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || 'Source language directory not found');
       }
       
       // Get available languages
@@ -739,7 +739,7 @@ class I18nValidator {
         if (isRequired && isCalledDirectly && !args.noPrompt) {
           console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'validate translations' }));
           
-          const pin = await this.prompt('🔐 Enter admin PIN: ');
+          const pin = await this.prompt(this.t('adminCli.enterPin'));
           
           const isValid = await adminAuth.verifyPin(pin);
           this.closeReadline();

@@ -176,7 +176,7 @@ class TranslationValidator {
       });
       
       // Check other languages
-      ['de', 'fr', 'es', 'ru', 'ja', 'zh', 'pt'].forEach(lang => {
+      ['de', 'fr', 'es', 'ru', 'ja', 'zh'].forEach(lang => {
         const langPath = path.join(__dirname, '..', 'ui-locales', lang);
         
         files.forEach(file => {

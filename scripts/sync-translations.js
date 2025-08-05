@@ -16,7 +16,7 @@ const path = require('path');
 // Configuration
 const UI_LOCALES_DIR = path.join(__dirname, '..', 'ui-locales');
 const ENGLISH_DIR = path.join(UI_LOCALES_DIR, 'en');
-const TARGET_LANGUAGES = ['de', 'es', 'fr', 'ru', 'ja', 'pt']; // Exclude Chinese (zh) as it's fully translated
+const TARGET_LANGUAGES = ['de', 'es', 'fr', 'ru', 'ja']; // Exclude Chinese (zh) as it's fully translated
 
 /**
  * Get all JSON files in the English directory

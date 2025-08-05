@@ -1,271 +1,126 @@
 #!/usr/bin/env node
 
 /**
- * i18nTK Debugger
- * Main debugging script for identifying and fixing issues in the i18n toolkit
+ * i18nTK Frontend Debugger
+ * Simple debugging tool for frontend developers to check their i18n setup
  */
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
-const SecurityUtils = require('../../utils/security');
 
-class I18nDebugger {
+class FrontendI18nDebugger {
     constructor(projectRoot = null) {
-        // Validate and sanitize project root path
-        let defaultRoot;
-        
-        if (projectRoot) {
-            defaultRoot = projectRoot;
-        } else {
-            // Find the actual project root by walking up from current directory
-            defaultRoot = this.findProjectRoot();
-        }
-        
-        const validatedRoot = SecurityUtils.validatePath(defaultRoot, process.cwd());
-        if (!validatedRoot) {
-            throw new Error('Invalid project root path provided');
-        }
-        
-        this.projectRoot = validatedRoot;
+        this.projectRoot = projectRoot || process.cwd();
         this.issues = [];
         this.warnings = [];
-        this.logFile = path.join(__dirname, 'logs', `debug-${new Date().toISOString().replace(/[:.]/g, '-')}.log`);
-        
-        // Ensure logs directory exists
-        const logsDir = path.dirname(this.logFile);
-        if (!fs.existsSync(logsDir)) {
-            fs.mkdirSync(logsDir, { recursive: true });
-        }
+        this.results = {
+            translations: {},
+            missingKeys: {},
+            fileStatus: {},
+            summary: {}
+        };
     }
 
-    log(message, level = 'INFO') {
-        const timestamp = new Date().toISOString();
-        const logMessage = `[${timestamp}] [${level}] ${message}`;
-        console.log(logMessage);
-        fs.appendFileSync(this.logFile, logMessage + '\n');
+    log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        console.log(`[${timestamp}] ${message}`);
     }
 
-    findProjectRoot() {
-        // Start from the current working directory and walk up to find project root
-        let currentDir = process.cwd();
+    async checkTranslationFiles() {
+        this.log('Checking translation files...');
         
-        // First, check if we're running from within node_modules/i18ntk
-        const nodeModulesPattern = /[\/\\]node_modules[\/\\]i18ntk/;
-        if (nodeModulesPattern.test(currentDir)) {
-            // We're running from the i18ntk package, find the actual project root
-            let projectDir = currentDir;
-            while (projectDir !== path.dirname(projectDir)) {
-                if (fs.existsSync(path.join(projectDir, 'package.json')) && 
-                    !projectDir.includes('node_modules')) {
-                    return projectDir;
-                }
-                projectDir = path.dirname(projectDir);
+        // Get configuration to determine translation directory
+        const configPath = path.join(this.projectRoot, 'settings', 'i18ntk-config.json');
+        let translationsDir = 'locales';
+        let languages = [];
+        
+        if (fs.existsSync(configPath)) {
+            try {
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                translationsDir = config.translationsPath || 'locales';
+                languages = config.languages || [];
+            } catch (error) {
+                this.issues.push(`Invalid config file: ${error.message}`);
             }
         }
         
-        // Walk up the directory tree to find package.json
-        while (currentDir !== path.dirname(currentDir)) {
-            const packageJsonPath = path.join(currentDir, 'package.json');
-            
-            if (fs.existsSync(packageJsonPath)) {
-                try {
-                    const packageContent = fs.readFileSync(packageJsonPath, 'utf8');
-                    const packageData = JSON.parse(packageContent);
-                    
-                    // Skip if this is the i18ntk package itself
-                    if (packageData.name === 'i18ntk' && currentDir.includes('node_modules')) {
-                        currentDir = path.dirname(currentDir);
-                        continue;
+        const fullTranslationsDir = path.join(this.projectRoot, translationsDir);
+        
+        if (fs.existsSync(fullTranslationsDir)) {
+            // If languages are specified in config, use those
+            if (languages.length > 0) {
+                const existingLanguages = languages.filter(lang => 
+                    fs.existsSync(path.join(fullTranslationsDir, lang, 'common.json'))
+                );
+                
+                for (const lang of existingLanguages) {
+                    const filePath = path.join(fullTranslationsDir, lang, 'common.json');
+                    try {
+                        const content = fs.readFileSync(filePath, 'utf8');
+                        const translations = JSON.parse(content);
+                        this.results.translations[lang] = translations;
+                    } catch (error) {
+                        this.issues.push(`Invalid JSON in ${lang}/common.json: ${error.message}`);
                     }
-                    
-                    // Found a valid project package.json
-                    return currentDir;
-                } catch (error) {
-                    // Invalid package.json, continue searching
                 }
-            }
-            
-            currentDir = path.dirname(currentDir);
-        }
-        
-        // Fallback to the original behavior if no project root found
-        return path.resolve(__dirname, '../..');
-    }
-
-    addIssue(issue) {
-        this.issues.push(issue);
-        this.log(`ISSUE: ${issue}`, 'ERROR');
-    }
-
-    addWarning(warning) {
-        this.warnings.push(warning);
-        this.log(`WARNING: ${warning}`, 'WARN');
-    }
-
-    checkFileExists(filePath, description) {
-        try {
-            // Validate path before checking existence
-            const validatedPath = SecurityUtils.validatePath(filePath, this.projectRoot);
-            if (!validatedPath) {
-                this.addIssue(`Invalid file path: ${filePath}`);
-                return false;
-            }
-            
-            const fullPath = path.resolve(this.projectRoot, filePath);
-            if (!fs.existsSync(fullPath)) {
-                this.addIssue(`Missing file: ${filePath} (${description})`);
-                return false;
-            }
-            this.log(`✓ Found: ${filePath}`);
-            return true;
-        } catch (error) {
-            this.addIssue(`Error checking file existence: ${filePath} - ${error.message}`);
-            SecurityUtils.logSecurityEvent('File existence check failed', 'warn', { filePath, error: error.message });
-            return false;
-        }
-    }
-
-    checkOldNamingConventions() {
-        this.log('Checking for old naming conventions...');
-        const oldFiles = [
-            '00-manage-i18n.js',
-            '01-init-i18n.js',
-            '02-analyze-translations.js',
-            '03-validate-translations.js',
-            '04-check-usage.js',
-            '05-complete-translations.js',
-            '06-analyze-sizing.js',
-            '07-generate-summary.js'
-        ];
-
-        oldFiles.forEach(file => {
-            const fullPath = path.resolve(this.projectRoot, file);
-            if (fs.existsSync(fullPath)) {
-                this.addIssue(`Old naming convention file still exists: ${file}`);
-            }
-        });
-
-        // Check for references to old files in code
-        this.checkForOldReferences();
-    }
-
-    async checkForOldReferences() {
-        this.log('Checking for old file references in code...');
-        const filesToCheck = [
-            'i18ntk-complete.js',
-            'i18ntk-usage.js',
-            'i18ntk-validate.js',
-            'package.json'
-        ];
-
-        const oldReferences = [
-            '04-check-usage.js',
-            '00-manage-i18n.js',
-            '01-init-i18n.js',
-            '02-analyze-translations.js',
-            '03-validate-translations.js',
-            '05-complete-translations.js',
-            '06-analyze-sizing.js',
-            '07-generate-summary.js'
-        ];
-
-        for (const file of filesToCheck) {
-            const fullPath = path.resolve(this.projectRoot, file);
-            if (fs.existsSync(fullPath)) {
-                try {
-                    const content = await SecurityUtils.safeReadFile(fullPath, this.projectRoot);
-                    if (content) {
-                        oldReferences.forEach(oldRef => {
-                            if (content.includes(oldRef)) {
-                                this.addIssue(`Old reference '${oldRef}' found in ${file}`);
-                            }
-                        });
+                
+                this.results.fileStatus.translations = {
+                    exists: true,
+                    directory: translationsDir,
+                    languages: existingLanguages,
+                    count: existingLanguages.length
+                };
+            } else {
+                // Auto-detect languages from directory structure
+                const detectedLanguages = fs.readdirSync(fullTranslationsDir)
+                    .filter(f => fs.statSync(path.join(fullTranslationsDir, f)).isDirectory());
+                
+                for (const lang of detectedLanguages) {
+                    const filePath = path.join(fullTranslationsDir, lang, 'common.json');
+                    if (fs.existsSync(filePath)) {
+                        try {
+                            const content = fs.readFileSync(filePath, 'utf8');
+                            const translations = JSON.parse(content);
+                            this.results.translations[lang] = translations;
+                        } catch (error) {
+                            this.issues.push(`Invalid JSON in ${lang}/common.json: ${error.message}`);
+                        }
                     }
-                } catch (error) {
-                    this.addIssue(`Error reading file ${fullPath}: ${error.message}`);
-                    SecurityUtils.logSecurityEvent('File read failed during reference check', 'error', { filePath: fullPath, error: error.message });
                 }
+                
+                this.results.fileStatus.translations = {
+                    exists: true,
+                    directory: translationsDir,
+                    languages: detectedLanguages,
+                    count: detectedLanguages.length
+                };
             }
+        } else {
+            this.results.fileStatus.translations = { exists: false, directory: translationsDir };
+            this.warnings.push(`Translations directory '${translationsDir}' not found`);
         }
     }
 
-    async checkTranslationKeys() {
+    async checkMissingKeys() {
         this.log('Checking for missing translation keys...');
-        const uiLocalesDir = path.resolve(this.projectRoot, 'ui-locales');
         
-        if (!fs.existsSync(uiLocalesDir)) {
-            this.addIssue('ui-locales directory not found');
-            return;
-        }
+        const languages = Object.keys(this.results.translations);
+        if (languages.length < 2) return;
 
-        const languages = ['en', 'de', 'es', 'fr', 'ja', 'ru', 'zh'];
-        const availableLanguages = [];
+        // Use first language as reference
+        const referenceLang = languages[0];
+        const referenceKeys = this.extractAllKeys(this.results.translations[referenceLang]);
         
         for (const lang of languages) {
-            const langDir = path.join(uiLocalesDir, lang);
-            const commonFile = path.join(langDir, 'common.json');
-            if (fs.existsSync(commonFile)) {
-                availableLanguages.push(lang);
-            }
-        }
-        
-        if (availableLanguages.length === 0) {
-            this.addIssue('No locale files found in ui-locales directory');
-            return;
-        }
-
-        // Load English as reference
-        const enPath = path.join(uiLocalesDir, 'en', 'common.json');
-        if (!fs.existsSync(enPath)) {
-            this.addIssue('English locale file (en/common.json) not found');
-            return;
-        }
-
-        try {
-            const enContent = await SecurityUtils.safeReadFile(enPath, this.projectRoot);
-            if (!enContent) {
-                this.addIssue('Failed to read en.json file');
-                return;
-            }
+            if (lang === referenceLang) continue;
             
-            const enLocale = SecurityUtils.safeParseJSON(enContent);
-            if (!enLocale) {
-                this.addIssue('Failed to parse en.json file');
-                return;
-            }
+            const langKeys = this.extractAllKeys(this.results.translations[lang]);
+            const missing = referenceKeys.filter(key => !langKeys.includes(key));
             
-            const requiredKeys = this.extractAllKeys(enLocale);
-
-            for (const language of availableLanguages) {
-                const filePath = path.join(uiLocalesDir, language, 'common.json');
-                try {
-                    const content = await SecurityUtils.safeReadFile(filePath, this.projectRoot);
-                    if (!content) {
-                        this.addIssue(`Failed to read ${language}/common.json`);
-                        continue;
-                    }
-                    
-                    const locale = SecurityUtils.safeParseJSON(content);
-                    if (!locale) {
-                        this.addIssue(`Failed to parse ${language}/common.json`);
-                        continue;
-                    }
-                    
-                    const existingKeys = this.extractAllKeys(locale);
-                    
-                    const missingKeys = requiredKeys.filter(key => !existingKeys.includes(key));
-                    if (missingKeys.length > 0) {
-                        this.addIssue(`Missing translation keys in ${language}/common.json: ${missingKeys.join(', ')}`);
-                    }
-                } catch (error) {
-                    this.addIssue(`Error processing ${language}/common.json: ${error.message}`);
-                    SecurityUtils.logSecurityEvent('Translation file processing failed', 'error', { file: `${language}/common.json`, error: error.message });
-                }
+            if (missing.length > 0) {
+                this.results.missingKeys[lang] = missing;
+                this.warnings.push(`${lang} is missing ${missing.length} keys`);
             }
-        } catch (error) {
-            this.addIssue(`Error processing en.json: ${error.message}`);
-            SecurityUtils.logSecurityEvent('English translation file processing failed', 'error', { error: error.message });
         }
     }
 
@@ -282,195 +137,124 @@ class I18nDebugger {
         return keys;
     }
 
-    async checkUserConfig() {
-        this.log('Checking user configuration...');
+    async checkConfiguration() {
+        this.log('Checking configuration...');
+        
+        const configPath = path.join(this.projectRoot, 'settings', 'i18ntk-config.json');
+        const packagePath = path.join(this.projectRoot, 'package.json');
         
         // Check i18ntk-config.json
-        const configPath = path.resolve(this.projectRoot, 'settings', 'i18ntk-config.json');
-        if (this.checkFileExists('settings/i18ntk-config.json', 'Main configuration file')) {
+        if (fs.existsSync(configPath)) {
             try {
-                const content = fs.readFileSync(configPath, 'utf8');
-                const config = JSON.parse(content);
-                
-                this.log('Configuration file found and valid');
-                
-                // Check directory paths
-                if (config.directories) {
-                    const dirs = ['sourceDir', 'outputDir', 'uiLocalesDir'];
-                    dirs.forEach(dir => {
-                        if (config.directories[dir]) {
-                            const dirPath = path.resolve(this.projectRoot, config.directories[dir]);
-                            if (!fs.existsSync(dirPath)) {
-                                this.addWarning(`Configured directory does not exist: ${config.directories[dir]}`);
-                            }
-                        }
-                    });
-                }
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                this.results.fileStatus.config = {
+                    exists: true,
+                    languages: config.languages || [],
+                    defaultLanguage: config.defaultLanguage || 'en'
+                };
             } catch (error) {
-                this.addIssue(`Error processing i18ntk-config.json: ${error.message}`);
-                SecurityUtils.logSecurityEvent('User config processing failed', 'error', { error: error.message });
+                this.issues.push(`Invalid config file: ${error.message}`);
+                this.results.fileStatus.config = { exists: false };
+            }
+        } else {
+            this.results.fileStatus.config = { exists: false };
+        }
+
+        // Check package.json for i18n scripts
+        if (fs.existsSync(packagePath)) {
+            try {
+                const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+                const scripts = packageJson.scripts || {};
+                this.results.fileStatus.package = {
+                    hasI18nScripts: Object.keys(scripts).some(key => key.includes('i18n'))
+                };
+            } catch (error) {
+                this.issues.push(`Invalid package.json: ${error.message}`);
             }
         }
     }
 
-    checkPackageJson() {
-        this.log('Checking package configuration...');
-        this.checkFileExists('package.json', 'Package configuration');
-    }
-
-    checkCoreFiles() {
-        this.log('Checking core i18nTK files...');
-        const coreFiles = [
-            'main/i18ntk-manage.js',
-            'main/i18ntk-init.js',
-            'main/i18ntk-analyze.js',
-            'main/i18ntk-validate.js',
-            'main/i18ntk-usage.js',
-            'main/i18ntk-complete.js',
-            'main/i18ntk-sizing.js',
-            'main/i18ntk-summary.js'
-        ];
-
-        coreFiles.forEach(file => {
-            this.checkFileExists(file, 'Core i18nTK script');
-        });
-    }
-
-    checkDependencies() {
-        this.log('Checking dependencies...');
-        try {
-            const packageJson = JSON.parse(fs.readFileSync(path.resolve(this.projectRoot, 'package.json'), 'utf8'));
-            const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
-            
-            // Check if node_modules exists in project root
-            const nodeModulesPath = path.resolve(this.projectRoot, 'node_modules');
-            if (!fs.existsSync(nodeModulesPath)) {
-                // Also check parent directories for node_modules (monorepo support)
-                let currentDir = this.projectRoot;
-                let foundNodeModules = false;
-                
-                while (currentDir !== path.dirname(currentDir)) {
-                    const parentNodeModules = path.join(currentDir, 'node_modules');
-                    if (fs.existsSync(parentNodeModules)) {
-                        this.log(`Found node_modules in: ${parentNodeModules}`);
-                        foundNodeModules = true;
-                        break;
-                    }
-                    currentDir = path.dirname(currentDir);
-                }
-                
-                if (!foundNodeModules) {
-                    const depCount = Object.keys(dependencies).length;
-                    if (depCount > 0) {
-                        this.addWarning(`node_modules directory not found in project or parent directories. Run 'npm install' in ${this.projectRoot}`);
-                    } else {
-                        this.log('No dependencies found in package.json');
-                    }
-                }
-            } else {
-                this.log(`Found node_modules in: ${nodeModulesPath}`);
-            }
-
-            this.log(`Found ${Object.keys(dependencies).length} dependencies`);
-        } catch (error) {
-            this.addIssue(`Could not check dependencies: ${error.message}`);
-        }
-    }
-
-    async generateReport() {
-        const timestamp = new Date().toLocaleString();
-        let summary = '';
-        
-        summary += '\n' + '='.repeat(60) + '\n';
-        summary += '           i18nTK DEBUG REPORT\n';
-        summary += '='.repeat(60) + '\n';
-        summary += `Generated: ${timestamp}\n`;
-        summary += `Project Root: ${this.projectRoot}\n`;
-        summary += '-'.repeat(60) + '\n';
-        summary += `📊 Summary: ${this.issues.length} issue(s), ${this.warnings.length} warning(s)\n`;
-        summary += '-'.repeat(60) + '\n';
-        
-        if (this.issues.length > 0) {
-            summary += '\n🚨 CRITICAL ISSUES:\n';
-            this.issues.forEach((issue, index) => {
-                summary += `   ${index + 1}. ❌ ${issue}\n`;
-            });
-        }
-
-        if (this.warnings.length > 0) {
-            summary += '\n⚠️  WARNINGS:\n';
-            this.warnings.forEach((warning, index) => {
-                summary += `   ${index + 1}. ⚠️  ${warning}\n`;
-            });
-        }
-
-        if (this.issues.length === 0 && this.warnings.length === 0) {
-            summary += '\n✅ EXCELLENT! No issues found.\n';
-            summary += '   The i18nTK project appears to be healthy.\n';
-        }
-
-        summary += '\n' + '='.repeat(60) + '\n';
-        summary += `📄 Full debug log: ${this.logFile}\n`;
-        summary += '='.repeat(60) + '\n';
-        
-        console.log(summary);
-        
-        // Save report to file securely
-        const reportPath = path.join(path.dirname(this.logFile), 'debug-report.txt');
-        const success = await SecurityUtils.safeWriteFile(reportPath, summary, this.projectRoot);
-        if (!success) {
-            console.warn('Warning: Could not save debug report due to security restrictions');
-            SecurityUtils.logSecurityEvent('Debug report save failed', 'warn', { reportPath });
-        }
-        
-        return {
+    generateFrontendReport() {
+        const report = {
+            timestamp: new Date().toLocaleString(),
+            projectRoot: this.projectRoot,
+            summary: {
+                totalLanguages: Object.keys(this.results.translations).length,
+                totalIssues: this.issues.length,
+                totalWarnings: this.warnings.length,
+                status: this.issues.length === 0 ? '✅ Ready for production' : '❌ Needs attention'
+            },
+            translations: this.results.translations,
+            missingKeys: this.results.missingKeys,
+            fileStatus: this.results.fileStatus,
             issues: this.issues,
-            warnings: this.warnings,
-            summary: summary,
-            reportPath: reportPath,
-            logFile: this.logFile
+            warnings: this.warnings
         };
+
+        return report;
     }
 
     async run() {
-        this.log('Starting i18nTK Debug Analysis...');
-        this.log(`Project Root: ${this.projectRoot}`);
-        this.log(`Working Directory: ${process.cwd()}`);
-        this.log(`Debug Tool Directory: ${__dirname}`);
-        
-        SecurityUtils.logSecurityEvent('Debug analysis started', 'info', { projectRoot: this.projectRoot });
+        this.log('🚀 Starting i18n Frontend Debug Analysis...');
         
         try {
-            this.checkCoreFiles();
-            await this.checkUserConfig();
-            this.checkPackageJson();
-            this.checkOldNamingConventions();
-            await this.checkTranslationKeys();
-            this.checkDependencies();
+            await this.checkTranslationFiles();
+            await this.checkMissingKeys();
+            await this.checkConfiguration();
             
-            SecurityUtils.logSecurityEvent('Debug analysis completed', 'info', { 
-                issuesFound: this.issues.length, 
-                warningsFound: this.warnings.length 
+            const report = this.generateFrontendReport();
+            
+            // Display summary
+            console.log('\n' + '='.repeat(50));
+            console.log('📊 i18n Debug Report');
+            console.log('='.repeat(50));
+            console.log(`Status: ${report.summary.status}`);
+            console.log(`Languages: ${report.summary.totalLanguages}`);
+            console.log(`Issues: ${report.summary.totalIssues}`);
+            console.log(`Warnings: ${report.summary.totalWarnings}`);
+            
+            if (report.issues.length > 0) {
+                console.log('\n❌ Issues to fix:');
+                report.issues.forEach(issue => console.log(`  • ${issue}`));
+            }
+            
+            if (report.warnings.length > 0) {
+                console.log('\n⚠️  Warnings:');
+                report.warnings.forEach(warning => console.log(`  • ${warning}`));
+            }
+            
+            console.log('\n📁 File Status:');
+            Object.entries(report.fileStatus).forEach(([type, status]) => {
+                const icon = status.exists ? '✅' : '❌';
+                if (type === 'translations') {
+                    console.log(`  ${icon} ${status.directory || 'translations'}: ${status.exists ? `Found (${status.count} languages)` : 'Missing'}`);
+                } else {
+                    console.log(`  ${icon} ${type}: ${status.exists ? 'Found' : 'Missing'}`);
+                }
             });
             
-            return await this.generateReport();
+            console.log('\n🌍 Languages found:');
+            Object.keys(report.translations).forEach(lang => {
+                const keyCount = Object.keys(this.extractAllKeys(report.translations[lang])).length;
+                console.log(`  • ${lang}: ${keyCount} keys`);
+            });
+            
+            return report;
+            
         } catch (error) {
-            this.addIssue(`Debug analysis failed: ${error.message}`);
-            SecurityUtils.logSecurityEvent('Debug analysis failed', 'error', { error: error.message });
-            return await this.generateReport();
+            console.error('❌ Debug failed:', error.message);
+            return { error: error.message };
         }
     }
 }
 
 // Run debugger if called directly
 if (require.main === module) {
-    const debugTool = new I18nDebugger();
-    debugTool.run().then(result => {
-        process.exit(result.issues.length > 0 ? 1 : 0);
-    }).catch(error => {
+    const debugTool = new FrontendI18nDebugger();
+    debugTool.run().catch(error => {
         console.error('Debugger failed:', error);
         process.exit(1);
     });
 }
 
-module.exports = I18nDebugger;
+module.exports = FrontendI18nDebugger;

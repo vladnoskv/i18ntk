@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Test Runner for i18n Management Toolkit v1.4.0
+ * Test Runner for i18n Management Toolkit v1.4.2
  * Runs all test suites and provides comprehensive reporting
  */
 
@@ -23,7 +23,7 @@ class TestRunner {
     }
 
     async runAllTests() {
-        console.log('🚀 i18n Management Toolkit v1.4.0 Test Runner');
+        console.log('🚀 i18n Management Toolkit v1.4.2 Test Runner');
         console.log('='.repeat(80));
         console.log(`Started: ${this.startTime.toLocaleString()}`);
         console.log();
@@ -124,7 +124,7 @@ class TestRunner {
 
         // Generate detailed report
         const report = {
-            version: '1.4.0',
+            version: '1.4.2',
             timestamp: endTime.toISOString(),
             totalTests: this.testSuites.length,
             passed,
@@ -145,11 +145,11 @@ class TestRunner {
 
     // Quick test option for development
     async runQuickTests() {
-        console.log('⚡ Running Quick Tests (Admin PIN + Portuguese)...');
+        console.log('⚡ Running Quick Tests (Admin PIN)...');
         
         const quickSuites = [
             { name: 'Admin PIN Tests', script: 'dev/tests/test-admin-pin.js' },
-            { name: 'Portuguese Validation', script: 'scripts/validate-all-translations.js --language=pt' }
+            
         ];
 
         let passed = 0;

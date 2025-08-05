@@ -21,7 +21,7 @@ class UIi18n {
         const config = getConfig();
         this.currentLanguage = 'en';
         this.translations = {};
-        this.availableLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh', 'pt'];
+        this.availableLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
         this.uiLocalesDir = path.resolve(config.uiLocalesDir);
         this.configFile = path.resolve(config.configFile);
 
@@ -47,47 +47,58 @@ class UIi18n {
             language = 'en';
         }
 
-        const langDir = path.join(this.uiLocalesDir, language);
-                this.translations = {}; // Reset translations for the new language
-                
-                const settings = require('../settings/settings-manager').getSettings();
-                const debugEnabled = settings.debug?.enabled || false;
-                
-                if (debugEnabled) {
-                    console.log(`UI: Attempting to load translations from: ${langDir}`);
-                }
+        this.translations = {}; // Reset translations for the new language
         
+        const settings = require('../settings/settings-manager').getSettings();
+        const debugEnabled = settings.debug?.enabled || false;
+        
+        if (debugEnabled) {
+            console.log(`UI: Attempting to load translations from monolith file for: ${language}`);
+        }
+        
+        try {
+            // Primary: Use monolith JSON file (en.json, de.json, etc.)
+            const monolithTranslationFile = path.join(this.uiLocalesDir, `${language}.json`);
+            
+            if (fs.existsSync(monolithTranslationFile)) {
                 try {
-                    if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
-                        const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
-                        if (debugEnabled) {
-                            console.log(`UI: Found files in ${langDir}: ${files.join(', ')}`);
-                        }
-        
-                        for (const file of files) {
-                            const filePath = path.join(langDir, file);
-                            try {
-                                const content = fs.readFileSync(filePath, 'utf8');
-                                const fileTranslations = JSON.parse(content);
-                                const moduleName = path.basename(file, '.json');
-                                this.translations[moduleName] = this.deepMerge(this.translations[moduleName] || {}, fileTranslations);
-                                if (debugEnabled) {
-                                    console.log(`UI: Loaded ${filePath}, module: ${moduleName}`);
-                                }
-                            } catch (parseError) {
-                                console.error(`UI: Error parsing translation file ${filePath}: ${parseError.message}`);
-                            }
-                        }
-                        this.currentLanguage = language;
-            } else {
-                // Fallback to old single file if new modular structure not found
-                const oldTranslationFile = path.join(this.uiLocalesDir, `${language}.json`);
-                if (fs.existsSync(oldTranslationFile)) {
-                    const content = fs.readFileSync(oldTranslationFile, 'utf8');
+                    const content = fs.readFileSync(monolithTranslationFile, 'utf8');
                     this.translations = JSON.parse(content);
                     this.currentLanguage = language;
+                    if (debugEnabled) {
+                        console.log(`UI: Loaded monolith translation file: ${monolithTranslationFile}`);
+                    }
+                } catch (error) {
+                    console.error(`UI: Error parsing monolith translation file ${monolithTranslationFile}: ${error.message}`);
+                    this.translations = {};
+                }
+            } else {
+                // Fallback: Use folder-based structure if monolith file doesn't exist
+                const langDir = path.join(this.uiLocalesDir, language);
+                
+                if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+                    const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
+                    if (debugEnabled) {
+                        console.log(`UI: Found files in ${langDir}: ${files.join(', ')}`);
+                    }
+    
+                    for (const file of files) {
+                        const filePath = path.join(langDir, file);
+                        try {
+                            const content = fs.readFileSync(filePath, 'utf8');
+                            const fileTranslations = JSON.parse(content);
+                            const moduleName = path.basename(file, '.json');
+                            this.translations[moduleName] = this.deepMerge(this.translations[moduleName] || {}, fileTranslations);
+                            if (debugEnabled) {
+                                console.log(`UI: Loaded ${filePath}, module: ${moduleName}`);
+                            }
+                        } catch (parseError) {
+                            console.error(`UI: Error parsing translation file ${filePath}: ${parseError.message}`);
+                        }
+                    }
+                    this.currentLanguage = language;
                 } else {
-                    console.warn(`⚠️  Translation directory or file not found for language ${language}: ${langDir} or ${oldTranslationFile}`);
+                    console.warn(`⚠️  Translation file or directory not found for language ${language}: ${monolithTranslationFile} or ${langDir}`);
                     if (language !== 'en') {
                         this.loadLanguage('en'); // Fallback to English
                     }
@@ -149,7 +160,11 @@ class UIi18n {
     refreshLanguageFromSettings() {
         const configuredLanguage = this.getCurrentLanguageFromSettings();
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
-            this.loadLanguage(configuredLanguage);
+            if (configuredLanguage !== this.currentLanguage) {
+                this.loadLanguage(configuredLanguage);
+                // Update current language reference
+                this.currentLanguage = configuredLanguage;
+            }
         }
     }
 
@@ -303,8 +318,7 @@ class UIi18n {
             'fr': 'Français (French)',
             'ru': 'Русский (Russian)',
             'ja': '日本語 (Japanese)',
-            'zh': '中文 (Chinese)',
-            'pt': 'Português (Portuguese)'
+            'zh': '中文 (Chinese)'
          };
 
         // Hardcoded texts that are not part of the i18n system but need to be displayed

@@ -1,0 +1,128 @@
+{
+  "metadata": {
+    "environment": {
+      "os": "win32 10.0.19045",
+      "nodeVersion": "v22.14.0",
+      "npmVersion": "unknown",
+      "cpu": "Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz",
+      "cpuCount": 8,
+      "memory": {
+        "total": "15.95 GB",
+        "free": "6.15 GB"
+      },
+      "architecture": "x64"
+    },
+    "configuration": {
+      "benchmarkVersion": "1.0.0",
+      "datasetSizes": [
+        100,
+        1000,
+        10000,
+        50000
+      ],
+      "iterations": 3,
+      "warmupIterations": 1
+    }
+  },
+  "benchmarks": {
+    "translationAnalysis": {
+      "100": {
+        "executionTime": {
+          "mean": 63.38053333333334,
+          "min": 62.872000000000014,
+          "max": 64.19599999999997,
+          "stdDev": 0.5824660524203924
+        },
+        "memory": {
+          "mean": 413664,
+          "min": 410192,
+          "max": 418960,
+          "stdDev": 3804.7941687648054
+        },
+        "throughput": 1577.7715134405096
+      },
+      "1000": {
+        "executionTime": {
+          "mean": 514.3662333333333,
+          "min": 506.3957999999999,
+          "max": 518.55,
+          "stdDev": 5.638278563730441
+        },
+        "memory": {
+          "mean": -509304,
+          "min": -1427104,
+          "max": 1116536,
+          "stdDev": 1152827.4209091316
+        },
+        "throughput": 1944.1400605158958
+      },
+      "10000": {
+        "executionTime": {
+          "mean": 5238.7916,
+          "min": 5207.5767,
+          "max": 5275.576700000001,
+          "stdDev": 28.038905661361238
+        },
+        "memory": {
+          "mean": -296256,
+          "min": -4781136,
+          "max": 4769496,
+          "stdDev": 3920603.8744173073
+        },
+        "throughput": 1908.8371448102653
+      },
+      "50000": {
+        "executionTime": {
+          "mean": 30809.745533333335,
+          "min": 30595.079999999994,
+          "max": 31170.9761,
+          "stdDev": 256.93716643802776
+        },
+        "memory": {
+          "mean": 2144794.6666666665,
+          "min": -3768,
+          "max": 5673264,
+          "stdDev": 2514660.9962099376
+        },
+        "throughput": 1622.863127704335
+      }
+    },
+    "configurationValidation": {
+      "minimal": {
+        "executionTime": {
+          "mean": 15.73179999999896,
+          "min": 15.374299999995856,
+          "max": 15.983399999997346,
+          "stdDev": 0.2596944486650974
+        }
+      },
+      "standard": {
+        "executionTime": {
+          "mean": 15.74586666666437,
+          "min": 15.392800000001444,
+          "max": 15.934399999998277,
+          "stdDev": 0.24984802491569535
+        }
+      },
+      "full": {
+        "executionTime": {
+          "mean": 20.419133333334077,
+          "min": 15.808099999994738,
+          "max": 29.4545999999973,
+          "stdDev": 6.389493892491959
+        }
+      }
+    },
+    "memoryUsage": {
+      "largeDatasetSize": 25000,
+      "memoryUsage": {
+        "heapUsed": -3343760,
+        "heapTotal": 13541376,
+        "external": 0,
+        "rss": -1200128
+      },
+      "executionTime": 13924.57740000001
+    }
+  },
+  "timestamp": "2025-08-05T22:40:08.374Z"
+}

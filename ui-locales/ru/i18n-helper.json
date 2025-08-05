@@ -1,9 +1,0 @@
-{
-  "i18n_helper": {
-    "translation_file_not_found": "Файл перевода не найден: {translationFile}",
-    "error_loading_translations": "Ошибка загрузки переводов: {errorMessage}",
-    "translation_not_found": "Перевод не найден для ключа: {key}",
-    "translation_key_not_string": "Ключ перевода не разрешается в строку: {key}",
-    "error_reading_locales_directory": "Ошибка чтения каталога локалей: {errorMessage}"
-  }
-}
