@@ -1,7 +1,7 @@
 # I18N Management Toolkit Documentation Index
 
 **Version:** 1.5.0  
-**Last Updated:** 08/08/2025  
+**Last Updated:** 2025-05-08  
 **Maintainer:** Vladimir Noskov  
 
 ## 📚 Documentation Overview
@@ -38,11 +38,6 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Console Mismatch Bug Report v1.5.0](./reports/CONSOLE_MISMATCH_BUG_REPORT_v1.5.0.md)** - Console translation mismatch issues
 - **[Translation Bug Report v1.5.0](./reports/TRANSLATION_BUG_REPORT_v1.5.0.md)** - Translation-related bug reports
 
-### 📋 Release Notes
-- **[Release Notes v1.3.0](./docs/release-notes/v1.3.0.md)** - Script directory configuration & path resolution fixes
-- **[Release Notes v1.0.0](./release-notes/RELEASE_NOTES_v1.0.0.md)** - First stable release notes
-- **[Release Notes v1.6.1](./release-notes/RELEASE_NOTES_v1.6.1.md)** - Previous release notes
-- **[Release Notes v1.6.0](./release-notes/RELEASE_NOTES_v1.6.0.md)** - Previous release notes
 
 ### 🐛 Debug & Troubleshooting
 - **[Debug Documentation](./debug/DEBUG_README.md)** - Debug tools and troubleshooting
@@ -115,7 +110,7 @@ npm run i18ntk:settings          # Manage settings
 ## 🔄 Version Management
 
 **Current Version:** 1.5.0  
-**Release Date:** 08/08/2025  
+**Release Date:** 08/05/2025  
 **Previous Versions:** 1.4.1, 1.4.0, 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
 
 ### Version History
@@ -138,7 +133,7 @@ For contribution guidelines, please refer to:
 
 - **Issues:** [GitHub Issues](https://github.com/vladnoskv/i18n-management-toolkit/issues)
 - **Documentation:** This index and linked documents
-- **Email:** vladnoskv@gmail.com
+- **Email:** vladno@hotmail.co.uk
 
 ---
 

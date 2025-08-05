@@ -943,7 +943,7 @@ RUN i18ntk validate --strict
 
 ## 📊 Project Health
 
-- ✅ **Stable Release**: v1.4.2
+- ✅ **Stable Release**: v1.5.0
 - ✅ **Production Ready**: Available on npm with growing adoption
 - ✅ **Security Audited**: Regular security reviews
 - ✅ **Performance Optimized**: Sub-second analysis times
@@ -968,7 +968,7 @@ RUN i18ntk validate --strict
 | **Large Dataset Performance** | 50K translations in ~29 seconds |
 | **Memory Efficiency** | Stable memory usage across all dataset sizes |
 
-## 🚀 Latest Improvements (v1.4.2+)
+## 🚀 Latest Improvements (v1.5.0+)
 
 ### 🎯 Zero Dependencies Achievement
 - **Removed i18next dependency**: Package now has zero runtime dependencies

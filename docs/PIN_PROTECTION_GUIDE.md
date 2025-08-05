@@ -244,10 +244,10 @@ await settingsManager.updateSetting('security.pinProtection.protectedScripts.deb
 
 ## Migration Guide
 
-### From v1.3.x to v1.4.2
+### From v1.3.x to v1.5.0
 
 1. **Backup**: Create backup of existing configuration
-2. **Update**: Install v1.4.2
+2. **Update**: Install v1.5.0
 3. **Configure**: Enable PIN protection as needed
 4. **Test**: Verify all scripts work with new protection
 

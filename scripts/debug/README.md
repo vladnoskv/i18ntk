@@ -29,6 +29,6 @@ node scripts/debug/performance-profiler.js
 
 Debug logs and reports are saved to `scripts/debug/logs/` with timestamps.
 
-## Version 1.4.2 Update
+## Version 1.5.0 Update
 
-**Critical Bug Fix**: These debug tools were moved from `/dev/debug/` to `/scripts/debug/` in v1.4.2 to resolve MODULE_NOT_FOUND errors when using `npx i18ntk`.
+**Critical Bug Fix**: These debug tools were moved from `/dev/debug/` to `/scripts/debug/` in v1.5.0 to resolve MODULE_NOT_FOUND errors when using `npx i18ntk`.
