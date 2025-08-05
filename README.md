@@ -203,6 +203,23 @@ npm run benchmark:baseline
 
 📈 **Detailed Performance Analysis**: See [benchmarks/PERFORMANCE_ANALYSIS.md](benchmarks/PERFORMANCE_ANALYSIS.md) for comprehensive performance data, regression thresholds, and usage guidelines.
 
+## ⚙️ CLI Interaction Showcase
+
+Explore how the command-line workflow looks in practice. All prompts and confirmations are fully localized and consistent with the UI experience.
+
+| Screenshot | Description |
+|------------|-------------|
+| ![NPX Init – Decline](./docs/screenshots/i18ntk-npx-n.PNG) | The `npx i18ntk init` command detects no existing i18n framework and shows a confirmation prompt (user selected **No**). |
+| ![NPX Init – Accept](./docs/screenshots/i18ntk-npx-y.PNG) | The same prompt when the user selects **Yes**, proceeding with toolkit initialization. |
+| ![Analyze Command](./docs/screenshots/i18ntk-analyze.PNG) | Output from `i18ntk analyze` summarising translation coverage and detected issues. |
+| ![Validate Command](./docs/screenshots/i18ntk-validate.PNG) | `i18ntk validate` ensuring 100 % key coverage before deployment. |
+| ![Delete Reports](./docs/screenshots/i18ntk-delete.PNG) | Safety prompt when removing obsolete validation reports via `i18ntk delete`. |
+| ![Completion Summary](./docs/screenshots/i18ntk-complete.PNG) | Success message after all tasks complete with zero errors. |
+| ![Manage Interface](./docs/screenshots/i18ntk-manage.PNG) | Snapshot of the interactive `i18ntk manage` flow in the terminal. |
+| ![PIN Setup – After Confirmation](./docs/screenshots/i18ntk-init-admin-1.PNG) | Final step of admin PIN setup showing confirmation screen. |
+
+These terminal screenshots complement the graphical dashboard, giving a full picture of both **UI** and **CLI** workflows.
+
 ## 🛠️ Framework Integration Guide
 
 ### React / Next.js Integration
@@ -613,22 +630,7 @@ Demonstration of seamless language switching:
 
 ---
 
-## ⚙️ CLI Interaction Showcase
 
-Explore how the command-line workflow looks in practice. All prompts and confirmations are fully localized and consistent with the UI experience.
-
-| Screenshot | Description |
-|------------|-------------|
-| ![NPX Init – Decline](./docs/screenshots/i18ntk-npx-n.PNG) | The `npx i18ntk init` command detects no existing i18n framework and shows a confirmation prompt (user selected **No**). |
-| ![NPX Init – Accept](./docs/screenshots/i18ntk-npx-y.PNG) | The same prompt when the user selects **Yes**, proceeding with toolkit initialization. |
-| ![Analyze Command](./docs/screenshots/i18ntk-analyze.PNG) | Output from `i18ntk analyze` summarising translation coverage and detected issues. |
-| ![Validate Command](./docs/screenshots/i18ntk-validate.PNG) | `i18ntk validate` ensuring 100 % key coverage before deployment. |
-| ![Delete Reports](./docs/screenshots/i18ntk-delete.PNG) | Safety prompt when removing obsolete validation reports via `i18ntk delete`. |
-| ![Completion Summary](./docs/screenshots/i18ntk-complete.PNG) | Success message after all tasks complete with zero errors. |
-| ![Manage Interface](./docs/screenshots/i18ntk-manage.PNG) | Snapshot of the interactive `i18ntk manage` flow in the terminal. |
-| ![PIN Setup – After Confirmation](./docs/screenshots/i18ntk-init-admin-1.PNG) | Final step of admin PIN setup showing confirmation screen. |
-
-These terminal screenshots complement the graphical dashboard, giving a full picture of both **UI** and **CLI** workflows.
 
 ### 🎯 UI Features Highlight
 - **Complete translation coverage** across all interface elements
