@@ -144,16 +144,30 @@
       "🔄 Reset to defaults functionality for PIN protection settings",
       "🧪 Enhanced test coverage for security features",
       "📊 Updated documentation for new security features",
-      "🌐 Complete translation updates across all 8 languages"
+      "🌐 Complete translation updates across all 7 languages",
+      "📦 Package size optimization - reduced from 536kB to under 499kB",
+      "🚀 Enhanced framework support for Next.js, Nuxt.js, SvelteKit, and more",
+      "🔧 Added support for TypeScript i18n configurations",
+      "📱 Extended mobile framework support including React Native and Ionic"
     ],
     "breakingChanges": [],
-    "deprecations": ["<1.3.0", "1.0.x", "1.1.x", "1.2.x"],
+    "deprecations": ["<1.5.0", "1.0.x", "1.1.x", "1.2.x", "1.3.x", "1.4.x"],
     "nextVersion": "1.6.0",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
       "vue-i18n": ">=9.0.0",
-      "angular-i18n": ">=12.0.0"
+      "angular-i18n": ">=12.0.0",
+      "next-i18next": ">=13.0.0",
+      "nuxt-i18n": ">=8.0.0",
+      "svelte-i18n": ">=3.0.0",
+      "sveltekit-i18n": ">=2.0.0",
+      "react-native-localize": ">=2.0.0",
+      "expo-localization": ">=14.0.0",
+      "ionic-angular": ">=6.0.0",
+      "ember-intl": ">=5.0.0",
+      "formatjs": ">=2.0.0",
+      "i18next": ">=21.0.0"
     }
   }
 }
