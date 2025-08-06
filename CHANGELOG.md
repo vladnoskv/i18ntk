@@ -2,7 +2,9 @@
 
 All notable changes to the i18n Management Toolkit will be documented in this file.
 
-**Current Version:** 1.5.2
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## [1.5.2] - 2025-08-06
 

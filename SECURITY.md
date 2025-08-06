@@ -1,5 +1,9 @@
 # Security Guide
 
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
 This document outlines the security measures and best practices implemented in the i18n Management Toolkit.
 
 ## 🔐 PIN / Secret Handling
@@ -124,5 +128,5 @@ When deploying as a web application, implement:
 ---
 
 **Last Updated**: 2025-08-06
-**Version**: 1.5.1
+**Version**: 1.5.2
 **Maintainer**: i18n Management Toolkit Team

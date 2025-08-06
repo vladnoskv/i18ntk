@@ -1,6 +1,6 @@
 # i18ntk API Reference
 
-**Version:** 1.5.1  
+**Version:** 1.5.2  
 **Last Updated:** 2025-08-06  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 

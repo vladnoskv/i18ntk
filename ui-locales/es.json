@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.5.1",
+    "version": "1.5.2",
     "consolidated": "2025-08-06T14:36:37.481Z",
     "sourceFiles": 256
   },
@@ -933,7 +933,7 @@
   "translation_replacement_complete": "\n✅ ¡Reemplazo de traducciones completado!",
   "total_replacements": "📊 Total de reemplazos: {count}",
   "dry_run_mode": "\n⚠️ MODO SIMULADO - No se modificaron archivos",
-  "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.5.1",
+  "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.5.2",
   "tool_separator": "======================================\n",
   "dry_run_warning": "⚠️ Ejecutando en modo simulado - no se modificarán archivos\n",
   "error_during_replacement": "❌ Error durante el reemplazo de traducciones:"

@@ -1,5 +1,9 @@
 # Development Scripts and Tools
 
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
 This folder contains development scripts, test files, and debugging tools to help maintain and improve the i18nTK toolkit.
 
 ## 📁 Folder Structure

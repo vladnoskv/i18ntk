@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.5.1",
+    "version": "1.5.2",
   "consolidated": "2025-08-06T14:36:37.488Z",
     "sourceFiles": 256
   },
@@ -934,7 +934,7 @@
     "translation_replacement_complete": "\n✅ Ersetzung der Übersetzungen abgeschlossen!",
     "total_replacements": "📊 Gesamt ersetzte Einträge: {count}",
     "dry_run_mode": "\n⚠️ DRY-RUN-MODUS – Keine Dateien wurden verändert",
-    "tool_title": "🌍 Native Translation Replacer v1.5.1",
+    "tool_title": "🌍 Native Translation Replacer v1.5.2",
     "tool_separator": "======================================\n",
     "dry_run_warning": "⚠️ DRY-RUN aktiv – Es werden keine Dateien verändert\n",
     "error_during_replacement": "❌ Fehler während der Ersetzung der Übersetzungen:"

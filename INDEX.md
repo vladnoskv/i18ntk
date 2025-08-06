@@ -1,8 +1,8 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.5.1  
+**Version:** 1.5.2  
 **Last Updated:** 2025-08-06  
-**Maintainer:** Vladimir Noskov  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 📚 Documentation Overview
 
@@ -41,7 +41,7 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Debug Documentation](./debug/DEBUG_README.md)** - Debug tools and troubleshooting
 - **[Debug Tools Overview](./debug/DEBUG_TOOLS.md)** - Available debug utilities
 
-## 🆕 What's New in v1.5.1
+## 🆕 What's New in v1.5.2
 
 ### Major Features
 - **🚨 Critical Bug Fix** - Fixed MODULE_NOT_FOUND error in v1.4.1
@@ -107,12 +107,12 @@ npm run i18ntk:settings          # Manage settings
 
 ## 🔄 Version Management
 
-**Current Version:** 1.5.1  
+**Current Version:** 1.5.2  
 **Release Date:** 08/06/2025  
 **Previous Versions:** 1.5.1, 1.5.0, 1.4.2, 1.4.1, 1.4.0, 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
 
 ### Version History
-- **1.5.1** - 📚 **Documentation Update** - Streamlined README, updated GitHub URLs, clarified framework usage  
+- **1.5.2** - 📚 **Documentation Update** - Streamlined README, updated GitHub URLs, clarified framework usage  
 - **1.4.2** - 🚨 **Critical Bug Fix** - Fixed MODULE_NOT_FOUND error, relocated debug tools for proper npm package inclusion
 - **1.4.1** - 🔧 **Debug Tools Streamlining & Package Optimization** - Streamlined debug menu, removed development tools from production builds, improved package structure for production deployment
 - **1.3.0** - 🎯 **Script Directory Configuration & Path Resolution** - Per-script directory configuration, fixed path resolution, enhanced internationalization support
@@ -136,4 +136,4 @@ For contribution guidelines, please refer to:
 
 ---
 
-**Note:** This documentation is automatically maintained and updated with each release. Last updated on 08/06/2025 for version 1.5.1.
+**Note:** This documentation is automatically maintained and updated with each release. Last updated on 08/06/2025 for version 1.5.2.

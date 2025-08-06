@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Console Key Checker v1.5.1
+ * Console Key Checker v1.5.2
  * 
  * This script finds missing translation keys by comparing the source language (en.json)
  * with other language files and adds [NOT TRANSLATED] placeholders for missing keys.
@@ -351,7 +351,7 @@ class ConsoleKeyChecker {
      * Main execution function
      */
     async run() {
-        console.log('🔍 Console Key Checker v1.5.1');
+        console.log('🔍 Console Key Checker v1.5.2');
         console.log('===============================\n');
         
         if (this.dryRun) {

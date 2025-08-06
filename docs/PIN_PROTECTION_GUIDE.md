@@ -1,8 +1,12 @@
 # PIN Protection Guide
 
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
 ## Overview
 
-The i18n Management Toolkit v1.5.1 includes advanced PIN protection capabilities, providing granular security control over sensitive operations. This guide covers the complete PIN protection system, from basic setup to advanced configuration.
+The i18n Management Toolkit v1.5.2 includes advanced PIN protection capabilities, providing granular security control over sensitive operations. This guide covers the complete PIN protection system, from basic setup to advanced configuration.
 
 ## PIN Protection Features
 

@@ -2,7 +2,9 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.5.2 (2025-08-06) - i18n Internationalization Toolkit
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
@@ -10,16 +12,16 @@
 
 > **Zero runtime dependencies** | **70% smaller package** | **Works with any framework** | **Enterprise-grade security**
 
-**Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with i18next, LinguiJS, and other frameworks using standard JSON translation files. 
+**Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
 
 **No runtime dependencies!**
 
-**Key Features of v1.5.2** (Optional Update)
+**Key Features of v1.5.2**
 - Further package optimizations reduced size from 536kB to under 499kB
 - Updated documentation to reflect more up to date and clear instructions
 - Added more detailed examples and use cases in the documentation.
 - Changed GitHub urls to `https://github.com/vladnoskv/i18ntk` for reporting a bug, and across documentation.
-- No core functionality was changed.
+- No core functionality was changed, minor changes and removal of legacy code.
 
 ## 🚀 Quick Start
 
@@ -199,7 +201,7 @@ npx i18ntk manage
 - **Repository**: https://github.com/vladnoskv/i18ntk
 - **NPM Registry**: https://www.npmjs.com/package/i18ntk
 - **License**: MIT
-- **Current Version**: 1.5.1 (Released: August 6, 2025)
+- **Current Version**: 1.5.2 (Released: August 6, 2025)
 
 ### **🔍 Identity Disclaimer**
 
@@ -208,11 +210,11 @@ This package (`i18ntk` by vladnoskv) is an **independent, standalone internation
 ### **✅ Version Accuracy Guarantee**
 
 All version information is current as of **August 6, 2025**:
-- **Package Version**: 1.5.1
+- **Package Version**: 1.5.2
 - **Release Date**: 2025-08-06
 - **Node.js Compatibility**: >=16.0.0
 - **Zero Runtime Dependencies**: Verified ✓
-- **Package Size**: 536KB unpacked, 111.8KB packed
+- **Package Size**: 499.0kB unpacked, 103.5kB packed
 
 ## 📚 Documentation
 

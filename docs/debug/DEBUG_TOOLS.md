@@ -1,6 +1,6 @@
 # i18ntk Debug Tools
 
-**Version:** 1.5.1 (06/08/2025)
+**Version:** 1.5.2 (06/08/2025)
 
 ## Overview
 

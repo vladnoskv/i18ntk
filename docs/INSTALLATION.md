@@ -1,6 +1,8 @@
 # Installation Guide
 
-**Version:** 1.5.1 (08/06/2025) - Latest Release with Enhanced Documentation
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## Quick Start
 

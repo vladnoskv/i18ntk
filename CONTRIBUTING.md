@@ -1,5 +1,9 @@
 # Contributing to i18n Management Toolkit
 
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
 Thank you for your interest in contributing to the i18n Management Toolkit! This document provides comprehensive guidelines for contributors, including setup instructions, contribution processes, and community standards.
 
 ## Development Setup

@@ -1,10 +1,10 @@
-# 🤖 AI Agent Guidelines for I18N Management Toolkit v1.5.1
+# 🤖 AI Agent Guidelines for I18N Management Toolkit v1.5.2
 
 ## Overview
 
-This document provides essential guidelines for AI agents working with the I18N Management Toolkit v1.5.1. It explains how to properly handle translations, understand the enhanced security architecture, and ensure accurate localization with complete console translation support.
+This document provides essential guidelines for AI agents working with the I18N Management Toolkit v1.5.2. It explains how to properly handle translations, understand the enhanced security architecture, and ensure accurate localization with complete console translation support.
 
-## 🆕 Version 1.5.1 Key Features
+## 🆕 Version 1.5.2 Key Features
 
 - **🌐 100% Console Translation Support**: All console output is fully internationalized
 - **🔒 Enhanced Admin PIN Security**: Modern encrypted PIN with session-based authentication
@@ -95,7 +95,7 @@ formatMessage({ id: 'key.name' }) // React Intl
 - Maintain consistency in terminology
 - Example: `[TRANSLATED]Settings` → `设置`
 
-## 📁 File Structure Understanding (v1.5.1)
+## 📁 File Structure Understanding (v1.5.2)
 
 ### Core Architecture
 ```
@@ -168,7 +168,7 @@ utils/
 └── security.js             # Security utilities
 ```
 
-## 🔧 Enhanced Translation Workflow for AI Agents (v1.5.1)
+## 🔧 Enhanced Translation Workflow for AI Agents (v1.5.2)
 
 ### Step 1: Comprehensive Analysis & Detection
 1. Search for `[NOT_TRANSLATED]` markers in project files
@@ -217,11 +217,11 @@ utils/
 - ❌ Mix languages within the same file
 - ❌ Leave `[TRANSLATED]` markers after translation
 
-## 🔍 Enhanced Search Commands for AI Agents (v1.5.1)
+## 🔍 Enhanced Search Commands for AI Agents (v1.5.2)
 
 ### Essential Search Patterns
 ```bash
-# Find all translation markers (updated for v1.5.1)
+# Find all translation markers (updated for v1.5.2)
 grep -r "\[NOT_TRANSLATED\]" .
 grep -r "\[TRANSLATED\]" .
 
@@ -244,7 +244,7 @@ grep -r "[a-zA-Z]" locales/de/ --include="*.json" | grep -v "\"[a-zA-Z]*\":"
 grep -r "[a-zA-Z]" locales/es/ --include="*.json" | grep -v "\"[a-zA-Z]*\":"
 ```
 
-### V1.5.1 Diagnostic Commands
+### V1.5.2 Diagnostic Commands
 ```bash
 # Run comprehensive translation analysis
 node main/i18ntk-analyze.js
@@ -293,7 +293,7 @@ node main/i18ntk-complete.js
 }
 ```
 
-## 🛠️ Enhanced Tools and Validation (v1.5.1)
+## 🛠️ Enhanced Tools and Validation (v1.5.2)
 
 ### Core Validation Commands
 ```bash
@@ -333,7 +333,7 @@ node main/i18ntk-init.js
 node dev/debug/console-key-checker.js
 ```
 
-## 📞 Support and Resources (v1.5.1)
+## 📞 Support and Resources (v1.5.2)
 
 - **Enhanced Security**: Modern AES-256-GCM encryption with session management
 - **Settings Configuration**: See `settings/settings-manager.js` for advanced configuration options

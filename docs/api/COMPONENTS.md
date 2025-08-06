@@ -1,8 +1,8 @@
 # I18N Management Toolkit - Components Documentation
 
-**Version:** 1.4.6  
-**Last Updated:** 26/07/2025  
-**Maintainer:** Vladimir Noskov  
+**Version:** 1.5.2  
+**Last Updated:** 2025-08-06  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 📋 Overview
 
