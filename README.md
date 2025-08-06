@@ -10,14 +10,14 @@
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
-> **Zero runtime dependencies** | **70% smaller package** | **Works with any framework** | **Enterprise-grade security**
+> **Zero runtime dependencies** | **70% smaller package <500kB ** | **Works with any framework** | **Enterprise-grade security**
 
 **Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
 
 **No runtime dependencies!**
 
 **Key Features of v1.5.2**
-- Further package optimizations reduced size from 536kB to under 499kB
+- Further package optimizations reduced size from 536kB to under 500kB
 - Updated documentation to reflect more up to date and clear instructions
 - Added more detailed examples and use cases in the documentation.
 - Changed GitHub urls to `https://github.com/vladnoskv/i18ntk` for reporting a bug, and across documentation.

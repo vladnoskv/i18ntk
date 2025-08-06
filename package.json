@@ -145,10 +145,8 @@
       "🧪 Enhanced test coverage for security features",
       "📊 Updated documentation for new security features",
       "🌐 Complete translation updates across all 7 languages",
-      "📦 Package size optimization - reduced from 536kB to under 499kB",
-      "🚀 Enhanced framework support for Next.js, Nuxt.js, SvelteKit, and more",
-      "🔧 Added support for TypeScript i18n configurations",
-      "📱 Extended mobile framework support including React Native and Ionic"
+      "📦 Package size optimization - reduced from 536kB to under 500kB",
+      "🚀 Enhanced framework support for Next.js, Nuxt.js, SvelteKit, and more"
     ],
     "breakingChanges": [],
     "deprecations": ["<1.5.0", "1.0.x", "1.1.x", "1.2.x", "1.3.x", "1.4.x"],
