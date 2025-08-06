@@ -12,8 +12,8 @@ All notable changes to the i18n Management Toolkit will be documented in this fi
 - **Package size optimization** - Further reduced from 536kB to under 499kB (unpacked)
 - **Updated documentation** - More up-to-date and clear instructions
 - **Enhanced examples** - Added detailed use cases and examples throughout documentation
-- **GitHub URL updates** - Changed all GitHub URLs to `https://github.com/vladnoskv/i18ntk` for bug reporting and documentation
-- **No core functionality changes** - This is a documentation and optimization update
+- **GitHub URL updates** - Changed all GitHub URLs to `https://github.com/vladnoskv/i18ntk`
+- **No core functionality changes** - This is a documentation and optimization update.
 
 ### 🔧 Changed
 - **Documentation clarity** - Improved instructions and examples across all documentation
