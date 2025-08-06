@@ -14,8 +14,6 @@
 
 **Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
 
-**No runtime dependencies!**
-
 **Key Features of v1.5.2**
 - Further package optimizations reduced size from 536kB to under 500kB
 - Updated documentation to reflect more up to date and clear instructions
@@ -74,19 +72,6 @@ npx i18ntk analyze       # Analyze translations
 - **70% package size reduction** - From 1.7MB to 499kB
 - **Verified benchmarks** - 1,600-1,900 operations/second across all scales
 
-#### 🔧 Running Performance Tests
-```bash
-# Full benchmark suite
-npm run benchmark
-
-# Quick regression check (CI mode)
-npm run benchmark:ci
-
-# Update baseline measurements
-npm run benchmark:baseline
-```
-
-📈 **Detailed Performance Analysis**: See [benchmarks/PERFORMANCE_ANALYSIS.md](benchmarks/PERFORMANCE_ANALYSIS.md)
 
 ## 🎯 Framework Integration
 
@@ -223,11 +208,8 @@ Complete documentation available at [vladnoskv/i18ntk](https://github.com/vladno
 - **[Setup Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/SETUP.md)** - Getting started
 - **[CLI Commands](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/COMMANDS.md)** - Command reference
 - **[Framework Integration](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/FRAMEWORK_INTEGRATION.md)** - Framework setup
-- **[Security Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/PIN_PROTECTION_GUIDE.md)** - PIN protection
 - **[Language Support](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/LANGUAGE_SUPPORT.md)** - Language setup
-- **[Debug Tools](https://github.com/vladnoskv/i18ntk/blob/main/docs/debug/DEBUG_TOOLS.md)** - Troubleshooting
 - **[Changelog](https://github.com/vladnoskv/i18ntk/blob/main/CHANGELOG.md)** - Version history
-- **[Contributing](https://github.com/vladnoskv/i18ntk/blob/main/CONTRIBUTING.md)** - Development guidelines
 
 ---
 
