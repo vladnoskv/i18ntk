@@ -12,7 +12,7 @@
 
 **Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
 
-> **Zero dependencies** | **70% smaller package** | **Works with any framework** | **Enterprise-grade security**
+> **Zero dependencies** | **71% smaller package** | **Works with any framework** | **Enterprise-grade security**
 
 **Key Features of v1.5.2**
 - Further package optimizations reduced size from 536kB to under 500kB
@@ -69,7 +69,7 @@ npx i18ntk analyze       # Analyze translations
 
 ### 📊 Performance & Reliability
 - **Zero runtime dependencies** - Pure Node.js implementation
-- **70% package size reduction** - From 1.7MB to 499kB
+- **71% package size reduction** - From 1.7MB to 499kB
 - **Verified benchmarks** - 1,600-1,900 operations/second across all scales
 
 
