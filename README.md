@@ -2,15 +2,14 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
+**Version:** 1.5.1 (2025-08-06) - i18n internationalization toolkit
+
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
 > **Zero runtime dependencies** | **70% smaller package** | **Works with any framework** | **Enterprise-grade security**
 
-⚠️ **Disclaimer**: This package (`i18ntk` by Vlad Noskov) is an independent internationalization management toolkit and is **not affiliated with** any other packages named "i18ntk" or similar i18n tools. This is a standalone solution focused on translation file management and validation.
-
-**Version:** 1.5.1 (2025-08-06) - i18n internationalization toolkit
 
 **Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with i18next, LinguiJS, and other frameworks using standard JSON translation files. **No runtime dependencies!**
 
@@ -196,19 +195,6 @@ npx i18ntk manage
 
 ---
 
-## ⭐ Trusted by Developers Worldwide
-
-**Join thousands of developers** who have streamlined their internationalization workflow with i18ntk.
-
-- ✅ **Zero configuration** - Works out of the box
-- ✅ **Production ready** - Battle-tested in enterprise environments  
-- ✅ **Active development** - Regular updates and improvements
-- ✅ **Community driven** - Built by developers, for developers
-
-### **Made with ❤️ for the developer community**
-
----
-
 ## ⚖️ Package Identity & Legal Notice
 
 ### **📋 Package Attribution**
@@ -220,9 +206,11 @@ npx i18ntk manage
 - **Current Version**: 1.5.1 (Released: August 6, 2025)
 
 ### **🔍 Identity Disclaimer**
+
 This package (`i18ntk` by vladnoskv) is an **independent, standalone internationalization management toolkit** and is **not affiliated with, endorsed by, or connected to** any other packages, tools, or services using similar names.
 
 ### **✅ Version Accuracy Guarantee**
+
 All version information is current as of **August 6, 2025**:
 - **Package Version**: 1.5.1
 - **Release Date**: 2025-08-06
@@ -242,3 +230,16 @@ Complete documentation available at [vladnoskv/i18ntk](https://github.com/vladno
 - **[Debug Tools](https://github.com/vladnoskv/i18ntk/blob/main/docs/debug/DEBUG_TOOLS.md)** - Troubleshooting
 - **[Changelog](https://github.com/vladnoskv/i18ntk/blob/main/CHANGELOG.md)** - Version history
 - **[Contributing](https://github.com/vladnoskv/i18ntk/blob/main/CONTRIBUTING.md)** - Development guidelines
+
+---
+
+## ⭐ Trusted by Developers Worldwide
+
+**Join hundreds (soon thousands) of developers** who have streamlined their internationalization workflow with i18ntk.
+
+- ✅ **Zero configuration** - Works out of the box
+- ✅ **Production ready** - Battle-tested in enterprise environments  
+- ✅ **Active development** - Regular updates and improvements
+- ✅ **Community driven** - Built by developers, for developers
+
+### **Made with ❤️ for the developer community** P.S I'm looking for a JOB!
