@@ -2,10 +2,27 @@
 
 All notable changes to the i18n Management Toolkit will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+**Current Version:** 1.5.2
 
-**Current Version:** 1.5.1
+## [1.5.2] - 2025-08-06
+
+### 🆕 Added
+- **Package size optimization** - Further reduced from 536kB to under 499kB (unpacked)
+- **Updated documentation** - More up-to-date and clear instructions
+- **Enhanced examples** - Added detailed use cases and examples throughout documentation
+- **GitHub URL updates** - Changed all GitHub URLs to `https://github.com/vladnoskv/i18ntk` for bug reporting and documentation
+- **No core functionality changes** - This is a documentation and optimization update
+
+### 🔧 Changed
+- **Documentation clarity** - Improved instructions and examples across all documentation
+- **URL standardization** - Consistent GitHub repository links throughout
+- **README.md** - Updated to reflect v1.5.2 and enhanced documentation
+
+### 📚 Documentation
+- **Comprehensive examples** - Added more detailed use cases and scenarios
+- **Bug reporting** - Updated GitHub URLs for issue tracking
+- **Setup guides** - Enhanced clarity with better examples
+- **Integration documentation** - Improved framework integration examples
 
 ## [1.5.1] - 2025-08-06
 
@@ -64,16 +81,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **File path validation** - Enhanced validation for invalid file paths and directory structures
 - **Write operation feedback** - Clearer error messages for file write failures
 - **Sample file creation** - Better error handling for sample translation file creation
-
-### 🎯 Translation Key Additions
-- **Added 7 new validation keys** across all language files:
-  - `noJsonFilesFound` - When no JSON files found in source directory
-  - `i18nDirectoryNotFound` - When i18n directory is missing
-  - `invalidDirectoryPaths` - When directory paths are invalid
-  - `invalidSampleFilePath` - When sample file path is invalid
-  - `failedToCreateSampleTranslationFile` - When sample file creation fails
-  - `invalidFilePathDetected` - When invalid file paths are detected
-  - `failedToWriteFile` - When file write operations fail
 
 ### 🛠️ Code Quality & Consistency
 - **Standardized error handling** - Consistent error message patterns across all scripts

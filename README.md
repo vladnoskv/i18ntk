@@ -2,7 +2,7 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.5.1 (2025-08-06) - i18n Internationalization Toolkit
+**Version:** 1.5.2 (2025-08-06) - i18n Internationalization Toolkit
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
@@ -14,16 +14,12 @@
 
 **No runtime dependencies!**
 
-**Key Features of v1.5.1:**
-- Complete internationalization management toolkit
-- Zero runtime dependencies
-- 70% package size reduction compared to 1.4.0
-- Framework-agnostic JSON translation support
-- Enhanced security with PIN protection
-- Enterprise-grade AES-256-GCM encryption
-- 7-language support (EN, DE, ES, FR, RU, JA, ZH)
-- Real-time analysis and validation
-- CI/CD ready workflows
+**Key Features of v1.5.2** (Optional Update)
+- Further package optimizations reduced size from 536kB to under 499kB
+- Updated documentation to reflect more up to date and clear instructions
+- Added more detailed examples and use cases in the documentation.
+- Changed GitHub urls to `https://github.com/vladnoskv/i18ntk` for reporting a bug, and across documentation.
+- No core functionality was changed.
 
 ## 🚀 Quick Start
 
@@ -47,7 +43,7 @@ npx i18ntk analyze       # Analyze translations
 - **Standard JSON format** - Compatible with i18next, LinguiJS, and more
 
 ### ⚡ **Lightning Fast**
-- **70% package size reduction** - From 1.7MB to just 499kB (unpacked) and 100kB (packed)
+- **71% package size reduction** - From 1.7MB to just 499kB (unpacked) and 100kB (packed)
 - **1,600-1,900 operations/second** - Benchmarked performance
 - **Instant startup** - No heavy dependencies to load
 
