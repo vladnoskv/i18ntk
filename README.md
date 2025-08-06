@@ -10,7 +10,7 @@
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
-> **Zero runtime dependencies** | **70% smaller package <500kB ** | **Works with any framework** | **Enterprise-grade security**
+> **Zero dependencies** | **70% smaller package ** | **Works with any framework** | **Enterprise-grade security**
 
 **Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
 
