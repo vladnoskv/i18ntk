@@ -6,7 +6,7 @@
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
-> **Zero runtime dependencies** | **68% smaller package** | **Works with any framework** | **Enterprise-grade security**
+> **Zero runtime dependencies** | **70% smaller package** | **Works with any framework** | **Enterprise-grade security**
 
 ⚠️ **Disclaimer**: This package (`i18ntk` by Vlad Noskov) is an independent internationalization management toolkit and is **not affiliated with** any other packages named "i18ntk" or similar i18n tools. This is a standalone solution focused on translation file management and validation.
 
@@ -17,7 +17,7 @@
 **Key Features of v1.5.1:**
 - Complete internationalization management toolkit
 - Zero runtime dependencies
-- 68% package size reduction
+- 70% package size reduction compared to 1.4.0
 - Framework-agnostic JSON translation support
 - Enhanced security with PIN protection
 - Enterprise-grade AES-256-GCM encryption
@@ -48,7 +48,7 @@ npx i18ntk analyze       # Analyze translations
 - **Standard JSON format** - Compatible with i18next, LinguiJS, and more
 
 ### ⚡ **Lightning Fast**
-- **68% package size reduction** - From 1.7MB to just 536KB
+- **70% package size reduction** - From 1.7MB to just 499kB (unpacked) and 100kB (packed)
 - **1,600-1,900 operations/second** - Benchmarked performance
 - **Instant startup** - No heavy dependencies to load
 
@@ -74,7 +74,7 @@ npx i18ntk analyze       # Analyze translations
 
 ### 📊 Performance & Reliability
 - **Zero runtime dependencies** - Pure Node.js implementation
-- **68% package size reduction** - From 1.7MB to 536KB
+- **70% package size reduction** - From 1.7MB to 499kB
 - **Verified benchmarks** - 1,600-1,900 operations/second across all scales
 
 #### 🔧 Running Performance Tests
@@ -90,31 +90,6 @@ npm run benchmark:baseline
 ```
 
 📈 **Detailed Performance Analysis**: See [benchmarks/PERFORMANCE_ANALYSIS.md](benchmarks/PERFORMANCE_ANALYSIS.md)
-
-## ⚙️ CLI Showcase
-
-Interactive prompts, validation, reports, and security features - all accessible via simple CLI commands.
-
-### 🎬 **Live Demo**
-
-```bash
-# Start with zero configuration
-npx i18ntk init
-
-# Get instant insights
-npx i18ntk analyze
-# → Found 247 keys across 5 languages
-# → 98.7% complete (3 missing translations)
-# → 0 validation errors
-
-# Interactive management
-npx i18ntk manage
-# → 📋 Main Menu
-# →    1. Translation Overview  2. Add Language  3. Find Missing
-# →    4. Validate Files       5. Generate Report 6. Settings
-```
-
-📖 **CLI Reference**: [docs/core/COMMANDS.md](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/COMMANDS.md)
 
 ## 🎯 Framework Integration
 
