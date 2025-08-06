@@ -94,9 +94,9 @@ i18ntk --language=pt
 
 **700+ downloads strong!** Thank you for being part of the i18ntk journey.
 
-- **GitHub Issues:** [Report bugs or request features](https://github.com/vladnoskv/i18n-management-toolkit-main/issues)
-- **Discussions:** [Join our community discussions](https://github.com/vladnoskv/i18n-management-toolkit-main/discussions)
-- **Documentation:** [Comprehensive guides and API reference](https://github.com/vladnoskv/i18n-management-toolkit-main#readme)
+- **GitHub Issues:** [Report bugs or request features](https://github.com/vladnoskv/i18ntk/issues)
+- **Discussions:** [Join our community discussions](https://github.com/vladnoskv/i18ntk/discussions)
+- **Documentation:** [Comprehensive guides and API reference](https://github.com/vladnoskv/i18ntk#readme)
 
 ---
 

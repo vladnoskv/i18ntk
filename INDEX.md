@@ -1,7 +1,7 @@
 # I18N Management Toolkit Documentation Index
 
-**Version:** 1.5.0  
-**Last Updated:** 2025-05-08  
+**Version:** 1.5.1  
+**Last Updated:** 2025-08-06  
 **Maintainer:** Vladimir Noskov  
 
 ## 📚 Documentation Overview
@@ -35,15 +35,13 @@ This documentation index provides comprehensive guidance for the I18N Management
 - **[Usage Reports](./reports/USAGE_README.md)** - Translation key usage documentation
 - **[Sizing Reports](./reports/SIZING_README.md)** - Translation sizing analysis documentation
 - **[Summary Reports](./reports/SUMMARY_README.md)** - Project summary documentation
-- **[Console Mismatch Bug Report v1.5.0](./reports/CONSOLE_MISMATCH_BUG_REPORT_v1.5.0.md)** - Console translation mismatch issues
-- **[Translation Bug Report v1.5.0](./reports/TRANSLATION_BUG_REPORT_v1.5.0.md)** - Translation-related bug reports
 
 
 ### 🐛 Debug & Troubleshooting
 - **[Debug Documentation](./debug/DEBUG_README.md)** - Debug tools and troubleshooting
 - **[Debug Tools Overview](./debug/DEBUG_TOOLS.md)** - Available debug utilities
 
-## 🆕 What's New in v1.5.0
+## 🆕 What's New in v1.5.1
 
 ### Major Features
 - **🚨 Critical Bug Fix** - Fixed MODULE_NOT_FOUND error in v1.4.1
@@ -109,11 +107,12 @@ npm run i18ntk:settings          # Manage settings
 
 ## 🔄 Version Management
 
-**Current Version:** 1.5.0  
-**Release Date:** 08/05/2025  
-**Previous Versions:** 1.4.1, 1.4.0, 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
+**Current Version:** 1.5.1  
+**Release Date:** 08/06/2025  
+**Previous Versions:** 1.5.1, 1.5.0, 1.4.2, 1.4.1, 1.4.0, 1.3.x, 1.2.x, 1.1.x, 1.0.x series 
 
 ### Version History
+- **1.5.1** - 📚 **Documentation Update** - Streamlined README, updated GitHub URLs, clarified framework usage  
 - **1.4.2** - 🚨 **Critical Bug Fix** - Fixed MODULE_NOT_FOUND error, relocated debug tools for proper npm package inclusion
 - **1.4.1** - 🔧 **Debug Tools Streamlining & Package Optimization** - Streamlined debug menu, removed development tools from production builds, improved package structure for production deployment
 - **1.3.0** - 🎯 **Script Directory Configuration & Path Resolution** - Per-script directory configuration, fixed path resolution, enhanced internationalization support
@@ -131,10 +130,10 @@ For contribution guidelines, please refer to:
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/vladnoskv/i18n-management-toolkit/issues)
+- **Issues:** [GitHub Issues](https://github.com/vladnoskv/i18ntk/issues)
 - **Documentation:** This index and linked documents
 - **Email:** vladno@hotmail.co.uk
 
 ---
 
-**Note:** This documentation is automatically maintained and updated with each release. Last updated on 12/19/2024 for version 1.5.0.
+**Note:** This documentation is automatically maintained and updated with each release. Last updated on 08/06/2025 for version 1.5.1.

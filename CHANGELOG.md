@@ -5,7 +5,27 @@ All notable changes to the i18n Management Toolkit will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**Current Version:** 1.5.0
+**Current Version:** 1.5.1
+
+## [1.5.1] - 2025-08-06
+
+### 🆕 Added
+- **Framework clarification documentation** - Explicitly states that frameworks are optional
+- **Streamlined README** - Concise overview with detailed documentation links
+- **Updated GitHub URL** - New repository location at [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+- **Enhanced compatibility documentation** - Clear guidance for framework vs. framework-free usage
+
+### 🔧 Changed
+- **Documentation structure** - Moved detailed content to GitHub docs
+- **Version references** - Updated all documentation to v1.5.1
+- **GitHub URLs** - Updated to new repository location
+- **README.md** - Streamlined with documentation links instead of detailed content
+
+### 📚 Documentation
+- **Framework integration guide** - Clarified that frameworks are optional
+- **Setup documentation** - Updated installation and configuration guides
+- **Troubleshooting** - Added framework-specific guidance
+- **Community resources** - Updated all links to new repository
 
 ## [1.5.0] - 2025-08-05
 

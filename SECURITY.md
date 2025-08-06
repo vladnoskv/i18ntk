@@ -75,7 +75,6 @@ This document outlines the security measures and best practices implemented in t
 ### Before Deployment
 - [ ] Run `npm audit` and address all high/critical issues
 - [ ] Verify all secrets use environment variables
-- [ ] Confirm AES-256-GCM implementation uses unique IVs
 - [ ] Test PIN verification with timing attack resistance
 - [ ] Review dependency tree for known vulnerabilities
 
@@ -90,7 +89,7 @@ This document outlines the security measures and best practices implemented in t
 If you discover a security vulnerability, please:
 
 1. **DO NOT** create a public GitHub issue
-2. Email security concerns to: [maintainer email]
+2. Email security concerns to: vladno@hotmail.co.uk
 3. Provide detailed reproduction steps
 4. Allow reasonable time for response before disclosure
 
@@ -124,6 +123,6 @@ When deploying as a web application, implement:
 
 ---
 
-**Last Updated**: 2024-12-19
-**Version**: 1.0.0
+**Last Updated**: 2025-08-06
+**Version**: 1.5.1
 **Maintainer**: i18n Management Toolkit Team

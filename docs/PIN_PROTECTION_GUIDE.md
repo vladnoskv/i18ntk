@@ -2,7 +2,7 @@
 
 ## Overview
 
-The i18n Management Toolkit v1.5.0 includes advanced PIN protection capabilities, providing granular security control over sensitive operations. This guide covers the complete PIN protection system, from basic setup to advanced configuration.
+The i18n Management Toolkit v1.5.1 includes advanced PIN protection capabilities, providing granular security control over sensitive operations. This guide covers the complete PIN protection system, from basic setup to advanced configuration.
 
 ## PIN Protection Features
 

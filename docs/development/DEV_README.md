@@ -1,6 +1,6 @@
 # i18ntk Development Guide
 
-**Version:** 1.4.2 (05/08/2025)
+**Version:** 1.5.1 (06/08/2025)
 
 ## Overview
 

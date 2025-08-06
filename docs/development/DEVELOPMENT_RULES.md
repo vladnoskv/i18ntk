@@ -33,7 +33,7 @@ This document outlines the essential rules and guidelines that must be followed 
 ```
 project-root/
 ├── i18ntk-*.js           # Core scripts with i18ntk- prefix
-├── dev/                   # Development tools and tests
+├── dev/                  # Development tools and tests
 │   ├── tests/            # Test scripts
 │   ├── debug/            # Debug tools
 │   └── scripts/          # Development utilities

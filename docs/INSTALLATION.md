@@ -1,6 +1,6 @@
 # Installation Guide
 
-**Version:** 1.4.2 (05/08/2025) - Stable Release with Critical Bug Fixes
+**Version:** 1.5.1 (08/06/2025) - Latest Release with Enhanced Documentation
 
 ## Quick Start
 
@@ -47,6 +47,8 @@ yarn global add i18ntk
 
 ## Framework Setup
 
+**Note:** Frameworks are optional - i18ntk works with or without i18n frameworks. We recommend using a framework for larger projects.
+
 ### React
 ```bash
 npm install i18ntk --save-dev
@@ -71,6 +73,12 @@ npm install i18ntk --save-dev
 npx i18ntk init
 ```
 
+### Framework-Free Usage
+```bash
+npm install i18ntk --save-dev
+npx i18ntk init --no-framework
+```
+
 ## Configuration
 
 Create `i18ntk-config.json` in your project root:
@@ -93,6 +101,6 @@ Create `i18ntk-config.json` in your project root:
 
 ## Support
 
-- **Issues:** [GitHub Issues](https://github.com/vladnoskv/i18n-management-toolkit-main/issues)
+- **Issues:** [GitHub Issues](https://github.com/vladnoskv/i18ntk/issues)
 - **Documentation:** [Complete Guide](README.md)
 - **Examples:** [Framework Examples](examples/)

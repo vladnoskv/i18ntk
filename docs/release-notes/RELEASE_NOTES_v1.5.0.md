@@ -215,9 +215,9 @@ npm publish
 Thank you for being part of the i18ntk evolution! This major architectural improvement sets the foundation for future enhancements.
 
 - **Migration Issues:** Use `npm run migrate:help`
-- **GitHub Issues:** [Report migration problems](https://github.com/vladnoskv/i18n-management-toolkit-main/issues)
-- **Discussions:** [Migration support forum](https://github.com/vladnoskv/i18n-management-toolkit-main/discussions)
-- **Documentation:** [Complete v1.5.0 guide](https://github.com/vladnoskv/i18n-management-toolkit-main#readme)
+- **GitHub Issues:** [Report migration problems](https://github.com/vladnoskv/i18ntk/issues)
+- **Discussions:** [Migration support forum](https://github.com/vladnoskv/i18ntk/discussions)
+- **Documentation:** [Complete v1.5.0 guide](https://github.com/vladnoskv/i18ntk#readme)
 
 ---
 

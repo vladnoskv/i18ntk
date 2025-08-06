@@ -2,10 +2,6 @@
 
 Thank you for your interest in contributing to the i18n Management Toolkit! This document provides comprehensive guidelines for contributors, including setup instructions, contribution processes, and community standards.
 
-## Code of Conduct
-
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the maintainers.
-
 ## Development Setup
 
 ### Prerequisites
@@ -17,8 +13,8 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/your-username/i18n-management-toolkit-main.git
-   cd i18n-management-toolkit-main
+   git clone https://github.com/vladnoskv/i18ntk.git
+   cd i18ntk
    ```
 
 3. Install dependencies:
@@ -276,9 +272,9 @@ When contributing, be aware that:
 
 ## Getting Help
 
-- Check existing [issues](https://github.com/vladnoskv/i18n-management-toolkit-main/issues)
+- Check existing [issues](https://github.com/vladnoskv/i18ntk/issues)
 - Review [documentation](docs/README.md)
-- Join [GitHub Discussions](https://github.com/vladnoskv/i18n-management-toolkit-main/discussions)
+- Join [GitHub Discussions](https://github.com/vladnoskv/i18ntk/discussions)
 
 ## Code of Conduct
 

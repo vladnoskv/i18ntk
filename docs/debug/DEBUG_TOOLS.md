@@ -1,6 +1,6 @@
 # i18ntk Debug Tools
 
-**Version:** 1.4.2 (05/08/2025)
+**Version:** 1.5.1 (06/08/2025)
 
 ## Overview
 
@@ -22,33 +22,10 @@ npm run i18ntk:debug -- --performance   # Performance analysis
 - Configuration validation
 - Dependency checking
 
-### Console Tools
-
-#### Key Validation
-```bash
-node scripts/debug/console-key-checker.js
-```
-
-**Features:**
-- Console message key validation
-- Missing key detection
-- Unused key identification
-- Format validation
-
-#### Translation Manager
-```bash
-node scripts/debug/console-translations.js
-```
-
-**Features:**
-- Dynamic console message translation
-- Language switching
-- Message formatting
-- Fallback handling
 
 #### Complete Coverage
 ```bash
-node scripts/debug/complete-console-translations.js
+node dev/debug/complete-console-translations.js
 ```
 
 **Features:**
@@ -56,22 +33,6 @@ node scripts/debug/complete-console-translations.js
 - Identify untranslated messages
 - Auto-complete translations
 - Batch processing
-
-### Code Transformation
-
-#### Replace Hardcoded Messages
-```bash
-node scripts/debug/replace-hardcoded-console.js
-```
-
-**Transforms:**
-```javascript
-// Before
-console.log('Analysis complete');
-
-// After
-console.log(this.ui.t('analysis.complete'));
-```
 
 ### Data Export
 

@@ -1178,12 +1178,12 @@ class SettingsCLI {
         console.log(`${colors.bright}${this.t('settings.reportBug.title')}${colors.reset}\n`);
         console.log(this.t('settings.reportBug.description'));
         console.log(`
-${colors.dim}${this.t('settings.reportBug.link')}: https://github.com/vladnoskv/i18n-management-toolkit-main/issues${colors.reset}
+${colors.dim}${this.t('settings.reportBug.link')}: https://github.com/vladnoskv/i18ntk/issues${colors.reset}
 `);
 
         try {
             const { exec } = require('child_process');
-            const url = 'https://github.com/vladnoskv/i18n-management-toolkit-main/issues';
+            const url = 'https://github.com/vladnoskv/i18ntk/issues';
             
             // Try to open the URL in the default browser
             let command;
@@ -1209,7 +1209,7 @@ ${colors.dim}${this.t('settings.reportBug.link')}: https://github.com/vladnoskv/
             });
         } catch (error) {
             console.log(`${colors.yellow}${this.t('settings.reportBug.browserOpenFailed')}${colors.reset}`);
-            console.log(`${this.t('settings.reportBug.manualVisit', { url: 'https://github.com/vladnoskv/i18n-management-toolkit-main/issues' })}`);
+            console.log(`${this.t('settings.reportBug.manualVisit', { url: 'https://github.com/vladnoskv/i18ntk/issues' })}`);
         }
         
         await this.pause();
