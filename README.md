@@ -2,7 +2,7 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.5.2  
+**Version:** 1.5.3  
 **Last Updated:** 2025-08-06  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
@@ -12,14 +12,15 @@
 
 **Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
 
-> **Zero dependencies** | **71% smaller package** | **Works with any framework** | **Enterprise-grade security**
+> **Zero dependencies** | ** Optimized smaller package** | **Works with any framework** | **Enterprise-grade security**
 
-**Key Features of v1.5.2**
-- Further package optimizations reduced size from 536kB to under 500kB
-- Updated documentation to reflect more up to date and clear instructions
-- Added more detailed examples and use cases in the documentation.
-- Changed GitHub urls to `https://github.com/vladnoskv/i18ntk` for reporting a bug, and across documentation.
-- No core functionality was changed, minor changes and removal of legacy code.
+**Key Features of v1.5.3**
+- **Package size optimization**: Reduced from 1.7MB to 1.3MB (23% reduction)
+- **Fixed translation file inclusion**: Resolved issue where ui-locales were incorrectly excluded from package
+- **Updated documentation**: More accurate and up-to-date instructions
+- **Enhanced examples**: Added detailed use cases throughout documentation
+- **GitHub URL updates**: Changed all URLs to `https://github.com/vladnoskv/i18ntk`
+- **Maintained functionality**: All core features preserved while optimizing package size
 
 ## 🚀 Quick Start
 
@@ -43,9 +44,10 @@ npx i18ntk analyze       # Analyze translations
 - **Standard JSON format** - Compatible with i18next, LinguiJS, and more
 
 ### ⚡ **Lightning Fast**
-- **71% package size reduction** - From 1.7MB to just 499kB (unpacked) and 100kB (packed)
+- **23% package size reduction** - From 1.7MB to 1.3MB (unpacked)
 - **1,600-1,900 operations/second** - Benchmarked performance
 - **Instant startup** - No heavy dependencies to load
+- **Accurate sizing** - Package includes all necessary translation files
 
 ### 🔐 **Enterprise Security**
 - **AES-256-GCM encryption** - Enterprise-grade PIN protection
@@ -69,8 +71,9 @@ npx i18ntk analyze       # Analyze translations
 
 ### 📊 Performance & Reliability
 - **Zero runtime dependencies** - Pure Node.js implementation
-- **71% package size reduction** - From 1.7MB to 499kB
+- **23% package size reduction** - From 1.7MB to 1.3MB
 - **Verified benchmarks** - 1,600-1,900 operations/second across all scales
+- **Complete package** - All translation files properly included
 
 
 ## 🎯 Framework Integration
@@ -186,7 +189,7 @@ npx i18ntk manage
 - **Repository**: https://github.com/vladnoskv/i18ntk
 - **NPM Registry**: https://www.npmjs.com/package/i18ntk
 - **License**: MIT
-- **Current Version**: 1.5.2 (Released: August 6, 2025)
+- **Package Version**: 1.5.3 (Released: August 6, 2025)
 
 ### **🔍 Identity Disclaimer**
 

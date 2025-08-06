@@ -2,9 +2,18 @@
 
 All notable changes to the i18n Management Toolkit will be documented in this file.
 
-**Version:** 1.5.2  
+**Version:** 1.5.3  
 **Last Updated:** 2025-08-06  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
+## [1.5.3] - 2025-08-06
+### Version Correction & Package Optimization
+- **Fixed critical translation file exclusion** - Resolved issue where `ui-locales/` directory was incorrectly excluded from npm package, which reduced package size but left the package unusable due to missing key warnings.
+- **Corrected package size claims** - Actual reduction: 1.7MB → 1.3MB (23% reduction), not the previously claimed 499kB
+- **Preserved all functionality** - All translation files now properly included while maintaining size optimization
+- **Eliminated translation warnings** - Fixed "Translation file or directory not found" errors in production
+- **Maintained performance** - 1,600-1,900 operations/second benchmarks remain valid
+- **Complete language support** - All 7 languages (EN, DE, ES, FR, JA, ZH, RU) properly packaged
 
 ## [1.5.2] - 2025-08-06
 
@@ -49,9 +58,9 @@ All notable changes to the i18n Management Toolkit will be documented in this fi
 ## [1.5.0] - 2025-08-05
 
 ### 🚀 **MAJOR PACKAGE OPTIMIZATION** - 68% Size Reduction
-- **🔥 MASSIVE size reduction**: 1.7MB → 536KB unpacked (68% reduction)
-- **📦 Compressed package**: 316.5kB → 111.8kB packed (65% reduction)
-- **🎯 Production-ready**: 39 files vs 256+ fragmented files
+- **🔥 MASSIVE size reduction**: 1.7MB → 1.3MB unpacked
+- **📦 Compressed package**: 316.5kB → 295.1kB packed
+- **🎯 Production-ready**: 44 files vs 256+ fragmented files
 - **⚡ Enhanced performance**: Zero runtime dependencies, framework-agnostic
 
 ### 🏗️ Monolithic Translation Architecture - **Major Refactoring**
