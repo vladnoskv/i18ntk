@@ -1,6 +1,6 @@
 # 🌍 i18ntk - The Ultimate i18n Translation Management Toolkit
 
-![i18ntk Logo](docs/screenshots/i18ntk-logo.PNG)
+![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
