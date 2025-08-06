@@ -2,7 +2,7 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.5.1 (2025-08-06) - i18n internationalization toolkit
+**Version:** 1.5.1 (2025-08-06) - i18n Internationalization Toolkit
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
@@ -10,8 +10,9 @@
 
 > **Zero runtime dependencies** | **70% smaller package** | **Works with any framework** | **Enterprise-grade security**
 
+**Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with i18next, LinguiJS, and other frameworks using standard JSON translation files. 
 
-**Framework Support:** Works **with or without** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with i18next, LinguiJS, and other frameworks using standard JSON translation files. **No runtime dependencies!**
+**No runtime dependencies!**
 
 **Key Features of v1.5.1:**
 - Complete internationalization management toolkit
@@ -23,7 +24,6 @@
 - 7-language support (EN, DE, ES, FR, RU, JA, ZH)
 - Real-time analysis and validation
 - CI/CD ready workflows
-- Comprehensive documentation at [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 🚀 Quick Start
 
