@@ -1,4 +1,24 @@
 #!/usr/bin/env node
+
+// Check for uppercase command usage and provide helpful error
+const commandLine = process.argv.join(' ');
+const isUppercase = /NPX I18NTK|NPM I18NTK/i.test(commandLine);
+
+if (isUppercase) {
+  console.error('❌ Invalid command format detected!');
+  console.error('');
+  console.error('📝 Please use lowercase commands:');
+  console.error('   npx i18ntk [command] [options]');
+  console.error('   npm run i18ntk:[command]');
+  console.error('');
+  console.error('💡 Examples:');
+  console.error('   npx i18ntk validate');
+  console.error('   npx i18ntk init --languages=de,es');
+  console.error('   npm run i18ntk:manage');
+  console.error('');
+  console.error('📖 For more information, run: npx i18ntk --help');
+  process.exit(1);
+}
 /**
  * I18N TRANSLATION VALIDATION TOOLKIT
  * 
@@ -22,79 +42,48 @@ const settingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
-// Get configuration from settings manager
-async function getConfig(t) {
-  try {
-    SecurityUtils.logSecurityEvent(t('validate.configAccess'), 'info', 'Accessing configuration for validation');
-    const settings = settingsManager.getSettings();
-    
-    // Check for per-script directory override, fallback to global sourceDir
-    const sourceDir = settings.scriptDirectories?.validate || settings.sourceDir || './locales';
-    
-    const config = {
-      sourceDir: sourceDir,
-      sourceLanguage: settings.sourceLanguage || 'en',
-      notTranslatedMarker: settings.notTranslatedMarker || settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
-      excludeFiles: settings.excludeFiles || settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
-      strictMode: settings.strictMode || settings.processing?.strictMode || false,
-      uiLanguage: settings.language || 'en'
-    };
-    
-    // Validate configuration
-    SecurityUtils.validateConfig(config);
-    SecurityUtils.logSecurityEvent(t('validate.configValidated'), 'info', 'Configuration validated successfully');
-    
-    return config;
-  } catch (error) {
-    SecurityUtils.logSecurityEvent(t('validate.configError'), 'error', `Configuration error: ${error.message}`);
-    throw error;
-  }
-}
+const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 
 class I18nValidator {
   constructor(config = {}) {
     this.config = config;
     this.errors = [];
     this.warnings = [];
-    this.t = null;
+    this.t = t; // Use global translation function
     this.rl = null;
   }
   
   async initialize() {
     try {
       // Initialize i18n with UI language first
-      const tempConfig = await getConfig(t);
-      const uiLanguage = SecurityUtils.sanitizeInput(tempConfig.uiLanguage || 'en');
+      const args = this.parseArgs();
+      if (args.help) {
+        displayHelp('i18ntk-validate', {
+          'setup-admin': 'Configure admin PIN protection',
+          'disable-admin': 'Disable admin PIN protection',
+          'admin-status': 'Check admin PIN status'
+        });
+        process.exit(0);
+      }
+      
+      const baseConfig = await getUnifiedConfig('validate', args);
+      this.config = { ...baseConfig, ...this.config };
+      
+      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
       loadTranslations(uiLanguage);
-      this.t = t; // Assign the translation function
       
-      SecurityUtils.logSecurityEvent(this.t('validate.validatorInit'), 'info', 'Initializing I18n validator');
+      SecurityUtils.logSecurityEvent('I18n validator initializing', 'info', 'Initializing I18n validator');
       
-      const defaultConfig = await getConfig(this.t);
-      this.config = { ...defaultConfig, ...this.config };
-      
-      // Validate configuration values
-      if (!this.config.sourceDir) {
-        throw new Error(this.t('validate.sourceDirNotConfigured') || 'Source directory not configured');
-      }
-      
-      if (!this.config.sourceLanguage) {
-        throw new Error(this.t('validate.sourceLanguageNotConfigured') || 'Source language not configured');
-      }
-      
-      // Validate and resolve paths
-      const resolvedSourceDir = path.resolve(this.config.sourceDir);
-      this.sourceDir = resolvedSourceDir;
+      this.sourceDir = this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
-      // Verify translation function is working
-      if (typeof this.t !== 'function') {
-        throw new Error(this.t('validate.translationFunctionNotInitialized') || 'Translation function not properly initialized');
-      }
+      // Validate source directory exists
+      const { validateSourceDir } = require('../utils/config-helper');
+      validateSourceDir(this.sourceDir, 'i18ntk-validate');
       
-      SecurityUtils.logSecurityEvent(this.t('validate.validatorInitialized'), 'info', 'I18n validator initialized successfully');
+      SecurityUtils.logSecurityEvent('I18n validator initialized successfully', 'info', 'I18n validator initialized successfully');
     } catch (error) {
-      SecurityUtils.logSecurityEvent(this.t('validate.validatorInitError'), 'error', `Validator initialization error: ${error.message}`);
+      SecurityUtils.logSecurityEvent('I18n validator initialization error', 'error', `Validator initialization error: ${error.message}`);
       throw error;
     }
   }
@@ -131,48 +120,22 @@ class I18nValidator {
   // Parse command line arguments
   parseArgs() {
     try {
-      SecurityUtils.logSecurityEvent(this.t('validate.argsParsing'), 'info', 'Parsing command line arguments');
-      
+      const baseArgs = parseCommonArgs(process.argv.slice(2));
+
+      // Handle shorthand language flags
       const args = process.argv.slice(2);
-      const parsed = {};
-      
       args.forEach(arg => {
         const sanitizedArg = SecurityUtils.sanitizeInput(arg);
-        
-        if (sanitizedArg.startsWith('--')) {
-          const [key, value] = sanitizedArg.substring(2).split('=');
-          const sanitizedKey = SecurityUtils.sanitizeInput(key);
-          const sanitizedValue = value ? SecurityUtils.sanitizeInput(value) : true;
-          
-          if (sanitizedKey === 'language') {
-            parsed.language = sanitizedValue;
-          } else if (sanitizedKey === 'source-dir') {
-            parsed.sourceDir = sanitizedValue;
-          } else if (sanitizedKey === 'strict') {
-            parsed.strictMode = true;
-          } else if (sanitizedKey === 'ui-language') {
-            parsed.uiLanguage = sanitizedValue;
-          } else if (sanitizedKey === 'help') {
-            parsed.help = true;
-          } else if (sanitizedKey === 'setup-admin') {
-            parsed.setupAdmin = true;
-          } else if (sanitizedKey === 'disable-admin') {
-            parsed.disableAdmin = true;
-          } else if (sanitizedKey === 'admin-status') {
-            parsed.adminStatus = true;
-          } else if (sanitizedKey === 'no-prompt') {
-            parsed.noPrompt = true;
-          } else if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(sanitizedKey)) {
-            // Support shorthand language flags like --de, --fr, etc.
-            parsed.uiLanguage = sanitizedKey;
+        if (sanitizedArg.startsWith('--') && !sanitizedArg.includes('=')) {
+          const key = sanitizedArg.substring(2);
+          if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(key)) {
+            baseArgs.uiLanguage = key;
           }
         }
       });
-      
-      SecurityUtils.logSecurityEvent(this.t('validate.argsParsed'), 'info', 'Command line arguments parsed successfully');
-      return parsed;
+
+      return baseArgs;
     } catch (error) {
-      SecurityUtils.logSecurityEvent(this.t('validate.argsParseError'), 'error', `Argument parsing error: ${error.message}`);
       throw error;
     }
   }
@@ -190,10 +153,8 @@ class I18nValidator {
   // Get all available languages
   getAvailableLanguages() {
     try {
-      SecurityUtils.logSecurityEvent(this.t('validate.languagesScan'), 'info', 'Scanning available languages');
-      
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+        throw new Error(`Source directory not found: ${this.sourceDir}`);
       }
       
       const languages = fs.readdirSync(this.sourceDir)
@@ -202,10 +163,8 @@ class I18nValidator {
           return fs.statSync(itemPath).isDirectory() && item !== this.config.sourceLanguage;
         });
       
-      SecurityUtils.logSecurityEvent(this.t('validate.languagesFound'), 'info', `Found ${languages.length} languages`);
       return languages;
     } catch (error) {
-      SecurityUtils.logSecurityEvent(this.t('validate.languagesScanError'), 'error', `Language scanning error: ${error.message}`);
       throw error;
     }
   }
@@ -226,10 +185,8 @@ class I18nValidator {
                  !this.config.excludeFiles.includes(file);
         });
       
-      SecurityUtils.logSecurityEvent(this.t('validate.filesScan'), 'info', `Found ${files.length} files in ${sanitizedLanguage}`);
       return files;
     } catch (error) {
-      SecurityUtils.logSecurityEvent(this.t('validate.filesScanError'), 'error', `File scanning error: ${error.message}`);
       throw error;
     }
   }
@@ -725,7 +682,21 @@ class I18nValidator {
     const { fromMenu = false } = options;
     
     try {
-      await this.initialize();
+      // Initialize configuration properly when called from menu
+      if (fromMenu && !this.sourceDir) {
+        const args = this.parseArgs();
+        const baseConfig = await getUnifiedConfig('validate', args);
+        this.config = { ...baseConfig, ...this.config };
+        
+        const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+        loadTranslations(uiLanguage);
+        this.t = t;
+        
+        this.sourceDir = this.config.sourceDir;
+        this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+      } else {
+        await this.initialize();
+      }
       
       // Skip admin authentication when called from menu
       if (!fromMenu) {

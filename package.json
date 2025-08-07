@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "i18ntk (i18n Toolkit) - A comprehensive, enterprise-grade internationalization (i18n) management toolkit for JavaScript/TypeScript projects with advanced analysis, validation, and automation features",
   "keywords": [
     "i18n",
@@ -101,6 +101,11 @@
     "test:pin": "node dev/tests/test-admin-pin.js",
     "test:edge-cases": "node dev/tests/test-comprehensive.js",
     "test:old": "node utils/test-complete-system.js",
+    "test:config": "node test/config-system-tests.js",
+    "test:admin-fixed": "node test/test-admin-pin-fixed.js",
+    "test:cleanup": "node test/cleanup-system.js",
+    "test:master": "node test/run-all-tests.js",
+    "test:full": "npm run test:cleanup && npm run test:config && npm run test:admin-fixed && npm run test:cleanup",
     "security:audit": "npm audit --audit-level=moderate",
     "security:fix": "npm audit fix",
     "security:check": "node utils/security-check.js",
@@ -114,7 +119,7 @@
     "languages:restore": "echo 'Language restoration - use settings CLI for manual configuration'"
   },
   "dependencies": {
-    "i18ntk": "^1.5.2"
+    "i18ntk": "^1.5.3"
   },
   "engines": {
     "node": ">=16.0.0"

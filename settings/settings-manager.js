@@ -1,6 +1,7 @@
 /**
- * Settings Manager Module
- * Handles loading, saving, and managing user configuration settings
+ * Settings Manager
+ * Central configuration management for i18n toolkit
+ * Handles loading, saving, and managing all settings with backup support
  */
 
 const fs = require('fs');
@@ -9,90 +10,124 @@ const path = require('path');
 class SettingsManager {
     constructor() {
         this.configFile = path.join(__dirname, 'i18ntk-config.json');
+        this.lastBackupTime = 0;
+        this.backupDebounceMs = 5000; // 5 seconds debounce
+        
+        // Default configuration
         this.defaultConfig = {
-            // UI Language Settings
-            language: 'en', // Default: 'en' | Options: 'en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'
+            // Basic settings
+            language: 'en',
+            uiLanguage: 'en',
+            theme: 'light',
             
-            // File Size Limits
-            sizeLimit: null, // Default: null (no limit) | Example: 1048576 (1MB in bytes)
+            // Directory settings
+            projectRoot: '.',
+            sourceDir: './locales',
+            i18nDir: './locales',
+            outputDir: './i18ntk-reports',
+            uiLocalesDir: './ui-locales',
             
-            // Directory Configuration
-            sourceDir: './locales', // Default: './locales' | Example: './src/i18n/locales'
-            sourceLanguage: 'en', // Default: 'en' | Recommended: Use your primary development language
-            defaultLanguages: ['de', 'es', 'fr', 'ru'], // Default target languages | Example: ['de', 'es', 'fr', 'ru', 'ja', 'zh']
-            outputDir: './i18ntk-reports', // Default: './i18ntk-reports' | Example: './reports/i18n'
-            
-            // Per-Script Directory Configuration (optional overrides)
+            // Script-specific directory overrides
             scriptDirectories: {
-                analyze: null,      // Custom sourceDir for i18ntk-analyze.js
-                init: null,         // Custom sourceDir for i18ntk-init.js
-                validate: null,     // Custom sourceDir for i18ntk-validate.js
-                complete: null,     // Custom sourceDir for i18ntk-complete.js
-                manage: null,       // Custom sourceDir for i18ntk-manage.js
-                summary: null,      // Custom sourceDir for i18ntk-summary.js
-                usage: null,        // Custom sourceDir for i18ntk-usage.js
-                sizing: null        // Custom sourceDir for i18ntk-sizing.js
+                init: null,
+                analyze: null,
+                validate: null,
+                usage: null,
+                sizing: null,
+                summary: null,
+                complete: null,
+                manage: null
             },
             
-            // Report Settings
-            reportLanguage: 'auto', // Default: 'auto' (matches UI language) | Options: 'auto', 'en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'
-            
-            // UI Preferences
-            theme: 'light', // Default: 'light' | Options: 'light', 'dark'
-            
-            // Behavior Settings
-            autoSave: true, // Default: true | Automatically save settings changes
-
-            
-            
-            // Notification Settings
-            notifications: {
-                enabled: true, // Default: true | Enable/disable all notifications
-                types: {
-                    success: true, // Show success notifications (e.g., "Translation completed")
-                    warnings: true, // Show warning notifications (e.g., "Missing translations found")
-                    errors: true, // Show error notifications (e.g., "File not found")
-                    progress: true // Show progress notifications during long operations
-                },
-                sound: false, // Default: false | Play notification sounds
-                desktop: false // Default: false | Show desktop notifications (requires permission)
-            },
-            
-            
-            // Date and Time Formatting
-            dateFormat: 'DD/MM/YYYY', // Default: 'DD/MM/YYYY' | Options: 'DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD', 'DD.MM.YYYY'
-            timeFormat: '24h', // Default: '24h' | Options: '24h', '12h'
-            timezone: 'auto', // Default: 'auto' (system timezone) | Example: 'UTC', 'Europe/London', 'America/New_York'
-            
-            // Processing Settings
+            // Processing settings
             processing: {
-                notTranslatedMarker: 'NOT_TRANSLATED', // Default marker for untranslated content
-                excludeFiles: ['.DS_Store', 'Thumbs.db', '*.tmp',], // Files to ignore during processing
-                excludeDirs: ['node_modules', '.next', '.git', 'dist', 'build'], // Directories to ignore
-                includeExtensions: ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'], // File extensions to scan
-                strictMode: false, // Default: false | Enable strict validation (fails on warnings)
-                defaultLanguages: ['de', 'es', 'fr', 'ru'], // Languages to create when initializing
-                translationPatterns: [ // Patterns to detect translation keys in code
-                    /t\(['"`]([^'"`]+)['"`]\)/g, // t('key')
-                    /\$t\(['"`]([^'"`]+)['"`]\)/g, // $t('key')
-                    /i18n\.t\(['"`]([^'"`]+)['"`]\)/g // i18n.t('key')
-                ]
+                batchSize: 100,
+                concurrency: 4,
+                maxFileSize: 10 * 1024 * 1024, // 10MB
+                timeout: 30000, // 30 seconds
+                retryAttempts: 3,
+                retryDelay: 1000,
+                cacheEnabled: true,
+                cacheTTL: 3600000, // 1 hour
+                validateOnSave: true,
+                autoBackup: true
             },
             
-            // Advanced Performance Settings
+            // Report settings
+            reports: {
+                format: 'json',
+                includeStats: true,
+                includeMissingKeys: true,
+                includeUnusedKeys: true,
+                includeUsageStats: true,
+                includeValidationErrors: true,
+                outputFormat: 'both', // json, html, both
+                generateSummary: true,
+                generateDetailed: true,
+                saveToFile: true,
+                filenameTemplate: 'i18n-report-{timestamp}'
+            },
+            
+            // UI preferences
+            ui: {
+                showProgress: true,
+                showDetailedOutput: false,
+                colorOutput: true,
+                interactive: true,
+                confirmActions: true,
+                autoSave: true,
+                autoLoad: true
+            },
+            
+            // Behavior settings
+            behavior: {
+                autoDetectLanguage: true,
+                strictMode: false,
+                caseSensitive: true,
+                ignoreComments: false,
+                ignoreWhitespace: true,
+                normalizeKeys: true,
+                validateOnStartup: false
+            },
+            
+            // Notification settings
+            notifications: {
+                enabled: true,
+                types: {
+                    success: true,
+                    warning: true,
+                    error: true,
+                    info: true
+                },
+                sound: false,
+                desktop: false,
+                webhook: null
+            },
+            
+            // Date/time formatting
+            dateTime: {
+                format: 'YYYY-MM-DD HH:mm:ss',
+                timezone: 'local',
+                locale: 'en-US'
+            },
+            
+            // Advanced settings
             advanced: {
-                batchSize: 100, // Default: 100 | Recommended: 50-200 | Number of items processed per batch
-                maxConcurrentFiles: 10, // Default: 10 | Recommended: 5-20 | Maximum files processed simultaneously
-                enableProgressBars: true, // Default: true | Show progress bars for long operations
-                enableColorOutput: true, // Default: true | Use colored console output
-                strictMode: false, // Default: false | Enable strict validation mode
-                enableAuditLog: false, // Default: false | Track all translation changes (creates audit.log)
-                backupBeforeChanges: true, // Default: true | Create backups before modifications
-                validateOnSave: true, // Default: true | Auto-validate translations after saving
-                sizingThreshold: 50, // Default: 50% | Threshold for size variation warnings
-                sizingFormat: 'table', // Default: 'table' | Options: 'table', 'json', 'csv'
-                memoryLimit: '512MB', // Default: '512MB' | Memory limit for large file processing
-                timeout: 30000 // Default: 30000ms (30s) | Timeout for individual operations
+                backupBeforeChanges: true,
+                validateSettings: true,
+                logLevel: 'info',
+                performanceTracking: false,
+                memoryLimit: 512, // MB
+                enableExperimental: false
+            },
+            
+            // Backup Settings
+            backup: {
+                enabled: false, // Default: false | Enable/disable automatic backups
+                singleFileMode: false, // Default: false | Use single backup file when disabled
+                singleBackupFile: 'i18ntk-central-backup.json', // Default: 'i18ntk-central-backup.json' | Single backup filename
+                retentionDays: 30, // Default: 30 | Days to keep backup files
+                maxBackups: 100 // Default: 100 | Maximum number of backup files to keep
             },
             
             // Security & Admin Settings
@@ -138,6 +173,7 @@ class SettingsManager {
                 debugLogPath: './debug.log' // Default: './debug.log' | Path for debug log file
             }
         };
+        
         this.settings = this.loadSettings();
     }
 
@@ -222,18 +258,26 @@ class SettingsManager {
                 throw new Error('Invalid settings provided');
             }
             
-            // Create backup if enabled
-            if (settingsToSave.advanced?.backupBeforeChanges) {
+            // Check if settings have actually changed before creating backup
+            const currentSettingsStr = JSON.stringify(this.settings);
+            const newSettingsStr = JSON.stringify(settingsToSave);
+            const hasChanges = currentSettingsStr !== newSettingsStr;
+            
+            // Only create backup if settings have changed and backup is enabled
+            if (hasChanges && settingsToSave.advanced?.backupBeforeChanges) {
                 this.createBackup();
+            }
+            
+            // Skip saving if no changes
+            if (!hasChanges) {
+                return true;
             }
             
             fs.writeFileSync(this.configFile, JSON.stringify(settingsToSave, null, 2), 'utf8');
             this.settings = settingsToSave;
             return true;
         } catch (error) {
-            const { loadTranslations, t } = require('../utils/i18n-helper');
-            loadTranslations('en');
-            console.error(t('settings.saveError'), error.message);
+            console.error('Error saving settings:', error.message);
             return false;
         }
     }
@@ -247,17 +291,59 @@ class SettingsManager {
     }
 
     /**
-     * Get a specific setting value
-     * @param {string} key - Setting key (supports dot notation)
-     * @returns {any} Setting value
+     * Update directory settings globally
+     * @param {object} directorySettings - Object containing directory settings to update
+     * @returns {boolean} Success status
      */
-    getSetting(key) {
-        const keys = key.split('.');
+    updateDirectorySettings(directorySettings) {
+        try {
+            const allowedKeys = ['projectRoot', 'sourceDir', 'i18nDir', 'outputDir', 'uiLocalesDir'];
+            const updates = {};
+            
+            for (const [key, value] of Object.entries(directorySettings)) {
+                if (allowedKeys.includes(key) && typeof value === 'string') {
+                    updates[key] = value;
+                }
+            }
+            
+            if (Object.keys(updates).length > 0) {
+                const newSettings = { ...this.settings, ...updates };
+                return this.saveSettings(newSettings);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error updating directory settings:', error.message);
+            return false;
+        }
+    }
+
+    /**
+     * Get directory settings for validation
+     * @returns {object} Directory settings
+     */
+    getDirectorySettings() {
+        return {
+            projectRoot: this.settings.projectRoot,
+            sourceDir: this.settings.sourceDir,
+            i18nDir: this.settings.i18nDir,
+            outputDir: this.settings.outputDir,
+            uiLocalesDir: this.settings.uiLocalesDir
+        };
+    }
+
+    /**
+     * Get specific setting value
+     * @param {string} keyPath - Dot-separated key path (e.g., 'backup.enabled')
+     * @returns {*} Setting value
+     */
+    getSetting(keyPath) {
+        const keys = keyPath.split('.');
         let value = this.settings;
         
-        for (const k of keys) {
-            if (value && typeof value === 'object' && k in value) {
-                value = value[k];
+        for (const key of keys) {
+            if (value && typeof value === 'object' && key in value) {
+                value = value[key];
             } else {
                 return undefined;
             }
@@ -267,36 +353,29 @@ class SettingsManager {
     }
 
     /**
-     * Set a specific setting value
-     * @param {string} key - Setting key (supports dot notation)
-     * @param {any} value - Setting value
+     * Set specific setting value
+     * @param {string} keyPath - Dot-separated key path
+     * @param {*} value - Value to set
      * @returns {boolean} Success status
      */
-    setSetting(key, value) {
+    setSetting(keyPath, value) {
         try {
-            const keys = key.split('.');
-            let current = this.settings;
+            const keys = keyPath.split('.');
+            const lastKey = keys.pop();
+            let target = this.settings;
             
             // Navigate to the parent object
-            for (let i = 0; i < keys.length - 1; i++) {
-                const k = keys[i];
-                if (!(k in current) || typeof current[k] !== 'object') {
-                    current[k] = {};
+            for (const key of keys) {
+                if (!(key in target) || typeof target[key] !== 'object') {
+                    target[key] = {};
                 }
-                current = current[k];
+                target = target[key];
             }
             
-            // Set the value
-            current[keys[keys.length - 1]] = value;
-            
-            // Auto-save if enabled
-            if (this.settings.autoSave) {
-                return this.saveSettings();
-            }
-            
-            return true;
+            target[lastKey] = value;
+            return this.saveSettings();
         } catch (error) {
-            console.error('Error setting value:', error.message);
+            console.error('Error setting setting:', error.message);
             return false;
         }
     }
@@ -306,117 +385,28 @@ class SettingsManager {
      * @returns {boolean} Success status
      */
     resetToDefaults() {
-        this.settings = { ...this.defaultConfig };
-        return this.saveSettings();
+        try {
+            this.settings = { ...this.defaultConfig };
+            return this.saveSettings();
+        } catch (error) {
+            console.error('Error resetting to defaults:', error.message);
+            return false;
+        }
     }
 
     /**
-     * Validate settings object
+     * Validate settings structure
      * @param {object} settings - Settings to validate
-     * @returns {boolean} Validation result
+     * @returns {boolean} True if valid
      */
     validateSettings(settings) {
         try {
-            // Check required properties
-            const required = ['language', 'sourceDir', 'sourceLanguage', 'defaultLanguages', 'outputDir'];
-            for (const prop of required) {
-                if (!(prop in settings)) {
-                    console.error(`Missing required setting: ${prop}`);
-                    return false;
-                }
-            }
-            
-            // Validate language codes
-            const validLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
-            if (!validLanguages.includes(settings.language)) {
-                console.error(`Invalid language: ${settings.language}`);
+            // Basic validation - ensure it's an object
+            if (!settings || typeof settings !== 'object') {
                 return false;
             }
             
-            if (!validLanguages.includes(settings.sourceLanguage)) {
-                console.error(`Invalid source language: ${settings.sourceLanguage}`);
-                return false;
-            }
-            
-            // Validate arrays
-            if (!Array.isArray(settings.defaultLanguages)) {
-                console.error('Default languages must be an array');
-                return false;
-            }
-            
-            // Validate date format
-            const validDateFormats = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD', 'DD.MM.YYYY'];
-            if (settings.dateFormat && !validDateFormats.includes(settings.dateFormat)) {
-                console.error(`Invalid date format: ${settings.dateFormat}. Valid formats: ${validDateFormats.join(', ')}`);
-                return false;
-            }
-            
-            // Validate time format
-            const validTimeFormats = ['24h', '12h'];
-            if (settings.timeFormat && !validTimeFormats.includes(settings.timeFormat)) {
-                console.error(`Invalid time format: ${settings.timeFormat}. Valid formats: ${validTimeFormats.join(', ')}`);
-                return false;
-            }
-            
-            // Validate notifications settings
-            if (settings.notifications && typeof settings.notifications === 'object') {
-                if (settings.notifications.types && typeof settings.notifications.types !== 'object') {
-                    console.error('Notifications types must be an object');
-                    return false;
-                }
-            }
-            
-            // Validate processing settings
-            if (settings.processing && typeof settings.processing === 'object') {
-                const processing = settings.processing;
-                
-                if (processing.excludeFiles && !Array.isArray(processing.excludeFiles)) {
-                    console.error('Exclude files must be an array');
-                    return false;
-                }
-                
-                if (processing.excludeDirs && !Array.isArray(processing.excludeDirs)) {
-                    console.error('Exclude directories must be an array');
-                    return false;
-                }
-                
-                if (processing.includeExtensions && !Array.isArray(processing.includeExtensions)) {
-                    console.error('Include extensions must be an array');
-                    return false;
-                }
-            }
-            
-            // Validate advanced settings if present
-            if (settings.advanced) {
-                const advanced = settings.advanced;
-                
-                if (advanced.batchSize && (typeof advanced.batchSize !== 'number' || advanced.batchSize < 1)) {
-                    console.error('Invalid batch size: must be a positive number');
-                    return false;
-                }
-                
-                if (advanced.maxConcurrentFiles && (typeof advanced.maxConcurrentFiles !== 'number' || advanced.maxConcurrentFiles < 1)) {
-                    console.error('Invalid max concurrent files: must be a positive number');
-                    return false;
-                }
-                
-                if (advanced.sizingThreshold && (typeof advanced.sizingThreshold !== 'number' || advanced.sizingThreshold < 0)) {
-                    console.error('Invalid sizing threshold: must be a non-negative number');
-                    return false;
-                }
-                
-                if (advanced.timeout && (typeof advanced.timeout !== 'number' || advanced.timeout < 1000)) {
-                    console.error('Invalid timeout: must be at least 1000ms');
-                    return false;
-                }
-                
-                const validSizingFormats = ['table', 'json', 'csv'];
-                if (advanced.sizingFormat && !validSizingFormats.includes(advanced.sizingFormat)) {
-                    console.error(`Invalid sizing format: ${advanced.sizingFormat}. Valid formats: ${validSizingFormats.join(', ')}`);
-                    return false;
-                }
-            }
-            
+            // Add more specific validation as needed
             return true;
         } catch (error) {
             console.error('Error validating settings:', error.message);
@@ -430,6 +420,18 @@ class SettingsManager {
      */
     createBackup() {
         try {
+            // Check if backup system is enabled
+            if (!this.settings.backup?.enabled) {
+                return true;
+            }
+            
+            // Debounce backup creation to prevent duplicates
+            const now = Date.now();
+            if (now - this.lastBackupTime < this.backupDebounceMs) {
+                return true; // Skip if backup was created recently
+            }
+            this.lastBackupTime = now;
+            
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupDir = path.join(path.dirname(this.configFile), 'backups');
             
@@ -443,12 +445,66 @@ class SettingsManager {
             if (fs.existsSync(this.configFile)) {
                 fs.copyFileSync(this.configFile, backupFile);
                 console.log(`Backup created: ${path.relative(process.cwd(), backupFile)}`);
+                
+                // Clean up old backups after creating new one
+                this.cleanupOldBackups();
             }
             
             return true;
         } catch (error) {
             console.error('Error creating backup:', error.message);
             return false;
+        }
+    }
+
+    /**
+     * Clean up old backup files based on retention settings
+     */
+    cleanupOldBackups() {
+        try {
+            const backupDir = path.join(path.dirname(this.configFile), 'backups');
+            
+            if (!fs.existsSync(backupDir)) {
+                return;
+            }
+            
+            const backupFiles = fs.readdirSync(backupDir)
+                .filter(file => file.endsWith('.json') && file.includes('-backup-'))
+                .map(file => ({
+                    name: file,
+                    path: path.join(backupDir, file),
+                    created: fs.statSync(path.join(backupDir, file)).mtime
+                }))
+                .sort((a, b) => b.created - a.created);
+            
+            const maxBackups = this.settings.backup?.maxBackups || 100;
+            const retentionDays = this.settings.backup?.retentionDays || 30;
+            
+            // Filter by retention days
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+            
+            const filesToDelete = backupFiles.filter(file => 
+                file.created < cutoffDate || backupFiles.indexOf(file) >= maxBackups
+            );
+            
+            if (filesToDelete.length > 0) {
+                console.log(`\n⚠️  Found ${backupFiles.length} backup files. Cleaning up old backups...`);
+                console.log(`Keeping ${Math.min(maxBackups, backupFiles.length)} most recent backups within ${retentionDays} days.`);
+                
+                filesToDelete.forEach(file => {
+                    try {
+                        fs.unlinkSync(file.path);
+                        console.log(`Deleted old backup: ${file.name}`);
+                    } catch (error) {
+                        console.warn(`Could not delete backup ${file.name}: ${error.message}`);
+                    }
+                });
+                
+                console.log(`Cleanup completed. ${filesToDelete.length} old backup(s) removed.`);
+            }
+        } catch (error) {
+            console.warn('Error during backup cleanup:', error.message);
         }
     }
 
@@ -550,10 +606,20 @@ class SettingsManager {
                         options: this.getAvailableLanguages(),
                         description: 'Language for the user interface'
                     },
+                    projectRoot: {
+                        type: 'text',
+                        label: 'Project Root',
+                        description: 'Root directory of your project (all other paths are relative to this)'
+                    },
                     sourceDir: {
                         type: 'text',
                         label: 'Source Directory',
-                        description: 'Directory containing translation files'
+                        description: 'Directory containing translation files (relative to project root)'
+                    },
+                    i18nDir: {
+                        type: 'text',
+                        label: 'i18n Directory',
+                        description: 'Directory for i18n files (relative to project root)'
                     },
                     sourceLanguage: {
                         type: 'select',
@@ -564,7 +630,7 @@ class SettingsManager {
                     outputDir: {
                         type: 'text',
                         label: 'Output Directory',
-                        description: 'Directory for generated reports'
+                        description: 'Directory for generated reports (relative to project root)'
                     },
                     theme: {
                         type: 'select',
@@ -585,64 +651,32 @@ class SettingsManager {
                         label: 'Batch Size',
                         min: 1,
                         max: 1000,
-                        description: 'Number of items processed per batch'
+                        description: 'Number of files to process in each batch'
                     },
-                    'advanced.maxConcurrentFiles': {
+                    'advanced.concurrency': {
                         type: 'number',
-                        label: 'Max Concurrent Files',
+                        label: 'Concurrency',
                         min: 1,
-                        max: 50,
-                        description: 'Maximum files processed simultaneously'
-                    },
-                    'advanced.sizingThreshold': {
-                        type: 'number',
-                        label: 'Sizing Threshold (%)',
-                        min: 0,
-                        max: 200,
-                        description: 'Threshold for size variation warnings'
-                    },
-                    'advanced.strictMode': {
-                        type: 'checkbox',
-                        label: 'Strict Mode',
-                        description: 'Enable strict validation mode'
-                    },
-                    'advanced.enableAuditLog': {
-                        type: 'checkbox',
-                        label: 'Enable Audit Log',
-                        description: 'Track all translation changes'
+                        max: 8,
+                        description: 'Number of concurrent processing threads'
                     },
                     'advanced.backupBeforeChanges': {
-                        type: 'checkbox',
+                        type: 'boolean',
                         label: 'Backup Before Changes',
-                        description: 'Create backups before modifications'
+                        description: 'Create backup before making changes to settings'
+                    },
+                    'advanced.validateSettings': {
+                        type: 'boolean',
+                        label: 'Validate Settings',
+                        description: 'Validate settings on load and save'
                     }
                 }
             }
         };
     }
-
-    /**
-     * Set UI language
-     * @param {string} language - Language code (e.g., 'en', 'de', 'fr')
-     */
-    setLanguage(language) {
-        if (typeof language !== 'string' || language.length === 0) {
-            throw new Error('Language must be a non-empty string');
-        }
-        
-        const availableLanguages = this.getAvailableLanguages().map(lang => lang.code);
-        if (!availableLanguages.includes(language)) {
-            throw new Error(`Language not supported: ${language}. Available languages: ${availableLanguages.join(', ')}`);
-        }
-        
-        this.settings.language = language;
-        this.saveSettings();
-        
-        const { loadTranslations, t } = require('../utils/i18n-helper');
-        loadTranslations(language);
-        console.log(t('settings.languageSet', { language }));
-    }
 }
 
-// Export singleton instance
-module.exports = new SettingsManager();
+// Create singleton instance
+const settingsManager = new SettingsManager();
+
+module.exports = settingsManager;

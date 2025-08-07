@@ -37,6 +37,7 @@ const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const settingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
+const { getUnifiedConfig } = require('../utils/config-helper');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -46,7 +47,9 @@ function getConfig() {
   const sourceDir = settings.scriptDirectories?.sizing || settings.sourceDir || './locales';
   
   return {
+    projectRoot: settings.projectRoot || '.',
     sourceDir: sourceDir,
+    i18nDir: settings.i18nDir || settings.sourceDir || './locales',
     outputDir: settings.outputDir || './i18ntk-reports',
     threshold: settings.processing?.sizingThreshold || 50,
     uiLanguage: settings.language || 'en'
@@ -56,8 +59,9 @@ function getConfig() {
 class I18nSizingAnalyzer {
   constructor(options = {}) {
     const config = getConfig();
-    this.sourceDir = options.sourceDir || config.sourceDir;
-    this.outputDir = options.outputDir || config.outputDir;
+    const projectRoot = path.resolve(config.projectRoot || '.');
+    this.sourceDir = path.resolve(projectRoot, options.sourceDir || config.sourceDir);
+    this.outputDir = path.resolve(projectRoot, options.outputDir || config.outputDir);
     this.languages = options.languages || [];
     this.threshold = options.threshold || config.threshold; // Size difference threshold in percentage
     this.format = options.format || 'table';
@@ -404,73 +408,87 @@ class I18nSizingAnalyzer {
     this.stats.summary.recommendations = recommendations;
   }
 
-  // Display results in table format
-  displayTable() {
-    console.log(this.t("sizing.sourceDirectoryLabel", { sourceDir: path.resolve(this.sourceDir) }));
-    console.log(this.t("sizing.sourceLanguageLabel", { sourceLanguage: this.config?.sourceLanguage || 'en' }));
-    console.log(this.t("sizing.strictModeLabel", { mode: 'OFF' }));
-    console.log();
-    console.log(this.t("sizing.sizing_analysis_results"));
-    console.log(this.t("sizing.separator"));
-    
-    // File sizes table
-    console.log("\n" + this.t("sizing.file_sizes_title"));
+  // Display concise folder-level results
+  displayFolderResults() {
+    console.log("\n" + this.t("sizing.sizing_analysis_results"));
     console.log(this.t("sizing.lineSeparator"));
-    console.log(this.t("sizing.file_sizes_header"));
+    
+    // Folder-level summary table
+    console.log("\n" + this.t("sizing.folder_summary_title"));
+    console.log(this.t("sizing.folder_summary_table_header"));
     console.log(this.t("sizing.lineSeparator"));
     
     Object.entries(this.stats.files).forEach(([lang, data]) => {
-      console.log(this.t("sizing.file_size_row", { lang, sizeKB: data.sizeKB, lines: data.lines, characters: data.characters }));
+      const langData = this.stats.languages[lang];
+      const totalChars = Math.round(langData.totalKeys * langData.averageKeyLength);
+      console.log(this.t("sizing.folder_summary_row", { 
+        lang, 
+        sizeKB: data.sizeKB, 
+        totalKeys: langData.totalKeys, 
+        avgLength: langData.averageKeyLength.toFixed(1),
+        totalChars: totalChars
+      }));
     });
     
-    // Language statistics
-    console.log("\n" + this.t("sizing.language_statistics_title"));
-    console.log(this.t("sizing.lineSeparator"));
-    console.log(this.t("sizing.language_stats_header"));
-    console.log(this.t("sizing.lineSeparator"));
-    
-    Object.entries(this.stats.languages).forEach(([lang, data]) => {
-      console.log(this.t("sizing.language_stats_row", { lang, totalKeys: data.totalKeys, totalCharacters: data.totalCharacters, averageKeyLength: data.averageKeyLength.toFixed(1), maxKeyLength: data.maxKeyLength, emptyKeys: data.emptyKeys, longKeys: data.longKeys }));
-    });
-    
-    // Size variations
-    if (this.stats.summary.sizeVariations) {
-      console.log("\n" + this.t("sizing.size_variations_title"));
-      console.log(this.t("sizing.lineSeparator"));
-      console.log(this.t("sizing.size_variations_header"));
-      console.log(this.t("sizing.lineSeparator"));
+    // Language comparison summary
+    console.log("\n" + this.t("sizing.language_comparison_title"));
+    const baseLang = this.languages[0];
+    if (this.languages.length > 1 && this.stats.languages[baseLang]) {
+      const baseChars = Math.round(this.stats.languages[baseLang].totalKeys * this.stats.languages[baseLang].averageKeyLength);
       
-      Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
-        const problematic = data.isProblematic ? this.t("sizing.problematic_yes") : this.t("sizing.problematic_no");
-        console.log(this.t("sizing.size_variation_row", { lang, characterDifference: data.characterDifference, percentageDifference: data.percentageDifference, problematic }));
+      this.languages.slice(1).forEach(lang => {
+        if (this.stats.languages[lang]) {
+          const langChars = Math.round(this.stats.languages[lang].totalKeys * this.stats.languages[lang].averageKeyLength);
+          const diff = langChars - baseChars;
+          const percent = baseChars > 0 ? ((diff / baseChars) * 100).toFixed(1) : 0;
+          const status = Math.abs(diff) > this.threshold ? "⚠️" : "✅";
+          console.log(`${lang}: ${diff > 0 ? '+' : ''}${diff} chars (${percent}%) ${status}`);
+        }
       });
     }
     
-    // Problematic keys details
-    if (this.stats.summary.problematicKeys.length > 0) {
-      console.log("\n" + this.t("sizing.problematicKeysLabel", { problematicKeys: this.stats.summary.problematicKeys.map(item => item.key).join(', ') }));
-      console.log(this.t("sizing.lineSeparator"));
-      this.stats.summary.problematicKeys.forEach((item, index) => {
-        console.log(this.t("sizing.problematic_key_detail", { 
-          index: index + 1, 
-          key: item.key,
-          variations: item.variations.map(v => `${v.language}: ${v.characterDifference} chars (${v.percentageDifference}%)`).join(', ')
-        }));
-      });
-    }
+    // Summary stats
+    console.log("\n" + this.t("sizing.summary_stats", { 
+      totalLanguages: Object.keys(this.stats.languages).length,
+      totalKeys: Object.keys(this.stats.keys).length,
+      reportPath: this.outputDir
+    }));
     
-    // Recommendations
-    if (this.stats.summary.recommendations.length > 0) {
-      console.log("\n" + this.t("sizing.recommendations_title"));
-      console.log(this.t("sizing.lineSeparator"));
-      this.stats.summary.recommendations.forEach((rec, index) => {
-        console.log(this.t("sizing.recommendation_item", { index: index + 1, recommendation: rec }));
-      });
+    if (this.detailedKeys) {
+      this.displayDetailedKeys();
     }
   }
 
-  // Generate detailed report
-  async generateReport() {
+  // Display detailed key analysis (only when explicitly requested)
+  displayDetailedKeys() {
+    console.log("\n" + this.t("sizing.detailed_key_analysis_title"));
+    console.log(this.t("sizing.lineSeparator"));
+    
+    let counter = 0;
+    Object.entries(this.stats.keys).forEach(([key, data]) => {
+      if (counter >= 50) {
+        console.log(this.t("sizing.too_many_keys_warning"));
+        return;
+      }
+      
+      console.log(this.t("sizing.key_analysis_header", { key }));
+      
+      Object.entries(data.translations).forEach(([lang, translation]) => {
+        const length = translation.length;
+        const isEmpty = length === 0;
+        const isLong = length > this.threshold;
+        const status = isEmpty ? this.t("sizing.status_empty") : isLong ? this.t("sizing.status_long") : this.t("sizing.status_ok");
+        
+        console.log(this.t("sizing.key_analysis_detail", { lang, length, status, translation: translation.substring(0, 50) + (translation.length > 50 ? "..." : "") }));
+      });
+      
+      console.log("");
+      counter++;
+    });
+  }
+
+  // Generate human-readable report
+  async generateHumanReadableReport() {
     if (!this.outputReport) return;
     
     console.log(this.t("sizing.generating_detailed_report"));
@@ -486,9 +504,22 @@ class I18nSizingAnalyzer {
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const reportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.json`), process.cwd());
     
-    if (!reportPath) {
+    // Generate human-readable text report
+    const textReportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.txt`), process.cwd());
+    if (!textReportPath) {
+      throw new Error(this.t("sizing.invalidReportFileError"));
+    }
+    
+    let textReport = this.generateTextReport(timestamp);
+    const textSuccess = SecurityUtils.safeWriteFileSync(textReportPath, textReport, process.cwd());
+    if (textSuccess) {
+      console.log(this.t("sizing.human_report_saved", { reportPath: textReportPath }));
+    }
+    
+    // Generate JSON for programmatic access
+    const jsonReportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.json`), process.cwd());
+    if (!jsonReportPath) {
       throw new Error(this.t("sizing.invalidReportFileError"));
     }
     
@@ -507,18 +538,103 @@ class I18nSizingAnalyzer {
       }
     };
     
-    const success = SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd());
-    if (success) {
-      console.log(this.t("sizing.report_saved_to", { reportPath }));
-      SecurityUtils.logSecurityEvent('Sizing report saved', 'info', { reportPath });
-    } else {
-      throw new Error(this.t("sizing.failedToSaveReportError"));
+    const jsonSuccess = SecurityUtils.safeWriteFileSync(jsonReportPath, JSON.stringify(report, null, 2), process.cwd());
+    if (jsonSuccess) {
+      SecurityUtils.logSecurityEvent('Sizing report saved', 'info', { jsonReportPath });
     }
     
     // Generate CSV if requested
     if (this.format === 'csv') {
       await this.generateCSVReport(timestamp);
     }
+  }
+
+  // Generate human-readable text report
+  generateTextReport(timestamp) {
+    let report = `# i18n Sizing Analysis Report
+Generated: ${new Date().toISOString()}
+
+## Configuration
+- Source Directory: ${this.sourceDir}
+- Languages: ${this.languages.join(', ')}
+- Threshold: ${this.threshold}%
+
+## Summary Statistics
+- Total Languages: ${Object.keys(this.stats.languages).length}
+- Total Translation Keys: ${Object.keys(this.stats.keys).length}
+- Total Files: ${Object.keys(this.stats.files).length}
+
+## Language Overview
+`;
+
+    Object.entries(this.stats.languages).forEach(([lang, data]) => {
+      const fileData = this.stats.files[lang] || { sizeKB: 0, lines: 0, characters: 0 };
+      report += `
+### ${lang.toUpperCase()}
+- File Size: ${fileData.sizeKB} KB
+- Lines: ${fileData.lines}
+- Total Characters: ${fileData.characters}
+- Translation Keys: ${data.totalKeys}
+- Average Key Length: ${data.averageKeyLength.toFixed(1)} characters
+- Empty Translations: ${data.emptyKeys}
+- Long Keys (> ${this.threshold} chars): ${data.longKeys}
+`;
+    });
+
+    // Size variations
+    if (this.stats.summary.sizeVariations && Object.keys(this.stats.summary.sizeVariations).length > 0) {
+      report += `
+## Size Variations (vs ${this.languages[0]})
+`;
+      Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
+        report += `- ${lang}: ${data.characterDifference > 0 ? '+' : ''}${data.characterDifference} chars (${data.percentageDifference > 0 ? '+' : ''}${data.percentageDifference}%) ${data.isProblematic ? '⚠️ PROBLEMATIC' : '✅ OK'}\n`;
+      });
+    }
+
+    // Problematic keys
+    if (this.stats.summary.problematicKeys.length > 0) {
+      report += `
+## Problematic Keys (${this.stats.summary.problematicKeys.length})
+`;
+      this.stats.summary.problematicKeys.forEach((item, index) => {
+        report += `${index + 1}. ${item.key}\n`;
+        item.variations.forEach(v => {
+          report += `   ${v.language}: ${v.characterDifference > 0 ? '+' : ''}${v.characterDifference} chars (${v.percentageDifference > 0 ? '+' : ''}${v.percentageDifference}%)\n`;
+        });
+        report += '\n';
+      });
+    }
+
+    // Recommendations
+    if (this.stats.summary.recommendations.length > 0) {
+      report += `
+## Recommendations
+`;
+      this.stats.summary.recommendations.forEach((rec, index) => {
+        report += `${index + 1}. ${rec}\n`;
+      });
+    }
+
+    // Detailed key analysis
+    if (this.detailedKeys) {
+      report += `
+## Detailed Key Analysis
+`;
+      Object.entries(this.stats.keys).forEach(([key, data]) => {
+        report += `
+### ${key}
+`;
+        Object.entries(data.translations).forEach(([lang, translation]) => {
+          const length = translation.length;
+          const isEmpty = length === 0;
+          const isLong = length > this.threshold;
+          const status = isEmpty ? 'EMPTY' : isLong ? 'LONG' : 'OK';
+          report += `- ${lang}: ${length} chars [${status}] "${translation.substring(0, 100)}${translation.length > 100 ? '...' : ''}"\n`;
+        });
+      });
+    }
+
+    return report;
   }
 
   // Generate CSV report
@@ -573,12 +689,12 @@ class I18nSizingAnalyzer {
       this.generateSizeComparison();
       
       if (this.format === 'table') {
-        this.displayTable();
+        this.displayFolderResults();
       } else if (this.format === 'json') {
         console.log(this.t("sizing.analysisStats", { stats: JSON.stringify(this.stats, null, 2) }));
       }
       
-      await this.generateReport();
+      await this.generateHumanReadableReport();
       
       const endTime = performance.now();
       console.log(this.t("sizing.analysis_completed", { duration: (endTime - startTime).toFixed(2) }));
@@ -589,12 +705,79 @@ class I18nSizingAnalyzer {
     }
   }
 
+  // Parse command line arguments
+  parseArgs() {
+    const yargs = require('yargs/yargs');
+    const { hideBin } = require('yargs/helpers');
+    
+    return yargs(hideBin(process.argv))
+      .option('source-dir', {
+        alias: 's',
+        type: 'string',
+        description: 'Source directory containing translation files',
+        default: './locales'
+      })
+      .option('languages', {
+        alias: 'l',
+        type: 'string',
+        description: 'Comma-separated list of languages to analyze',
+        default: ''
+      })
+      .option('output-report', {
+        alias: 'o',
+        type: 'boolean',
+        description: 'Generate detailed sizing report',
+        default: true
+      })
+      .option('format', {
+        alias: 'f',
+        type: 'string',
+        choices: ['json', 'csv', 'table'],
+        description: 'Output format: json, csv, table',
+        default: 'table'
+      })
+      .option('threshold', {
+        alias: 't',
+        type: 'number',
+        description: 'Size difference threshold for warnings (%)',
+        default: 50
+      })
+      .option('detailed', {
+        alias: 'd',
+        type: 'boolean',
+        description: 'Generate detailed report with more information',
+        default: false
+      })
+      .option('detailed-keys', {
+        type: 'boolean',
+        description: 'Show detailed key-level analysis',
+        default: false
+      })
+      .option('output-dir', {
+        type: 'string',
+        description: 'Output directory for reports',
+        default: './i18ntk-reports'
+      })
+      .help()
+      .argv;
+  }
+
   // Add run method for compatibility with manager
   async run(options = {}) {
     const { fromMenu = false } = options;
     
-    // Skip admin authentication when called from menu
-    if (!fromMenu) {
+    // Initialize configuration properly when called from menu
+    if (fromMenu && !this.sourceDir) {
+      const args = this.parseArgs();
+      const config = await getUnifiedConfig('sizing', args);
+      this.sourceDir = path.resolve(config.projectRoot || '.', config.sourceDir || './locales');
+      this.outputDir = path.resolve(config.projectRoot || '.', config.outputDir || './i18ntk-reports');
+      this.threshold = config.threshold || 50;
+      
+      const uiLanguage = SecurityUtils.sanitizeInput(config.uiLanguage || 'en');
+      loadTranslations(uiLanguage);
+      this.t = t;
+    } else if (!fromMenu) {
       const args = this.parseArgs();
       const AdminAuth = require('../utils/admin-auth');
       const adminAuth = new AdminAuth();
@@ -616,6 +799,16 @@ class I18nSizingAnalyzer {
         
         console.log(this.t('adminCli.authenticationSuccess'));
       }
+      
+      // Update instance properties from args
+      this.sourceDir = args['source-dir'];
+      this.languages = args.languages ? args.languages.split(',').map(l => l.trim()) : [];
+      this.outputReport = args['output-report'];
+      this.format = args.format;
+      this.threshold = args.threshold;
+      this.detailed = args.detailed;
+      this.detailedKeys = args['detailed-keys'];
+      this.outputDir = args['output-dir'];
     }
     
     return await this.analyze();

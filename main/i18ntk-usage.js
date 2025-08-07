@@ -29,110 +29,10 @@ const settingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
-// Enhanced configuration that prioritizes settings over auto-detection
+const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+
 async function getConfig() {
-  try {
-    const settings = settingsManager.getSettings();
-    
-    // Use per-script directory configuration if available, fallback to global settings
-    let sourceDir = settings.scriptDirectories?.usage || settings.sourceDir;
-    let i18nDir = settings.scriptDirectories?.usage || settings.i18nDir;
-    
-    // Auto-detect only if settings don't specify directories
-    if (!sourceDir) {
-      const possibleSourceDirs = [
-        './main',     // Primary source directory for this project
-        './src',
-        './app', 
-        './components',
-        './pages',
-        './views',
-        './client',
-        './frontend',
-        './' // Current directory as fallback
-      ];
-      
-      for (const dir of possibleSourceDirs) {
-        if (fs.existsSync(dir)) {
-          try {
-            const files = fs.readdirSync(dir);
-            const hasCodeFiles = files.some(file => 
-              ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'].includes(path.extname(file))
-            );
-            if (hasCodeFiles) {
-              sourceDir = dir;
-              break;
-            }
-          } catch (error) {
-            // Continue checking
-          }
-        }
-      }
-      sourceDir = sourceDir || './src'; // Final fallback
-    }
-    
-    if (!i18nDir) {
-      const possibleI18nDirs = [
-        './locales',
-        './src/locales',
-        './src/i18n',
-        './src/i18n/locales', 
-        './app/locales',
-        './app/i18n',
-        './public/locales',
-        './assets/locales',
-        './translations',
-        './lang'
-      ];
-      
-      for (const dir of possibleI18nDirs) {
-        if (fs.existsSync(dir)) {
-          try {
-            const items = fs.readdirSync(dir);
-            const hasLanguageDirs = items.some(item => {
-              const itemPath = path.join(dir, item);
-              if (fs.statSync(itemPath).isDirectory()) {
-                return ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
-              }
-              return item.endsWith('.json');
-            });
-            if (hasLanguageDirs) {
-              i18nDir = dir;
-              break;
-            }
-          } catch (error) {
-            // Continue checking
-          }
-        }
-      }
-      i18nDir = i18nDir || './locales'; // Final fallback
-    }
-    
-    const config = {
-      sourceDir: sourceDir,
-      i18nDir: i18nDir,
-      sourceLanguage: settings.sourceLanguage || 'en',
-      outputDir: settings.outputDir || './i18ntk-reports',
-      excludeDirs: settings.processing?.excludeDirs || [
-        'node_modules', '.git', 'dist', 'build', '.next', '.nuxt', 
-        'i18ntk-reports', 'reports', 'dev', 'utils', 'test', 'tests'
-      ],
-      includeExtensions: settings.processing?.includeExtensions || ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
-      translationPatterns: settings.processing?.translationPatterns || [
-        /t\(['"`]([^'"`]+)['"`]\)/g,
-        /\$t\(['"`]([^'"`]+)['"`]\)/g,
-        /i18n\.t\(['"`]([^'"`]+)['"`]\)/g,
-        /useTranslation\(\).*t\(['"`]([^'"`]+)['"`]\)/g
-      ]
-    };
-    
-   console.log(t('usage.detectedSourceDirectory', { sourceDir: config.sourceDir }));
-   console.log(t('usage.detectedI18nDirectory', { i18nDir: config.i18nDir }));
-    
-    return config;
-  } catch (error) {
-    throw new Error(`Configuration error: ${error.message}`);
-  }
+  return getUnifiedConfig('usage');
 }
 
 class I18nUsageAnalyzer {
@@ -149,10 +49,8 @@ class I18nUsageAnalyzer {
     this.translationFiles = new Map(); // New: Track all translation files
     this.translationStats = new Map(); // New: Track translation completeness
     
-    // Initialize UI i18n for console messages
-    const UIi18n = require('./i18ntk-ui');
-    this.ui = new UIi18n();
-    this.t = this.ui.t.bind(this.ui);
+    // Use global translation function
+    this.t = t;
     
     // Initialize readline interface
     this.rl = null;
@@ -190,14 +88,15 @@ class I18nUsageAnalyzer {
       const defaultConfig = await getConfig();
       this.config = { ...defaultConfig, ...this.config };
       
-      // Resolve paths
-      this.sourceDir = path.resolve(this.config.sourceDir);
-      this.i18nDir = path.resolve(this.config.i18nDir);
+      // Resolve paths using projectRoot as base
+      const projectRoot = path.resolve(this.config.projectRoot || '.');
+      this.sourceDir = path.resolve(projectRoot, this.config.sourceDir);
+      this.i18nDir = path.resolve(projectRoot, this.config.i18nDir);
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
       
       // Verify translation function
       if (typeof this.t !== 'function') {
-        throw new Error(this.t('validate.translationFunctionNotInitialized') || 'Translation function not properly initialized');
+        throw new Error('Translation function not properly initialized');
       }
       
       await SecurityUtils.logSecurityEvent(this.t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
@@ -257,10 +156,8 @@ class I18nUsageAnalyzer {
           }
       }
       
-      await SecurityUtils.logSecurityEvent(this.t('usage.argsParsed'), { component: 'i18ntk-usage', args: parsed });
       return parsed;
     } catch (error) {
-      await SecurityUtils.logSecurityEvent(this.t('usage.argsParseFailed'), { component: 'i18ntk-usage', error: error.message });
       throw error;
     }
   }
@@ -406,7 +303,22 @@ class I18nUsageAnalyzer {
     const { fromMenu = false } = options;
     
     try {
-      await this.initialize();
+      // Initialize configuration properly when called from menu
+      if (fromMenu && !this.sourceDir) {
+        const args = await this.parseArgs();
+        const baseConfig = await getUnifiedConfig('usage', args);
+        this.config = { ...baseConfig, ...this.config };
+        
+        const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+        loadTranslations(uiLanguage);
+        this.t = t;
+        
+        this.sourceDir = this.config.sourceDir;
+        this.i18nDir = this.config.i18nDir;
+        this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+      } else {
+        await this.initialize();
+      }
       
       // Skip admin authentication when called from menu
       if (!fromMenu) {
@@ -687,7 +599,7 @@ class I18nUsageAnalyzer {
           
           // Progress indicator for large numbers of files
           if (sourceFiles.length > 10 && processedFiles % Math.ceil(sourceFiles.length / 10) === 0) {
-            console.log(t('usage.processedFiles', { processedFiles, totalFiles: sourceFiles.length }));
+            console.log(this.t('usage.processedFiles', { processedFiles, totalFiles: sourceFiles.length }));
           }
         } catch (fileError) {
           console.warn(`${this.t('usage.failedToProcessFile')} ${filePath}: ${fileError.message}`);
@@ -1125,28 +1037,29 @@ class I18nUsageAnalyzer {
       const dynamicKeys = Array.from(this.usedKeys).filter(key => key.endsWith('*'));
       const notTranslatedStats = this.getNotTranslatedStats();
       
-      // Display results
-      console.log(this.t("usage.checkUsage.n"));
-      console.log(this.t("usage.checkUsage.usage_analysis_results"));
-      console.log(this.t("usage.checkUsage.message"));
+      // Prepare output lines
+      const outputLines = [];
+      outputLines.push(this.t("usage.checkUsage.n"));
+      outputLines.push(this.t("usage.checkUsage.usage_analysis_results"));
+      outputLines.push(this.t("usage.checkUsage.message"));
       
-      console.log(this.t("usage.checkUsage.source_files_scanned_thisfileu", { fileUsageSize: this.fileUsage.size }));
-      console.log(this.t("usage.checkUsage.available_translation_keys_thi", { availableKeysSize: this.availableKeys.size }));
-      console.log(this.t("usage.checkUsage.used_translation_keys_thisused", { usedKeysSize: this.usedKeys.size - dynamicKeys.length }));
-      console.log(this.t("usage.checkUsage.dynamic_keys_detected_dynamick", { dynamicKeysLength: dynamicKeys.length }));
-      console.log(this.t("usage.checkUsage.unused_keys_unusedkeyslength", { unusedKeysLength: unusedKeys.length }));
-      console.log(this.t("usage.checkUsage.missing_keys_missingkeyslength", { missingKeysLength: missingKeys.length }));
-      console.log(this.t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
+      outputLines.push(this.t("usage.checkUsage.source_files_scanned_thisfileu", { fileUsageSize: this.fileUsage.size }));
+      outputLines.push(this.t("usage.checkUsage.available_translation_keys_thi", { availableKeysSize: this.availableKeys.size }));
+      outputLines.push(this.t("usage.checkUsage.used_translation_keys_thisused", { usedKeysSize: this.usedKeys.size - dynamicKeys.length }));
+      outputLines.push(this.t("usage.checkUsage.dynamic_keys_detected_dynamick", { dynamicKeysLength: dynamicKeys.length }));
+      outputLines.push(this.t("usage.checkUsage.unused_keys_unusedkeyslength", { unusedKeysLength: unusedKeys.length }));
+      outputLines.push(this.t("usage.checkUsage.missing_keys_missingkeyslength", { missingKeysLength: missingKeys.length }));
+      outputLines.push(this.t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
 
       // Removed redundant hardcoded console output to avoid duplication
 // The translation completeness and not translated keys count are already logged below
 
       
       // Display translation completeness
-      console.log(this.t("usage.checkUsage.translation_completeness_title"));
+      outputLines.push(this.t("usage.checkUsage.translation_completeness_title"));
       for (const [language, stats] of this.translationStats) {
         const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
-        console.log(this.t("usage.checkUsage.language_completeness_stats", {
+        outputLines.push(this.t("usage.checkUsage.language_completeness_stats", {
           language: language.toUpperCase(),
           completeness,
           translated: stats.translated,
@@ -1156,66 +1069,76 @@ class I18nUsageAnalyzer {
       
       // Show some examples
       if (unusedKeys.length > 0) {
-        console.log(this.t("usage.checkUsage.n_sample_unused_keys"));
+        outputLines.push(this.t("usage.checkUsage.n_sample_unused_keys"));
         unusedKeys.slice(0, 5).forEach(key => {
-          console.log(this.t("usage.checkUsage.key", { key }));
+          outputLines.push(this.t("usage.checkUsage.key", { key }));
         });
         if (unusedKeys.length > 5) {
-          console.log(this.t("usage.checkUsage.and_unusedkeyslength_5_more", { count: unusedKeys.length - 5 }));
+          outputLines.push(this.t("usage.checkUsage.and_unusedkeyslength_5_more", { count: unusedKeys.length - 5 }));
         }
       }
       
       if (missingKeys.length > 0) {
-        console.log(this.t("usage.checkUsage.n_sample_missing_keys"));
+        outputLines.push(this.t("usage.checkUsage.n_sample_missing_keys"));
         missingKeys.slice(0, 5).forEach(key => {
-          console.log(this.t("usage.checkUsage.key", { key }));
+          outputLines.push(this.t("usage.checkUsage.key", { key }));
         });
         if (missingKeys.length > 5) {
-          console.log(this.t("usage.checkUsage.and_missingkeyslength_5_more", { count: missingKeys.length - 5 }));
+          outputLines.push(this.t("usage.checkUsage.and_missingkeyslength_5_more", { count: missingKeys.length - 5 }));
         }
       }
       
       // Generate and save report if requested
       if (args.outputReport) {
-        console.log(this.t("usage.checkUsage.n_generating_detailed_report"));
+        outputLines.push(this.t("usage.checkUsage.n_generating_detailed_report"));
         const report = this.generateUsageReport();
         const reportPath = await this.saveReport(report);
-        console.log(this.t("usage.checkUsage.report_saved_reportpath", { reportPath }));
+        outputLines.push(this.t("usage.checkUsage.report_saved_reportpath", { reportPath }));
       }
       
       // Recommendations
-      console.log(this.t("usage.checkUsage.n_recommendations"));
-      console.log(this.t("usage.checkUsage.message"));
+      outputLines.push(this.t("usage.checkUsage.n_recommendations"));
+      outputLines.push(this.t("usage.checkUsage.message"));
       
       if (unusedKeys.length > 0) {
-        console.log(this.t("usage.checkUsage.consider_removing_unused_trans"));
+        outputLines.push(this.t("usage.checkUsage.consider_removing_unused_trans"));
       }
       
       if (missingKeys.length > 0) {
-        console.log(this.t("usage.checkUsage.add_missing_translation_keys_t"));
+        outputLines.push(this.t("usage.checkUsage.add_missing_translation_keys_t"));
       }
       
       if (dynamicKeys.length > 0) {
-        console.log(this.t("usage.checkUsage.review_dynamic_keys_manually_t"));
+        outputLines.push(this.t("usage.checkUsage.review_dynamic_keys_manually_t"));
       }
       
       if (notTranslatedStats.total > 0) {
-        console.log(this.t('usage.reviewNotTranslatedKeys', { total: notTranslatedStats.total }));
+        outputLines.push(this.t('usage.reviewNotTranslatedKeys', { total: notTranslatedStats.total }));
       }
       
       if (unusedKeys.length === 0 && missingKeys.length === 0 && notTranslatedStats.total === 0) {
-        console.log(this.t("usage.checkUsage.all_translation_keys_are_prope"));
+        outputLines.push(this.t("usage.checkUsage.all_translation_keys_are_prope"));
       }
       
-      console.log(this.t("usage.checkUsage.n_next_steps"));
-      console.log(this.t("usage.checkUsage.1_review_the_analysis_results"));
+      outputLines.push(this.t("usage.checkUsage.n_next_steps"));
+      outputLines.push(this.t("usage.checkUsage.1_review_the_analysis_results"));
       if (args.outputReport) {
-        console.log(this.t("usage.checkUsage.2_check_the_detailed_report_fo"));
+        outputLines.push(this.t("usage.checkUsage.2_check_the_detailed_report_fo"));
       } else {
-        console.log(this.t("usage.checkUsage.2_run_with_outputreport_for_de"));
+        outputLines.push(this.t("usage.checkUsage.2_run_with_outputreport_for_de"));
       }
-      console.log(this.t("usage.checkUsage.3_remove_unused_keys_or_add_mi"));
-      console.log(this.t("usage.checkUsage.4_rerun_analysis_to_verify_imp"));
+      outputLines.push(this.t("usage.checkUsage.3_remove_unused_keys_or_add_mi"));
+      outputLines.push(this.t("usage.checkUsage.4_rerun_analysis_to_verify_imp"));
+      
+      // Display output with truncation if too long
+      const maxLines = 100;
+      if (outputLines.length > maxLines) {
+        outputLines.slice(0, maxLines - 1).forEach(line => console.log(line));
+        const reportFile = args.outputReport ? this.getReportPath() : 'report file';
+        console.log(`... see report for more details. (${reportFile})`);
+      } else {
+        outputLines.forEach(line => console.log(line));
+      }
       
       await SecurityUtils.logSecurityEvent('analysis_completed', {
         component: 'i18ntk-usage',
@@ -1273,10 +1196,35 @@ class I18nUsageAnalyzer {
 
 // Run if called directly
 if (require.main === module) {
-  const analyzer = new I18nUsageAnalyzer();
+  async function main() {
+    try {
+      const args = parseCommonArgs(process.argv.slice(2));
+      
+      if (args.help) {
+        displayHelp('i18ntk-usage', {
+          'output-report': 'Generate detailed usage report',
+          'source-dir': 'Source code directory to scan',
+          'i18n-dir': 'Directory containing translation files',
+          'output-dir': 'Directory for output reports'
+        });
+        return;
+      }
+      
+      const config = await getUnifiedConfig('usage', args);
+      
+      // Load translations
+      loadTranslations(config.uiLanguage);
+      
+      const analyzer = new I18nUsageAnalyzer(config);
+      await analyzer.analyze();
+      
+    } catch (error) {
+      console.error('Error:', error.message);
+      process.exit(1);
+    }
+  }
   
   // Check if we're being called from the menu system (stdin has data)
-  // In that case, we should run with default settings without prompting
   const hasStdinData = !process.stdin.isTTY;
   
   if (hasStdinData) {
@@ -1284,38 +1232,11 @@ if (require.main === module) {
     process.stdin.resume();
     process.stdin.on('data', () => {});
     process.stdin.on('end', () => {
-      // Run analysis with default settings (no prompts)
-      analyzer.analyze()
-        .then((result) => {
-          if (result.success) {
-            console.log(analyzer.t('usage.analysisCompletedSuccessfully'));
-            process.exit(0);
-          } else {
-            console.error(analyzer.t('usage.analysisFailed', { error: result.error }));
-            process.exit(1);
-          }
-        })
-        .catch((error) => {
-          console.error(analyzer.t('usage.analysisFailed', { error: error.message }));
-          process.exit(1);
-        });
+      main();
     });
   } else {
     // Normal direct execution
-    analyzer.analyze()
-      .then((result) => {
-        if (result.success) {
-          console.log('\n' + analyzer.t('usage.analysisCompletedSuccessfully'));
-          process.exit(0);
-        } else {
-          console.error('\n' + analyzer.t('usage.analysisFailed', { error: result.error }));
-          process.exit(1);
-        }
-      })
-      .catch((error) => {
-        console.error('\n' + analyzer.t('usage.analysisFailed', { error: error.message }));
-        process.exit(1);
-      });
+    main();
   }
 }
 

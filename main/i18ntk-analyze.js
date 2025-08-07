@@ -16,41 +16,55 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-const PROJECT_ROOT = process.cwd();
-const settingsManager = require('../settings/settings-manager');
+const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
+const AdminCLI = require('../utils/admin-cli');
 
-// Get configuration from settings manager
-function getConfig() {
-  const settings = settingsManager.getSettings();
-  
-  // Check for per-script directory override, fallback to global sourceDir
-  const sourceDir = settings.scriptDirectories?.analyze || settings.sourceDir || './locales';
-  
-  return {
-    sourceDir: sourceDir,
-    sourceLanguage: settings.sourceLanguage || 'en',
-    notTranslatedMarker: settings.notTranslatedMarker || settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
-    outputDir: settings.outputDir || './i18ntk-reports',
-    excludeFiles: settings.excludeFiles || settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
-    uiLanguage: settings.language || 'en'
-  };
-}
+const PROJECT_ROOT = process.cwd();
 
 class I18nAnalyzer {
   constructor(config = {}) {
-    this.config = { ...getConfig(), ...config };
-    this.sourceDir = path.resolve(this.config.sourceDir);
-    this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
-    this.outputDir = path.resolve(this.config.outputDir);
-    
-    // Initialize i18n with UI language
-    const uiLanguage = this.config.uiLanguage || 'en';
-    loadTranslations(uiLanguage);
-    this.t = t;
-    
-    // Initialize readline interface
+    this.config = config;
     this.rl = null;
+    this.t = t; // Use global translation function
+    
+    // Don't set defaults here - let getUnifiedConfig handle it
+    // This ensures we use the configuration from settings files
+  }
+
+  async initialize() {
+    try {
+      const args = this.parseArgs();
+      if (args.help) {
+        displayHelp('i18ntk-analyze', {
+          'language': 'Analyze specific language only',
+          'output-reports': 'Generate detailed reports',
+          'setup-admin': 'Configure admin PIN protection',
+          'disable-admin': 'Disable admin PIN protection',
+          'admin-status': 'Check admin PIN status'
+        });
+        process.exit(0);
+      }
+      
+      // Initialize i18n with UI language first
+      const baseConfig = await getUnifiedConfig('analyze', args);
+      this.config = { ...baseConfig, ...this.config };
+      
+      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      loadTranslations(uiLanguage);
+      
+      this.sourceDir = this.config.sourceDir;
+      this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+      this.outputDir = this.config.outputDir;
+      
+      // Validate source directory exists
+      const { validateSourceDir } = require('../utils/config-helper');
+      validateSourceDir(this.sourceDir, 'i18ntk-analyze');
+      
+    } catch (error) {
+      console.error(`Fatal analysis error: ${error.message}`);
+      throw error;
+    }
   }
   
   // Initialize readline interface
@@ -82,40 +96,41 @@ class I18nAnalyzer {
 
   // Parse command line arguments
   parseArgs() {
-    const args = process.argv.slice(2);
-    const parsed = {};
-    
-    args.forEach(arg => {
-      if (arg.startsWith('--')) {
-        const [key, value] = arg.substring(2).split('=');
-        if (key === 'language') {
-          parsed.language = value;
-        } else if (key === 'source-dir') {
-          parsed.sourceDir = value;
-        } else if (key === 'output-reports') {
-          parsed.outputReports = true;
-        } else if (key === 'output-dir') {
-          parsed.outputDir = value;
-        } else if (key === 'ui-language') {
-          parsed.uiLanguage = value;
-        } else if (key === 'help') {
-          parsed.help = true;
-        } else if (key === 'no-prompt') {
-          parsed.noPrompt = true;
-        } else if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(key)) {
-          // Support shorthand language flags like --de, --fr, etc.
-          parsed.uiLanguage = key;
+    try {
+      const args = process.argv.slice(2);
+      const parsed = parseCommonArgs(args);
+      
+      // Add script-specific arguments
+      args.forEach(arg => {
+        if (arg.startsWith('--')) {
+          const [key, value] = arg.substring(2).split('=');
+          const sanitizedKey = SecurityUtils.sanitizeInput(key);
+          const sanitizedValue = value ? SecurityUtils.sanitizeInput(value) : true;
+          
+          if (sanitizedKey === 'language') {
+            parsed.language = sanitizedValue;
+          } else if (sanitizedKey === 'output-reports') {
+            parsed.outputReports = true;
+          } else if (sanitizedKey === 'setup-admin') {
+            parsed.setupAdmin = true;
+          } else if (sanitizedKey === 'disable-admin') {
+            parsed.disableAdmin = true;
+          } else if (sanitizedKey === 'admin-status') {
+            parsed.adminStatus = true;
+          }
         }
-      }
-    });
-    
-    return parsed;
+      });
+      
+      return parsed;
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Get all available languages
   getAvailableLanguages() {
     if (!fs.existsSync(this.sourceDir)) {
-      throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+      throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
     return fs.readdirSync(this.sourceDir)
@@ -560,6 +575,8 @@ class I18nAnalyzer {
 
   // Main analysis process
   async run(options = {}) {
+    const fromMenu = options.fromMenu || false;
+    
     try {
       const args = this.parseArgs();
       
@@ -568,8 +585,18 @@ class I18nAnalyzer {
         return;
       }
       
-      // Check if called from menu system
-      const fromMenu = options.fromMenu || false;
+      // Initialize configuration properly when called from menu
+      if (fromMenu && !this.sourceDir) {
+        const baseConfig = await getUnifiedConfig('analyze', args);
+        this.config = { ...baseConfig, ...this.config };
+        
+        const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+        loadTranslations(uiLanguage);
+        
+        this.sourceDir = this.config.sourceDir;
+        this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+        this.outputDir = this.config.outputDir;
+      }
       
       // Skip admin authentication when called from menu system (i18ntk-manage.js) or when --no-prompt is used
       // Authentication is handled by the menu system
@@ -637,7 +664,9 @@ class I18nAnalyzer {
 // Run if called directly
 if (require.main === module) {
   const analyzer = new I18nAnalyzer();
-  analyzer.run().catch(error => {
+  analyzer.initialize().then(() => {
+    return analyzer.run();
+  }).catch(error => {
     console.error('❌ Analysis failed:', error.message);
     process.exit(1);
   });

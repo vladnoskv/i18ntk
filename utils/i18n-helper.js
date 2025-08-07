@@ -5,8 +5,26 @@ const settingsManager = require('../settings/settings-manager');
 // Get configuration from settings manager
 function getConfig() {
   const settings = settingsManager.getSettings();
+  
+  // Determine the correct ui-locales directory
+  let uiLocalesDir;
+  
+  if (settings.uiLocalesDir) {
+    uiLocalesDir = settings.uiLocalesDir;
+  } else {
+    // Use a more robust approach to find ui-locales directory
+    const possiblePaths = [
+      path.join(process.cwd(), 'ui-locales'),
+      path.join(__dirname, '..', 'ui-locales'),
+      path.join(__dirname, '..', '..', 'ui-locales')
+    ];
+    
+    // Find the first existing path
+    uiLocalesDir = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
+  }
+  
   return {
-    uiLocalesDir: settings.directories?.uiLocalesDir || path.join(__dirname, '..', 'ui-locales')
+    uiLocalesDir
   };
 }
 
@@ -171,8 +189,10 @@ function getAvailableLanguages() {
   const localesDir = path.resolve(config.uiLocalesDir);
   try {
     if (fs.existsSync(localesDir)) {
-      return fs.readdirSync(localesDir)
-        .filter(file => fs.statSync(path.join(localesDir, file)).isDirectory());
+      const files = fs.readdirSync(localesDir);
+      const jsonFiles = files.filter(file => file.endsWith('.json'));
+      const languages = jsonFiles.map(file => path.basename(file, '.json'));
+      return languages.length > 0 ? languages : ['en'];
     }
   } catch (error) {
     console.error(`Error reading locales directory: ${error.message}`);

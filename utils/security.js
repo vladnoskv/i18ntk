@@ -177,7 +177,7 @@ class SecurityUtils {
     }
 
     const {
-      allowedChars = /^[a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:;"']+$/,
+      allowedChars = /^[a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:\;"'\/\\]+$/,
       maxLength = 1000,
       removeHTML = true,
       removeScripts = true
@@ -254,7 +254,8 @@ class SecurityUtils {
       'translationPatterns', 'notTranslatedMarker', 'excludeFiles', 'strictMode',
       'uiLanguage', 'language', 'sizeLimit', 'defaultLanguages', 'reportLanguage',
       'theme', 'autoSave', 'notifications', 'dateFormat', 'timeFormat', 'timezone',
-      'processing', 'advanced', 'security', 'debug'
+      'processing', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
+      'supportedExtensions', 'settings'
     ];
 
     for (const [key, value] of Object.entries(config)) {
@@ -270,7 +271,7 @@ class SecurityUtils {
           if (typeof value === 'string') {
             // Basic path validation - will be further validated when used
             validatedConfig[key] = this.sanitizeInput(value, {
-              allowedChars: /^[a-zA-Z0-9\-_\.\,\/\\\:]+$/,
+              allowedChars: /^[a-zA-Z0-9\-_\.\,\/\\\:\s]+$/,
               maxLength: 500
             });
           }

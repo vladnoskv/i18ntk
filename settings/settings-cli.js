@@ -140,8 +140,9 @@ class SettingsCLI {
             { key: '2', label: this.t('settings.mainMenu.directorySettings'), description: this.t('settings.mainMenu.directorySettingsDesc') },
             { key: '3', label: this.t('settings.mainMenu.scriptDirectorySettings'), description: this.t('settings.mainMenu.scriptDirectorySettingsDesc') },
             { key: '4', label: this.t('settings.mainMenu.processingSettings'), description: this.t('settings.mainMenu.processingSettingsDesc') },
-            { key: '5', label: this.t('settings.mainMenu.securitySettings'), description: `${this.t('settings.mainMenu.securitySettingsDesc')} ${pinStatus}` },
-            { key: '6', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
+            { key: '5', label: this.t('settings.mainMenu.backupSettings'), description: this.t('settings.mainMenu.backupSettingsDesc') },
+            { key: '6', label: this.t('settings.mainMenu.securitySettings'), description: `${this.t('settings.mainMenu.securitySettingsDesc')} ${pinStatus}` },
+            { key: '7', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
             { key: '7', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
             { key: '8', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
             { key: '9', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
@@ -183,21 +184,24 @@ class SettingsCLI {
                 await this.showProcessingSettings();
                 break;
             case '5':
-                await this.showSecuritySettings();
+                await this.showBackupSettings();
                 break;
             case '6':
-                await this.showAdvancedSettings();
+                await this.showSecuritySettings();
                 break;
             case '7':
-                await this.showAllSettings();
+                await this.showAdvancedSettings();
                 break;
             case '8':
-                await this.showImportExport();
+                await this.showAllSettings();
                 break;
             case '9':
-                await this.resetToDefaults();
+                await this.showImportExport();
                 break;
             case '0':
+                await this.resetToDefaults();
+                break;
+            case '-':
                 await this.reportBug();
                 break;
             case 'u':
@@ -258,9 +262,13 @@ class SettingsCLI {
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.categories.directorySettings')}${colors.reset}\n`);
+        console.log(`📁 ${colors.cyan}${this.t('settings.currentDirectory')}: ${process.cwd()}${colors.reset}`);
+        console.log(`💡 ${colors.dim}${this.t('settings.relativePathHint')}${colors.reset}\n`);
 
         const dirSettings = {
+            'projectRoot': this.t('settings.fields.projectRoot.label'),
             'sourceDir': this.t('settings.fields.sourceDir.label'),
+            'i18nDir': this.t('settings.fields.i18nDir.label'),
             'outputDir': this.t('settings.fields.outputDir.label')
         };
 
@@ -374,6 +382,32 @@ class SettingsCLI {
     }
 
     /**
+     * Show backup settings menu
+     */
+    async showBackupSettings() {
+        // Refresh language from settings to ensure consistency
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+        
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}${this.t('settings.backup.title')}${colors.reset}\n`);
+        console.log(`${this.t('settings.backup.description')}\n`);
+
+
+        const backupSettings = {
+            'backup.enabled': this.t('settings.fields.backup_enabled.label'),
+            'backup.singleFileMode': this.t('settings.fields.backup_singleFileMode.label'),
+            'backup.singleBackupFile': this.t('settings.fields.backup_singleBackupFile.label'),
+            'backup.retentionDays': this.t('settings.fields.backup_retentionDays.label'),
+            'backup.maxBackups': this.t('settings.fields.backup_maxBackups.label')
+        };
+
+        await this.showSettingsCategory(backupSettings);
+    }
+
+    /**
      * Show settings category with edit options
      */
     async showSettingsCategory(categorySettings) {
@@ -481,7 +515,9 @@ class SettingsCLI {
             'debug.verboseLogging': ['true', 'false'],
             'security.adminPinEnabled': ['true', 'false'],
             'security.pinProtection.enabled': ['true', 'false'],
-            'advanced.backupBeforeChanges': ['true', 'false']
+            'advanced.backupBeforeChanges': ['true', 'false'],
+            'backup.enabled': ['true', 'false'],
+            'backup.singleFileMode': ['true', 'false']
         };
         
         return validOptions[key] || null;
@@ -509,7 +545,9 @@ class SettingsCLI {
             'maxFailedAttempts': { min: 1, max: 10, type: 'int' },
             'lockoutDuration': { min: 1, max: 60, type: 'int', unit: 'minutes' },
             'backupRetention': { min: 1, max: 30, type: 'int', unit: 'days' },
-            'logRetention': { min: 1, max: 90, type: 'int', unit: 'days' }
+            'logRetention': { min: 1, max: 90, type: 'int', unit: 'days' },
+            'retentionDays': { min: 1, max: 365, type: 'int', unit: 'days' },
+            'maxBackups': { min: 1, max: 1000, type: 'int' }
         };
         
         for (const [field, rules] of Object.entries(validations)) {

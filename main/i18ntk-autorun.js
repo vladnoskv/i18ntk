@@ -9,6 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+const SecurityUtils = require('../utils/security');
 
 class AutoRunner {
   constructor() {
@@ -41,6 +43,10 @@ class AutoRunner {
           "description": "autorun.stepGenerateSummary"
         }
       ]
+    };
+    this.config = {
+      ...getUnifiedConfig('autorun'),
+      ...this.DEFAULT_CONFIG
     };
     this.initializeTranslations();
   }
@@ -96,7 +102,7 @@ class AutoRunner {
     console.log();
   }
 
-  runStep(step, stepNumber, totalSteps) {
+  runStep(step, stepNumber, totalSteps, commonArgs = []) {
     const scriptPath = path.join(__dirname, step.script);
     
     if (!fs.existsSync(scriptPath)) {
@@ -109,7 +115,8 @@ class AutoRunner {
     console.log(this.t('autorun.separator'));
 
     try {
-      execSync(`node "${scriptPath}" --no-prompt`, { stdio: 'inherit' });
+      const command = `node "${scriptPath}" --no-prompt ${commonArgs.join(' ')}`.trim();
+      execSync(command, { stdio: 'inherit' });
       const completionMessage = this.t('autorun.stepCompletedWithIcon', { stepName: this.t(step.description) });
       console.log(completionMessage);
       return true;
@@ -121,7 +128,7 @@ class AutoRunner {
   }
 
   async runAll(quiet = false) {
-    const config = this.loadConfig();
+    const config = this.config;
 
     if (!quiet) {
       console.log(`\n${this.t('autorun.startingAutoRunWorkflow')}`);
@@ -129,12 +136,27 @@ class AutoRunner {
       console.log(`${this.t('autorun.workflowIncludesSteps', { count: config.steps.length })}`);
     }
 
+    // Build common arguments from unified config
+    const commonArgs = [];
+    if (config.sourceDir !== './locales') {
+      commonArgs.push(`--source-dir="${config.sourceDir}"`);
+    }
+    if (config.i18nDir !== config.sourceDir) {
+      commonArgs.push(`--i18n-dir="${config.i18nDir}"`);
+    }
+    if (config.outputDir !== './i18ntk-reports') {
+      commonArgs.push(`--output-dir="${config.outputDir}"`);
+    }
+    if (config.uiLanguage !== 'en') {
+      commonArgs.push(`--ui-language="${config.uiLanguage}"`);
+    }
+
     let successCount = 0;
     for (let i = 0; i < config.steps.length; i++) {
       const step = config.steps[i];
       const stepNumber = i + 1;
       
-      if (this.runStep(step, stepNumber, config.steps.length)) {
+      if (this.runStep(step, stepNumber, config.steps.length, commonArgs)) {
         successCount++;
       } else {
         if (!quiet) {
@@ -151,29 +173,88 @@ class AutoRunner {
     }
     process.exit(0);
   }
-}
 
-// Main execution for command-line usage
-function main() {
-  const runner = new AutoRunner();
-  const args = process.argv.slice(2);
+  // Add run method for menu execution
+  async run(options = {}) {
+    const { fromMenu = false } = options;
+    
+    if (fromMenu) {
+      // Ensure proper configuration when called from menu
+      const config = await getUnifiedConfig('autorun', {});
+      this.config = config;
+      
+      const uiLanguage = SecurityUtils.sanitizeInput(config.uiLanguage || 'en');
+      loadTranslations(uiLanguage);
+      
+      await this.runAll();
+    } else {
+      await this.runAll();
+    }
+  }
 
-  if (args.includes('--help') || args.includes('-h')) {
-    runner.displayHelp();
+  // Main execution for command-line usage
+  static main() {
+    const runner = new AutoRunner();
+    const args = process.argv.slice(2);
+
+    if (args.includes('--help') || args.includes('-h')) {
+      runner.displayHelp();
+      process.exit(0);
+    }
+
+    if (args.includes('--config') || args.includes('-c')) {
+      runner.displayConfig();
+      process.exit(0);
+    }
+
+    runner.runAll();
     process.exit(0);
   }
 
-  if (args.includes('--config') || args.includes('-c')) {
-    runner.displayConfig();
-    process.exit(0);
+  // List available automation steps
+  listSteps() {
+    console.log(`\n${this.t('autorun.availableSteps')}`);
+    console.log(this.t('autorun.separator'));
+    this.config.steps.forEach((step, index) => {
+      console.log(`${index + 1}. ${this.t(step.description)} (${step.script})`);
+    });
+    console.log();
   }
-
-  runner.runAll();
-  process.exit(0);
 }
 
 // Execute if called directly
 if (require.main === module) {
+  async function main() {
+    try {
+      const args = parseCommonArgs(process.argv.slice(2));
+      
+      if (args.help) {
+        displayHelp('i18ntk-autorun', {
+          'list': 'List available automation steps',
+          'source-dir': 'Source code directory',
+          'i18n-dir': 'Translation files directory',
+          'output-dir': 'Output reports directory',
+          'ui-language': 'UI language for messages'
+        });
+        return;
+      }
+      
+      if (args.list) {
+        const runner = new AutoRunner();
+        runner.listSteps();
+        return;
+      }
+      
+      const config = await getUnifiedConfig('autorun', args);
+      const runner = new AutoRunner(config);
+      await runner.runAll();
+      
+    } catch (error) {
+      console.error('Error:', error.message);
+      process.exit(1);
+    }
+  }
+  
   main();
 }
 

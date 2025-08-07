@@ -243,19 +243,23 @@
     "report_saved_to": "Informe guardado en: {{reportPath}}",
     "considerReviewingTranslations": "Considera revisar las traducciones de ${lang} - son ${data.percentageDifference}% más largas que la referencia",
     "csv_report_saved_to": "Informe CSV guardado en: {{csvPath}}",
-    "no_translation_files_found": "No se encontraron archivos de traducción",
-    "analysis_completed": "Análisis completado en {{duration}}ms",
+      "human_report_saved": "Informe legible guardado: {{reportPath}}",
+      "folder_summary_title": "Resumen de Carpeta",
+      "folder_summary_table_header": "Idioma    Tamaño(KB)    Claves    Longitud Media    Caracteres Totales",
+      "folder_summary_row": "{{lang}}      {{sizeKB}}      {{totalKeys}}    {{avgLength}}    {{totalChars}}",
+      "language_comparison_title": "Comparación de Idiomas",
+      "language_comparison_row": "{{lang}}: {{diff}} caracteres ({{percent}}%) {{status}}",
+      "summary_stats": "📊 Resumen: {{totalLanguages}} idiomas, {{totalKeys}} claves - Informes guardados en {{reportPath}}",
+      "detailedKeysDescription": "Mostrar análisis detallado de claves en consola",
+      "too_many_keys_warning": "⚠️ Demasiadas claves para mostrar en consola - ver informe detallado para análisis completo",
+      "no_translation_files_found": "No se encontraron archivos de traducción",
+      "analysis_completed": "Análisis completado en {{duration}}ms",
     "analysis_failed": "Análisis fallido: {{errorMessage}}",
     "failed_to_parse_language_error": "Error al analizar las traducciones de {{language}}: {{errorMessage}}",
     "recommendations": {
       "keys_have_significant_size_variations": "las claves tienen variaciones de tamaño significativas",
       "consider_reviewing_translations": "Considera revisar las traducciones de {{lang}} - son {{percentageDifference}}% {{comparison}} que la referencia",
       "long_translations_detected": "{{lang}} tiene {{longKeys}} traducciones de más de {{threshold}} caracteres - considera dividirlas"
-    },
-    "hardcodedTexts": {
-      "keysHaveSignificantSizeVariations": "las claves tienen variaciones de tamaño significativas",
-      "considerReviewingTranslations": "Considera revisar las traducciones de {{lang}} - son {{percentageDifference}}% {{comparison}} que la referencia",
-      "longTranslationsDetected": "{{lang}} tiene {{longKeys}} traducciones de más de {{threshold}} caracteres - considera dividirlas"
     }
   },
   "usage": {
@@ -276,8 +280,9 @@
     "noSourceFilesFound": "⚠️  No se encontraron archivos de origen.",
     "reviewNotTranslatedKeys": "💡 Revisa las claves no traducidas",
     "analysisCompletedSuccessfully": "🎉 ¡Análisis completado con éxito!",
-    "detectedSourceDirectory": "Directorio de origen detectado: {{sourceDir}}",
-    "detectedI18nDirectory": "Directorio i18n detectado: {{i18nDir}}",
+    "detectedSourceDirectory": "Directorio de origen detectado: {sourceDir}",
+    "detectedI18nDirectory": "Directorio i18n detectado: {i18nDir}",
+    "processedFiles": "Procesados {processedFiles} de {totalFiles} archivos.",
     "fileInfo": "   📄 {namespace}: {keys} claves",
     "failedToAnalyzeUsage": "❌ Error al analizar uso: {error}",
     "failedToAnalyzeFile": "❌ Error al analizar archivo: {error}",
@@ -721,6 +726,7 @@
   "summaryCommand": "  summary   - Mostrar estado del proyecto",
   "debugCommand": "  debug     - Depurar problemas de traducción",
   "menu": {
+    "pressEnterToContinue": "Presione Enter para continuar...",
     "title": "\n🌐 MENÚ DE GESTIÓN DE I18N\n",
     "description": "Menú interactivo para gestionar la internacionalización\n",
     "exit": "\n🚪 Salir"
@@ -792,6 +798,9 @@
   "useExistingDirectoryPrompt": "¿Deseas usar el directorio existente? (s/n)",
   "autoDetectedI18nDirectory": "📂 Directorio i18n detectado automáticamente: {directory}",
   "initializingProject": "⚙️  Inicializando configuración del proyecto...",
+  "selectDirectoryPrompt": "Selecciona un directorio ingresando el número (o elige 'Crear nuevo directorio'):",
+  "usingExistingDirectory": "Usando directorio existente: {{dir}}",
+  "createdNewDirectory": "Creado nuevo directorio: {{dir}}",
   "createdSampleTranslationFile": "✅ Archivo de traducción de muestra creado: {file}",
   "languageSelectionTitle": "🌐 Configuración de Idioma",
   "available": "Disponible",
@@ -832,6 +841,7 @@
   "creatingSourceDirectory": "Creando directorio fuente: {dir}",
   "creatingSourceLanguageDirectory": "Creando directorio de idioma fuente: {dir}",
   "errors": {
+    "errorExecutingCommand": "Error al ejecutar el comando: {error}",
     "sourceDirectoryNotFound": "No se encontró el directorio fuente: {dir}",
     "sourceLanguageDirectoryNotFound": "No se encontró el directorio del idioma fuente: {dir}",
     "noJsonFilesInSourceDirectory": "No se encontraron archivos JSON en el directorio fuente: {dir}",
@@ -1291,8 +1301,28 @@
     "lockoutDurationUpdated": "Duración del bloqueo actualizada a {{minutes}} minutos"
   }
 },
-"fields": {
-  "language": {
+  "fields": {
+    "i18nDir": {
+      "label": "Directorio I18n",
+      "description": "Directorio que contiene los archivos de traducción",
+      "current": "Actual: {value}",
+      "help": "Ruta al directorio con archivos de traducción"
+    },
+    "projectRoot": {
+      "label": "Raíz del Proyecto",
+      "description": "Directorio raíz del proyecto",
+      "current": "Actual: {value}", 
+      "help": "Ruta al directorio raíz del proyecto"
+    },
+    "checkUsage": {
+      "usage_analysis_failed": "Análisis de uso fallido",
+      "usage_analysis_success": "Análisis de uso exitoso",
+      "usage_analysis_complete": "Análisis de uso completado",
+      "usage_analysis_in_progress": "Análisis de uso en progreso",
+      "usage_analysis_started": "Análisis de uso iniciado",
+      "usage_analysis_skipped": "Análisis de uso omitido"
+    },
+    "language": {
     "label": "Idioma de la interfaz",
     "description": "Idioma para la interfaz de usuario",
     "current": "Actual: {value}",

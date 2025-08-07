@@ -22,5 +22,13 @@
   "tryReconnect": "Try to reconnect",
   "logout": "Logout",
   "login": "Login",
-  "amount": "Amount"
+  "amount": "Amount",
+  "complete": {
+    "configurationValidationFailed": "Configuration validation failed: {{error}}",
+    "configLoadedSuccessfully": "Configuration loaded successfully",
+    "configLoadingFailed": "Configuration loading failed",
+    "completeSuccess": "Completion process completed successfully",
+    "completeFailed": "Completion process failed"
+  }
+    
 }

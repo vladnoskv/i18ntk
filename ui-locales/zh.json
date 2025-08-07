@@ -242,6 +242,15 @@
     "report_saved_to": "报告已保存到: {{reportPath}}",
     "considerReviewingTranslations": "考虑检查 ${lang} 翻译 - 它们比基准长 ${data.percentageDifference}%",
     "csv_report_saved_to": "CSV报告已保存到: {{csvPath}}",
+    "human_report_saved": "已保存可读报告: {{reportPath}}",
+    "folder_summary_title": "文件夹摘要",
+    "folder_summary_table_header": "语言    大小(KB)    键数    平均长度    总字符数",
+    "folder_summary_row": "{{lang}}      {{sizeKB}}      {{totalKeys}}    {{avgLength}}    {{totalChars}}",
+    "language_comparison_title": "语言比较",
+    "language_comparison_row": "{{lang}}: {{diff}} 字符 ({{percent}}%) {{status}}",
+    "summary_stats": "📊 摘要: {{totalLanguages}} 种语言, {{totalKeys}} 个键 - 报告已保存到 {{reportPath}}",
+    "detailedKeysDescription": "在控制台显示详细的键级分析",
+    "too_many_keys_warning": "⚠️ 键数过多，无法在控制台显示 - 请查看详细报告文件获取完整分析",
     "no_translation_files_found": "未找到翻译文件",
     "analysis_completed": "分析在{{duration}}毫秒内完成",
     "analysis_failed": "分析失败: {{errorMessage}}",
@@ -250,11 +259,6 @@
       "keys_have_significant_size_variations": "键有显著的大小变化",
       "consider_reviewing_translations": "考虑检查 {{lang}} 翻译 - 它们比基准 {{comparison}} {{percentageDifference}}%",
       "long_translations_detected": "{{lang}} 有 {{longKeys}} 个翻译超过 {{threshold}} 个字符 - 考虑拆分它们"
-    },
-    "hardcodedTexts": {
-      "keysHaveSignificantSizeVariations": "键有显著的大小变化",
-      "considerReviewingTranslations": "考虑检查 {{lang}} 翻译 - 它们比基准 {{comparison}} {{percentageDifference}}%",
-      "longTranslationsDetected": "{{lang}} 有 {{longKeys}} 个翻译超过 {{threshold}} 个字符 - 考虑拆分它们"
     }
   },
   "usage": {
@@ -278,6 +282,7 @@
     "detectedSourceDirectory": "检测到源目录: {{sourceDir}}",
     "detectedI18nDirectory": "检测到 I18n 目录: {{i18nDir}}",
     "fileInfo": "   📄 {namespace}: {keys} 个键",
+    "processedFiles": "已处理 {processedFiles} 个文件中的 {totalFiles} 个文件。",
     "failedToAnalyzeUsage": "❌ 使用分析失败: {error}",
     "failedToAnalyzeFile": "❌ 文件分析失败: {error}",
     "analyzerInitialized": "分析器已初始化",
@@ -792,6 +797,9 @@
   "initializingProject": "⚙️  正在初始化项目配置...",
   "createdSampleTranslationFile": "✅ 已创建示例翻译文件：{file}",
   "languageSelectionTitle": "🌐 语言配置",
+  "selectDirectoryPrompt": "选择目录（输入数字或选择 '创建新目录'）:",
+  "usingExistingDirectory": "使用现有目录: {{dir}}",
+  "createdNewDirectory": "已创建新目录: {{dir}}",
   "available": "可用",
   "defaultLanguages": "📝 默认语言：{languages}",
   "enterLanguageCodes": "🎯 输入目标语言代码（逗号分隔，例如 de, es, fr, ru）：",
@@ -937,7 +945,8 @@
     "tool_separator": "======================================\n",
     "dry_run_warning": "⚠️ 正在试运行模式 - 不会修改文件\n",
     "error_during_replacement": "❌ 翻译替换过程中出错："
-  },
+  }
+},
  "operations": {
   "completed": "✅ 操作成功完成！",
   "deleteReportsTitle": "🗑️ 删除报告与日志",
@@ -1042,8 +1051,8 @@
   "alertMessage": "[安全警报] {timestamp}：{event}",
   "securityWarning": "[安全警告] {timestamp}：{event}",
   "json_parse_error": "安全：JSON 解析错误：{errorMessage}"
-}
 },
+
 "settings-cli": {
   "settings": {
     "mainMenu": {
@@ -1288,8 +1297,28 @@
     "lockoutDurationUpdated": "锁定持续时间已更新为 {{minutes}} 分钟"
   }
 },
-"fields": {
-  "language": {
+  "fields": {
+    "i18nDir": {
+      "label": "国际化目录",
+      "description": "包含翻译文件的目录",
+      "current": "当前：{value}",
+      "help": "翻译文件所在目录的路径"
+    },
+    "projectRoot": {
+      "label": "项目根目录",
+      "description": "项目的根目录",
+      "current": "当前：{value}", 
+      "help": "项目根目录的路径"
+    },
+    "checkUsage": {
+      "usage_analysis_failed": "使用情况分析失败",
+      "usage_analysis_success": "使用情况分析成功",
+      "usage_analysis_complete": "使用情况分析完成",
+      "usage_analysis_in_progress": "使用情况分析进行中",
+      "usage_analysis_started": "使用情况分析已开始",
+      "usage_analysis_skipped": "使用情况分析已跳过"
+    },
+    "language": {
     "label": "界面语言",
     "description": "用户界面的语言",
     "current": "当前：{value}",

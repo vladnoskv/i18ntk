@@ -9,6 +9,7 @@
 /docs
 /dev
 /benchmarks
+/src
 
 # Test files
 /dev/tests/test-report-final.json

@@ -242,7 +242,16 @@
     "longTranslationsDetected": "{{lang}} a {{data.longKeys}} traductions de plus de 100 caractères - envisagez de les décomposer",
     "report_saved_to": "Rapport enregistré dans : {{reportPath}}",
     "considerReviewingTranslations": "Envisagez de revoir les traductions {{lang}} - elles sont {{data.percentageDifference}}% plus longues que la référence",
-    "csv_report_saved_to": "Rapport CSV enregistré dans : {{csvPath}}",
+    "csv_report_saved_to": "Rapport CSV enregistré dans: {{csvPath}}",
+    "human_report_saved": "Rapport lisible enregistré: {{reportPath}}",
+    "folder_summary_title": "Résumé du dossier",
+    "folder_summary_table_header": "Langue    Taille(KB)    Clés    Longueur Moyenne    Caractères Totaux",
+    "folder_summary_row": "{{lang}}      {{sizeKB}}      {{totalKeys}}    {{avgLength}}    {{totalChars}}",
+    "language_comparison_title": "Comparaison des langues",
+    "language_comparison_row": "{{lang}}: {{diff}} caractères ({{percent}}%) {{status}}",
+    "summary_stats": "📊 Résumé: {{totalLanguages}} langues, {{totalKeys}} clés - Rapports enregistrés dans {{reportPath}}",
+    "detailedKeysDescription": "Afficher l'analyse détaillée des clés dans la console",
+    "too_many_keys_warning": "⚠️ Trop de clés pour l'affichage console - voir le rapport détaillé pour l'analyse complète",
     "no_translation_files_found": "Aucun fichier de traduction trouvé",
     "analysis_completed": "Analyse terminée en {{duration}}ms",
     "analysis_failed": "L'analyse a échoué : {{errorMessage}}",
@@ -251,11 +260,6 @@
       "keys_have_significant_size_variations": "les clés présentent des variations de taille significatives",
       "consider_reviewing_translations": "Envisagez de revoir les traductions {{lang}} - elles sont {{percentageDifference}}% {{comparison}} que la référence",
       "long_translations_detected": "{{lang}} a {{longKeys}} traductions de plus de {{threshold}} caractères - envisagez de les décomposer"
-    },
-    "hardcodedTexts": {
-      "keysHaveSignificantSizeVariations": "les clés présentent des variations de taille significatives",
-      "considerReviewingTranslations": "Envisagez de revoir les traductions {{lang}} - elles sont {{percentageDifference}}% {{comparison}} que la référence",
-      "longTranslationsDetected": "{{lang}} a {{longKeys}} traductions de plus de {{threshold}} caractères - envisagez de les décomposer"
     }
   },
   "usage": {
@@ -276,8 +280,9 @@
     "noSourceFilesFound": "⚠️  Aucun fichier source trouvé dans le répertoire source.",
     "reviewNotTranslatedKeys": "💡 Examiner les clés non traduites",
     "analysisCompletedSuccessfully": "🎉 Analyse terminée avec succès !",
-    "detectedSourceDirectory": "Répertoire source détecté : {{sourceDir}}",
-    "detectedI18nDirectory": "Répertoire i18n détecté : {{i18nDir}}",
+    "detectedSourceDirectory": "Répertoire source détecté : {sourceDir}",
+    "detectedI18nDirectory": "Répertoire i18n détecté : {i18nDir}",
+    "processedFiles": "Traité {processedFiles} de {totalFiles} fichiers.",
     "fileInfo": "   📄 {namespace}: {keys} clés",
     "failedToAnalyzeUsage": "❌ Échec de l'analyse d'utilisation : {error}",
     "failedToAnalyzeFile": "❌ Échec de l'analyse de fichier : {error}",
@@ -720,6 +725,7 @@
     "summaryCommand": "  summary   - Afficher le statut du projet",
     "debugCommand": "  debug     - Déboguer les problèmes de traduction",
     "menu": {
+    "pressEnterToContinue": "Appuyez sur Entrée pour continuer...",
       "title": "\n🌐 MENU DE GESTION I18N\n",
       "description": "Menu interactif pour la gestion de l’internationalisation\n",
       "exit": "\n🚪 Quitter"
@@ -793,6 +799,9 @@
     "initializingProject": "⚙️  Initialisation de la configuration du projet…",
     "createdSampleTranslationFile": "✅ Fichier de traduction d’exemple créé : {file}",
     "languageSelectionTitle": "🌐 Configuration des langues",
+    "selectDirectoryPrompt": "Sélectionnez un répertoire en entrant le numéro (ou choisissez 'Créer un nouveau répertoire'):",
+    "createdNewDirectory": "Créé nouveau répertoire : {{dir}}",
+    "usingExistingDirectory": "Utilisation du répertoire existant : {{dir}}",
     "available": "Disponible",
     "defaultLanguages": "📝 Langues par défaut : {languages}",
     "enterLanguageCodes": "🎯 Saisissez les codes des langues cibles (séparés par des virgules, ex. de, es, fr, ru) :",
@@ -831,6 +840,7 @@
     "creatingSourceDirectory": "Création du répertoire source : {dir}",
     "creatingSourceLanguageDirectory": "Création du répertoire de langue source : {dir}",
     "errors": {
+    "errorExecutingCommand": "Erreur lors de l'exécution de la commande : {error}",
       "sourceDirectoryNotFound": "Répertoire source introuvable : {dir}",
       "sourceLanguageDirectoryNotFound": "Répertoire de langue source introuvable : {dir}",
       "noJsonFilesInSourceDirectory": "Aucun fichier JSON trouvé dans le répertoire source : {dir}",
@@ -1288,8 +1298,28 @@
         "lockoutDurationUpdated": "Durée de verrouillage mise à jour à {minutes} minutes"
       }
     },
-    "fields": {
-      "language": {
+      "fields": {
+        "i18nDir": {
+          "label": "Répertoire I18n",
+          "description": "Répertoire contenant les fichiers de traduction",
+          "current": "Actuel : {value}",
+          "help": "Chemin vers le répertoire des fichiers de traduction"
+        },
+        "projectRoot": {
+          "label": "Racine du projet",
+          "description": "Répertoire racine du projet",
+          "current": "Actuel : {value}",
+          "help": "Chemin vers le répertoire racine du projet"
+        },
+        "checkUsage": {
+          "usage_analysis_failed": "L'analyse d'utilisation a échoué",
+          "usage_analysis_success": "L'analyse d'utilisation a réussi",
+          "usage_analysis_complete": "L'analyse d'utilisation est terminée",
+          "usage_analysis_in_progress": "L'analyse d'utilisation est en cours",
+          "usage_analysis_started": "L'analyse d'utilisation a démarré",
+          "usage_analysis_skipped": "L'analyse d'utilisation a été ignorée"
+        },
+        "language": {
         "label": "Langue de l’interface",
         "description": "Langue de l’interface utilisateur",
         "current": "Actuelle : {value}",

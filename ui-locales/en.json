@@ -164,6 +164,11 @@
     "complete": {
       "configLoadedSuccessfully": "Configuration loaded successfully",
       "configLoadingFailed": "Configuration loading failed",
+      "sourceLanguageNotFound": "Source language directory not found: {sourceLanguage}",
+      "couldNotParseTarget": "Could not parse target file: {file}",
+      "couldNotParseSource": "Could not parse source file: {file}",
+      "reportGenerated": "Report generated: {path}",
+      "generateReportPrompt": "Would you like a report generated?",
       "title": "🌍 I18N TRANSLATION COMPLETION",
       "separator": "============================================================",
       "sourceDir": "📁 Source directory: {sourceDir}",
@@ -243,6 +248,15 @@
       "report_saved_to": "Report saved to: {{reportPath}}",
       "considerReviewingTranslations": "Consider reviewing ${lang} translations - they are ${data.percentageDifference}% longer than baseline",
       "csv_report_saved_to": "CSV report saved to: {{csvPath}}",
+      "human_report_saved": "Human-readable report saved: {{reportPath}}",
+      "folder_summary_title": "Folder Summary",
+      "folder_summary_table_header": "Language    Size(KB)    Keys    Avg Length    Total Chars",
+      "folder_summary_row": "{{lang}}      {{sizeKB}}      {{totalKeys}}    {{avgLength}}    {{totalChars}}",
+      "language_comparison_title": "Language Comparison",
+      "language_comparison_row": "{{lang}}: {{diff}} chars ({{percent}}%) {{status}}",
+      "summary_stats": "📊 Summary: {{totalLanguages}} languages, {{totalKeys}} keys - Reports saved to {{reportPath}}",
+      "detailedKeysDescription": "Show detailed key-level analysis in console",
+      "too_many_keys_warning": "⚠️ Too many keys to display in console - check the detailed report file for full analysis",
       "no_translation_files_found": "No translation files found",
       "analysis_completed": "Analysis completed in {{duration}}ms",
       "analysis_failed": "Analysis failed: {{errorMessage}}",
@@ -251,11 +265,6 @@
         "keys_have_significant_size_variations": "keys have significant size variations",
         "consider_reviewing_translations": "Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
         "long_translations_detected": "{{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
-      },
-      "hardcodedTexts": {
-        "keysHaveSignificantSizeVariations": "keys have significant size variations",
-        "considerReviewingTranslations": "Consider reviewing {{lang}} translations - they are {{percentageDifference}}% {{comparison}} than baseline",
-        "longTranslationsDetected": "{{lang}} has {{longKeys}} translations longer than {{threshold}} characters - consider breaking them down"
       }
     },
     "usage": {
@@ -276,7 +285,7 @@
       "noSourceFilesFound": "⚠️  No source files found in the source directory.",
       "reviewNotTranslatedKeys": "💡 Review not translated keys",
       "analysisCompletedSuccessfully": "🎉 Analysis completed successfully!",
-      "detectedSourceDirectory": "Detected source directory: {{sourceDir}}",
+      "detectedSourceDirectory": "Detected source directory: {sourceDir}",
       "detectedI18nDirectory": "Detected i18n directory: {i18nDir}",
       "fileInfo": "   📄 {namespace}: {keys} keys",
       "failedToAnalyzeUsage": "❌ Failed to analyze usage: {error}",
@@ -284,6 +293,7 @@
       "analyzerInitialized": "Analyzer initialized",
       "analyzerInitFailed": "Analyzer initialization failed: {error}",
       "argsParsed": "Arguments parsed",
+      "processedFiles": "Processed {processedFiles} of {totalFiles} files.",
       "argsParseFailed": "Argument parsing failed: {error}",
       "translationDiscoveryError": "Translation discovery error: {error}",
       "fileTraversalError": "File traversal error: {error}",
@@ -297,6 +307,7 @@
       "usedKeysCount": "Used keys: {count}",
       "availableKeysCount": "Available keys: {count}",
       "analysisResults": "Analysis results:",
+      "i18nDirectoryNotFound": "⚠️  I18n directory not found. Please check the path.",
       "checkUsage": {
         "title": "🔍 I18N USAGE ANALYSIS",
         "message": "Analyzing i18n key usage across your project.",
@@ -721,6 +732,7 @@
       "summaryCommand": "  summary   - Show project status",
       "debugCommand": "  debug     - Debug translation issues",
       "menu": {
+    "pressEnterToContinue": "Press Enter to continue...",
         "title": "\n🌐 I18N MANAGEMENT MENU\n",
         "description": "Interactive menu for managing internationalization\n",
         "exit": "\n🚪 Exit"
@@ -790,6 +802,12 @@
       "detectedI18nFrameworks": "🔍 Detected i18n framework(s): {frameworks}",
       "existingDirectoriesFound": "📁 Existing translation directories found:",
       "useExistingDirectoryPrompt": "Do you want to use the existing directory? (y/n)",
+      "selectDirectoryPrompt": "Select a directory by entering the number (or choose 'Create new directory')",
+      "enterNewDirectoryName": "Enter the name for your new translation directory", 
+      "createdNewDirectory": "✅ Created new directory: {{dir}}",
+      "directoryAlreadyExists": "⚠️ Directory already exists: {{dir}}",
+      "invalidDirectoryName": "❌ Invalid directory name provided.",
+      "usingExistingDirectory": "Using existing directory: {{dir}}",
       "autoDetectedI18nDirectory": "📂 Auto-detected i18n directory: {directory}",
       "initializingProject": "⚙️  Initializing project configuration...",
       "createdSampleTranslationFile": "✅ Created sample translation file: {file}",
@@ -834,6 +852,7 @@
       "creatingSourceDirectory": "Creating source directory: {dir}",
       "creatingSourceLanguageDirectory": "Creating source language directory: {dir}",
       "errors": {
+        "errorExecutingCommand": "Error executing command: {error}",
         "sourceDirectoryNotFound": "Source directory not found: {dir}",
         "sourceLanguageDirectoryNotFound": "Source language directory not found: {dir}",
         "noJsonFilesInSourceDirectory": "No JSON files found in source directory: {dir}",
@@ -942,12 +961,13 @@
       }
     },
     "operations": {
-      "completed": "✅ Operation completed successfully!",
+      "completed": "✅ Operation completed successfully!\n",
       "deleteReportsTitle": "🗑️ Delete Reports & Logs",
       "scanningForFiles": "🔍 Scanning for files to delete...",
       "noFilesFoundToDelete": "✅ No files found to delete.",
       "availableDirectories": "📁 Available directories:",
       "allDirectories": "All directories",
+      "andMore": "and more...",
       "cancelOption": "Cancel",
       "cancelReportOption": "Cancel / Return to Menu",
       "invalidSelection": "❌ Invalid selection.",
@@ -1209,6 +1229,10 @@
         "browserOpened": "✅ Browser opened successfully!"
       },
       "importExport": {
+        "title": "Import/Export Settings",
+        "export": "Export Settings",
+        "import": "Import Settings",
+        "backup": "Create Backup",
         "enterFilename": "Enter filename (or press Enter for default): ",
         "exportSuccess": "Settings exported to {{file}}",
         "exportFailed": "Failed to export settings: {{error}}",
@@ -1221,11 +1245,16 @@
         "backupSuccess": "Backup created: {{file}}",
         "backupFailed": "Failed to create backup: {{error}}"
       },
+      "selectOption": "Select an option: ",
+      "resetToDefaultsTitle": "Reset Settings to Defaults",
+      "resetWarning1": "⚠️ This will reset ALL settings to their default values.",
+      "resetWarning2": "This action cannot be undone.",
       "resetConfirm": "Are you sure you want to continue? (y/N): ",
       "resetSuccess": "Settings reset to defaults successfully.",
       "resetFailed": "Failed to reset settings: {error}",
       "saveSuccess": "Settings saved successfully.",
       "saveFailed": "Failed to save settings.",
+      "saveError": "Invalid settings provided",
       "pressEnter": "Press Enter to continue...",
       "initFailed": "Failed to initialize settings: {error}",
       "invalidValueFormat": "Invalid value format.",
@@ -1293,6 +1322,26 @@
         }
       },
       "fields": {
+        "i18nDir": {
+          "label": "I18n Directory",
+          "description": "Directory containing translation files",
+          "current": "Current: {value}",
+          "help": "Path to directory with translation files"
+        },
+        "projectRoot": {
+          "label": "Project Root",
+          "description": "Root directory of the project",
+          "current": "Current: {value}",
+          "help": "Path to the project root directory"
+        },
+        "checkUsage": {
+          "usage_analysis_failed": "Usage analysis failed",
+          "usage_analysis_success": "Usage analysis successful",
+          "usage_analysis_complete": "Usage analysis complete",
+          "usage_analysis_in_progress": "Usage analysis in progress",
+          "usage_analysis_started": "Usage analysis started",
+          "usage_analysis_skipped": "Usage analysis skipped"
+        },
         "language": {
           "label": "Interface Language",
           "description": "Language for the user interface",
@@ -1383,6 +1432,18 @@
           "description": "Create backups before modifications",
           "current": "Current: {value}",
           "help": "Automatically create backups before making changes"
+        },
+        "advanced_maxConcurrentFiles": {
+          "label": "Max Concurrent Files",
+          "description": "Maximum files processed simultaneously",
+          "current": "Current: {value}",
+          "help": "Maximum number of files to process at the same time"
+        },
+        "advanced_strictMode": {
+          "label": "Strict Validation Mode",
+          "description": "Enable strict validation mode",
+          "current": "Current: {value}",
+          "help": "Enable strict validation for translation files"
         },
         "adminPinEnabled": {
           "label": "Admin PIN Protection",

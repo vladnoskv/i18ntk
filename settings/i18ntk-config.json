@@ -1,96 +1,122 @@
 {
   "language": "en",
-  "sizeLimit": null,
-  "sourceDir": "./locales",
-  "sourceLanguage": "en",
-  "defaultLanguages": [
-    "de",
-    "es",
-    "fr",
-    "ru"
-  ],
-  "outputDir": "./i18ntk-reports",
-  "scriptDirectories": {
-    "analyze": null,
-    "init": null,
-    "validate": null,
-    "complete": null,
-    "manage": null,
-    "summary": null,
-    "usage": null,
-    "sizing": null
-  },
-  "reportLanguage": "auto",
+  "uiLanguage": "en",
   "theme": "light",
-  "autoSave": true,
-  "notifications": {
-    "enabled": true,
-    "types": {
-      "success": true,
-      "warnings": true,
-      "errors": true,
-      "progress": true
-    },
-    "sound": false,
-    "desktop": false
+  "projectRoot": ".",
+  "sourceDir": "E:\\i18n-management-toolkit-main\\i18n-management-toolkit-main\\locales",
+  "i18nDir": "./locales",
+  "outputDir": "E:\\i18n-management-toolkit-main\\i18n-management-toolkit-main\\i18ntk-reports",
+  "uiLocalesDir": "./ui-locales",
+  "scriptDirectories": {
+    "init": null,
+    "analyze": null,
+    "validate": null,
+    "usage": null,
+    "sizing": null,
+    "summary": null,
+    "complete": null,
+    "manage": null
   },
-  "dateFormat": "DD/MM/YYYY",
-  "timeFormat": "24h",
-  "timezone": "auto",
   "processing": {
+    "batchSize": 300,
+    "concurrency": 8,
+    "maxFileSize": 2097152,
+    "timeout": 15000,
+    "retryAttempts": 2,
+    "retryDelay": 500,
+    "cacheEnabled": true,
+    "cacheTTL": 7200000,
+    "validateOnSave": false,
+    "autoBackup": true,
     "notTranslatedMarker": "NOT_TRANSLATED",
     "excludeFiles": [
       ".DS_Store",
       "Thumbs.db",
       "*.tmp",
-      "auth.json",
-      "pagination.json",
-      "reportGenerator.json",
-      "validationStep.json"
-    ],
-    "excludeDirs": [
-      "node_modules",
-      ".git",
-      "dist",
-      "build"
-    ],
-    "includeExtensions": [
-      ".js",
-      ".jsx",
-      ".ts",
-      ".tsx",
-      ".vue",
-      ".svelte"
-    ],
-    "strictMode": false,
-    "defaultLanguages": [
-      "de",
-      "es",
-      "fr",
-      "ru"
-    ],
-    "translationPatterns": [
-      {},
-      {},
-      {}
+      "*.bak",
+      "*.log",
+      "~*",
+      "*.swp"
     ]
   },
+  "reports": {
+    "format": "json",
+    "includeStats": true,
+    "includeMissingKeys": true,
+    "includeUnusedKeys": true,
+    "includeUsageStats": true,
+    "includeValidationErrors": true,
+    "outputFormat": "both",
+    "generateSummary": true,
+    "generateDetailed": true,
+    "saveToFile": true,
+    "filenameTemplate": "i18n-report-{timestamp}"
+  },
+  "ui": {
+    "showProgress": true,
+    "showDetailedOutput": false,
+    "colorOutput": true,
+    "interactive": true,
+    "confirmActions": true,
+    "autoSave": true,
+    "autoLoad": true
+  },
+  "behavior": {
+    "autoDetectLanguage": true,
+    "strictMode": false,
+    "caseSensitive": true,
+    "ignoreComments": false,
+    "ignoreWhitespace": true,
+    "normalizeKeys": true,
+    "validateOnStartup": false
+  },
+  "notifications": {
+    "enabled": true,
+    "types": {
+      "success": true,
+      "warning": true,
+      "error": true,
+      "info": true,
+      "warnings": true,
+      "errors": true,
+      "progress": true
+    },
+    "sound": false,
+    "desktop": false,
+    "webhook": null
+  },
+  "dateTime": {
+    "format": "YYYY-MM-DD HH:mm:ss",
+    "timezone": "local",
+    "locale": "en-US"
+  },
   "advanced": {
+    "backupBeforeChanges": true,
+    "validateSettings": true,
+    "logLevel": "info",
+    "performanceTracking": false,
+    "memoryLimit": "512MB",
+    "enableExperimental": false,
     "batchSize": 100,
     "maxConcurrentFiles": 10,
     "enableProgressBars": true,
     "enableColorOutput": true,
     "strictMode": false,
     "enableAuditLog": false,
-    "backupBeforeChanges": true,
     "validateOnSave": true,
     "sizingThreshold": 50,
     "sizingFormat": "table",
-    "memoryLimit": "512MB",
     "timeout": 30000
   },
+  "backup": {
+    "enabled": false,
+    "singleFileMode": false,
+    "singleBackupFile": "i18ntk-central-backup.json",
+    "retentionDays": 30,
+    "maxBackups": 100
+  },
   "security": {
-    "adminPinEnabled": "false",
+    "adminPinEnabled": false,
     "adminPinPromptOnInit": false,
     "keepAuthenticatedUntilExit": true,
     "sessionTimeout": 30,
@@ -116,12 +142,12 @@
     ],
     "strictMode": false,
     "pinProtection": {
-      "enabled": "false",
+      "enabled": true,
       "protectedScripts": {
-        "debugMenu": false,
-        "deleteReports": false,
-        "summaryReports": false,
-        "settingsMenu": false,
+        "debugMenu": true,
+        "deleteReports": true,
+        "summaryReports": true,
+        "settingsMenu": true,
         "init": false,
         "analyze": false,
         "validate": false,
@@ -139,5 +165,18 @@
     "logLevel": "info",
     "saveDebugLogs": false,
     "debugLogPath": "./debug.log"
-  }
+  },
+  "sizeLimit": null,
+  "sourceLanguage": "en",
+  "defaultLanguages": [
+    "de",
+    "es",
+    "fr",
+    "ru"
+  ],
+  "reportLanguage": "auto",
+  "autoSave": true,
+  "dateFormat": "DD/MM/YYYY",
+  "timeFormat": "24h",
+  "timezone": "auto"
 }

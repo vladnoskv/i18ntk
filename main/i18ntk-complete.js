@@ -15,48 +15,10 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const SecurityUtils = require('../utils/security');
-const settingsManager = require('../settings/settings-manager');
+const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+const { loadTranslations, t } = require('../utils/i18n-helper');
 
-// Get configuration from settings manager securely
-async function getConfig() {
-  try {
-    const settings = await settingsManager.getSettings();
-    
-    // Check for per-script directory override, fallback to global sourceDir
-    const sourceDir = settings.scriptDirectories?.complete || settings.sourceDir || './ui-locales';
-    
-    const config = {
-      sourceDir: sourceDir,
-      sourceLanguage: settings.sourceLanguage || 'en',
-      notTranslatedMarker: settings.notTranslatedMarker || settings.processing?.notTranslatedMarker || 'NOT_TRANSLATED',
-      excludeFiles: settings.excludeFiles || settings.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db']
-    };
-    
-    // Basic validation for required fields
-    if (!config.sourceDir || !config.sourceLanguage) {
-      throw new Error(this.t('complete.configurationValidationFailed') || 'Configuration validation failed: missing required fields');
-    }
-    
-    return config;
-  } catch (error) {
-    throw error;
-  }
-}
 
-// Common missing keys that should be added to all projects
-const COMMON_MISSING_KEYS = {
-  // Offline/Network
-  'offlineTitle': 'You are offline',
-  'offlineMessage': 'Please check your internet connection',
-  'tryReconnect': 'Try to reconnect',
-  
-  // Common UI
-  'common': 'Common',
-  'logout': 'Logout',
-  'login': 'Login',
-  'amount': 'Amount',
-  
-};
 
 class I18nCompletionTool {
   constructor(config = {}) {
@@ -73,10 +35,24 @@ class I18nCompletionTool {
   
   async initialize() {
     try {
-      const baseConfig = await getConfig();
+      const args = this.parseArgs();
+      if (args.help) {
+        displayHelp('i18ntk-complete', {
+          'auto-translate': 'Enable automatic translation suggestions',
+          'dry-run': 'Preview changes without applying them'
+        });
+        process.exit(0);
+      }
+      
+      const baseConfig = await getUnifiedConfig('complete', args);
       this.config = { ...baseConfig, ...this.config };
-      this.sourceDir = path.resolve(this.config.sourceDir);
+      this.sourceDir = this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+      
+      // Validate source directory exists
+      const { validateSourceDir } = require('../utils/config-helper');
+      validateSourceDir(this.sourceDir, 'i18ntk-complete');
+      
       SecurityUtils.logSecurityEvent(this.t('complete.configLoadedSuccessfully'), 'info');
     } catch (error) {
       SecurityUtils.logSecurityEvent(this.t('complete.configLoadingFailed'), 'error', { error: error.message });
@@ -122,6 +98,8 @@ class I18nCompletionTool {
         const [key, value] = arg.substring(2).split('=');
         if (key === 'source-dir') {
           parsed.sourceDir = value;
+        } else if (key === 'source-language') {
+          parsed.sourceLanguage = value;
         } else if (key === 'auto-translate') {
           parsed.autoTranslate = true;
         } else if (key === 'dry-run') {
@@ -138,7 +116,7 @@ class I18nCompletionTool {
   // Get all available languages
   getAvailableLanguages() {
     if (!fs.existsSync(this.sourceDir)) {
-      throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+      throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
     // Check for monolith JSON files (en.json, es.json, etc.)
@@ -298,16 +276,16 @@ class I18nCompletionTool {
 
   // Generate appropriate translation value based on key and language
   generateTranslationValue(keyPath, language) {
-    // Use English as base value from COMMON_MISSING_KEYS or generate from key
-    const baseValue = COMMON_MISSING_KEYS[keyPath] || this.generateValueFromKey(keyPath);
+    // Generate value from key path for source language
+    const baseValue = this.generateValueFromKey(keyPath);
     
-    // For source language, use the base value (never use namespace prefix)
+    // For source language, use the generated value
     if (language === this.config.sourceLanguage) {
       return baseValue;
     }
     
     // For other languages, use the not translated marker
-    return 'NOT_TRANSLATED';
+    return this.config.notTranslatedMarker || 'NOT_TRANSLATED';
   }
 
   // Generate a readable value from a key path
@@ -325,72 +303,107 @@ class I18nCompletionTool {
     return readable || keyName;
   }
 
-  // Get missing keys from usage analysis
-  getMissingKeysFromUsage() {
-    const usageReportPath = path.join(process.cwd(), 'reports', 'usage-analysis.txt');
+  // Get all keys from a nested object with full paths
+  getAllKeys(obj, prefix = '') {
+    const keys = [];
     
-    // Delete old report to ensure fresh data
-    if (fs.existsSync(usageReportPath)) {
-      console.log(this.t("operations.complete.deletingOldReport"));
-      fs.unlinkSync(usageReportPath);
-    }
-    
-    // Generate fresh usage analysis report (quietly)
-    console.log(this.t("operations.complete.generatingFreshAnalysis"));
-    const { execSync } = require('child_process');
-    try {
-      execSync('node main/i18ntk-usage.js --output-report', { 
-        stdio: 'pipe', // Suppress output to avoid double display
-        cwd: process.cwd()
-      });
-    } catch (error) {
-      console.log(this.t("operations.complete.couldNotGenerate"));
-      return Object.keys(COMMON_MISSING_KEYS);
-    }
-    
-    if (!fs.existsSync(usageReportPath)) {
-      console.log(this.t("operations.complete.reportNotFound"));
-      return Object.keys(COMMON_MISSING_KEYS);
-    }
-    
-    try {
-      const reportContent = fs.readFileSync(usageReportPath, 'utf8');
-      const missingKeys = [];
+    for (const [key, value] of Object.entries(obj)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
       
-      // Extract missing keys from the report
-      const lines = reportContent.split('\n');
-      let inMissingSection = false;
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        keys.push(...this.getAllKeys(value, fullKey));
+      } else {
+        keys.push(fullKey);
+      }
+    }
+    
+    return keys;
+  }
+
+  // Get missing keys by comparing source language with target languages
+  getMissingKeysFromComparison() {
+    const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
+    const missingKeys = [];
+    
+    if (!fs.existsSync(this.sourceLanguageDir)) {
+      console.log(this.t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
+      return [];
+    }
+    
+    // Process each file in source language
+    for (const fileName of sourceFiles) {
+      const sourceFilePath = path.join(this.sourceLanguageDir, fileName);
       
-      for (const line of lines) {
-        if (line.includes('MISSING TRANSLATION KEYS')) {
-          inMissingSection = true;
-          continue;
-        }
+      try {
+        const sourceContent = JSON.parse(fs.readFileSync(sourceFilePath, 'utf8'));
+        const sourceKeys = this.getAllKeys(sourceContent);
         
-        if (inMissingSection) {
-          // Stop when we reach another section
-          if (line.includes('DYNAMIC KEYS') || line.includes('USED KEYS') || line.includes('UNUSED KEYS')) {
-            break;
-          }
+        // Check all other languages
+        const languages = this.getAvailableLanguages();
+        for (const language of languages) {
+          if (language === this.config.sourceLanguage) continue;
           
-          // Extract key from lines like "⚠️  offlineTitle"
-          const match = line.match(/^⚠️\s+(.+)$/);
-          if (match) {
-            const key = match[1].trim();
-            // Skip lines that are file paths or other metadata
-            if (!key.includes('Used in:') && !key.includes('📄') && key.length > 0 && !missingKeys.includes(key)) {
-              missingKeys.push(key);
+          const targetFilePath = path.join(this.sourceDir, language, fileName);
+          let targetKeys = [];
+          
+          if (fs.existsSync(targetFilePath)) {
+            try {
+              const targetContent = JSON.parse(fs.readFileSync(targetFilePath, 'utf8'));
+              targetKeys = this.getAllKeys(targetContent);
+            } catch (error) {
+              console.warn(this.t("complete.couldNotParseTarget", { file: targetFilePath }));
             }
           }
+          
+          // Find keys missing in target language
+          const missingInTarget = sourceKeys.filter(key => !targetKeys.includes(key));
+          missingKeys.push(...missingInTarget);
         }
+      } catch (error) {
+        console.warn(this.t("complete.couldNotParseSource", { file: sourceFilePath }));
       }
-      
-      console.log(this.t("operations.complete.foundMissingKeys", { count: missingKeys.length }));
-      return missingKeys.length > 0 ? missingKeys : Object.keys(COMMON_MISSING_KEYS);
-    } catch (error) {
-      console.log(this.t("operations.complete.couldNotParse"));
-      return Object.keys(COMMON_MISSING_KEYS);
     }
+    
+    // Remove duplicates
+    const uniqueMissingKeys = [...new Set(missingKeys)];
+    console.log(this.t("complete.foundMissingKeys", { count: uniqueMissingKeys.length }));
+    return uniqueMissingKeys;
+  }
+
+  // Generate completion report
+  async generateReport(changes, languages) {
+    const reportsDir = path.join(this.config.projectRoot || '.', 'i18ntk-reports');
+    if (!fs.existsSync(reportsDir)) {
+      fs.mkdirSync(reportsDir, { recursive: true });
+    }
+    
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const reportPath = path.join(reportsDir, `completion-report-${timestamp}.json`);
+    
+    const report = {
+      timestamp: new Date().toISOString(),
+      sourceLanguage: this.config.sourceLanguage,
+      sourceDir: this.sourceDir,
+      languagesProcessed: languages.length,
+      totalChanges: changes.reduce((sum, lang) => sum + lang.changes.length, 0),
+      languages: languages.map(lang => ({
+        language: lang.language,
+        changes: lang.changes.length,
+        files: lang.changes.reduce((acc, change) => {
+          if (!acc[change.file]) acc[change.file] = [];
+          acc[change.file].push({
+            key: change.key,
+            value: change.value,
+            action: change.action
+          });
+          return acc;
+        }, {})
+      }))
+    };
+    
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
+    console.log(this.t("complete.reportGenerated", { path: reportPath }));
+    return reportPath;
   }
 
   // Run the completion process
@@ -430,87 +443,117 @@ class I18nCompletionTool {
       }
     }
     
-    await this.initialize();
-    
-    if (args.sourceDir) {
-      this.config.sourceDir = args.sourceDir;
-      this.sourceDir = path.resolve(this.config.sourceDir);
+    // Initialize configuration properly when called from menu
+    if (fromMenu && !this.sourceDir) {
+      const baseConfig = await getUnifiedConfig('complete', args);
+      this.config = { ...baseConfig, ...this.config };
+      
+      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      loadTranslations(uiLanguage);
+      this.t = t;
+      
+      this.sourceDir = this.config.sourceDir;
+      this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+    } else {
+      await this.initialize();
+      
+      if (args.sourceDir) {
+        this.config.sourceDir = args.sourceDir;
+        this.sourceDir = path.resolve(this.config.sourceDir);
+      }
+      
+      if (args.sourceLanguage) {
+        this.config.sourceLanguage = args.sourceLanguage;
+      }
+      
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     }
     
-    console.log(this.t("operations.complete.title"));
-    console.log(this.t("operations.complete.separator"));
-    console.log(this.t("operations.complete.sourceDir", { sourceDir: this.sourceDir }));
-    console.log(this.t("operations.complete.sourceLanguage", { sourceLanguage: this.config.sourceLanguage }));
+    console.log(this.t("complete.title"));
+    console.log(this.t("complete.separator"));
+    console.log(this.t("complete.sourceDir", { sourceDir: this.sourceDir }));
+    console.log(this.t("complete.sourceLanguage", { sourceLanguage: this.config.sourceLanguage }));
     
     if (args.dryRun) {
-      console.log(this.t("operations.complete.dryRunMode"));
+      console.log(this.t("complete.dryRunMode"));
     }
     
     try {
       // Get available languages
       const languages = this.getAvailableLanguages();
-      console.log(this.t("operations.complete.languages", { languages: languages.join(', ') }));
+      console.log(this.t("complete.languages", { languages: languages.join(', ') }));
       
-      // Get missing keys from usage analysis or use common keys
-      const missingKeys = this.getMissingKeysFromUsage();
-      console.log(this.t("operations.complete.addingMissingKeys"));
+      // Get missing keys by comparing source language with others
+      const missingKeys = this.getMissingKeysFromComparison();
+      console.log(this.t("complete.addingMissingKeys"));
       
       let totalChanges = 0;
       
-      // Process each language
-      for (const language of languages) {
-        console.log(this.t("operations.complete.processing", { language }));
+      // Process all languages except source language
+      const targetLanguages = languages.filter(lang => lang !== this.config.sourceLanguage);
+      const allChanges = [];
+      for (const language of targetLanguages) {
+        console.log(this.t("complete.processing", { language }));
         
         const changes = this.addMissingKeysToLanguage(language, missingKeys, args.dryRun);
         
         if (changes.length > 0) {
-          console.log(this.t("operations.complete.addedKeys", { count: changes.length }));
+          console.log(this.t("complete.addedKeys", { count: changes.length }));
           totalChanges += changes.length;
+          allChanges.push({ language, changes });
           
           // Show sample of changes
           const sampleChanges = changes.slice(0, 3);
           sampleChanges.forEach(change => {
-            console.log(this.t("operations.complete.changeDetails", { file: change.file, key: change.key }));
+            console.log(this.t("complete.changeDetails", { file: change.file, key: change.key }));
           });
           
           if (changes.length > 3) {
             console.log(this.t("complete.andMore", { count: changes.length - 3 }));
           }
         } else {
-          console.log(this.t("operations.complete.noChangesNeeded", { language }));
+          console.log(this.t("complete.noChangesNeeded", { language }));
         }
       }
       
       console.log('\n');
-      console.log(this.t("operations.complete.summaryTitle"));
-      console.log(this.t("operations.complete.separator"));
-      console.log(this.t("operations.complete.totalChanges", { totalChanges }));
-      console.log(this.t("operations.complete.languagesProcessed", { languagesProcessed: languages.length }));
-      console.log(this.t("operations.complete.missingKeysAdded", { missingKeysAdded: missingKeys.length }));
+      console.log(this.t("complete.summaryTitle"));
+      console.log(this.t("complete.separator"));
+      console.log(this.t("complete.totalChanges", { totalChanges }));
+      console.log(this.t("complete.languagesProcessed", { languagesProcessed: languages.length }));
+      console.log(this.t("complete.missingKeysAdded", { missingKeysAdded: missingKeys.length }));
+      
+      if (!args.dryRun && allChanges.length > 0) {
+        const rl = this.rl || this.initReadline();
+        const answer = await this.prompt('\n' + this.t('complete.generateReportPrompt') + ' (Y/N): ');
+        
+        if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+          await this.generateReport(allChanges, languages);
+        }
+      }
       
       if (!args.dryRun) {
-        console.log('\n' + this.t("operations.complete.nextStepsTitle"));
-        console.log(this.t("operations.complete.separator"));
-        console.log(this.t("operations.complete.nextStep1"));
+        console.log('\n' + this.t("complete.nextStepsTitle"));
+        console.log(this.t("complete.separator"));
+        console.log(this.t("complete.nextStep1"));
         console.log('   node i18ntk-usage.js --output-report');
-        console.log(this.t("operations.complete.nextStep2"));
+        console.log(this.t("complete.nextStep2"));
         console.log('   node i18ntk-validate.js');
-        console.log(this.t("operations.complete.nextStep3"));
+        console.log(this.t("complete.nextStep3"));
         console.log('   node i18ntk-analyze.js');
-        console.log('\n' + this.t("operations.complete.allKeysAvailable"));
+        console.log('\n' + this.t("complete.allKeysAvailable"));
       } else {
-        console.log('\n' + this.t("operations.complete.runWithoutDryRun"));
+        console.log('\n' + this.t("complete.runWithoutDryRun"));
       }
       
       // Only prompt when run from the menu (i.e., when a callback or menu context is present)
       if (typeof this.prompt === "function" && args.fromMenu) {
-        console.log(this.t('operations.completed'));
-        await this.prompt(this.t('operations.pressEnterToContinue'));
+        console.log(this.t('common.completed'));
+        await this.prompt(this.t('pressEnterToContinue'));
       }
       
     } catch (error) {
-      console.error(this.t('operations.complete.errorDuringCompletion', { error: error.message }));
+      console.error(this.t('complete.errorDuringCompletion', { error: error.message }));
       process.exit(1);
     }
   }
@@ -524,7 +567,7 @@ if (require.main === module) {
   }).catch(error => {
     const UIi18n = require('./i18ntk-ui');
     const ui = new UIi18n();
-    console.error(this.t('operations.complete.fatalError', { error: error.message }));
+    console.error(this.t('complete.errorDuringCompletion', { error: error.message }));
     SecurityUtils.logSecurityEvent('I18n completion tool failed', 'error', { error: error.message });
     process.exit(1);
   });

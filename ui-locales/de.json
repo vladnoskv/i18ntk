@@ -242,7 +242,16 @@
     "longTranslationsDetected": "${lang} hat ${data.longKeys} Übersetzungen länger als 100 Zeichen - in Betracht ziehen, sie aufzuteilen",
     "report_saved_to": "Bericht gespeichert in: {{reportPath}}",
     "considerReviewingTranslations": "Überprüfung der ${lang} Übersetzungen in Betracht ziehen - sie sind ${data.percentageDifference}% länger als die Grundlage",
-    "csv_report_saved_to": "CSV-Bericht gespeichert in: {{csvPath}}",
+    "csv_report_saved_to": "CSV-Bericht gespeichert unter: {{csvPath}}",
+    "human_report_saved": "Menschenlesbarer Bericht gespeichert: {{reportPath}}",
+    "folder_summary_title": "Ordner-Zusammenfassung",
+    "folder_summary_table_header": "Sprache    Größe(KB)    Schlüssel    Ø Länge    Gesamtzeichen",
+    "folder_summary_row": "{{lang}}      {{sizeKB}}      {{totalKeys}}    {{avgLength}}    {{totalChars}}",
+    "language_comparison_title": "Sprachvergleich",
+    "language_comparison_row": "{{lang}}: {{diff}} Zeichen ({{percent}}%) {{status}}",
+    "summary_stats": "📊 Zusammenfassung: {{totalLanguages}} Sprachen, {{totalKeys}} Schlüssel - Berichte gespeichert unter {{reportPath}}",
+    "detailedKeysDescription": "Detaillierte Schlüssel-Analyse in der Konsole anzeigen",
+    "too_many_keys_warning": "⚠️ Zu viele Schlüssel für Konsolenanzeige - siehe detaillierter Bericht für vollständige Analyse",
     "no_translation_files_found": "Keine Übersetzungsdateien gefunden",
     "analysis_completed": "Analyse abgeschlossen in {{duration}}ms",
     "analysis_failed": "Analyse fehlgeschlagen: {{errorMessage}}",
@@ -251,11 +260,6 @@
       "keys_have_significant_size_variations": "Schlüssel haben signifikante Größenvariationen",
       "consider_reviewing_translations": "Überprüfung der {{lang}} Übersetzungen in Betracht ziehen - sie sind {{percentageDifference}}% {{comparison}} als die Grundlage",
       "long_translations_detected": "{{lang}} hat {{longKeys}} Übersetzungen länger als {{threshold}} Zeichen - in Betracht ziehen, sie aufzuteilen"
-    },
-    "hardcodedTexts": {
-      "keysHaveSignificantSizeVariations": "Schlüssel haben signifikante Größenvariationen",
-      "considerReviewingTranslations": "Überprüfung der {{lang}} Übersetzungen in Betracht ziehen - sie sind {{percentageDifference}}% {{comparison}} als die Grundlage",
-      "longTranslationsDetected": "{{lang}} hat {{longKeys}} Übersetzungen länger als {{threshold}} Zeichen - in Betracht ziehen, sie aufzuteilen"
     }
   },
   "usage": {
@@ -273,6 +277,7 @@
     "foundTranslationFiles": "✅ {count} Übersetzungsdateien gefunden",
     "pressEnterToReturnToMenu": "📝 Drücken Sie Enter, um zum Hauptmenü zurückzugehen...",
     "notTranslatedKeysTotal": "⚠️  Nicht übersetzte Schlüssel: {total}",
+    "processedFiles": "Verarbeitet {processedFiles} von {totalFiles} Dateien.",
     "noSourceFilesFound": "⚠️  Keine Quelldateien im Quellverzeichnis gefunden.",
     "reviewNotTranslatedKeys": "💡 Nicht übersetzte Schlüssel überprüfen",
     "analysisCompletedSuccessfully": "🎉 Analyse erfolgreich abgeschlossen!",
@@ -721,6 +726,7 @@
   "summaryCommand": "  summary   - Projektstatus anzeigen",
   "debugCommand": "  debug     - Übersetzungsfehler debuggen",
   "menu": {
+    "pressEnterToContinue": "Drücken Sie die Eingabetaste, um fortzufahren...",
     "title": "\n🌐 I18N VERWALTUNGSMENÜ\n",
     "description": "Interaktives Menü zur Verwaltung der Internationalisierung\n",
     "exit": "\n🚪 Beenden"
@@ -789,6 +795,9 @@
   "sourceLanguageLabel": "🌍 Quellsprache: {language}",
   "detectedI18nFrameworks": "🔍 Erkanntes i18n-Framework: {frameworks}",
   "existingDirectoriesFound": "📁 Vorhandene Übersetzungsverzeichnisse gefunden:",
+  "selectDirectoryPrompt": "Wählen Sie ein Verzeichnis durch Eingabe der Nummer (oder wählen Sie 'Neues Verzeichnis erstellen')",
+  "usingExistingDirectory": "Verwende bestehendes Verzeichnis: {{dir}}",
+  "createdNewDirectory": "Erstellt neues Verzeichnis: {{dir}}",
   "useExistingDirectoryPrompt": "Möchten Sie das vorhandene Verzeichnis verwenden? (j/n)",
   "autoDetectedI18nDirectory": "📂 Automatisch erkanntes i18n-Verzeichnis: {directory}",
   "initializingProject": "⚙️  Initialisiere Projektkonfiguration...",
@@ -833,6 +842,7 @@
   "creatingSourceDirectory": "Erstelle Quellverzeichnis: {dir}",
   "creatingSourceLanguageDirectory": "Erstelle Verzeichnis für Quellsprache: {dir}",
   "errors": {
+    "errorExecutingCommand": "Fehler beim Ausführen des Befehls: {error}",
     "sourceDirectoryNotFound": "Quellverzeichnis nicht gefunden: {dir}",
     "sourceLanguageDirectoryNotFound": "Verzeichnis der Quellsprache nicht gefunden: {dir}",
     "noJsonFilesInSourceDirectory": "Keine JSON-Dateien im Quellverzeichnis gefunden: {dir}",
@@ -1292,11 +1302,31 @@
   }
     },
     "fields": {
-  "language": {
-    "label": "Oberflächensprache",
-    "description": "Sprache für die Benutzeroberfläche",
-    "current": "Aktuell: {value}",
-    "help": "Wähle deine bevorzugte Sprache für die Oberfläche"
+      "i18nDir": {
+        "label": "I18n Verzeichnis",
+        "description": "Verzeichnis mit Übersetzungsdateien",
+        "current": "Aktuell: {value}",
+        "help": "Pfad zum Verzeichnis mit Übersetzungsdateien"
+      },
+      "projectRoot": {
+        "label": "Projektwurzel",
+        "description": "Wurzelverzeichnis des Projekts",
+        "current": "Aktuell: {value}",
+        "help": "Pfad zum Wurzelverzeichnis des Projekts"
+      },
+      "checkUsage": {
+        "usage_analysis_failed": "Nutzungsanalyse fehlgeschlagen",
+        "usage_analysis_success": "Nutzungsanalyse erfolgreich",
+        "usage_analysis_complete": "Nutzungsanalyse abgeschlossen",
+        "usage_analysis_in_progress": "Nutzungsanalyse im Gange",
+        "usage_analysis_started": "Nutzungsanalyse gestartet",
+        "usage_analysis_skipped": "Nutzungsanalyse übersprungen"
+      },
+      "language": {
+        "label": "Oberflächensprache",
+        "description": "Sprache für die Benutzeroberfläche",
+        "current": "Aktuell: {value}",
+        "help": "Wähle deine bevorzugte Sprache für die Oberfläche"
   },
   "scriptDirectories": {
     "analyzeLabel": "Skriptdirektory analysieren",

@@ -27,7 +27,7 @@ class UIi18n {
 
         // Use settings manager as the single source of truth
         const settings = settingsManager.getSettings();
-        const configuredLanguage = settings.language;
+        const configuredLanguage = settings.language || settings.uiLanguage;
 
         // Load language from settings manager or fallback
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
@@ -105,7 +105,7 @@ class UIi18n {
                 }
             }
         } catch (error) {
-           console.error(this.t('ui.errorLoadingTranslationFile', { language, error: error.message }));
+           console.error(`Error loading translation file for language ${language}: ${error.message}`);
             if (language !== 'en') {
                 this.loadLanguage('en'); // Fallback to English
             }
@@ -137,7 +137,7 @@ class UIi18n {
      */
     getCurrentLanguageFromSettings() {
         const settings = settingsManager.getSettings();
-        return settings.language || 'en';
+        return settings.language || settings.uiLanguage || 'en';
     }
 
     /**
@@ -150,7 +150,7 @@ class UIi18n {
             settings.language = language;
             settingsManager.saveSettings(settings);
         } catch (error) {
-           console.error(this.t('ui.errorSavingLanguagePreference', { error: error.message }));
+           console.error(`Error saving language preference: ${error.message}`);
         }
     }
 

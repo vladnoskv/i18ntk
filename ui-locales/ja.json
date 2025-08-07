@@ -243,6 +243,15 @@
     "report_saved_to": "レポートを保存しました: {{reportPath}}",
     "considerReviewingTranslations": "${lang} の翻訳を見直すことを検討してください - ベースラインより ${data.percentageDifference}% 長くなっています",
     "csv_report_saved_to": "CSV レポートを保存しました: {{csvPath}}",
+    "human_report_saved": "人間が読めるレポートを保存しました: {{reportPath}}",
+    "folder_summary_title": "フォルダー要約",
+    "folder_summary_table_header": "言語    サイズ(KB)    キー数    平均長    総文字数",
+    "folder_summary_row": "{{lang}}      {{sizeKB}}      {{totalKeys}}    {{avgLength}}    {{totalChars}}",
+    "language_comparison_title": "言語比較",
+    "language_comparison_row": "{{lang}}: {{diff}} 文字 ({{percent}}%) {{status}}",
+    "summary_stats": " 📊 サマリー: {{totalLanguages}} 言語, {{totalKeys}} キー - レポートの保存先: {{reportPath}}",
+    "detailedKeysDescription": "コンソールに詳細なキーレベルの分析を表示",
+    "too_many_keys_warning": "⚠️ コンソールに表示するにはキーが多すぎます - 完全な分析は詳細レポートファイルを確認してください",
     "no_translation_files_found": "翻訳ファイルが見つかりません",
     "analysis_completed": "分析が完了しました（{{duration}}ms）",
     "analysis_failed": "分析に失敗しました: {{errorMessage}}",
@@ -251,11 +260,6 @@
       "keys_have_significant_size_variations": "キーに大きなサイズのばらつきがあります",
       "consider_reviewing_translations": "{{lang}} の翻訳を見直すことを検討してください - ベースラインより {{percentageDifference}}% {{comparison}} です",
       "long_translations_detected": "{{lang}} では長さが {{threshold}} 文字を超える翻訳が {{longKeys}} 件検出されました - 分割を検討してください"
-    },
-    "hardcodedTexts": {
-      "keysHaveSignificantSizeVariations": "キーに大きなサイズのばらつきがあります",
-      "considerReviewingTranslations": "{{lang}} の翻訳を見直すことを検討してください - ベースラインより {{percentageDifference}}% {{comparison}} です",
-      "longTranslationsDetected": "{{lang}} では長さが {{threshold}} 文字を超える翻訳が {{longKeys}} 件検出されました - 分割を検討してください"
     }
   },
   "usage": {
@@ -285,6 +289,7 @@
     "analyzerInitFailed": "アナライザの初期化に失敗しました: {error}",
     "argsParsed": "引数を解析しました",
     "argsParseFailed": "引数の解析に失敗しました: {error}",
+    "processedFiles": "処理済み {processedFiles} 件のファイルから {totalFiles} 件のファイルを処理しました。",
     "translationDiscoveryError": "翻訳の検出エラー: {error}",
     "fileTraversalError": "ファイル走査エラー: {error}",
     "usageAnalysisFailed": "使用状況分析に失敗しました: {error}",
@@ -795,6 +800,9 @@
     "languageSelectionTitle": "🌐 言語設定",
     "available": "利用可能",
     "defaultLanguages": "📝 デフォルト言語: {languages}",
+    "selectDirectoryPrompt": "ディレクトリを選択してください (番号を入力) (または '新しいディレクトリを作成' を選択):",
+    "usingExistingDirectory": "使用中のディレクトリ: {{dir}}",
+    "createdNewDirectory": "新しいディレクトリを作成しました: {{dir}}",
     "enterLanguageCodes": "🎯 対象言語コードを入力してください (カンマ区切り 例: de, es, fr, ru):",
     "targetLanguages": "🌍 対象言語",
     "foundSourceFiles": "📄 分析対象として {count} 件のソースファイルを検出",
@@ -1290,8 +1298,28 @@
         "lockoutDurationUpdated": "ロックアウト時間が {{minutes}} 分に更新されました"
       }
     },
-    "fields": {
-      "language": {
+  "fields": {
+    "i18nDir": {
+      "label": "I18nディレクトリ",
+      "description": "翻訳ファイルを含むディレクトリ",
+      "current": "現在: {value}",
+      "help": "翻訳ファイルがあるディレクトリへのパス"
+    },
+    "projectRoot": {
+      "label": "プロジェクトルート",
+      "description": "プロジェクトのルートディレクトリ",
+      "current": "現在: {value}", 
+      "help": "プロジェクトのルートディレクトリへのパス"
+    },
+    "checkUsage": {
+      "usage_analysis_failed": "使用状況分析に失敗しました",
+      "usage_analysis_success": "使用状況分析が成功しました",
+      "usage_analysis_complete": "使用状況分析が完了しました",
+      "usage_analysis_in_progress": "使用状況分析を実行中です",
+      "usage_analysis_started": "使用状況分析を開始しました",
+      "usage_analysis_skipped": "使用状況分析をスキップしました"
+    },
+    "language": {
       "label": "インターフェイス言語",
       "description": "ユーザーインターフェイスの言語",
       "current": "現在: {value}",

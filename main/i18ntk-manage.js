@@ -36,10 +36,12 @@ const I18nDebugger = require('../scripts/debug/debugger');
 
 // Enhanced default configuration with multiple path detection
 const DEFAULT_CONFIG = {
+  projectRoot: '.',
   sourceDir: './locales',
   sourceLanguage: 'en',
   defaultLanguages: ['de', 'es', 'fr', 'ru'],
   outputDir: './i18ntk-reports',
+  i18nDir: './locales',
   // Multiple possible i18n locations to check
   possibleI18nPaths: [
     './locales',
@@ -99,18 +101,19 @@ class I18nManager {
   // Auto-detect i18n directory from common locations only if not configured in settings
   detectI18nDirectory() {
     const settings = settingsManager.getSettings();
+    const projectRoot = path.resolve(settings.projectRoot || this.config.projectRoot || '.');
     
     // Use per-script directory configuration if available, fallback to global sourceDir
     const sourceDir = settings.scriptDirectories?.manage || settings.sourceDir;
     
     if (sourceDir) {
-      this.config.sourceDir = sourceDir;
+      this.config.sourceDir = path.resolve(projectRoot, sourceDir);
       return;
     }
     
     // Only auto-detect if no settings are configured
     for (const possiblePath of this.config.possibleI18nPaths) {
-      const resolvedPath = path.resolve(possiblePath);
+      const resolvedPath = path.resolve(projectRoot, possiblePath);
       if (fs.existsSync(resolvedPath)) {
         // Check if it contains language directories
         try {
@@ -329,8 +332,8 @@ class I18nManager {
     try {
         switch (command) {
             case 'init':
-                const initializer = new I18nInitializer();
-                await initializer.run();
+                const initializer = new I18nInitializer(this.config);
+                await initializer.run({fromMenu: isManagerExecution});
                 break;
             case 'analyze':
                 const analyzer = new I18nAnalyzer();
@@ -417,7 +420,7 @@ class I18nManager {
         }
         
     } catch (error) {
-        console.error(this.ui.t('errors.errorExecutingCommand', { error: error.message }));
+        console.error(this.ui.t('common.errorExecutingCommand', { error: error.message }));
         
         if (isManagerExecution && !this.isNonInteractiveMode()) {
           // Interactive menu execution - show error and return to menu
@@ -546,7 +549,7 @@ class I18nManager {
         try {
           const summaryTool = require('./i18ntk-summary');
           const summary = new summaryTool();
-          await summary.run();
+          await summary.run({ fromMenu: true });
           console.log(this.ui.t('summary.status.completed'));
           
           // Check if we're in interactive mode before prompting
@@ -563,7 +566,7 @@ class I18nManager {
             process.exit(0);
           }
         } catch (error) {
-          console.error(this.ui.t('errors.errorGeneratingStatusSummary', { error: error.message }));
+          console.error(this.ui.t('common.errorGeneratingStatusSummary', { error: error.message }));
           
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {

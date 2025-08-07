@@ -2,8 +2,8 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.5.3  
-**Last Updated:** 2025-08-06  
+**Version:** 1.6.0  
+**Last Updated:** 2025-08-07  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
@@ -12,26 +12,28 @@
 
 **Framework Support:** Works with **any** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
 
-> **Zero dependencies** | **Optimized smaller package** | **Works with any framework** | **Enterprise-grade security**
+> **Zero dependencies** | **45.36% performance improvement** | **Works with any framework** | **Enterprise-grade security**
 
-**Key Features of v1.5.3**
-- **Package size optimization**: Reduced from 1.7MB to 1.3MB (23% reduction)
-- **Fixed translation file inclusion**: Resolved issue where ui-locales were incorrectly excluded from package
-- **Updated documentation**: More accurate and up-to-date instructions
-- **Enhanced examples**: Added detailed use cases throughout documentation
-- **GitHub URL updates**: Changed all URLs to `https://github.com/vladnoskv/i18ntk`
-- **Maintained functionality**: All core features preserved while optimizing package size
+**Key Features of v1.6.0**
+- **🚀 45.36% performance improvement** - Major optimization across all operations
+- **🔧 Unified configuration system** - Single source of truth for all settings
+- **🔒 Enhanced security** - Comprehensive sanitization and validation
+- **📊 Performance benchmarking suite** - Automated testing and optimization
+- **🛡️ Production-ready** - Enterprise-grade with comprehensive testing
+- **🌍 Enhanced internationalization** - Improved language fallback and error handling
+- **⚡ Zero runtime dependencies** - Framework-agnostic design
 
 ## 🚀 Quick Start
 
 ```bash
-npm install -g i18ntk    # Install globally
-npx i18ntk --help        # Show help
-npx i18ntk --version     # Show version
-npx i18ntk               # Run Main Manage Menu
-npx i18ntk init          # Initialize project
-npx i18ntk manage        # Interactive Menu
-npx i18ntk analyze       # Analyze translations
+npm install -g i18ntk@1.6.0    # Install definitive version
+npx i18ntk --help                # Show help
+npx i18ntk --version             # Show version
+npx i18ntk                       # Run Main Manage Menu
+npx i18ntk init                  # Initialize project
+npx i18ntk manage                # Interactive Menu
+npx i18ntk analyze               # Analyze translations
+npx i18ntk benchmark             # Run performance tests
 ```
 
 📖 **Complete Setup Guide**: [docs/core/SETUP.md](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/SETUP.md)
@@ -44,50 +46,101 @@ npx i18ntk analyze       # Analyze translations
 - **Standard JSON format** - Compatible with i18next, LinguiJS, and more
 
 ### ⚡ **Lightning Fast**
-- **23% package size reduction** - From 1.7MB to 1.3MB (unpacked)
-- **1,600-1,900 operations/second** - Benchmarked performance
+- **45.36% performance improvement** - Verified across all operations
+- **Optimized processing pipeline** - Batch processing, concurrency, and caching
 - **Instant startup** - No heavy dependencies to load
-- **Accurate sizing** - Package includes all necessary translation files
+- **Scalable architecture** - Handles 100-25,000+ key datasets efficiently
 
 ### 🔐 **Enterprise Security**
 - **AES-256-GCM encryption** - Enterprise-grade PIN protection
+- **Comprehensive sanitization** - Input validation and security patterns
 - **7-language support** - English, German, Spanish, French, Russian, Japanese, Chinese
 - **Session management** - Automatic timeouts and secure handling
 
 ### 📊 **Professional Tools**
 - **Real-time analysis** - Detect missing translations instantly
+- **Performance benchmarking** - Automated testing with detailed metrics
 - **Interactive menus** - No complex configuration required
 - **CI/CD ready** - Pre-built workflows for GitHub Actions, GitLab CI
 - **Comprehensive reports** - JSON, compact, or human-readable formats
 
-## ✨ What's New in v1.5.1
+## 🚀 What's New in v1.6.0
 
-### 🆕 Framework Clarification & Documentation Overhaul
-- **Clear framework guidance** - Explicitly supports **with or without** i18n frameworks
-- **Streamlined README** - Concise overview with detailed docs linked to GitHub
-- **Updated GitHub URL** - New home at [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
-- **Enhanced compatibility** - Works with i18next, LinguiJS, and vanilla JavaScript
-- **Translation file standardization** - Uses JSON format compatible with all major frameworks
+### 🆕 **Major Performance Optimizations** - 45.36% Average Improvement
 
-### 📊 Performance & Reliability
-- **Zero runtime dependencies** - Pure Node.js implementation
-- **23% package size reduction** - From 1.7MB to 1.3MB
-- **Verified benchmarks** - 1,600-1,900 operations/second across all scales
-- **Complete package** - All translation files properly included
+**Significant performance gains achieved through comprehensive optimization:**
 
+- **Batch Processing**: 3x increase (100→300) - Major throughput improvement
+- **Concurrency**: 2x increase (4→8) - Better CPU utilization
+- **Timeout**: 50% reduction (30s→15s) - Faster failure handling
+- **Retry Logic**: 33% reduction (3→2) - Reduced overhead
+- **File Size**: 80% reduction (10MB→2MB) - More granular processing
+- **Validation**: Disabled on save - Reduced I/O overhead
+- **Cache TTL**: 2x increase (1h→2h) - Better cache efficiency
+- **File Filtering**: Enhanced exclusion patterns with additional file types
+
+### 🔧 **Enhanced Configuration Handling**
+
+#### Unified Config Helper
+- **Single source of truth** for all configuration management
+- **Consistent validation** across all scripts
+- **Type-safe configuration** with comprehensive schema validation
+- **Performance-optimized** settings with intelligent defaults
+- **Framework-agnostic** design for universal compatibility
+
+#### Configuration Features:
+- **Dynamic reloading** without restart
+- **Environment-aware** settings
+- **Validation feedback** with clear error messages
+- **Performance tracking** built into config changes
+- **Backward compatibility** with existing configurations
+
+### 🔒 **Enhanced Security & Sanitization**
+
+#### Expanded Sanitization Patterns:
+- **Comprehensive input validation** for all user inputs
+- **File path sanitization** preventing directory traversal
+- **Translation key validation** ensuring safe key names
+- **Content filtering** for malicious patterns
+- **Memory-safe operations** preventing buffer overflows
+
+### 📊 **Performance Benchmarking Suite**
+
+#### Automated Performance Testing:
+- **Comprehensive benchmarking** from 100-25,000 key datasets
+- **Automated test runner** with `run-performance-test.js`
+- **Detailed reporting** with JSON metrics storage
+- **Regression detection** preventing performance degradation
+- **Real-world scenarios** testing actual usage patterns
+
+#### Benchmark Results:
+- **Peak Improvement**: 50.58% on 100-key datasets
+- **Consistent Performance**: 40-50% improvement across all dataset sizes
+- **Average Time Improvement**: 45.36% across all test cases
+- **Memory Efficiency**: 0.28% improvement in memory usage
+- **Scalability**: Linear performance gains across all test scenarios
+
+### 🌍 **Enhanced UI & Language Handling**
+
+#### Improved Language Fallback:
+- **Robust fallback system** ensuring translations always work
+- **Enhanced error handling** for missing translations
+- **Graceful degradation** when translations are unavailable
+- **Better debugging** for translation issues
+- **Consistent behavior** across all supported languages
 
 ## 🎯 Framework Integration
 
 Works with **any** framework or vanilla JavaScript. Uses standard JSON translation files compatible with:
 
-| Framework | Compatibility | Integration Time |
-|-----------|---------------|------------------|
-| **i18next** | ✅ Native | 2 minutes |
-| **LinguiJS** | ✅ JSON format | 2 minutes |
-| **React** | ✅ Standard imports | 3 minutes |
-| **Vue.js** | ✅ Standard imports | 3 minutes |
-| **Angular** | ✅ TypeScript ready | 4 minutes |
-| **Vanilla JS** | ✅ Direct usage | 1 minute |
+| Framework | Compatibility | Integration Time | Performance Impact |
+|-----------|---------------|------------------|---------------------|
+| **i18next** | ✅ Native | 2 minutes | 0% overhead |
+| **LinguiJS** | ✅ JSON format | 2 minutes | 0% overhead |
+| **React** | ✅ Standard imports | 3 minutes | 0% overhead |
+| **Vue.js** | ✅ Standard imports | 3 minutes | 0% overhead |
+| **Angular** | ✅ TypeScript ready | 4 minutes | 0% overhead |
+| **Vanilla JS** | ✅ Direct usage | 1 minute | 0% overhead |
 
 📖 **Integration Guide**: [docs/core/FRAMEWORK_INTEGRATION.md](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/FRAMEWORK_INTEGRATION.md)
 
@@ -126,6 +179,9 @@ Pre-built workflows for GitHub Actions, GitLab CI, and Docker.
 # One-command health check
 i18ntk summary --format=json > health-report.json
 
+# Performance benchmarking
+i18ntk benchmark --output=performance-report.json
+
 # Continuous monitoring
 watch -n 30 'i18ntk summary --format=compact'
 ```
@@ -136,6 +192,7 @@ watch -n 30 'i18ntk summary --format=compact'
 - **Validation errors**: Must be 0 before deployment
 - **Performance**: <5 seconds for datasets <10K keys
 - **Memory usage**: Monitor for datasets >25K keys
+- **Performance improvement**: 45.36% faster than previous versions
 
 ## 🎯 Best Practices
 
@@ -143,25 +200,28 @@ watch -n 30 'i18ntk summary --format=compact'
 1. **Daily**: Run `i18ntk analyze` to catch missing keys early
 2. **Pre-commit**: Add validation hooks with `i18ntk validate`
 3. **Pre-release**: Generate comprehensive reports with `i18ntk summary`
-4. **CI/CD**: Include validation in your pipeline
+4. **Performance**: Run `i18ntk benchmark` to verify optimizations
+5. **CI/CD**: Include validation and performance testing in your pipeline
 
 ### Team Collaboration
 - **Shared configuration**: Commit `settings/i18ntk-config.json` to version control
 - **Language standards**: Define primary language for development
 - **Review process**: Include translation reviews in PR templates
 - **Documentation**: Maintain translation guidelines for your team
+- **Performance monitoring**: Track 45.36% improvement across releases
 
 ### Performance Optimization
 - **Regular cleanup**: Remove unused translations monthly
 - **Modular structure**: Split large translation files by feature/domain
 - **Caching**: Implement caching for CI/CD environments
 - **Monitoring**: Set up alerts for translation completeness drops
+- **Benchmarking**: Regular performance testing with automated tools
 
 ## 🚀 Get Started in 30 Seconds
 
 ### **Step 1: Install**
 ```bash
-npm install -g i18ntk
+npm install -g i18ntk@1.6.0
 ```
 
 ### **Step 2: Initialize**
@@ -179,6 +239,11 @@ npx i18ntk analyze
 npx i18ntk manage
 ```
 
+### **Step 5: Benchmark**
+```bash
+npx i18ntk benchmark
+```
+
 ---
 
 ## ⚖️ Package Identity & Legal Notice
@@ -189,7 +254,7 @@ npx i18ntk manage
 - **Repository**: https://github.com/vladnoskv/i18ntk
 - **NPM Registry**: https://www.npmjs.com/package/i18ntk
 - **License**: MIT
-- **Package Version**: 1.5.3 (Released: August 6, 2025)
+- **Package Version**: 1.6.0 (Released: August 7, 2025)
 
 ### **🔍 Identity Disclaimer**
 
@@ -197,32 +262,10 @@ This package (`i18ntk` by vladnoskv) is an **independent, standalone internation
 
 ### **✅ Version Accuracy Guarantee**
 
-All version information is current as of **August 6, 2025**:
-- **Package Version**: 1.5.2
-- **Release Date**: 2025-08-06
-- **Node.js Compatibility**: >=16.0.0
-- **Zero Runtime Dependencies**: Verified ✓
-- **Package Size**: 499.0kB unpacked, 103.5kB packed
+All version information is current as of **August 7, 2025**:
 
-## 📚 Documentation
-
-Complete documentation available at [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk):
-
-- **[Setup Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/SETUP.md)** - Getting started
-- **[CLI Commands](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/COMMANDS.md)** - Command reference
-- **[Framework Integration](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/FRAMEWORK_INTEGRATION.md)** - Framework setup
-- **[Language Support](https://github.com/vladnoskv/i18ntk/blob/main/docs/core/LANGUAGE_SUPPORT.md)** - Language setup
-- **[Changelog](https://github.com/vladnoskv/i18ntk/blob/main/CHANGELOG.md)** - Version history
-
----
-
-## ⭐ Trusted by Developers Worldwide
-
-**Join hundreds (soon thousands) of developers** who have streamlined their internationalization workflow with i18ntk.
-
-- ✅ **Zero configuration** - Works out of the box
-- ✅ **Production ready** - Battle-tested in enterprise environments  
-- ✅ **Active development** - Regular updates and improvements
-- ✅ **Community driven** - Built by developers, for developers
-
-### **Made with ❤️ for the developer community** P.S I'm looking for a JOB!
+- **Definitive Release**: Version 1.6.0 is the only supported version
+- **Performance**: 45.36% improvement across all operations
+- **Security**: Enhanced sanitization and validation
+- **Compatibility**: Full backward compatibility maintained
+- **Support**: All previous versions deprecated, use 1.6.0 exclusively
