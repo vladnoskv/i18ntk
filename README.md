@@ -10,7 +10,7 @@
 > **🚀 97% cumulative performance improvement** with ultra-extreme optimization  
 > **⚡ 15.38ms processing time** for 200k keys (vs 300ms baseline)  
 > **💾 1.62MB memory usage** with memory pooling optimization  
-> **🎯 Interactive locale optimizer** - 67% package size reduction  
+> **🎯 Interactive locale optimizer** - Dynamic package size reduction  
 > **🔒 Enhanced security** with admin PIN protection & session management  
 > **⚡ Zero runtime dependencies** - Production-ready for enterprise use  
 > **🛡️ Comprehensive stability** with null-safety improvements
@@ -191,7 +191,8 @@ your-project/
 │   ├── es.json
 │   ├── fr.json
 │   └── ...
-├── .i18ntk.config.js        # Configuration file
+├── settings/
+│   └── .i18ntk.config.js        # Configuration file
 ├── node_modules/
 │   └── i18ntk/
 │       ├── scripts/
@@ -307,7 +308,7 @@ ls backup/locales/*/REMOVED_LOCALES.txt
 
 | Feature | Before v1.6.0 | After v1.6.0 | Impact |
 |-------|---------------|--------------|---------|
-| **Performance** | 2,894ms baseline | **38.90ms extreme** | **87% faster** |
+| **Performance** | 2,894ms baseline | **15.38ms extreme** | **97% faster** |
 | **Package Size** | 830.4KB full package | **115.3KB optimized** | **86% smaller** |
 | **Null-safety** | Occasional crashes | **Zero crashes guaranteed** | **100% reliability** |
 | **JSON scanning** | JSON files scanned as source | **JSON files properly excluded** | **Better accuracy** |

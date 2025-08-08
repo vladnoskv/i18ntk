@@ -277,7 +277,7 @@ When contributing, be aware that:
 ## Getting Help
 
 - Check existing [issues](https://github.com/vladnoskv/i18ntk/issues)
-- Review [documentation](docs/README.md)
+- Review [documentation](INDEX.md)
 - Join [GitHub Discussions](https://github.com/vladnoskv/i18ntk/discussions)
 
 ## Code of Conduct

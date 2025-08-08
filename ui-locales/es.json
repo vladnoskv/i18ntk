@@ -980,7 +980,7 @@
       "translation_replacement_complete": "\n✅ ¡Reemplazo de traducciones completado!",
       "total_replacements": "📊 Total de reemplazos: {count}",
       "dry_run_mode": "\n⚠️ MODO SIMULADO - No se modificaron archivos",
-      "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.5.3",
+      "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.6.0",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Ejecutando en modo simulado - no se modificarán archivos\n",
       "error_during_replacement": "❌ Error durante el reemplazo de traducciones:"

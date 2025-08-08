@@ -1,7 +1,7 @@
 # Development Scripts and Tools
 
-**Version:** 1.5.2  
-**Last Updated:** 2025-08-06  
+**Version:** 1.6.0  
+**Last Updated:** 2025-08-08  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 This folder contains development scripts, test files, and debugging tools to help maintain and improve the i18nTK toolkit.
@@ -26,6 +26,9 @@ dev/
 
 - **debugger.js** - Main debugging utility for identifying issues
 - **debug-config.js** - Configuration debugging helper
+- **debug-security.js** - Security diagnostics and sanitization checks
+- **console-key-checker.js** - Detects missing console translation keys
+- **benchmark.js** - Performance benchmarking tool
 
 ## 📊 Reports
 
@@ -39,3 +42,38 @@ Development reports are organized by type:
 ## 🔧 Development Rules
 
 See `DEVELOPMENT_RULES.md` for coding standards and best practices.
+
+## ⚙️ Diagnostic Commands (v1.6.0)
+
+```bash
+# Run performance benchmarks
+npm run benchmark
+
+# Optimize included locales interactively
+node scripts/locale-optimizer.js --interactive
+
+# View current settings
+i18ntk --settings
+
+# Switch performance mode
+i18ntk --config performance.mode=extreme
+
+# Validate configuration schema
+i18ntk --validate-config
+
+# Check for missing console keys
+node scripts/console-key-checker.js
+
+# Run security diagnostics
+node scripts/debug-security.js
+
+# Generate performance report
+npm run report:performance
+
+# Generate sizing report
+npm run report:sizing
+
+# Generate summary report
+npm run report:summary
+
+```

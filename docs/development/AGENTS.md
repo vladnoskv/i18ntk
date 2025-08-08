@@ -1,16 +1,16 @@
-# 🤖 AI Agent Guidelines for I18N Management Toolkit v1.5.2
+# 🤖 AI Agent Guidelines for I18N Management Toolkit v1.6.0
 
 ## Overview
 
-This document provides essential guidelines for AI agents working with the I18N Management Toolkit v1.5.2. It explains how to properly handle translations, understand the enhanced security architecture, and ensure accurate localization with complete console translation support.
+This document provides essential guidelines for AI agents working with the I18N Management Toolkit v1.6.0. It explains how to properly handle translations, understand the enhanced security architecture, and ensure accurate localization with complete console translation support.
 
-## 🆕 Version 1.5.2 Key Features
+## 🆕 Version 1.6.0 Key Features 
 
-- **🌐 100% Console Translation Support**: All console output is fully internationalized
-- **🔒 Enhanced Admin PIN Security**: Modern encrypted PIN with session-based authentication
-- **🛡️ Session Management**: 30-minute timeout with automatic re-authentication
-- **📁 Improved Architecture**: Better organized file structure and modular design
-- **🔧 Advanced Security**: AES-256-GCM encryption replacing deprecated crypto functions
+- **🚀 Extreme-Performance Optimizations**: 97% cumulative speed improvements across the toolkit
+- **🎯 Interactive Locale Optimizer**: Selectively include locales with real-time size impact
+- **🛠 Unified Configuration Helper**: Dynamic reloading and type-safe settings management
+- **🔒 Expanded Security & Sanitization**: Comprehensive validation of inputs and translation keys
+- **📊 Performance Benchmarking Suite**: Automated regression detection with JSON metrics
 
 ## 🔍 Key Search Patterns
 
@@ -95,7 +95,7 @@ formatMessage({ id: 'key.name' }) // React Intl
 - Maintain consistency in terminology
 - Example: `[TRANSLATED]Settings` → `设置`
 
-## 📁 File Structure Understanding (v1.5.2)
+## 📁 File Structure Understanding (v1.6.0)
 
 ### Core Architecture
 ```
@@ -132,6 +132,8 @@ i18n-management-toolkit/
 │   ├── api/                # API documentation
 │   ├── development/        # Development guides
 │   └── reports/            # Report documentation
+├── benchmarks/             # Automated performance benchmarking suite
+├── scripts/                # Helper scripts (locale optimizer, etc.)
 └── ui-locales/             # Toolkit's UI translations (7 languages)
     ├── en.json             # English (source)
     ├── de.json             # German
@@ -168,14 +170,15 @@ utils/
 └── security.js             # Security utilities
 ```
 
-## 🔧 Enhanced Translation Workflow for AI Agents (v1.5.2)
+## 🔧 Enhanced Translation Workflow for AI Agents (v1.6.0)
 
 ### Step 1: Comprehensive Analysis & Detection
 1. Search for `[NOT_TRANSLATED]` markers in project files
 2. Run `node dev/debug/console-key-checker.js` to identify missing UI translations
 3. Use `node main/i18ntk-analyze.js` for detailed translation analysis
-4. Determine target language from file path context
-5. Understand the context (UI, console output, error message, documentation, etc.)
+4. Execute performance diagnostics with `npm run benchmark` when investigating speed issues
+5. Determine target language from file path context
+6. Understand the context (UI, console output, error message, documentation, etc.)
 
 ### Step 2: Automated Translation Processing
 1. Use `node utils/native-translations.js` to replace `[NOT_TRANSLATED]` placeholders
@@ -183,6 +186,7 @@ utils/
 3. Maintain technical terminology consistency across all 7 supported languages
 4. Consider cultural appropriateness and formality levels
 5. Preserve formatting, variables, and special characters
+6. Use `node scripts/locale-optimizer.js --interactive` when adjusting included locales
 
 ### Step 3: Advanced Validation & Quality Assurance
 1. Remove `[NOT_TRANSLATED]` markers after translation
@@ -192,6 +196,7 @@ utils/
 5. Verify placeholder variables are preserved (e.g., `{{variable}}`)
 6. Check for consistency with existing translations
 7. Generate reports with `node main/i18ntk-summary.js` and `node main/i18ntk-sizing.js`
+8. Validate configuration with `i18ntk --validate-config`
 
 ### Step 4: Security & Session Management
 1. Use enhanced admin PIN system for secure access to management tools
@@ -202,7 +207,7 @@ utils/
 ## 🚨 Critical Rules
 
 ### DO:
-- ✅ Always search for `[TRANSLATED]` markers
+- ✅ Always search for country codes like [GB], [ES], [FR], [RU], [JA], [ZH]`[NOT TRANSLATED]` markers
 - ✅ Identify language from file path context
 - ✅ Maintain JSON structure and syntax
 - ✅ Preserve placeholder variables (e.g., `{{variable}}`)
@@ -215,59 +220,8 @@ utils/
 - ❌ Remove or alter placeholder variables
 - ❌ Use machine translation without context consideration
 - ❌ Mix languages within the same file
-- ❌ Leave `[TRANSLATED]` markers after translation
+- ❌ Leave `[NOT TRANSLATED]` markers after translation
 
-## 🔍 Enhanced Search Commands for AI Agents (v1.5.2)
-
-### Essential Search Patterns
-```bash
-# Find all translation markers (updated for v1.5.2)
-grep -r "\[NOT_TRANSLATED\]" .
-grep -r "\[TRANSLATED\]" .
-
-# Find specific language files in project locales
-find . -path "*/locales/de/*" -name "*.json"
-find . -path "*/locales/es/*" -name "*.json"
-find . -path "*/locales/fr/*" -name "*.json"
-find . -path "*/locales/ru/*" -name "*.json"
-find . -path "*/locales/ja/*" -name "*.json"
-find . -path "*/locales/zh/*" -name "*.json"
-
-# Find UI locale files (toolkit's own translations)
-ls ui-locales/*.json
-
-# Search for translation function usage
-grep -r "t(\|\$t(\|i18n\.t(" --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" .
-
-# Check for English text in foreign language files
-grep -r "[a-zA-Z]" locales/de/ --include="*.json" | grep -v "\"[a-zA-Z]*\":"
-grep -r "[a-zA-Z]" locales/es/ --include="*.json" | grep -v "\"[a-zA-Z]*\":"
-```
-
-### V1.5.2 Diagnostic Commands
-```bash
-# Run comprehensive translation analysis
-node main/i18ntk-analyze.js
-
-# Check for missing console translations
-node dev/debug/console-key-checker.js
-
-# Validate all translations
-node main/i18ntk-validate.js
-
-# Generate translation usage report
-node main/i18ntk-usage.js
-
-# Create summary and sizing reports
-node main/i18ntk-summary.js
-node main/i18ntk-sizing.js
-
-# Replace [NOT_TRANSLATED] placeholders
-node utils/native-translations.js
-
-# Complete missing translations workflow
-node main/i18ntk-complete.js
-```
 
 ## 📝 Example Translation Process
 
@@ -292,58 +246,5 @@ node main/i18ntk-complete.js
   }
 }
 ```
-
-## 🛠️ Enhanced Tools and Validation (v1.5.2)
-
-### Core Validation Commands
-```bash
-# Validate JSON syntax
-node -e "console.log(JSON.parse(require('fs').readFileSync('path/to/file.json', 'utf8')))"
-
-# Check for remaining translation markers
-grep -r "\[NOT_TRANSLATED\]" locales/
-grep -r "\[TRANSLATED\]" locales/
-
-# Run comprehensive toolkit validation
-node main/i18ntk-validate.js
-
-# Main management interface
-node main/i18ntk-manage.js
-```
-
-### Security and Authentication
-```bash
-# Access admin features (requires PIN)
-node utils/admin-cli.js
-
-# Settings management with enhanced security
-node settings/settings-manager.js
-node settings/settings-cli.js
-```
-
-### Advanced Analysis Tools
-```bash
-# Complete workflow automation
-node main/i18ntk-autorun.js
-
-# Initialize new i18n projects
-node main/i18ntk-init.js
-
-# Debug and development tools
-node dev/debug/console-key-checker.js
-```
-
-## 📞 Support and Resources (v1.5.2)
-
-- **Enhanced Security**: Modern AES-256-GCM encryption with session management
-- **Settings Configuration**: See `settings/settings-manager.js` for advanced configuration options
-- **Admin Authentication**: Enhanced PIN system with `utils/admin-pin.js`
-- **Translation Patterns**: Check `processing.translationPatterns` in settings
-- **Validation**: Use built-in validation tools with comprehensive reporting
-- **Console Translation**: 100% internationalized console output
-- **Documentation**: Comprehensive docs in `docs/` directory
-- **Development Tools**: Advanced debugging utilities in `dev/debug/`
-
----
 
 **Remember**: The goal is to provide native, contextually appropriate translations that maintain the technical accuracy and user experience of the original content. Always prioritize clarity and cultural appropriateness over literal translation.

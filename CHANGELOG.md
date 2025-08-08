@@ -24,8 +24,8 @@
 - **File processing**: Streamlined validation pipeline
 
 #### **Phase 3: Extreme-Performance Configuration** - Additional 42.54% Improvement
-- **Batch Size**: Maximum **1000** (333% increase from 300, 100% from 500)
-- **Concurrency**: Extreme **16** (100% increase from 8, 33% from 12)
+- **Batch Size**: Maximum **1000** (67% increase from 300)
+- **Concurrency**: Extreme **16** (100% increase from 8)
 - **Timeout**: Ultra-fast 10s (67% reduction from 30s baseline)
 - **Retry Attempts**: Minimal 1 (67% reduction from 3 baseline)
 - **File Size**: Optimized 1MB (90% reduction from 10MB baseline)
@@ -43,8 +43,8 @@
 - **Parallel Processing**: Maximum CPU utilization
 - **Memory Pooling**: Object reuse and string interning
 
-#### **Ultra-Extreme Performance Results (200,000 keys across 8 languages):**
-- **Ultra-Extreme Settings**: **15.38ms** average (**97% improvement**)
+#### **Ultra-Extreme Performance Results (200,000 keys across 7 languages):**
+- **Ultra-Extreme Settings**: **15.38ms** average (**97% improvement** from 1.2 seconds in v1.5)
 - **Memory Usage**: **1.62MB** (**67% reduction** from baseline)
 - **Throughput**: **13.01M keys/sec** (**1850% improvement**)
 - **Cache Hit Rate**: 85% with intelligent caching
@@ -254,98 +254,13 @@ node scripts/locale-optimizer.js --init
 - **All existing scripts** continue to function
 - **Performance improvements** are automatic
 - **Security enhancements** are transparent
+
 ### 🏆 **Key Achievements**
-
-## [1.6.1] - 2025-08-08 - **STABILITY & SAFETY RELEASE**
-
-### 🔧 **CRITICAL BUG FIXES & SAFETY IMPROVEMENTS**
-
-#### **Null-Safety Enhancements**
-- **Fixed "Cannot read properties of undefined" errors** in helper functions
-- **Added null-safe handling** for `translationPatterns`, `excludeDirs`, and `includeExtensions`
-- **Enhanced configuration defaults** when initialization is skipped in menu flow
-- **Improved error handling** with graceful fallbacks
-
-#### **JSON Scanning Prevention**
-- **Prevented JSON files from being scanned** as source code
-- **Added early exit** in `extractKeysFromFile()` for `.json` files
-- **Enhanced file traversal logic** to skip JSON files during key extraction
-- **Improved performance** by avoiding unnecessary JSON parsing
-
-#### **Configuration Safety**
-- **Added warning system** when `sourceDir` equals `i18nDir`
-- **Automatic fallback mechanism** to prevent directory conflicts
-- **Enhanced validation** for source directory paths
-- **Better user guidance** for configuration issues
-
-#### **Sanity Checks & User Guidance**
-- **Added "0 used keys" warning** when translations exist but no usage found
-- **Enhanced diagnostic messages** for troubleshooting configuration issues
-- **Improved error messages** with actionable guidance for users
-- **Added translation string** `noUsedKeysHint` for better user communication
-
-#### **Robust File Operations**
-- **Enhanced file traversal safety** with null checks
-- **Improved directory exclusion logic** with null-safe handling
-- **Better handling of missing configuration values**
-- **Enhanced security validation** for file paths
-
-### 🎯 **User Experience Improvements**
-
-#### **Better Error Messages**
-- **Clear guidance** when no source files are found
-- **Actionable suggestions** for fixing configuration issues
-- **Enhanced warning system** for potential problems
-- **Improved debugging information** for troubleshooting
-
-#### **Configuration Robustness**
-- **Automatic defaults** applied when initialization is skipped
-- **Graceful degradation** when settings are missing
-- **Enhanced validation** for all configuration parameters
-- **Better handling of edge cases**
-
-### 📊 **Impact Summary**
-- **Zero breaking changes** - Full backward compatibility maintained
-- **Enhanced stability** - Fewer crashes and better error handling
-- **Improved user experience** - Clearer guidance and better diagnostics
-- **Performance maintained** - No performance impact from safety improvements
-- **Security enhanced** - Better input validation and path sanitization
-
-### 🔧 **Technical Details**
-
-#### **Files Modified:**
-- `main/i18ntk-usage.js` - Enhanced with null-safety and error handling
-- `ui-locales/en.json` - Added new translation string for warnings
-
-#### **Key Improvements:**
-- **Null-safe defaults** for all configuration parameters
-- **JSON file exclusion** from source scanning
-- **Directory conflict detection** with automatic fallback
-- **Comprehensive error handling** throughout the codebase
-- **Enhanced user guidance** for configuration troubleshooting
-
-#### **Testing Coverage:**
-- **Edge cases handled** for missing configurations
-- **Error scenarios tested** for robust operation
-- **Configuration validation** thoroughly tested
-- **Performance benchmarks** maintained across all changes
-
-### 🚀 **Migration**
-- **No migration required** - All changes are backward compatible
-- **Automatic benefits** - Improvements apply to existing installations
-- **Enhanced reliability** - Existing configurations work better
-- **Improved diagnostics** - Better error reporting for existing setups
-
-```- **87% cumulative performance improvement** across all operations
-- **67% package size reduction** with selective locale installation
-- **Zero runtime dependencies** maintained
-- **Enhanced security** with comprehensive validation
-- **Unified configuration** system
-- **Comprehensive benchmarking** suite
-- **Full internationalization** support
-- **Backward compatibility** guaranteed
-- **Production-ready** with enterprise-grade features
-
+- **Extreme Performance**: 25,000+ keys processed in 35ms
+- **Zero-Trust Security**: Ultra-secure PIN protection
+- **Comprehensive Sanitization**: Robust input validation
+- **Enhanced Backup**: Advanced backup features
+- **Robust Error Handling**: Comprehensive error detection
 ---
 
 ## **Installation & Usage**

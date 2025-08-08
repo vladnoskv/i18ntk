@@ -979,7 +979,7 @@
       "translation_replacement_complete": "\n✅ Remplacement des traductions terminé !",
       "total_replacements": "📊 Remplacements totaux : {count}",
       "dry_run_mode": "\n⚠️ MODE DRY RUN – Aucun fichier n’a été modifié",
-      "tool_title": "🌍 Remplaceur de traductions natives v1.5.3",
+      "tool_title": "🌍 Remplaceur de traductions natives v1.6.0",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Exécution en mode DRY RUN – aucun fichier ne sera modifié\n",
       "error_during_replacement": "❌ Erreur lors du remplacement des traductions :"
