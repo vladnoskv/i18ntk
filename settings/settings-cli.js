@@ -153,6 +153,7 @@ class SettingsCLI {
             { key: '8', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
             { key: '9', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
             { key: '0', label: this.t('settings.mainMenu.reportBug'), description: this.t('settings.mainMenu.reportBugDesc') },
+            { key: 'x', label: 'Reset Script Directory Overrides', description: 'Clear script directory overrides and use defaults' },
             { key: 'r', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
             { key: 'u', label: this.t('settings.mainMenu.updatePackage'), description: this.t('settings.mainMenu.updatePackageDesc') },
             { key: 's', label: this.t('settings.mainMenu.saveChanges'), description: this.t('settings.mainMenu.saveChangesDesc') },
@@ -207,6 +208,9 @@ class SettingsCLI {
                 break;
             case '0':
                 await this.reportBug();
+                break;
+            case 'x':
+                await this.resetScriptDirectories();
                 break;
             case 'r':
                 await this.resetToDefaults();
@@ -437,7 +441,7 @@ class SettingsCLI {
         for (let index = 0; index < keys.length; index++) {
             const key = keys[index];
             let value = this.getNestedValue(this.settings, key);
-            let displayValue = this.formatValue(value);
+            let displayValue = this.formatValue(value, key);
             
             // Special display for admin PIN protection and PIN setup
             if (key === 'security.adminPinEnabled') {
@@ -659,9 +663,9 @@ class SettingsCLI {
             const config = await this.adminAuth.loadConfig();
             const pinSet = config && config.enabled === true && !!config.pinHash;
             const pinDisplay = pinSet ? '****' : '(not set)';
-            console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue)} (${this.t('settings.pin')}: ${pinDisplay})`);
+            console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue, key)} (${this.t('settings.pin')}: ${pinDisplay})`);
         } else {
-            console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue)}`);
+            console.log(`${this.t('settings.current')}: ${this.formatValue(currentValue, key)}`);
         }
         
         // Show valid options
@@ -814,7 +818,15 @@ class SettingsCLI {
         }
         
         // Update the setting for all other cases
-        this.setNestedValue(this.settings, key, convertedValue);
+        let finalValue = convertedValue;
+        if (typeof finalValue === 'string') {
+            const lowerKey = key.toLowerCase();
+            if (lowerKey.includes('dir') || lowerKey.includes('path') || lowerKey.includes('root')) {
+                finalValue = finalValue.replace(/^([/\\])/, './');
+                finalValue = configManager.toRelative(path.resolve(finalValue));
+            }
+        }
+        this.setNestedValue(this.settings, key, finalValue);
         this.modified = true;
         
         // Save settings immediately after each change
@@ -1106,7 +1118,7 @@ class SettingsCLI {
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.viewAll.title')}${colors.reset}\n`);
         
-        this.displaySettingsTree(this.settings, '');
+        this.displaySettingsTree(this.settings, '', '');
         
         console.log(`\n${this.t('settings.pressEnter')}...`);
         await this.prompt('');
@@ -1115,14 +1127,15 @@ class SettingsCLI {
     /**
      * Display settings in a tree format
      */
-    displaySettingsTree(obj, prefix) {
+    displaySettingsTree(obj, prefix, parentKey = '') {
         Object.keys(obj).forEach(key => {
             const value = obj[key];
+            const fullKey = parentKey ? `${parentKey}.${key}` : key;
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                 console.log(`${prefix}${colors.bright}${key}:${colors.reset}`);
-                this.displaySettingsTree(value, prefix + '  ');
+                this.displaySettingsTree(value, prefix + '  ', fullKey);
             } else {
-                console.log(`${prefix}${colors.cyan}${key}:${colors.reset} ${this.formatValue(value)}`);
+                console.log(`${prefix}${colors.cyan}${key}:${colors.reset} ${this.formatValue(value, fullKey)}`);
             }
         });
     }
@@ -1628,11 +1641,11 @@ class SettingsCLI {
         if (confirm.toLowerCase() === 'y') {
             try {
                 await this.adminAuth.disableAuth();
-                configManager.updateConfig(configManager.defaultConfig || {});
+                configManager.resetToDefaults();
                 this.settings = configManager.getConfig();
                 this.modified = false;
                 this.adminAuthenticated = false;
-                this.success('Settings reset to defaults successfully.');
+                this.success(this.t('settings.resetDone'));
             } catch (error) {
                 this.error(`Failed to reset settings: ${error.message}`);
             }
@@ -1672,7 +1685,7 @@ class SettingsCLI {
                 });
                 
                 this.modified = true;
-                this.success('Script directories reset to system defaults successfully.');
+                this.success(this.t('settings.resetScriptDirsDone'));
                 // Save settings immediately
                 try {
                     await this.saveSettings();
@@ -1908,9 +1921,13 @@ ${colors.dim}${this.t('settings.updatePackage.command')}: npm update i18ntk -g${
     /**
      * Format value for display
      */
-    formatValue(value) {
+    formatValue(value, key = '') {
         if (value === null || value === undefined) {
             return `${colors.dim}(not set)${colors.reset}`;
+        }
+        const lowerKey = key.toLowerCase();
+        if (typeof value === 'string' && (lowerKey.includes('dir') || lowerKey.includes('path') || lowerKey.includes('root'))) {
+            return configManager.toRelative(path.resolve(value));
         }
         if (typeof value === 'boolean') {
             return value ? `${colors.green}enabled${colors.reset}` : `${colors.red}disabled${colors.reset}`;

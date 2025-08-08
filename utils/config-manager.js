@@ -1,114 +1,154 @@
 const fs = require('fs');
 const path = require('path');
 
-// Determine configuration path
+// Project root is where commands are executed
 const projectRoot = process.cwd();
-const rootCandidate = path.resolve(projectRoot, 'i18ntk-config.json');
-const settingsCandidate = path.resolve(projectRoot, 'settings', 'i18ntk-config.json');
-const CONFIG_PATH = fs.existsSync(rootCandidate) ? rootCandidate : settingsCandidate;
+const CONFIG_DIR = path.join(projectRoot, '.i18ntk');
+const CONFIG_PATH = path.join(CONFIG_DIR, 'i18ntk-config.json');
+
+// Default configuration values
+const DEFAULT_CONFIG = {
+  projectRoot: '.',
+  sourceDir: './locales',
+  i18nDir: './locales',
+  outputDir: './i18ntk-reports',
+  uiLocalesDir: './ui-locales',
+  scriptDirectories: {
+    init: null,
+    analyze: null,
+    validate: null,
+    usage: null,
+    sizing: null,
+    summary: null,
+    complete: null,
+    manage: null,
+  },
+  sourceLanguage: 'en',
+  uiLanguage: 'en',
+  defaultLanguages: ['de', 'es', 'fr', 'ru'],
+  notTranslatedMarker: 'NOT_TRANSLATED',
+  excludeFiles: ['.DS_Store', 'Thumbs.db'],
+  strictMode: false,
+};
 
 let currentConfig = null;
 
-function loadConfig() {
-  try {
-    const data = fs.readFileSync(CONFIG_PATH, 'utf8');
-    currentConfig = JSON.parse(data);
-  } catch (err) {
-    currentConfig = {};
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function ensureConfigDir() {
+  if (!fs.existsSync(CONFIG_DIR)) {
+    fs.mkdirSync(CONFIG_DIR, { recursive: true });
   }
-  return currentConfig;
 }
 
-function getConfig() {
-  return loadConfig();
-}
-
-function findKey(obj, key) {
-  const lower = key.toLowerCase();
-  return Object.keys(obj).find(k => k.toLowerCase() === lower);
-}
-
-function resolvePath(obj, keyPath) {
-  const parts = keyPath.split('.');
-  const resolved = [];
-  let current = obj;
-  for (const part of parts) {
-    const real = findKey(current, part);
-    if (!real) return null;
-    resolved.push(real);
-    current = current[real];
-  }
-  return resolved;
-}
-
-function getValue(obj, parts) {
-  return parts.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
-}
-
-function setValue(obj, parts, value) {
-  let current = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    current = current[parts[i]];
-  }
-  current[parts[parts.length - 1]] = value;
+function toRelative(absPath) {
+  if (!absPath) return absPath;
+  const rel = path.relative(projectRoot, absPath);
+  const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
+  return normalized;
 }
 
 function normalizePathValue(keyPath, value) {
   if (typeof value !== 'string') return value;
   const last = keyPath.split('.').pop();
   if (/dir|directory|root|path$/i.test(last)) {
-    return path.resolve(projectRoot, value);
+    const abs = path.resolve(projectRoot, value);
+    return toRelative(abs);
   }
   return value;
 }
 
-function saveConfig() {
-  if (!currentConfig) return;
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(currentConfig, null, 2), 'utf8');
-}
-
-function setConfig(keyPath, value) {
-  const config = loadConfig();
-  const parts = resolvePath(config, keyPath);
-  if (!parts) throw new Error(`Invalid config path: ${keyPath}`);
-  const existing = getValue(config, parts);
-  if (existing !== undefined && existing !== null && typeof existing !== typeof value) {
-    throw new Error(`Invalid type for ${keyPath}`);
-  }
-  const normalized = normalizePathValue(parts.join('.'), value);
-  setValue(config, parts, normalized);
-  saveConfig();
-  return config;
-}
-
-function merge(target, updates, basePath = '') {
-  for (const [key, val] of Object.entries(updates)) {
-    const existingKey = findKey(target, key);
-    if (!existingKey) throw new Error(`Invalid config path: ${basePath}${key}`);
-    const fullPath = basePath ? `${basePath}${existingKey}` : existingKey;
-    const current = target[existingKey];
-    if (typeof current === 'object' && current !== null && !Array.isArray(current) &&
-        typeof val === 'object' && val !== null && !Array.isArray(val)) {
-      merge(current, val, `${fullPath}.`);
-    } else if (typeof current === typeof val) {
-      target[existingKey] = normalizePathValue(fullPath, val);
+function deepMerge(target, source, basePath = '') {
+  for (const [key, val] of Object.entries(source || {})) {
+    const pathKey = basePath ? `${basePath}.${key}` : key;
+    if (val && typeof val === 'object' && !Array.isArray(val)) {
+      if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+      deepMerge(target[key], val, pathKey);
     } else {
-      throw new Error(`Invalid type for ${fullPath}`);
+      target[key] = normalizePathValue(pathKey, val);
     }
   }
+  return target;
 }
 
-function updateConfig(obj) {
-  const config = loadConfig();
-  merge(config, obj);
+function loadConfig() {
+  if (currentConfig) return currentConfig;
+  let cfg = clone(DEFAULT_CONFIG);
+  try {
+    if (fs.existsSync(CONFIG_PATH)) {
+      const data = fs.readFileSync(CONFIG_PATH, 'utf8');
+      const parsed = JSON.parse(data);
+      cfg = deepMerge(clone(DEFAULT_CONFIG), parsed);
+    }
+  } catch (_) {
+    // ignore and use defaults
+  }
+  currentConfig = cfg;
+  return currentConfig;
+}
+
+function saveConfig(cfg = currentConfig) {
+  if (!cfg) return;
+  ensureConfigDir();
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+}
+
+function getConfig() {
+  return loadConfig();
+}
+
+function setConfig(cfg) {
+  currentConfig = deepMerge(clone(DEFAULT_CONFIG), cfg || {});
   saveConfig();
-  return config;
+  return currentConfig;
+}
+
+function updateConfig(patch) {
+  const cfg = loadConfig();
+  deepMerge(cfg, patch);
+  saveConfig();
+  return cfg;
+}
+
+function resetToDefaults() {
+  currentConfig = clone(DEFAULT_CONFIG);
+  saveConfig();
+  return currentConfig;
+}
+
+function resolvePaths(cfg = getConfig()) {
+  const root = path.resolve(projectRoot, cfg.projectRoot || '.');
+  const resolved = clone(cfg);
+  resolved.projectRoot = root;
+  ['sourceDir', 'i18nDir', 'outputDir', 'uiLocalesDir'].forEach(key => {
+    if (resolved[key]) resolved[key] = path.resolve(root, resolved[key]);
+  });
+  if (resolved.scriptDirectories) {
+    resolved.scriptDirectories = { ...resolved.scriptDirectories };
+    for (const [k, v] of Object.entries(resolved.scriptDirectories)) {
+      if (v) resolved.scriptDirectories[k] = path.resolve(root, v);
+    }
+  }
+  return resolved;
+}
+
+function toRelative(absolutePath) {
+  const rel = path.relative(projectRoot, absolutePath);
+  return rel || '.';
 }
 
 module.exports = {
   CONFIG_PATH,
-  getConfig,
-  setConfig,
-  updateConfig,
+  DEFAULT_CONFIG,
+  loadConfig,
   saveConfig,
+  getConfig,
+  updateConfig,
+  setConfig,
+  resetToDefaults,
+  resolvePaths,
+  toRelative,
+  normalizePathValue,
 };

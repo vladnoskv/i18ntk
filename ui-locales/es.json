@@ -822,6 +822,9 @@
   "init": {
     "initializationTitle": "🚀 Toolkit de Gestión I18n - Inicialización del Proyecto",
     "sourceDirectoryLabel": "📁 Directorio fuente: {dir}",
+    "requiredTitle": "Se requiere inicialización",
+    "requiredBody": "Este proyecto debe inicializarse antes de ejecutar este comando.",
+    "promptRunNow": "¿Desea ejecutar la inicialización ahora? (s/N): ",
     "sourceLanguageLabel": "🌍 Idioma fuente: {language}",
     "detectedI18nFrameworks": "🔍 Framework(s) de i18n detectado(s): {frameworks}",
     "existingDirectoriesFound": "📁 Directorios de traducción existentes encontrados:",
@@ -985,6 +988,10 @@
       "dry_run_warning": "⚠️ Ejecutando en modo simulado - no se modificarán archivos\n",
       "error_during_replacement": "❌ Error durante el reemplazo de traducciones:"
     }
+  },
+    "config": {
+    "dirFallbackWarning": "⚠️ Directorio {dir} no encontrado. Usando {fallback}.",
+    "dirInvalidError": "❌ Directorio no válido: {dir}"
   },
   "operations": {
     "completed": "✅ ¡Operación completada con éxito!",
@@ -1287,6 +1294,8 @@
     "resetConfirm": "s",
     "resetSuccess": "Configuración restablecida a valores predeterminados.",
     "resetFailed": "Error al restablecer la configuración: {{error}}",
+    "resetDone": "Configuración restablecida a valores predeterminados correctamente.",
+    "resetScriptDirsDone": "Los directorios de scripts se restablecieron a los valores predeterminados del sistema correctamente.",
     "saveSuccess": "Configuración guardada con éxito.",
     "saveFailed": "Error al guardar la configuración: {{error}}",
     "saveError": "Error al guardar la configuración: {{error}}",

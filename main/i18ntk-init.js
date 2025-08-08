@@ -78,12 +78,12 @@ class I18nInitializer {
   }
 
   // Add the missing checkI18nDependencies method
-  async checkI18nDependencies() {
+  async checkI18nDependencies(noPrompt = false) {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
       console.log(this.ui.t('init.noPackageJson'));
-      return await this.promptContinueWithoutI18n();
+      return await this.promptContinueWithoutI18n(noPrompt);
     }
     
     try {
@@ -117,16 +117,19 @@ class I18nInitializer {
         console.log(this.ui.t('init.frameworks.i18next'));
         console.log(this.ui.t('init.frameworks.nuxt'));
         console.log(this.ui.t('init.frameworks.svelte'));
-        return await this.promptContinueWithoutI18n();
+        return await this.promptContinueWithoutI18n(noPrompt);
       }
     } catch (error) {
       console.log(this.ui.t('init.errors.packageJsonRead'));
-      return await this.promptContinueWithoutI18n();
+      return await this.promptContinueWithoutI18n(noPrompt);
     }
   }
 
   // Add the missing promptContinueWithoutI18n method
-  async promptContinueWithoutI18n() {
+  async promptContinueWithoutI18n(noPrompt = false) {
+    if (noPrompt || !process.stdin.isTTY) {
+      return true;
+    }
     const answer = await this.prompt('\n' + this.ui.t('init.continueWithoutI18nPrompt'));
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
   }
@@ -156,15 +159,24 @@ class I18nInitializer {
           parsed.sourceLanguage = value;
         } else if (key === 'no-prompt') {
           parsed.noPrompt = true;
+        } else if (key === 'yes') {
+          parsed.yes = true;
         }
       }
     });
-    
+
+    if (!process.stdin.isTTY) {
+      parsed.yes = true;
+    }
+    if (parsed.yes) {
+      parsed.noPrompt = true;
+    }
+
     return parsed;
   }
 
   // Detect existing translation directories and allow user selection
-  async detectAndSelectDirectory() {
+  async detectAndSelectDirectory(skipPrompt = false) {
     const possibleLocations = [
       './locales',
       './src/locales',
@@ -220,67 +232,66 @@ class I18nInitializer {
     }
 
     if (existingLocations.length > 0) {
-      console.log('\n' + this.ui.t('init.existingDirectoriesFound'));
-      console.log(this.ui.t('common.separator'));
-      
-      existingLocations.forEach((location, index) => {
-        console.log(`  ${index + 1}. ${location}`);
-      });
-      
-      console.log(`  ${existingLocations.length + 1}. Create new directory`);
-      
-      const answer = await this.prompt('\n' + this.ui.t('init.selectDirectoryPrompt') + ' (Enter number):');
-      const selectedIndex = parseInt(answer) - 1;
-      
-      if (selectedIndex >= 0 && selectedIndex < existingLocations.length) {
-        const selectedDir = existingLocations[selectedIndex];
-        console.log(this.ui.t('init.usingExistingDirectory', { dir: selectedDir }));
-        
-        // Update settings to use the existing directory
+      if (skipPrompt || !process.stdin.isTTY) {
+        const selectedDir = existingLocations[0];
         this.config.sourceDir = selectedDir;
         this.sourceDir = path.resolve(selectedDir);
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
-        
-        // Save to settings
-        const currentSettings = configManager.getConfig();
-        currentSettings.sourceDir = selectedDir;
-        configManager.updateConfig(currentSettings);
-        
+        const rel = configManager.toRelative(selectedDir);
+        configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+        return selectedDir;
+      }
+
+      console.log('\n' + this.ui.t('init.existingDirectoriesFound'));
+      console.log(this.ui.t('common.separator'));
+
+      existingLocations.forEach((location, index) => {
+        console.log(`  ${index + 1}. ${location}`);
+      });
+
+      console.log(`  ${existingLocations.length + 1}. Create new directory`);
+
+      const answer = await this.prompt('\n' + this.ui.t('init.selectDirectoryPrompt') + ' (Enter number):');
+      const selectedIndex = parseInt(answer) - 1;
+
+      if (selectedIndex >= 0 && selectedIndex < existingLocations.length) {
+        const selectedDir = existingLocations[selectedIndex];
+        console.log(this.ui.t('init.usingExistingDirectory', { dir: selectedDir }));
+
+        this.config.sourceDir = selectedDir;
+        this.sourceDir = path.resolve(selectedDir);
+        this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+
+        const rel = configManager.toRelative(selectedDir);
+        configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+
         return selectedDir;
       } else if (selectedIndex === existingLocations.length) {
-        // User chose to create new directory
         const newDirName = await this.prompt('\n' + this.ui.t('init.enterNewDirectoryName') + ': ');
         if (newDirName && newDirName.trim()) {
           const newDirPath = path.resolve(newDirName.trim());
-          
-          // Create the directory
+
           if (!fs.existsSync(newDirPath)) {
             fs.mkdirSync(newDirPath, { recursive: true });
             console.log(this.ui.t('init.createdNewDirectory', { dir: newDirPath }));
           } else {
             console.log(this.ui.t('init.directoryAlreadyExists', { dir: newDirPath }));
           }
-          
-          // Create source language directory and starter file
+
           const sourceLangDir = path.join(newDirPath, this.config.sourceLanguage);
           if (!fs.existsSync(sourceLangDir)) {
             fs.mkdirSync(sourceLangDir, { recursive: true });
             console.log(this.ui.t('init.createdSourceLanguageDirectory', { dir: sourceLangDir }));
-            
-            // Create starter common.json file
             await this.createSampleTranslationFile(sourceLangDir);
           }
-          
-          // Update settings to use the new directory
+
           this.config.sourceDir = newDirPath;
           this.sourceDir = newDirPath;
           this.sourceLanguageDir = sourceLangDir;
-          
-          // Save to settings
-          const currentSettings = configManager.getConfig();
-          currentSettings.sourceDir = newDirPath;
-          configManager.updateConfig(currentSettings);
-          
+
+          const rel = configManager.toRelative(newDirPath);
+          configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+
           return newDirPath;
         } else {
           console.log(this.ui.t('init.invalidDirectoryName'));
@@ -288,14 +299,18 @@ class I18nInitializer {
         }
       }
     }
-    
+
+    if (skipPrompt || !process.stdin.isTTY) {
+      return null;
+    }
+
     return null;
   }
 
   // Setup initial directory structure if needed
-  async setupInitialStructure() {
+  async setupInitialStructure(skipPrompt = false) {
     // First, detect if there are existing translation directories with English files
-    const usedExisting = await this.detectAndSelectDirectory();
+    const usedExisting = await this.detectAndSelectDirectory(skipPrompt);
     
     if (usedExisting) {
       console.log(this.ui.t('init.usingExistingStructure', { dir: this.sourceDir }));
@@ -336,6 +351,9 @@ class I18nInitializer {
         this.createSampleTranslationFile(validatedSourceLanguageDir);
       }
     }
+
+    const rel = configManager.toRelative(this.sourceDir);
+    configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
   }
   
   // Create sample translation file with smart naming
@@ -645,11 +663,15 @@ class I18nInitializer {
   }
 
   // Interactive language selection
-  async selectLanguages() {
+  async selectLanguages(skipPrompt = false) {
+    if (skipPrompt || !process.stdin.isTTY) {
+      return this.config.defaultLanguages;
+    }
+
     // Use the global readline interface if available, otherwise create one
     let rl = this.rl;
     let shouldClose = false;
-    
+
     if (!rl) {
       const readline = require('readline');
       rl = readline.createInterface({
@@ -660,38 +682,38 @@ class I18nInitializer {
       });
       shouldClose = true;
     }
-    
+
     const question = (query) => new Promise(resolve => rl.question(query, resolve));
-    
+
     console.log('\n' + this.ui.t('init.languageSelectionTitle'));
     console.log(this.ui.t('common.separator'));
     console.log(this.ui.t('language.available'));
-    
+
     Object.entries(LANGUAGE_CONFIG).forEach(([code, config], index) => {
       console.log(`  ${(index + 1).toString().padStart(2)}. ${code} - ${config.name} (${config.nativeName})`);
     });
-    
+
     console.log('\n' + this.ui.t('init.defaultLanguages', { languages: this.config.defaultLanguages.join(', ') }));
-    
+
     const answer = await question('\n' + this.ui.t('init.enterLanguageCodes'));
-    
+
     // Only close if we created our own readline interface
     if (shouldClose) {
       rl.close();
     }
-    
+
     if (answer.trim() === '') {
       return this.config.defaultLanguages;
     }
-    
+
     const selectedLanguages = answer.split(',').map(lang => lang.trim().toLowerCase());
     const validLanguages = selectedLanguages.filter(lang => LANGUAGE_CONFIG[lang]);
     const invalidLanguages = selectedLanguages.filter(lang => !LANGUAGE_CONFIG[lang]);
-    
+
     if (invalidLanguages.length > 0) {
       console.warn(this.ui.t('init.warningInvalidLanguageCodes', { languages: invalidLanguages.join(', ') }));
     }
-    
+
     return validLanguages.length > 0 ? validLanguages : this.config.defaultLanguages;
   }
 
@@ -714,7 +736,7 @@ class I18nInitializer {
       console.log(this.ui.t('init.sourceLanguageLabel', { language: this.config.sourceLanguage }));
       
       // Check i18n dependencies first and exit if user chooses not to continue
-      const hasI18n = await this.checkI18nDependencies();
+      const hasI18n = await this.checkI18nDependencies(args.noPrompt);
       
       if (!hasI18n) {
         console.log(this.t('init.errors.noFramework'));
@@ -755,14 +777,14 @@ class I18nInitializer {
     }
     
       // Handle directory selection and structure setup
-    const selectedDir = await this.detectAndSelectDirectory();
+    const selectedDir = await this.detectAndSelectDirectory(args.noPrompt);
     if (selectedDir) {
       this.config.sourceDir = selectedDir;
       this.sourceDir = path.resolve(selectedDir);
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       console.log(this.ui.t('init.usingExistingDirectory', { dir: selectedDir }));
     } else {
-      await this.setupInitialStructure();
+      await this.setupInitialStructure(args.noPrompt);
     }
     
     // Validate source
@@ -771,12 +793,12 @@ class I18nInitializer {
     // Prompt for admin PIN setup if not already configured
     const securitySettings = configManager.getConfig().security || {};
     
-    if (!securitySettings.adminPinEnabled && securitySettings.adminPinPromptOnInit !== false) {
+    if (!securitySettings.adminPinEnabled && securitySettings.adminPinPromptOnInit !== false && !args.noPrompt) {
       await this.promptAdminPinSetup();
     }
-    
+
     // Get target languages - use args.languages if provided
-    let targetLanguages = args.languages || await this.selectLanguages();
+    let targetLanguages = args.languages || await this.selectLanguages(args.noPrompt);
     
     // Ensure targetLanguages is always an array
     targetLanguages = Array.isArray(targetLanguages) ? targetLanguages : [];
@@ -987,7 +1009,7 @@ class I18nInitializer {
       }
 
       // Check i18n dependencies first and exit if user chooses not to continue
-      const hasI18n = await this.checkI18nDependencies();
+      const hasI18n = await this.checkI18nDependencies(args.noPrompt);
       
       if (!hasI18n) {
         console.log(this.ui.t('init.errors.noFramework'));

@@ -820,6 +820,9 @@
   },
   "init": {
     "initializationTitle": "🚀 i18n-Management-Toolkit – Projektinitialisierung",
+    "requiredTitle": "Initialisierung erforderlich",
+    "requiredBody": "Dieses Projekt muss vor dem Ausführen dieses Befehls initialisiert werden.",
+    "promptRunNow": "Möchten Sie die Initialisierung jetzt ausführen? (j/N): ",
     "sourceDirectoryLabel": "📁 Quellverzeichnis: {dir}",
     "sourceLanguageLabel": "🌍 Quellsprache: {language}",
     "detectedI18nFrameworks": "🔍 Erkanntes i18n-Framework: {frameworks}",
@@ -984,6 +987,10 @@
       "dry_run_warning": "⚠️ DRY-RUN aktiv – Es werden keine Dateien verändert\n",
       "error_during_replacement": "❌ Fehler während der Ersetzung der Übersetzungen:"
     }
+  },
+   "config": {
+    "dirFallbackWarning": "⚠️ Verzeichnis {dir} nicht gefunden. Es wird auf {fallback} zurückgegriffen.",
+    "dirInvalidError": "❌ Ungültiges Verzeichnis: {dir}"
   },
   "operations": {
     "completed": "✅ Vorgang erfolgreich abgeschlossen!",
@@ -1287,6 +1294,8 @@
     "resetSuccess": "Einstellungen wurden erfolgreich auf die Standardwerte zurückgesetzt.",
     "resetFailed": "Fehler beim Zurücksetzen der Einstellungen: {error}",
     "saveSuccess": "Einstellungen wurden erfolgreich gespeichert.",
+    "resetDone": "Einstellungen erfolgreich auf Standardwerte zurückgesetzt.",
+    "resetScriptDirsDone": "Skriptverzeichnisse erfolgreich auf Systemstandardwerte zurückgesetzt.",
     "saveFailed": "Fehler beim Speichern der Einstellungen.",
     "saveError": "⚠️  Fehler beim Speichern der Einstellungen: {error}",
     "pressEnter": "Drücken Sie die Eingabetaste, um fortzufahren...",

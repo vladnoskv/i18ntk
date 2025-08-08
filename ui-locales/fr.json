@@ -821,6 +821,9 @@
   "init": {
     "initializationTitle": "🚀 Boîte à outils de gestion i18n – Initialisation du projet",
     "sourceDirectoryLabel": "📁 Répertoire source : {dir}",
+    "requiredTitle": "Initialisation requise",
+    "requiredBody": "Ce projet doit être initialisé avant d'exécuter cette commande.",
+    "promptRunNow": "Voulez-vous exécuter l'initialisation maintenant ? (o/N): ",
     "sourceLanguageLabel": "🌍 Langue source : {language}",
     "detectedI18nFrameworks": "🔍 Framework(s) i18n détecté(s) : {frameworks}",
     "existingDirectoriesFound": "📁 Répertoires de traduction existants trouvés :",
@@ -984,6 +987,10 @@
       "dry_run_warning": "⚠️ Exécution en mode DRY RUN – aucun fichier ne sera modifié\n",
       "error_during_replacement": "❌ Erreur lors du remplacement des traductions :"
     }
+  },
+    "config": {
+    "dirFallbackWarning": "⚠️ Répertoire {dir} introuvable. Utilisation de {fallback}.",
+    "dirInvalidError": "❌ Répertoire invalide : {dir}"
   },
   "operations": {
     "completed": "✅ Opération terminée avec succès !",
@@ -1286,6 +1293,8 @@
     "resetConfirm": "Confirmez-vous la réinitialisation des paramètres ? (y/N) : ",
     "resetSuccess": "Paramètres réinitialisés aux valeurs par défaut avec succès.",
     "resetFailed": "Échec de la réinitialisation des paramètres : {error}",
+    "resetDone": "Paramètres réinitialisés aux valeurs par défaut avec succès.",
+    "resetScriptDirsDone": "Répertoires de scripts réinitialisés aux valeurs par défaut du système avec succès.",
     "saveSuccess": "Paramètres enregistrés avec succès.",
     "saveFailed": "Échec de l’enregistrement des paramètres.",
     "saveError": "Erreur lors de l’enregistrement des paramètres : {error}",

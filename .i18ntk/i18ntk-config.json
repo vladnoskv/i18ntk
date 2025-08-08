@@ -1,0 +1,31 @@
+{
+  "projectRoot": ".",
+  "sourceDir": "locales",
+  "i18nDir": "locales",
+  "outputDir": "i18ntk-reports",
+  "uiLocalesDir": "ui-locales",
+  "scriptDirectories": {
+    "init": null,
+    "analyze": null,
+    "validate": null,
+    "usage": null,
+    "sizing": null,
+    "summary": null,
+    "complete": null,
+    "manage": null
+  },
+  "sourceLanguage": "en",
+  "uiLanguage": "en",
+  "defaultLanguages": [
+    "de",
+    "es",
+    "fr",
+    "ru"
+  ],
+  "notTranslatedMarker": "NOT_TRANSLATED",
+  "excludeFiles": [
+    ".DS_Store",
+    "Thumbs.db"
+  ],
+  "strictMode": false
+}

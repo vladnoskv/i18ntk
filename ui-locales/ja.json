@@ -821,6 +821,9 @@
   "init": {
     "initializationTitle": "🚀 i18n 管理ツールキット – プロジェクト初期化",
     "sourceDirectoryLabel": "📁 ソースディレクトリ: {dir}",
+    "requiredTitle": "初期化が必要です",
+    "requiredBody": "このコマンドを実行する前にプロジェクトを初期化する必要があります。",
+    "promptRunNow": "今すぐ初期化を実行しますか？(y/N): ",
     "sourceLanguageLabel": "🌍 ソース言語: {language}",
     "detectedI18nFrameworks": "🔍 検出されたi18nフレームワーク: {frameworks}",
     "existingDirectoriesFound": "📁 既存の翻訳ディレクトリが見つかりました:",
@@ -984,6 +987,10 @@
       "dry_run_warning": "⚠️ DRY RUNモードで実行中 - ファイルは変更されません\n",
       "error_during_replacement": "❌ 翻訳置換中にエラーが発生しました:"
     }
+  },
+  "config": {
+    "dirFallbackWarning": "⚠️ ディレクトリ {dir} が見つかりません。{fallback} を使用します。",
+    "dirInvalidError": "❌ 無効なディレクトリ: {dir}"
   },
   "operations": {
     "completed": "✅ 操作が正常に完了しました！",
@@ -1286,6 +1293,8 @@
     "resetConfirm": "続行してもよろしいですか？ (y/N): ",
     "resetSuccess": "設定をデフォルトにリセットしました。",
     "resetFailed": "設定のリセットに失敗しました: {error}",
+    "resetDone": "設定がデフォルトにリセットされました。",
+    "resetScriptDirsDone": "スクリプトディレクトリがシステムのデフォルトにリセットされました。",
     "saveSuccess": "設定を正常に保存しました。",
     "saveFailed": "設定の保存に失敗しました。",
     "saveError": "⚠️  設定の保存に失敗しました。",

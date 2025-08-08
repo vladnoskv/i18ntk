@@ -7,27 +7,17 @@ const fs = require('fs');
 const path = require('path');
 const configManager = require('../utils/config-manager');
 
-// Get configuration from settings manager
-function getConfig() {
- const settings = configManager.getConfig();
-  return {
-    uiLocalesDir: settings.uiLocalesDir || path.join(__dirname, '..', 'ui-locales'),
-    configFile: configManager.CONFIG_PATH
-  };
-}
-
 class UIi18n {
     constructor() {
-        const config = getConfig();
+        const config = configManager.getConfig();
+        const paths = configManager.resolvePaths();
         this.currentLanguage = 'en';
         this.translations = {};
         this.availableLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
-        this.uiLocalesDir = path.resolve(config.uiLocalesDir);
-        this.configFile = path.resolve(config.configFile);
+        this.uiLocalesDir = paths.uiLocalesDir;
+        this.configFile = path.resolve(configManager.CONFIG_PATH);
 
-        // Use settings manager as the single source of truth
-        const settings = configManager.getConfig();
-        const configuredLanguage = settings.language || settings.uiLanguage;
+        const configuredLanguage = config.language || config.uiLanguage;
 
         // Load language from settings manager or fallback
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
@@ -48,8 +38,8 @@ class UIi18n {
         }
 
         this.translations = {}; // Reset translations for the new language
-        
-        const settings = require('../settings/settings-manager').getAllSettings();
+
+        const settings = configManager.getConfig();
         const debugEnabled = settings.debug?.enabled || false;
         
         if (debugEnabled) {

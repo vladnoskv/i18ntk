@@ -48,7 +48,7 @@
   "type": "commonjs",
   "main": "main/i18ntk-manage.js",
   "bin": {
-    "i18ntk": "main/i18ntk-manage.js",
+    "i18ntk": "bin/i18ntk.js",
     "i18ntk-manage": "main/i18ntk-manage.js",
     "i18ntk-init": "main/i18ntk-init.js",
     "i18ntk-analyze": "main/i18ntk-analyze.js",
@@ -64,6 +64,7 @@
   },
   "files": [
     "*.js",
+    "bin/",
     "main/",
     "utils/",
     "scripts/",
@@ -75,7 +76,7 @@
   "scripts": {
     "start": "node main/i18ntk-manage.js",
     "i18ntk": "node main/i18ntk-manage.js",
-    "i18ntk:init": "node main/i18ntk-init.js",
+    "i18ntk:init": "node main/i18ntk-init.js --yes",
     "i18ntk:analyze": "node main/i18ntk-analyze.js",
     "i18ntk:validate": "node main/i18ntk-validate.js",
     "i18ntk:usage": "node main/i18ntk-usage.js",
@@ -85,6 +86,7 @@
     "i18ntk:debug": "node main/i18ntk-manage.js --command=debug",
     "i18ntk:settings": "node settings/settings-cli.js",
     "settings": "node settings/settings-cli.js",
+    "i18ntk:doctor": "node main/i18ntk-doctor.js",
     "i18ntk:summary": "node main/i18ntk-summary.js",
     "i18ntk:manage": "node main/i18ntk-manage.js",
     "i18n:autorun": "node main/i18ntk-autorun.js",

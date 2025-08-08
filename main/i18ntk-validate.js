@@ -42,7 +42,8 @@ const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
-const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
+const I18nInitializer = require('./i18ntk-init');
 
 class I18nValidator {
   constructor(config = {}) {
@@ -78,18 +79,25 @@ class I18nValidator {
       this.sourceDir = this.config.i18nDir || this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
-      // Validate source directory exists - be more permissive
       try {
-        if (!fs.existsSync(this.sourceDir)) {
-          console.warn(`Warning: Source directory ${this.sourceDir} does not exist, using fallback`);
-          // Try to create the directory structure if it doesn't exist
+        validateSourceDir(this.sourceDir, 'i18ntk-validate');
+      } catch (err) {
+        console.log(t('init.requiredTitle'));
+        console.log(t('init.requiredBody'));
+        const answer = await this.prompt(t('init.promptRunNow'));
+        if (answer.trim().toLowerCase() === 'y') {
+          const initializer = new I18nInitializer(this.config);
+          await initializer.run({ fromMenu: true });
+        } else {
+          console.warn(t('config.dirFallbackWarning', { dir: this.sourceDir, fallback: this.sourceLanguageDir }) ||
+            `Warning: Directory ${this.sourceDir} not found. Using ${this.sourceLanguageDir}.`);
           if (!fs.existsSync(this.sourceLanguageDir)) {
             fs.mkdirSync(this.sourceLanguageDir, { recursive: true });
           }
         }
-      } catch (error) {
-        console.warn(`Directory validation warning: ${error.message}`);
       }
+
+      displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
       
       SecurityUtils.logSecurityEvent('I18n validator initialized successfully', 'info', 'I18n validator initialized successfully');
     } catch (error) {

@@ -821,6 +821,9 @@
   "init": {
     "initializationTitle": "🚀 i18n 管理工具 - 项目初始化",
     "sourceDirectoryLabel": "📁 源目录：{dir}",
+    "requiredTitle": "需要初始化",
+    "requiredBody": "在运行此命令之前，必须先初始化项目。",
+    "promptRunNow": "现在要运行初始化吗？(y/N): ",
     "sourceLanguageLabel": "🌍 源语言：{language}",
     "detectedI18nFrameworks": "🔍 检测到的 i18n 框架：{frameworks}",
     "existingDirectoriesFound": "📁 发现已有翻译目录：",
@@ -984,6 +987,10 @@
       "dry_run_warning": "⚠️ 正在试运行模式 - 不会修改文件\n",
       "error_during_replacement": "❌ 翻译替换过程中出错："
     }
+  },
+  "config": {
+    "dirFallbackWarning": "⚠️ 找不到目录 {dir}，使用 {fallback}。",
+    "dirInvalidError": "❌ 无效的目录：{dir}"
   },
   "operations": {
     "completed": "✅ 操作成功完成！",
@@ -1288,6 +1295,8 @@
     "resetFailed": "重置设置失败：{error}",
     "saveSuccess": "设置已成功保存。",
     "saveFailed": "保存设置失败。",
+    "resetDone": "设置已成功重置为默认值。",
+    "resetScriptDirsDone": "脚本目录已成功重置为系统默认值。",
     "saveError": "保存设置时出错：{error}",
     "pressEnter": "按 Enter 继续…",
     "initFailed": "初始化设置失败：{error}",

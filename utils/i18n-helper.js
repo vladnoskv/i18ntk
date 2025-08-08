@@ -39,15 +39,19 @@ function loadTranslations(language, baseDir) {
   }
   if (typeof localesDir !== 'string' || localesDir.trim() === '') {
     const config = getConfig();
-    localesDir = config.uiLocalesDir;
+    localesDir = config.uiLocalesDir || path.join(__dirname, '..', 'ui-locales');
+  }
+
+  // Ensure localesDir is a valid string
+  if (typeof localesDir !== 'string' || localesDir.trim() === '') {
+    localesDir = path.join(__dirname, '..', 'ui-locales');
   }
 
   try {
     localesDir = path.resolve(localesDir);
   } catch (resolveError) {
     // Fallback to package ui-locales directory if resolution fails
-    const fallbackConfig = getConfig();
-    localesDir = path.resolve(fallbackConfig.uiLocalesDir);
+    localesDir = path.join(__dirname, '..', 'ui-locales');
   }
   
   try {

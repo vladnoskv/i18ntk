@@ -29,7 +29,8 @@ const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
-const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir } = require('../utils/config-helper');
+const I18nInitializer = require('./i18ntk-init');
 
 async function getConfig() {
   return getUnifiedConfig('usage');
@@ -99,6 +100,17 @@ class I18nUsageAnalyzer {
       this.sourceDir = this.config.sourceDir;
       this.i18nDir = this.config.i18nDir;
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+
+      if (!fs.existsSync(this.i18nDir)) {
+        console.warn(this.t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
+        this.i18nDir = this.sourceDir;
+        this.config.i18nDir = this.i18nDir;
+        configManager.updateConfig({ i18nDir: configManager.toRelative(this.sourceDir) });
+        this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+      }
+
+      displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
+      
       
       // Ensure translation patterns are defined
       this.config = this.config || {};

@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+const { getUnifiedConfig, parseCommonArgs, displayHelp, ensureInitialized } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const configManager = require('../utils/config-manager');
 
@@ -148,16 +148,16 @@ class AutoRunner {
   _buildCommonArgs() {
     const cfg = this.config;
     const args = [];
-    if (cfg.sourceDir && cfg.sourceDir !== './locales') {
+    if (cfg.sourceDir) {
       args.push(`--source-dir=${cfg.sourceDir}`);
     }
-    if (cfg.i18nDir && cfg.i18nDir !== cfg.sourceDir) {
+    if (cfg.i18nDir) {
       args.push(`--i18n-dir=${cfg.i18nDir}`);
     }
-    if (cfg.outputDir && cfg.outputDir !== './i18ntk-reports') {
+    if (cfg.outputDir) {
       args.push(`--output-dir=${cfg.outputDir}`);
     }
-    if (cfg.uiLanguage && cfg.uiLanguage !== 'en') {
+    if (cfg.uiLanguage) {
       args.push(`--ui-language=${cfg.uiLanguage}`);
     }
     return args;
@@ -176,6 +176,8 @@ class AutoRunner {
   }
 
   async runAll(quiet = false) {
+    const initialized = await ensureInitialized(this.config);
+    if (!initialized) return;
     const stepsToRun = this._selectStepsForRun();
 
     if (!quiet) {

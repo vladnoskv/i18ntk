@@ -35,7 +35,7 @@ const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
 
 // Use unified configuration system
-const { getUnifiedConfig } = require('../utils/config-helper');
+const { getUnifiedConfig, ensureInitialized, validateSourceDir } = require('../utils/config-helper');
 
 class I18nManager {
   constructor(config = {}) {
@@ -90,8 +90,20 @@ class I18nManager {
       this.ui.loadLanguage(uiLanguage);
       
       // Validate source directory exists
-      const { validateSourceDir } = require('../utils/config-helper');
-      validateSourceDir(this.config.sourceDir, 'i18ntk-manage');
+      const {validateSourceDir, displayPaths} = require('../utils/config-helper');
+       try {
+        validateSourceDir(this.config.sourceDir, 'i18ntk-manage');
+      } catch (err) {
+        console.log(this.ui.t('init.requiredTitle'));
+        console.log(this.ui.t('init.requiredBody'));
+        const answer = await new Promise(resolve => this.rl.question(this.ui.t('init.promptRunNow'), resolve));
+        if (answer.trim().toLowerCase() === 'y') {
+          const initializer = new I18nInitializer(this.config);
+          await initializer.run({ fromMenu: true });
+        } else {
+          throw err;
+        }
+      }
       
     } catch (error) {
       console.error(`Error initializing i18n manager: ${error.message}`);

@@ -8,6 +8,10 @@ const fs = require('fs');
 const path = require('path');
 const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
+const {t, loadTranslations} = require('./i18n-helper');
+
+const readline = require('readline');
+const { spawnSync } = require('child_process');
 
 /**
  * Get unified configuration for any script
@@ -17,126 +21,72 @@ const SecurityUtils = require('./security');
  */
 function getUnifiedConfig(scriptName, cliArgs = {}) {
   try {
-    const settings = configManager.getConfig();
-    const projectRoot = path.resolve(
-      settings.projectRoot || 
-      '.'
-    );
-    
-    // Use .i18ntk directory for configuration storage
-    const configDir = path.join(projectRoot, '.i18ntk');
-    if (!fs.existsSync(configDir)) {
-      fs.mkdirSync(configDir, { recursive: true });
+    let cfg = configManager.getConfig();
+    const projectRoot = path.resolve(cfg.projectRoot || '.');
+
+    const updates = {};
+    if (cliArgs.sourceDir) {
+      const abs = path.resolve(projectRoot, cliArgs.sourceDir);
+      updates.sourceDir = configManager.toRelative(abs);
     }
-    
-    // Determine source directory with proper precedence:
-  // 1. CLI argument (highest priority)
-  // 2. Script-specific override from settings
-  // 3. Global source directory from settings
-  // 4. Global i18n directory from settings
-  // 5. Default fallback
-  let sourceDir;
-  const directoryUpdates = {};
-  
-  if (cliArgs.sourceDir) {
-    sourceDir = cliArgs.sourceDir;
-    directoryUpdates.sourceDir = sourceDir;
-  } else if (settings.scriptDirectories?.[scriptName]) {
-    sourceDir = settings.scriptDirectories[scriptName];
-  } else {
-    sourceDir = settings.sourceDir || settings.i18nDir || './locales';
-  }
-  
-  // Ensure sourceDir is resolved relative to projectRoot
-  sourceDir = path.resolve(projectRoot, sourceDir);
-    
-    // Determine i18n directory (can be different from sourceDir)
-    let i18nDir;
     if (cliArgs.i18nDir) {
-      i18nDir = cliArgs.i18nDir;
-      directoryUpdates.i18nDir = i18nDir;
-    } else {
-      i18nDir = settings.i18nDir || settings.sourceDir || './locales';
+      const abs = path.resolve(projectRoot, cliArgs.i18nDir);
+      updates.i18nDir = configManager.toRelative(abs);
     }
-    i18nDir = path.resolve(projectRoot, i18nDir);
-    
-    // Determine output directory
-    let outputDir;
     if (cliArgs.outputDir) {
-      outputDir = cliArgs.outputDir;
-      directoryUpdates.outputDir = outputDir;
-    } else {
-      outputDir = settings.outputDir || './i18ntk-reports';
+      const abs = path.resolve(projectRoot, cliArgs.outputDir);
+      updates.outputDir = configManager.toRelative(abs);
     }
-    outputDir = path.resolve(projectRoot, outputDir);
-    
-    // Update global settings if directories were specified via CLI
-    if (Object.keys(directoryUpdates).length > 0) {
-      configManager.updateConfig(directoryUpdates);
+    if (Object.keys(updates).length > 0) {
+      configManager.updateConfig(updates);
+      cfg = configManager.getConfig();
     }
-    
-    const config = {
-      projectRoot,
-      sourceDir,
-      i18nDir,
-      outputDir,
-      sourceLanguage: cliArgs.sourceLanguage || settings.sourceLanguage || 'en',
-      notTranslatedMarker: settings.notTranslatedMarker || 
-                          settings.processing?.notTranslatedMarker || 
-                          'NOT_TRANSLATED',
-      supportedExtensions: settings.supportedExtensions || 
-                          settings.processing?.supportedExtensions || 
-                          ['.json', '.js', '.ts'],
-      excludeFiles: settings.excludeFiles || 
-                   settings.processing?.excludeFiles || 
-                   ['.DS_Store', 'Thumbs.db'],
-      excludeDirs: settings.excludeDirs || 
-                  settings.processing?.excludeDirs || 
-                  ['node_modules', '.next', '.git', 'dist', 'build'],
-      strictMode: cliArgs.strictMode || 
-                   settings.strictMode || 
-                   settings.processing?.strictMode || 
-                   false,
-      uiLanguage: cliArgs.uiLanguage || 
-                 settings.language || 
-                 settings.uiLanguage || 
-                 'en',
-      // Environment-specific directories - use .i18ntk subdirectory
-      backupDir: path.resolve(projectRoot, path.join('.i18ntk', 'backups')),
-      tempDir: path.resolve(projectRoot, path.join('.i18ntk', 'temp')),
-      cacheDir: path.resolve(projectRoot, path.join('.i18ntk', '.cache')),
-      configDir: configDir,
-      // Pass through additional settings
-      settings: {
-        defaultLanguages: settings.defaultLanguages || ['de', 'es', 'fr', 'ru'],
-        processing: {
-          maxFileSize: parseInt(settings.processing?.maxFileSize || '5242880', 10),
-          maxFiles: parseInt(settings.processing?.maxFiles || '1000', 10),
-          timeout: parseInt(settings.processing?.timeout || '300000', 10),
-          enableCompression: settings.processing?.enableCompression !== false,
-          compressionLevel: parseInt(settings.processing?.compressionLevel || '6', 10),
-          ...settings.processing
-        },
-        security: {
-          adminPin: settings.security?.adminPin || '0000',
-          encryptionKey: settings.security?.encryptionKey,
-          jwtSecret: settings.security?.jwtSecret,
-          disableWeakPinWarning: settings.security?.disableWeakPinWarning === true,
-          ...settings.security
-        },
-        advanced: settings.advanced || {}
-      },
-      // Debug and logging configuration
-      debug: {
-        enabled: settings.debug?.enabled || false,
-        level: settings.debug?.level || 'info',
-        logFile: settings.debug?.logFile || path.join(configDir, 'i18ntk.log')
-      }
+
+    // Resolve all paths to absolute
+    cfg = configManager.resolvePaths(cfg);
+
+    // Script-specific override for sourceDir
+    if (cfg.scriptDirectories?.[scriptName]) {
+      cfg.sourceDir = path.resolve(cfg.projectRoot, cfg.scriptDirectories[scriptName]);
+    }
+
+    // Auto-fix i18nDir if missing but sourceDir exists
+    if (!fs.existsSync(cfg.i18nDir) && fs.existsSync(cfg.sourceDir)) {
+      configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
+      cfg.i18nDir = cfg.sourceDir;
+    }
+
+    const displayPaths = {
+      projectRoot: '.',
+      sourceDir: configManager.toRelative(cfg.sourceDir),
+      i18nDir: configManager.toRelative(cfg.i18nDir),
+      outputDir: configManager.toRelative(cfg.outputDir),
     };
-    
-    // Validate critical paths
+
+    const config = {
+      ...cfg,
+      sourceLanguage: cliArgs.sourceLanguage || cfg.sourceLanguage || 'en',
+      uiLanguage: cliArgs.uiLanguage || cfg.uiLanguage || 'en',
+      notTranslatedMarker: cfg.notTranslatedMarker || 'NOT_TRANSLATED',
+      supportedExtensions: cfg.supportedExtensions || cfg.processing?.supportedExtensions || ['.json', '.js', '.ts'],
+      excludeFiles: cfg.excludeFiles || cfg.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
+      excludeDirs: cfg.excludeDirs || cfg.processing?.excludeDirs || ['node_modules', '.next', '.git', 'dist', 'build'],
+      strictMode: cliArgs.strictMode || cfg.strictMode || false,
+      backupDir: path.resolve(cfg.projectRoot, path.join('.i18ntk', 'backups')),
+      tempDir: path.resolve(cfg.projectRoot, path.join('.i18ntk', 'temp')),
+      cacheDir: path.resolve(cfg.projectRoot, path.join('.i18ntk', '.cache')),
+      configDir: path.resolve(cfg.projectRoot, '.i18ntk'),
+      settings: {
+        defaultLanguages: cfg.defaultLanguages || ['de', 'es', 'fr', 'ru'],
+        processing: { ...cfg.processing },
+        security: { ...cfg.security },
+        advanced: cfg.advanced || {},
+      },
+      debug: cfg.debug || {},
+      displayPaths,
+    };
+
     SecurityUtils.validateConfig(config);
-    
     return config;
   } catch (error) {
     throw new Error(`Configuration error for ${scriptName}: ${error.message}`);
@@ -295,11 +245,55 @@ function ensureDirectory(dirPath) {
  */
 function validateSourceDir(sourceDir, scriptName) {
   if (!fs.existsSync(sourceDir)) {
-    throw new Error(`Source directory not found: ${sourceDir}\n` +
-                   `Run "node main/i18ntk-init.js" to initialize project structure, ` +
-                    `or check your settings in ${configManager.CONFIG_PATH}`);
+    // Ensure translations loaded for error message
+    try { loadTranslations(); } catch (e) {}
+    const message = t('config.dirInvalidError', { dir: sourceDir }) ||
+      `Source directory not found: ${sourceDir}`;
+    throw new Error(message);
   }
 }
+
+// Display commonly used directories
+function displayPaths(cfg = {}) {
+  if (cfg.sourceDir) console.log(`📁 Source directory: ${cfg.sourceDir}`);
+  if (cfg.i18nDir) console.log(`🌐 I18n directory: ${cfg.i18nDir}`);
+  if (cfg.outputDir) console.log(`📤 Output directory: ${cfg.outputDir}`);
+}
+
+// Ensure project has been initialized with source language files
+async function ensureInitialized(cfg) {
+  try {
+    const sourceDir = cfg.sourceDir;
+    const sourceLanguage = cfg.sourceLanguage || 'en';
+    const langDir = path.join(sourceDir, sourceLanguage);
+
+    const initialized = fs.existsSync(langDir) &&
+      fs.readdirSync(langDir).some(f => f.endsWith('.json'));
+    if (initialized) return true;
+
+    const nonInteractive = !process.stdin.isTTY;
+    const initScript = path.join(__dirname, '..', 'main', 'i18ntk-init.js');
+
+    if (nonInteractive) {
+      console.warn(`Missing source language files in ${langDir}. Running initialization...`);
+      const result = spawnSync(process.execPath, [initScript, '--yes', `--source-dir=${sourceDir}`, `--source-language=${sourceLanguage}`], { stdio: 'inherit', windowsHide: true });
+      return result.status === 0;
+    }
+
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const answer = await new Promise(res => rl.question(`Source language files not found in ${langDir}. Run initialization now? (y/N) `, res));
+    rl.close();
+    if (answer.trim().toLowerCase().startsWith('y')) {
+      const result = spawnSync(process.execPath, [initScript, `--source-dir=${sourceDir}`, `--source-language=${sourceLanguage}`], { stdio: 'inherit', windowsHide: true });
+      return result.status === 0;
+    }
+    return false;
+  } catch (err) {
+    console.error(`Initialization check failed: ${err.message}`);
+    return false;
+  }
+}
+
 
 module.exports = {
   getUnifiedConfig,
@@ -308,5 +302,8 @@ module.exports = {
   getEnvironmentConfig,
   displayBasicConfig,
   ensureDirectory,
-  validateSourceDir
+  validateSourceDir,
+  displayPaths,
+  ensureInitialized,
+
 };
