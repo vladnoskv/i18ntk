@@ -31,14 +31,23 @@ function loadTranslations(language, baseDir) {
   currentLanguage = language || configuredLanguage;
   
   // Use provided directory, environment variable, or default
-  let localesDir;
-  if (baseDir) {
-    localesDir = path.resolve(baseDir);
-  } else if (process.env.I18NTK_UI_LOCALE_DIR) {
-    localesDir = path.resolve(process.env.I18NTK_UI_LOCALE_DIR);
-  } else {
+  let localesDir = baseDir;
+
+  // Ensure we have a string path to resolve
+  if (typeof localesDir !== 'string' || localesDir.trim() === '') {
+    localesDir = process.env.I18NTK_UI_LOCALE_DIR;
+  }
+  if (typeof localesDir !== 'string' || localesDir.trim() === '') {
     const config = getConfig();
-    localesDir = path.resolve(config.uiLocalesDir);
+    localesDir = config.uiLocalesDir;
+  }
+
+  try {
+    localesDir = path.resolve(localesDir);
+  } catch (resolveError) {
+    // Fallback to package ui-locales directory if resolution fails
+    const fallbackConfig = getConfig();
+    localesDir = path.resolve(fallbackConfig.uiLocalesDir);
   }
   
   try {

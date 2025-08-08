@@ -49,16 +49,29 @@ class AutoRunner {
         .filter(Boolean);
     }
 
-    // Ensure a concrete UI locales dir for i18n-helper
-    this.config.uiLocalesDir = this.config.uiLocalesDir || DEFAULT_UI_LOCALES_DIR;
-    process.env.I18NTK_UI_LOCALE_DIR = this.config.uiLocalesDir;
+    // Ensure a concrete UI locales dir for i18n-helper (absolute, string)
+    const uiLocalesDir =
+      (typeof this.config.uiLocalesDir === 'string' && this.config.uiLocalesDir.trim())
+        ? path.resolve(this.config.uiLocalesDir)
+        : DEFAULT_UI_LOCALES_DIR;
+    this.config.uiLocalesDir = uiLocalesDir;
+    process.env.I18NTK_UI_LOCALE_DIR = uiLocalesDir;
+    if (!fs.existsSync(uiLocalesDir)) {
+      console.warn(`[i18ntk] UI locales directory not found at: ${uiLocalesDir}`);
+    }
 
     const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
     try {
-      // pass the CLI UI locales folder explicitly so helper has a valid baseDir
-      loadTranslations(uiLanguage, this.config.uiLocalesDir);
-    } catch (e) {
-      console.error('Error loading translations:', e.message);
+      // Try the helper’s object-style API first (most common):
+      // loadTranslations(language, { baseDir })
+      loadTranslations(uiLanguage, { baseDir: uiLocalesDir });
+    } catch (e1) {
+      // Fallback to legacy signature loadTranslations(language, baseDir)
+      try {
+        loadTranslations(uiLanguage, uiLocalesDir);
+      } catch (e2) {
+        console.error('Error loading translations:', e2.message);
+      }
     }
   }
 

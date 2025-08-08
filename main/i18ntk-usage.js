@@ -89,6 +89,11 @@ class I18nUsageAnalyzer {
       const defaultConfig = await getUnifiedConfig('usage', cliArgs);
       this.config = { ...defaultConfig, ...this.config };
       
+      // Load translations for UI
+      const uiLanguage = this.config.uiLanguage || 'en';
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+      this.t = t;
+      
       // Resolve paths using projectRoot as base
       const projectRoot = path.resolve(this.config.projectRoot || '.');
       this.sourceDir = this.config.sourceDir;
@@ -110,9 +115,12 @@ class I18nUsageAnalyzer {
         /getTranslation\(['"`]([^'"`]+)['"`]/g
       ];
       
-      // Verify translation function
-      if (typeof this.t !== 'function') {
-        throw new Error('Translation function not properly initialized');
+      // Ensure defaults for other config values
+      if (!Array.isArray(this.config.excludeDirs)) {
+        this.config.excludeDirs = ['node_modules', '.git'];
+      }
+      if (!Array.isArray(this.config.includeExtensions) && !Array.isArray(this.config.supportedExtensions)) {
+        this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx'];
       }
       
       await SecurityUtils.logSecurityEvent(this.t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
@@ -328,7 +336,7 @@ class I18nUsageAnalyzer {
         const baseConfig = await getUnifiedConfig('usage', args);
         this.config = { ...baseConfig, ...this.config };
         
-        const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+        const uiLanguage = this.config.uiLanguage || 'en';
         loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         this.t = t;
         
