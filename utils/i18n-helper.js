@@ -4,24 +4,11 @@ const settingsManager = require('../settings/settings-manager');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = settingsManager.getSettings();
+  const settings = settingsManager.getAllSettings();
   
-  // Determine the correct ui-locales directory
-  let uiLocalesDir;
-  
-  if (settings.uiLocalesDir) {
-    uiLocalesDir = settings.uiLocalesDir;
-  } else {
-    // Use a more robust approach to find ui-locales directory
-    const possiblePaths = [
-      path.join(process.cwd(), 'ui-locales'),
-      path.join(__dirname, '..', 'ui-locales'),
-      path.join(__dirname, '..', '..', 'ui-locales')
-    ];
-    
-    // Find the first existing path
-    uiLocalesDir = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
-  }
+  // Always use the package's ui-locales directory, regardless of current working directory
+  const packageDir = path.join(__dirname, '..');
+  const uiLocalesDir = path.join(packageDir, 'ui-locales');
   
   return {
     uiLocalesDir
@@ -36,11 +23,23 @@ let isInitialized = false;
 /**
  * Load translations from the ui-locales directory
  * @param {string} language - Language code (default: 'en')
+ * @param {string} baseDir - Base directory for locale files (optional)
  */
-function loadTranslations(language = 'en') {
-  currentLanguage = language;
-  const config = getConfig();
-  const localesDir = path.resolve(config.uiLocalesDir);
+function loadTranslations(language, baseDir) {
+  const settings = settingsManager.getAllSettings();
+  const configuredLanguage = settings.uiLanguage || settings.language || 'en';
+  currentLanguage = language || configuredLanguage;
+  
+  // Use provided directory, environment variable, or default
+  let localesDir;
+  if (baseDir) {
+    localesDir = path.resolve(baseDir);
+  } else if (process.env.I18NTK_UI_LOCALE_DIR) {
+    localesDir = path.resolve(process.env.I18NTK_UI_LOCALE_DIR);
+  } else {
+    const config = getConfig();
+    localesDir = path.resolve(config.uiLocalesDir);
+  }
   
   try {
     translations = {}; // Reset translations for the new language
@@ -97,7 +96,7 @@ function loadTranslations(language = 'en') {
 function t(key, params = {}) {
   // Auto-initialize translations if not already loaded
   if (!isInitialized) {
-    loadTranslations('en');
+    loadTranslations();
     isInitialized = true;
   }
   
@@ -225,8 +224,8 @@ function deepMerge(target, source) {
  * This ensures translations stay in sync with settings changes
  */
 function refreshLanguageFromSettings() {
-  const settings = settingsManager.getSettings();
-  const configuredLanguage = settings.language || 'en';
+  const settings = settingsManager.getAllSettings();
+  const configuredLanguage = settings.language || settings.uiLanguage || 'en';
   
   if (configuredLanguage !== currentLanguage) {
     loadTranslations(configuredLanguage);

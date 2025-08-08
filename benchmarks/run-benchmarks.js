@@ -296,6 +296,14 @@ class BenchmarkRunner {
   async runAll() {
     const isCI = process.env.CI === 'true' || process.argv.includes('--ci-mode');
     
+    // Ensure metadata structure exists
+    if (!this.results.metadata.configuration) {
+      this.results.metadata.configuration = {
+        iterations: 3,
+        warmupIterations: 1
+      };
+    }
+    
     if (isCI) {
       console.log('🚀 Running i18n Management Toolkit Benchmark Suite (CI Mode)...\n');
       // Reduce iterations for faster CI runs

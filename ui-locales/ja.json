@@ -1,8 +1,7 @@
 {
   "meta": {
-    "version": "1.5.3",
-    "consolidated": "2025-08-06",
-    "sourceFiles": 256
+    "version": "1.6.0",
+    "updated": "2025-08-08"
   },
   "common": {
     "welcome": "ようこそ",
@@ -15,11 +14,11 @@
     "delete": "削除",
     "edit": "編集",
     "loading": "読み込み中...",
-    "offlineTitle": "You are offline",
-    "offlineMessage": "Please check your internet connection",
-    "tryReconnect": "Try to reconnect",
-    "logout": "Logout",
-    "login": "Login",
+    "offlineTitle": "オフラインです",
+    "offlineMessage": "インターネット接続を確認してください",
+    "tryReconnect": "再接続を試みる",
+    "logout": "ログアウト",
+    "login": "ログイン",
     "amount": "Amount",
     "success": "成功",
     "error": "エラー",
@@ -75,14 +74,28 @@
     "review": "翻訳をレビュー中...",
     "finalizing": "翻訳を最終調整中...",
     "finalized": "正常に確定されました！",
-    "errors": "エラー：",
     "warnings": "警告：",
     "completedKeys": "完了したキー：",
     "missingKeys": "不足しているキー：",
-    "partialKeys": "部分的なキー："
+    "partialKeys": "部分的なキー：",
+    "home": "ホーム",
+    "settings": "設定",
+    "confirm": "確認",
+    "errors": {
+      "errors": "エラー：",
+      "genericError": "❌ エラー：{{error}}",
+      "initializationFailed": "❌ 初期化に失敗しました: {error}",
+      "translationKeyNotFound": "翻訳キーが見つかりません: {key}",
+      "sourceDirectoryNotFound": "ソースディレクトリが見つかりません: {directory}",
+      "configLoadingFailed": "構成の読み込みに失敗しました",
+      "invalidSourceDirectory": "無効なソースディレクトリ: {directory}",
+      "securityViolation": "セキュリティ違反が検出されました",
+      "authenticationFailed": "認証が失敗しました",
+      "sourceEqualsI18nWarn": "⚠️ ソースディレクトリと I18n ディレクトリが等しいため、ソーススキャンを {fallback} にフォールバックします。"
+    }
   },
   "analyze": {
-    "help_message": "\ni18n 翻訳分析ツール\n\n使い方: node i18ntk-analyze.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./src）\n  --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./src/locales）\n  --output-report        詳細レポートを生成する\n  --output-dir <dir>     レポート出力先ディレクトリ（デフォルト: ./reports）\n  --help                 このヘルプを表示する\n\n例:\n  node i18ntk-analyze.js --output-report\n  node i18ntk-analyze.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-analyze.js --output-dir=./analysis --output-report\n",
+    "help_message": "\ni18n 翻訳分析ツール\n\n使い方: node i18ntk-analyze.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./locales）\n  --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./locales）\n  --output-report        詳細レポートを生成する\n  --output-dir <dir>     レポート出力先ディレクトリ（デフォルト: ./i18ntk-reports）\n  --help                 このヘルプを表示する\n\n例:\n  node i18ntk-analyze.js --output-report\n  node i18ntk-analyze.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-analyze.js --output-dir=./analysis --output-report\n",
     "source_directory": "📁 ソースディレクトリ: {sourceDir}",
     "i18n_directory": "🌐 I18n ディレクトリ: {i18nDir}",
     "loading_translation_files": "📋 翻訳ファイルを読み込み中...",
@@ -164,6 +177,11 @@
   "complete": {
     "configLoadedSuccessfully": "設定が正常に読み込まれました",
     "configLoadingFailed": "設定の読み込みに失敗しました",
+    "sourceLanguageNotFound": "⚠️  ソース言語が見つかりません: {language}",
+    "couldNotParseTarget": "⚠️  ターゲット言語の解析中にエラーが発生しました: {error}",
+    "couldNotParseSource": "⚠️  ソース言語の解析中にエラーが発生しました: {error}",
+    "reportGenerated": "📄 レポートが生成されました: {reportPath}",
+    "generateReportPrompt": "📄 レポートを生成しますか？ (y/n): ",
     "title": "🌍 I18N 翻訳の補完",
     "separator": "============================================================",
     "sourceDir": "📁 ソースディレクトリ：{sourceDir}",
@@ -180,11 +198,11 @@
     "missingKeysAdded": "➕ 追加された不足キー：{missingKeysAdded}",
     "nextStepsTitle": "📋 次のステップ",
     "nextStep1": "1. 使用状況分析を実行：",
-    "nextStep2": "   node i18ntk-usage.js --output-report",
+    "nextStep2": "    node i18ntk-usage.js --output-report",
     "nextStep3": "2. 翻訳を検証：",
-    "nextStep4": "   node i18ntk-validate.js",
+    "nextStep4": "    node i18ntk-validate.js",
     "nextStep5": "3. パターンを分析：",
-    "nextStep6": "   node i18ntk-analyze.js",
+    "nextStep6": "    node i18ntk-analyze.js",
     "allKeysAvailable": "🎉 すべての翻訳キーが利用可能になりました！",
     "runWithoutDryRun": "💡 --dry-run を外して実行すると変更が適用されます",
     "deletingOldReport": "🗑️ 古いレポートを削除中...",
@@ -260,12 +278,16 @@
       "keys_have_significant_size_variations": "キーに大きなサイズのばらつきがあります",
       "consider_reviewing_translations": "{{lang}} の翻訳を見直すことを検討してください - ベースラインより {{percentageDifference}}% {{comparison}} です",
       "long_translations_detected": "{{lang}} では長さが {{threshold}} 文字を超える翻訳が {{longKeys}} 件検出されました - 分割を検討してください"
-    }
+    },
+    "longer": "より長い",
+    "shorter": "より短い",
+    "review_translations": "{{lang}} の翻訳を見直すことを検討してください - ベースラインより {{percentageDifference}}% {{comparison}} です"
   },
   "usage": {
     "help_message": "\nI18n 使用解析ツール\n\n使い方: node i18ntk-usage.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./src）\n  --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./src/locales）\n  --output-report        詳細レポートを生成する\n  --output-dir <dir>     レポートの出力ディレクトリ（デフォルト: ./reports）\n  --help                 このヘルプを表示する\n\n例:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
     "source_directory_thissourcedir": "📁 ソースディレクトリ: {sourceDir}",
     "translationCompletenessTitle": "🌍 翻訳の完全性:",
+    "failedToExtractKeys": "⚠️  キーの抽出中にエラーが発生しました: {error}",
     "i18n_directory_thisi18ndir": "🌐 I18n ディレクトリ: {i18nDir}",
     "failed_to_parse_filename_error": "⚠️  {fileName} の解析に失敗しました: {errorMessage}",
     "analyzing_source_files": "🔍 ソースファイルを解析中...",
@@ -288,20 +310,24 @@
     "analyzerInitialized": "アナライザが初期化されました",
     "analyzerInitFailed": "アナライザの初期化に失敗しました: {error}",
     "argsParsed": "引数を解析しました",
-    "argsParseFailed": "引数の解析に失敗しました: {error}",
     "processedFiles": "処理済み {processedFiles} 件のファイルから {totalFiles} 件のファイルを処理しました。",
+    "argsParseFailed": "引数の解析に失敗しました: {error}",
     "translationDiscoveryError": "翻訳の検出エラー: {error}",
     "fileTraversalError": "ファイル走査エラー: {error}",
     "usageAnalysisFailed": "使用状況分析に失敗しました: {error}",
     "translationFileParseError": "翻訳ファイルの解析エラー: {error}",
     "translationKeysLoadError": "翻訳キーの読み込みエラー: {error}",
-    "languageCompletenessStats": "{language}: {translated}/{total} ({completeness}% 翻訳済み)",
-    "missingKeysCount": "不足しているキー: {count}",
+    "sourceEqualsI18nWarn": "⚠️  ソースディレクトリと i18n ディレクトリは同じです。分析に問題が発生する可能性があります。",
+    "i18nEqualsSourceWarn": "⚠️  I18n ディレクトリとソースディレクトリは同じです。分析に問題が発生する可能性があります。",
+    "languageCompletenessStats": "🌍 {language}: {translated}/{total} ({completeness}% 翻訳済み)",
+    "missingKeysCount": "⚠️  不足しているキー: {count}",
     "analyzingTranslationCompleteness": "翻訳の完全性を分析中...",
     "unusedKeysCount": "未使用のキー: {count}",
     "usedKeysCount": "使用されたキー: {count}",
     "availableKeysCount": "利用可能なキー: {count}",
     "analysisResults": "分析結果:",
+    "i18nDirectoryNotFound": "⚠️  I18n ディレクトリが見つかりません: {dir}",
+    "sourceDirectoryNotFound": "⚠️  ソースディレクトリが見つかりません: {dir}",
     "checkUsage": {
       "title": "🔍 I18N 使用状況分析",
       "message": "プロジェクト全体の i18n キー使用を分析しています。",
@@ -361,11 +387,11 @@
       "missingKeysAdded": "➕ 追加された不足キー: {missingKeysAdded}",
       "nextStepsTitle": "📋 次のステップ",
       "nextStep1": "1. 使用状況分析を実行：",
-      "nextStep2": "   node i18ntk-usage.js --output-report",
+      "nextStep2": "    node i18ntk-usage.js --output-report",
       "nextStep3": "2. 翻訳を検証：",
-      "nextStep4": "   node i18ntk-validate.js",
+      "nextStep4": "    node i18ntk-validate.js",
       "nextStep5": "3. パターンを分析：",
-      "nextStep6": "   node i18ntk-analyze.js",
+      "nextStep6": "    node i18ntk-analyze.js",
       "allKeysAvailable": "🎉 すべての翻訳キーが利用可能になりました！",
       "runWithoutDryRun": "💡 --dry-run を外して実行すると変更が適用されます",
       "deletingOldReport": "🗑️  古いレポートを削除中...",
@@ -374,10 +400,13 @@
       "reportNotFound": "📋 使用レポートが見つかりません。共通キーを使用しています...",
       "foundMissingKeys": "📋 使用状況分析から {count} 件の不足キーを検出しました",
       "couldNotParse": "❌ 使用レポートの解析に失敗しました。共通キーを使用しています..."
-    }
+    },
+    "noTranslationLanguagesFound": "翻訳言語が見つかりませんでした。",
+    "failedToAnalyzeLanguage": "{language} の解析に失敗しました: {error}",
+    "translationCompletenessAnalysisFailed": "{language} の翻訳完全性分析に失敗しました: {error}"
   },
   "validate": {
-    "help_message": "\nI18n 翻訳バリデータ\n\n使い方: node i18ntk-validate.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ (デフォルト: ./src)\n  --i18n-dir <dir>       I18n ディレクトリ (デフォルト: ./src/locales)\n  --output-report        詳細レポートを生成\n  --output-dir <dir>     レポートの出力ディレクトリ (デフォルト: ./reports)\n  --help                 ヘルプを表示\n\n例:\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
+    "help_message": "\nI18n 翻訳バリデータ\n\n使い方: node i18ntk-validate.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ (デフォルト: ./locales)\n  --i18n-dir <dir>       I18n ディレクトリ (デフォルト: ./locales)\n  --output-report        詳細レポートを生成\n  --output-dir <dir>     レポートの出力ディレクトリ (デフォルト: ./i18ntk-reports)\n  --help                 ヘルプを表示\n\n例:\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
     "title": "🔍 I18n 翻訳バリデータ",
     "message": "バリデーションプロセスを開始しています…",
     "sourceDirectory": "📁 ソースディレクトリ: {dir}",
@@ -648,6 +677,7 @@
     "selectOption": "デバッグツールを選択してください: ",
     "runningDebugTool": "{displayName}を実行中...",
     "debugToolNotFound": "❌ デバッグツールが見つかりません: {toolName}",
+    "errorRunningDebugTool": "⚠️  デバッグツールの実行中にエラーが発生しました: {error}",
     "recentDebugLogs": "📄 最新のデバッグログ",
     "noDebugLogsFound": "❌ デバッグログが見つかりません。",
     "debugLogsDirectoryNotFound": "❌ デバッグログディレクトリが見つかりません。",
@@ -725,6 +755,7 @@
     "summaryCommand": "  summary   - プロジェクトのステータスを表示",
     "debugCommand": "  debug     - 翻訳の問題をデバッグ",
     "menu": {
+      "pressEnterToContinue": "Enterキーを押して続行してください…",
       "title": "\n🌐 I18N 管理メニュー\n",
       "description": "国際化管理のためのインタラクティブメニュー\n",
       "exit": "\n🚪 終了"
@@ -749,11 +780,11 @@
     },
     "examples": {
       "title": "\n例:\n",
-      "example1": "  node i18ntk-manage.js",
-      "example2": "  node i18ntk-manage.js --source-dir ./locales",
-      "example3": "  node i18ntk-manage.js --output summary-report.txt",
-      "example4": "  node i18ntk-manage.js --verbose",
-      "example5": "  node i18ntk-manage.js --source-dir ./locales --output report.json"
+      "example1": "   node i18ntk-manage.js",
+      "example2": "   node i18ntk-manage.js --source-dir ./locales",
+      "example3": "   node i18ntk-manage.js --output summary-report.txt",
+      "example4": "   node i18ntk-manage.js --verbose",
+      "example5": "   node i18ntk-manage.js --command=init --source-dir ./locales --output report.json"
     },
     "features": {
       "initProject": "🚀 新しい言語を初期化",
@@ -794,15 +825,18 @@
     "detectedI18nFrameworks": "🔍 検出されたi18nフレームワーク: {frameworks}",
     "existingDirectoriesFound": "📁 既存の翻訳ディレクトリが見つかりました:",
     "useExistingDirectoryPrompt": "既存のディレクトリを使用しますか？ (y/n)",
+    "selectDirectoryPrompt": "ディレクトリを選択してください (番号を入力) (または '新しいディレクトリを作成' を選択):",
+    "enterNewDirectoryName": "新しいディレクトリ名を入力してください:",
+    "createdNewDirectory": "新しいディレクトリを作成しました: {{dir}}",
+    "directoryAlreadyExists": "⚠️  ディレクトリが既に存在します: {dir}",
+    "invalidDirectoryName": "⚠️  無効なディレクトリ名です。",
+    "usingExistingDirectory": "使用中のディレクトリ: {{dir}}",
     "autoDetectedI18nDirectory": "📂 自動検出されたi18nディレクトリ: {directory}",
     "initializingProject": "⚙️  プロジェクト設定を初期化中…",
     "createdSampleTranslationFile": "✅ サンプル翻訳ファイルを作成しました: {file}",
     "languageSelectionTitle": "🌐 言語設定",
     "available": "利用可能",
     "defaultLanguages": "📝 デフォルト言語: {languages}",
-    "selectDirectoryPrompt": "ディレクトリを選択してください (番号を入力) (または '新しいディレクトリを作成' を選択):",
-    "usingExistingDirectory": "使用中のディレクトリ: {{dir}}",
-    "createdNewDirectory": "新しいディレクトリを作成しました: {{dir}}",
     "enterLanguageCodes": "🎯 対象言語コードを入力してください (カンマ区切り 例: de, es, fr, ru):",
     "targetLanguages": "🌍 対象言語",
     "foundSourceFiles": "📄 分析対象として {count} 件のソースファイルを検出",
@@ -820,7 +854,10 @@
     "nextStep2": "2. 各対象言語の翻訳を追加する",
     "nextStep3": "3. 'npm run i18ntk' を再実行して翻訳を検証する",
     "detectedFrameworks": "✅ 検出されたi18nフレームワーク: {frameworks}",
-    "warnings.noPackageJson": "package.json が見つかりません。i18nフレームワークを自動検出できません。",
+    "warnings": {
+      "noPackageJson": "package.json が見つかりません。i18nフレームワークを自動検出できません。"
+    },
+    "errorsPackageJsonRead": "⚠️  package.json の読み込み中にエラーが発生しました: {error}",
     "errorsNoFramework": "i18nフレームワークが検出されませんでした。インストールするか手動で指定してください。",
     "suggestions": {
       "noFramework": "i18nフレームワークが検出されませんでした。以下のいずれかの使用を検討してください：",
@@ -840,6 +877,7 @@
     "creatingSourceDirectory": "ソースディレクトリを作成中: {dir}",
     "creatingSourceLanguageDirectory": "ソース言語ディレクトリを作成中: {dir}",
     "errors": {
+      "errorExecutingCommand": "⚠️  コマンドの実行中にエラーが発生しました: {error}",
       "sourceDirectoryNotFound": "ソースディレクトリが見つかりません: {dir}",
       "sourceLanguageDirectoryNotFound": "ソース言語ディレクトリが見つかりません: {dir}",
       "noJsonFilesInSourceDirectory": "ソースディレクトリにJSONファイルが見つかりません: {dir}",
@@ -954,6 +992,7 @@
     "noFilesFoundToDelete": "✅ 削除対象ファイルはありません。",
     "availableDirectories": "📁 利用可能なディレクトリ:",
     "allDirectories": "すべてのディレクトリ",
+    "andMore": "その他 {count} 件",
     "cancelOption": "キャンセル",
     "cancelReportOption": "キャンセル / メニューに戻る",
     "invalidSelection": "❌ 無効な選択です。",
@@ -973,7 +1012,8 @@
       "title": "🚀 新しい言語を初期化"
     },
     "usage": {
-      "title": "📊 キー使用状況をチェック"
+      "title": "📊 キー使用状況をチェック",
+      "noUsedKeysHint": "翻訳が見つかりましたが、ソースで使用されていません。--source-dir と translationPatterns を確認してください。"
     },
     "analyze": {
       "title": "🔍 翻訳を分析"
@@ -1050,7 +1090,13 @@
     "logMessage": "[SECURITY {level}] {timestamp}: {event}",
     "alertMessage": "[SECURITY ALERT] {timestamp}: {event}",
     "securityWarning": "[SECURITY WARNING] {timestamp}: {event}",
-    "json_parse_error": "セキュリティ: JSON解析エラー: {errorMessage}"
+    "json_parse_error": "セキュリティ: JSON解析エラー: {errorMessage}",
+    "file_too_large": "セキュリティ: ファイルが大きすぎます",
+    "file_read_error": "セキュリティ: ファイル読み取りエラー",
+    "content_too_large_for_file": "セキュリティ: ファイルに対してコンテンツが大きすぎます",
+    "file_write_error": "セキュリティ: ファイル書き込みエラー",
+    "json_string_too_large": "セキュリティ: JSON文字列が大きすぎます",
+    "security_alert": "セキュリティ: アラート"
   },
   "settings-cli": {
     "settings": {
@@ -1081,7 +1127,7 @@
         "help": "ヘルプ",
         "helpDesc": "詳細なヘルプ情報を表示",
         "quit": "終了",
-        "quitDesc": "設定を終了（必要に応じて保存確認あり）",
+        "quitDesc": "設定から終了（必要に応じて保存確認）",
         "unsavedChangesWarning": "⚠️  保存されていない変更があります",
         "saveChangesBeforeQuit": "終了前に変更を保存しますか？ (y/N): ",
         "selectOption": "オプションを選択してください: ",
@@ -1162,7 +1208,9 @@
       "scriptDirectorySettingsDesc": "設定しない場合はグローバル設定が使用されます。",
       "currentDirectory": "現在のプロジェクトディレクトリ",
       "securitySettings": "セキュリティ設定",
-      "securitySettingsDesc": "管理者PINおよびその他のセキュリティオプション"
+      "securitySettingsDesc": "管理者PINとその他のセキュリティオプション",
+      "backupSettings": "バックアップ設定",
+      "backupSettingsDesc": "バックアップおよび復元の設定を行う"
     },
     "updatePackage": {
       "title": "パッケージを更新",
@@ -1170,7 +1218,7 @@
       "command": "npm update i18ntk -g",
       "success": "更新が正常に完了しました。",
       "failed": "更新に失敗しました。",
-      "prompt": "今すぐパッケージを更新しますか？ (y/N): ",
+      "prompt": "パッケージを更新しますか？ (y/N): ",
       "promptDesc": "注: 最新バージョンに更新します。",
       "confirm": "y",
       "cancelled": "更新がキャンセルされました。"
@@ -1215,6 +1263,10 @@
       "browserOpened": "✅ ブラウザを正常に開きました！"
     },
     "importExport": {
+      "title": "インポート/エクスポート",
+      "export": "エクスポート",
+      "import": "インポート",
+      "backup": "バックアップ",
       "enterFilename": "ファイル名を入力してください (デフォルトはEnter): ",
       "exportSuccess": "設定を {{file}} にエクスポートしました",
       "exportFailed": "設定のエクスポートに失敗しました: {{error}}",
@@ -1227,11 +1279,16 @@
       "backupSuccess": "バックアップを作成しました: {{file}}",
       "backupFailed": "バックアップの作成に失敗しました: {{error}}"
     },
+    "selectOption": "オプションを選択してください: ",
+    "resetToDefaultsTitle": "デフォルトにリセット",
+    "resetWarning1": "⚠️  この操作は元に戻せません。",
+    "resetWarning2": "⚠️  デフォルト設定にリセットします。",
     "resetConfirm": "続行してもよろしいですか？ (y/N): ",
     "resetSuccess": "設定をデフォルトにリセットしました。",
     "resetFailed": "設定のリセットに失敗しました: {error}",
     "saveSuccess": "設定を正常に保存しました。",
     "saveFailed": "設定の保存に失敗しました。",
+    "saveError": "⚠️  設定の保存に失敗しました。",
     "pressEnter": "Enterキーを押して続行してください…",
     "initFailed": "設定の初期化に失敗しました: {error}",
     "invalidValueFormat": "無効な値の形式です。",
@@ -1298,199 +1355,215 @@
         "lockoutDurationUpdated": "ロックアウト時間が {{minutes}} 分に更新されました"
       }
     },
-  "fields": {
-    "i18nDir": {
-      "label": "I18nディレクトリ",
-      "description": "翻訳ファイルを含むディレクトリ",
-      "current": "現在: {value}",
-      "help": "翻訳ファイルがあるディレクトリへのパス"
-    },
-    "projectRoot": {
-      "label": "プロジェクトルート",
-      "description": "プロジェクトのルートディレクトリ",
-      "current": "現在: {value}", 
-      "help": "プロジェクトのルートディレクトリへのパス"
-    },
-    "checkUsage": {
-      "usage_analysis_failed": "使用状況分析に失敗しました",
-      "usage_analysis_success": "使用状況分析が成功しました",
-      "usage_analysis_complete": "使用状況分析が完了しました",
-      "usage_analysis_in_progress": "使用状況分析を実行中です",
-      "usage_analysis_started": "使用状況分析を開始しました",
-      "usage_analysis_skipped": "使用状況分析をスキップしました"
-    },
-    "language": {
-      "label": "インターフェイス言語",
-      "description": "ユーザーインターフェイスの言語",
-      "current": "現在: {value}",
-      "help": "希望するインターフェイス言語を選択してください"
-    },
-    "scriptDirectories": {
-      "analyzeLabel": "解析スクリプトディレクトリ",
-      "analyzeHelp": "問題のあるスクリプトディレクトリを解析します",
-      "completeLabel": "完了セットアップディレクトリ",
-      "initLabel": "初期化スクリプトディレクトリ",
-      "manageLabel": "管理スクリプトディレクトリ",
-      "sizingLabel": "サイズ設定スクリプトディレクトリ",
-      "summaryLabel": "要約レポートディレクトリ",
-      "usageLabel": "使用状況レポートディレクトリ",
-      "validateLabel": "検証スクリプトディレクトリ"
-    },
-    "theme": {
-      "label": "カラーテーマ",
-      "description": "UIテーマの設定",
-      "current": "現在: {value}",
-      "help": "ライトまたはダークテーマを選択してください"
-    },
-    "dateFormat": {
-      "label": "日付形式",
-      "description": "日付表示の形式",
-      "current": "現在: {value}",
-      "help": "レポートの日付表示方法を選択してください"
-    },
-    "notifications": {
-      "enabled": {
-        "label": "通知を有効にする",
-        "description": "デスクトップ通知を表示",
+    "fields": {
+      "i18nDir": {
+        "label": "I18nディレクトリ",
+        "description": "翻訳ファイルを含むディレクトリ",
         "current": "現在: {value}",
-        "help": "操作完了時にデスクトップ通知を有効にします"
-      }
-    },
-    "sourceDir": {
-      "label": "ソースディレクトリ",
-      "description": "翻訳ファイルを含むディレクトリ",
-      "current": "現在: {value}",
-      "help": "ソース翻訳ファイルがあるディレクトリへのパスを指定してください"
-    },
-    "sourceLanguage": {
-      "label": "ソース言語",
-      "description": "翻訳の基礎となる言語",
-      "current": "現在: {value}",
-      "help": "翻訳の基となる主要な言語を指定してください"
-    },
-    "outputDir": {
-      "label": "出力ディレクトリ",
-      "description": "生成されたレポートのディレクトリ",
-      "current": "現在: {value}",
-      "help": "レポートや処理済みファイルを保存する場所を指定してください"
-    },
-    "batchSize": {
-      "label": "バッチサイズ",
-      "description": "一度に処理するアイテム数",
-      "current": "現在: {value}",
-      "help": "1バッチあたりに処理するファイル数を指定してください"
-    },
-    "maxConcurrentFiles": {
-      "label": "同時処理ファイル数",
-      "description": "同時に処理する最大ファイル数",
-      "current": "現在: {value}",
-      "help": "同時に処理するファイルの最大数を指定してください"
-    },
-    "sizingThreshold": {
-      "label": "サイズしきい値 (%)",
-      "description": "サイズ変動警告のしきい値",
-      "current": "現在: {value}%",
-      "help": "サイズ不一致を検出するためのパーセンテージしきい値を指定してください"
-    },
-    "strictMode": {
-      "label": "厳格検証モード",
-      "description": "厳格検証モードを有効にする",
-      "current": "現在: {value}",
-      "help": "翻訳ファイルの厳格検証を有効にします"
-    },
-    "enableAuditLog": {
-      "label": "監査ログを有効にする",
-      "description": "すべての翻訳変更を記録する",
-      "current": "現在: {value}",
-      "help": "翻訳ファイルに対するすべての変更をログに残します"
-    },
-    "backupBeforeChanges": {
-      "label": "自動バックアップ",
-      "description": "変更前にバックアップを作成する",
-      "current": "現在: {value}",
-      "help": "変更を加える前に自動的にバックアップを作成します"
-    },
-    "adminPinEnabled": {
-      "label": "管理者PIN保護",
-      "description": "機密設定に管理者PIN認証を要求する",
-      "current": "現在: {value}",
-      "help": "セキュリティおよび詳細設定を変更する際に管理者PINを要求します"
-    },
-    "sessionTimeout": {
-      "label": "セッションタイムアウト",
-      "description": "管理者セッションのタイムアウト（分）",
-      "current": "現在: {value} 分",
-      "help": "再認証が必要になるまで管理者セッションを維持する時間を指定してください"
-    },
-    "maxFailedAttempts": {
-      "label": "最大失敗試行回数",
-      "description": "ロックアウト前の最大PIN失敗試行回数",
-      "current": "現在: {value} 回",
-      "help": "一時ロックアウト前に許可するPIN失敗回数を指定してください"
-    },
-    "lockoutDuration": {
-      "label": "ロックアウト期間",
-      "description": "失敗後のロックアウト期間（分）",
-      "current": "現在: {value} 分",
-      "help": "最大失敗試行後にシステムがロックされる時間を指定してください"
-    },
-    "scriptDirectories_analyze": {
-      "label": "解析スクリプトディレクトリ",
-      "description": "解析スクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "解析スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "scriptDirectories_complete": {
-      "label": "完了セットアップディレクトリ",
-      "description": "完了セットアップスクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "完了セットアップスクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "scriptDirectories_init": {
-      "label": "初期化スクリプトディレクトリ",
-      "description": "初期化スクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "初期化スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "scriptDirectories_manage": {
-      "label": "管理スクリプトディレクトリ",
-      "description": "管理スクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "管理スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "scriptDirectories_sizing": {
-      "label": "サイズ設定スクリプトディレクトリ",
-      "description": "サイズ設定スクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "サイズ設定スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "scriptDirectories_summary": {
-      "label": "要約レポートディレクトリ",
-      "description": "要約レポートスクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "要約レポートスクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "scriptDirectories_usage": {
-      "label": "使用状況レポートディレクトリ",
-      "description": "使用状況レポートスクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "使用状況レポートスクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "scriptDirectories_validate": {
-      "label": "検証スクリプトディレクトリ",
-      "description": "検証スクリプト用のカスタムディレクトリ",
-      "current": "現在: {value}",
-      "help": "検証スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
-    },
-    "security_adminPinEnabled": {
-      "label": "管理者PIN保護",
-      "description": "機密設定に管理者PIN認証を要求する",
-      "current": "現在: {value}",
-      "help": "セキュリティおよび詳細設定を変更する際に管理者PINを要求します"
-    },
-      "fields.adminPinEnabled.label": "管理者 PIN の保護",
-      "fields.adminPinEnabled.description": "機密設定に管理者PIN認証を有効にする",
-      "fields.adminPinEnabled.help": "セキュリティと詳細設定の変更には管理者PINが必要です",
+        "help": "翻訳ファイルがあるディレクトリへのパス"
+      },
+      "projectRoot": {
+        "label": "プロジェクトルート",
+        "description": "プロジェクトのルートディレクトリ",
+        "current": "現在: {value}",
+        "help": "プロジェクトのルートディレクトリへのパス"
+      },
+      "checkUsage": {
+        "usage_analysis_failed": "使用状況分析に失敗しました",
+        "usage_analysis_success": "使用状況分析が成功しました",
+        "usage_analysis_complete": "使用状況分析が完了しました",
+        "usage_analysis_in_progress": "使用状況分析を実行中です",
+        "usage_analysis_started": "使用状況分析を開始しました",
+        "usage_analysis_skipped": "使用状況分析をスキップしました"
+      },
+      "language": {
+        "label": "インターフェイス言語",
+        "description": "ユーザーインターフェイスの言語",
+        "current": "現在: {value}",
+        "help": "希望するインターフェイス言語を選択してください"
+      },
+      "scriptDirectories": {
+        "analyzeLabel": "解析スクリプトディレクトリ",
+        "analyzeHelp": "問題のあるスクリプトディレクトリを解析します",
+        "completeLabel": "完了セットアップディレクトリ",
+        "initLabel": "初期化スクリプトディレクトリ",
+        "manageLabel": "管理スクリプトディレクトリ",
+        "sizingLabel": "サイズ設定スクリプトディレクトリ",
+        "summaryLabel": "要約レポートディレクトリ",
+        "usageLabel": "使用状況レポートディレクトリ",
+        "validateLabel": "検証スクリプトディレクトリ"
+      },
+      "theme": {
+        "label": "カラーテーマ",
+        "description": "UIテーマの設定",
+        "current": "現在: {value}",
+        "help": "ライトまたはダークテーマを選択してください"
+      },
+      "dateFormat": {
+        "label": "日付形式",
+        "description": "日付表示の形式",
+        "current": "現在: {value}",
+        "help": "レポートの日付表示方法を選択してください"
+      },
+      "notifications": {
+        "enabled": {
+          "label": "通知を有効にする",
+          "description": "デスクトップ通知を表示",
+          "current": "現在: {value}",
+          "help": "操作完了時にデスクトップ通知を有効にします"
+        }
+      },
+      "sourceDir": {
+        "label": "ソースディレクトリ",
+        "description": "翻訳ファイルを含むディレクトリ",
+        "current": "現在: {value}",
+        "help": "ソース翻訳ファイルがあるディレクトリへのパスを指定してください"
+      },
+      "sourceLanguage": {
+        "label": "ソース言語",
+        "description": "翻訳の基礎となる言語",
+        "current": "現在: {value}",
+        "help": "翻訳の基となる主要な言語を指定してください"
+      },
+      "outputDir": {
+        "label": "出力ディレクトリ",
+        "description": "生成されたレポートのディレクトリ",
+        "current": "現在: {value}",
+        "help": "レポートや処理済みファイルを保存する場所を指定してください"
+      },
+      "batchSize": {
+        "label": "バッチサイズ",
+        "description": "一度に処理するアイテム数",
+        "current": "現在: {value}",
+        "help": "1バッチあたりに処理するファイル数を指定してください"
+      },
+      "maxConcurrentFiles": {
+        "label": "同時処理ファイル数",
+        "description": "同時に処理する最大ファイル数",
+        "current": "現在: {value}",
+        "help": "同時に処理するファイルの最大数を指定してください"
+      },
+      "sizingThreshold": {
+        "label": "サイズしきい値 (%)",
+        "description": "サイズ変動警告のしきい値",
+        "current": "現在: {value}%",
+        "help": "サイズ不一致を検出するためのパーセンテージしきい値を指定してください"
+      },
+      "strictMode": {
+        "label": "厳格検証モード",
+        "description": "厳格検証モードを有効にする",
+        "current": "現在: {value}",
+        "help": "翻訳ファイルの厳格検証を有効にします"
+      },
+      "enableAuditLog": {
+        "label": "監査ログを有効にする",
+        "description": "すべての翻訳変更を記録する",
+        "current": "現在: {value}",
+        "help": "翻訳ファイルに対するすべての変更をログに残します"
+      },
+      "backupBeforeChanges": {
+        "label": "自動バックアップ",
+        "description": "変更前にバックアップを作成する",
+        "current": "現在: {value}",
+        "help": "変更を加える前に自動的にバックアップを作成します"
+      },
+      "advanced_maxConcurrentFiles": {
+        "label": "同時処理ファイル数",
+        "description": "同時に処理する最大ファイル数",
+        "current": "現在: {value}",
+        "help": "同時に処理するファイルの最大数を指定してください"
+      },
+      "advanced_strictMode": {
+        "label": "厳格検証モード",
+        "description": "厳格検証モードを有効にする",
+        "current": "現在: {value}",
+        "help": "翻訳ファイルの厳格検証を有効にします"
+      },
+      "adminPinEnabled": {
+        "label": "管理者PIN保護",
+        "description": "機密設定に管理者PIN認証を要求する",
+        "current": "現在: {value}",
+        "help": "セキュリティおよび詳細設定を変更する際に管理者PINを要求します"
+      },
+      "sessionTimeout": {
+        "label": "セッションタイムアウト",
+        "description": "管理者セッションのタイムアウト（分）",
+        "current": "現在: {value} 分",
+        "help": "再認証が必要になるまで管理者セッションを維持する時間を指定してください"
+      },
+      "maxFailedAttempts": {
+        "label": "最大失敗試行回数",
+        "description": "ロックアウト前の最大PIN失敗試行回数",
+        "current": "現在: {value} 回",
+        "help": "一時ロックアウト前に許可するPIN失敗回数を指定してください"
+      },
+      "lockoutDuration": {
+        "label": "ロックアウト期間",
+        "description": "失敗後のロックアウト期間（分）",
+        "current": "現在: {value} 分",
+        "help": "最大失敗試行後にシステムがロックされる時間を指定してください"
+      },
+      "scriptDirectories_analyze": {
+        "label": "解析スクリプトディレクトリ",
+        "description": "解析スクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "解析スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "scriptDirectories_complete": {
+        "label": "完了セットアップディレクトリ",
+        "description": "完了セットアップスクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "完了セットアップスクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "scriptDirectories_init": {
+        "label": "初期化スクリプトディレクトリ",
+        "description": "初期化スクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "初期化スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "scriptDirectories_manage": {
+        "label": "管理スクリプトディレクトリ",
+        "description": "管理スクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "管理スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "scriptDirectories_sizing": {
+        "label": "サイズ設定スクリプトディレクトリ",
+        "description": "サイズ設定スクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "サイズ設定スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "scriptDirectories_summary": {
+        "label": "要約レポートディレクトリ",
+        "description": "要約レポートスクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "要約レポートスクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "scriptDirectories_usage": {
+        "label": "使用状況レポートディレクトリ",
+        "description": "使用状況レポートスクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "使用状況レポートスクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "scriptDirectories_validate": {
+        "label": "検証スクリプトディレクトリ",
+        "description": "検証スクリプト用のカスタムディレクトリ",
+        "current": "現在: {value}",
+        "help": "検証スクリプトのソースディレクトリを指定します。空欄の場合はグローバル設定を使用します。"
+      },
+      "security_adminPinEnabled": {
+        "label": "管理者PIN保護",
+        "description": "機密設定に管理者PIN認証を要求する",
+        "current": "現在: {value}",
+        "help": "セキュリティおよび詳細設定を変更する際に管理者PINを要求します"
+      },
+      "fields": {
+        "adminPinEnabled": {
+          "label": "管理者 PIN の保護",
+          "description": "機密設定に管理者PIN認証を有効にする",
+          "help": "セキュリティと詳細設定の変更には管理者PINが必要です"
+        }
+      },
       "security_pinProtection_enabled": {
         "label": "PIN保護",
         "description": "機密設定に PIN 保護を有効にする",
@@ -1533,67 +1606,90 @@
         "help": "初期化スクリプトの実行にPIN保護を有効にする"
       },
       "pinProtection_resetDefaults": {
-        "label": "PIN保護のリセット",
+        "label": "PIN保護をリセット",
         "description": "すべてのPIN保護設定をデフォルトにリセット",
-        "help": "すべての個別スクリプトのPIN保護をデフォルト値にリセット"
+        "help": "すべてのスクリプト保護を工場出荷時の値にリセット"
+      },
+      "${helperKey}": {
+        "help": "ヘルプ"
       }
     },
-  "actions": {
-    "editSetting": "{setting} を編集: ",
-    "settingUpdated": "✅ {setting} が正常に更新されました！",
-    "invalidValue": "❌ 無効な値です。もう一度お試しください。",
-    "pressEnter": "Enterキーを押して続行してください…",
-    "backToMenu": "メインメニューに戻る",
-    "saveSuccess": "✅ 設定が正常に保存されました！",
-    "saveFailed": "❌ 設定の保存に失敗しました: {error}",
-    "resetConfirm": "すべての設定をデフォルトにリセットしてもよろしいですか？ (y/N): ",
-    "resetSuccess": "✅ 設定がデフォルトにリセットされました！",
-    "importSuccess": "✅ 設定が正常にインポートされました！",
-    "exportSuccess": "✅ 設定が正常にエクスポートされました！",
-    "fileNotFound": "❌ ファイルが見つかりません: {path}",
-    "invalidFormat": "❌ 無効な設定ファイル形式です",
-    "pinProtectionUpdated": "✅ {script} のPIN保護が正常に更新されました！",
-    "pinProtectionReset": "✅ すべてのPIN保護設定がデフォルトにリセットされました！",
-    "pinProtectionConfigure": "個別スクリプトのPIN保護を設定",
-    "pinProtectionSelectScript": "PIN保護を切り替えるスクリプトを選択してください: ",
-    "pinProtectionCurrentStatus": "現在のステータス: {status}",
-    "pinProtectionEnabled": "有効",
-    "pinProtectionDisabled": "無効",
-    "pinProtectionToggle": "PIN保護を切り替え",
-    "pinProtectionResetAll": "すべてをデフォルトにリセット",
-    "pinProtectionBack": "セキュリティ設定に戻る"
-  },
-  "themes": {
-    "light": "ライト",
-    "dark": "ダーク",
-    "system": "システム"
-  },
-  "languages": {
-    "en": "English",
-    "de": "Deutsch",
-    "es": "Español",
-    "fr": "Français",
-    "ru": "Русский",
-    "ja": "日本語",
-    "zh": "中文"
-  },
-  "viewAll": {
-    "title": "すべての設定を表示"
-  },
-  "current": "現在",
-  "back": "メインメニューに戻る",
-  "selectSettingPrompt": "編集する設定を選択してください（戻る: b、リセット: r）: ",
-  "invalidOption": "❌ 無効なオプションです。",
-  "editing": "編集中",
-  "enterNewValue": "新しい値を入力してください（Enterで現在の値を保持、'default'でシステムデフォルトを使用）: ",
-  "validOptions": "有効なオプション",
-  "updatedSuccessfully": "が正常に更新されました！",
-  "noHelp": "この設定のヘルプはありません",
-  "resetScriptDirectories": "デフォルト値にリセット",
-  "resetScriptDirectoriesTitle": "スクリプトディレクトリをデフォルトにリセット",
-  "resetScriptDirectoriesWarning1": "これによりすべてのスクリプトディレクトリ設定がシステムデフォルトに戻ります。",
-  "resetScriptDirectoriesWarning2": "すべてのカスタムディレクトリパスがクリアされます。この操作は取り消せません。",
-  "resetScriptDirectoriesConfirm": "すべてのスクリプトディレクトリをデフォルトにリセットしてもよろしいですか？ (y/N): "
+    "actions": {
+      "editSetting": "{setting} を編集: ",
+      "settingUpdated": "✅ {setting} が正常に更新されました！",
+      "invalidValue": "❌ 無効な値です。もう一度お試しください。",
+      "pressEnter": "Enterキーを押して続行してください…",
+      "backToMenu": "メインメニューに戻る",
+      "saveSuccess": "✅ 設定が正常に保存されました！",
+      "saveFailed": "❌ 設定の保存に失敗しました: {error}",
+      "resetConfirm": "すべての設定をデフォルトにリセットしてもよろしいですか？ (y/N): ",
+      "resetSuccess": "✅ 設定がデフォルトにリセットされました！",
+      "importSuccess": "✅ 設定が正常にインポートされました！",
+      "exportSuccess": "✅ 設定が正常にエクスポートされました！",
+      "fileNotFound": "❌ ファイルが見つかりません: {path}",
+      "invalidFormat": "❌ 無効な設定ファイル形式です",
+      "pinProtectionUpdated": "✅ {script} のPIN保護が正常に更新されました！",
+      "pinProtectionReset": "✅ すべてのPIN保護設定がデフォルトにリセットされました！",
+      "pinProtectionConfigure": "個別スクリプトのPIN保護を設定",
+      "pinProtectionSelectScript": "PIN保護を切り替えるスクリプトを選択してください: ",
+      "pinProtectionCurrentStatus": "現在のステータス: {status}",
+      "pinProtectionEnabled": "有効",
+      "pinProtectionDisabled": "無効",
+      "pinProtectionToggle": "PIN保護を切り替え",
+      "pinProtectionResetAll": "すべてをデフォルトにリセット",
+      "pinProtectionBack": "セキュリティ設定に戻る"
+    },
+    "themes": {
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    },
+    "languages": {
+      "en": "English",
+      "de": "Deutsch",
+      "es": "Español",
+      "fr": "Français",
+      "ru": "Русский",
+      "ja": "日本語",
+      "zh": "中文"
+    },
+    "viewAll": {
+      "title": "すべての設定を表示"
+    },
+    "current": "現在",
+    "back": "メインメニューに戻る",
+    "selectSettingPrompt": "編集する設定を選択してください（戻る: b、リセット: r）: ",
+    "invalidOption": "❌ 無効なオプションです。",
+    "editing": "編集中",
+    "enterNewValue": "新しい値を入力してください（Enterで現在の値を保持、'default'でシステムデフォルトを使用）: ",
+    "validOptions": "有効なオプション",
+    "updatedSuccessfully": "が正常に更新されました！",
+    "noHelp": "この設定のヘルプはありません",
+    "resetScriptDirectories": "デフォルト値にリセット",
+    "resetScriptDirectoriesTitle": "スクリプトディレクトリをデフォルトにリセット",
+    "resetScriptDirectoriesWarning1": "これによりすべてのスクリプトディレクトリ設定がシステムデフォルトに戻ります。",
+    "resetScriptDirectoriesWarning2": "すべてのカスタムディレクトリパスがクリアされます。この操作は取り消せません。",
+    "resetScriptDirectoriesConfirm": "Are you sure you want to reset all script directories to defaults? (y/N): ",
+    "backup": {
+      "title": "バックアップ設定",
+      "description": "現在の設定をファイルにバックアップ",
+      "confirm": "現在の設定をバックアップしますか？ (y/N): ",
+      "success": "✅ 設定を {backupFile} にバックアップしました",
+      "failed": "❌ 設定のバックアップに失敗しました: {error}",
+      "enabled": "有効",
+      "enabledHelp": "バックアップ機能の有効/無効を切り替え",
+      "singleFileMode": "単一ファイルモード",
+      "singleFileModeHelp": "設定を単一ファイルにバックアップ",
+      "singleBackupFile": "単一バックアップファイル",
+      "singleBackupFileHelp": "単一バックアップファイルのパス",
+      "retentionDays": "保持日数",
+      "retentionDaysHelp": "古いバックアップファイルを保持する日数",
+      "maxBackups": "最大バックアップ数",
+      "maxBackupsHelp": "保持する最大バックアップファイル数",
+      "confirmHelp": "バックアップ操作の確認",
+      "confirmYes": "はい",
+      "confirmNo": "いいえ"
+    }
   },
   "summary": {
     "separator": "============================================================",
@@ -1614,11 +1710,11 @@
     "helpDeleteReports": "  --delete-reports        既存のレポートを削除",
     "helpHelp": "  --help, -h              ヘルプを表示",
     "helpExamples": "\n例:",
-    "helpExample1": "  node i18ntk-summary.js",
-    "helpExample2": "  node i18ntk-summary.js --source-dir ./locales",
-    "helpExample3": "  node i18ntk-summary.js --output summary-report.txt",
-    "helpExample4": "  node i18ntk-summary.js --verbose",
-    "helpExample5": "  node i18ntk-summary.js --source-dir ./locales --output report.json",
+    "helpExample1": "   node i18ntk-summary.js",
+    "helpExample2": "   node i18ntk-summary.js --source-dir ./locales",
+    "helpExample3": "   node i18ntk-summary.js --output summary-report.txt",
+    "helpExample4": "   node i18ntk-summary.js --verbose",
+    "helpExample5": "   node i18ntk-summary.js --source-dir ./locales --output report.json",
     "couldNotReadFile": "⚠️  ファイルを読み取れませんでした: {filePath}",
     "couldNotParseJSFile": "⚠️  JS/TS ファイルを解析できませんでした: {filePath}",
     "errorReadingFile": "⚠️  ファイル読み取りエラー {filePath}: {error}",
@@ -1731,100 +1827,100 @@
       "debugCommand": "  debug     - 翻訳の問題をデバッグ"
     },
     "test_complete_system": {
-    "starting_test": "🧪 完全システムテストを開始します\n",
-    "separator": "＝",
-    "testing_ui_translations": "\n📝 UI翻訳をテスト中…",
-    "testing_settings_manager": "\n⚙️  設定マネージャーをテスト中…",
-    "testing_main_scripts": "\n🔧 メインスクリプトをテスト中…",
-    "checking_translation_consistency": "\n🌐 翻訳の一貫性をチェック中…",
-    "non_critical_missing_keys": "ℹ️ {file}: 重大ではない欠落キー {count} 件",
-    "extra_keys": "ℹ️ {file}: 余分なキー {count} 件",
-    "generating_report": "\n📊 レポートを生成中…",
-    "final_test_report_title": "📋 最終テストレポート",
-    "passed": "✅ 合格: {passed}",
-    "failed": "❌ 不合格: {failed}",
-    "warnings": "⚠️  警告: {warnings}",
-    "missing_translations_title": "\n🔍 欠落翻訳 ({count} 件):",
-    "missing_translation_key": "   - {key}",
-    "missing_translations_more": "   …さらに {count} 件",
-    "errors_title": "\n❌ エラー:",
-    "error_message": "   - {error}",
-    "overall_status": "\n📊 全体ステータス: {status}",
-    "success_message": "✅ {message}",
-    "failure_message": "❌ {message}",
-    "failure_error_message": "   {errorMessage}",
-    "warning_message": "⚠️  {message}",
-    "test_runner_failed": "❌ テストランナーが失敗しました:",
-    "recommendations": {
-      "add_missing_translation_keys": "一貫性を保つために欠落した翻訳キーを追加してください",
-      "fix_failing_scripts": "デプロイ前にテストに失敗したスクリプトを修正してください",
-      "review_warning_messages": "警告メッセージを確認して対処してください",
-      "system_ready_for_deployment": "システムはデプロイの準備が整っています"
+      "starting_test": "🧪 完全システムテストを開始します\n",
+      "separator": "＝",
+      "testing_ui_translations": "\n📝 UI翻訳をテスト中…",
+      "testing_settings_manager": "\n⚙️  設定マネージャーをテスト中…",
+      "testing_main_scripts": "\n🔧 メインスクリプトをテスト中…",
+      "checking_translation_consistency": "\n🌐 翻訳の一貫性をチェック中…",
+      "non_critical_missing_keys": "ℹ️ {file}: 重大ではない欠落キー {count} 件",
+      "extra_keys": "ℹ️ {file}: 余分なキー {count} 件",
+      "generating_report": "\n📊 レポートを生成中…",
+      "final_test_report_title": "📋 最終テストレポート",
+      "passed": "✅ 合格: {passed}",
+      "failed": "❌ 不合格: {failed}",
+      "warnings": "⚠️  警告: {warnings}",
+      "missing_translations_title": "\n🔍 欠落翻訳 ({count} 件):",
+      "missing_translation_key": "   - {key}",
+      "missing_translations_more": "   …さらに {count} 件",
+      "errors_title": "\n❌ エラー:",
+      "error_message": "   - {error}",
+      "overall_status": "\n📊 全体ステータス: {status}",
+      "success_message": "✅ {message}",
+      "failure_message": "❌ {message}",
+      "failure_error_message": "   {errorMessage}",
+      "warning_message": "⚠️  {message}",
+      "test_runner_failed": "❌ テストランナーが失敗しました:",
+      "recommendations": {
+        "add_missing_translation_keys": "一貫性を保つために欠落した翻訳キーを追加してください",
+        "fix_failing_scripts": "デプロイ前にテストに失敗したスクリプトを修正してください",
+        "review_warning_messages": "警告メッセージを確認して対処してください",
+        "system_ready_for_deployment": "システムはデプロイの準備が整っています"
+      },
+      "hardcodedTexts": {
+        "addMissingTranslationKeys": "一貫性を保つために欠落した翻訳キーを追加してください",
+        "fixFailingScripts": "デプロイ前にテストに失敗したスクリプトを修正してください",
+        "reviewWarningMessages": "警告メッセージを確認して対処してください",
+        "systemReadyForDeployment": "システムはデプロイの準備が整っています"
+      }
     },
-    "hardcodedTexts": {
-      "addMissingTranslationKeys": "一貫性を保つために欠落した翻訳キーを追加してください",
-      "fixFailingScripts": "デプロイ前にテストに失敗したスクリプトを修正してください",
-      "reviewWarningMessages": "警告メッセージを確認して対処してください",
-      "systemReadyForDeployment": "システムはデプロイの準備が整っています"
-    }
-  },
-  "testConsoleI18n": {
-    "found_target_file": "対象ファイルを検出しました: {fileName}",
-    "scanning_files_for_console_statements": "コンソールステートメントをスキャンしています…",
-    "found_javascript_files": "JavaScriptファイルを {count} 件検出しました。",
-    "console_i18n_analysis_results": "コンソール I18n 分析結果",
-    "total_console_statements": "コンソールステートメント総数: {count}",
-    "translated_statements": "翻訳済みステートメント: {count}",
-    "hardcoded_statements": "ハードコードされたステートメント: {count}",
-    "translation_coverage": "翻訳カバレッジ: {percentage}%",
-    "coverage_by_file": "ファイルごとのカバレッジ:",
-    "file_coverage_stats": "{emoji} {fileName}: {coverage}% ({translated}/{total})",
-    "hardcoded_console_statements": "ハードコードされたコンソールステートメント:",
-    "file_header": "ファイル: {file}",
-    "line_statement": "  行 {line}: {statement}",
-    "suggested_key": "    推奨キー: {key}",
-    "suggested_replacement": "    推奨置換: {replacement}",
-    "recommendations": "推奨事項:",
-    "recommendation_1": "1. ハードコードされた文字列を i18n.t() 呼び出しに置き換えてください。",
-    "recommendation_2": "2. 関連する翻訳JSONファイルに新しいキーを追加してください。",
-    "recommendation_3": "3. すべてのコンソールメッセージがユーザー向けで翻訳が必要であることを確認してください。",
-    "recommendation_4": "4. 動的メッセージにはテンプレートリテラルまたは文字列連結を使用し、変数を i18n.t() に渡してください。",
-    "translation_keys_to_add": "追加する翻訳キーの提案:",
-    "add_keys_instruction": "以下のJSON構造を翻訳ファイルにコピーしてください:",
-    "perfect_translation_coverage": "完璧な翻訳カバレッジ！",
-    "all_statements_using_translation": "すべてのコンソールステートメントが翻訳システムを使用しています。",
-    "i18n_console_translation_checker": "I18n コンソール翻訳チェッカー",
-    "script_description_line1": "このスクリプトはすべてのJavaScriptファイルをスキャンしコンソール文を検出します",
-    "script_description_line2": "翻訳システムを使用しているかどうかをチェックします。",
-    "analysis_completed_in_duration": "分析完了まで {duration} 秒かかりました。",
-    "report_saved_to_path": "レポートを次の場所に保存しました: {path}",
-    "found_hardcoded_messages": "ハードコードされたメッセージを {count} 件検出しました。エラーコード1で終了します。",
-    "all_console_messages_use_translation": "すべてのコンソールメッセージが翻訳を使用しています。コード0で終了します。",
-    "consoleTranslationsCheck": "コンソール翻訳チェック"
-  },
-  "translate_mismatches": {
-    "title": "🌐 翻訳ヘルパー {dryRun}",
-    "separator": "=====================================\n",
-    "processing_file": "📄 {language}.json を処理中…",
-    "translation_summary_title": "\n📊 翻訳サマリー:",
-    "total_translations_applied": "   適用された翻訳総数: {totalTranslations}",
-    "run_with_apply_instruction": "\n💡 --apply フラグを付けて実行するとこれらの翻訳を適用します\n",
-    "no_translation_mappings": "   ⚠️  {language} に利用可能な翻訳マッピングがありません",
-    "translation_applied": "   ✅ {key}: \"{oldValue}\" → \"{newValue}\"",
-    "saved_translations": "   💾 {count} 件の翻訳を {filename} に保存しました",
-    "found_translatable_items": "   🔍 翻訳可能な項目を {count} 件検出",
-    "no_automatic_translations": "   ✨ 自動翻訳は利用できません",
-    "error_processing_file": "   ❌ {filename} の処理中にエラー: {errorMessage}",
-    "coverage_report_title": "📊 翻訳カバレッジレポート",
-    "coverage_report_separator": "===============================\n",
-    "file_header": "📄 {filename}:",
-    "total_keys": "   キー総数: {total}",
-    "translated_keys": "   翻訳済み: {translated}",
-    "untranslated_markers": "   未翻訳マーカー: {untranslated}",
-    "contains_english": "   英語を含む: {hasEnglish}",
-    "coverage_percentage": "   カバレッジ: {coverage}%\n",
-    "error_general": "❌ エラー:",
-    "use_help": "使用法情報は --help を参照してください"
+    "testConsoleI18n": {
+      "found_target_file": "対象ファイルを検出しました: {fileName}",
+      "scanning_files_for_console_statements": "コンソールステートメントをスキャンしています…",
+      "found_javascript_files": "JavaScriptファイルを {count} 件検出しました。",
+      "console_i18n_analysis_results": "コンソール I18n 分析結果",
+      "total_console_statements": "コンソールステートメント総数: {count}",
+      "translated_statements": "翻訳済みステートメント: {count}",
+      "hardcoded_statements": "ハードコードされたステートメント: {count}",
+      "translation_coverage": "翻訳カバレッジ: {percentage}%",
+      "coverage_by_file": "ファイルごとのカバレッジ:",
+      "file_coverage_stats": "{emoji} {fileName}: {coverage}% ({translated}/{total})",
+      "hardcoded_console_statements": "ハードコードされたコンソールステートメント:",
+      "file_header": "ファイル: {file}",
+      "line_statement": "  行 {line}: {statement}",
+      "suggested_key": "    推奨キー: {key}",
+      "suggested_replacement": "    推奨置換: {replacement}",
+      "recommendations": "推奨事項:",
+      "recommendation_1": "1. ハードコードされた文字列を i18n.t() 呼び出しに置き換えてください。",
+      "recommendation_2": "2. 関連する翻訳JSONファイルに新しいキーを追加してください。",
+      "recommendation_3": "3. すべてのコンソールメッセージがユーザー向けで翻訳が必要であることを確認してください。",
+      "recommendation_4": "4. 動的メッセージにはテンプレートリテラルまたは文字列連結を使用し、変数を i18n.t() に渡してください。",
+      "translation_keys_to_add": "追加する翻訳キーの提案:",
+      "add_keys_instruction": "以下のJSON構造を翻訳ファイルにコピーしてください:",
+      "perfect_translation_coverage": "完璧な翻訳カバレッジ！",
+      "all_statements_using_translation": "すべてのコンソールステートメントが翻訳システムを使用しています。",
+      "i18n_console_translation_checker": "I18n コンソール翻訳チェッカー",
+      "script_description_line1": "このスクリプトはすべてのJavaScriptファイルをスキャンしコンソール文を検出します",
+      "script_description_line2": "翻訳システムを使用しているかどうかをチェックします。",
+      "analysis_completed_in_duration": "分析完了まで {duration} 秒かかりました。",
+      "report_saved_to_path": "レポートを次の場所に保存しました: {path}",
+      "found_hardcoded_messages": "ハードコードされたメッセージを {count} 件検出しました。エラーコード1で終了します。",
+      "all_console_messages_use_translation": "すべてのコンソールメッセージが翻訳を使用しています。コード0で終了します。",
+      "consoleTranslationsCheck": "コンソール翻訳チェック"
+    },
+    "translate_mismatches": {
+      "title": "🌐 翻訳ヘルパー {dryRun}",
+      "separator": "=====================================\n",
+      "processing_file": "📄 {language}.json を処理中…",
+      "translation_summary_title": "\n📊 翻訳サマリー:",
+      "total_translations_applied": "   適用された翻訳総数: {totalTranslations}",
+      "run_with_apply_instruction": "\n💡 --apply フラグを付けて実行するとこれらの翻訳を適用します\n",
+      "no_translation_mappings": "   ⚠️  {language} に利用可能な翻訳マッピングがありません",
+      "translation_applied": "   ✅ {key}: \"{oldValue}\" → \"{newValue}\"",
+      "saved_translations": "   💾 {count} 件の翻訳を {filename} に保存しました",
+      "found_translatable_items": "   🔍 翻訳可能な項目を {count} 件検出",
+      "no_automatic_translations": "   ✨ 自動翻訳は利用できません",
+      "error_processing_file": "   ❌ {filename} の処理中にエラー: {errorMessage}",
+      "coverage_report_title": "📊 翻訳カバレッジレポート",
+      "coverage_report_separator": "===============================\n",
+      "file_header": "📄 {filename}:",
+      "total_keys": "   キー総数: {total}",
+      "translated_keys": "   翻訳済み: {translated}",
+      "untranslated_markers": "   未翻訳マーカー: {untranslated}",
+      "contains_english": "   英語を含む: {hasEnglish}",
+      "coverage_percentage": "   カバレッジ: {coverage}%\n",
+      "error_general": "❌ エラー:",
+      "use_help": "使用法情報は --help を参照してください"
     }
   },
   "ui": {
@@ -1947,5 +2043,104 @@
       "success": "✅",
       "warning": "⚠️"
     }
+  },
+  "consoleI18nTester": {  
+    "found_target_file": "ターゲットファイルが見つかりました",
+    "scanning_files_for_console_statements": "コンソールステートメントのファイルをスキャン中",
+    "found_javascript_files": "JavaScriptファイルが見つかりました",
+    "console_i18n_analysis_results": "コンソールi18n分析結果",
+    "total_console_statements": "コンソールステートメント合計",
+    "translated_statements": "翻訳済みステートメント",
+    "hardcoded_statements": "ハードコードされたステートメント",
+    "translation_coverage": "翻訳カバレッジ",
+    "coverage_by_file": "ファイル別カバレッジ",
+    "file_coverage_stats": "ファイルカバレッジ統計",
+    "hardcoded_console_statements": "ハードコードされたコンソールステートメント",
+    "file_header": "ファイルヘッダー",
+    "line_statement": "行ステートメント",
+    "suggested_key": "推奨キー",
+    "suggested_replacement": "推奨される置換",
+    "recommendations": "推奨事項",
+    "recommendation_1": "推奨事項1",
+    "recommendation_2": "推奨事項2",
+    "recommendation_3": "推奨事項3",
+    "recommendation_4": "推奨事項4",
+    "translation_keys_to_add": "追加する翻訳キー",
+    "add_keys_instruction": "キー追加の手順",
+    "perfect_translation_coverage": "完全な翻訳カバレッジ",
+    "all_statements_using_translation": "すべてのステートメントが翻訳を使用中",
+    "i18n_console_translation_checker": "i18nコンソール翻訳チェッカー",
+    "script_description_line1": "スクリプトの説明1",
+    "script_description_line2": "スクリプトの説明2",
+    "analysis_completed_in_duration": "分析が完了しました（所要時間）",
+    "report_saved_to_path": "レポートが保存されました：パス",
+    "found_hardcoded_messages": "ハードコードされたメッセージが見つかりました",
+    "all_console_messages_use_translation": "すべてのコンソールメッセージが翻訳を使用しています"
+  },
+  "\\nSelect directory to clean (0-${availableDirs": {
+    "length + 1}): ": ""
+  },
+  "exportTranslations": {
+    "createdDirectory": "ディレクトリを作成しました",
+    "foundFiles": "ファイルが見つかりました",
+    "createdTemplate": "テンプレートを作成しました",
+    "skippedExisting": "既存をスキップしました",
+    "title": "タイトル",
+    "creatingTemplates": "テンプレートを作成中",
+    "summary": "サマリー",
+    "summaryLanguages": "言語サマリー",
+    "summaryFilesPerLanguage": "言語ごとのファイル数",
+    "summaryTotalFiles": "合計ファイル数",
+    "success": "成功",
+    "location": "場所",
+    "nextSteps": "次のステップ"
+  },
+  ")) {\n          console": {
+    "log(": "ログ("
+  },
+  "dashboard": {
+    "title": "タイトル",
+    "overview": "概要"
+  },
+  "auth": {
+    "title": "タイトル",
+    "email": "メール",
+    "password": "パスワード",
+    "signIn": "サインイン",
+    "forgotPassword": "パスワードを忘れた",
+    "signUp": "サインアップ"
+  },
+  "autorun": {
+    "autoRunScriptTitle": "🧪 自動ワークフロー",
+    "separator": "==================================================",
+    "usageTitle": "使用方法",
+    "runAllSteps": "実行: node i18ntk-autorun.js",
+    "configureSettingsFirst": "設定: i18ntk-config.json または CLIフラグ",
+    "runSpecificSteps": "--steps=1,3 または --list を使用してステップを表示",
+    "showHelp": "--help で詳細情報",
+    "examplesTitle": "例",
+    "configExample": "node i18ntk-autorun.js --ui-language=ja",
+    "stepsExample1": "node i18ntk-autorun.js --steps=analyze,validate",
+    "stepsExample2": "node i18ntk-autorun.js --list",
+    "customSettingsConfiguration": "🌍 カスタム設定",
+    "startingAutoRunWorkflow": "🚀 自動ワークフローを開始しています...",
+    "workflowIncludesSteps": "ワークフローには {count} ステップが含まれています:",
+    "stepRunning": "▶️  ステップ {stepNumber}/{totalSteps}: {stepName}",
+    "stepCompletedWithIcon": "✅ ステップ '{stepName}' が正常に完了しました！",
+    "stepFailed": "❌ 失敗: {stepName}",
+    "errorLabel": "エラー: {error}",
+    "missingRequiredFile": "必要なファイルが見つかりません: {file}",
+    "workflowCompleted": "🎉 ワークフローが正常に完了しました！",
+    "workflowStopped": "エラーが発生したためワークフローが停止しました。",
+    "successfulSteps": "✅ 成功したステップ: {count}",
+    "failedSteps": "❌ 失敗したステップ: {count}",
+    "availableSteps": "📋 利用可能な自動化ステップ",
+    "configReadError": "設定ファイルの読み取りに失敗しました: {file}",
+    "stepInitializeProject": "プロジェクトを初期化",
+    "stepAnalyzeTranslations": "翻訳を分析",
+    "stepValidateTranslations": "翻訳を検証",
+    "stepCheckUsage": "使用状況を確認",
+    "stepGenerateSummary": "要約レポートを生成",
+    "stepCompleted": "ステップ '{stepName}' が完了しました。"
   }
 }

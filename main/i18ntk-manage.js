@@ -34,32 +34,12 @@ const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
 
-// Enhanced default configuration with multiple path detection
-const DEFAULT_CONFIG = {
-  projectRoot: '.',
-  sourceDir: './locales',
-  sourceLanguage: 'en',
-  defaultLanguages: ['de', 'es', 'fr', 'ru'],
-  outputDir: './i18ntk-reports',
-  i18nDir: './locales',
-  // Multiple possible i18n locations to check
-  possibleI18nPaths: [
-    './locales',
-    './src/locales', 
-    './src/i18n',
-    './src/i18n/locales',
-    './app/locales',
-    './app/i18n',
-    './public/locales',
-    './assets/locales',
-    './translations',
-    './lang'
-  ]
-};
+// Use unified configuration system
+const { getUnifiedConfig } = require('../utils/config-helper');
 
 class I18nManager {
   constructor(config = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = config;
     this.rl = null;
     this.isReadlineClosed = false;
     this.isAuthenticated = false;
@@ -70,9 +50,6 @@ class I18nManager {
     
     // Initialize admin authentication
     this.adminAuth = new AdminAuth();
-    
-    // Auto-detect i18n directory on initialization
-    this.detectI18nDirectory();
     
     // Initialize readline interface
     this.initializeReadline();
@@ -98,9 +75,34 @@ class I18nManager {
     }
   }
 
+  // Initialize configuration using unified system
+  async initialize() {
+    try {
+      const args = this.parseArgs();
+      if (args.help) {
+        this.showHelp();
+        process.exit(0);
+      }
+      
+      const baseConfig = await getUnifiedConfig('manage', args);
+      this.config = { ...baseConfig, ...this.config };
+      
+      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      this.ui.loadLanguage(uiLanguage);
+      
+      // Validate source directory exists
+      const { validateSourceDir } = require('../utils/config-helper');
+      validateSourceDir(this.config.sourceDir, 'i18ntk-manage');
+      
+    } catch (error) {
+      console.error(`Error initializing i18n manager: ${error.message}`);
+      throw error;
+    }
+  }
+
   // Auto-detect i18n directory from common locations only if not configured in settings
   detectI18nDirectory() {
-    const settings = settingsManager.getSettings();
+    const settings = settingsManager.getAllSettings();
     const projectRoot = path.resolve(settings.projectRoot || this.config.projectRoot || '.');
     
     // Use per-script directory configuration if available, fallback to global sourceDir
@@ -111,8 +113,22 @@ class I18nManager {
       return;
     }
     
+    // Define possible i18n paths for auto-detection
+    const possibleI18nPaths = [
+      './locales',
+      './src/locales', 
+      './src/i18n',
+      './src/i18n/locales',
+      './app/locales',
+      './app/i18n',
+      './public/locales',
+      './assets/locales',
+      './translations',
+      './lang'
+    ];
+    
     // Only auto-detect if no settings are configured
-    for (const possiblePath of this.config.possibleI18nPaths) {
+    for (const possiblePath of possibleI18nPaths) {
       const resolvedPath = path.resolve(projectRoot, possiblePath);
       if (fs.existsSync(resolvedPath)) {
         // Check if it contains language directories
@@ -141,7 +157,7 @@ class I18nManager {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
-      console.log(this.ui.t('init.warnings.noPackageJson'));
+      console.log(this.ui.t('init.noPackageJson'));
       return await this.promptContinueWithoutI18n();
     }
     
@@ -192,11 +208,59 @@ class I18nManager {
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
   }
 
+  // Parse command line arguments
+  parseArgs() {
+    const args = process.argv.slice(2);
+    const parsed = {};
+    
+    args.forEach(arg => {
+      if (arg.startsWith('--')) {
+        const [key, value] = arg.substring(2).split('=');
+        const sanitizedKey = key?.trim();
+        const sanitizedValue = value !== undefined ? value.trim() : true;
+        
+        switch (sanitizedKey) {
+          case 'source-dir':
+            parsed.sourceDir = sanitizedValue;
+            break;
+          case 'i18n-dir':
+            parsed.i18nDir = sanitizedValue;
+            break;
+          case 'output-dir':
+            parsed.outputDir = sanitizedValue;
+            break;
+          case 'source-language':
+            parsed.sourceLanguage = sanitizedValue;
+            break;
+          case 'ui-language':
+            parsed.uiLanguage = sanitizedValue;
+            break;
+          case 'help':
+          case 'h':
+            parsed.help = true;
+            break;
+          default:
+            // Handle language shorthand flags like --de, --fr
+            if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(sanitizedKey)) {
+              parsed.uiLanguage = sanitizedKey;
+            }
+            break;
+        }
+      }
+    });
+    
+    return parsed;
+  }
+
   // Add this run method after the checkI18nDependencies method
   async run() {
     try {
+      // Initialize configuration using unified system
+      await this.initialize();
+      
       // Parse command line arguments
-      const args = process.argv.slice(2);
+      const args = this.parseArgs();
+      const rawArgs = process.argv.slice(2); // Preserve original CLI args array for positional checks
       let commandToExecute = null;
 
       // Define valid direct commands
@@ -205,25 +269,25 @@ class I18nManager {
       ];
 
       // Handle help immediately without dependency checks
-      if (args.includes('--help') || args.includes('-h')) {
+      if (args.help) {
         this.showHelp();
         this.safeClose();
         process.exit(0);
       }
 
       // Handle debug flag
-      if (args.includes('--debug')) {
+      if (args.debug) {
         // Enable debug mode for this session
-        process.env.I18NTK_DEBUG_MODE = 'true';
+        console.log(chalk.blue('Debug mode enabled'));
       }
 
       // Check for --command= argument first
-      const commandFlagArg = args.find(arg => arg.startsWith('--command='));
+      const commandFlagArg = rawArgs.find(arg => arg.startsWith('--command='));
       if (commandFlagArg) {
         commandToExecute = commandFlagArg.split('=')[1];
-      } else if (args.length > 0 && directCommands.includes(args[0])) {
+      } else if (rawArgs.length > 0 && directCommands.includes(rawArgs[0])) {
         // If no --command=, check if the first argument is a direct command
-        commandToExecute = args[0];
+        commandToExecute = rawArgs[0];
       }
 
       if (commandToExecute) {
@@ -245,7 +309,7 @@ class I18nManager {
       await this.showInteractiveMenu();
       
     } catch (error) {
-      console.error(this.ui.t('errors.genericError', { error: error.message }));
+      console.error(this.ui.t('common.genericError', { error: error.message }));
       process.exit(1);
     } finally {
       this.safeClose();
@@ -289,7 +353,7 @@ class I18nManager {
     }
     
     // Check if called from workflow/autorun
-    if (options.fromWorkflow === true || process.env.I18NTK_WORKFLOW_MODE === 'true') {
+    if (options.fromWorkflow === true) {
       return { type: 'workflow', source: 'autorun_script' };
     }
     
@@ -790,9 +854,11 @@ class I18nManager {
     const targetDirs = [
       { path: path.join(process.cwd(), 'i18ntk-reports'), name: 'Reports', type: 'reports' },
       { path: path.join(process.cwd(), 'reports'), name: 'Legacy Reports', type: 'reports' },
+      { path: path.join(process.cwd(), 'reports', 'backups'), name: 'Reports Backups', type: 'backups' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
-      { path: path.join(process.cwd(), 'settings', 'backups'), name: 'Backups', type: 'backups' }
+      { path: path.join(process.cwd(), 'settings', 'backups'), name: 'Settings Backups', type: 'backups' },
+      { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' }
     ];
     
     try {
@@ -936,16 +1002,36 @@ class I18nManager {
   getAllReportFiles(dir) {
     let files = [];
     
-    const items = fs.readdirSync(dir);
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
-      
-      if (stat.isDirectory()) {
-        files.push(...this.getAllReportFiles(fullPath));
-      } else if (item.endsWith('.json') || item.endsWith('.html') || item.endsWith('.txt') || item.endsWith('.log')) {
-        files.push(fullPath);
+    try {
+      const items = fs.readdirSync(dir);
+      for (const item of items) {
+        const fullPath = path.join(dir, item);
+        const stat = fs.statSync(fullPath);
+        
+        if (stat.isDirectory()) {
+          files.push(...this.getAllReportFiles(fullPath));
+        } else if (
+          // Common report file extensions
+          item.endsWith('.json') || 
+          item.endsWith('.html') || 
+          item.endsWith('.txt') || 
+          item.endsWith('.log') || 
+          item.endsWith('.csv') || 
+          item.endsWith('.md') ||
+          // Specific report filename patterns
+          item.includes('-report.') || 
+          item.includes('_report.') || 
+          item.includes('report-') || 
+          item.includes('report_') ||
+          item.includes('analysis-') ||
+          item.includes('validation-')
+        ) {
+          files.push(fullPath);
+        }
       }
+    } catch (error) {
+      // Silent fail for inaccessible directories
+      console.log(`⚠️ Could not access directory: ${dir}`);
     }
     
     return files;
@@ -1047,26 +1133,26 @@ if (require.main === module) {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       const versionInfo = packageJson.versionInfo || {};
       
-      console.log(`\n${this.ui.t('ui.toolkitTitle')}`);
-      console.log(`${this.ui.t('ui.versionInfo', { version: packageJson.version })}`);
-      console.log(`${this.ui.t('ui.releaseDate', { date: versionInfo.releaseDate || 'N/A' })}`);
-      console.log(`${this.ui.t('ui.maintainer', { maintainer: versionInfo.maintainer || packageJson.author })}`);
-      console.log(`${this.ui.t('ui.nodeVersion', { version: versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0' })}`);
-      console.log(`${this.ui.t('ui.license', { license: packageJson.license })}`);
+      console.log(`\n🌍 i18n Toolkit (i18ntk)`);
+      console.log(`Version: ${packageJson.version}`);
+      console.log(`Release Date: ${versionInfo.releaseDate || 'N/A'}`);
+      console.log(`Maintainer: ${versionInfo.maintainer || packageJson.author}`);
+      console.log(`Node.js: ${versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0'}`);
+      console.log(`License: ${packageJson.license}`);
       
       if (versionInfo.majorChanges && versionInfo.majorChanges.length > 0) {
-        console.log(`\n${this.ui.t('ui.whatsNew', { version: packageJson.version })}`);
+        console.log(`\n✨ What's New in ${packageJson.version}:`);
         versionInfo.majorChanges.forEach(change => {
-          console.log(`${this.ui.t('ui.changeItem', { change: change })}`);
+          console.log(`  • ${change}`);
         });
       }
       
-      console.log(`\n${this.ui.t('ui.documentation', { url: packageJson.homepage || 'https://github.com/vladnoskv/i18n-management-toolkit#readme' })}`);
-      console.log(`${this.ui.t('ui.issues', { url: packageJson.bugs?.url || 'https://github.com/vladnoskv/i18n-management-toolkit/issues' })}`)
+      console.log(`\n📖 Documentation: ${packageJson.homepage || 'https://github.com/vladnoskv/i18n-management-toolkit#readme'}`);
+      console.log(`🐛 Report Issues: ${packageJson.bugs?.url || 'https://github.com/vladnoskv/i18n-management-toolkit/issues'}`);
       
     } catch (error) {
-      console.log(`\n${this.ui.t('ui.versionInfoUnavailable')}`);
-      console.log(`${this.ui.t('ui.versionInfoError', { error: error.message })}`);
+      console.log(`\n❌ Version information unavailable`);
+      console.log(`Error: ${error.message}`);
     }
     process.exit(0);
   }

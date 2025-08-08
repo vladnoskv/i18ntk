@@ -10,6 +10,7 @@
 /dev
 /benchmarks
 /src
+.trae
 
 # Test files
 /dev/tests/test-report-final.json
@@ -30,12 +31,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Configuration files
+config.json
+settings.json
 
 # NPM files
 npm

@@ -49,18 +49,16 @@ class I18nInitializer {
   constructor(config = {}) {
     this.ui = new UIi18n();
     this.config = {
-      sourceDir: './locales',
       sourceLanguage: 'en',
-      defaultLanguages: ['de', 'es', 'fr', 'ru'],
       excludeFiles: ['.DS_Store', 'Thumbs.db'],
       supportedExtensions: ['.json'],
       notTranslatedMarker: '[NOT_TRANSLATED]',
       ...config
     };
-    this.sourceDir = this.config.sourceDir;
+    this.sourceDir = this.config.sourceDir || './locales';
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     
-    // Ensure defaultLanguages is properly initialized
+    // Ensure defaultLanguages is properly initialized from config
     this.config.defaultLanguages = this.config.defaultLanguages || ['de', 'es', 'fr', 'ru'];
     
     // Use global readline interface to prevent doubling
@@ -84,7 +82,7 @@ class I18nInitializer {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
-      console.log(this.ui.t('init.warnings.noPackageJson'));
+      console.log(this.ui.t('init.noPackageJson'));
       return await this.promptContinueWithoutI18n();
     }
     
@@ -244,7 +242,7 @@ class I18nInitializer {
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
         
         // Save to settings
-        const currentSettings = settingsManager.getSettings();
+        const currentSettings = settingsManager.getAllSettings();
         currentSettings.sourceDir = selectedDir;
         settingsManager.saveSettings(currentSettings);
         
@@ -279,7 +277,7 @@ class I18nInitializer {
           this.sourceLanguageDir = sourceLangDir;
           
           // Save to settings
-          const currentSettings = settingsManager.getSettings();
+          const currentSettings = settingsManager.getAllSettings();
           currentSettings.sourceDir = newDirPath;
           settingsManager.saveSettings(currentSettings);
           
@@ -731,6 +729,11 @@ class I18nInitializer {
       // Call the enhanced initialize method with args
       await this.initialize(hasI18n, args);
       
+      // Offer interactive locale optimization after successful initialization
+      if (!args.noPrompt) {
+        await this.offerLocaleOptimization();
+      }
+      
     } catch (error) {
       console.error(this.ui.t('init.errors.initializationFailed', { error: error.message }));
       throw error;
@@ -875,6 +878,53 @@ class I18nInitializer {
     console.log(this.ui.t('init.nextStep3'));
   }
 
+  // Offer interactive locale optimization after initialization
+  async offerLocaleOptimization() {
+    try {
+      console.log('\n' + '='.repeat(60));
+      console.log('🎯 **PACKAGE SIZE OPTIMIZATION**');
+      console.log('='.repeat(60));
+      
+      // First run dry run to show current state
+      console.log('\n🔍 Running locale optimization preview...');
+      const { spawn } = require('child_process');
+      const path = require('path');
+      
+      const dryRun = spawn('node', [path.join(__dirname, '..', 'scripts', 'locale-optimizer.js'), '--dry-run'], {
+        stdio: 'inherit',
+        cwd: process.cwd()
+      });
+
+      await new Promise(resolve => {
+        dryRun.on('close', resolve);
+      });
+
+      console.log('\n💡 You can reduce package size by selecting only the languages you need');
+      
+      const answer = await this.prompt('\n🤖 Would you like to run interactive optimization now? (y/n): ');
+      
+      if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+        console.log('\n🚀 Starting interactive locale optimization...');
+        
+        const optimizer = spawn('node', [path.join(__dirname, '..', 'scripts', 'locale-optimizer.js'), '--interactive'], {
+          stdio: 'inherit',
+          cwd: process.cwd()
+        });
+
+        await new Promise(resolve => {
+          optimizer.on('close', resolve);
+        });
+        
+        console.log('\n✅ Package optimization completed!');
+      } else {
+        console.log('\n💡 You can run locale optimization later with:');
+        console.log('   node scripts/locale-optimizer.js --interactive');
+      }
+    } catch (error) {
+      console.log('\n⚠️ Could not offer locale optimization:', error.message);
+    }
+  }
+
   // Run the initialization process with admin authentication
   async run(options = {}) {
     const fromMenu = options.fromMenu || false;
@@ -892,9 +942,9 @@ class I18nInitializer {
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
         
         // Load translations for UI messages
-        const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-        const { loadTranslations } = require('../utils/i18n-helper');
-        loadTranslations(uiLanguage);
+      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      const { loadTranslations } = require('../utils/i18n-helper');
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       }
 
       // Override config with command line arguments
@@ -981,7 +1031,7 @@ class I18nInitializer {
       // Load translations for UI messages
       const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
       const { loadTranslations } = require('../utils/i18n-helper');
-      loadTranslations(uiLanguage);
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
       // Skip i18n framework check in non-interactive mode
       console.log('Running initialization in non-interactive mode...');

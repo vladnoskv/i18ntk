@@ -1,8 +1,7 @@
 {
   "meta": {
-    "version": "1.5.3",
-    "consolidated": "2025-08-06T14:36:37.494Z",
-    "sourceFiles": 256
+    "version": "1.6.0",
+    "updated": "2025-08-08"
   },
   "common": {
     "welcome": "Bienvenue",
@@ -75,14 +74,28 @@
     "review": "Révision des traductions...",
     "finalizing": "Finalisation des traductions...",
     "finalized": "Finalisé avec succès !",
-    "errors": "Erreurs :",
     "warnings": "Avertissements :",
     "completedKeys": "Clés complétées :",
     "missingKeys": "Clés manquantes :",
-    "partialKeys": "Clés partielles :"
+    "partialKeys": "Clés partielles :",
+    "home": "Accueil",
+    "settings": "Paramètres",
+    "confirm": "Confirmer",
+    "errors": {
+      "errors": "Erreurs :",
+      "genericError": "❌ Erreur : {{error}}",
+      "initializationFailed": "❌ Initialisation échouée : {error}",
+      "translationKeyNotFound": "Clé de traduction non trouvée : {key}",
+      "sourceDirectoryNotFound": "Répertoire source non trouvé : {directory}",
+      "configLoadingFailed": "Chargement de la configuration échoué",
+      "invalidSourceDirectory": "Répertoire source invalide : {directory}",
+      "securityViolation": "Violation de sécurité détectée",
+      "authenticationFailed": "Authentification échouée",
+      "sourceEqualsI18nWarn": "⚠️ sourceDir equals i18nDir ({sourceDir}). Falling back to {fallback} for source scanning."
+    }
   },
   "analyze": {
-    "help_message": "\nAnalyseur de Traduction I18n\n\nUtilisation: node i18ntk-analyze.js [options]\n\nOptions:\n  --source-dir <dir>     Répertoire source à analyser (par défaut: ./src)\n  --i18n-dir <dir>       Répertoire i18n (par défaut: ./src/locales)\n  --output-report        Générer un rapport détaillé\n  --output-dir <dir>     Répertoire de sortie pour les rapports (par défaut: ./reports)\n  --help                 Afficher cette aide\n\nExemples:\n  node i18ntk-analyze.js --output-report\n  node i18ntk-analyze.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-analyze.js --output-dir=./analysis --output-report\n",
+    "help_message": "\nAnalyseur de Traduction I18n\nUtilisation: node i18ntk-analyze.js [options]\n\nOptions:\n  --source-dir <dir>     Répertoire source à analyser (par défaut: ./locales)\n  --i18n-dir <dir>       Répertoire i18n (par défaut: ./locales)\n  --output-report        Générer un rapport détaillé\n  --output-dir <dir>     Répertoire de sortie pour les rapports (par défaut: ./i18ntk-reports)\n  --help                 Afficher cette aide\n\nExemples:\n  node i18ntk-analyze.js --output-report\n  node i18ntk-analyze.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-analyze.js --output-dir=./analysis --output-report\n",
     "source_directory": "📁 Répertoire source: {sourceDir}",
     "i18n_directory": "🌐 Répertoire i18n: {i18nDir}",
     "loading_translation_files": "📋 Chargement des fichiers de traduction...",
@@ -164,6 +177,11 @@
   "complete": {
     "configLoadedSuccessfully": "Configuration chargée avec succès",
     "configLoadingFailed": "Échec du chargement de la configuration",
+    "sourceLanguageNotFound": "Langue source non trouvée",
+    "couldNotParseTarget": "Impossible de parser la cible",
+    "couldNotParseSource": "Impossible de parser la source",
+    "reportGenerated": "Rapport généré",
+    "generateReportPrompt": "Générer un rapport détaillé ? (y/N): ",
     "title": "🌍 COMPLÉTION DE TRADUCTION I18N",
     "separator": "============================================================",
     "sourceDir": "📁 Répertoire source : {sourceDir}",
@@ -180,11 +198,11 @@
     "missingKeysAdded": "➕ Clés manquantes ajoutées : {missingKeysAdded}",
     "nextStepsTitle": "📋 ÉTAPES SUIVANTES",
     "nextStep1": "1. Exécuter l'analyse d'utilisation :",
-    "nextStep2": "   node i18ntk-usage.js --output-report",
+    "nextStep2": "    node i18ntk-usage.js --output-report",
     "nextStep3": "2. Valider les traductions :",
-    "nextStep4": "   node i18ntk-validate.js",
+    "nextStep4": "    node i18ntk-validate.js",
     "nextStep5": "3. Analyser les motifs :",
-    "nextStep6": "   node i18ntk-analyze.js",
+    "nextStep6": "    node i18ntk-analyze.js",
     "allKeysAvailable": "🎉 Toutes les clés de traduction sont maintenant disponibles !",
     "runWithoutDryRun": "💡 Exécuter sans --dry-run pour appliquer les modifications",
     "deletingOldReport": "🗑️  Suppression de l'ancien rapport...",
@@ -199,7 +217,7 @@
   },
   "sizing": {
     "separator": "================================================================================",
-    "lineSeparator": "--------------------------------------------------------------------------------",
+    "lineSeparator": " --------------------------------------------------------------------------------",
     "analysisStats": "{{stats}}",
     "sourceDirectoryLabel": "📁 Répertoire source : {{sourceDir}}",
     "sourceLanguageLabel": "🌍 Langue source : {{sourceLanguage}}",
@@ -260,12 +278,16 @@
       "keys_have_significant_size_variations": "les clés présentent des variations de taille significatives",
       "consider_reviewing_translations": "Envisagez de revoir les traductions {{lang}} - elles sont {{percentageDifference}}% {{comparison}} que la référence",
       "long_translations_detected": "{{lang}} a {{longKeys}} traductions de plus de {{threshold}} caractères - envisagez de les décomposer"
-    }
+    },
+    "longer": "plus long",
+    "shorter": "plus court",
+    "review_translations": "Considérez la revue des traductions {{lang}} - elles sont {{percentageDifference}}% {{comparison}} que la référence"
   },
   "usage": {
     "help_message": "\nAnalyseur d'utilisation I18n\n\nUsage : node i18ntk-usage.js [options]\n\nOptions :\n  --source-dir <dir>     Répertoire source à analyser (défaut : ./src)\n  --i18n-dir <dir>       Répertoire I18n (défaut : ./src/locales)\n  --output-report        Générer un rapport détaillé\n  --output-dir <dir>     Répertoire de sortie pour les rapports (défaut : ./reports)\n  --help                 Afficher cette aide\n\nExemples :\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
     "source_directory_thissourcedir": "📁 Répertoire source : {sourceDir}",
     "translationCompletenessTitle": "🌍 Complétude de la traduction :",
+    "failedToExtractKeys": "⚠️  Échec de l'analyse de {fileName} : {errorMessage}",
     "i18n_directory_thisi18ndir": "🌐 Répertoire I18n : {i18nDir}",
     "failed_to_parse_filename_error": "⚠️  Échec de l'analyse de {fileName} : {errorMessage}",
     "analyzing_source_files": "🔍 Analyse des fichiers source...",
@@ -282,26 +304,30 @@
     "analysisCompletedSuccessfully": "🎉 Analyse terminée avec succès !",
     "detectedSourceDirectory": "Répertoire source détecté : {sourceDir}",
     "detectedI18nDirectory": "Répertoire i18n détecté : {i18nDir}",
-    "processedFiles": "Traité {processedFiles} de {totalFiles} fichiers.",
     "fileInfo": "   📄 {namespace}: {keys} clés",
     "failedToAnalyzeUsage": "❌ Échec de l'analyse d'utilisation : {error}",
     "failedToAnalyzeFile": "❌ Échec de l'analyse de fichier : {error}",
     "analyzerInitialized": "Analyseur initialisé",
     "analyzerInitFailed": "Échec de l'initialisation de l'analyseur : {error}",
     "argsParsed": "Arguments analysés",
+    "processedFiles": "Traité {processedFiles} de {totalFiles} fichiers.",
     "argsParseFailed": "Échec de l'analyse des arguments : {error}",
     "translationDiscoveryError": "Erreur de découverte de traduction : {error}",
     "fileTraversalError": "Erreur de parcours des fichiers : {error}",
     "usageAnalysisFailed": "Échec de l'analyse d'utilisation : {error}",
-    "translationFileParseError": "Erreur d'analyse du fichier de traduction : {error}",
-    "translationKeysLoadError": "Erreur de chargement des clés de traduction : {error}",
-    "languageCompletenessStats": "{language}: {translated}/{total} ({completeness}% traduit)",
-    "missingKeysCount": "Clés manquantes : {count}",
+    "sourceEqualsI18nWarn": "⚠️  Répertoire source et répertoire i18n sont les mêmes. Cela peut causer des problèmes avec l'analyse.",
+    "i18nEqualsSourceWarn": "⚠️  Répertoire i18n et répertoire source sont les mêmes. Cela peut causer des problèmes avec l'analyse.",
+    "translationFileParseError": "⚠️  Erreur d'analyse du fichier de traduction : {error}",
+    "translationKeysLoadError": "⚠️  Erreur de chargement des clés de traduction : {error}",
+    "languageCompletenessStats": " 🌐 {language}: {translated}/{total} ({completeness}% traduit)",
+    "missingKeysCount": "⚠️  Clés manquantes : {count}",
     "analyzingTranslationCompleteness": "Analyse de la complétude des traductions...",
     "unusedKeysCount": "Clés inutilisées : {count}",
     "usedKeysCount": "Clés utilisées : {count}",
     "availableKeysCount": "Clés disponibles : {count}",
     "analysisResults": "Résultats de l'analyse :",
+    "i18nDirectoryNotFound": "⚠️  Répertoire i18n non trouvé : {dir}",
+    "sourceDirectoryNotFound": "⚠️  Répertoire source non trouvé : {dir}",
     "checkUsage": {
       "title": "🔍 ANALYSE D'UTILISATION I18N",
       "message": "Analyse de l'utilisation des clés i18n dans votre projet.",
@@ -361,11 +387,11 @@
       "missingKeysAdded": "➕ Clés manquantes ajoutées : {missingKeysAdded}",
       "nextStepsTitle": "📋 PROCHAINES ÉTAPES",
       "nextStep1": "1. Exécuter l'analyse d'utilisation :",
-      "nextStep2": "   node i18ntk-usage.js --output-report",
+      "nextStep2": "    node i18ntk-usage.js --output-report",
       "nextStep3": "2. Valider les traductions :",
-      "nextStep4": "   node i18ntk-validate.js",
+      "nextStep4": "    node i18ntk-validate.js",
       "nextStep5": "3. Analyser les modèles :",
-      "nextStep6": "   node i18ntk-analyze.js",
+      "nextStep6": "    node i18ntk-analyze.js",
       "allKeysAvailable": "🎉 Toutes les clés de traduction sont maintenant disponibles !",
       "runWithoutDryRun": "💡 Exécuter sans --dry-run pour appliquer les changements",
       "deletingOldReport": "🗑️  Suppression de l'ancien rapport...",
@@ -374,10 +400,13 @@
       "reportNotFound": "📋 Rapport d'utilisation introuvable. Utilisation des clés communes...",
       "foundMissingKeys": "📋 Trouvé {count} clés manquantes depuis l'analyse d'utilisation",
       "couldNotParse": "❌ Impossible d'analyser le rapport d'utilisation. Utilisation des clés communes..."
-    }
+    },
+    "noTranslationLanguagesFound": "Aucune langue de traduction trouvée.",  
+    "failedToAnalyzeLanguage": "Échec de l'analyse de la langue {language} : {error}",
+    "translationCompletenessAnalysisFailed": "L'analyse de complétude de traduction a échoué : {error}"
   },
   "validate": {
-    "help_message": "\nValidateur de traductions I18n\n\nUtilisation : node i18ntk-validate.js [options]\n\nOptions :\n  --source-dir <dir>     Répertoire source à analyser (par défaut : ./src)\n  --i18n-dir <dir>       Répertoire i18n (par défaut : ./src/locales)\n  --output-report        Générer un rapport détaillé\n  --output-dir <dir>     Répertoire de sortie pour les rapports (par défaut : ./reports)\n  --help                 Afficher cette aide\n\nExemples :\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
+    "help_message": "\nValidateur de traductions I18n\n\nUtilisation : node i18ntk-validate.js [options]\n\nOptions :\n  --source-dir <dir>     Répertoire source à analyser (par défaut : ./locales)\n  --i18n-dir <dir>       Répertoire I18n (par défaut : ./locales)\n  --output-report        Générer un rapport détaillé\n  --output-dir <dir>     Répertoire de sortie pour les rapports (par défaut : ./i18ntk-reports)\n  --help                 Afficher cette aide\n\nExemples :\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
     "title": "🔍 Validateur de traductions I18n",
     "message": "Lancement du processus de validation...",
     "sourceDirectory": "📁 Répertoire source : {dir}",
@@ -612,7 +641,7 @@
     "showHelp": "node i18ntk-autorun.js --help - Afficher cette aide",
     "availableSteps": "Étapes disponibles :",
     "examplesTitle": "Exemples :",
-    "configExample": "node i18ntk-autorun.js --config",
+    "configExample": "node i18ntk-autorun.js --config",  
     "stepsExample1": "node i18ntk-autorun.js --steps 1,2,3",
     "stepsExample2": "node i18ntk-autorun.js --all",
     "configurationComplete": "Configuration terminée.",
@@ -648,6 +677,7 @@
     "selectOption": "Sélectionnez un outil de débogage : ",
     "runningDebugTool": "Exécution de {displayName}…",
     "debugToolNotFound": "❌ Outil de débogage introuvable : {toolName}",
+    "errorRunningDebugTool": "❌ Erreur lors de l’exécution de {displayName} : {errorMessage}",
     "recentDebugLogs": "📄 Journaux de débogage récents",
     "noDebugLogsFound": "❌ Aucun journal de débogage trouvé.",
     "debugLogsDirectoryNotFound": "❌ Répertoire des journaux de débogage introuvable.",
@@ -725,7 +755,7 @@
     "summaryCommand": "  summary   - Afficher le statut du projet",
     "debugCommand": "  debug     - Déboguer les problèmes de traduction",
     "menu": {
-    "pressEnterToContinue": "Appuyez sur Entrée pour continuer...",
+      "pressEnterToContinue": "Appuyez sur Entrée pour continuer...",
       "title": "\n🌐 MENU DE GESTION I18N\n",
       "description": "Menu interactif pour la gestion de l’internationalisation\n",
       "exit": "\n🚪 Quitter"
@@ -750,7 +780,7 @@
     },
     "examples": {
       "title": "\nExemples :\n",
-      "example1": "  node i18ntk-manage.js",
+      "example1": "  node i18ntk-manage.js", 
       "example2": "  node i18ntk-manage.js --source-dir ./locales",
       "example3": "  node i18ntk-manage.js --output summary-report.txt",
       "example4": "  node i18ntk-manage.js --verbose",
@@ -795,13 +825,16 @@
     "detectedI18nFrameworks": "🔍 Framework(s) i18n détecté(s) : {frameworks}",
     "existingDirectoriesFound": "📁 Répertoires de traduction existants trouvés :",
     "useExistingDirectoryPrompt": "Voulez-vous utiliser le répertoire existant ? (y/n)",
+    "selectDirectoryPrompt": "Sélectionnez un répertoire en entrant le numéro (ou choisissez 'Créer un nouveau répertoire'):",
+    "enterNewDirectoryName": "📝 Entrez le nom du nouveau répertoire :",
+    "createdNewDirectory": "Créé nouveau répertoire : {{dir}}",
+    "directoryAlreadyExists": "⚠️  Le répertoire existe déjà.",
+    "invalidDirectoryName": "⚠️  Nom de répertoire invalide.",
+    "usingExistingDirectory": "Utilisation du répertoire existant : {{dir}}",
     "autoDetectedI18nDirectory": "📂 Répertoire i18n auto-détecté : {directory}",
     "initializingProject": "⚙️  Initialisation de la configuration du projet…",
     "createdSampleTranslationFile": "✅ Fichier de traduction d’exemple créé : {file}",
     "languageSelectionTitle": "🌐 Configuration des langues",
-    "selectDirectoryPrompt": "Sélectionnez un répertoire en entrant le numéro (ou choisissez 'Créer un nouveau répertoire'):",
-    "createdNewDirectory": "Créé nouveau répertoire : {{dir}}",
-    "usingExistingDirectory": "Utilisation du répertoire existant : {{dir}}",
     "available": "Disponible",
     "defaultLanguages": "📝 Langues par défaut : {languages}",
     "enterLanguageCodes": "🎯 Saisissez les codes des langues cibles (séparés par des virgules, ex. de, es, fr, ru) :",
@@ -820,7 +853,11 @@
     "nextStep1": "1. Vérifiez les fichiers de traduction générés dans votre répertoire locales/",
     "nextStep2": "2. Ajoutez les traductions pour chaque langue cible",
     "nextStep3": "3. Exécutez à nouveau « npm run i18ntk » pour valider les traductions",
-    "warnings.noPackageJson": "Aucun package.json trouvé. Impossible de détecter le framework i18n.",
+    "detectedFrameworks": "Frameworks i18n détectés : {frameworks}",
+    "warnings": {
+      "noPackageJson": "Aucun package.json trouvé. Impossible de détecter le framework i18n."
+    },
+    "errorsPackageJsonRead": "Erreur de lecture de package.json : {errorMessage}",
     "errorsNoFramework": "Aucun framework i18n détecté. Veuillez en installer un ou en spécifier un manuellement.",
     "suggestions": {
       "noFramework": "Aucun framework i18n détecté. Envisagez d'utiliser l'un des suivants :",
@@ -840,7 +877,7 @@
     "creatingSourceDirectory": "Création du répertoire source : {dir}",
     "creatingSourceLanguageDirectory": "Création du répertoire de langue source : {dir}",
     "errors": {
-    "errorExecutingCommand": "Erreur lors de l'exécution de la commande : {error}",
+      "errorExecutingCommand": "Erreur lors de l'exécution de la commande : {error}",
       "sourceDirectoryNotFound": "Répertoire source introuvable : {dir}",
       "sourceLanguageDirectoryNotFound": "Répertoire de langue source introuvable : {dir}",
       "noJsonFilesInSourceDirectory": "Aucun fichier JSON trouvé dans le répertoire source : {dir}",
@@ -918,6 +955,7 @@
     "autoDetectedI18nDirectory": "📂 Répertoire i18n auto-détecté : {directory}",
     "executingCommand": "Exécution de la commande : {command}",
     "unknownCommand": "Commande inconnue : {command}",
+    "languageOption": "Langue {index}. {displayName}{current}",
     "debugTools": {
       "1": "Analyse des fichiers journaux",
       "2": "Analyse de l’utilisation des clés de traduction",
@@ -954,6 +992,7 @@
     "noFilesFoundToDelete": "✅ Aucun fichier à supprimer.",
     "availableDirectories": "📁 Répertoires disponibles :",
     "allDirectories": "Tous les répertoires",
+    "andMore": "et {count} autre(s)",
     "cancelOption": "Annuler",
     "cancelReportOption": "Annuler / Retour au menu",
     "invalidSelection": "❌ Sélection invalide.",
@@ -973,7 +1012,8 @@
       "title": "🚀 Initialiser de nouvelles langues"
     },
     "usage": {
-      "title": "📊 Vérifier l’utilisation des clés"
+      "title": "📊 Vérifier l’utilisation des clés",
+      "noUsedKeysHint": "Trouvé des traductions mais aucune utilisation dans la source. Vérifiez --source-dir et translationPatterns."
     },
     "analyze": {
       "title": "🔍 Analyser les traductions"
@@ -1050,7 +1090,13 @@
     "logMessage": "[SÉCURITÉ {level}] {timestamp} : {event}",
     "alertMessage": "[ALERTE SÉCURITÉ] {timestamp} : {event}",
     "securityWarning": "[AVERTISSEMENT SÉCURITÉ] {timestamp} : {event}",
-    "json_parse_error": "Sécurité : Erreur d’analyse JSON : {errorMessage}"
+    "json_parse_error": "Sécurité : Erreur d’analyse JSON : {errorMessage}",
+    "file_too_large": "Sécurité : Fichier trop volumineux : {filePath}",
+    "file_read_error": "Sécurité : Erreur de lecture du fichier : {errorMessage}",
+    "content_too_large_for_file": "Sécurité : Contenu trop volumineux pour le fichier : {filePath}",
+    "file_write_error": "Sécurité : Erreur d’écriture du fichier : {errorMessage}",
+    "json_string_too_large": "Sécurité : Chaîne JSON trop volumineuse",
+    "security_alert": "Sécurité : Alerte"
   },
   "settings-cli": {
     "settings": {
@@ -1144,6 +1190,8 @@
       "resetToDefaultsDesc": "Restaurer les paramètres d’usine",
       "reportBug": "Signaler un bug",
       "reportBugDesc": "Soumettre un rapport d’incident sur GitHub",
+      "backupSettings": "Paramètres de sauvegarde",
+      "backupSettingsDesc": "Configurer les paramètres de sauvegarde automatique pour vos fichiers de traduction",
       "saveChanges": "Enregistrer les modifications",
       "saveChangesDesc": "Enregistrer la configuration actuelle dans un fichier",
       "help": "Aide",
@@ -1161,8 +1209,8 @@
       "scriptDirectoryDesc": "Spécifiez des répertoires personnalisés pour chaque script",
       "scriptDirectorySettingsDesc": "Vous pouvez définir des répertoires personnalisés pour chaque script. Si non défini, les paramètres globaux seront utilisés.",
       "currentDirectory": "Répertoire de projet actuel",
-      "securitySettings": "Paramètres de sécurité",
-      "securitySettingsDesc": "PIN admin et autres options de sécurité"
+      "securitySettings": "Paramètres de Sécurité",
+      "securitySettingsDesc": "Paramètres de sécurité, y compris la protection PIN"
     },
     "updatePackage": {
       "title": "Mettre à jour le paquet",
@@ -1215,6 +1263,10 @@
       "browserOpened": "✅ Navigateur ouvert avec succès !"
     },
     "importExport": {
+      "title": "Importation et exportation",
+      "export": "Exportation",
+      "import": "Importation",
+      "backup": "Sauvegarde",
       "enterFilename": "Entrez le nom de fichier (ou appuyez sur Entrée pour défaut) : ",
       "exportSuccess": "Paramètres exportés vers {file}",
       "exportFailed": "Échec de l’export des paramètres : {error}",
@@ -1227,11 +1279,16 @@
       "backupSuccess": "Sauvegarde créée : {file}",
       "backupFailed": "Échec de la création de la sauvegarde : {error}"
     },
-    "resetConfirm": "Êtes-vous sûr de vouloir continuer ? (y/N) : ",
+    "selectOption": "Sélectionnez une option : ",
+    "resetToDefaultsTitle": "Réinitialiser les paramètres à leurs valeurs par défaut",
+    "resetWarning1": "⚠️  Attention : Cette action réinitialisera tous les paramètres à leurs valeurs par défaut. Êtes-vous sûr de vouloir continuer ?",
+    "resetWarning2": "⚠️  Attention : Cette action réinitialisera tous les paramètres à leurs valeurs par défaut. Êtes-vous sûr de vouloir continuer ?",
+    "resetConfirm": "Confirmez-vous la réinitialisation des paramètres ? (y/N) : ",
     "resetSuccess": "Paramètres réinitialisés aux valeurs par défaut avec succès.",
     "resetFailed": "Échec de la réinitialisation des paramètres : {error}",
     "saveSuccess": "Paramètres enregistrés avec succès.",
     "saveFailed": "Échec de l’enregistrement des paramètres.",
+    "saveError": "Erreur lors de l’enregistrement des paramètres : {error}",
     "pressEnter": "Appuyez sur Entrée pour continuer…",
     "initFailed": "Échec de l’initialisation des paramètres : {error}",
     "invalidValueFormat": "Format de valeur invalide.",
@@ -1298,28 +1355,28 @@
         "lockoutDurationUpdated": "Durée de verrouillage mise à jour à {minutes} minutes"
       }
     },
-      "fields": {
-        "i18nDir": {
-          "label": "Répertoire I18n",
-          "description": "Répertoire contenant les fichiers de traduction",
-          "current": "Actuel : {value}",
-          "help": "Chemin vers le répertoire des fichiers de traduction"
-        },
-        "projectRoot": {
-          "label": "Racine du projet",
-          "description": "Répertoire racine du projet",
-          "current": "Actuel : {value}",
-          "help": "Chemin vers le répertoire racine du projet"
-        },
-        "checkUsage": {
-          "usage_analysis_failed": "L'analyse d'utilisation a échoué",
-          "usage_analysis_success": "L'analyse d'utilisation a réussi",
-          "usage_analysis_complete": "L'analyse d'utilisation est terminée",
-          "usage_analysis_in_progress": "L'analyse d'utilisation est en cours",
-          "usage_analysis_started": "L'analyse d'utilisation a démarré",
-          "usage_analysis_skipped": "L'analyse d'utilisation a été ignorée"
-        },
-        "language": {
+    "fields": {
+      "i18nDir": {
+        "label": "Répertoire I18n",
+        "description": "Répertoire contenant les fichiers de traduction",
+        "current": "Actuel : {value}",
+        "help": "Chemin vers le répertoire des fichiers de traduction"
+      },
+      "projectRoot": {
+        "label": "Racine du projet",
+        "description": "Répertoire racine du projet",
+        "current": "Actuel : {value}",
+        "help": "Chemin vers le répertoire racine du projet"
+      },
+      "checkUsage": {
+        "usage_analysis_failed": "L'analyse d'utilisation a échoué",
+        "usage_analysis_success": "L'analyse d'utilisation a réussi",
+        "usage_analysis_complete": "L'analyse d'utilisation est terminée",
+        "usage_analysis_in_progress": "L'analyse d'utilisation est en cours",
+        "usage_analysis_started": "L'analyse d'utilisation a démarré",
+        "usage_analysis_skipped": "L'analyse d'utilisation a été ignorée"
+      },
+      "language": {
         "label": "Langue de l’interface",
         "description": "Langue de l’interface utilisateur",
         "current": "Actuelle : {value}",
@@ -1410,8 +1467,6 @@
         "current": "Actuel : {value}",
         "help": "Créer automatiquement des sauvegardes avant chaque modification"
       },
-      "adminPinEnabled": {
-        "label": "Protection PIN admin",
         "description": "Activer l’authentification PIN admin pour les paramètres sensibles",
         "current": "Actuel : {value}",
         "help": "Exiger un PIN admin pour modifier les paramètres de sécurité et avancés"
@@ -1488,6 +1543,18 @@
         "current": "Actuel : {value}",
         "help": "Exiger un PIN admin pour modifier les paramètres de sécurité et avancés"
       },
+      "adminPinEnabled": {
+          "label": "Protection PIN administrateur",
+          "description": "Activer l'authentification PIN administrateur pour les paramètres sensibles",
+          "help": "Exiger un PIN administrateur pour modifier les paramètres de sécurité et avancés"
+        }
+      },
+      "security_pinProtection_enabled": {
+        "label": "Protection PIN des scripts",
+        "description": "Activer l'authentification PIN pour l'exécution des scripts",
+        "current": "Actuel : {value}",
+        "help": "Exiger un PIN pour l'exécution des scripts"
+      },
       "pinProtection_configure": {
         "label": "Configurer la protection PIN des scripts",
         "description": "Sélectionnez les scripts nécessitant une protection PIN",
@@ -1501,7 +1568,7 @@
       },
       "pinProtection_deleteReports": {
         "label": "Suppression des rapports",
-        "description": "Exiger un PIN pour la suppression des rapports",  
+        "description": "Exiger un PIN pour la suppression des rapports",
         "current": "Actuel : {value}",
         "help": "Activer la protection PIN pour la suppression des rapports"
       },
@@ -1524,12 +1591,14 @@
         "help": "Activer la protection PIN pour l’exécution du script d’initialisation"
       },
       "pinProtection_resetDefaults": {
-        "label": "Réinitialiser la protection PIN",
+        "label": "Réinitialiser la protection par PIN",
         "description": "Réinitialiser tous les paramètres de protection PIN aux valeurs par défaut",
-        "help": "Réinitialiser toutes les protections PIN des scripts aux valeurs par défaut"
-      }
-    },
-    "actions": {
+        "help": "Réinitialise toutes les protections de script aux valeurs d'usine"
+      },
+      "${helperKey}": {
+        "help": "Aide pour {helperKey}"
+      },
+      "actions": {  
       "editSetting": "Modifier {setting} : ",
       "settingUpdated": "✅ {setting} mis à jour avec succès !",
       "invalidValue": "❌ Valeur invalide. Veuillez réessayer.",
@@ -1584,8 +1653,27 @@
     "resetScriptDirectoriesTitle": "Réinitialiser les répertoires de scripts aux valeurs par défaut",
     "resetScriptDirectoriesWarning1": "Cela réinitialisera toutes les configurations de répertoires de scripts aux valeurs système par défaut.",
     "resetScriptDirectoriesWarning2": "Tous les chemins personnalisés seront effacés. Cette action est irréversible.",
-    "resetScriptDirectoriesConfirm": "Êtes-vous sûr de vouloir réinitialiser tous les répertoires de scripts aux valeurs par défaut ? (y/N) : "
-  },
+    "resetScriptDirectoriesConfirm": "Are you sure you want to reset all script directories to defaults? (y/N): ",
+    "backup": {
+      "title": "Paramètres de sauvegarde",
+      "description": "Sauvegarder les paramètres actuels dans un fichier",
+      "confirm": "Êtes-vous sûr de vouloir sauvegarder les paramètres actuels ? (o/N) : ",
+      "success": "✅ Paramètres sauvegardés avec succès dans {backupFile}",
+      "failed": "❌ Échec de la sauvegarde des paramètres : {error}",
+      "enabled": "Activé",
+      "enabledHelp": "Activer/désactiver la fonction de sauvegarde",
+      "singleFileMode": "Mode fichier unique",
+      "singleFileModeHelp": "Sauvegarder les paramètres dans un seul fichier",
+      "singleBackupFile": "Fichier de sauvegarde unique",
+      "singleBackupFileHelp": "Chemin vers le fichier de sauvegarde unique",
+      "retentionDays": "Jours de rétention",
+      "retentionDaysHelp": "Nombre de jours de conservation des anciens fichiers de sauvegarde",
+      "maxBackups": "Sauvegardes maximum",
+      "maxBackupsHelp": "Nombre maximum de fichiers de sauvegarde à conserver",
+      "confirmHelp": "Confirmer l'opération de sauvegarde",
+      "confirmYes": "Oui",
+      "confirmNo": "Non"
+    },
   "summary": {
     "separator": "============================================================",
     "configurationTitle": "🔧 Configuration :",
@@ -1722,102 +1810,102 @@
       "debugCommand": "  debug     - Déboguer les problèmes de traduction"
     },
     "test_complete_system": {
-    "starting_test": "🧪 Démarrage du test complet du système\n",
-    "separator": "=",
-    "testing_ui_translations": "\n📝 Test des traductions de l’interface…",
-    "testing_settings_manager": "\n⚙️  Test du gestionnaire de paramètres…",
-    "testing_main_scripts": "\n🔧 Test des scripts principaux…",
-    "checking_translation_consistency": "\n🌐 Vérification de la cohérence des traductions…",
-    "non_critical_missing_keys": "ℹ️ {file} : {count} clés manquantes non critiques",
-    "extra_keys": "ℹ️ {file} : {count} clés en trop",
-    "generating_report": "\n📊 Génération du rapport…",
-    "final_test_report_title": "📋 RAPPORT DE TEST FINAL",
-    "passed": "✅ Réussis : {passed}",
-    "failed": "❌ Échoués : {failed}",
-    "warnings": "⚠️  Avertissements : {warnings}",
-    "missing_translations_title": "\n🔍 Traduct­­ions manquantes ({count}) :",
-    "missing_translation_key": "   - {key}",
-    "missing_translations_more": "   … et {count} de plus",
-    "errors_title": "\n❌ Erreurs :",
-    "error_message": "   - {error}",
-    "overall_status": "\n📊 Statut global : {status}",
-    "success_message": "✅ {message}",
-    "failure_message": "❌ {message}",
-    "failure_error_message": "   {errorMessage}",
-    "warning_message": "⚠️  {message}",
-    "test_runner_failed": "❌ Le lanceur de tests a échoué :",
-    "recommendations": {
-      "add_missing_translation_keys": "Ajouter les clés de traduction manquantes pour garantir la cohérence",
-      "fix_failing_scripts": "Corriger les scripts en échec avant le déploiement",
-      "review_warning_messages": "Examiner et traiter les avertissements",
-      "system_ready_for_deployment": "Le système est prêt pour le déploiement"
+      "starting_test": "🧪 Démarrage du test complet du système\n",
+      "separator": "=",
+      "testing_ui_translations": "\n📝 Test des traductions de l’interface…",
+      "testing_settings_manager": "\n⚙️  Test du gestionnaire de paramètres…",
+      "testing_main_scripts": "\n🔧 Test des scripts principaux…",
+      "checking_translation_consistency": "\n🌐 Vérification de la cohérence des traductions…",
+      "non_critical_missing_keys": "ℹ️ {file} : {count} clés manquantes non critiques",
+      "extra_keys": "ℹ️ {file} : {count} clés en trop",
+      "generating_report": "\n📊 Génération du rapport…",
+      "final_test_report_title": "📋 RAPPORT DE TEST FINAL",
+      "passed": "✅ Réussis : {passed}",
+      "failed": "❌ Échoués : {failed}",
+      "warnings": "⚠️  Avertissements : {warnings}",
+      "missing_translations_title": "\n🔍 Traduct­­ions manquantes ({count}) :",
+      "missing_translation_key": "   - {key}",
+      "missing_translations_more": "   … et {count} de plus",
+      "errors_title": "\n❌ Erreurs :",
+      "error_message": "   - {error}",
+      "overall_status": "\n📊 Statut global : {status}",
+      "success_message": "✅ {message}",
+      "failure_message": "❌ {message}",
+      "failure_error_message": "   {errorMessage}",
+      "warning_message": "⚠️  {message}",
+      "test_runner_failed": "❌ Le lanceur de tests a échoué :",
+      "recommendations": {
+        "add_missing_translation_keys": "Ajouter les clés de traduction manquantes pour garantir la cohérence",
+        "fix_failing_scripts": "Corriger les scripts en échec avant le déploiement",
+        "review_warning_messages": "Examiner et traiter les avertissements",
+        "system_ready_for_deployment": "Le système est prêt pour le déploiement"
+      },
+      "hardcodedTexts": {
+        "addMissingTranslationKeys": "Ajouter les clés de traduction manquantes pour garantir la cohérence",
+        "fixFailingScripts": "Corriger les scripts en échec avant le déploiement",
+        "reviewWarningMessages": "Examiner et traiter les avertissements",
+        "systemReadyForDeployment": "Le système est prêt pour le déploiement"
+      }
     },
-    "hardcodedTexts": {
-      "addMissingTranslationKeys": "Ajouter les clés de traduction manquantes pour garantir la cohérence",
-      "fixFailingScripts": "Corriger les scripts en échec avant le déploiement",
-      "reviewWarningMessages": "Examiner et traiter les avertissements",
-      "systemReadyForDeployment": "Le système est prêt pour le déploiement"
+    "testConsoleI18n": {
+      "found_target_file": "Fichier cible trouvé : {fileName}",
+      "scanning_files_for_console_statements": "Recherche des instructions console…",
+      "found_javascript_files": "{count} fichiers JavaScript trouvés.",
+      "console_i18n_analysis_results": "Résultats de l’analyse i18n console",
+      "total_console_statements": "Total d’instructions console : {count}",
+      "translated_statements": "Instructions traduites : {count}",
+      "hardcoded_statements": "Instructions codées en dur : {count}",
+      "translation_coverage": "Couverture des traductions : {percentage}%",
+      "coverage_by_file": "Couverture par fichier :",
+      "file_coverage_stats": "{emoji} {fileName} : {coverage}% ({translated}/{total})",
+      "hardcoded_console_statements": "Instructions console codées en dur :",
+      "file_header": "Fichier : {file}",
+      "line_statement": "  Ligne {line} : {statement}",
+      "suggested_key": "    Clé suggérée : {key}",
+      "suggested_replacement": "    Remplacement suggéré : {replacement}",
+      "recommendations": "Recommandations :",
+      "recommendation_1": "1. Remplacer les chaînes codées en dur par des appels i18n.t().",
+      "recommendation_2": "2. Ajouter de nouvelles clés dans les fichiers JSON de traduction correspondants.",
+      "recommendation_3": "3. S’assurer que tous les messages console destinés à l’utilisateur sont traduisibles.",
+      "recommendation_4": "4. Utiliser des littéraux de gabarit ou la concaténation, en passant les variables à i18n.t().",
+      "translation_keys_to_add": "Clés de traduction suggérées à ajouter :",
+      "add_keys_instruction": "Copiez la structure JSON suivante dans vos fichiers de traduction :",
+      "perfect_translation_coverage": "Couverture de traduction parfaite !",
+      "all_statements_using_translation": "Toutes les instructions console utilisent le système de traduction.",
+      "i18n_console_translation_checker": "Vérificateur de traduction console i18n",
+      "script_description_line1": "Ce script parcourt tous les fichiers JavaScript pour trouver les instructions console",
+      "script_description_line2": "et vérifie si elles utilisent le système de traduction.",
+      "analysis_completed_in_duration": "Analyse terminée en {duration} secondes.",
+      "report_saved_to_path": "Rapport enregistré dans : {path}",
+      "found_hardcoded_messages": "{count} messages codés en dur trouvés. Sortie avec le code d’erreur 1.",
+      "all_console_messages_use_translation": "Toutes les instructions console utilisent la traduction. Sortie avec le code 0.",
+      "consoleTranslationsCheck": "Vérification des traductions console"
+    },
+    "translate_mismatches": {
+      "title": "🌐 Assistant de traduction {dryRun}",
+      "separator": "=====================================\n",
+      "processing_file": "📄 Traitement de {language}.json…",
+      "translation_summary_title": "\n📊 Résumé des traductions :",
+      "total_translations_applied": "   Total de traductions appliquées : {totalTranslations}",
+      "run_with_apply_instruction": "\n💡 Exécutez avec --apply pour appliquer ces traductions\n",
+      "no_translation_mappings": "   ⚠️  Aucun mappage de traduction disponible pour {language}",
+      "translation_applied": "   ✅ {key} : « {oldValue} » → « {newValue} »",
+      "saved_translations": "   💾 {count} traductions enregistrées dans {filename}",
+      "found_translatable_items": "   🔍 {count} éléments traduisibles trouvés",
+      "no_automatic_translations": "   ✨ Aucune traduction automatique disponible",
+      "error_processing_file": "   ❌ Erreur de traitement de {filename} : {errorMessage}",
+      "coverage_report_title": "📊 Rapport de couverture des traductions",
+      "coverage_report_separator": "===============================\n",
+      "file_header": "📄 {filename} :",
+      "total_keys": "   Total de clés : {total}",
+      "translated_keys": "   Traduites : {translated}",
+      "untranslated_markers": "   Marqueurs non traduits : {untranslated}",
+      "contains_english": "   Contient de l’anglais : {hasEnglish}",
+      "coverage_percentage": "   Couverture : {coverage}%\n",
+      "error_general": "❌ Erreur :",
+      "use_help": "Utilisez --help pour l’aide"
     }
   },
-  "testConsoleI18n": {
-    "found_target_file": "Fichier cible trouvé : {fileName}",
-    "scanning_files_for_console_statements": "Recherche des instructions console…",
-    "found_javascript_files": "{count} fichiers JavaScript trouvés.",
-    "console_i18n_analysis_results": "Résultats de l’analyse i18n console",
-    "total_console_statements": "Total d’instructions console : {count}",
-    "translated_statements": "Instructions traduites : {count}",
-    "hardcoded_statements": "Instructions codées en dur : {count}",
-    "translation_coverage": "Couverture des traductions : {percentage}%",
-    "coverage_by_file": "Couverture par fichier :",
-    "file_coverage_stats": "{emoji} {fileName} : {coverage}% ({translated}/{total})",
-    "hardcoded_console_statements": "Instructions console codées en dur :",
-    "file_header": "Fichier : {file}",
-    "line_statement": "  Ligne {line} : {statement}",
-    "suggested_key": "    Clé suggérée : {key}",
-    "suggested_replacement": "    Remplacement suggéré : {replacement}",
-    "recommendations": "Recommandations :",
-    "recommendation_1": "1. Remplacer les chaînes codées en dur par des appels i18n.t().",
-    "recommendation_2": "2. Ajouter de nouvelles clés dans les fichiers JSON de traduction correspondants.",
-    "recommendation_3": "3. S’assurer que tous les messages console destinés à l’utilisateur sont traduisibles.",
-    "recommendation_4": "4. Utiliser des littéraux de gabarit ou la concaténation, en passant les variables à i18n.t().",
-    "translation_keys_to_add": "Clés de traduction suggérées à ajouter :",
-    "add_keys_instruction": "Copiez la structure JSON suivante dans vos fichiers de traduction :",
-    "perfect_translation_coverage": "Couverture de traduction parfaite !",
-    "all_statements_using_translation": "Toutes les instructions console utilisent le système de traduction.",
-    "i18n_console_translation_checker": "Vérificateur de traduction console i18n",
-    "script_description_line1": "Ce script parcourt tous les fichiers JavaScript pour trouver les instructions console",
-    "script_description_line2": "et vérifie si elles utilisent le système de traduction.",
-    "analysis_completed_in_duration": "Analyse terminée en {duration} secondes.",
-    "report_saved_to_path": "Rapport enregistré dans : {path}",
-    "found_hardcoded_messages": "{count} messages codés en dur trouvés. Sortie avec le code d’erreur 1.",
-    "all_console_messages_use_translation": "Toutes les instructions console utilisent la traduction. Sortie avec le code 0.",
-    "consoleTranslationsCheck": "Vérification des traductions console"
-  },
-  "translate_mismatches": {
-    "title": "🌐 Assistant de traduction {dryRun}",
-    "separator": "=====================================\n",
-    "processing_file": "📄 Traitement de {language}.json…",
-    "translation_summary_title": "\n📊 Résumé des traductions :",
-    "total_translations_applied": "   Total de traductions appliquées : {totalTranslations}",
-    "run_with_apply_instruction": "\n💡 Exécutez avec --apply pour appliquer ces traductions\n",
-    "no_translation_mappings": "   ⚠️  Aucun mappage de traduction disponible pour {language}",
-    "translation_applied": "   ✅ {key} : « {oldValue} » → « {newValue} »",
-    "saved_translations": "   💾 {count} traductions enregistrées dans {filename}",
-    "found_translatable_items": "   🔍 {count} éléments traduisibles trouvés",
-    "no_automatic_translations": "   ✨ Aucune traduction automatique disponible",
-    "error_processing_file": "   ❌ Erreur de traitement de {filename} : {errorMessage}",
-    "coverage_report_title": "📊 Rapport de couverture des traductions",
-    "coverage_report_separator": "===============================\n",
-    "file_header": "📄 {filename} :",
-    "total_keys": "   Total de clés : {total}",
-    "translated_keys": "   Traduites : {translated}",
-    "untranslated_markers": "   Marqueurs non traduits : {untranslated}",
-    "contains_english": "   Contient de l’anglais : {hasEnglish}",
-    "coverage_percentage": "   Couverture : {coverage}%\n",
-    "error_general": "❌ Erreur :",
-    "use_help": "Utilisez --help pour l’aide"
-  }
-},
   "ui": {
     "autoDetectedI18nDirectory": "Répertoire i18n auto-détecté : {path}",
     "executingCommand": "🔄 Exécution de la commande : {command}",
@@ -1847,7 +1935,7 @@
   "validateLanguagePurity": {
     "phrase_debug_tools": "outils de débogage",
     "phrase_settings": "paramètres",
-    "phrase_configuration": "configuration",
+    "phrase_configuration": "configuration",  
     "phrase_invalid_choice": "choix invalide",
     "phrase_please_select": "merci de sélectionner",
     "phrase_back_to_main_menu": "retour au menu principal",
@@ -1938,5 +2026,104 @@
       "success": "✅",
       "warning": "⚠️"
     }
+  },
+  "consoleI18nTester": {
+    "found_target_file": "Fichier cible trouvé",
+    "scanning_files_for_console_statements": "Scanning files for console statements", 
+    "found_javascript_files": "Fichiers javascript trouvés",
+    "console_i18n_analysis_results": "Résultats d'analyse i18n console",
+    "total_console_statements": "Total console statements",
+    "translated_statements": "Statements traduits",
+    "hardcoded_statements": "Statements codés en dur",
+    "translation_coverage": "Couverture de traduction",
+    "coverage_by_file": "Couverture par fichier",
+    "file_coverage_stats": "Statistiques de couverture par fichier",
+    "hardcoded_console_statements": "Statements console codés en dur",
+    "file_header": "En-tête de fichier",
+    "line_statement": "Ligne de statement",
+    "suggested_key": "Clé suggérée",
+    "suggested_replacement": "Remplacement suggéré",
+    "recommendations": "Recommendations",
+    "recommendation_1": "Recommendation 1",
+    "recommendation_2": "Recommendation 2",
+    "recommendation_3": "Recommendation 3",
+    "recommendation_4": "Recommendation 4",
+    "translation_keys_to_add": "Clés de traduction à ajouter",
+    "add_keys_instruction": "Instructions d'ajout de clés",
+    "perfect_translation_coverage": "Couverture de traduction parfaite",
+    "all_statements_using_translation": "Tous les statements utilisant la traduction",
+    "i18n_console_translation_checker": "Vérificateur de traduction console i18n",
+    "script_description_line1": "Description du script ligne 1",
+    "script_description_line2": "Description du script ligne 2",
+    "analysis_completed_in_duration": "Analyse terminée en {duration}",
+    "report_saved_to_path": "Rapport sauvegardé à l'emplacement : {path}",
+    "found_hardcoded_messages": "Messages codés en dur trouvés",
+    "all_console_messages_use_translation": "Tous les messages console utilisent la traduction"
+  },
+  "\\nSelect directory to clean (0-${availableDirs": {
+    "length + 1}): ": "Sélectionnez le répertoire à nettoyer (0-${availableDirs.length}): "
+  },
+  "exportTranslations": {
+    "createdDirectory": "Répertoire créé",
+    "foundFiles": "Fichiers trouvés",
+    "createdTemplate": "Modèle créé",
+    "skippedExisting": "Ignoré (existant)",
+    "title": "Titre",
+    "creatingTemplates": "Création de modèles",
+    "summary": "Résumé",
+    "summaryLanguages": "Résumé Langues",
+    "summaryFilesPerLanguage": "Résumé Fichiers par Langue",
+    "summaryTotalFiles": "Résumé Total de Fichiers",
+    "success": "Succès",
+    "location": "Emplacement",
+    "nextSteps": "Prochaines Étapes"
+  },
+  ")) {\n          console": {
+    "log(": "Log("
+  },
+  "dashboard": {
+    "title": "Titre",
+    "overview": "Vue d'ensemble"
+  },
+  "auth": {
+    "title": "Titre",
+    "email": "Email",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "forgotPassword": "Mot de passe oublié",
+    "signUp": "S'inscrire"
+  },
+  "autorun": {
+    "autoRunScriptTitle": "🧪 Flux de travail automatique",
+    "separator": "==================================================",
+    "usageTitle": "Utilisation",
+    "runAllSteps": "Exécuter: node i18ntk-autorun.js",
+    "configureSettingsFirst": "Config: i18ntk-config.json ou flags CLI",
+    "runSpecificSteps": "Utiliser --steps=1,3 ou --list pour afficher les étapes",
+    "showHelp": "--help pour plus d'informations",
+    "examplesTitle": "Exemples",
+    "configExample": "node i18ntk-autorun.js --ui-language=fr",
+    "stepsExample1": "node i18ntk-autorun.js --steps=analyze,validate",
+    "stepsExample2": "node i18ntk-autorun.js --list",
+    "customSettingsConfiguration": "🌍 Configuration personnalisée",
+    "startingAutoRunWorkflow": "🚀 Démarrage du flux de travail automatique...",
+    "workflowIncludesSteps": "Le flux comprend {count} étapes:",
+    "stepRunning": "▶️  Étape {stepNumber}/{totalSteps}: {stepName}",
+    "stepCompletedWithIcon": "✅ Étape '{stepName}' terminée avec succès !",
+    "stepFailed": "❌ Échec: {stepName}",
+    "errorLabel": "Erreur: {error}",
+    "missingRequiredFile": "Fichier requis manquant: {file}",
+    "workflowCompleted": "🎉 Flux de travail terminé avec succès !",
+    "workflowStopped": "Le flux s'est arrêté en raison d'une erreur.",
+    "successfulSteps": "✅ Étapes réussies: {count}",
+    "failedSteps": "❌ Étapes échouées: {count}",
+    "availableSteps": "📋 Étapes d'automatisation disponibles",
+    "configReadError": "Échec de lecture du fichier de configuration: {file}",
+    "stepInitializeProject": "Initialiser le projet",
+    "stepAnalyzeTranslations": "Analyser les traductions",
+    "stepValidateTranslations": "Valider les traductions",
+    "stepCheckUsage": "Vérifier l'utilisation",
+    "stepGenerateSummary": "Générer le rapport récapitulatif",
+    "stepCompleted": "Étape '{stepName}' terminée."
   }
 }

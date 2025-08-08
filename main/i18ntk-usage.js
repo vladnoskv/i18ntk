@@ -85,14 +85,30 @@ class I18nUsageAnalyzer {
 
   async initialize() {
     try {
-      const defaultConfig = await getConfig();
+      const cliArgs = parseCommonArgs(process.argv.slice(2));
+      const defaultConfig = await getUnifiedConfig('usage', cliArgs);
       this.config = { ...defaultConfig, ...this.config };
       
       // Resolve paths using projectRoot as base
       const projectRoot = path.resolve(this.config.projectRoot || '.');
-      this.sourceDir = path.resolve(projectRoot, this.config.sourceDir);
-      this.i18nDir = path.resolve(projectRoot, this.config.i18nDir);
+      this.sourceDir = this.config.sourceDir;
+      this.i18nDir = this.config.i18nDir;
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+      
+      // Ensure translation patterns are defined
+      this.config.translationPatterns = this.config.translationPatterns || [
+        // React i18next patterns
+        /t\(['"`]([^'"`]+)['"`]/g,
+        /i18n\.t\(['"`]([^'"`]+)['"`]/g,
+        /useTranslation\(\)\.t\(['"`]([^'"`]+)['"`]/g,
+        // Template literal patterns
+        /t\(`([^`]+)`\)/g,
+        // JSX patterns
+        /i18nKey=['"`]([^'"`]+)['"`]/g,
+        // Common patterns
+        /\$t\(['"`]([^'"`]+)['"`]/g,
+        /getTranslation\(['"`]([^'"`]+)['"`]/g
+      ];
       
       // Verify translation function
       if (typeof this.t !== 'function') {
@@ -106,60 +122,41 @@ class I18nUsageAnalyzer {
     }
   }
 
+  // Normalize CLI arguments to handle both camelCase and hyphenated flags
+  normalizeArgs(a) {
+    return {
+      sourceDir: a.sourceDir ?? a['source-dir'],
+      i18nDir: a.i18nDir ?? a['i18n-dir'],
+      outputReport: a.outputReport ?? a['output-report'],
+      outputDir: a.outputDir ?? a['output-dir'],
+      uiLanguage: a.uiLanguage ?? a['ui-language'],
+      help: a.help || a.h,
+      noPrompt: a.noPrompt ?? a['no-prompt'],
+      strict: a.strict,
+      debug: a.debug
+    };
+  }
+
   // Parse command line arguments
   async parseArgs() {
-    try {
-      const args = process.argv.slice(2);
-      const parsed = {};
-      
-      // Convert array to object for processing
-      const argsObj = {};
-      for (let i = 0; i < args.length; i++) {
-        const arg = args[i];
-        if (arg.startsWith('--')) {
-          const key = arg.substring(2);
-          if (key.includes('=')) {
-            const [k, v] = key.split('=', 2);
-            argsObj[k] = v;
-          } else {
-            argsObj[key] = args[i + 1] && !args[i + 1].startsWith('--') ? args[++i] : true;
-          }
+    const args = process.argv.slice(2);
+    const parsed = {};
+    
+    for (const arg of args) {
+      if (arg.startsWith('--')) {
+        const [key, value] = arg.substring(2).split('=');
+        if (value !== undefined) {
+          parsed[key] = value;
+        } else {
+          parsed[key] = true;
         }
+      } else if (arg.startsWith('-')) {
+        const key = arg.substring(1);
+        parsed[key] = true;
       }
-      
-      const validatedArgs = await SecurityUtils.validateCommandArgs(argsObj);
-      
-      // Process validated arguments
-      for (const [key, value] of Object.entries(validatedArgs)) {
-        if (key === 'source-dir' && value) {
-          const sanitized = await SecurityUtils.sanitizeInput(value);
-          const validated = SecurityUtils.validatePath(sanitized, process.cwd());
-          if (validated) {
-            parsed.sourceDir = validated;
-          }
-        } else if (key === 'i18n-dir' && value) {
-          const sanitized = await SecurityUtils.sanitizeInput(value);
-          const validated = SecurityUtils.validatePath(sanitized, process.cwd());
-          if (validated) {
-            parsed.i18nDir = validated;
-          }
-        } else if (key === 'output-dir' && value) {
-          const sanitized = await SecurityUtils.sanitizeInput(value);
-          const validated = SecurityUtils.validatePath(sanitized, process.cwd());
-          if (validated) {
-            parsed.outputDir = validated;
-          }
-        } else if (key === 'help') {
-          parsed.help = true;
-        } else if (key === 'no-prompt') {
-            parsed.noPrompt = true;
-          }
-      }
-      
-      return parsed;
-    } catch (error) {
-      throw error;
     }
+    
+    return this.normalizeArgs(parsed);
   }
 
   // NEW: Recursively discover all translation files in modular structure
@@ -184,8 +181,9 @@ class I18nUsageAnalyzer {
             const stat = fs.statSync(itemPath);
             
             if (stat.isDirectory()) {
-              // Skip excluded directories
-              if (!this.config.excludeDirs.includes(item)) {
+              // Skip excluded directories with null-safety
+              const excludes = Array.isArray(this.config.excludeDirs) ? this.config.excludeDirs : [];
+              if (!excludes.includes(item)) {
                 await traverse(itemPath);
               }
             } else if (stat.isFile()) {
@@ -237,7 +235,7 @@ class I18nUsageAnalyzer {
   }
 
   // Get all files recursively from a directory with enhanced filtering
-  async getAllFiles(dir, extensions = this.config.includeExtensions) {
+  async getAllFiles(dir, extensions = this.config.includeExtensions || this.config.supportedExtensions || ['.js', '.jsx', '.ts', '.tsx']) {
     const files = [];
     
     // Enhanced list of toolkit files to exclude from analysis
@@ -252,6 +250,9 @@ class I18nUsageAnalyzer {
       'admin-cli.js'
     ];
     
+    // Null-safe extensions handling
+    const safeExtensions = Array.isArray(extensions) ? extensions : ['.js', '.jsx', '.ts', '.tsx'];
+    const skipRoot = path.resolve(this.i18nDir || '');
     const traverse = async (currentDir) => {
       try {
         const absoluteDir = path.resolve(currentDir);
@@ -270,14 +271,22 @@ class I18nUsageAnalyzer {
             const stat = fs.statSync(itemPath);
             
             if (stat.isDirectory()) {
-              // Skip excluded directories
-              if (!this.config.excludeDirs.includes(item)) {
+              const excludes = Array.isArray(this.config.excludeDirs) ? this.config.excludeDirs : [];
+              if (!excludes.includes(item)) {
+                // hard-skip the locales root to avoid reading JSON
+                if (skipRoot && path.resolve(itemPath).startsWith(skipRoot)) continue;
                 await traverse(itemPath);
               }
             } else if (stat.isFile()) {
+              // Skip JSON files entirely to prevent scanning translation files
+              if (itemPath.endsWith('.json')) continue;
+              
               // Include files with specified extensions, but exclude toolkit files
               const ext = path.extname(item);
-              if (extensions.includes(ext) && !excludeFiles.includes(item)) {
+              // Ensure extension has dot prefix
+              const normalizedExt = ext.startsWith('.') ? ext : `.${ext}`;
+              const normalizedExtensions = safeExtensions.map(ext => ext.startsWith('.') ? ext : `.${ext}`);
+              if (normalizedExtensions.includes(normalizedExt) && !excludeFiles.includes(item)) {
                 files.push(itemPath);
               }
             }
@@ -302,17 +311,46 @@ class I18nUsageAnalyzer {
   async run(options = {}) {
     const { fromMenu = false } = options;
     
+    // Parse command line arguments for strict/debug flags
+    const args = await this.parseArgs();
+    const cliOptions = {
+      strict: process.argv.includes('--strict'),
+      debug: process.argv.includes('--debug')
+    };
+    
+    if (cliOptions.debug) {
+      console.log('🔍 Debug mode enabled');
+    }
+    
     try {
       // Initialize configuration properly when called from menu
       if (fromMenu && !this.sourceDir) {
-        const args = await this.parseArgs();
         const baseConfig = await getUnifiedConfig('usage', args);
         this.config = { ...baseConfig, ...this.config };
         
         const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-        loadTranslations(uiLanguage);
+        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         this.t = t;
         
+        // ✅ ensure defaults when skipping initialize()
+        if (!Array.isArray(this.config.translationPatterns)) {
+          this.config.translationPatterns = [
+            /t\(['"`]([^'"`]+)['"`]/g,
+            /i18n\.t\(['"`]([^'"`]+)['"`]/g,
+            /useTranslation\(\)\.t\(['"`]([^'"`]+)['"`]/g,
+            /t\(`([^`]+)`\)/g,
+            /i18nKey=['"`]([^'"`]+)['"`]/g,
+            /\$t\(['"`]([^'"`]+)['"`]/g,
+            /getTranslation\(['"`]([^'"`]+)['"`]/g
+          ];
+        }
+        if (!Array.isArray(this.config.excludeDirs)) {
+          this.config.excludeDirs = ['node_modules', '.git'];
+        }
+        if (!Array.isArray(this.config.includeExtensions) && !Array.isArray(this.config.supportedExtensions)) {
+          this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx'];
+        }
+
         this.sourceDir = this.config.sourceDir;
         this.i18nDir = this.config.i18nDir;
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
@@ -358,8 +396,6 @@ class I18nUsageAnalyzer {
         }
       }
       
-      const args = await this.parseArgs();
-      
       if (args.help) {
         this.showHelp();
         return;
@@ -375,6 +411,36 @@ class I18nUsageAnalyzer {
         this.config.i18nDir = args.i18nDir;
         this.i18nDir = path.resolve(args.i18nDir);
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+      }
+      
+      // Ensure sourceDir points to source code, not locales
+      if (!args.sourceDir && this.config.sourceDir === this.config.i18nDir) {
+        // Default to common source directories if not explicitly provided
+        const possibleSourceDirs = ['src', 'lib', 'app', 'source'];
+        const projectRoot = this.config.projectRoot || '.';
+        
+        for (const dir of possibleSourceDirs) {
+          const testPath = path.resolve(projectRoot, dir);
+          if (fs.existsSync(testPath)) {
+            this.config.sourceDir = testPath;
+            this.sourceDir = testPath;
+            break;
+          }
+        }
+        
+        // If no common source directory found, use current directory
+        if (this.config.sourceDir === this.config.i18nDir) {
+          this.config.sourceDir = projectRoot;
+          this.sourceDir = projectRoot;
+        }
+      }
+
+      // 🚧 prevent scanning locales as source
+      if (path.resolve(this.sourceDir) === path.resolve(this.i18nDir)) {
+        const fallback = path.resolve(this.config.projectRoot || '.', 'src');
+        console.warn(this.t('usage.sourceEqualsI18nWarn') ||
+          `⚠️ sourceDir equals i18nDir (${this.sourceDir}). Falling back to ${fallback} for source scanning.`);
+        this.sourceDir = fallback;
       }
       
       console.log(this.t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir }));
@@ -400,6 +466,11 @@ class I18nUsageAnalyzer {
       console.log(this.t('usage.unusedKeysCount', { count: unusedKeys.length }));
       console.log(this.t('usage.missingKeysCount', { count: missingKeys.length }));
       console.log(this.t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
+      
+      // Sanity check: warn if 0 used keys but available keys exist
+      if (this.availableKeys.size > 0 && this.usedKeys.size === 0) {
+        console.warn('\n⚠️  ' + (this.t('operations.usage.noUsedKeysHint') || 'Found translations but no usage in source. Check --source-dir and translationPatterns.'));
+      }
       
       // Display translation completeness by language
       console.log(this.t('usage.translationCompletenessTitle'));
@@ -433,12 +504,43 @@ class I18nUsageAnalyzer {
 
   // Show help message
   showHelp() {
-    console.log(this.t('usage.checkUsage.help_message'));
+    console.log(`
+📊 i18ntk usage - Translation key usage analysis
+
+Usage:
+  node i18ntk-usage.js [options]
+  npm run i18ntk:usage -- [options]
+
+Options:
+  --source-dir=<path>    Source code directory to scan (default: ./src)
+  --i18n-dir=<path>      Directory containing translation files (default: ./src/i18n/locales)
+  --output-report        Generate detailed usage report
+  --output-dir=<path>    Directory for output reports (default: ./i18ntk-reports/usage)
+  --strict               Show all warnings and errors during analysis
+  --debug                Enable debug mode with stack traces
+  --no-prompt            Skip interactive prompts (useful for CI/CD)
+  --help, -h             Show this help message
+
+Examples:
+  node i18ntk-usage.js --source-dir=./src --i18n-dir=./translations --output-report
+  npm run i18ntk:usage -- --strict --debug
+  node i18ntk-usage.js --no-prompt --output-dir=./reports
+
+Analysis Features:
+  • Detects unused translation keys
+  • Identifies missing translation keys
+  • Shows translation completeness by language
+  • Reports NOT_TRANSLATED values
+  • Supports modular folder structures
+  • Generates detailed reports
+`);
   }
 
   // NEW: Enhanced translation key loading with modular support
   async getAllTranslationKeys() {
     const keys = new Set();
+    const isStrict = process.argv.includes('--strict');
+    const isDebug = process.argv.includes('--debug');
     
     try {
       // Discover all translation files in the i18n directory
@@ -449,8 +551,48 @@ class I18nUsageAnalyzer {
       for (const fileInfo of translationFiles) {
         try {
           await SecurityUtils.validatePath(fileInfo.filePath);
+          
+          // Check if file exists and is readable
+          if (!fs.existsSync(fileInfo.filePath)) {
+            if (isDebug || isStrict) {
+              console.warn(`⚠️  File not found: ${path.basename(fileInfo.filePath)}`);
+            }
+            continue;
+          }
+          
           const content = await SecurityUtils.safeReadFile(fileInfo.filePath);
+          
+          // Handle empty files
+          if (!content || content.trim() === '') {
+            if (isDebug || isStrict) {
+              console.warn(`⚠️  Empty file: ${path.basename(fileInfo.filePath)}`);
+            }
+            continue;
+          }
+          
           const jsonData = await SecurityUtils.safeParseJSON(content);
+          
+          // Validate JSON structure before processing
+          if (jsonData === null || jsonData === undefined) {
+            if (isDebug || isStrict) {
+              console.warn(`⚠️  Null/undefined JSON data: ${path.basename(fileInfo.filePath)}`);
+            }
+            continue;
+          }
+          
+          if (typeof jsonData !== 'object') {
+            if (isDebug || isStrict) {
+              console.warn(`⚠️  Invalid JSON structure (not an object): ${path.basename(fileInfo.filePath)}`);
+            }
+            continue;
+          }
+          
+          if (Array.isArray(jsonData)) {
+            if (isDebug || isStrict) {
+              console.warn(`⚠️  Invalid JSON structure (array instead of object): ${path.basename(fileInfo.filePath)}`);
+            }
+            continue;
+          }
           
           // Store file info for later analysis
           this.translationFiles.set(fileInfo.filePath, fileInfo);
@@ -458,12 +600,16 @@ class I18nUsageAnalyzer {
           const fileKeys = this.extractKeysFromObject(jsonData, '', fileInfo.namespace);
           fileKeys.forEach(key => keys.add(key));
           
-         console.log(this.t('usage.fileInfo', { namespace: fileInfo.namespace, keys: fileKeys.length }));
+          if (isDebug) {
+            console.log(this.t('usage.fileInfo', { namespace: fileInfo.namespace, keys: fileKeys.length }));
+          }
         } catch (error) {
-          console.warn(this.t("usage.checkUsage.failed_to_parse_filename_error", { 
-            fileName: path.basename(fileInfo.filePath), 
-            errorMessage: error.message 
-          }));
+          if (isDebug || isStrict) {
+            console.warn(`❌ Failed to extract keys from ${path.basename(fileInfo.filePath)}: ${error.message}`);
+          }
+          if (isDebug) {
+            console.error(error.stack);
+          }
           await SecurityUtils.logSecurityEvent(this.t('usage.translationFileParseError'), {
             component: 'i18ntk-usage',
             file: fileInfo.filePath,
@@ -485,17 +631,26 @@ class I18nUsageAnalyzer {
   extractKeysFromObject(obj, prefix = '', namespace = '') {
     const keys = [];
     
-    for (const [key, value] of Object.entries(obj)) {
-      const fullKey = prefix ? `${prefix}.${key}` : key;
-      
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        keys.push(...this.extractKeysFromObject(value, fullKey, namespace));
-      } else {
-        // Add dot notation key (e.g., "pagination.showing")
-        keys.push(fullKey);
+    // Validate input object before processing
+    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+      return keys; // Return empty array for invalid input
+    }
+    
+    try {
+      for (const [key, value] of Object.entries(obj)) {
+        const fullKey = prefix ? `${prefix}.${key}` : key;
         
-
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          keys.push(...this.extractKeysFromObject(value, fullKey, namespace));
+        } else {
+          // Add dot notation key (e.g., "pagination.showing")
+          keys.push(fullKey);
+        }
       }
+    } catch (error) {
+      // Handle any unexpected errors during key extraction
+      console.warn(`⚠️  Error during key extraction: ${error.message}`);
+      return keys;
     }
     
     return keys;
@@ -507,10 +662,17 @@ class I18nUsageAnalyzer {
       const content = SecurityUtils.safeReadFileSync(filePath);
       if (!content) return [];
       
+      // Skip JSON files entirely to prevent scanning translation files
+      if (filePath.endsWith('.json')) return [];
+      
       const keys = [];
       
+      // Null-safe translation patterns handling
+      const rawPatterns = Array.isArray(this.config.translationPatterns) ? this.config.translationPatterns : [];
+      if (rawPatterns.length === 0) return []; // nothing to match
+      
       // Ensure patterns are RegExp objects with better error handling
-      const patterns = this.config.translationPatterns.map(pattern => {
+      const patterns = rawPatterns.map(pattern => {
         try {
           if (typeof pattern === 'string') {
             return new RegExp(pattern, 'g');
@@ -629,6 +791,9 @@ class I18nUsageAnalyzer {
     try {
       console.log('\n' + this.t('usage.analyzingTranslationCompleteness'));
       
+      const isDebug = process.argv.includes('--debug');
+      const isStrict = process.argv.includes('--strict');
+      
       // Check if i18n directory exists
       if (!fs.existsSync(this.i18nDir)) {
         console.warn(this.t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
@@ -684,17 +849,56 @@ class I18nUsageAnalyzer {
           for (const fileInfo of translationFiles) {
             try {
               if (!fs.existsSync(fileInfo.filePath)) {
+                if (isDebug || isStrict) {
+                  console.warn(`⚠️  File not found: ${path.basename(fileInfo.filePath)}`);
+                }
                 continue;
               }
               
               const content = await SecurityUtils.safeReadFile(fileInfo.filePath);
+              
+              // Handle empty files
+              if (!content || content.trim() === '') {
+                if (isDebug || isStrict) {
+                  console.warn(`⚠️  Empty file: ${path.basename(fileInfo.filePath)}`);
+                }
+                continue;
+              }
+              
               const jsonData = await SecurityUtils.safeParseJSON(content);
+              
+              // Validate JSON structure before processing
+              if (jsonData === null || jsonData === undefined) {
+                if (isDebug || isStrict) {
+                  console.warn(`⚠️  Null/undefined JSON data: ${path.basename(fileInfo.filePath)}`);
+                }
+                continue;
+              }
+              
+              if (typeof jsonData !== 'object') {
+                if (isDebug || isStrict) {
+                  console.warn(`⚠️  Invalid JSON structure (not an object): ${path.basename(fileInfo.filePath)}`);
+                }
+                continue;
+              }
+              
+              if (Array.isArray(jsonData)) {
+                if (isDebug || isStrict) {
+                  console.warn(`⚠️  Invalid JSON structure (array instead of object): ${path.basename(fileInfo.filePath)}`);
+                }
+                continue;
+              }
               
               const stats = this.analyzeFileCompleteness(jsonData);
               totalKeys += stats.total;
               translatedKeys += stats.translated;
             } catch (error) {
-              console.warn(t('usage.failedToAnalyzeFile', { filePath: fileInfo.filePath, error: error.message }));
+              if (isDebug || isStrict) {
+                console.warn(`❌ Failed to analyze file ${path.basename(fileInfo.filePath)}: ${error.message}`);
+              }
+              if (isDebug) {
+                console.error(error.stack);
+              }
               continue;
             }
           }
@@ -705,7 +909,9 @@ class I18nUsageAnalyzer {
             notTranslated: totalKeys - translatedKeys
           });
         } catch (error) {
-          console.warn(t('usage.failedToAnalyzeLanguage', { language, error: error.message }));
+          if (isDebug || isStrict) {
+            console.warn(t('usage.failedToAnalyzeLanguage', { language, error: error.message }));
+          }
           continue;
         }
       }
@@ -720,7 +926,17 @@ class I18nUsageAnalyzer {
     let total = 0;
     let translated = 0;
     
+    // Validate input object before processing
+    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+      return { total: 0, translated: 0 }; // Return empty stats for invalid input
+    }
+    
     const traverse = (current) => {
+      // Validate current object before processing
+      if (typeof current !== 'object' || current === null || Array.isArray(current)) {
+        return;
+      }
+      
       for (const [key, value] of Object.entries(current)) {
         if (value && typeof value === 'object' && !Array.isArray(value)) {
           traverse(value);
@@ -1198,26 +1414,21 @@ class I18nUsageAnalyzer {
 if (require.main === module) {
   async function main() {
     try {
-      const args = parseCommonArgs(process.argv.slice(2));
-      
-      if (args.help) {
-        displayHelp('i18ntk-usage', {
-          'output-report': 'Generate detailed usage report',
-          'source-dir': 'Source code directory to scan',
-          'i18n-dir': 'Directory containing translation files',
-          'output-dir': 'Directory for output reports'
-        });
-        return;
-      }
-      
-      const config = await getUnifiedConfig('usage', args);
-      
-      // Load translations
-      loadTranslations(config.uiLanguage);
-      
+      const cliArgs = parseCommonArgs(process.argv.slice(2));
+      const config = await getUnifiedConfig('usage', cliArgs);
       const analyzer = new I18nUsageAnalyzer(config);
-      await analyzer.analyze();
-      
+
+      if (cliArgs.help) {
+        displayHelp('usage');
+        process.exit(0);
+      }
+
+      // Load UI translations based on settings or default to English
+      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
+    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+
+      await analyzer.initialize();
+      await analyzer.run(cliArgs);
     } catch (error) {
       console.error('Error:', error.message);
       process.exit(1);

@@ -21,18 +21,18 @@ async function runPerformanceTest() {
         if (fs.existsSync(settingsPath)) {
             const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
             
-            // Update processing settings to new optimized values
+            // Update processing settings to EXTREME performance values
             settings.processing = {
-                batchSize: 300,
-                concurrency: 8,
-                maxFileSize: 2097152,
-                timeout: 15000,
-                retryAttempts: 2,
-                retryDelay: 500,
-                cacheEnabled: true,
-                cacheTTL: 7200000,
-                validateOnSave: false,
-                autoBackup: true,
+                batchSize: 1000,           // Maximum batch processing
+                concurrency: 16,           // Maximum parallel processing
+                maxFileSize: 524288,     // Optimized file size limit (512KB)
+                timeout: 8000,           // Reduced timeout for speed
+                retryAttempts: 0,        // No retries for speed
+                retryDelay: 0,           // No retry delay
+                cacheEnabled: true,      // Enable caching
+                cacheTTL: 600000,       // 10-minute cache TTL
+                validateOnSave: false,   // Skip validation for speed
+                autoBackup: false,       // Disable backup for speed
                 notTranslatedMarker: "NOT_TRANSLATED",
                 excludeFiles: [
                     ".DS_Store",

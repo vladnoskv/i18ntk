@@ -21,10 +21,10 @@ const UIi18n = require('../../main/i18ntk-ui');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = settingsManager.getSettings();
+  const settings = settingsManager.loadSettings();
   return {
-    excludeDirs: settings.processing?.excludeDirs || ['node_modules', '.git', 'i18ntk-reports', 'ui-locales'],
-    includeExtensions: settings.processing?.includeExtensions || ['.js']
+    excludeDirs: settings.excludeFiles || ['node_modules', '.git', 'i18ntk-reports', 'ui-locales'],
+    includeExtensions: ['.js']
   };
 }
 

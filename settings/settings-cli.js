@@ -65,7 +65,7 @@ class SettingsCLI {
      */
     async init() {
         try {
-            this.settings = settingsManager.getSettings();
+            this.settings = settingsManager.getAllSettings();
             this.schema = settingsManager.getSettingsSchema();
             return true;
         } catch (error) {
@@ -130,7 +130,8 @@ class SettingsCLI {
         // Check if admin PIN is configured for display purposes
         await this.adminAuth.initialize();
         const config = await this.adminAuth.loadConfig();
-        const pinSet = config && config.enabled === true && !!config.pinHash;
+        const pinSet = config && !!config.pinHash;
+        const protectionEnabled = this.settingsManager.isAdminPinEnabled();
         const pinStatus = pinSet ? 
             `${colors.green}✅${colors.reset}` : 
             `${colors.red}❌${colors.reset}`;
@@ -143,10 +144,10 @@ class SettingsCLI {
             { key: '5', label: this.t('settings.mainMenu.backupSettings'), description: this.t('settings.mainMenu.backupSettingsDesc') },
             { key: '6', label: this.t('settings.mainMenu.securitySettings'), description: `${this.t('settings.mainMenu.securitySettingsDesc')} ${pinStatus}` },
             { key: '7', label: this.t('settings.mainMenu.advancedSettings'), description: this.t('settings.mainMenu.advancedSettingsDesc') },
-            { key: '7', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
-            { key: '8', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
-            { key: '9', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
+            { key: '8', label: this.t('settings.mainMenu.viewAllSettings'), description: this.t('settings.mainMenu.viewAllSettingsDesc') },
+            { key: '9', label: this.t('settings.mainMenu.importExport'), description: this.t('settings.mainMenu.importExportDesc') },
             { key: '0', label: this.t('settings.mainMenu.reportBug'), description: this.t('settings.mainMenu.reportBugDesc') },
+            { key: 'r', label: this.t('settings.mainMenu.resetToDefaults'), description: this.t('settings.mainMenu.resetToDefaultsDesc') },
             { key: 'u', label: this.t('settings.mainMenu.updatePackage'), description: this.t('settings.mainMenu.updatePackageDesc') },
             { key: 's', label: this.t('settings.mainMenu.saveChanges'), description: this.t('settings.mainMenu.saveChangesDesc') },
             { key: 'h', label: this.t('settings.mainMenu.help'), description: this.t('settings.mainMenu.helpDesc') },
@@ -199,10 +200,10 @@ class SettingsCLI {
                 await this.showImportExport();
                 break;
             case '0':
-                await this.resetToDefaults();
-                break;
-            case '-':
                 await this.reportBug();
+                break;
+            case 'r':
+                await this.resetToDefaults();
                 break;
             case 'u':
                 await this.updatePackage();
@@ -340,18 +341,17 @@ class SettingsCLI {
         console.log(`${colors.bright}${this.t('settings.security.title')}${colors.reset}\n`);
 
         const config = await this.adminAuth.loadConfig();
-        const pinSet = config && config.enabled === true && !!config.pinHash;
-        const pinDisplay = pinSet ? '(set)' : '(not set)';
+        const pinSet = config && !!config.pinHash;
+        const protectionEnabled = this.settingsManager.isAdminPinEnabled();
         const pinStatus = pinSet ? 
             `${colors.green}${this.t('settings.security.pinConfigured')}${colors.reset}` : 
             `${colors.red}${this.t('settings.security.pinNotConfigured')}${colors.reset}`;
 
         console.log(`${this.t('settings.security.currentPin')}: ${pinStatus}`);
-        console.log(`${this.t('settings.security.pinDisplay')}: ${colors.dim}${pinDisplay}${colors.reset}\n`);
+        console.log(`Protection Status: ${protectionEnabled ? `${colors.green}enabled${colors.reset}` : `${colors.red}disabled${colors.reset}`}\n`);
 
         const securitySettings = {
             'security.adminPinEnabled': this.t('settings.fields.adminPinEnabled.label'),
-            '_setupPin': 'Setup/Change Admin PIN',
             'security.sessionTimeout': 'Session Timeout (minutes)',
             'security.maxFailedAttempts': 'Max Failed Attempts',
             'security.lockoutDuration': 'Lockout Duration (minutes)',
@@ -393,15 +393,23 @@ class SettingsCLI {
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.backup.title')}${colors.reset}\n`);
+
         console.log(`${this.t('settings.backup.description')}\n`);
 
 
         const backupSettings = {
-            'backup.enabled': this.t('settings.fields.backup_enabled.label'),
-            'backup.singleFileMode': this.t('settings.fields.backup_singleFileMode.label'),
-            'backup.singleBackupFile': this.t('settings.fields.backup_singleBackupFile.label'),
-            'backup.retentionDays': this.t('settings.fields.backup_retentionDays.label'),
-            'backup.maxBackups': this.t('settings.fields.backup_maxBackups.label')
+            'backup.enabled': this.t('settings.backup.enabled'),
+            'backup.enabled.help': this.t('settings.backup.enabledHelp'),
+            'backup.singleFileMode': this.t('settings.backup.singleFileMode'),
+            'backup.singleFileMode.help': this.t('settings.backup.singleFileModeHelp'),
+            'backup.singleBackupFile': this.t('settings.backup.singleBackupFile'),
+            'backup.singleBackupFile.help': this.t('settings.backup.singleBackupFileHelp'),
+            'backup.retentionDays': this.t('settings.backup.retentionDays'),
+            'backup.retentionDays.help': this.t('settings.backup.retentionDaysHelp'),
+            'backup.maxBackups': this.t('settings.backup.maxBackups'),
+            'backup.maxBackups.help': this.t('settings.backup.maxBackupsHelp'),
+            'backup.confirm': this.t('settings.backup.confirm'),
+            'backup.confirm.help': this.t('settings.backup.confirmHelp')
         };
 
         await this.showSettingsCategory(backupSettings);
@@ -424,11 +432,12 @@ class SettingsCLI {
             let value = this.getNestedValue(this.settings, key);
             let displayValue = this.formatValue(value);
             
-            // Special handling for _setupPin to show actual PIN status
-            if (key === '_setupPin') {
+            // Special display for admin PIN protection
+            if (key === 'security.adminPinEnabled') {
                 const config = await this.adminAuth.loadConfig();
-                const pinSet = config && config.enabled === true && !!config.pinHash;
-                displayValue = pinSet ? '(set)' : '(not set)';
+                const pinSet = config && !!config.pinHash;
+                const pinStatus = pinSet ? `${colors.green}PIN configured${colors.reset}` : `${colors.red}PIN not configured${colors.reset}`;
+                displayValue = `${displayValue} - ${pinStatus}`;
             }
             
             console.log(`  ${colors.cyan}${index + 1}${colors.reset}) ${categorySettings[key]}`);
@@ -493,6 +502,14 @@ class SettingsCLI {
      * Get helper text for a setting
      */
     getHelperText(key) {
+        // Handle backup settings with proper dot notation
+        if (key.startsWith('backup.')) {
+            // Check if key already has .help suffix
+            if (key.endsWith('.help')) {
+                return this.t(`settings.fields.${key}`) || this.t('settings.noHelp');
+            }
+            return this.t(`settings.fields.${key}.help`) || this.t('settings.noHelp');
+        }
         const helperKey = key.replace(/\./g, '_');
         return this.t(`settings.fields.${helperKey}.help`) || this.t('settings.noHelp');
     }
@@ -537,9 +554,9 @@ class SettingsCLI {
         
         // Numeric validations with proper ranges
         const validations = {
-            'batchSize': { min: 1, max: 100, type: 'int' },
-            'concurrentFiles': { min: 1, max: 20, type: 'int' },
-            'sizingThreshold': { min: 1, max: 10000, type: 'int', unit: 'KB' },
+            'batchSize': { min: 1, max: 10000, type: 'int' },
+            'concurrentFiles': { min: 1, max: 100, type: 'int' },
+            'sizingThreshold': { min: 1, max: 20000, type: 'int', unit: 'KB' },
             'autoSave': { min: 0, max: 60, type: 'int', unit: 'minutes' },
             'sessionTimeout': { min: 0, max: 60, type: 'int', unit: 'minutes' },
             'maxFailedAttempts': { min: 1, max: 10, type: 'int' },
@@ -677,38 +694,121 @@ class SettingsCLI {
         }
         
         // Convert the value
-        const convertedValue = this.convertValue(newValue.trim(), schema);
+        const convertedValue = this.convertValue(newValue.trim(), schema, key);
         if (convertedValue === null) {
             this.error(this.t('settings.invalidValueFormat'));
             await this.pause();
             return;
         }
         
-        // Special handling for admin PIN setup
-        if (key === 'security.adminPinEnabled' && convertedValue === true) {
+        // Special handling for admin PIN protection toggle
+        if (key === 'security.adminPinEnabled') {
             const config = await this.adminAuth.loadConfig();
-            const pinSet = config && config.enabled && config.pinHash;
-            if (!pinSet) {
-                console.log(this.t('settings.admin.setupPin'));
-                const pin = await this.promptPin('Enter new admin PIN (4-6 digits): ');
-                if (pin) {
-                    const pinSetup = await this.adminAuth.setupPin(pin);
-                    if (!pinSetup) {
-                        console.log(this.t('settings.admin.setupFailed'));
-                        await this.pause();
+            const pinSet = config && config.pinHash;
+            
+            if (convertedValue === true) {
+                // Enable protection
+                if (!pinSet) {
+                    // No PIN exists, need to set one up
+                    console.log('\n🔐 Admin PIN Protection Setup');
+                    console.log('You must set a PIN to enable protection.\n');
+                    const pin = await this.promptPin('Enter new admin PIN (4-6 digits): ');
+                    if (pin) {
+                        const confirmPin = await this.promptPin('Confirm PIN: ');
+                        if (pin === confirmPin) {
+                            const success = await this.adminAuth.setupPin(pin);
+                            if (success) {
+                                this.setNestedValue(this.settings, key, true);
+                                this.modified = true;
+                                try {
+                                    await this.saveSettings();
+                                    this.success('Admin PIN protection enabled successfully!');
+                                } catch (error) {
+                                    this.error(`Failed to save settings: ${error.message}`);
+                                }
+                            } else {
+                                this.error('Failed to set admin PIN.');
+                                return;
+                            }
+                        } else {
+                            this.error('PINs do not match.');
+                            return;
+                        }
+                    } else {
+                        this.warning('PIN setup cancelled. Protection not enabled.');
                         return;
                     }
                 } else {
-                    console.log('PIN setup cancelled.');
-                    await this.pause();
-                    return;
+                    // PIN already exists, just enable protection
+                    const success = await this.adminAuth.enablePinProtection();
+                    if (success) {
+                        this.setNestedValue(this.settings, key, true);
+                        this.modified = true;
+                        try {
+                            await this.saveSettings();
+                            this.success('Admin PIN protection enabled!');
+                        } catch (error) {
+                            this.error(`Failed to save settings: ${error.message}`);
+                        }
+                    } else {
+                        this.error('Failed to enable PIN protection.');
+                        return;
+                    }
+                }
+            } else {
+                // Disable protection
+                console.log('\n⚠️  This will disable admin PIN protection (PIN will be retained).');
+                
+                if (pinSet) {
+                    // PIN exists, need to verify before disabling
+                    const pin = await this.promptPin('Enter current PIN to confirm: ');
+                    if (pin && await this.adminAuth.verifyPin(pin)) {
+                        const success = await this.adminAuth.disablePinProtection();
+                        if (success) {
+                            this.setNestedValue(this.settings, key, false);
+                            this.modified = true;
+                            try {
+                                await this.saveSettings();
+                                this.success('Admin PIN protection disabled (PIN retained)!');
+                            } catch (error) {
+                                this.error(`Failed to save settings: ${error.message}`);
+                            }
+                        } else {
+                            this.error('Failed to disable PIN protection.');
+                            return;
+                        }
+                    } else if (pin) {
+                        this.error('Invalid PIN. Protection not disabled.');
+                        return;
+                    } else {
+                        this.warning('Operation cancelled. Protection remains enabled.');
+                        return;
+                    }
+                } else {
+                    // No PIN set, just disable protection
+                    this.setNestedValue(this.settings, key, false);
+                    this.modified = true;
+                    try {
+                        await this.saveSettings();
+                        this.success('Admin PIN protection disabled!');
+                    } catch (error) {
+                        this.error(`Failed to save settings: ${error.message}`);
+                    }
                 }
             }
+            return;
         }
         
-        // Update the setting
+        // Update the setting for all other cases
         this.setNestedValue(this.settings, key, convertedValue);
         this.modified = true;
+        
+        // Save settings immediately after each change
+        try {
+            await this.saveSettings();
+        } catch (error) {
+            this.error(`Failed to save settings: ${error.message}`);
+        }
         
         // Special handling for language changes
         if (key === 'language') {
@@ -722,11 +822,8 @@ class SettingsCLI {
             refreshLanguageFromSettings();
             
             // Force reload settings to ensure consistency
-            this.settings = settingsManager.getSettings();
+            this.settings = settingsManager.getAllSettings();
         }
-        
-        this.success(this.t('settings.updatedSuccessfully', { setting: label }));
-        await this.pause();
     }
 
     /**
@@ -779,6 +876,12 @@ class SettingsCLI {
                                 const success = await this.adminAuth.setupPin(newPin);
                                 if (success) {
                                     this.success('Admin PIN updated successfully!');
+                                    // Save settings immediately
+                                    try {
+                                        await this.saveSettings();
+                                    } catch (error) {
+                                        this.error(`Failed to save settings: ${error.message}`);
+                                    }
                                 } else {
                                     this.error('Failed to update admin PIN.');
                                 }
@@ -797,6 +900,12 @@ class SettingsCLI {
                         const success = await this.adminAuth.disableAuth();
                         if (success) {
                             this.success('Admin PIN protection removed.');
+                            // Save settings immediately
+                            try {
+                                await this.saveSettings();
+                            } catch (error) {
+                                this.error(`Failed to save settings: ${error.message}`);
+                            }
                         } else {
                             this.error('Failed to remove PIN protection.');
                         }
@@ -832,6 +941,12 @@ class SettingsCLI {
                             // Enable admin PIN protection in settings
                             this.setNestedValue(this.settings, 'security.adminPinEnabled', true);
                             this.modified = true;
+                            // Save settings immediately
+                            try {
+                                await this.saveSettings();
+                            } catch (error) {
+                                this.error(`Failed to save settings: ${error.message}`);
+                            }
                         } else {
                             this.error('Failed to configure admin PIN.');
                         }
@@ -931,6 +1046,12 @@ class SettingsCLI {
             this.setNestedValue(this.settings, 'security.pinProtection', defaultConfig);
             this.modified = true;
             this.success('PIN protection settings reset to defaults.');
+            // Save settings immediately
+            try {
+                await this.saveSettings();
+            } catch (error) {
+                this.error(`Failed to save settings: ${error.message}`);
+            }
             await this.pause();
             await this.configurePinProtection();
             return;
@@ -946,6 +1067,13 @@ class SettingsCLI {
             
             const status = newValue ? 'enabled' : 'disabled';
             this.success(`PIN protection ${status} for ${option.label}.`);
+            
+            // Save settings immediately
+            try {
+                await this.saveSettings();
+            } catch (error) {
+                this.error(`Failed to save settings: ${error.message}`);
+            }
             
             await this.pause();
             await this.configurePinProtection();
@@ -996,6 +1124,8 @@ class SettingsCLI {
         console.log(`  ${colors.cyan}1${colors.reset}) ${this.t('settings.importExport.export')}`);
         console.log(`  ${colors.cyan}2${colors.reset}) ${this.t('settings.importExport.import')}`);
         console.log(`  ${colors.cyan}3${colors.reset}) ${this.t('settings.importExport.backup')}`);
+        console.log(`  ${colors.cyan}4${colors.reset}) ${this.t('settings.importExport.restore')}`);
+        console.log(`  ${colors.cyan}5${colors.reset}) ${this.t('settings.importExport.manageBackups')}`);
         console.log(`  ${colors.yellow}b${colors.reset}) ${this.t('settings.back')}\n`);
         
         const choice = await this.prompt(this.t('settings.selectOption'));
@@ -1010,6 +1140,12 @@ class SettingsCLI {
             case '3':
                 await this.createBackup();
                 break;
+            case '4':
+                await this.restoreFromBackup();
+                break;
+            case '5':
+                await this.manageBackups();
+                break;
             case 'b':
                 return;
             default:
@@ -1023,12 +1159,48 @@ class SettingsCLI {
      * Export settings to a file
      */
     async exportSettings() {
+        // Check admin PIN authentication if enabled
+        if (this.settingsManager.isAdminPinEnabled()) {
+            const pin = await this.promptPin('Enter admin PIN to export settings: ');
+            if (!pin || !await this.adminAuth.verifyPin(pin)) {
+                this.error('Invalid PIN. Export cancelled.');
+                await this.pause();
+                return;
+            }
+        }
+
+        console.log('\nExport format options:');
+        console.log(`  ${colors.cyan}1${colors.reset}) JSON (formatted)`);
+        console.log(`  ${colors.cyan}2${colors.reset}) JSON (minified)`);
+        console.log(`  ${colors.cyan}3${colors.reset}) JSON (with metadata)`);
+        
+        const formatChoice = await this.prompt('Select export format (1-3, default: 1): ') || '1';
+        
         const filename = await this.prompt(this.t('settings.importExport.exportFilenamePrompt'));
         const exportFile = filename.trim() || `i18n-settings-${new Date().toISOString().split('T')[0]}.json`;
         
+        let exportData;
+        switch (formatChoice) {
+            case '2':
+                exportData = JSON.stringify(this.settings);
+                break;
+            case '3':
+                exportData = JSON.stringify({
+                    exportedAt: new Date().toISOString(),
+                    version: this.settings.version || '1.0.0',
+                    settings: this.settings
+                }, null, 2);
+                break;
+            default:
+                exportData = JSON.stringify(this.settings, null, 2);
+        }
+
         try {
-            fs.writeFileSync(exportFile, JSON.stringify(this.settings, null, 2));
+            fs.writeFileSync(exportFile, exportData);
+            const stats = fs.statSync(exportFile);
             this.success(`Settings exported to ${exportFile}`);
+            console.log(`  Size: ${Math.round(stats.size / 1024)}KB`);
+            console.log(`  Format: ${formatChoice === '2' ? 'Minified JSON' : formatChoice === '3' ? 'JSON with metadata' : 'Formatted JSON'}`);
         } catch (error) {
             this.error(`Failed to export settings: ${error.message}`);
         }
@@ -1040,6 +1212,16 @@ class SettingsCLI {
      * Import settings from a file
      */
     async importSettings() {
+        // Check admin PIN authentication if enabled
+        if (this.settingsManager.isAdminPinEnabled()) {
+            const pin = await this.promptPin('Enter admin PIN to import settings: ');
+            if (!pin || !await this.adminAuth.verifyPin(pin)) {
+                this.error('Invalid PIN. Import cancelled.');
+                await this.pause();
+                return;
+            }
+        }
+
         const filename = await this.prompt(this.t('settings.importExport.importFilenamePrompt'));
         
         if (!filename.trim()) {
@@ -1052,8 +1234,30 @@ class SettingsCLI {
                 await this.pause();
                 return;
             }
+
+            const fileContent = fs.readFileSync(filename, 'utf8');
+            let importedSettings;
             
-            const importedSettings = JSON.parse(fs.readFileSync(filename, 'utf8'));
+            try {
+                const parsed = JSON.parse(fileContent);
+                
+                // Handle different import formats
+                if (parsed.settings && parsed.exportedAt) {
+                    // Format with metadata
+                    importedSettings = parsed.settings;
+                    console.log(`  Export date: ${new Date(parsed.exportedAt).toLocaleString()}`);
+                    if (parsed.version) {
+                        console.log(`  Version: ${parsed.version}`);
+                    }
+                } else {
+                    // Direct settings format
+                    importedSettings = parsed;
+                }
+            } catch (parseError) {
+                this.error('Invalid JSON format in file.');
+                await this.pause();
+                return;
+            }
             
             // Validate imported settings
             if (!settingsManager.validateSettings(importedSettings)) {
@@ -1061,12 +1265,25 @@ class SettingsCLI {
                 await this.pause();
                 return;
             }
+
+            // Show import preview
+            console.log('\nImport preview:');
+            console.log(`  Languages: ${importedSettings.supportedLanguages?.join(', ') || 'Not specified'}`);
+            console.log(`  Source directory: ${importedSettings.sourceDir || 'Not specified'}`);
+            console.log(`  Output directory: ${importedSettings.outputDir || 'Not specified'}`);
+            console.log(`  Admin PIN enabled: ${importedSettings.security?.adminPinEnabled || false}`);
             
             const confirm = await this.prompt(this.t('settings.importExport.importConfirm'));
             if (confirm.toLowerCase() === 'y') {
                 this.settings = importedSettings;
                 this.modified = true;
                 this.success('Settings imported successfully.');
+                // Save settings immediately
+                try {
+                    await this.saveSettings();
+                } catch (error) {
+                    this.error(`Failed to save settings: ${error.message}`);
+                }
             }
         } catch (error) {
             this.error(`Failed to import settings: ${error.message}`);
@@ -1079,9 +1296,34 @@ class SettingsCLI {
      * Create a backup of current settings
      */
     async createBackup() {
+        // Check admin PIN authentication if enabled
+        if (this.settingsManager.isAdminPinEnabled()) {
+            const pin = await this.promptPin('Enter admin PIN to create backup: ');
+            if (!pin || !await this.adminAuth.verifyPin(pin)) {
+                this.error('Invalid PIN. Backup creation cancelled.');
+                await this.pause();
+                return;
+            }
+        }
+
         try {
             const backupFile = settingsManager.createBackup();
             this.success(`Backup created: ${backupFile}`);
+            
+            // Show backup statistics
+            const backupDir = path.join(path.dirname(settingsManager.configFile), 'backups');
+            if (fs.existsSync(backupDir)) {
+                const backupFiles = fs.readdirSync(backupDir)
+                    .filter(file => file.endsWith('.json') && file.includes('-backup-'));
+                
+                const totalSize = backupFiles.reduce((total, file) => {
+                    const filePath = path.join(backupDir, file);
+                    return total + fs.statSync(filePath).size;
+                }, 0);
+                
+                console.log(`  Total backups: ${backupFiles.length}`);
+                console.log(`  Total size: ${Math.round(totalSize / 1024)}KB`);
+            }
         } catch (error) {
             this.error(`Failed to create backup: ${error.message}`);
         }
@@ -1090,9 +1332,277 @@ class SettingsCLI {
     }
 
     /**
+     * Restore settings from a backup file
+     */
+    async restoreFromBackup() {
+        // Check admin PIN authentication if enabled
+        if (this.settingsManager.isAdminPinEnabled()) {
+            const pin = await this.promptPin('Enter admin PIN to restore from backup: ');
+            if (!pin || !await this.adminAuth.verifyPin(pin)) {
+                this.error('Invalid PIN. Restore cancelled.');
+                await this.pause();
+                return;
+            }
+        }
+
+        try {
+            const backupDir = path.join(path.dirname(settingsManager.configFile), 'backups');
+            
+            if (!fs.existsSync(backupDir)) {
+                this.error('No backup directory found.');
+                await this.pause();
+                return;
+            }
+
+            const backupFiles = fs.readdirSync(backupDir)
+                .filter(file => file.endsWith('.json') && file.includes('-backup-'))
+                .map(file => ({
+                    name: file,
+                    path: path.join(backupDir, file),
+                    created: fs.statSync(path.join(backupDir, file)).mtime
+                }))
+                .sort((a, b) => b.created - a.created);
+
+            if (backupFiles.length === 0) {
+                this.error('No backup files found.');
+                await this.pause();
+                return;
+            }
+
+            console.log('\nAvailable backup files:');
+            backupFiles.forEach((file, index) => {
+                const date = file.created.toLocaleDateString();
+                const time = file.created.toLocaleTimeString();
+                console.log(`  ${colors.cyan}${index + 1}${colors.reset}) ${file.name} (${date} ${time})`);
+            });
+            console.log();
+
+            const choice = await this.prompt('Select backup file number (or press Enter to cancel): ');
+            const index = parseInt(choice) - 1;
+
+            if (isNaN(index) || index < 0 || index >= backupFiles.length) {
+                this.error('Invalid selection.');
+                await this.pause();
+                return;
+            }
+
+            const selectedBackup = backupFiles[index];
+            
+            const confirm = await this.prompt(`Restore from ${selectedBackup.name}? This will overwrite current settings. (y/n): `);
+            if (confirm.toLowerCase() === 'y') {
+                const importedSettings = JSON.parse(fs.readFileSync(selectedBackup.path, 'utf8'));
+                
+                // Validate imported settings
+                if (!settingsManager.validateSettings(importedSettings)) {
+                    this.error('Invalid backup file format.');
+                    await this.pause();
+                    return;
+                }
+
+                this.settings = importedSettings;
+                this.modified = true;
+                this.success(`Settings restored from ${selectedBackup.name}`);
+                
+                // Save settings immediately
+                try {
+                    await this.saveSettings();
+                } catch (error) {
+                    this.error(`Failed to save settings: ${error.message}`);
+                }
+            }
+        } catch (error) {
+            this.error(`Failed to restore from backup: ${error.message}`);
+        }
+        
+        await this.pause();
+    }
+
+    /**
+     * Manage backup files - view, delete, and clean up old backups
+     */
+    async manageBackups() {
+        // Check admin PIN authentication if enabled
+        if (this.settingsManager.isAdminPinEnabled()) {
+            const pin = await this.promptPin('Enter admin PIN to manage backups: ');
+            if (!pin || !await this.adminAuth.verifyPin(pin)) {
+                this.error('Invalid PIN. Backup management cancelled.');
+                await this.pause();
+                return;
+            }
+        }
+
+        try {
+            const backupDir = path.join(path.dirname(settingsManager.configFile), 'backups');
+            
+            if (!fs.existsSync(backupDir)) {
+                this.error('No backup directory found.');
+                await this.pause();
+                return;
+            }
+
+            while (true) {
+                this.clearScreen();
+                this.showHeader();
+                console.log(`${colors.bright}Manage Backup Files${colors.reset}\n`);
+
+                const backupFiles = fs.readdirSync(backupDir)
+                    .filter(file => file.endsWith('.json') && file.includes('-backup-'))
+                    .map(file => {
+                        const filePath = path.join(backupDir, file);
+                        const stats = fs.statSync(filePath);
+                        return {
+                            name: file,
+                            path: filePath,
+                            created: stats.mtime,
+                            size: stats.size
+                        };
+                    })
+                    .sort((a, b) => b.created - a.created);
+
+                if (backupFiles.length === 0) {
+                    console.log('No backup files found.');
+                    await this.pause();
+                    return;
+                }
+
+                let totalSize = 0;
+                console.log('\nBackup files:');
+                backupFiles.forEach((file, index) => {
+                    const date = file.created.toLocaleDateString();
+                    const time = file.created.toLocaleTimeString();
+                    const size = Math.round(file.size / 1024);
+                    totalSize += file.size;
+                    console.log(`  ${colors.cyan}${index + 1}${colors.reset}) ${file.name} (${date} ${time}) - ${size}KB`);
+                });
+
+                console.log(`\nTotal: ${backupFiles.length} files, ${Math.round(totalSize / 1024)}KB`);
+                console.log(`\n  ${colors.cyan}1${colors.reset}) Delete specific backup`);
+                console.log(`  ${colors.cyan}2${colors.reset}) Delete old backups (keep last 10)`);
+                console.log(`  ${colors.cyan}3${colors.reset}) Delete all backups`);
+                console.log(`  ${colors.yellow}b${colors.reset}) Back to Import/Export menu`);
+
+                const choice = await this.prompt('\nSelect option: ');
+                
+                switch (choice) {
+                    case '1':
+                        await this.deleteSpecificBackup(backupFiles);
+                        break;
+                    case '2':
+                        await this.cleanupOldBackups(backupFiles);
+                        break;
+                    case '3':
+                        await this.deleteAllBackups(backupFiles);
+                        break;
+                    case 'b':
+                        return;
+                    default:
+                        this.error('Invalid option.');
+                        await this.pause();
+                }
+            }
+        } catch (error) {
+            this.error(`Failed to manage backups: ${error.message}`);
+            await this.pause();
+        }
+    }
+
+    /**
+     * Delete a specific backup file
+     */
+    async deleteSpecificBackup(backupFiles) {
+        const choice = await this.prompt('Enter backup number to delete (or press Enter to cancel): ');
+        const index = parseInt(choice) - 1;
+
+        if (isNaN(index) || index < 0 || index >= backupFiles.length) {
+            this.error('Invalid selection.');
+            await this.pause();
+            return;
+        }
+
+        const selectedBackup = backupFiles[index];
+        const confirm = await this.prompt(`Delete ${selectedBackup.name}? (y/n): `);
+        
+        if (confirm.toLowerCase() === 'y') {
+            try {
+                fs.unlinkSync(selectedBackup.path);
+                this.success(`Deleted ${selectedBackup.name}`);
+            } catch (error) {
+                this.error(`Failed to delete backup: ${error.message}`);
+            }
+            await this.pause();
+        }
+    }
+
+    /**
+     * Clean up old backups, keeping only the most recent ones
+     */
+    async cleanupOldBackups(backupFiles) {
+        const keepCount = 10;
+        if (backupFiles.length <= keepCount) {
+            console.log(`Less than ${keepCount} backups found. No cleanup needed.`);
+            await this.pause();
+            return;
+        }
+
+        const filesToDelete = backupFiles.slice(keepCount);
+        console.log(`\nWill delete ${filesToDelete.length} old backup files:`);
+        filesToDelete.forEach(file => {
+            const date = file.created.toLocaleDateString();
+            console.log(`  - ${file.name} (${date})`);
+        });
+
+        const confirm = await this.prompt('\nProceed with cleanup? (y/n): ');
+        if (confirm.toLowerCase() === 'y') {
+            let deletedCount = 0;
+            filesToDelete.forEach(file => {
+                try {
+                    fs.unlinkSync(file.path);
+                    deletedCount++;
+                } catch (error) {
+                    this.error(`Failed to delete ${file.name}: ${error.message}`);
+                }
+            });
+            this.success(`Cleaned up ${deletedCount} old backup files`);
+            await this.pause();
+        }
+    }
+
+    /**
+     * Delete all backup files
+     */
+    async deleteAllBackups(backupFiles) {
+        console.log(`\nWARNING: This will delete all ${backupFiles.length} backup files!`);
+        const confirm = await this.prompt('Type "DELETE ALL" to confirm: ');
+        
+        if (confirm === 'DELETE ALL') {
+            let deletedCount = 0;
+            backupFiles.forEach(file => {
+                try {
+                    fs.unlinkSync(file.path);
+                    deletedCount++;
+                } catch (error) {
+                    this.error(`Failed to delete ${file.name}: ${error.message}`);
+                }
+            });
+            this.success(`Deleted ${deletedCount} backup files`);
+            await this.pause();
+        }
+    }
+
+    /**
      * Reset settings to defaults
      */
     async resetToDefaults() {
+        // Check admin PIN authentication if enabled
+        if (this.settingsManager.isAdminPinEnabled()) {
+            const pin = await this.promptPin('Enter admin PIN to reset settings: ');
+            if (!pin || !await this.adminAuth.verifyPin(pin)) {
+                this.error('Invalid PIN. Reset cancelled.');
+                await this.pause();
+                return;
+            }
+        }
+
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${this.t('settings.resetToDefaultsTitle')}${colors.reset}\n`);
@@ -1104,7 +1614,7 @@ class SettingsCLI {
         if (confirm.toLowerCase() === 'y') {
             try {
                 settingsManager.resetToDefaults();
-                this.settings = settingsManager.getSettings();
+                this.settings = settingsManager.getAllSettings();
                 this.modified = false;
                 this.success('Settings reset to defaults successfully.');
             } catch (error) {
@@ -1147,6 +1657,12 @@ class SettingsCLI {
                 
                 this.modified = true;
                 this.success('Script directories reset to system defaults successfully.');
+                // Save settings immediately
+                try {
+                    await this.saveSettings();
+                } catch (error) {
+                    this.error(`Failed to save settings: ${error.message}`);
+                }
             } catch (error) {
                 this.error(`Failed to reset script directories: ${error.message}`);
             }
@@ -1193,10 +1709,7 @@ class SettingsCLI {
         console.log(`${this.t('settings.help.categoryProcessing')}`);
         console.log(`${this.t('settings.help.categoryAdvanced')}\n`);
 
-        console.log(`${colors.cyan}${this.t('settings.help.envVarsTitle')}${colors.reset}`);
-        console.log(`${this.t('settings.help.envVar1')}`);
-        console.log(`${this.t('settings.help.envVar2')}`);
-        console.log(`${this.t('settings.help.envVar3')}\n`);
+
 
         console.log(`${colors.cyan}${this.t('settings.help.cliUsageTitle')}${colors.reset}`);
         console.log(`${this.t('settings.help.cliUsage1')}`);
@@ -1398,9 +1911,23 @@ ${colors.dim}${this.t('settings.updatePackage.command')}: npm update i18ntk -g${
     /**
      * Convert string input to appropriate type
      */
-    convertValue(input, schema) {
+    convertValue(input, schema, key = '') {
+        const raw = String(input).trim();
+        const lower = raw.toLowerCase();
+
+        // Fallback coercion when schema is missing
         if (!schema) {
-            return input;
+            // Booleans
+            if (['true','yes','y','1','on','enabled'].includes(lower)) return true;
+            if (['false','no','n','0','off','disabled'].includes(lower)) return false;
+
+            // Numbers for known numeric settings
+            const numericKeys = /(sessionTimeout|maxFailedAttempts|lockoutDuration|retentionDays|maxBackups|advanced\.|backup\.)/;
+            if (numericKeys.test(key)) {
+                const n = Number(raw);
+                if (!Number.isNaN(n)) return n;
+            }
+            return raw;
         }
         
         switch (schema.type) {

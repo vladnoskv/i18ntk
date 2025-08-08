@@ -449,7 +449,7 @@ class I18nCompletionTool {
       this.config = { ...baseConfig, ...this.config };
       
       const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-      loadTranslations(uiLanguage);
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       this.t = t;
       
       this.sourceDir = this.config.sourceDir;

@@ -9,13 +9,7 @@ const AdminCLI = require('../utils/admin-cli');
 
 class I18nSummaryReporter {
   constructor() {
-    this.config = {
-      sourceDir: null, // Will be set from settings
-      outputDir: './i18ntk-reports',
-      sourceLanguage: 'en',
-      excludeFiles: ['.DS_Store', 'Thumbs.db'],
-      supportedExtensions: ['.json']
-    };
+    this.config = null; // Will be set from getUnifiedConfig
     this.t = t; // Use global translation function
     this.stats = {
       languages: [],
@@ -36,17 +30,17 @@ class I18nSummaryReporter {
 
   async initialize() {
     try {
-      const args = this.parseArgs();
-      if (args.help) {
+      const cliArgs = parseCommonArgs(process.argv.slice(2));
+      if (cliArgs.help) {
         this.showHelp();
         process.exit(0);
       }
 
-      const baseConfig = await getUnifiedConfig('summary', args);
+      const baseConfig = getUnifiedConfig('summary', cliArgs);
       this.config = baseConfig;
 
       const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-      loadTranslations(uiLanguage);
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
 
       this.sourceDir = this.config.sourceDir;
 
@@ -87,41 +81,7 @@ class I18nSummaryReporter {
     }
   }
 
-  // Parse command line arguments
-  parseArgs() {
-    const args = process.argv.slice(2);
-    const parsed = {
-      sourceDir: null,
-      outputFile: null,
-      verbose: false,
-      help: false,
-      keepReports: false,
-      deleteReports: false,
-      noPrompt: false
-    };
 
-    for (let i = 0; i < args.length; i++) {
-      const arg = args[i];
-      
-      if (arg === '--help' || arg === '-h') {
-        parsed.help = true;
-      } else if (arg === '--verbose' || arg === '-v') {
-        parsed.verbose = true;
-      } else if (arg === '--source-dir' || arg === '-s') {
-        parsed.sourceDir = args[++i];
-      } else if (arg === '--output' || arg === '-o') {
-        parsed.outputFile = args[++i];
-      } else if (arg === '--keep-reports') {
-        parsed.keepReports = true;
-      } else if (arg === '--delete-reports') {
-        parsed.deleteReports = true;
-      } else if (arg === '--no-prompt') {
-        parsed.noPrompt = true;
-      }
-    }
-
-    return parsed;
-  }
 
   // Show help information
   showHelp() {
@@ -143,49 +103,7 @@ class I18nSummaryReporter {
     console.log(this.t('summary.helpExample5') + '\n');
   }
 
-  // Auto-detect i18n directory (only used as fallback when no directory is configured)
-  detectI18nDirectory() {
-    const possiblePaths = [
-      'locales',
-      'src/i18n/locales',
-      'src/locales',
-      'src/i18n',
-      'i18n/locales',
-      'i18n',
-      'public/locales',
-      'assets/i18n',
-      'translations'
-    ];
 
-    // Fall back to detection from possible paths only if no directory is configured
-    for (const possiblePath of possiblePaths) {
-      const fullPath = path.resolve(possiblePath);
-      if (fs.existsSync(fullPath)) {
-        const contents = fs.readdirSync(fullPath);
-        
-        // Check for directory-based structure
-        const hasLanguageDirs = contents.some(item => {
-          const itemPath = path.join(fullPath, item);
-          return fs.statSync(itemPath).isDirectory() && 
-                 item.length === 2 && 
-                 /^[a-z]{2}$/.test(item);
-        });
-        
-        // Check for file-based structure
-        const hasLanguageFiles = contents.some(item => 
-          item.endsWith('.json') && 
-          item.length === 6 &&
-          /^[a-z]{2}\.json$/.test(item)
-        );
-        
-        if (hasLanguageDirs || hasLanguageFiles) {
-          return fullPath;
-        }
-      }
-    }
-
-    return './locales'; // Final fallback
-  }
 
   // Get all available languages
   getAvailableLanguages() {
@@ -858,6 +776,37 @@ class I18nSummaryReporter {
     return report.join('\n');
   }
 
+  // Parse command line arguments
+  parseArgs() {
+    const args = process.argv.slice(2);
+    const parsed = {};
+    
+    args.forEach(arg => {
+      if (arg.startsWith('--')) {
+        const [key, value] = arg.substring(2).split('=');
+        if (key === 'source-dir') {
+          parsed.sourceDir = value;
+        } else if (key === 'source-language') {
+          parsed.sourceLanguage = value;
+        } else if (key === 'output-file') {
+          parsed.outputFile = value;
+        } else if (key === 'verbose') {
+          parsed.verbose = true;
+        } else if (key === 'delete-reports') {
+          parsed.deleteReports = true;
+        } else if (key === 'keep-reports') {
+          parsed.keepReports = true;
+        } else if (key === 'no-prompt') {
+          parsed.noPrompt = true;
+        } else if (key === 'help') {
+          parsed.help = true;
+        }
+      }
+    });
+    
+    return parsed;
+  }
+
   // Run the analysis and generate report
   async run(options = {}) {
     const args = this.parseArgs();
@@ -868,7 +817,7 @@ class I18nSummaryReporter {
     this.config = { ...this.config, ...baseConfig };
     
     const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-    loadTranslations(uiLanguage);
+    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
     this.t = t;
     
     // Use settings configuration, only fall back to detection if absolutely necessary
@@ -1056,9 +1005,13 @@ class I18nSummaryReporter {
 
 // Run if called directly
 if (require.main === module) {
-  const reporter = new I18nSummaryReporter();
-  reporter.run().catch(error => {
-    console.error(this.t('summary.fatalError', { error: error.message }));
+  async function main() {
+    const reporter = new I18nSummaryReporter();
+    await reporter.initialize();
+    await reporter.run();
+  }
+  main().catch(error => {
+    console.error('Error in i18ntk-summary:', error.message);
     process.exit(1);
   });
 }

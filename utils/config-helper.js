@@ -1,6 +1,7 @@
 /**
  * Unified Configuration Helper
  * Provides consistent directory configuration across all i18n toolkit scripts
+ * Configuration is managed through settings files only
  */
 
 const fs = require('fs');
@@ -16,29 +17,38 @@ const SecurityUtils = require('./security');
  */
 function getUnifiedConfig(scriptName, cliArgs = {}) {
   try {
-    const settings = settingsManager.getSettings();
-    const projectRoot = path.resolve(settings.projectRoot || '.');
+    const settings = settingsManager.getAllSettings();
+    const projectRoot = path.resolve(
+      settings.projectRoot || 
+      '.'
+    );
     
-    // Determine source directory with proper precedence:
-    // 1. CLI argument (highest priority)
-    // 2. Script-specific override from settings
-    // 3. Global source directory from settings
-    // 4. Global i18n directory from settings
-    // 5. Default fallback
-    let sourceDir;
-    const directoryUpdates = {};
-    
-    if (cliArgs.sourceDir) {
-      sourceDir = cliArgs.sourceDir;
-      directoryUpdates.sourceDir = sourceDir;
-    } else if (settings.scriptDirectories?.[scriptName]) {
-      sourceDir = settings.scriptDirectories[scriptName];
-    } else {
-      sourceDir = settings.sourceDir || settings.i18nDir || './locales';
+    // Use .i18ntk directory for configuration storage
+    const configDir = path.join(projectRoot, '.i18ntk');
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
     }
     
-    // Ensure sourceDir is resolved relative to projectRoot
-    sourceDir = path.resolve(projectRoot, sourceDir);
+    // Determine source directory with proper precedence:
+  // 1. CLI argument (highest priority)
+  // 2. Script-specific override from settings
+  // 3. Global source directory from settings
+  // 4. Global i18n directory from settings
+  // 5. Default fallback
+  let sourceDir;
+  const directoryUpdates = {};
+  
+  if (cliArgs.sourceDir) {
+    sourceDir = cliArgs.sourceDir;
+    directoryUpdates.sourceDir = sourceDir;
+  } else if (settings.scriptDirectories?.[scriptName]) {
+    sourceDir = settings.scriptDirectories[scriptName];
+  } else {
+    sourceDir = settings.sourceDir || settings.i18nDir || './locales';
+  }
+  
+  // Ensure sourceDir is resolved relative to projectRoot
+  sourceDir = path.resolve(projectRoot, sourceDir);
     
     // Determine i18n directory (can be different from sourceDir)
     let i18nDir;
@@ -87,13 +97,40 @@ function getUnifiedConfig(scriptName, cliArgs = {}) {
                    settings.strictMode || 
                    settings.processing?.strictMode || 
                    false,
-      uiLanguage: cliArgs.uiLanguage || settings.language || settings.uiLanguage || 'en',
+      uiLanguage: cliArgs.uiLanguage || 
+                 settings.language || 
+                 settings.uiLanguage || 
+                 'en',
+      // Environment-specific directories - use .i18ntk subdirectory
+      backupDir: path.resolve(projectRoot, path.join('.i18ntk', 'backups')),
+      tempDir: path.resolve(projectRoot, path.join('.i18ntk', 'temp')),
+      cacheDir: path.resolve(projectRoot, path.join('.i18ntk', '.cache')),
+      configDir: configDir,
       // Pass through additional settings
       settings: {
         defaultLanguages: settings.defaultLanguages || ['de', 'es', 'fr', 'ru'],
-        processing: settings.processing || {},
-        advanced: settings.advanced || {},
-        security: settings.security || {}
+        processing: {
+          maxFileSize: parseInt(settings.processing?.maxFileSize || '5242880', 10),
+          maxFiles: parseInt(settings.processing?.maxFiles || '1000', 10),
+          timeout: parseInt(settings.processing?.timeout || '300000', 10),
+          enableCompression: settings.processing?.enableCompression !== false,
+          compressionLevel: parseInt(settings.processing?.compressionLevel || '6', 10),
+          ...settings.processing
+        },
+        security: {
+          adminPin: settings.security?.adminPin || '0000',
+          encryptionKey: settings.security?.encryptionKey,
+          jwtSecret: settings.security?.jwtSecret,
+          disableWeakPinWarning: settings.security?.disableWeakPinWarning === true,
+          ...settings.security
+        },
+        advanced: settings.advanced || {}
+      },
+      // Debug and logging configuration
+      debug: {
+        enabled: settings.debug?.enabled || false,
+        level: settings.debug?.level || 'info',
+        logFile: settings.debug?.logFile || path.join(configDir, 'i18ntk.log')
       }
     };
     
@@ -104,6 +141,41 @@ function getUnifiedConfig(scriptName, cliArgs = {}) {
   } catch (error) {
     throw new Error(`Configuration error for ${scriptName}: ${error.message}`);
   }
+}
+
+/**
+ * Get environment-specific configuration
+ * @returns {object} Environment configuration
+ */
+function getEnvironmentConfig() {
+  const settings = require('../settings/settings-manager').getAllSettings();
+  return {
+    nodeEnv: settings.nodeEnv || 'production',
+    isProduction: (settings.nodeEnv || 'production') === 'production',
+    isDevelopment: (settings.nodeEnv || 'production') !== 'production',
+    isTest: (settings.nodeEnv || 'production') === 'test',
+    port: parseInt(settings.apiPort || '3000', 10),
+    host: settings.apiHost || 'localhost',
+    apiEnabled: settings.apiEnabled === true,
+    hotReload: settings.hotReload === true,
+    mockData: settings.mockData === true,
+    testMode: settings.testMode === true
+  };
+}
+
+/**
+ * Display current basic configuration
+ */
+function displayBasicConfig() {
+  const basicConfig = getBasicConfig();
+  console.log('\n🔧 Basic Configuration:');
+  console.log(`   Node Environment: ${basicConfig.nodeEnv}`);
+  console.log(`   API Enabled: ${basicConfig.apiEnabled}`);
+  console.log(`   Port: ${basicConfig.port}`);
+  console.log(`   Host: ${basicConfig.host}`);
+  console.log(`   Hot Reload: ${basicConfig.hotReload}`);
+  console.log(`   Test Mode: ${basicConfig.testMode}`);
+  console.log(`   Mock Data: ${basicConfig.mockData}`);
 }
 
 /**
@@ -195,9 +267,10 @@ function displayHelp(scriptName, additionalOptions = {}) {
     console.log(`  --${flag.padEnd(15)} ${description}`);
   });
   
-  console.log('\nExamples:');
-  console.log(`  node ${scriptName}.js --source-dir=./src/i18n/locales`);
-  console.log(`  node ${scriptName}.js --source-language=de --strict`);
+  console.log(`\nExamples:`);
+  console.log(`  node ${scriptName}.js --source-dir=./locales`);
+  console.log(`  node ${scriptName}.js --source-dir=./app --i18n-dir=./locales`);
+  console.log(`  node ${scriptName}.js --output-dir=./i18ntk-reports`);
   console.log(`  npx i18ntk ${scriptName.replace('i18ntk-', '')} --help`);
   
   console.log('\nConfiguration:');
@@ -232,6 +305,8 @@ module.exports = {
   getUnifiedConfig,
   parseCommonArgs,
   displayHelp,
+  getEnvironmentConfig,
+  displayBasicConfig,
   ensureDirectory,
   validateSourceDir
 };

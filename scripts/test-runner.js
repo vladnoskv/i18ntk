@@ -23,7 +23,7 @@ class TestRunner {
     }
 
     async runAllTests() {
-        console.log('🚀 i18n Management Toolkit v1.4.2 Test Runner');
+        console.log('🚀 i18n Management Toolkit v1.6.0 Test Runner');
         console.log('='.repeat(80));
         console.log(`Started: ${this.startTime.toLocaleString()}`);
         console.log();

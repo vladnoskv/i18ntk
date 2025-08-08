@@ -41,7 +41,7 @@ const { getUnifiedConfig } = require('../utils/config-helper');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = settingsManager.getSettings();
+  const settings = settingsManager.getAllSettings();
   
   // Check for per-script directory override, fallback to global sourceDir
   const sourceDir = settings.scriptDirectories?.sizing || settings.sourceDir || './locales';
@@ -70,7 +70,7 @@ class I18nSizingAnalyzer {
     
     // Initialize i18n with UI language from config
     const uiLanguage = options.uiLanguage || config.uiLanguage || 'en';
-    loadTranslations(uiLanguage);
+    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
     this.t = t;
     
     this.stats = {
@@ -774,8 +774,8 @@ Generated: ${new Date().toISOString()}
       this.outputDir = path.resolve(config.projectRoot || '.', config.outputDir || './i18ntk-reports');
       this.threshold = config.threshold || 50;
       
-      const uiLanguage = SecurityUtils.sanitizeInput(config.uiLanguage || 'en');
-      loadTranslations(uiLanguage);
+      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
+    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       this.t = t;
     } else if (!fromMenu) {
       const args = this.parseArgs();

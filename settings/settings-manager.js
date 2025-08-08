@@ -9,23 +9,30 @@ const path = require('path');
 
 class SettingsManager {
     constructor() {
-        this.configFile = path.join(__dirname, 'i18ntk-config.json');
+        const projectRoot = process.cwd();
+        this.configDir = path.join(projectRoot, '.i18ntk');
+        this.configFile = path.join(this.configDir, 'config.json');
         this.lastBackupTime = 0;
         this.backupDebounceMs = 5000; // 5 seconds debounce
+        this.settings = {};
         
-        // Default configuration
+        // Ensure config directory exists
+        if (!fs.existsSync(this.configDir)) {
+            fs.mkdirSync(this.configDir, { recursive: true });
+        }
+        
         this.defaultConfig = {
             // Basic settings
             language: 'en',
             uiLanguage: 'en',
             theme: 'light',
             
-            // Directory settings
+            // Directory settings - use absolute paths based on package directory
             projectRoot: '.',
             sourceDir: './locales',
             i18nDir: './locales',
             outputDir: './i18ntk-reports',
-            uiLocalesDir: './ui-locales',
+            uiLocalesDir: path.join(__dirname, '..', 'ui-locales'),
             
             // Script-specific directory overrides
             scriptDirectories: {
@@ -187,12 +194,14 @@ class SettingsManager {
                 const content = fs.readFileSync(this.configFile, 'utf8');
                 const loadedSettings = JSON.parse(content);
                 // Merge with defaults to ensure all properties exist
-                return this.mergeWithDefaults(loadedSettings);
+                this.settings = this.mergeWithDefaults(loadedSettings);
+                return this.settings;
             }
         } catch (error) {
             console.error('Error loading settings:', error.message);
         }
-        return { ...this.defaultConfig };
+        this.settings = { ...this.defaultConfig };
+        return this.settings;
     }
 
     /**
@@ -286,7 +295,7 @@ class SettingsManager {
      * Get current settings
      * @returns {object} Current settings
      */
-    getSettings() {
+    getAllSettings() {
         return { ...this.settings };
     }
 
@@ -335,9 +344,10 @@ class SettingsManager {
     /**
      * Get specific setting value
      * @param {string} keyPath - Dot-separated key path (e.g., 'backup.enabled')
+     * @param {*} defaultValue - Default value to return if key not found
      * @returns {*} Setting value
      */
-    getSetting(keyPath) {
+    getSetting(keyPath, defaultValue = null) {
         const keys = keyPath.split('.');
         let value = this.settings;
         
@@ -345,7 +355,7 @@ class SettingsManager {
             if (value && typeof value === 'object' && key in value) {
                 value = value[key];
             } else {
-                return undefined;
+                return defaultValue;
             }
         }
         
@@ -360,9 +370,12 @@ class SettingsManager {
      */
     setSetting(keyPath, value) {
         try {
+            // Create a deep copy of current settings to avoid modifying the original
+            const newSettings = JSON.parse(JSON.stringify(this.settings));
+            
             const keys = keyPath.split('.');
             const lastKey = keys.pop();
-            let target = this.settings;
+            let target = newSettings;
             
             // Navigate to the parent object
             for (const key of keys) {
@@ -373,7 +386,7 @@ class SettingsManager {
             }
             
             target[lastKey] = value;
-            return this.saveSettings();
+            return this.saveSettings(newSettings);
         } catch (error) {
             console.error('Error setting setting:', error.message);
             return false;
@@ -387,7 +400,9 @@ class SettingsManager {
     resetToDefaults() {
         try {
             this.settings = { ...this.defaultConfig };
-            return this.saveSettings();
+            this.saveSettings();
+            console.log('Settings reset to defaults');
+            return true;
         } catch (error) {
             console.error('Error resetting to defaults:', error.message);
             return false;
@@ -397,20 +412,48 @@ class SettingsManager {
     /**
      * Validate settings structure
      * @param {object} settings - Settings to validate
-     * @returns {boolean} True if valid
+     * @returns {Array} Array of validation errors, empty if valid
      */
     validateSettings(settings) {
+        const errors = [];
+        
         try {
             // Basic validation - ensure it's an object
             if (!settings || typeof settings !== 'object') {
-                return false;
+                errors.push('Settings must be an object');
+                return errors;
             }
             
-            // Add more specific validation as needed
-            return true;
+            // Validate required fields
+            if (!settings.language) {
+                errors.push('Language is required');
+            }
+            
+            if (!settings.sourceDir) {
+                errors.push('Source directory is required');
+            }
+            
+            // Validate directory paths exist
+            const sourceDir = path.resolve(settings.projectRoot || '.', settings.sourceDir || '');
+            if (!fs.existsSync(sourceDir)) {
+                errors.push(`Source directory does not exist: ${sourceDir}`);
+            }
+            
+            if (settings.outputDir) {
+                const outputDir = path.resolve(settings.projectRoot || '.', settings.outputDir);
+                if (!fs.existsSync(outputDir)) {
+                    try {
+                        fs.mkdirSync(outputDir, { recursive: true });
+                    } catch (error) {
+                        errors.push(`Cannot create output directory: ${outputDir}`);
+                    }
+                }
+            }
+            
+            return errors;
         } catch (error) {
-            console.error('Error validating settings:', error.message);
-            return false;
+            errors.push(`Error validating settings: ${error.message}`);
+            return errors;
         }
     }
 

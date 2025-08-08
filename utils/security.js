@@ -203,11 +203,16 @@ class SecurityUtils {
       sanitized = sanitized.replace(/function\s*\(/gi, '');
     }
 
-    // Check against allowed characters
+    // Check against allowed characters - suppress warnings for normal operations
     if (!allowedChars.test(sanitized)) {
-      console.warn(i18n.t('security.inputDisallowedCharacters'));
-      // Remove disallowed characters
-      sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:;"']/g, '');
+      // Skip warning for common file path characters and reduce verbosity
+      const isFilePath = sanitized.includes('/') || sanitized.includes('\\') || sanitized.includes('.');
+      const isCommonContent = sanitized.length < 1000 && !sanitized.includes('<script');
+      if (!isFilePath && !isCommonContent) {
+        console.warn(i18n.t('security.inputDisallowedCharacters'));
+      }
+      // Allow more characters for file paths and content
+      sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:\;"'\/\\]/g, '');
     }
 
     return sanitized;
@@ -255,7 +260,7 @@ class SecurityUtils {
       'uiLanguage', 'language', 'sizeLimit', 'defaultLanguages', 'reportLanguage',
       'theme', 'autoSave', 'notifications', 'dateFormat', 'timeFormat', 'timezone',
       'processing', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
-      'supportedExtensions', 'settings'
+      'supportedExtensions', 'settings', 'backupDir', 'tempDir', 'cacheDir', 'configDir'
     ];
 
     for (const [key, value] of Object.entries(config)) {

@@ -4,6 +4,8 @@
 .env
 /src
 /test
+/test-i18ntk-local
+.trae
 
 # Security and configuration files
 settings/.i18n-admin-config.json
@@ -48,12 +50,9 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# Environment variables and secrets
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Configuration files
+config.json
+settings.json
 
 # Security sensitive files
 admin-pin.json

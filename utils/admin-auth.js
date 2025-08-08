@@ -360,7 +360,7 @@ class AdminAuth {
   }
 
   /**
-   * Disable admin authentication
+   * Disable admin authentication (completely removes PIN)
    */
   async disableAuth() {
     try {
@@ -379,6 +379,50 @@ class AdminAuth {
       return true;
     } catch (error) {
       SecurityUtils.logSecurityEvent('admin_auth_disable_error', 'error', `Failed to disable auth: ${error.message}`);
+      return false;
+    }
+  }
+
+  /**
+   * Disable PIN protection (keeps PIN for future re-enable)
+   */
+  async disablePinProtection() {
+    try {
+      const config = await this.loadConfig();
+      if (config) {
+        config.enabled = false;
+        config.lastModified = new Date().toISOString();
+        const success = await this.saveConfig(config);
+        if (success) {
+          SecurityUtils.logSecurityEvent('pin_protection_disabled', 'info', 'PIN protection disabled (PIN retained)');
+        }
+        return success;
+      }
+      return true;
+    } catch (error) {
+      SecurityUtils.logSecurityEvent('pin_protection_disable_error', 'error', `Failed to disable PIN protection: ${error.message}`);
+      return false;
+    }
+  }
+
+  /**
+   * Enable PIN protection (requires PIN to be already set)
+   */
+  async enablePinProtection() {
+    try {
+      const config = await this.loadConfig();
+      if (config && config.pinHash) {
+        config.enabled = true;
+        config.lastModified = new Date().toISOString();
+        const success = await this.saveConfig(config);
+        if (success) {
+          SecurityUtils.logSecurityEvent('pin_protection_enabled', 'info', 'PIN protection enabled');
+        }
+        return success;
+      }
+      return false;
+    } catch (error) {
+      SecurityUtils.logSecurityEvent('pin_protection_enable_error', 'error', `Failed to enable PIN protection: ${error.message}`);
       return false;
     }
   }

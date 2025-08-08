@@ -5,11 +5,6 @@
  * This script analyzes translation files to identify missing translations,
  * inconsistencies, and provides detailed reports for each language.
  * 
- * Usage:
- *   node scripts/i18n/02-analyze-translations.js
- *   node scripts/i18n/02-analyze-translations.js --language=de
- *   node scripts/i18n/02-analyze-translations.js --source-dir=./src/i18n/locales
- *   node scripts/i18n/02-analyze-translations.js --output-reports
  */
 
 const fs = require('fs');
@@ -51,7 +46,7 @@ class I18nAnalyzer {
       this.config = { ...baseConfig, ...this.config };
       
       const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-      loadTranslations(uiLanguage);
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
       this.sourceDir = this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
@@ -159,17 +154,23 @@ class I18nAnalyzer {
   // Get all keys recursively from an object
   getAllKeys(obj, prefix = '') {
     const keys = new Set();
-    
+
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+      // Log a warning instead of crashing
+      console.warn(`⚠️  Skipping invalid translation object at prefix '${prefix}'`);
+      return keys;
+    }
+
     for (const [key, value] of Object.entries(obj)) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
       keys.add(fullKey);
-      
+
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         const nestedKeys = this.getAllKeys(value, fullKey);
         nestedKeys.forEach(k => keys.add(k));
       }
     }
-    
+
     return keys;
   }
 
@@ -342,15 +343,25 @@ class I18nAnalyzer {
         continue;
       }
       
-      try {
-        const targetFileContent = fs.readFileSync(targetFullPath, 'utf8');
-        targetContent = JSON.parse(targetFileContent);
-      } catch (error) {
-        analysis.files[fileName] = {
-          error: `Failed to parse target file: ${error.message}`
-        };
-        continue;
-      }
+try {
+    const targetFileContent = fs.readFileSync(targetFullPath, 'utf8');
+    const parsed = JSON.parse(targetFileContent);
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      analysis.files[fileName] = {
+        error: `Invalid structure in target file: must be a plain object (not array/null/type)`
+      };
+      continue;
+    }
+
+    targetContent = parsed;
+
+  } catch (error) {
+    analysis.files[fileName] = {
+      error: `Failed to parse target file: ${error.message}`
+    };
+    continue;
+  }
       
       // Analyze this file
       const stats = this.getTranslationStats(targetContent);
@@ -591,7 +602,7 @@ class I18nAnalyzer {
         this.config = { ...baseConfig, ...this.config };
         
         const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-        loadTranslations(uiLanguage);
+        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         
         this.sourceDir = this.config.sourceDir;
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
@@ -629,7 +640,7 @@ class I18nAnalyzer {
       
       // Handle UI language change
       if (args.uiLanguage) {
-        loadTranslations(args.uiLanguage);
+        loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         this.t = t;
       }
       

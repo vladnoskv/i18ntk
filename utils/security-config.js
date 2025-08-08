@@ -9,7 +9,9 @@ const path = require('path');
 
 class SecurityConfig {
     constructor() {
-        this.configPath = process.env.I18NTK_CONFIG_PATH || './i18ntk-config.json';
+        const projectRoot = process.cwd();
+        this.configDir = path.join(projectRoot, '.i18ntk');
+        this.configPath = path.join(this.configDir, 'security-config.json');
         this.securityDefaults = {
             pin: {
                 minLength: 4,
@@ -34,20 +36,20 @@ class SecurityConfig {
     }
 
     /**
-     * Generate secure configuration with environment variable support
+     * Generate secure configuration with settings-based configuration
      */
-    generateSecureConfig() {
+    generateSecureConfig(settings = {}) {
         const config = {
             ...this.securityDefaults,
             secrets: {
-                adminPin: process.env.I18NTK_ADMIN_PIN || null,
-                encryptionKey: process.env.I18NTK_ENCRYPTION_KEY || this.generateSecureKey(),
-                jwtSecret: process.env.I18NTK_JWT_SECRET || this.generateSecureKey()
+                adminPin: settings.adminPin || null,
+                encryptionKey: settings.encryptionKey || this.generateSecureKey(),
+                jwtSecret: settings.jwtSecret || this.generateSecureKey()
             },
             security: {
                 ...this.securityDefaults,
-                environment: process.env.NODE_ENV || 'development',
-                disableWeakPinWarning: process.env.I18NTK_DISABLE_WEAK_PIN_WARNING === 'true'
+                environment: 'production',
+                disableWeakPinWarning: settings.disableWeakPinWarning === true
             }
         };
 
@@ -121,6 +123,12 @@ class SecurityConfig {
             throw new Error(`Invalid security configuration: ${validation.errors.join(', ')}`);
         }
 
+        // Ensure config directory exists
+        const configDir = path.dirname(this.configPath);
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+
         // Remove actual secrets from config file (use env vars)
         const safeConfig = {
             ...config,
@@ -133,31 +141,8 @@ class SecurityConfig {
 
         fs.writeFileSync(this.configPath, JSON.stringify(safeConfig, null, 2));
         
-        // Create .env template
-        const envTemplate = `# i18n Management Toolkit - Security Configuration
-# Copy this to .env and fill in your actual values
-
-# Admin PIN (optional - will prompt if not set)
-I18NTK_ADMIN_PIN=
-
-# Encryption key (32 bytes hex, auto-generated if not set)
-I18NTK_ENCRYPTION_KEY=${this.generateSecureKey()}
-
-# JWT secret for API authentication
-I18NTK_JWT_SECRET=${this.generateSecureKey()}
-
-# Environment (development/production)
-NODE_ENV=development
-
-# Disable weak PIN warnings (not recommended)
-I18NTK_DISABLE_WEAK_PIN_WARNING=false
-`;
-
-        fs.writeFileSync('.env.example', envTemplate);
-        
         return {
             configPath: this.configPath,
-            envTemplatePath: '.env.example',
             validation
         };
     }

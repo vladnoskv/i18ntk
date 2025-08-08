@@ -70,16 +70,26 @@ class I18nValidator {
       this.config = { ...baseConfig, ...this.config };
       
       const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-      loadTranslations(uiLanguage);
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
       SecurityUtils.logSecurityEvent('I18n validator initializing', 'info', 'Initializing I18n validator');
       
-      this.sourceDir = this.config.sourceDir;
+      // Use the i18n directory for language files
+      this.sourceDir = this.config.i18nDir || this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
-      // Validate source directory exists
-      const { validateSourceDir } = require('../utils/config-helper');
-      validateSourceDir(this.sourceDir, 'i18ntk-validate');
+      // Validate source directory exists - be more permissive
+      try {
+        if (!fs.existsSync(this.sourceDir)) {
+          console.warn(`Warning: Source directory ${this.sourceDir} does not exist, using fallback`);
+          // Try to create the directory structure if it doesn't exist
+          if (!fs.existsSync(this.sourceLanguageDir)) {
+            fs.mkdirSync(this.sourceLanguageDir, { recursive: true });
+          }
+        }
+      } catch (error) {
+        console.warn(`Directory validation warning: ${error.message}`);
+      }
       
       SecurityUtils.logSecurityEvent('I18n validator initialized successfully', 'info', 'I18n validator initialized successfully');
     } catch (error) {
@@ -518,7 +528,7 @@ class I18nValidator {
       
       // Handle UI language change
       if (args.uiLanguage) {
-        loadTranslations(args.uiLanguage);
+        loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         this.t = t;
       }
       
@@ -689,7 +699,7 @@ class I18nValidator {
         this.config = { ...baseConfig, ...this.config };
         
         const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-        loadTranslations(uiLanguage);
+        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         this.t = t;
         
         this.sourceDir = this.config.sourceDir;
@@ -748,9 +758,9 @@ if (require.main === module) {
   (async () => {
     try {
       // Initialize translations for CLI usage
-      const settings = settingsManager.getSettings();
+      const settings = settingsManager.getAllSettings();
       const uiLanguage = settings.language || 'en';
-      loadTranslations(uiLanguage);
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
       SecurityUtils.logSecurityEvent(t('validate.scriptExecution'), 'info', {
         script: 'i18ntk-validate.js',

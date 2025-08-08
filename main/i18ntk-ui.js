@@ -9,7 +9,7 @@ const settingsManager = require('../settings/settings-manager');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = settingsManager.getSettings();
+  const settings = settingsManager.getAllSettings();
   return {
     uiLocalesDir: settings.directories?.uiLocalesDir || path.join(__dirname, '..', 'ui-locales'),
     configFile: settings.directories?.configFile || path.join(__dirname, '..', 'settings', 'i18ntk-config.json')
@@ -26,7 +26,7 @@ class UIi18n {
         this.configFile = path.resolve(config.configFile);
 
         // Use settings manager as the single source of truth
-        const settings = settingsManager.getSettings();
+        const settings = settingsManager.getAllSettings();
         const configuredLanguage = settings.language || settings.uiLanguage;
 
         // Load language from settings manager or fallback
@@ -49,7 +49,7 @@ class UIi18n {
 
         this.translations = {}; // Reset translations for the new language
         
-        const settings = require('../settings/settings-manager').getSettings();
+        const settings = require('../settings/settings-manager').getAllSettings();
         const debugEnabled = settings.debug?.enabled || false;
         
         if (debugEnabled) {
@@ -63,8 +63,12 @@ class UIi18n {
             if (fs.existsSync(monolithTranslationFile)) {
                 try {
                     const content = fs.readFileSync(monolithTranslationFile, 'utf8');
-                    this.translations = JSON.parse(content);
+                    const fullTranslations = JSON.parse(content);
+                    
+                    // Flatten the nested structure for easier key access
+                    this.translations = this.flattenTranslations(fullTranslations);
                     this.currentLanguage = language;
+                    
                     if (debugEnabled) {
                         console.log(`UI: Loaded monolith translation file: ${monolithTranslationFile}`);
                     }
@@ -113,6 +117,32 @@ class UIi18n {
     }
 
     /**
+     * Flatten nested translation objects into a single-level object
+     * @param {object} translations - Nested translation object
+     * @param {string} prefix - Prefix for nested keys
+     * @returns {object} Flattened translation object
+     */
+    flattenTranslations(translations, prefix = '') {
+        const flattened = {};
+        
+        for (const key in translations) {
+            if (translations.hasOwnProperty(key)) {
+                const newKey = prefix ? `${prefix}.${key}` : key;
+                
+                if (typeof translations[key] === 'object' && translations[key] !== null && !Array.isArray(translations[key])) {
+                    // Recursively flatten nested objects
+                    Object.assign(flattened, this.flattenTranslations(translations[key], newKey));
+                } else {
+                    // Add leaf values directly
+                    flattened[newKey] = translations[key];
+                }
+            }
+        }
+        
+        return flattened;
+    }
+
+    /**
      * Deep merge function for objects
      * @param {object} target
      * @param {object} source
@@ -136,7 +166,7 @@ class UIi18n {
      * @returns {string} Current language code
      */
     getCurrentLanguageFromSettings() {
-        const settings = settingsManager.getSettings();
+        const settings = settingsManager.getAllSettings();
         return settings.language || settings.uiLanguage || 'en';
     }
 
@@ -146,9 +176,7 @@ class UIi18n {
      */
     saveLanguagePreference(language) {
         try {
-            const settings = settingsManager.getSettings();
-            settings.language = language;
-            settingsManager.saveSettings(settings);
+            settingsManager.setSetting('language', language);
         } catch (error) {
            console.error(`Error saving language preference: ${error.message}`);
         }
@@ -164,6 +192,9 @@ class UIi18n {
                 this.loadLanguage(configuredLanguage);
                 // Update current language reference
                 this.currentLanguage = configuredLanguage;
+                // Force reload translations in i18n-helper
+                const { loadTranslations } = require('../utils/i18n-helper');
+                loadTranslations(configuredLanguage, path.resolve(__dirname, '..', 'ui-locales'));
             }
         }
     }
@@ -192,24 +223,18 @@ class UIi18n {
      * @returns {string|array|object} Translated text or data
      */
     t(keyPath, replacements = {}) {
-        const keys = keyPath.split('.');
-        let value = this.translations;
+        let value = this.translations[keyPath];
 
-        for (const key of keys) {
-            if (value && typeof value === 'object' && key in value) {
-                value = value[key];
-            } else {
-                // Try to get English fallback if current language is not English
-                if (this.currentLanguage !== 'en') {
-                    const englishFallback = this.getEnglishFallback(keyPath, replacements);
-                    if (englishFallback) {
-                        return englishFallback;
-                    }
+        if (value === undefined) {
+            // Try to get English fallback if current language is not English
+            if (this.currentLanguage !== 'en') {
+                const englishFallback = this.getEnglishFallback(keyPath, replacements);
+                if (englishFallback) {
+                    return englishFallback;
                 }
-                console.warn(`⚠️  Translation key not found: ${keyPath}`);
-                // console.log(`UI: Key '${keyPath}' not found. Current translations object:`, JSON.stringify(this.translations, null, 2));
-                return keyPath; // Return the key path as fallback
             }
+            console.warn(`⚠️  Translation key not found: ${keyPath}`);
+            return keyPath; // Return the key path as fallback
         }
 
         // Handle different data types
@@ -254,20 +279,11 @@ class UIi18n {
                 const englishContent = fs.readFileSync(englishFile, 'utf8');
                 const englishTranslations = JSON.parse(englishContent);
                 
-                const keys = keyPath.split('.');
-                let value = englishTranslations;
+                // Use the same flattening approach for consistency
+                const flattenedEnglish = this.flattenTranslations(englishTranslations);
                 
-                for (const key of keys) {
-                    if (value && typeof value === 'object' && key in value) {
-                        value = value[key];
-                    } else {
-                        return null;
-                    }
-                }
-                
-                if (typeof value === 'string') {
-                    // Replace placeholders in English fallback
-                    let result = value;
+                if (keyPath in flattenedEnglish && typeof flattenedEnglish[keyPath] === 'string') {
+                    let result = flattenedEnglish[keyPath];
                     for (const [placeholder, replacement] of Object.entries(replacements)) {
                         result = result.replace(new RegExp(`\\{${placeholder}\\}`, 'g'), replacement);
                     }
@@ -381,7 +397,7 @@ class UIi18n {
      * Call this after settings changes to update UI language
      */
     refreshLanguageFromSettings() {
-        const settings = settingsManager.getSettings();
+        const settings = settingsManager.getAllSettings();
         const configuredLanguage = settings.language;
         
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {

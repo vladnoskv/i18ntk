@@ -27,7 +27,7 @@ This guide provides comprehensive information about configuring the I18N Managem
     "framework": "framework-agnostic"
   },
   "directories": {
-    "source": "./src",
+    "source": "./locales",
     "locales": "./locales",
     "reports": "./i18ntk-reports",
     "backups": "./backups"
@@ -146,7 +146,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 | Variable | Description | Default | Example |
 |----------|-------------|---------|----------|
-| `I18N_SOURCE_DIR` | Source directory path | `./src` | `./app/src` |
+| `I18N_SOURCE_DIR` | Source directory path | `./locales` | `./app/src` |
 | `I18N_LOCALES_DIR` | Locales directory path | `./locales` | `./public/locales` |
 | `I18N_DEFAULT_LANG` | Default language code | `en` | `en-US` |
 | `I18N_SUPPORTED_LANGS` | Supported languages (comma-separated) | `en,es,fr,de,ja,ru,zh` | `en,es,fr,de,ja,ru,zh` |
@@ -291,8 +291,8 @@ export default i18n;
       "i18n": {
         "sourceLocale": "en",
         "locales": {
-          "es": "src/locales/es.json",
-          "fr": "src/locales/fr.json"
+          "es": "locales/es.json",
+          "fr": "locales/fr.json"
         }
       }
     }
@@ -336,7 +336,7 @@ project-root/
 ```json
 {
   "directories": {
-    "source": "./app/src",           # Custom source directory
+    "source": "./app",              # Custom source directory
     "locales": "./public/i18n",      # Custom locales directory
     "reports": "./reports/i18n",     # Custom reports directory
     "backups": "./data/backups",     # Custom backups directory
@@ -726,7 +726,7 @@ The i18n Management Toolkit now operates with **zero runtime dependencies**, mak
 {
   "directories": {
     "source": "./src",
-    "locales": "./src/locales"
+    "locales": "./locales"
   },
   "project": {
     "type": "vue",

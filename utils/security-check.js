@@ -20,17 +20,8 @@ class SecurityChecker {
      * Check if we should suppress output (e.g., during npm install)
      */
     shouldBeSilent() {
-        // Check if running during npm install/postinstall
-        const npmCommand = process.env.npm_command || '';
-        const npmLifecycleEvent = process.env.npm_lifecycle_event || '';
-        
-        // Suppress output during install, postinstall, prepublishOnly
-        const silentEvents = ['install', 'postinstall', 'prepublishOnly', 'publish'];
-        
-        return silentEvents.includes(npmCommand) || 
-               silentEvents.includes(npmLifecycleEvent) ||
-               process.env.NODE_ENV === 'production' ||
-               process.env.SILENT === 'true';
+        // Check if we're running in silent mode or specific contexts
+        return this.isSilent;
     }
 
     /**
@@ -49,7 +40,7 @@ class SecurityChecker {
         this.log('🔍 Running security checks...\n');
 
         this.checkSensitiveFiles();
-        this.checkEnvironmentConfig();
+        this.checkConfigurationFiles();
         this.checkDependencies();
         this.checkEncryptionConfig();
         this.checkAccessPermissions();
@@ -96,22 +87,21 @@ class SecurityChecker {
     }
 
     /**
-     * Check environment configuration
+     * Check configuration files
      */
-    checkEnvironmentConfig() {
-        const envFiles = ['.env', '.env.local', '.env.production'];
-        const hasEnvFile = envFiles.some(file => fs.existsSync(file));
-        const hasEnvExample = fs.existsSync('.env.example');
+    checkConfigurationFiles() {
+        const configFiles = ['i18ntk-config.json', 'config.json'];
+        const hasConfigFile = configFiles.some(file => fs.existsSync(file));
 
         this.checks.push({
-            name: 'Environment Configuration',
-            status: hasEnvFile || hasEnvExample ? 'PASS' : 'WARN',
-            message: hasEnvFile ? 'Environment files configured' : hasEnvExample ? 'Environment template available' : 'Consider creating .env.example'
+            name: 'Configuration Files',
+            status: hasConfigFile ? 'PASS' : 'WARN',
+            message: hasConfigFile ? 'Configuration files configured' : 'Consider creating i18ntk-config.json'
         });
 
         // Check for default PINs in config
-        const configFiles = ['i18ntk-config.json', 'config.json'];
-        configFiles.forEach(file => {
+        const defaultPinFiles = ['i18ntk-config.json', 'config.json'];
+        defaultPinFiles.forEach(file => {
             if (fs.existsSync(file)) {
                 try {
                     const config = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -211,7 +201,7 @@ class SecurityChecker {
      * Check file permissions
      */
     checkAccessPermissions() {
-        const sensitiveFiles = ['admin-pin.json', '.env', 'config.json'];
+        const sensitiveFiles = ['admin-pin.json', 'config.json', 'i18ntk-config.json'];
         
         sensitiveFiles.forEach(file => {
             if (fs.existsSync(file)) {
