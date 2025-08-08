@@ -25,7 +25,7 @@ const UIi18n = require('./i18ntk-ui');
 const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
 const I18nInitializer = require('./i18ntk-init');
 const { I18nAnalyzer } = require('./i18ntk-analyze');
 const I18nValidator = require('./i18ntk-validate');
@@ -43,7 +43,6 @@ class I18nManager {
     this.rl = null;
     this.isReadlineClosed = false;
     this.isAuthenticated = false;
-    this.settingsManager = settingsManager;
     
     // Initialize UI localization system
     this.ui = new UIi18n();
@@ -102,7 +101,7 @@ class I18nManager {
 
   // Auto-detect i18n directory from common locations only if not configured in settings
   detectI18nDirectory() {
-    const settings = settingsManager.getAllSettings();
+    const settings = configManager.getConfig();
     const projectRoot = path.resolve(settings.projectRoot || this.config.projectRoot || '.');
     
     // Use per-script directory configuration if available, fallback to global sourceDir

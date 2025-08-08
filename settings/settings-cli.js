@@ -9,6 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const settingsManager = require('./settings-manager');
 const UIi18n = require('../main/i18ntk-ui');
+const configManager = require('../utils/config-manager');
+
 const AdminAuth = require('../utils/admin-auth');
 const uiI18n = new UIi18n();
 
@@ -28,6 +30,11 @@ const colors = {
     bgGreen: '\x1b[42m',
     bgYellow: '\x1b[43m'
 };
+
+function isAdminPinEnabled() {
+    const cfg = configManager.getConfig();
+    return cfg.security?.adminPinEnabled || false;
+}
 
 class SettingsCLI {
     constructor() {
@@ -49,7 +56,6 @@ class SettingsCLI {
         this.schema = null;
         this.modified = false;
         this.adminAuth = new AdminAuth();
-        this.settingsManager = settingsManager;
         this.adminAuthenticated = false;
     }
 
@@ -65,7 +71,7 @@ class SettingsCLI {
      */
     async init() {
         try {
-            this.settings = settingsManager.getAllSettings();
+            this.settings = configManager.getConfig();
             this.schema = settingsManager.getSettingsSchema();
             return true;
         } catch (error) {
@@ -131,7 +137,7 @@ class SettingsCLI {
         await this.adminAuth.initialize();
         const config = await this.adminAuth.loadConfig();
         const pinSet = config && !!config.pinHash;
-        const protectionEnabled = this.settingsManager.isAdminPinEnabled();
+        const protectionEnabled = isAdminPinEnabled();
         const pinStatus = pinSet ? 
             `${colors.green}✅${colors.reset}` : 
             `${colors.red}❌${colors.reset}`;
@@ -342,7 +348,7 @@ class SettingsCLI {
 
         const config = await this.adminAuth.loadConfig();
         const pinSet = config && !!config.pinHash;
-        const protectionEnabled = this.settingsManager.isAdminPinEnabled();
+        const protectionEnabled = isAdminPinEnabled();
         const pinStatus = pinSet ? 
             `${colors.green}${this.t('settings.security.pinConfigured')}${colors.reset}` : 
             `${colors.red}${this.t('settings.security.pinNotConfigured')}${colors.reset}`;
@@ -352,6 +358,7 @@ class SettingsCLI {
 
         const securitySettings = {
             'security.adminPinEnabled': this.t('settings.fields.adminPinEnabled.label'),
+            '_setupPin': 'Configure Admin PIN',
             'security.sessionTimeout': 'Session Timeout (minutes)',
             'security.maxFailedAttempts': 'Max Failed Attempts',
             'security.lockoutDuration': 'Lockout Duration (minutes)',
@@ -432,12 +439,16 @@ class SettingsCLI {
             let value = this.getNestedValue(this.settings, key);
             let displayValue = this.formatValue(value);
             
-            // Special display for admin PIN protection
+            // Special display for admin PIN protection and PIN setup
             if (key === 'security.adminPinEnabled') {
                 const config = await this.adminAuth.loadConfig();
                 const pinSet = config && !!config.pinHash;
                 const pinStatus = pinSet ? `${colors.green}PIN configured${colors.reset}` : `${colors.red}PIN not configured${colors.reset}`;
                 displayValue = `${displayValue} - ${pinStatus}`;
+            } else if (key === '_setupPin') {
+                const config = await this.adminAuth.loadConfig();
+                const pinSet = config && !!config.pinHash;
+                displayValue = pinSet ? `${colors.green}PIN configured${colors.reset}` : `${colors.red}PIN not configured${colors.reset}`;
             }
             
             console.log(`  ${colors.cyan}${index + 1}${colors.reset}) ${categorySettings[key]}`);
@@ -609,7 +620,7 @@ class SettingsCLI {
         // Check if admin authentication is required
         if (this.requiresAdminAuth(key) && !this.adminAuthenticated) {
             // Check if admin PIN is actually enabled and configured
-            const adminPinEnabled = this.settingsManager.isAdminPinEnabled();
+            const adminPinEnabled = isAdminPinEnabled();
             const config = await this.adminAuth.loadConfig();
             const pinConfigured = adminPinEnabled && config && config.enabled === true && !!config.pinHash;
             
@@ -756,20 +767,21 @@ class SettingsCLI {
                     }
                 }
             } else {
-                // Disable protection
-                console.log('\n⚠️  This will disable admin PIN protection (PIN will be retained).');
-                
+                // Disable protection and remove PIN
+                console.log('\n⚠️  This will disable admin PIN protection and remove the configured PIN.');
+
                 if (pinSet) {
                     // PIN exists, need to verify before disabling
                     const pin = await this.promptPin('Enter current PIN to confirm: ');
                     if (pin && await this.adminAuth.verifyPin(pin)) {
-                        const success = await this.adminAuth.disablePinProtection();
+                        const success = await this.adminAuth.disableAuth();
                         if (success) {
                             this.setNestedValue(this.settings, key, false);
                             this.modified = true;
+                            this.adminAuthenticated = false;
                             try {
                                 await this.saveSettings();
-                                this.success('Admin PIN protection disabled (PIN retained)!');
+                                this.success('Admin PIN protection disabled and PIN removed!');
                             } catch (error) {
                                 this.error(`Failed to save settings: ${error.message}`);
                             }
@@ -786,8 +798,10 @@ class SettingsCLI {
                     }
                 } else {
                     // No PIN set, just disable protection
+                    await this.adminAuth.disableAuth();
                     this.setNestedValue(this.settings, key, false);
                     this.modified = true;
+                    this.adminAuthenticated = false;
                     try {
                         await this.saveSettings();
                         this.success('Admin PIN protection disabled!');
@@ -822,7 +836,7 @@ class SettingsCLI {
             refreshLanguageFromSettings();
             
             // Force reload settings to ensure consistency
-            this.settings = settingsManager.getAllSettings();
+            this.settings = configManager.getConfig();
         }
     }
 
@@ -981,7 +995,7 @@ class SettingsCLI {
         }
         
         // Check if PIN protection is enabled globally
-        if (!this.settingsManager.isAdminPinEnabled()) {
+        if (!isAdminPinEnabled()) {
             console.log(`${colors.red}PIN Protection is currently disabled.${colors.reset}`);
             console.log(`${colors.yellow}Please enable PIN Protection in Security Settings.${colors.reset}\n`);
             
@@ -1160,7 +1174,7 @@ class SettingsCLI {
      */
     async exportSettings() {
         // Check admin PIN authentication if enabled
-        if (this.settingsManager.isAdminPinEnabled()) {
+        if (isAdminPinEnabled()) {
             const pin = await this.promptPin('Enter admin PIN to export settings: ');
             if (!pin || !await this.adminAuth.verifyPin(pin)) {
                 this.error('Invalid PIN. Export cancelled.');
@@ -1213,7 +1227,7 @@ class SettingsCLI {
      */
     async importSettings() {
         // Check admin PIN authentication if enabled
-        if (this.settingsManager.isAdminPinEnabled()) {
+        if (isAdminPinEnabled()) {
             const pin = await this.promptPin('Enter admin PIN to import settings: ');
             if (!pin || !await this.adminAuth.verifyPin(pin)) {
                 this.error('Invalid PIN. Import cancelled.');
@@ -1297,7 +1311,7 @@ class SettingsCLI {
      */
     async createBackup() {
         // Check admin PIN authentication if enabled
-        if (this.settingsManager.isAdminPinEnabled()) {
+        if (isAdminPinEnabled()) {
             const pin = await this.promptPin('Enter admin PIN to create backup: ');
             if (!pin || !await this.adminAuth.verifyPin(pin)) {
                 this.error('Invalid PIN. Backup creation cancelled.');
@@ -1307,23 +1321,23 @@ class SettingsCLI {
         }
 
         try {
-            const backupFile = settingsManager.createBackup();
-            this.success(`Backup created: ${backupFile}`);
-            
-            // Show backup statistics
-            const backupDir = path.join(path.dirname(settingsManager.configFile), 'backups');
-            if (fs.existsSync(backupDir)) {
-                const backupFiles = fs.readdirSync(backupDir)
-                    .filter(file => file.endsWith('.json') && file.includes('-backup-'));
-                
-                const totalSize = backupFiles.reduce((total, file) => {
-                    const filePath = path.join(backupDir, file);
-                    return total + fs.statSync(filePath).size;
-                }, 0);
-                
-                console.log(`  Total backups: ${backupFiles.length}`);
-                console.log(`  Total size: ${Math.round(totalSize / 1024)}KB`);
+            const source = configManager.CONFIG_PATH;
+            const backupDir = path.join(path.dirname(source), 'backups');
+            if (!fs.existsSync(backupDir)) {
+                fs.mkdirSync(backupDir, { recursive: true });
             }
+            const backupFile = path.join(backupDir, `config-backup-${Date.now()}.json`);
+            fs.copyFileSync(source, backupFile);
+            this.success(`Backup created: ${backupFile}`);
+
+            const backupFiles = fs.readdirSync(backupDir)
+                .filter(file => file.endsWith('.json') && file.includes('-backup-'));
+            const totalSize = backupFiles.reduce((total, file) => {
+                const filePath = path.join(backupDir, file);
+                return total + fs.statSync(filePath).size;
+            }, 0);
+            console.log(`  Total backups: ${backupFiles.length}`);
+            console.log(`  Total size: ${Math.round(totalSize / 1024)}KB`);
         } catch (error) {
             this.error(`Failed to create backup: ${error.message}`);
         }
@@ -1336,7 +1350,7 @@ class SettingsCLI {
      */
     async restoreFromBackup() {
         // Check admin PIN authentication if enabled
-        if (this.settingsManager.isAdminPinEnabled()) {
+        if (isAdminPinEnabled()) {
             const pin = await this.promptPin('Enter admin PIN to restore from backup: ');
             if (!pin || !await this.adminAuth.verifyPin(pin)) {
                 this.error('Invalid PIN. Restore cancelled.');
@@ -1346,7 +1360,7 @@ class SettingsCLI {
         }
 
         try {
-            const backupDir = path.join(path.dirname(settingsManager.configFile), 'backups');
+            const backupDir = path.join(path.dirname(configManager.CONFIG_PATH), 'backups');
             
             if (!fs.existsSync(backupDir)) {
                 this.error('No backup directory found.');
@@ -1422,7 +1436,7 @@ class SettingsCLI {
      */
     async manageBackups() {
         // Check admin PIN authentication if enabled
-        if (this.settingsManager.isAdminPinEnabled()) {
+        if (isAdminPinEnabled()) {
             const pin = await this.promptPin('Enter admin PIN to manage backups: ');
             if (!pin || !await this.adminAuth.verifyPin(pin)) {
                 this.error('Invalid PIN. Backup management cancelled.');
@@ -1432,7 +1446,7 @@ class SettingsCLI {
         }
 
         try {
-            const backupDir = path.join(path.dirname(settingsManager.configFile), 'backups');
+            const backupDir = path.join(path.dirname(configManager.CONFIG_PATH), 'backups');
             
             if (!fs.existsSync(backupDir)) {
                 this.error('No backup directory found.');
@@ -1594,7 +1608,7 @@ class SettingsCLI {
      */
     async resetToDefaults() {
         // Check admin PIN authentication if enabled
-        if (this.settingsManager.isAdminPinEnabled()) {
+        if (isAdminPinEnabled()) {
             const pin = await this.promptPin('Enter admin PIN to reset settings: ');
             if (!pin || !await this.adminAuth.verifyPin(pin)) {
                 this.error('Invalid PIN. Reset cancelled.');
@@ -1613,9 +1627,11 @@ class SettingsCLI {
         
         if (confirm.toLowerCase() === 'y') {
             try {
-                settingsManager.resetToDefaults();
-                this.settings = settingsManager.getAllSettings();
+                await this.adminAuth.disableAuth();
+                configManager.updateConfig(configManager.defaultConfig || {});
+                this.settings = configManager.getConfig();
                 this.modified = false;
+                this.adminAuthenticated = false;
                 this.success('Settings reset to defaults successfully.');
             } catch (error) {
                 this.error(`Failed to reset settings: ${error.message}`);
@@ -1676,13 +1692,10 @@ class SettingsCLI {
      */
     async saveSettings() {
         try {
-            const success = settingsManager.saveSettings(this.settings);
-            if (success) {
-                this.modified = false;
-                this.success('Settings saved successfully.');
-            } else {
-                this.error('Failed to save settings.');
-            }
+            configManager.updateConfig(this.settings);
+            configManager.saveConfig();
+            this.modified = false;
+            this.success('Settings saved successfully.');
         } catch (error) {
             this.error(`Failed to save settings: ${error.message}`);
         }

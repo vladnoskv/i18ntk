@@ -399,7 +399,8 @@ class SettingsManager {
      */
     resetToDefaults() {
         try {
-            this.settings = { ...this.defaultConfig };
+            // Deep clone to avoid retaining references to default objects
+            this.settings = JSON.parse(JSON.stringify(this.defaultConfig));
             this.saveSettings();
             console.log('Settings reset to defaults');
             return true;

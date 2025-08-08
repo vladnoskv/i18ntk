@@ -5,14 +5,14 @@
 
 const fs = require('fs');
 const path = require('path');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = settingsManager.getAllSettings();
+ const settings = configManager.getConfig();
   return {
-    uiLocalesDir: settings.directories?.uiLocalesDir || path.join(__dirname, '..', 'ui-locales'),
-    configFile: settings.directories?.configFile || path.join(__dirname, '..', 'settings', 'i18ntk-config.json')
+    uiLocalesDir: settings.uiLocalesDir || path.join(__dirname, '..', 'ui-locales'),
+    configFile: configManager.CONFIG_PATH
   };
 }
 
@@ -26,7 +26,7 @@ class UIi18n {
         this.configFile = path.resolve(config.configFile);
 
         // Use settings manager as the single source of truth
-        const settings = settingsManager.getAllSettings();
+        const settings = configManager.getConfig();
         const configuredLanguage = settings.language || settings.uiLanguage;
 
         // Load language from settings manager or fallback
@@ -166,7 +166,7 @@ class UIi18n {
      * @returns {string} Current language code
      */
     getCurrentLanguageFromSettings() {
-        const settings = settingsManager.getAllSettings();
+        const settings = configManager.getConfig();
         return settings.language || settings.uiLanguage || 'en';
     }
 
@@ -176,7 +176,7 @@ class UIi18n {
      */
     saveLanguagePreference(language) {
         try {
-            settingsManager.setSetting('language', language);
+            configManager.setConfig('language', language);
         } catch (error) {
            console.error(`Error saving language preference: ${error.message}`);
         }
@@ -397,7 +397,7 @@ class UIi18n {
      * Call this after settings changes to update UI language
      */
     refreshLanguageFromSettings() {
-        const settings = settingsManager.getAllSettings();
+        const settings = configManager.getConfig();
         const configuredLanguage = settings.language;
         
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {

@@ -25,7 +25,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 

@@ -35,13 +35,13 @@ const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig } = require('../utils/config-helper');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = settingsManager.getAllSettings();
+  const settings = configManager.getConfig();
   
   // Check for per-script directory override, fallback to global sourceDir
   const sourceDir = settings.scriptDirectories?.sizing || settings.sourceDir || './locales';

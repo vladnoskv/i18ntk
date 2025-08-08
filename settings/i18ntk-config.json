@@ -2,11 +2,11 @@
   "language": "en",
   "uiLanguage": "en",
   "theme": "light",
-  "projectRoot": ".",
-  "sourceDir": "./src/i18n/locales",
-  "i18nDir": "./locales",
-  "outputDir": "./i18ntk-reports",
-  "uiLocalesDir": "./ui-locales",
+  "projectRoot": "E:\\i18n-management-toolkit-main\\i18ntk-1.6.0",
+  "sourceDir": "E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\src\\i18n\\locales",
+  "i18nDir": "E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\src\\i18n\\locales",
+  "outputDir": "E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\i18ntk-reports",
+  "uiLocalesDir": "E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\ui-locales",
   "scriptDirectories": {
     "init": null,
     "analyze": null,
@@ -133,7 +133,7 @@
     "maxBackups": 100
   },
   "security": {
-    "adminPinEnabled": true,
+    "adminPinEnabled": false,
     "adminPinPromptOnInit": true,
     "keepAuthenticatedUntilExit": true,
     "sessionTimeout": 30,
@@ -181,7 +181,7 @@
     "verboseLogging": false,
     "logLevel": "info",
     "saveDebugLogs": false,
-    "debugLogPath": "./debug.log"
+    "debugLogPath": "E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\debug.log"
   },
   "sizeLimit": null,
   "sourceLanguage": "en",

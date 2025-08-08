@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const configManager = require('../../utils/config-manager');
 
 class FrontendI18nDebugger {
     constructor(projectRoot = null) {
@@ -30,19 +31,9 @@ class FrontendI18nDebugger {
         this.log('Checking translation files...');
         
         // Get configuration to determine translation directory
-        const configPath = path.join(this.projectRoot, 'settings', 'i18ntk-config.json');
-        let translationsDir = 'locales';
-        let languages = [];
-        
-        if (fs.existsSync(configPath)) {
-            try {
-                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-                translationsDir = config.translationsPath || 'locales';
-                languages = config.languages || [];
-            } catch (error) {
-                this.issues.push(`Invalid config file: ${error.message}`);
-            }
-        }
+        const config = configManager.getConfig();
+        let translationsDir = config.translationsPath || config.sourceDir || 'locales';
+        let languages = config.languages || config.defaultLanguages || [];
         
         const fullTranslationsDir = path.join(this.projectRoot, translationsDir);
         
@@ -139,16 +130,16 @@ class FrontendI18nDebugger {
 
     async checkConfiguration() {
         this.log('Checking configuration...');
-        
-        const configPath = path.join(this.projectRoot, 'settings', 'i18ntk-config.json');
+
+        const configPath = configManager.CONFIG_PATH;
         const packagePath = path.join(this.projectRoot, 'package.json');
-        
-        // Check i18ntk-config.json
+
         if (fs.existsSync(configPath)) {
             try {
-                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                const config = configManager.getConfig();
                 this.results.fileStatus.config = {
                     exists: true,
+                    path: configPath,
                     languages: config.languages || [],
                     defaultLanguage: config.defaultLanguage || 'en'
                 };

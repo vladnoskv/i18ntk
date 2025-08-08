@@ -1,10 +1,10 @@
 const path = require('path');
 const fs = require('fs');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('./config-manager');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = settingsManager.getAllSettings();
+  const settings = configManager.getConfig();
   
   // Always use the package's ui-locales directory, regardless of current working directory
   const packageDir = path.join(__dirname, '..');
@@ -26,7 +26,7 @@ let isInitialized = false;
  * @param {string} baseDir - Base directory for locale files (optional)
  */
 function loadTranslations(language, baseDir) {
-  const settings = settingsManager.getAllSettings();
+  const settings = configManager.getConfig();
   const configuredLanguage = settings.uiLanguage || settings.language || 'en';
   currentLanguage = language || configuredLanguage;
   
@@ -233,7 +233,7 @@ function deepMerge(target, source) {
  * This ensures translations stay in sync with settings changes
  */
 function refreshLanguageFromSettings() {
-  const settings = settingsManager.getAllSettings();
+  const settings = configManager.getConfig();
   const configuredLanguage = settings.language || settings.uiLanguage || 'en';
   
   if (configuredLanguage !== currentLanguage) {

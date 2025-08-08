@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
 
 /**
@@ -17,7 +17,7 @@ const SecurityUtils = require('./security');
  */
 function getUnifiedConfig(scriptName, cliArgs = {}) {
   try {
-    const settings = settingsManager.getAllSettings();
+    const settings = configManager.getConfig();
     const projectRoot = path.resolve(
       settings.projectRoot || 
       '.'
@@ -72,7 +72,7 @@ function getUnifiedConfig(scriptName, cliArgs = {}) {
     
     // Update global settings if directories were specified via CLI
     if (Object.keys(directoryUpdates).length > 0) {
-      settingsManager.updateDirectorySettings(directoryUpdates);
+      configManager.updateConfig(directoryUpdates);
     }
     
     const config = {
@@ -274,7 +274,7 @@ function displayHelp(scriptName, additionalOptions = {}) {
   console.log(`  npx i18ntk ${scriptName.replace('i18ntk-', '')} --help`);
   
   console.log('\nConfiguration:');
-  console.log('  Settings are loaded from settings/i18ntk-config.json');
+  console.log(`  Settings are loaded from ${configManager.CONFIG_PATH}`);
   console.log('  Use --source-dir, --i18n-dir, and --output-dir to override');
 }
 
@@ -297,7 +297,7 @@ function validateSourceDir(sourceDir, scriptName) {
   if (!fs.existsSync(sourceDir)) {
     throw new Error(`Source directory not found: ${sourceDir}\n` +
                    `Run "node main/i18ntk-init.js" to initialize project structure, ` +
-                   `or check your settings in settings/i18ntk-config.json`);
+                    `or check your settings in ${configManager.CONFIG_PATH}`);
   }
 }
 

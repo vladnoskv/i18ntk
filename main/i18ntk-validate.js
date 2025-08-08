@@ -38,7 +38,7 @@ if (isUppercase) {
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
@@ -762,8 +762,8 @@ if (require.main === module) {
   (async () => {
     try {
       // Initialize translations for CLI usage
-      const settings = settingsManager.getAllSettings();
-      const uiLanguage = settings.language || 'en';
+      const config = configManager.getConfig();
+      const uiLanguage = config.language || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
       SecurityUtils.logSecurityEvent(t('validate.scriptExecution'), 'info', {

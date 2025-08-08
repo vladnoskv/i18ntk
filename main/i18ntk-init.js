@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const settingsManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
 const UIi18n = require('./i18ntk-ui');
@@ -242,9 +242,9 @@ class I18nInitializer {
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
         
         // Save to settings
-        const currentSettings = settingsManager.getAllSettings();
+        const currentSettings = configManager.getConfig();
         currentSettings.sourceDir = selectedDir;
-        settingsManager.saveSettings(currentSettings);
+        configManager.updateConfig(currentSettings);
         
         return selectedDir;
       } else if (selectedIndex === existingLocations.length) {
@@ -277,9 +277,9 @@ class I18nInitializer {
           this.sourceLanguageDir = sourceLangDir;
           
           // Save to settings
-          const currentSettings = settingsManager.getAllSettings();
+          const currentSettings = configManager.getConfig();
           currentSettings.sourceDir = newDirPath;
-          settingsManager.saveSettings(currentSettings);
+          configManager.updateConfig(currentSettings);
           
           return newDirPath;
         } else {
@@ -609,7 +609,7 @@ class I18nInitializer {
         const adminAuth = new AdminAuth();
         
         // Enable admin PIN in settings
-        settingsManager.setSecurity({ adminPinEnabled: true, adminPinPromptOnInit: true });
+        configManager.updateConfig({ security: { adminPinEnabled: true, adminPinPromptOnInit: true } });
         
         console.log('\n' + this.ui.t('init.settingUpAdminPin'));
         
@@ -769,7 +769,7 @@ class I18nInitializer {
     this.validateSource();
     
     // Prompt for admin PIN setup if not already configured
-    const securitySettings = settingsManager.getSecurity();
+    const securitySettings = configManager.getConfig().security || {};
     
     if (!securitySettings.adminPinEnabled && securitySettings.adminPinPromptOnInit !== false) {
       await this.promptAdminPinSetup();

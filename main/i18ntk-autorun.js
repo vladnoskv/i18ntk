@@ -16,13 +16,14 @@ const { spawnSync } = require('child_process');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
+const configManager = require('../utils/config-manager');
 
 // Default location for UI locale bundles (override via config.uiLocalesDir)
 const DEFAULT_UI_LOCALES_DIR = path.resolve(__dirname, '..', 'ui-locales');
 
 class AutoRunner {
   constructor(config = {}) {
-    this.CONFIG_FILE = 'i18ntk-config.json';
+    this.CONFIG_FILE = configManager.CONFIG_PATH;
     this.DEFAULT_CONFIG = {
       steps: [
         { name: 'autorun.stepInitializeProject',  script: 'i18ntk-init.js',     description: 'autorun.stepInitializeProject' },
@@ -77,15 +78,12 @@ class AutoRunner {
   }
 
   loadConfig() {
-    if (fs.existsSync(this.CONFIG_FILE)) {
-      try {
-        return JSON.parse(fs.readFileSync(this.CONFIG_FILE, 'utf8'));
-      } catch (error) {
-        console.error(this.t('autorun.configReadError', { file: this.CONFIG_FILE }) || `Failed to read config file: ${this.CONFIG_FILE}`, error.message);
-        return this.DEFAULT_CONFIG;
-      }
+    try {
+      return configManager.getConfig();
+    } catch (error) {
+      console.error(this.t('autorun.configReadError', { file: this.CONFIG_FILE }) || `Failed to read config file: ${this.CONFIG_FILE}`, error.message);
+      return this.DEFAULT_CONFIG;
     }
-    return this.DEFAULT_CONFIG;
   }
 
   t(key, params = {}) {

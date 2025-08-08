@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const SettingsManager = require('../settings/settings-manager');
+const configManager = require('./config-manager');
 const i18n = require('./i18n-helper');
 
 /**
@@ -363,8 +363,8 @@ class SecurityUtils {
 
     // Only show security logs if debug mode is enabled and showSecurityLogs is true
     try {
-      const settingsManager = SettingsManager;
-      if (settingsManager.shouldShowSecurityLogs()) {
+      const cfg = configManager.getConfig();
+      if (cfg.debug?.enabled && cfg.debug?.showSecurityLogs) {
         console.log(`[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`, details);
       }
     } catch (error) {
