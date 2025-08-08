@@ -87,7 +87,7 @@ class I18nManager {
       const baseConfig = await getUnifiedConfig('manage', args);
       this.config = { ...baseConfig, ...this.config };
       
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      const uiLanguage = this.config.uiLanguage || 'en';
       this.ui.loadLanguage(uiLanguage);
       
       // Validate source directory exists
@@ -423,7 +423,9 @@ class I18nManager {
             case 'workflow':
                 console.log(this.ui.t('workflow.starting'));
                 const AutoRunner = require('./i18ntk-autorun');
-                const runner = new AutoRunner();
+                const runner = new AutoRunner(this.config);
+                // Ensure autorun initializes its translations and config before running
+                await runner.init();
                 await runner.runAll(true); // Pass true for quiet mode
                 
                 // Show workflow completion message and return to menu

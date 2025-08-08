@@ -39,7 +39,7 @@ class I18nSummaryReporter {
       const baseConfig = getUnifiedConfig('summary', cliArgs);
       this.config = baseConfig;
 
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      const uiLanguage = this.config.uiLanguage || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
 
       this.sourceDir = this.config.sourceDir;
@@ -816,7 +816,7 @@ class I18nSummaryReporter {
     const baseConfig = await getUnifiedConfig('summary', args);
     this.config = { ...this.config, ...baseConfig };
     
-    const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+    const uiLanguage = this.config.uiLanguage || 'en';
     loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
     this.t = t;
     

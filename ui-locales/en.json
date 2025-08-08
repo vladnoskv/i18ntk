@@ -94,6 +94,16 @@
     "settings": "Settings",
     "confirm": "Confirm"
   },
+  "autorun": {
+    "stepAnalyzeTranslations": "Analyze translations",
+    "stepCompletedWithIcon": "✅ Completed: {stepName}",
+    "stepValidateTranslations": "Validate translations",
+    "stepRunning": "▶️  Step {stepNumber}/{totalSteps}: {stepName}",
+    "separator": "==================================================",
+    "stepCompleted": "✅ Completed: {stepName}",
+    "stepFailed": "❌ Failed: {stepName}",
+    "errorLabel": "Error"
+  },
   "analyze": {
     "help_message": "\nI18n Translation Analyzer\n\nUsage: node i18ntk-analyze.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --i18n-dir <dir>       I18n directory (default: ./src/locales)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-analyze.js --output-report\n  node i18ntk-analyze.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-analyze.js --output-dir=./analysis --output-report\n",
     "source_directory": "📁 Source directory: {sourceDir}",

@@ -87,10 +87,10 @@ class I18nUsageAnalyzer {
     try {
       const cliArgs = parseCommonArgs(process.argv.slice(2));
       const defaultConfig = await getUnifiedConfig('usage', cliArgs);
-      this.config = { ...defaultConfig, ...this.config };
+      this.config = { ...defaultConfig, ...(this.config || {}) };
       
       // Load translations for UI
-      const uiLanguage = this.config.uiLanguage || 'en';
+      const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       this.t = t;
       
@@ -101,6 +101,7 @@ class I18nUsageAnalyzer {
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
       
       // Ensure translation patterns are defined
+      this.config = this.config || {};
       this.config.translationPatterns = this.config.translationPatterns || [
         // React i18next patterns
         /t\(['"`]([^'"`]+)['"`]/g,
@@ -116,6 +117,7 @@ class I18nUsageAnalyzer {
       ];
       
       // Ensure defaults for other config values
+      this.config = this.config || {};
       if (!Array.isArray(this.config.excludeDirs)) {
         this.config.excludeDirs = ['node_modules', '.git'];
       }
@@ -168,7 +170,7 @@ class I18nUsageAnalyzer {
   }
 
   // NEW: Recursively discover all translation files in modular structure
-  async discoverTranslationFiles(baseDir, language = this.config.sourceLanguage) {
+  async discoverTranslationFiles(baseDir, language = (this.config && this.config.sourceLanguage) || 'en') {
     const translationFiles = [];
     
     const traverse = async (currentDir) => {
@@ -243,7 +245,7 @@ class I18nUsageAnalyzer {
   }
 
   // Get all files recursively from a directory with enhanced filtering
-  async getAllFiles(dir, extensions = this.config.includeExtensions || this.config.supportedExtensions || ['.js', '.jsx', '.ts', '.tsx']) {
+  async getAllFiles(dir, extensions = (this.config && (this.config.includeExtensions || this.config.supportedExtensions)) || ['.js', '.jsx', '.ts', '.tsx']) {
     const files = [];
     
     // Enhanced list of toolkit files to exclude from analysis
@@ -259,7 +261,7 @@ class I18nUsageAnalyzer {
     ];
     
     // Null-safe extensions handling
-    const safeExtensions = Array.isArray(extensions) ? extensions : ['.js', '.jsx', '.ts', '.tsx'];
+        const safeExtensions = Array.isArray(extensions) ? extensions : ['.js', '.jsx', '.ts', '.tsx'];
     const skipRoot = path.resolve(this.i18nDir || '');
     const traverse = async (currentDir) => {
       try {
@@ -331,12 +333,17 @@ class I18nUsageAnalyzer {
     }
     
     try {
+      // Ensure config is always initialized
+      if (!this.config) {
+        this.config = {};
+      }
+      
       // Initialize configuration properly when called from menu
       if (fromMenu && !this.sourceDir) {
         const baseConfig = await getUnifiedConfig('usage', args);
-        this.config = { ...baseConfig, ...this.config };
+        this.config = { ...baseConfig, ...(this.config || {}) };
         
-        const uiLanguage = this.config.uiLanguage || 'en';
+        const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
         loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         this.t = t;
         
@@ -1432,9 +1439,8 @@ if (require.main === module) {
       }
 
       // Load UI translations based on settings or default to English
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
-    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-
+      const uiLanguage = SecurityUtils.sanitizeInput(config.uiLanguage || 'en');
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       await analyzer.initialize();
       await analyzer.run(cliArgs);
     } catch (error) {

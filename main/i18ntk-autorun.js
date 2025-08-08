@@ -32,7 +32,8 @@ class AutoRunner {
         { name: 'autorun.stepGenerateSummary',      script: 'i18ntk-summary.js',  description: 'autorun.stepGenerateSummary' }
       ]
     };
-    this.config = { ...this.DEFAULT_CONFIG, ...config };
+    // Ensure config is always initialized
+    this.config = { ...this.DEFAULT_CONFIG, ...(config || {}) };
   }
 
   /** Initialize config and translations BEFORE any output that calls t() */
@@ -60,7 +61,7 @@ class AutoRunner {
       console.warn(`[i18ntk] UI locales directory not found at: ${uiLocalesDir}`);
     }
 
-    const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
+    const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
     try {
       // Try the helper’s object-style API first (most common):
       // loadTranslations(language, { baseDir })

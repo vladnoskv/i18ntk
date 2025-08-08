@@ -67,9 +67,9 @@ class I18nValidator {
       }
       
       const baseConfig = await getUnifiedConfig('validate', args);
-      this.config = { ...baseConfig, ...this.config };
+      this.config = { ...baseConfig, ...(this.config || {}) };
       
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
       SecurityUtils.logSecurityEvent('I18n validator initializing', 'info', 'Initializing I18n validator');
@@ -691,16 +691,21 @@ class I18nValidator {
   async run(options = {}) {
     const { fromMenu = false } = options;
     
-    try {
-      // Initialize configuration properly when called from menu
-      if (fromMenu && !this.sourceDir) {
-        const args = this.parseArgs();
-        const baseConfig = await getUnifiedConfig('validate', args);
-        this.config = { ...baseConfig, ...this.config };
-        
-        const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
-        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-        this.t = t;
+    const args = this.parseArgs();
+    
+    // Ensure config is always initialized
+    if (!this.config) {
+      this.config = {};
+    }
+    
+    // Initialize configuration properly when called from menu
+    if (fromMenu && !this.sourceDir) {
+      const baseConfig = await getUnifiedConfig('validate', args);
+      this.config = { ...baseConfig, ...(this.config || {}) };
+      
+      const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+      this.t = t;
         
         this.sourceDir = this.config.sourceDir;
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
@@ -750,7 +755,6 @@ class I18nValidator {
       throw error;
     }
   }
-}
 
 module.exports = I18nValidator;
 

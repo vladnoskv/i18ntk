@@ -43,9 +43,9 @@ class I18nAnalyzer {
       
       // Initialize i18n with UI language first
       const baseConfig = await getUnifiedConfig('analyze', args);
-      this.config = { ...baseConfig, ...this.config };
+      this.config = { ...baseConfig, ...(this.config || {}) };
       
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
       this.sourceDir = this.config.sourceDir;
@@ -601,7 +601,7 @@ try {
         const baseConfig = await getUnifiedConfig('analyze', args);
         this.config = { ...baseConfig, ...this.config };
         
-        const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+        const uiLanguage = this.config.uiLanguage || 'en';
         loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         
         this.sourceDir = this.config.sourceDir;

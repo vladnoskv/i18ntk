@@ -774,7 +774,7 @@ Generated: ${new Date().toISOString()}
       this.outputDir = path.resolve(config.projectRoot || '.', config.outputDir || './i18ntk-reports');
       this.threshold = config.threshold || 50;
       
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
+      const uiLanguage = this.config.uiLanguage || 'en';
     loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       this.t = t;
     } else if (!fromMenu) {

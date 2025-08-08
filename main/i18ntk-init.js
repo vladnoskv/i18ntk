@@ -942,7 +942,7 @@ class I18nInitializer {
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
         
         // Load translations for UI messages
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage);
+      const uiLanguage = this.config.uiLanguage || 'en';
       const { loadTranslations } = require('../utils/i18n-helper');
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       }
@@ -1029,7 +1029,7 @@ class I18nInitializer {
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
       // Load translations for UI messages
-      const uiLanguage = SecurityUtils.sanitizeInput(this.config.uiLanguage || 'en');
+      const uiLanguage = this.config.uiLanguage || 'en';
       const { loadTranslations } = require('../utils/i18n-helper');
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
