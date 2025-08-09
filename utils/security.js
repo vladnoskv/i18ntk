@@ -271,6 +271,7 @@ class SecurityUtils {
    * @returns {object|null} - Validated configuration or null if invalid
    */
   static validateConfig(config) {
+    const i18n = getI18n();
     if (!config || typeof config !== 'object') {
       return null;
     }
