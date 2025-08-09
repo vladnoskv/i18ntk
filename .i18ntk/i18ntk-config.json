@@ -1,12 +1,12 @@
 {
   "language": "en",
   "uiLanguage": "en",
-  "theme": "dark",
+  "theme": "system",
   "projectRoot": ".",
-  "sourceDir": "locales",
-  "i18nDir": "locales",
-  "outputDir": "i18ntk-reports",
-  "uiLocalesDir": "ui-locales",
+  "sourceDir": "./locales",
+  "i18nDir": "./locales",
+  "outputDir": "./i18ntk-reports",
+  "uiLocalesDir": "./ui-locales",
   "scriptDirectories": {
     "init": null,
     "analyze": null,
@@ -181,7 +181,7 @@
     "verboseLogging": false,
     "logLevel": "info",
     "saveDebugLogs": false,
-    "debugLogPath": "debug.log"
+    "debugLogPath": "./debug.log"
   },
   "sourceLanguage": "en",
   "defaultLanguages": [

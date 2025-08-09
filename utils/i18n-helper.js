@@ -28,7 +28,9 @@ let isInitialized = false;
 function loadTranslations(language, baseDir) {
   const settings = configManager.getConfig();
   const configuredLanguage = settings.uiLanguage || settings.language || 'en';
-  currentLanguage = language || configuredLanguage;
+  // Ensure we always have a concrete language value
+  language = language || configuredLanguage || 'en';
+  currentLanguage = language;
   
   // Ensure we always have a valid string path
   let localesDir = path.join(__dirname, '..', 'ui-locales');

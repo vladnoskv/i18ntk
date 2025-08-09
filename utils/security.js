@@ -286,7 +286,7 @@ class SecurityUtils {
       'theme', 'autoSave', 'notifications', 'dateFormat', 'timeFormat', 'timezone',
       'processing', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
       'supportedExtensions', 'settings', 'backupDir', 'tempDir', 'cacheDir', 'configDir',
-      'uiLocalesDir', 'displayPaths'
+      'uiLocalesDir', 'displayPaths', 'reports', 'ui', 'behavior', 'dateTime', 'backup'
     ];
 
     for (const [key, value] of Object.entries(config)) {

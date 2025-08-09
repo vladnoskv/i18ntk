@@ -1442,19 +1442,15 @@ if (require.main === module) {
   async function main() {
     try {
       const cliArgs = parseCommonArgs(process.argv.slice(2));
-      const config = await getUnifiedConfig('usage', cliArgs);
-      const analyzer = new I18nUsageAnalyzer(config);
 
       if (cliArgs.help) {
         displayHelp('usage');
         process.exit(0);
       }
 
-      // Load UI translations based on settings or default to English
-      const uiLanguage = SecurityUtils.sanitizeInput(config.uiLanguage || 'en');
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-      await analyzer.initialize();
-      await analyzer.run(cliArgs);
+      // Let run() handle full initialization to avoid duplicate setup output
+      const analyzer = new I18nUsageAnalyzer();
+      await analyzer.run();
     } catch (error) {
       console.error('Error:', error.message);
       process.exit(1);
