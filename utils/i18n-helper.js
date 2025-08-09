@@ -33,7 +33,20 @@ function loadTranslations(language, baseDir) {
   currentLanguage = language;
   
   // Ensure we always have a valid string path
+  // First, try to use the package's ui-locales directory (works for both development and npm install)
   let localesDir = path.join(__dirname, '..', 'ui-locales');
+  
+  // Check if the package is installed as a dependency (node_modules/i18ntk)
+  if (!fs.existsSync(localesDir)) {
+    try {
+      // When installed as npm package, use the package's ui-locales directory
+      const packageRoot = path.dirname(require.resolve('../package.json'));
+      localesDir = path.join(packageRoot, 'ui-locales');
+    } catch (resolveError) {
+      // Fallback to relative path if package.json resolution fails
+      localesDir = path.join(__dirname, '..', 'ui-locales');
+    }
+  }
 
   // Use provided directory if it's a valid string
   if (typeof baseDir === 'string' && baseDir.trim() !== '') {
@@ -50,8 +63,24 @@ function loadTranslations(language, baseDir) {
   try {
     localesDir = path.resolve(localesDir);
   } catch (resolveError) {
-    // Fallback to package ui-locales directory if resolution fails
+    // Final fallback to package ui-locales directory
     localesDir = path.join(__dirname, '..', 'ui-locales');
+  }
+  
+  // Ensure the directory exists before attempting to read from it
+  if (!fs.existsSync(localesDir)) {
+    console.warn(`UI locales directory not found: ${localesDir}`);
+    // Try one more fallback - direct package path
+    try {
+      const packageRoot = path.join(__dirname, '..');
+      const fallbackDir = path.join(packageRoot, 'ui-locales');
+      if (fs.existsSync(fallbackDir)) {
+        localesDir = fallbackDir;
+      }
+    } catch (e) {
+      // Last resort - use current directory
+      localesDir = path.join(process.cwd(), 'ui-locales');
+    }
   }
   
   try {
