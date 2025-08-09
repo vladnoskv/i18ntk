@@ -673,7 +673,7 @@ try {
             running = false;
           }
         });
-        console.log('í±€ Watching for translation changes. Press Ctrl+C to exit.');
+        console.log('ï¿½ï¿½ï¿½ Watching for translation changes. Press Ctrl+C to exit.');
       } else {
         await execute();
         if (!fromMenu && require.main === module) {
