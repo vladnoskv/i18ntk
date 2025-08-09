@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.6.1] - 2025-08-08 - **CRITICAL NPM PACKAGE FIX**
+
+> **🚨 CRITICAL BUG FIX**: Resolved npm package installation issues affecting global installations
+
+### 🔧 **NPM Package Path Resolution Fix**
+- **Fixed**: Critical path resolution failures when installed as npm global package
+- **Enhanced**: Robust fallback mechanisms for locating `ui-locales` directory
+- **Improved**: Package structure validation and file accessibility
+- **Added**: Multiple fallback strategies for translation file discovery
+- **Verified**: All CLI commands now work correctly after npm installation
+
+### 🎯 **Technical Details**
+- **Path Resolution**: Enhanced `i18n-helper.js` with comprehensive directory detection
+- **Fallback Logic**: Added fallback to package directory → current working directory → direct package path
+- **Validation**: Added directory existence checks and console warnings for debugging
+- **Compatibility**: Maintains full backward compatibility with existing configurations
+- **Testing**: Verified with comprehensive path resolution test suite
+
+### 📦 **Package Structure Improvements**
+- **File Inclusion**: Ensured all translation files are properly included in npm package
+- **Directory Access**: Fixed accessibility issues for `ui-locales` directory
+- **Global Installation**: Resolved issues with global npm package installations
+- **Local Development**: Maintained compatibility with local development workflows
+
+### 🚀 **Installation Experience**
+- **Global Install**: `npm install -g i18ntk@1.6.1` now works correctly
+- **Local Install**: `npm install i18ntk@1.6.1` functions as expected
+- **No Breaking Changes**: Existing configurations and workflows remain unchanged
+- **Immediate Benefits**: Performance and security improvements from 1.6.0 remain active
+
 ## [1.6.0] - 2025-08-08 - **ULTRA-EXTREME PERFORMANCE RELEASE**
 
 > **⚠️ DEPRECATION NOTICE**: All previous versions (1.0.0-1.5.3) are deprecated. Version 1.6.0 is the definitive release.
