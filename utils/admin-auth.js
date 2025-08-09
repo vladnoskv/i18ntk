@@ -105,8 +105,8 @@ class AdminAuth {
   async setupPin(pin) {
     try {
       // Validate PIN format (4-6 digits)
-      if (!/^\d{4}$/.test(pin)) {
-        throw new Error('PIN must be 4 digits');
+      if (!/^\d{4,6}$/.test(pin)) {
+        throw new Error('PIN must be 4-6 digits');
       }
 
       // Generate salt and hash

@@ -42,6 +42,7 @@ loadTranslations(process.env.I18NTK_LANG || 'en');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
+const watchLocales = require('../utils/watch-locales');
 
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
@@ -746,10 +747,11 @@ class I18nValidator {
             return { success: false, error: 'Authentication failed' };
           }
           
-          console.log(this.t('adminCli.authenticationSuccess'));
+        console.log(this.t('adminCli.authenticationSuccess'));
         }
       }
-      
+      const execute = async () => {
+
       console.log(this.t('validate.startingValidationProcess'));
       SecurityUtils.logSecurityEvent(this.t('validate.runStarted'), 'info', 'Starting validation run');
 
@@ -758,13 +760,33 @@ class I18nValidator {
       console.log(this.t('validate.validationProcessCompletedSuccessfully'));
       SecurityUtils.logSecurityEvent(this.t('validate.runCompleted'), 'info', 'Validation run completed successfully');
       return result;
-    } catch (error) {
-      console.error(this.t('validate.validationError', { error: error.message }));
-      console.error(this.t('validate.stackTrace', { stack: error.stack }));
-      SecurityUtils.logSecurityEvent(this.t('validate.runError'), 'error', `Validation run failed: ${error.message}`);
-      throw error;
+    };
+
+    if (args.watch) {
+      await execute();
+      let running = false;
+      watchLocales(this.sourceDir, async () => {
+        if (running) return;
+        running = true;
+        try {
+          await execute();
+        } finally {
+          running = false;
+        }
+      });
+      console.log('👀 Watching for translation changes. Press Ctrl+C to exit.');
+      return { watching: true };
     }
+
+    return await execute();
+  } catch (error) {
+    console.error(this.t('validate.validationError', { error: error.message }));
+    console.error(this.t('validate.stackTrace', { stack: error.stack }));
+    SecurityUtils.logSecurityEvent(this.t('validate.runError'), 'error', `Validation run failed: ${error.message}`);
+    throw error;
   }
+}
+
 
 module.exports = I18nValidator;
 
@@ -814,16 +836,19 @@ if (require.main === module) {
         }
       }
 
-      const result = await validator.validate();
+      const result = await validator.run();
+      const runArgs = validator.parseArgs();
 
-      SecurityUtils.logSecurityEvent(t('validate.validationCompleted'), 'info', {
-        success: result.success,
-        errors: result.errors || 0,
-        warnings: result.warnings || 0,
-        timestamp: new Date().toISOString()
-      });
+      if (!runArgs.watch) {
+        SecurityUtils.logSecurityEvent(t('validate.validationCompleted'), 'info', {
+          success: result.success,
+          errors: result.errors || 0,
+          warnings: result.warnings || 0,
+          timestamp: new Date().toISOString()
+        });
 
-      process.exit(result.success ? 0 : 1);
+        process.exit(result.success ? 0 : 1);
+      }
     } catch (error) {
       console.error(t('validate.fatalValidationError', { error: error.message }));
       console.error(t('validate.stackTrace', { stack: error.stack }));

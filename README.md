@@ -92,6 +92,19 @@ Configuration is managed through the `settings/i18ntk-config.json` file:
 }
 ```
 
+### Environment Variables
+
+You can override common path settings with environment variables:
+
+| Variable | Overrides | Description |
+|----------|-----------|-------------|
+| `I18NTK_PROJECT_ROOT` | `projectRoot` | Base project directory |
+| `I18NTK_SOURCE_DIR` | `sourceDir` | Location of source translation files |
+| `I18NTK_I18N_DIR` | `i18nDir` | Working i18n directory |
+| `I18NTK_OUTPUT_DIR` | `outputDir` | Output directory for generated reports |
+
+These values are merged into the loaded configuration at runtime.
+
 ## 🌍 Language Optimization
 
 ```bash

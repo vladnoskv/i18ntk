@@ -38,24 +38,30 @@ class SecurityUtils {
         return null;
       }
 
-      // Sanitize the input path
-      const sanitizedPath = path.normalize(filePath).replace(/\.\./g, '');
-      
-      // Resolve the full path
-      const resolvedPath = path.resolve(basePath, sanitizedPath);
-      
-      // Check if the resolved path is within the base path
-      const relativePath = path.relative(basePath, resolvedPath);
+      // Resolve base and target paths
+      const base = fs.realpathSync(basePath);
+      const resolvedPath = path.resolve(base, filePath);
+
+      // Resolve symlinks if the path exists
+      let finalPath = resolvedPath;
+      try {
+        finalPath = fs.realpathSync(resolvedPath);
+      } catch {
+        // If the path doesn't exist yet, fall back to the resolved path
+      }
+
+      // Ensure the target path is within the base directory
+      const relativePath = path.relative(base, finalPath);
       if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
         const i18n = getI18n();
-        SecurityUtils.logSecurityEvent(i18n.t('security.pathTraversalAttempt'), 'warning', { inputPath: filePath, resolvedPath, basePath });
+        SecurityUtils.logSecurityEvent(i18n.t('security.pathTraversalAttempt'), 'warning', { inputPath: filePath, resolvedPath: finalPath, basePath: base });
         return null;
       }
       
       const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidated'), 'info', { inputPath: filePath, resolvedPath });
+      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidated'), 'info', { inputPath: filePath, resolvedPath: finalPath });
       
-      return resolvedPath;
+      return finalPath;
     } catch (error) {
       const i18n = getI18n();
       SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationError'), 'error', { inputPath: filePath, error: error.message });
@@ -108,7 +114,7 @@ class SecurityUtils {
     if (!validatedPath) {
       return null;
     }
-
+    const i18n = getI18n();
     try {
       // Check if file exists and is readable
       fs.accessSync(validatedPath, fs.constants.R_OK);
@@ -233,6 +239,7 @@ class SecurityUtils {
       const isFilePath = sanitized.includes('/') || sanitized.includes('\\') || sanitized.includes('.');
       const isCommonContent = sanitized.length < 1000 && !sanitized.includes('<script');
       if (!isFilePath && !isCommonContent) {
+      const i18n = getI18n();
         console.warn(i18n.t('security.inputDisallowedCharacters'));
       }
       // Allow more characters for file paths and content
@@ -248,6 +255,7 @@ class SecurityUtils {
    * @returns {object} - Validated arguments
    */
   static async validateCommandArgs(args) {
+    const i18n = getI18n();
     const validatedArgs = {};
     const allowedArgs = [
       'source-dir', 'i18n-dir', 'output-dir', 'output-report', 
@@ -415,6 +423,7 @@ class SecurityUtils {
       // Fallback: if settings can't be loaded, don't show security logs to maintain clean UI
       // Only log critical security events in this case
       if (event.includes('CRITICAL') || event.includes('BREACH') || event.includes('ATTACK')) {
+        const i18n = getI18n();
         console.log(i18n.t('security.security_alert', { timestamp, event }), details);
       }
     }

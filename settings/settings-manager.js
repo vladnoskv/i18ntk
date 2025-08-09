@@ -470,13 +470,26 @@ class SettingsManager {
             if (!settings.sourceDir) {
                 errors.push('Source directory is required');
             }
-            
+
             // Validate directory paths exist
             const sourceDir = path.resolve(settings.projectRoot || '.', settings.sourceDir || '');
             if (!fs.existsSync(sourceDir)) {
                 errors.push(`Source directory does not exist: ${sourceDir}`);
             }
-            
+
+            if (!settings.i18nDir) {
+                errors.push('i18n directory is required');
+            } else {
+                const i18nDir = path.resolve(settings.projectRoot || '.', settings.i18nDir);
+                if (!fs.existsSync(i18nDir)) {
+                    try {
+                        fs.mkdirSync(i18nDir, { recursive: true });
+                    } catch (error) {
+                        errors.push(`Cannot create i18n directory: ${i18nDir}`);
+                    }
+                }
+            }
+
             if (settings.outputDir) {
                 const outputDir = path.resolve(settings.projectRoot || '.', settings.outputDir);
                 if (!fs.existsSync(outputDir)) {

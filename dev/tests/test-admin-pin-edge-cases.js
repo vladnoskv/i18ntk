@@ -67,7 +67,7 @@ class AdminPinEdgeCaseTester {
     console.log('🔐 Testing PIN Setup Edge Cases...');
     
     // Test 1: Valid PIN formats
-    const validPins = ['0000', '1234', '9999', '0001', '9876'];
+    const validPins = ['0000', '1234', '9999', '0001', '9876', '12345', '123456'];
     for (const pin of validPins) {
       const result = await this.auth.setupPin(pin);
       this.assertTrue(result, `Valid PIN ${pin} should be accepted`);
@@ -75,7 +75,7 @@ class AdminPinEdgeCaseTester {
     
     // Test 2: Invalid PIN formats
     const invalidPins = [
-      '', '123', '12345', '123456', 'abc', 'abcd', '12ab', '12.3', '12-3',
+      '', '123', '1234567', 'abc', 'abcd', '12ab', '12.3', '12-3',
       ' 123', '123 ', '1 23', '1234\n', '\t1234', null, undefined, 1234, true, false
     ];
     
@@ -85,7 +85,7 @@ class AdminPinEdgeCaseTester {
     }
     
     // Test 3: Boundary values
-    const boundaryPins = ['0000', '9999', '5000', '1000', '9998'];
+    const boundaryPins = ['0000', '9999', '5000', '1000', '9998', '12345', '123456'];
     for (const pin of boundaryPins) {
       const result = await this.auth.setupPin(pin);
       this.assertTrue(result, `Boundary PIN ${pin} should be accepted`);
@@ -98,7 +98,7 @@ class AdminPinEdgeCaseTester {
     console.log('🔍 Testing PIN Validation Edge Cases...');
     
     // Test 1: Valid PIN variations
-    const validPins = ['1234', '0000', '9999', '5000'];
+    const validPins = ['1234', '0000', '9999', '5000', '12345', '123456'];
     for (const pin of validPins) {
       await this.auth.setupPin(pin);
       const result = await this.auth.verifyPin(pin);
@@ -108,7 +108,7 @@ class AdminPinEdgeCaseTester {
     // Test 2: Invalid PIN variations (test against current PIN)
     await this.auth.setupPin('1234');
     const invalidPins = [
-      '', '0000', '123', '12345', '1234\n', '1234 ', ' 1234', '1 234',
+      '', '0000', '123', '12345', '1234567', '1234\n', '1234 ', ' 1234', '1 234',
       'abcd', '123a', 'a123', null, undefined, 1234, true, false, 0, -1
     ];
     

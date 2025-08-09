@@ -239,7 +239,7 @@ class I18nInitializer {
         this.sourceDir = path.resolve(selectedDir);
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
         const rel = configManager.toRelative(selectedDir);
-        configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+        await configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
         return selectedDir;
       }
 
@@ -264,7 +264,7 @@ class I18nInitializer {
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
 
         const rel = configManager.toRelative(selectedDir);
-        configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+        await configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
 
         return selectedDir;
       } else if (selectedIndex === existingLocations.length) {
@@ -291,7 +291,7 @@ class I18nInitializer {
           this.sourceLanguageDir = sourceLangDir;
 
           const rel = configManager.toRelative(newDirPath);
-          configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+          await configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
 
           return newDirPath;
         } else {
@@ -354,7 +354,7 @@ class I18nInitializer {
     }
 
     const rel = configManager.toRelative(this.sourceDir);
-    configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+    await configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
   }
   
   // Create sample translation file with smart naming
@@ -621,7 +621,7 @@ class I18nInitializer {
         const adminAuth = new AdminAuth();
         await adminAuth.initialize();
 
-        configManager.updateConfig({
+        await configManager.updateConfig({
           security: {
             adminPinEnabled: true,
             adminPinPromptOnInit: true,

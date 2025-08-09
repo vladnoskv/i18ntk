@@ -20,7 +20,7 @@ const { spawnSync } = require('child_process');
  * @param {object} cliArgs - Command line arguments parsed from the script
  * @returns {object} Unified configuration object
  */
-function getUnifiedConfig(scriptName, cliArgs = {}) {
+async function getUnifiedConfig(scriptName, cliArgs = {}) {
   try {
     let cfg = configManager.getConfig();
     const projectRoot = path.resolve(cfg.projectRoot || '.');
@@ -39,7 +39,7 @@ function getUnifiedConfig(scriptName, cliArgs = {}) {
       updates.outputDir = configManager.toRelative(abs);
     }
     if (Object.keys(updates).length > 0) {
-      configManager.updateConfig(updates);
+      await configManager.updateConfig(updates);
       cfg = configManager.getConfig();
     }
 
@@ -53,7 +53,7 @@ function getUnifiedConfig(scriptName, cliArgs = {}) {
 
     // Auto-fix i18nDir if missing but sourceDir exists
     if (!fs.existsSync(cfg.i18nDir) && fs.existsSync(cfg.sourceDir)) {
-      configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
+      await configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
       cfg.i18nDir = cfg.sourceDir;
     }
 
@@ -176,6 +176,9 @@ function parseCommonArgs(args) {
         case 'auto-translate':
           parsed.autoTranslate = true;
           break;
+        case 'watch':
+          parsed.watch = true;
+          break;
         default:
           // Handle language shorthand flags like --de, --fr
           if (availableLangCodes.includes(sanitizedKey)) {
@@ -203,7 +206,10 @@ function displayHelp(scriptName, additionalOptions = {}) {
     'ui-language': 'UI language for messages',
     'strict': 'Enable strict validation mode',
     'no-prompt': 'Skip interactive prompts',
-    'help': 'Show this help message'
+    'help': 'Show this help message',
+    'watch': 'Watch for changes in source files',
+    'dry-run': 'Run validation without modifying files',
+    'auto-translate': 'Automatically translate missing keys',
   };
   
   const allOptions = { ...commonOptions, ...additionalOptions };

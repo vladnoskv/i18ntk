@@ -34,7 +34,7 @@ const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displ
 const I18nInitializer = require('./i18ntk-init');
 
 async function getConfig() {
-  return getUnifiedConfig('usage');
+  return await getUnifiedConfig('usage');
 }
 
 class I18nUsageAnalyzer {
@@ -106,7 +106,7 @@ class I18nUsageAnalyzer {
         console.warn(this.t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         this.i18nDir = this.sourceDir;
         this.config.i18nDir = this.i18nDir;
-        configManager.updateConfig({ i18nDir: configManager.toRelative(this.sourceDir) });
+        await configManager.updateConfig({ i18nDir: configManager.toRelative(this.sourceDir) });
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
       }
 
@@ -445,7 +445,7 @@ class I18nUsageAnalyzer {
       }
       
       if (this.sourceDir || this.i18nDir) {
-        configManager.updateConfig({
+        await configManager.updateConfig({
           sourceDir: configManager.toRelative(this.sourceDir || this.config.sourceDir),
           i18nDir: configManager.toRelative(this.i18nDir || this.config.i18nDir)
         });

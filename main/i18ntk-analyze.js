@@ -15,6 +15,7 @@ loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
+const watchLocales = require('../utils/watch-locales');
 
 const PROJECT_ROOT = process.cwd();
 
@@ -656,12 +657,28 @@ try {
         this.config.outputDir = args.outputDir;
         this.outputDir = path.resolve(this.config.outputDir);
       }
-      
-      await this.analyze();
-      
-      // Only exit if not called from menu
-      if (!fromMenu && require.main === module) {
-        process.exit(0);
+      const execute = async () => {
+        await this.analyze();
+      };
+
+      if (args.watch) {
+        await execute();
+        let running = false;
+        watchLocales(this.sourceDir, async () => {
+          if (running) return;
+          running = true;
+          try {
+            await execute();
+          } finally {
+            running = false;
+          }
+        });
+        console.log('Ì±Ä Watching for translation changes. Press Ctrl+C to exit.');
+      } else {
+        await execute();
+        if (!fromMenu && require.main === module) {
+          process.exit(0);
+        }
       }
     } catch (error) {
       console.error(this.t('analyze.error') || '‚ùå Analysis failed:', error.message);

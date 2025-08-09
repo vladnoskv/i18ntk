@@ -17,10 +17,16 @@ const AdminAuth = require('../../utils/admin-auth');
     process.exit(1);
   }
 
-  // Ensure invalid PIN format is rejected
-  result = await auth.setupPin('12345');
+  // Ensure invalid PIN formats are rejected
+  result = await auth.setupPin('123');
   if (result) {
-    console.error('Five-digit PIN should be rejected');
+    console.error('Three-digit PIN should be rejected');
+    process.exit(1);
+  }
+
+  result = await auth.setupPin('1234567');
+  if (result) {
+    console.error('Seven-digit PIN should be rejected');
     process.exit(1);
   }
 

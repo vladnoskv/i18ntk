@@ -10,7 +10,7 @@ const path = require('path');
 const settingsManager = require('./settings-manager');
 const UIi18n = require('../main/i18ntk-ui');
 const configManager = require('../utils/config-manager');
-const { loadTranslations, t } = require('../utils/i18n-helper');
+const { loadTranslations } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
 
 const AdminAuth = require('../utils/admin-auth');
@@ -1659,7 +1659,7 @@ class SettingsCLI {
         if (confirm.toLowerCase() === 'y') {
             try {
                 await this.adminAuth.disableAuth();
-                configManager.resetToDefaults();
+                await configManager.resetToDefaults();
                 this.settings = configManager.getConfig();
                 this.modified = false;
                 this.adminAuthenticated = false;
@@ -1723,8 +1723,8 @@ class SettingsCLI {
      */
     async saveSettings() {
         try {
-            configManager.updateConfig(this.settings);
-            configManager.saveConfig();
+            await configManager.updateConfig(this.settings);
+            await configManager.saveConfig();
             this.modified = false;
             this.success('Settings saved successfully.');
         } catch (error) {

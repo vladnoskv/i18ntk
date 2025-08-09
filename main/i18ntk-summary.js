@@ -37,7 +37,7 @@ class I18nSummaryReporter {
         process.exit(0);
       }
 
-      const baseConfig = getUnifiedConfig('summary', cliArgs);
+      const baseConfig = await getUnifiedConfig('summary', cliArgs);
       this.config = baseConfig;
 
       const uiLanguage = this.config.uiLanguage || 'en';

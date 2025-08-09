@@ -206,9 +206,9 @@ this.translations = {};
      * Save language preference to settings manager
      * @param {string} language - Language code to save
      */
-    saveLanguagePreference(language) {
+    async saveLanguagePreference(language) {
         try {
-            configManager.setConfig('language', language);
+            await configManager.updateConfig({ language });
         } catch (error) {
            console.error(`Error saving language preference: ${error.message}`);
         }
@@ -239,11 +239,10 @@ this.translations = {};
         const currentLanguage = this.getCurrentLanguageFromSettings();
         if (!currentLanguage || currentLanguage === 'en') {
             const selectedLang = await this.selectLanguage();
-            this.saveLanguagePreference(selectedLang);
-            this.changeLanguage(selectedLang);
+            await this.changeLanguage(selectedLang);
             return selectedLang;
         } else {
-            this.changeLanguage(currentLanguage);
+            await this.changeLanguage(currentLanguage);
             return currentLanguage;
         }
     }
@@ -348,9 +347,9 @@ this.translations = {};
      * Change the current UI language
      * @param {string} language - New language code
      */
-    changeLanguage(language) {
+    async changeLanguage(language) {
         this.loadLanguage(language);
-        this.saveLanguagePreference(language);
+        await this.saveLanguagePreference(language);
     }
 
     /**
@@ -405,15 +404,15 @@ this.translations = {};
                console.log(this.t('language.languageOption', { index: index + 1, displayName, current }));
             });
             
-            rl.question('\n' + this.t('language.prompt'), (answer) => {
+            rl.question('\n' + this.t('language.prompt'), async (answer) => {
                 const choice = parseInt(answer);
-                
+
                 if (choice === 0) {
                     console.log(this.t('language.cancelled'));
                     resolve(this.currentLanguage);
                 } else if (choice >= 1 && choice <= this.availableLanguages.length) {
                     const selectedLang = this.availableLanguages[choice - 1];
-                    this.changeLanguage(selectedLang);
+                    await this.changeLanguage(selectedLang);
                     console.log(this.t('language.changed', { language: this.getLanguageDisplayName(selectedLang) }));
                     resolve(selectedLang);
                 } else {

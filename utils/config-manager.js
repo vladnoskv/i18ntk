@@ -205,6 +205,14 @@ const DEFAULT_CONFIG = {
   "timezone": "auto"
 };
 
+// Mapping of supported environment variables to config keys
+const ENV_VAR_MAP = {
+  I18NTK_PROJECT_ROOT: 'projectRoot',
+  I18NTK_SOURCE_DIR: 'sourceDir',
+  I18NTK_I18N_DIR: 'i18nDir',
+  I18NTK_OUTPUT_DIR: 'outputDir',
+};
+
 let currentConfig = null;
 
 function clone(obj) {
@@ -215,13 +223,6 @@ function ensureConfigDir() {
   if (!fs.existsSync(CONFIG_DIR)) {
     fs.mkdirSync(CONFIG_DIR, { recursive: true });
   }
-}
-
-function toRelative(absPath) {
-  if (!absPath) return absPath;
-  const rel = path.relative(projectRoot, absPath);
-  const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
-  return normalized;
 }
 
 function normalizePathValue(keyPath, value) {
@@ -247,6 +248,19 @@ function deepMerge(target, source, basePath = '') {
   return target;
 }
 
+function applyEnvOverrides(cfg) {
+  const overrides = {};
+  for (const [envVar, key] of Object.entries(ENV_VAR_MAP)) {
+    if (process.env[envVar]) {
+      overrides[key] = process.env[envVar];
+    }
+  }
+  if (Object.keys(overrides).length > 0) {
+    deepMerge(cfg, overrides);
+  }
+  return cfg;
+}
+
 function loadConfig() {
   if (currentConfig) return currentConfig;
   let cfg = clone(DEFAULT_CONFIG);
@@ -259,36 +273,47 @@ function loadConfig() {
   } catch (_) {
     // ignore and use defaults
   }
+  applyEnvOverrides(cfg);
   currentConfig = cfg;
   return currentConfig;
 }
 
-function saveConfig(cfg = currentConfig) {
+async function saveConfig(cfg = currentConfig) {
   if (!cfg) return;
   ensureConfigDir();
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+  const data = JSON.stringify(cfg, null, 2);
+  try {
+    await fs.promises.writeFile(CONFIG_PATH, data, 'utf8');
+  } catch (err) {
+    console.warn(`Warning: Async config save failed: ${err.message}`);
+    try {
+      fs.writeFileSync(CONFIG_PATH, data, 'utf8');
+    } catch (syncErr) {
+      console.error(`Fallback sync save failed: ${syncErr.message}`);
+    }
+  }
 }
 
 function getConfig() {
   return loadConfig();
 }
 
-function setConfig(cfg) {
+async function setConfig(cfg) {
   currentConfig = deepMerge(clone(DEFAULT_CONFIG), cfg || {});
-  saveConfig();
+  await saveConfig();
   return currentConfig;
 }
 
-function updateConfig(patch) {
+async function updateConfig(patch) {
   const cfg = loadConfig();
   deepMerge(cfg, patch);
-  saveConfig();
+  await saveConfig();
   return cfg;
 }
 
-function resetToDefaults() {
+async function resetToDefaults() {
   currentConfig = clone(DEFAULT_CONFIG);
-  saveConfig();
+  await saveConfig();
   return currentConfig;
 }
 
@@ -308,9 +333,11 @@ function resolvePaths(cfg = getConfig()) {
   return resolved;
 }
 
-function toRelative(absolutePath) {
-  const rel = path.relative(projectRoot, absolutePath);
-  return rel || '.';
+function toRelative(absPath) {
+  if (!absPath) return absPath;
+  const rel = path.relative(projectRoot, absPath);
+  const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
+  return normalized;
 }
 
 module.exports = {
