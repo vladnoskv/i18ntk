@@ -2,6 +2,13 @@
 const path = require('path');
 const fs = require('fs');
 
+// Helper functions for OS-agnostic path handling
+function toPosix(p) { return String(p).replace(/\\/g, '/'); }
+function isBundledPath(p) { 
+  const s = toPosix(p); 
+  return s.includes('/node_modules/i18ntk/') || s.includes('/i18ntk/ui-locales/'); 
+}
+
 function safeRequireConfig() {
   try { return require('./config-manager'); } catch { return null; }
 }
@@ -24,9 +31,8 @@ function pkgUiLocalesDirViaThisFile() {
 
 function pkgUiLocalesDirViaResolve() {
   try {
-    const mainPath = require.resolve('i18ntk'); // .../i18ntk/main/i18ntk-manage.js
-    const root = path.dirname(path.dirname(mainPath));
-    return path.join(root, 'ui-locales');
+    const enJson = require.resolve('i18ntk/ui-locales/en.json');
+    return path.dirname(enJson);
   } catch { return null; }
 }
 
@@ -36,64 +42,113 @@ function projectUiLocalesDir() {
 
 function resolveLocalesDirs(baseDir) {
   const dirs = [];
-  const addDir = dir => {
-    if (typeof dir === 'string' && dir.trim())
-      dirs.push(path.resolve(dir.trim()));
+  const addDir = (dir, source) => {
+    if (typeof dir === 'string' && dir.trim()) {
+      try {
+        const normalized = path.normalize(path.resolve(dir.trim()));
+        // Skip if directory doesn't exist or isn't accessible
+        if (fs.existsSync(normalized) && fs.statSync(normalized).isDirectory()) {
+          dirs.push({ path: normalized, source });
+        }
+      } catch {
+        // Silently ignore invalid paths
+      }
+    }
   };
 
-  // If a baseDir is provided, normalise it. Handle file paths gracefully.
-  if (typeof baseDir === 'string' && baseDir.trim()) {
-    const resolved = path.resolve(baseDir.trim());
-    addDir(fs.existsSync(resolved) && fs.statSync(resolved).isFile()
-      ? path.dirname(resolved)
-      : resolved);
+  // Priority 1: Environment override (highest priority)
+  if (process.env.I18NTK_UI_LOCALE_DIR && process.env.I18NTK_UI_LOCALE_DIR.trim()) {
+    addDir(process.env.I18NTK_UI_LOCALE_DIR, 'env');
   }
 
-  // Environment override
-  if (process.env.I18NTK_UI_LOCALE_DIR && process.env.I18NTK_UI_LOCALE_DIR.trim())
-        addDir(process.env.I18NTK_UI_LOCALE_DIR);
-
-  // Settings configuration
-
+  // Priority 2: Settings configuration
   const cfg = safeRequireConfig();
   if (cfg) {
     try {
       const settings = cfg.getConfig?.() || {};
-      if (typeof settings.uiLocalesDir === 'string' && settings.uiLocalesDir.trim())
-        addDir(settings.uiLocalesDir);
+      if (typeof settings.uiLocalesDir === 'string' && settings.uiLocalesDir.trim()) {
+        addDir(settings.uiLocalesDir, 'settings');
+      }
     } catch {}
   }
 
-// Package directories take precedence over project directories
+  // Priority 3: Bundled package directories (preferred over project)
   const pkgA = pkgUiLocalesDirViaThisFile();
-  addDir(pkgA);
+  addDir(pkgA, 'bundled');
+  
   const pkgB = pkgUiLocalesDirViaResolve();
-  if (pkgB && pkgB !== pkgA) addDir(pkgB);
+  if (pkgB && pkgB !== pkgA) {
+    addDir(pkgB, 'bundled');
+  }
 
-  // Finally fall back to project directory
-  addDir(projectUiLocalesDir());
+  // Priority 4: Project directory (fallback)
+  if (typeof baseDir === 'string' && baseDir.trim()) {
+    const resolved = path.resolve(baseDir.trim());
+    const dirPath = fs.existsSync(resolved) && fs.statSync(resolved).isFile()
+      ? path.dirname(resolved)
+      : resolved;
+    addDir(dirPath, 'project');
+  }
+  
+  addDir(projectUiLocalesDir(), 'project');
 
-  return [...new Set(dirs)];
+  // Deduplicate by path while preserving priority order
+  const seen = new Set();
+  const uniqueDirs = [];
+  for (const { path: dirPath, source } of dirs) {
+    if (!seen.has(dirPath)) {
+      seen.add(dirPath);
+      uniqueDirs.push(dirPath);
+    }
+  }
+
+  return uniqueDirs;
 }
 
 function candidatesForLang(dir, lang) {
   return [
-    path.join(dir, `${lang}.json`),
-    path.join(dir, lang, `${lang}.json`),
-    path.join(dir, lang, 'index.json')
+    path.join(dir, `${lang}.json`),          // ui-locales/en.json
+    path.join(dir, lang, 'index.json')       // ui-locales/en/index.json
   ];
 }
 
 function findLocaleFilesAllDirs(lang, baseDir) {
   const dirs = resolveLocalesDirs(baseDir);
+  
+  if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+    console.log('🔎 i18ntk locale search dirs:', dirs);
+  }
+  
   const files = [];
-  for (const d of dirs) {
-    for (const p of candidatesForLang(d, lang)) {
+  const errors = [];
+  
+  for (const dir of dirs) {
+    for (const candidate of candidatesForLang(dir, lang)) {
       try {
-        if (fs.existsSync(p) && fs.statSync(p).isFile()) files.push(p);
-      } catch {}
+        if (fs.existsSync(candidate)) {
+          const stats = fs.statSync(candidate);
+          if (stats.isFile() && stats.size > 0) {
+            // Validate file is readable and parseable
+            fs.accessSync(candidate, fs.constants.R_OK);
+            // Quick JSON validation
+            const content = fs.readFileSync(candidate, 'utf8');
+            if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
+              files.push(candidate);
+            } else {
+              errors.push({ file: candidate, error: 'Invalid JSON format' });
+            }
+          }
+        }
+      } catch (error) {
+        errors.push({ file: candidate, error: error.message });
+      }
     }
   }
+  
+  if (process.env.I18NTK_DEBUG_LOCALES === '1' && errors.length > 0) {
+    console.warn(`⚠️ Locale resolution errors for ${lang}:`, errors);
+  }
+  
   return files;
 }
 
@@ -110,23 +165,49 @@ function loadTranslations(language, baseDir) {
   const short = requested.split('-')[0].toLowerCase();
   const tryOrder = [requested, short, 'en'];
 
+  const loadErrors = [];
+  
   for (const lang of tryOrder) {
-   const files = findLocaleFilesAllDirs(lang, baseDir);
-    for (const file of files) {
+    const files = findLocaleFilesAllDirs(lang, baseDir);
+    
+    // Prioritize bundled locales over project ones
+      const prioritizedFiles = files.sort((a, b) => Number(isBundledPath(b)) - Number(isBundledPath(a)));
+    
+    for (const file of prioritizedFiles) {
       try {
         translations = readJsonSafe(file);
         currentLanguage = lang;
         isInitialized = true;
+        
         if (process.env.I18NTK_DEBUG_LOCALES === '1') {
-          console.log(`🗂 Loaded UI locale → ${file}`);
+          console.log(`🗂 Loaded UI locale → ${file} (${lang})`);
         }
-        return translations;
+        
+        // Validate translations object
+        if (typeof translations === 'object' && translations !== null) {
+          return translations;
+        } else {
+          loadErrors.push({ file, error: 'Invalid translation format' });
+        }
       } catch (e) {
-        console.warn(`⚠️ Failed to parse ${file}: ${e.message}. Trying next fallback...`);
+        loadErrors.push({ file, error: e.message });
+        if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+          console.warn(`⚠️ Failed to parse ${file}: ${e.message}`);
+        }
       }
     }
   }
 
+  // Log comprehensive error summary if debugging
+  if (process.env.I18NTK_DEBUG_LOCALES === '1' && loadErrors.length > 0) {
+    console.warn(`📊 Locale loading errors summary:`, {
+      requested: requested,
+      triedLanguages: tryOrder,
+      errors: loadErrors
+    });
+  }
+
+  // Fallback to built-in minimal translations
   translations = {
     menu: {
       title: '🌍 i18ntk - I18N Management',
@@ -152,7 +233,11 @@ function loadTranslations(language, baseDir) {
   };
   currentLanguage = 'en';
   isInitialized = true;
-  console.warn('⚠️ No UI locale files found/parsable. Using minimal built-in strings.');
+  
+  if (loadErrors.length > 0) {
+    console.warn(`⚠️ No valid UI locale files found. Using built-in English strings.`);
+  }
+  
   return translations;
 }
 

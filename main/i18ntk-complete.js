@@ -412,7 +412,7 @@ class I18nCompletionTool {
     const { fromMenu = false } = options;
     
     SecurityUtils.logSecurityEvent('I18n completion tool started', 'info', { 
-      version: '1.3.7',
+      version: this.config.version,
       nodeVersion: process.version,
       platform: process.platform
     });

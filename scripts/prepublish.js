@@ -26,6 +26,37 @@ class PrepublishCleaner {
             'npm-debug.log',
             'yarn-error.log'
         ];
+        
+        // Essential files that must exist for release
+        this.essentialFiles = [
+            'package.json',
+            'main/i18ntk-manage.js',
+            'main/i18ntk-init.js',
+            'main/i18ntk-analyze.js',
+            'main/i18ntk-validate.js',
+            'main/i18ntk-usage.js',
+            'main/i18ntk-summary.js',
+            'main/i18ntk-sizing.js',
+            'main/i18ntk-complete.js',
+            'main/i18ntk-ui.js',
+            'main/i18ntk-autorun.js',
+            'utils/i18n-helper.js',
+            'utils/security.js',
+            'settings/settings-manager.js',
+            'settings/settings-cli.js',
+            'settings/i18ntk-config.json'
+        ];
+        
+        // Essential locale files
+        this.essentialLocales = [
+            'ui-locales/en.json',
+            'ui-locales/es.json',
+            'ui-locales/fr.json',
+            'ui-locales/de.json',
+            'ui-locales/ja.json',
+            'ui-locales/ru.json',
+            'ui-locales/zh.json'
+        ];
     }
 
     log(message) {
@@ -33,7 +64,16 @@ class PrepublishCleaner {
     }
 
     async clean() {
-        this.log('Starting cleanup for npm publish...');
+        this.log('Starting comprehensive pre-publish validation...');
+        
+        // Validate essential files exist
+        await this.validateEssentialFiles();
+        
+        // Validate locale files
+        await this.validateLocaleFiles();
+        
+        // Validate package.json
+        await this.validatePackageJson();
         
         // Clean directories
         for (const dir of this.directories) {
@@ -48,7 +88,10 @@ class PrepublishCleaner {
         // Reset security settings
         await this.resetSecuritySettings();
         
-        this.log('Cleanup completed successfully!');
+        // Final validation
+        await this.finalValidation();
+        
+        this.log('Pre-publish validation completed successfully!');
     }
 
     async cleanDirectory(dirPath) {
@@ -116,6 +159,162 @@ class PrepublishCleaner {
         }
     }
 
+    async validateEssentialFiles() {
+        this.log('Validating essential files...');
+        
+        let missingFiles = [];
+        for (const file of this.essentialFiles) {
+            const filePath = path.join(this.projectRoot, file);
+            if (!fs.existsSync(filePath)) {
+                missingFiles.push(file);
+            } else if (!fs.statSync(filePath).isFile()) {
+                this.log(`❌ ${file} is not a file`);
+                process.exit(1);
+            }
+        }
+        
+        if (missingFiles.length > 0) {
+            this.log(`❌ Missing essential files: ${missingFiles.join(', ')}`);
+            process.exit(1);
+        }
+        
+        this.log('✅ All essential files present');
+    }
+    
+    async validateLocaleFiles() {
+        this.log('Validating locale files...');
+        
+        let invalidFiles = [];
+        for (const localeFile of this.essentialLocales) {
+            const filePath = path.join(this.projectRoot, localeFile);
+            if (!fs.existsSync(filePath)) {
+                invalidFiles.push(localeFile);
+                continue;
+            }
+            
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                const parsed = JSON.parse(content);
+                
+                // Validate structure
+                if (typeof parsed !== 'object' || parsed === null) {
+                    invalidFiles.push(`${localeFile}: Invalid structure`);
+                }
+                
+                // Check for required keys
+                if (!parsed.settings || !parsed.settings.title) {
+                    invalidFiles.push(`${localeFile}: Missing required keys`);
+                }
+                
+            } catch (e) {
+                invalidFiles.push(`${localeFile}: ${e.message}`);
+            }
+        }
+        
+        if (invalidFiles.length > 0) {
+            this.log(`❌ Invalid locale files: ${invalidFiles.join(', ')}`);
+            process.exit(1);
+        }
+        
+        this.log('✅ All locale files valid');
+    }
+    
+    async validatePackageJson() {
+        this.log('Validating package.json...');
+        
+        const packagePath = path.join(this.projectRoot, 'package.json');
+        try {
+            const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            
+            // Validate required fields
+            const requiredFields = ['name', 'version', 'description', 'main', 'bin', 'files'];
+            for (const field of requiredFields) {
+                if (!pkg[field]) {
+                    this.log(`❌ package.json missing required field: ${field}`);
+                    process.exit(1);
+                }
+            }
+            
+            // Validate version format
+            if (!/^\d+\.\d+\.\d+/.test(pkg.version)) {
+                this.log('❌ Invalid version format');
+                process.exit(1);
+            }
+            
+            // Validate bin entries
+            const requiredBinEntries = [
+                'i18ntk', 'i18ntk-init', 'i18ntk-analyze', 'i18ntk-validate',
+                'i18ntk-usage', 'i18ntk-summary', 'i18ntk-sizing', 'i18ntk-complete',
+                'i18ntk-ui', 'i18ntk-autorun'
+            ];
+            
+            for (const bin of requiredBinEntries) {
+                if (!pkg.bin || !pkg.bin[bin]) {
+                    this.log(`❌ Missing bin entry: ${bin}`);
+                    process.exit(1);
+                }
+                
+                const binPath = path.join(this.projectRoot, pkg.bin[bin]);
+                if (!fs.existsSync(binPath)) {
+                    this.log(`❌ Missing bin script: ${pkg.bin[bin]}`);
+                    process.exit(1);
+                }
+            }
+            
+            this.log('✅ package.json validated');
+        } catch (e) {
+            this.log(`❌ Invalid package.json: ${e.message}`);
+            process.exit(1);
+        }
+    }
+    
+    async finalValidation() {
+        this.log('Running final validation checks...');
+        
+        // Check for development artifacts
+        const devArtifacts = [
+            'dev/debug',
+            'benchmarks',
+            '.github',
+            'test-usage-fix.html',
+            '.i18ntk'
+        ];
+        
+        for (const artifact of devArtifacts) {
+            const artifactPath = path.join(this.projectRoot, artifact);
+            if (fs.existsSync(artifactPath)) {
+                this.log(`⚠️ Development artifact found: ${artifact}`);
+            }
+        }
+        
+        // Validate file permissions for executable scripts
+        const scripts = [
+            'main/i18ntk-manage.js',
+            'main/i18ntk-init.js',
+            'main/i18ntk-analyze.js',
+            'main/i18ntk-validate.js',
+            'main/i18ntk-usage.js',
+            'main/i18ntk-summary.js',
+            'main/i18ntk-sizing.js',
+            'main/i18ntk-complete.js',
+            'main/i18ntk-ui.js',
+            'main/i18ntk-autorun.js'
+        ];
+        
+        for (const script of scripts) {
+            const scriptPath = path.join(this.projectRoot, script);
+            if (fs.existsSync(scriptPath)) {
+                try {
+                    fs.accessSync(scriptPath, fs.constants.X_OK);
+                } catch (e) {
+                    this.log(`⚠️ Script not executable: ${script}`);
+                }
+            }
+        }
+        
+        this.log('✅ Final validation complete');
+    }
+    
     async resetSecuritySettings() {
         const configPath = path.join(this.projectRoot, 'settings', '.i18n-admin-config.json');
         

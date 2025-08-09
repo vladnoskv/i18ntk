@@ -1,7 +1,6 @@
 # I18N Management Toolkit - Configuration Guide
 
-**Version:** 1.6.0  
-**Last Updated:** 2025-08-08  
+**Version:** 1.6.3**Last Updated:** 2025-08-08
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 📋 Overview
@@ -13,13 +12,13 @@ This guide provides comprehensive information about configuring the I18N Managem
 ### Primary Configuration Files
 
 #### `i18ntk-config.json`
-**Location:** Project root directory  
-**Purpose:** User-specific settings and preferences  
-**Auto-generated:** Yes (on first run)  
+**Location:** Project root directory
+**Purpose:** User-specific settings and preferences
+**Auto-generated:** Yes (on first run)
 
 ```json
 {
-  "version": "1.0.0",
+  "version": "1.6.3 (DEPRECATED - use latest version) ",
   "lastUpdated": "2025-07-27",
   "project": {
     "name": "My Project",
@@ -72,13 +71,13 @@ This guide provides comprehensive information about configuring the I18N Managem
 ```
 
 #### `admin-config.json`
-**Location:** Project root directory  
-**Purpose:** Administrative settings and security configuration  
-**Auto-generated:** Yes (when admin features are enabled)  
+**Location:** Project root directory
+**Purpose:** Administrative settings and security configuration
+**Auto-generated:** Yes (when admin features are enabled)
 
 ```json
 {
-  "version": "1.6.3",
+  "version": "1.6.3 (DEPRECATED - use latest version) ",
   "lastUpdated": "2025-07-27",
   "security": {
     "adminMode": false,
@@ -122,7 +121,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 ### Package Configuration
 
 #### `package.json` Integration
-**Required Scripts:** Already configured in package.json  
+**Required Scripts:** Already configured in package.json
 
 ```json
 {
@@ -167,7 +166,7 @@ The toolkit now supports **runtime UI language switching** through the interacti
 
 **Supported UI Languages:**
 - `en` - English (default)
-- `de` - German  
+- `de` - German
 - `es` - Spanish
 - `fr` - French
 
@@ -177,7 +176,7 @@ The toolkit now supports **runtime UI language switching** through the interacti
 
 **Runtime Language Switching:**
 Access the language switcher via the interactive menu:
-1. Run `npx i18ntk` 
+1. Run `npx i18ntk`
 2. Select **10. ⚙️ Settings**
 3. Choose **Change UI Language**
 4. Select from the 8 available languages
@@ -649,7 +648,7 @@ Common configuration errors and solutions:
 
 ### Version Migration
 
-When upgrading to version 1.4.6, the toolkit automatically:
+When upgrading to version 1.6.3 (DEPRECATED - use latest version) , the toolkit automatically:
 
 1. **Backs up** existing configuration files
 2. **Migrates** settings to new format
@@ -785,4 +784,4 @@ npm run benchmark:ci
 npm run benchmark:baseline
 ```
 
-**Note:** This configuration guide is maintained for version 1.4.6. For the latest configuration options, refer to the [API Reference](./API_REFERENCE.md) and [Components Documentation](./COMPONENTS.md).
+**Note:** This configuration guide is maintained for version 1.6.3 (DEPRECATED - use latest version) . For the latest configuration options, refer to the [API Reference](./API_REFERENCE.md) and [Components Documentation](./COMPONENTS.md).

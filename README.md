@@ -2,13 +2,13 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.6.2 
+**Version:** 1.6.3 
 **Last Updated:** 2025-08-09  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
-> **🚨 Latest Update (v1.6.2)**: Critical npm package installation bug resolved from 1.6.0 and 1.6.1.
+> **🚨 Latest Update (v1.6.3)**: Critical npm package installation bug resolved from 1.6.0 onwards.
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
@@ -16,16 +16,16 @@
 
 > **Zero dependencies** | **Optimized smaller package** | **Works with any framework** | **Enterprise-grade security**
 
-> **v1.6.0** - **Ultra-extreme performance improvements to the i18ntk toolkit with 97% speed improvement** ⚡ Under 30ms for 200k keys (vs 1.2 seconds), up to 86% package size reduction, zero runtime dependencies.
+> **v1.6.3** - **Ultra-extreme performance improvements to the i18ntk toolkit with 97% speed improvement** ⚡ Under 30ms for 200k keys (vs 1.2 seconds), up to 86% package size reduction, zero runtime dependencies.
 
 ## 🚀 Quick Start
 
 ```bash
 # Install globally
-npm install -g i18ntk@1.6.0
+npm install i18ntk@1.6.3
 
 # Interactive setup
-npx i18ntk init
+npx i18ntk@1.6.3 init
 
 # Basic commands
 i18ntk analyze --source ./src
@@ -81,7 +81,7 @@ Configuration is managed through the `settings/i18ntk-config.json` file:
 
 ```json
 {
-  "version": "1.6.2",
+  "version": "1.6.3",
   "sourceDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "defaultLanguage": "en",
@@ -159,7 +159,7 @@ your-project/
 
 - **Locale files are backed up automatically** before optimization
 - **Use interactive optimizer** for safe locale management
-- **Zero breaking changes** from v1.5.x to v1.6.0
+- **Zero breaking changes** from v1.5.x to v1.6.3
 - **All improvements applied automatically** on update
 
 ## 📞 Support
@@ -172,3 +172,46 @@ your-project/
 ---
 
 **Made for the global development community** ❤️
+
+## Migration Guide
+
+### Upgrading from Deprecated Versions
+
+#### From any version < 1.6.3 (DEPRECATED - use latest version)
+1. **Backup your current configuration**:
+   ```bash
+   cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
+   ```
+
+2. **Install the latest version**:
+   ```bash
+   npm install i18ntk@1.6.3
+   ```
+
+3. **Run configuration migration**:
+   ```bash
+   npx i18ntk@1.6.3 --migrate
+   ```
+
+4. **Verify installation**:
+   ```bash
+   npx i18ntk@1.6.3--validate
+   ```
+
+#### Preserved Features from 1.6.3
+- ✅ Ultra-extreme performance improvements
+- ✅ Enhanced security with PIN protection
+- ✅ Comprehensive backup & recovery
+- ✅ Edge case handling
+- ✅ Memory optimization
+- ✅ Advanced configuration management
+
+#### Breaking Changes
+- **None** - 1.6.3 is fully backward compatible
+
+### Migration Support
+If you encounter issues during migration:
+1. Check the [troubleshooting guide](docs/TROUBLESHOOTING.md)
+2. Open an issue on [GitHub](https://github.com/vladnoskv/i18ntk/issues)
+3. Join our [Discord community](https://discord.gg/i18ntk)
+

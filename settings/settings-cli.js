@@ -1232,7 +1232,7 @@ class SettingsCLI {
             case '3':
                 exportData = JSON.stringify({
                     exportedAt: new Date().toISOString(),
-                    version: this.settings.version || '1.0.0',
+                    version: this.settings.version || '1.6.3 (DEPRECATED - use latest version) ',
                     settings: this.settings
                 }, null, 2);
                 break;

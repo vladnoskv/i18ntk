@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * I18N USAGE ANALYSIS TOOLKIT - Version 1.4.3
+ * I18N USAGE ANALYSIS TOOLKIT - Version 1.6.3
  * 
  * This script analyzes source code to find unused translation keys,
  * missing translations, and provides comprehensive translation completeness analysis.
  * 
- * NEW in v1.4.3:
+ * NEW in v1.6.3:
  * - Modular folder structure support
  * - Recursive translation file discovery
  * - NOT_TRANSLATED analysis

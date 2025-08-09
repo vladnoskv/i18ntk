@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * i18n Toolkit - Automated Workflow Runner (1.6.0-ready)
+ * i18n Toolkit - Automated Workflow Runner (1.6.3-ready)
  * Executes predefined workflow steps for i18n management.
  * - Deterministic translation loading
  * - Safe config precedence (defaults < constructor < unified/CLI)

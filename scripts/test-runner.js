@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Test Runner for i18n Management Toolkit v1.6.0
+ * Test Runner for i18n Management Toolkit v1.6.3
  * Runs all test suites and provides comprehensive reporting
  */
 
@@ -24,7 +24,7 @@ class TestRunner {
     }
 
     async runAllTests() {
-        console.log('🚀 i18n Management Toolkit v1.6.0 Test Runner');
+        console.log('🚀 i18n Management Toolkit v1.6.3 Test Runner');
         console.log('='.repeat(80));
         console.log(`Started: ${this.startTime.toLocaleString()}`);
         console.log();
@@ -125,7 +125,7 @@ class TestRunner {
 
         // Generate detailed report
         const report = {
-            version: '1.6.0',
+            version: '1.6.3',
             timestamp: endTime.toISOString(),
             totalTests: this.testSuites.length,
             passed,

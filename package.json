@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), advanced security with PIN protection, comprehensive backup & recovery, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
@@ -47,6 +47,11 @@
   "author": "Vladimir Noskov (https://github.com/vladnoskv)",
   "type": "commonjs",
   "main": "main/i18ntk-manage.js",
+  "exports": {
+    ".": "./main/i18ntk-manage.js",
+    "./ui-locales/*": "./ui-locales/*",
+    "./package.json": "./package.json"
+  },
   "bin": {
     "i18ntk": "main/i18ntk-manage.js",
     "i18ntk-init": "main/i18ntk-init.js",
@@ -69,9 +74,19 @@
     "settings/",
     "ui-locales/",
     "LICENSE",
+    "package.json",
     "README.md"
   ],
+  "sideEffects": false,
   "scripts": {
+    "docs:cleanup-deprecated": "node dev/cleanup-deprecated-notices.js",
+    "i18ntk": "node main/i18ntk-manage.js",
+    "i18ntk:init": "node main/i18ntk-init.js",
+    "i18ntk:analyze": "node main/i18ntk-analyze.js",
+    "i18ntk:validate": "main/i18ntk-validate.js",
+    "i18ntk:usage": "node main/i18ntk-usage.js",
+    "i18ntk:complete": "node main/i18ntk-complete.js",
+    "i18ntk-sizing": "main/i18ntk-sizing.js",
     "start": "node main/i18ntk-manage.js",
     "settings": "node settings/settings-cli.js",
     "i18ntk:doctor": "node main/i18ntk-doctor.js",
@@ -112,7 +127,13 @@
     "languages:select": "node settings/settings-cli.js",
     "languages:list": "node settings/settings-cli.js --list-languages",
     "languages:status": "node settings/settings-cli.js --language-status",
-    "languages:restore": "echo 'Language restoration - use settings CLI for manual configuration'"
+    "languages:restore": "echo 'Language restoration - use settings CLI for manual configuration'",
+    "version:update": "node scripts/version-updater.js",
+    "version:check": "node scripts/version-checker.js",
+    "version:bump": "node scripts/version-bump.js",
+    "docs:update-versions": "node scripts/update-docs-versions.js",
+    "release:prepare": "npm run version:check && npm run docs:update-versions && npm run prepublishOnly",
+    "deprecate:old-versions": "node scripts/deprecate-versions.js"
   },
   "dependencies": {},
   "engines": {
@@ -123,9 +144,9 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.6.1",
-    "releaseDate": "08/08/2025",
-    "lastUpdated": "08/08/2025",
+    "version": "1.6.3",
+    "releaseDate": "27/07/2025",
+    "lastUpdated": "09/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
@@ -143,12 +164,16 @@
     ],
     "breakingChanges": [],
     "deprecations": [
-      "<1.5.0",
       "1.0.x",
       "1.1.x",
       "1.2.x",
       "1.3.x",
-      "1.4.x"
+      "1.4.x",
+      "1.5.x",
+      "1.6.0",
+      "1.6.1",
+      "1.6.2"
+
     ],
     "nextVersion": "1.7.0",
     "supportedNodeVersions": ">=16.0.0",

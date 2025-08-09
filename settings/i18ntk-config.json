@@ -126,17 +126,17 @@
     "stringInterning": true
   },
   "backup": {
-    "enabled": true,
+    "enabled": false,
     "singleFileMode": false,
     "singleBackupFile": "i18ntk-central-backup.json",
     "retentionDays": 30,
     "maxBackups": 100
   },
   "security": {
-    "adminPinEnabled": true,
+    "adminPinEnabled": false,
     "adminPinPromptOnInit": true,
     "keepAuthenticatedUntilExit": true,
-    "sessionTimeout": 1800000,
+    "sessionTimeout": 30,
     "maxFailedAttempts": 3,
     "lockoutDuration": 15,
     "enablePathValidation": true,
@@ -194,26 +194,5 @@
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto",
-  "version": "1.6.2",
-  "defaultLanguage": "en",
-  "supportedLanguages": [
-    "en",
-    "es",
-    "fr",
-    "de",
-    "ja",
-    "ru",
-    "zh"
-  ],
-  "performance": {
-    "mode": "extreme",
-    "cacheEnabled": true,
-    "batchSize": 1000,
-    "streaming": true,
-    "compression": "brotli",
-    "parallelProcessing": true,
-    "memoryLimit": "256MB",
-    "gcInterval": 250
-  }
+  "timezone": "auto"
 }

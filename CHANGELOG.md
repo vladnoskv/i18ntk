@@ -1,8 +1,9 @@
 # Changelog
 
-## [1.6.2] - 2025-08-08 - **CRITICAL NPM PACKAGE FIX**
+## [1.6.3] - 2025-08-08 - **CRITICAL NPM PACKAGE FIX**
 
-> **🚨 CRITICAL BUG FIX**: Resolved npm package installation issues affecting global installations
+> **🚨 CRITICAL BUG FIX**: Resolved npm package installation issues affecting global installations.
+> **⚠️ DEPRECATION NOTICE**: All previous versions (prior to 1.6.3) are deprecated with critical bugs.
 
 ### 🔧 **NPM Package Path Resolution Fix**
 - **Fixed**: Critical path resolution failures when installed as npm global package
@@ -26,14 +27,14 @@
 - **Local Development**: Maintained compatibility with local development workflows
 
 ### 🚀 **Installation Experience**
-- **Global Install**: `npm install -g i18ntk@1.6.1` now works correctly
-- **Local Install**: `npm install i18ntk@1.6.1` functions as expected
+- **Global Install**: `npm install i18ntk@1.6.3` now works correctly
+- **Local Install**: `npm install i18ntk@1.6.3` now works correctly
 - **No Breaking Changes**: Existing configurations and workflows remain unchanged
 - **Immediate Benefits**: Performance and security improvements from 1.6.0 remain active
 
-## [1.6.0] - 2025-08-08 - **ULTRA-EXTREME PERFORMANCE RELEASE**
+## [1.6.3+] - 2025-08-08 - **ULTRA-EXTREME PERFORMANCE RELEASE**
 
-> **⚠️ DEPRECATION NOTICE**: All previous versions (1.0.0-1.5.3) are deprecated. Version 1.6.0 is the definitive release.
+> **⚠️ DEPRECATION NOTICE**: All previous versions (prior to 1.6.3) are deprecated. Version 1.6.3 is the definitive release.
 
 ### 🚀 **ULTRA-EXTREME PERFORMANCE OPTIMIZATIONS** - 97% Cumulative Performance Gain
 
@@ -218,7 +219,7 @@
 
 #### **From Previous Versions:**
 1. **Backup existing configurations** before upgrading
-2. **Install version 1.6.0** via npm: `npm install -g i18ntk@1.6.0`
+2. **Install version 1.6.3** via npm: `npm install i18ntk@1.6.3i18ntk@1.6.3`
 3. **Configurations are automatically migrated** with enhanced defaults
 4. **Performance benefits** are immediate without code changes
 5. **All existing functionality** is preserved with improvements
@@ -247,10 +248,10 @@
 
 ```bash
 # Install the latest version
-npm install -g i18ntk@1.6.0
+npm install i18ntk@1.6.3i18ntk@1.6.3
 
 # Initialize with interactive locale selection
-npx i18ntk init
+npx i18ntk@1.6.3init
 
 # Run with extreme performance settings
 i18ntk complete --config=extreme
@@ -263,10 +264,10 @@ node scripts/locale-optimizer.js --interactive
 
 ```bash
 # 1. Install with global optimization
-npm install -g i18ntk@1.6.0
+npm install i18ntk@1.6.3i18ntk@1.6.3
 
 # 2. Run init with locale optimization
-npx i18ntk init
+npx i18ntk@1.6.3init
 
 # 3. Select locales interactively (saves 67% package size)
 # 4. Use extreme settings for maximum performance
@@ -275,4 +276,46 @@ i18ntk complete --config=extreme
 
 ---
 
-*This release represents the culmination of extensive performance optimization, security hardening, and user experience enhancement. Version 1.6.0 is the definitive release for production use.*
+*This release represents the culmination of extensive performance optimization, security hardening, and user experience enhancement. Version 1.6.3 (DEPRECATED - use latest version) is the definitive release for production use.*
+
+## Migration Guide
+
+### Upgrading from Deprecated Versions
+
+#### From any version < 1.6.3 (DEPRECATED - use latest version) 1. **Backup your current configuration**:
+   ```bash
+   cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
+   ```
+
+2. **Install the latest version**:
+   ```bash
+   npm install i18ntk@1.6.3```
+
+3. **Run configuration migration**:
+   ```bash
+   npx i18ntk@1.6.3--migrate
+   ```
+
+4. **Verify installation**:
+   ```bash
+   npx i18ntk@1.6.3--version
+   npx i18ntk@1.6.3--validate
+   ```
+
+#### Preserved Features from 1.6.3
+- ✅ Ultra-extreme performance improvements
+- ✅ Enhanced security with PIN protection
+- ✅ Comprehensive backup & recovery
+- ✅ Edge case handling
+- ✅ Memory optimization
+- ✅ Advanced configuration management
+
+#### Breaking Changes
+- **None** - 1.6.3 is fully backward compatible
+
+### Migration Support
+If you encounter issues during migration:
+1. Check the [troubleshooting guide](docs/TROUBLESHOOTING.md)
+2. Open an issue on [GitHub](https://github.com/vladnoskv/i18ntk/issues)
+3. Join our [Discord community](https://discord.gg/i18ntk)
+
