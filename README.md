@@ -116,18 +116,6 @@ import { createI18n } from 'vue-i18n';
 const i18n = createI18n({ locale: 'en', messages: translations });
 ```
 
-## 📈 Benchmarking
-
-```bash
-# Run performance tests
-node benchmarks/ultra-performance-test.js --keys=50000
-
-# Compare configurations
-node benchmarks/compare-all-configs.js --keys=10000
-
-# Memory profiling
-node benchmarks/memory-test.js --keys=25000
-```
 
 ## 🔒 Security Features
 
