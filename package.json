@@ -128,8 +128,7 @@
     "languages:status": "node settings/settings-cli.js --language-status",
     "languages:restore": "echo 'Language restoration - use settings CLI for manual configuration'"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "engines": {
     "node": ">=16.0.0"
   },
