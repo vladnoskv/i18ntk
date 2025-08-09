@@ -44,11 +44,11 @@
     "url": "https://github.com/sponsors/vladnoskv"
   },
   "license": "MIT",
-  "author": "Vladimir Noskov <vladno@hotmail.co.uk> (https://github.com/vladnoskv)",
+  "author": "Vladimir Noskov (https://github.com/vladnoskv)",
   "type": "commonjs",
   "main": "main/i18ntk-manage.js",
   "bin": {
-    "i18ntk": "bin/i18ntk.js",
+    "i18ntk": "main/i18ntk.js",
     "i18ntk-manage": "main/i18ntk-manage.js",
     "i18ntk-init": "main/i18ntk-init.js",
     "i18ntk-analyze": "main/i18ntk-analyze.js",
@@ -100,7 +100,7 @@
     "sizing": "node main/i18ntk-sizing.js",
     "summary": "node main/i18ntk-summary.js",
     "full-coverage": "npm run complete && npm run analyze",
-    "verify-package": "node scripts/verify-package.js",
+    "verify-package": "node dev/verify-package.js",
     "prepublishOnly": "npm run verify-package && node scripts/prepublish.js",
     "test": "node scripts/test-runner.js",
     "test:all": "node scripts/test-runner.js",
@@ -138,7 +138,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.6.1",
+    "version": "1.6.0",
     "releaseDate": "08/08/2025",
     "lastUpdated": "08/08/2025",
     "maintainer": "Vladimir Noskov",

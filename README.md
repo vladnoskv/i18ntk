@@ -10,7 +10,7 @@
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
-**Framework Support:** Works with **any** i18n frameworks. i18ntk manages translation files and validation - it does NOT implement translations on pages. Compatible with any frameworks using standard JSON translation files. 
+**Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translations on pages.
 
 > **Zero dependencies** | **Optimized smaller package** | **Works with any framework** | **Enterprise-grade security**
 
@@ -45,8 +45,8 @@ i18ntk validate --source ./locales
 - **Smart Sizing**: Interactive locale optimizer (up to 86% size reduction)
 - **Enterprise Security**: Admin PIN protection & comprehensive validation
 - **Zero Dependencies**: Lightweight, production-ready
-- **8 Languages**: en, es, fr, de, ja, ru, zh + pt
-- **Framework Support**: React, Vue, Angular, Next.js, Nuxt, Svelte
+- **7 Languages**: English, Spanish, French, German, Japanese, Russian, Chinese 
+- **Framework Support**: Auto-detects React i18next, Vue i18n, Angular, Next i18next, Nuxt i18n, Svelte i18n
 
 ## 📊 Commands
 
@@ -65,8 +65,9 @@ Create `.i18ntk.config.js`:
 
 ```javascript
 module.exports = {
+    // All paths are relative to your project root
   sourceDir: './locales',
-  outputDir: './i18n-reports',
+  outputDir: './i18ntk-reports',
   defaultLanguage: 'en',
   supportedLanguages: ['en', 'es', 'fr', 'de'],
   performance: {
@@ -145,7 +146,7 @@ your-project/
 │   ├── en.json
 │   ├── es.json
 │   └── ...
-├── i18n-reports/      # Generated reports
+├── i18ntk-reports/      # Generated reports
 └── .i18ntk.config.js  # Configuration
 ```
 

@@ -1,7 +1,7 @@
 # Installation Guide
 
-**Version:** 1.5.2  
-**Last Updated:** 2025-08-06  
+**Version:** 1.6.0  
+**Last Updated:** 2025-08-08  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## Quick Start
@@ -49,7 +49,7 @@ yarn global add i18ntk
 
 ## Framework Setup
 
-**Note:** Frameworks are optional - i18ntk works with or without i18n frameworks. We recommend using a framework for larger projects.
+**Note:** Frameworks are optional - i18ntk auto-detects popular i18n libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) but works without a framework. We recommend using a framework for larger projects.
 
 ### React
 ```bash

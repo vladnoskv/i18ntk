@@ -22,163 +22,203 @@ class SettingsManager {
         }
         
         this.defaultConfig = {
-            // Basic settings
-            language: 'en',
-            uiLanguage: 'en',
-            theme: 'light',
-            
-            // Directory settings - use absolute paths based on package directory
-            projectRoot: '.',
-            sourceDir: './locales',
-            i18nDir: './locales',
-            outputDir: './i18ntk-reports',
-            uiLocalesDir: path.join(__dirname, '..', 'ui-locales'),
-            
-            // Script-specific directory overrides
-            scriptDirectories: {
-                init: null,
-                analyze: null,
-                validate: null,
-                usage: null,
-                sizing: null,
-                summary: null,
-                complete: null,
-                manage: null
+            "language": "en",
+            "uiLanguage": "en",
+            "theme": "light",
+            "projectRoot": ".",
+            "sourceDir": "./locales",
+            "i18nDir": "./locales",
+            "outputDir": "./i18ntk-reports",
+            "uiLocalesDir": "./ui-locales",
+            "scriptDirectories": {
+                "init": null,
+                "analyze": null,
+                "validate": null,
+                "usage": null,
+                "sizing": null,
+                "summary": null,
+                "complete": null,
+                "manage": null
             },
-            
-            // Processing settings
-            processing: {
-                batchSize: 100,
-                concurrency: 4,
-                maxFileSize: 10 * 1024 * 1024, // 10MB
-                timeout: 30000, // 30 seconds
-                retryAttempts: 3,
-                retryDelay: 1000,
-                cacheEnabled: true,
-                cacheTTL: 3600000, // 1 hour
-                validateOnSave: true,
-                autoBackup: true
+            "processing": {
+                "batchSize": 2000,
+                "concurrency": 32,
+                "maxFileSize": 524288,
+                "timeout": 3000,
+                "retryAttempts": 0,
+                "retryDelay": 0,
+                "cacheEnabled": true,
+                "cacheTTL": 180000,
+                "validateOnSave": false,
+                "autoBackup": false,
+                "validateOnLoad": false,
+                "fileFilter": "**/*.json",
+                "notTranslatedMarker": "NOT_TRANSLATED",
+                "excludeFiles": [
+                    ".DS_Store",
+                    "Thumbs.db",
+                    "*.tmp",
+                    "*.bak",
+                    "*.log",
+                    "~*",
+                    "*.swp"
+                ],
+                "performanceMode": "ultra-extreme",
+                "memoryLimit": "256MB",
+                "gcInterval": 250,
+                "streaming": true,
+                "compression": "brotli",
+                "parallelProcessing": true,
+                "minimalLogging": true
             },
-            
-            // Report settings
-            reports: {
-                format: 'json',
-                includeStats: true,
-                includeMissingKeys: true,
-                includeUnusedKeys: true,
-                includeUsageStats: true,
-                includeValidationErrors: true,
-                outputFormat: 'both', // json, html, both
-                generateSummary: true,
-                generateDetailed: true,
-                saveToFile: true,
-                filenameTemplate: 'i18n-report-{timestamp}'
+            "reports": {
+                "format": "json",
+                "includeStats": true,
+                "includeMissingKeys": true,
+                "includeUnusedKeys": true,
+                "includeUsageStats": true,
+                "includeValidationErrors": true,
+                "outputFormat": "both",
+                "generateSummary": true,
+                "generateDetailed": true,
+                "saveToFile": true,
+                "filenameTemplate": "i18n-report-{timestamp}"
             },
-            
-            // UI preferences
-            ui: {
-                showProgress: true,
-                showDetailedOutput: false,
-                colorOutput: true,
-                interactive: true,
-                confirmActions: true,
-                autoSave: true,
-                autoLoad: true
+            "ui": {
+                "showProgress": true,
+                "showDetailedOutput": false,
+                "colorOutput": true,
+                "interactive": true,
+                "confirmActions": true,
+                "autoSave": true,
+                "autoLoad": true
             },
-            
-            // Behavior settings
-            behavior: {
-                autoDetectLanguage: true,
-                strictMode: false,
-                caseSensitive: true,
-                ignoreComments: false,
-                ignoreWhitespace: true,
-                normalizeKeys: true,
-                validateOnStartup: false
+            "behavior": {
+                "autoDetectLanguage": true,
+                "strictMode": false,
+                "caseSensitive": true,
+                "ignoreComments": false,
+                "ignoreWhitespace": true,
+                "normalizeKeys": true,
+                "validateOnStartup": false
             },
-            
-            // Notification settings
-            notifications: {
-                enabled: true,
-                types: {
-                    success: true,
-                    warning: true,
-                    error: true,
-                    info: true
+            "notifications": {
+                "enabled": true,
+                "types": {
+                    "success": true,
+                    "warning": true,
+                    "error": true,
+                    "info": true,
+                    "warnings": true,
+                    "errors": true,
+                    "progress": true
                 },
-                sound: false,
-                desktop: false,
-                webhook: null
+                "sound": false,
+                "desktop": false,
+                "webhook": null
             },
-            
-            // Date/time formatting
-            dateTime: {
-                format: 'YYYY-MM-DD HH:mm:ss',
-                timezone: 'local',
-                locale: 'en-US'
+            "dateTime": {
+                "format": "YYYY-MM-DD HH:mm:ss",
+                "timezone": "local",
+                "locale": "en-US"
             },
-            
-            // Advanced settings
-            advanced: {
-                backupBeforeChanges: true,
-                validateSettings: true,
-                logLevel: 'info',
-                performanceTracking: false,
-                memoryLimit: 512, // MB
-                enableExperimental: false
+            "advanced": {
+                "backupBeforeChanges": true,
+                "validateSettings": true,
+                "logLevel": "error",
+                "performanceTracking": true,
+                "memoryLimit": "256MB",
+                "enableExperimental": true,
+                "batchSize": 2000,
+                "maxConcurrentFiles": 32,
+                "enableProgressBars": false,
+                "enableColorOutput": false,
+                "strictMode": false,
+                "enableAuditLog": false,
+                "validateOnSave": false,
+                "sizingThreshold": 50,
+                "sizingFormat": "table",
+                "timeout": 3000,
+                "performanceMode": "ultra-extreme",
+                "gcInterval": 250,
+                "streaming": true,
+                "compression": "brotli",
+                "parallelProcessing": true,
+                "aggressiveGC": true,
+                "memoryPooling": true,
+                "stringInterning": true
             },
-            
-            // Backup Settings
-            backup: {
-                enabled: false, // Default: false | Enable/disable automatic backups
-                singleFileMode: false, // Default: false | Use single backup file when disabled
-                singleBackupFile: 'i18ntk-central-backup.json', // Default: 'i18ntk-central-backup.json' | Single backup filename
-                retentionDays: 30, // Default: 30 | Days to keep backup files
-                maxBackups: 100 // Default: 100 | Maximum number of backup files to keep
+            "backup": {
+                "enabled": false,
+                "singleFileMode": false,
+                "singleBackupFile": "i18ntk-central-backup.json",
+                "retentionDays": 30,
+                "maxBackups": 100
             },
-            
-            // Security & Admin Settings
-            security: {
-                adminPinEnabled: false,
-                adminPinPromptOnInit: false,
-                keepAuthenticatedUntilExit: true,
-                sessionTimeout: 30,
-                maxFailedAttempts: 3,
-                lockoutDuration: 15,
-                enablePathValidation: true,
-                maxFileSize: 10 * 1024 * 1024, // 10MB
-                allowedExtensions: ['.json', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'],
-                notTranslatedMarker: '[NOT TRANSLATED]',
-                excludeFiles: ['node_modules', '.git', 'dist', 'build'],
-                strictMode: false,
-                // PIN Protection Configuration
-                pinProtection: {
-                    enabled: true, // Master switch for PIN protection
-                    protectedScripts: {
-                        debugMenu: true,
-                        deleteReports: true,
-                        summaryReports: true,
-                        settingsMenu: true,
-                        init: false,
-                        analyze: false,
-                        validate: false,
-                        complete: false,
-                        manage: false,
-                        sizing: false,
-                        usage: false
+            "security": {
+                "adminPinEnabled": false,
+                "adminPinPromptOnInit": true,
+                "keepAuthenticatedUntilExit": true,
+                "sessionTimeout": 30,
+                "maxFailedAttempts": 3,
+                "lockoutDuration": 15,
+                "enablePathValidation": true,
+                "maxFileSize": 10485760,
+                "allowedExtensions": [
+                    ".json",
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx",
+                    ".vue",
+                    ".svelte"
+                ],
+                "notTranslatedMarker": "[NOT TRANSLATED]",
+                "excludeFiles": [
+                    "node_modules",
+                    ".git",
+                    "dist",
+                    "build"
+                ],
+                "strictMode": false,
+                "pinProtection": {
+                    "enabled": true,
+                    "protectedScripts": {
+                        "debugMenu": true,
+                        "deleteReports": true,
+                        "summaryReports": true,
+                        "settingsMenu": true,
+                        "init": false,
+                        "analyze": false,
+                        "validate": false,
+                        "complete": false,
+                        "manage": false,
+                        "sizing": false,
+                        "usage": false
                     }
                 }
             },
-            
-            // Debug & Development Settings
-            debug: {
-                enabled: false, // Default: false | Enable debug mode
-                showSecurityLogs: false, // Default: false | Show security console logs when debug mode is enabled
-                verboseLogging: false, // Default: false | Enable verbose logging for debugging
-                logLevel: 'info', // Default: 'info' | Options: 'error', 'warn', 'info', 'debug'
-                saveDebugLogs: false, // Default: false | Save debug logs to file
-                debugLogPath: './debug.log' // Default: './debug.log' | Path for debug log file
-            }
+            "debug": {
+                "enabled": false,
+                "showSecurityLogs": false,
+                "verboseLogging": false,
+                "logLevel": "info",
+                "saveDebugLogs": false,
+                "debugLogPath": "./debug.log"
+            },
+            "sizeLimit": null,
+            "sourceLanguage": "en",
+            "defaultLanguages": [
+                "de",
+                "es",
+                "fr",
+                "ru"
+            ],
+            "reportLanguage": "auto",
+            "autoSave": true,
+            "dateFormat": "DD/MM/YYYY",
+            "timeFormat": "24h",
+            "timezone": "auto"
         };
         
         this.settings = this.loadSettings();
