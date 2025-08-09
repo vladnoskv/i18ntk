@@ -65,15 +65,10 @@
   "files": [
     "main/",
     "utils/",
-    "scripts/",
     "settings/",
     "ui-locales/",
     "LICENSE",
-    "README.md",
-    "!scripts/prepublish.js",
-    "!scripts/test-runner.js",
-    "!scripts/path-utils.test.js",
-    "!scripts/reset-defaults.test.js"
+    "README.md"
   ],
   "scripts": {
     "start": "node main/i18ntk-manage.js",
@@ -93,7 +88,9 @@
     "summary": "node main/i18ntk-summary.js",
     "full-coverage": "npm run complete && npm run analyze",
     "verify-package": "node dev/verify-package.js",
-    "prepublishOnly": "npm run verify-package && node scripts/prepublish.js",
+    "smoke:pack": "node scripts/smoke-pack.js",
+    "smoke:pack": "node scripts/smoke-pack.js",
+    "prepublishOnly": "npm run verify-package && npm run smoke:pack",
     "test": "node scripts/test-runner.js",
     "test:all": "node scripts/test-runner.js",
     "test:quick": "node scripts/test-runner.js --quick",

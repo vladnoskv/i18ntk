@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getUnifiedConfig, parseCommonArgs, displayHelp, ensureInitialized } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const configManager = require('../utils/config-manager');

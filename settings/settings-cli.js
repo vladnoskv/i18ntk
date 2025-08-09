@@ -10,6 +10,8 @@ const path = require('path');
 const settingsManager = require('./settings-manager');
 const UIi18n = require('../main/i18ntk-ui');
 const configManager = require('../utils/config-manager');
+const { loadTranslations, t } = require('../utils/i18n-helper');
+loadTranslations(process.env.I18NTK_LANG || 'en');
 
 const AdminAuth = require('../utils/admin-auth');
 const uiI18n = new UIi18n();

@@ -35,6 +35,7 @@ const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+loadTranslations(process.env.I18NTK_LANG || 'en');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig } = require('../utils/config-helper');

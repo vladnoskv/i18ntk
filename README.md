@@ -2,11 +2,13 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.6.0  
+**Version:** 1.6.1 (1.6 IS CURRENTLY FACING ISSUES, PLEASE USE 1.5.3 UNTIL FIXED)  
 **Last Updated:** 2025-08-08  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
+
+> **🚨 Latest Update (v1.6.1)**: Critical npm package installation bug, update to fix soon. Use 1.5.3
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 

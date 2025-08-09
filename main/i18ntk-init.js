@@ -19,7 +19,8 @@ const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
 const UIi18n = require('./i18ntk-ui');
-
+const { loadTranslations, t } = require('../utils/i18n-helper');
+loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 
 // Language configurations with native names

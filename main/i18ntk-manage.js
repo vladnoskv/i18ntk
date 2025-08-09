@@ -34,6 +34,9 @@ const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
 
+const { loadTranslations, t } = require('../utils/i18n-helper');
+loadTranslations(process.env.I18NTK_LANG || 'en');
+
 // Use unified configuration system
 const { getUnifiedConfig, ensureInitialized, validateSourceDir } = require('../utils/config-helper');
 

@@ -1,134 +1,139 @@
+// utils/i18n-helper.js
 const path = require('path');
 const fs = require('fs');
-const configManager = require('./config-manager');
 
-// Get configuration from settings manager
-function getConfig() {
-  const settings = configManager.getConfig();
-  
-  // Always use the package's ui-locales directory, regardless of current working directory
-  const packageDir = path.join(__dirname, '..');
-  const uiLocalesDir = path.join(packageDir, 'ui-locales');
-  
-  return {
-    uiLocalesDir
-  };
+function safeRequireConfig() {
+  try { return require('./config-manager'); } catch { return null; }
 }
 
-// Global translations object
+function stripBOMAndComments(s) {
+  if (s.charCodeAt(0) === 0xFEFF) s = s.slice(1);
+  s = s.replace(/\/\*[\s\S]*?\*\//g, '');
+  s = s.replace(/^\s*\/\/.*$/mg, '');
+  return s;
+}
+
+function readJsonSafe(file) {
+  const raw = fs.readFileSync(file, 'utf8');
+  return JSON.parse(stripBOMAndComments(raw));
+}
+
+function pkgUiLocalesDirViaThisFile() {
+  return path.resolve(__dirname, '..', 'ui-locales');
+}
+
+function pkgUiLocalesDirViaResolve() {
+  try {
+    const mainPath = require.resolve('i18ntk'); // .../i18ntk/main/i18ntk-manage.js
+    const root = path.dirname(path.dirname(mainPath));
+    return path.join(root, 'ui-locales');
+  } catch { return null; }
+}
+
+function projectUiLocalesDir() {
+  return path.resolve(process.cwd(), 'ui-locales');
+}
+
+function resolveLocalesDirs(baseDir) {
+  const dirs = [];
+  if (typeof baseDir === 'string' && baseDir.trim()) dirs.push(path.resolve(baseDir.trim()));
+  if (process.env.I18NTK_UI_LOCALE_DIR && process.env.I18NTK_UI_LOCALE_DIR.trim())
+    dirs.push(path.resolve(process.env.I18NTK_UI_LOCALE_DIR.trim()));
+
+  const cfg = safeRequireConfig();
+  if (cfg) {
+    try {
+      const settings = cfg.getConfig?.() || {};
+      if (typeof settings.uiLocalesDir === 'string' && settings.uiLocalesDir.trim())
+        dirs.push(path.resolve(settings.uiLocalesDir.trim()));
+    } catch {}
+  }
+
+  dirs.push(projectUiLocalesDir());
+  const pkgA = pkgUiLocalesDirViaThisFile();
+  dirs.push(pkgA);
+  const pkgB = pkgUiLocalesDirViaResolve();
+  if (pkgB && pkgB !== pkgA) dirs.push(pkgB);
+
+  return [...new Set(dirs)];
+}
+
+function candidatesForLang(dir, lang) {
+  return [
+    path.join(dir, `${lang}.json`),
+    path.join(dir, lang, `${lang}.json`),
+    path.join(dir, lang, 'index.json')
+  ];
+}
+
+function findLocaleFileAllDirs(lang, baseDir) {
+  const dirs = resolveLocalesDirs(baseDir);
+  for (const d of dirs) {
+    for (const p of candidatesForLang(d, lang)) {
+      if (fs.existsSync(p)) return p;
+    }
+  }
+  return null;
+}
+
 let translations = {};
 let currentLanguage = 'en';
 let isInitialized = false;
 
-/**
- * Load translations from the ui-locales directory
- * @param {string} language - Language code (default: 'en')
- * @param {string} baseDir - Base directory for locale files (optional)
- */
 function loadTranslations(language, baseDir) {
-  const settings = configManager.getConfig();
+  const cfg = safeRequireConfig();
+  const settings = cfg?.getConfig?.() || {};
   const configuredLanguage = settings.uiLanguage || settings.language || 'en';
-  // Ensure we always have a concrete language value
-  language = language || configuredLanguage || 'en';
-  currentLanguage = language;
-  
-  // Ensure we always have a valid string path
-  // First, try to use the package's ui-locales directory (works for both development and npm install)
-  let localesDir = path.join(__dirname, '..', 'ui-locales');
-  
-  // Check if the package is installed as a dependency (node_modules/i18ntk)
-  if (!fs.existsSync(localesDir)) {
-    try {
-      // When installed as npm package, use the package's ui-locales directory
-      const packageRoot = path.dirname(require.resolve('../package.json'));
-      localesDir = path.join(packageRoot, 'ui-locales');
-    } catch (resolveError) {
-      // Fallback to relative path if package.json resolution fails
-      localesDir = path.join(__dirname, '..', 'ui-locales');
-    }
-  }
 
-  // Use provided directory if it's a valid string
-  if (typeof baseDir === 'string' && baseDir.trim() !== '') {
-    localesDir = baseDir;
-  } else if (typeof process.env.I18NTK_UI_LOCALE_DIR === 'string' && process.env.I18NTK_UI_LOCALE_DIR.trim() !== '') {
-    localesDir = process.env.I18NTK_UI_LOCALE_DIR;
-  } else {
-    const config = getConfig();
-    if (config.uiLocalesDir && typeof config.uiLocalesDir === 'string') {
-      localesDir = config.uiLocalesDir;
-    }
-  }
+  const requested = (language || configuredLanguage || 'en').toString();
+  const short = requested.split('-')[0].toLowerCase();
+  const tryOrder = [requested, short, 'en'];
 
-  try {
-    localesDir = path.resolve(localesDir);
-  } catch (resolveError) {
-    // Final fallback to package ui-locales directory
-    localesDir = path.join(__dirname, '..', 'ui-locales');
-  }
-  
-  // Ensure the directory exists before attempting to read from it
-  if (!fs.existsSync(localesDir)) {
-    console.warn(`UI locales directory not found: ${localesDir}`);
-    // Try one more fallback - direct package path
+  for (const lang of tryOrder) {
+    const file = findLocaleFileAllDirs(lang, baseDir);
+    if (!file) continue;
     try {
-      const packageRoot = path.join(__dirname, '..');
-      const fallbackDir = path.join(packageRoot, 'ui-locales');
-      if (fs.existsSync(fallbackDir)) {
-        localesDir = fallbackDir;
+      translations = readJsonSafe(file);
+      currentLanguage = lang;
+      isInitialized = true;
+      if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+        console.log(`🗂 Loaded UI locale → ${file}`);
       }
+      return translations;
     } catch (e) {
-      // Last resort - use current directory
-      localesDir = path.join(process.cwd(), 'ui-locales');
+      console.warn(`⚠️ Failed to parse ${file}: ${e.message}. Trying next fallback...`);
     }
   }
-  
-  try {
-    translations = {}; // Reset translations for the new language
-    
-    // Primary: Use monolith JSON file (en.json, de.json, etc.)
-    const monolithTranslationFile = path.join(localesDir, `${language}.json`);
-    
-    if (fs.existsSync(monolithTranslationFile)) {
-      try {
-        const content = fs.readFileSync(monolithTranslationFile, 'utf8');
-        translations = JSON.parse(content);
-        isInitialized = true;
-      } catch (error) {
-        console.error(`Error parsing monolith translation file ${monolithTranslationFile}: ${error.message}`);
-        translations = {};
-      }
-    } else {
-      // Fallback: Use folder-based structure if monolith file doesn't exist
-      const langDir = path.join(localesDir, language);
-      
-      if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
-        const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
 
-        for (const file of files) {
-          const filePath = path.join(langDir, file);
-          try {
-            const content = fs.readFileSync(filePath, 'utf8');
-            const fileTranslations = JSON.parse(content);
-            
-            // Merge translations, using the filename (without .json) as the top-level key
-            const moduleName = path.basename(file, '.json');
-            translations[moduleName] = deepMerge(translations[moduleName] || {}, fileTranslations);
-          } catch (parseError) {
-            console.error(`Error parsing translation file ${filePath}: ${parseError.message}`);
-          }
-        }
-        isInitialized = true;
-      } else {
-        console.warn(`Translation file or directory not found for language ${language}: ${monolithTranslationFile} or ${langDir}`);
-        translations = {};
-      }
+  translations = {
+    menu: {
+      title: '🌍 i18ntk - I18N Management',
+      separator: '============================================================',
+      options: {
+        init: 'Initialize new languages',
+        analyze: 'Analyze translations',
+        validate: 'Validate translations',
+        usage: 'Check key usage',
+        complete: 'Complete translations',
+        sizing: 'Analyze sizing',
+        workflow: 'Run full workflow',
+        status: 'Show project status',
+        delete: 'Delete all reports',
+        settings: 'Settings',
+        help: 'Help',
+        debug: 'Debug Tools',
+        language: 'Change UI language',
+        exit: 'Exit'
+      },
+      selectOptionPrompt: 'Select an option:'
     }
-  } catch (error) {
-    console.error(`Error loading translations: ${error.message}`);
-    translations = {};
-  }
+  };
+  currentLanguage = 'en';
+  isInitialized = true;
+  console.warn('⚠️ No UI locale files found/parsable. Using minimal built-in strings.');
+  return translations;
 }
+
 /**
  * Get a translated string by key
  * @param {string} key - Translation key (e.g., 'module.subkey')
@@ -146,7 +151,6 @@ function t(key, params = {}) {
   const keyParts = key.split('.');
   let value = translations;
 
-
   // Try to find the key in the main translations object
   for (let i = 0; i < keyParts.length; i++) {
     const part = keyParts[i];
@@ -159,7 +163,6 @@ function t(key, params = {}) {
   }
 
   // If not found, try to find it in hardcodedTexts
-
   if (typeof value === 'undefined' && translations.hardcodedTexts) {
     let hardcodedValue = translations.hardcodedTexts;
     for (const part of keyParts) {
@@ -225,20 +228,23 @@ function getCurrentLanguage() {
  * Get all available languages
  * @returns {string[]} - Array of available language codes
  */
-function getAvailableLanguages() {
-  const config = getConfig();
-  const localesDir = path.resolve(config.uiLocalesDir);
-  try {
-    if (fs.existsSync(localesDir)) {
-      const files = fs.readdirSync(localesDir);
-      const jsonFiles = files.filter(file => file.endsWith('.json'));
-      const languages = jsonFiles.map(file => path.basename(file, '.json'));
-      return languages.length > 0 ? languages : ['en'];
-    }
-  } catch (error) {
-    console.error(`Error reading locales directory: ${error.message}`);
+function getAvailableLanguages(baseDir) {
+  const dirs = resolveLocalesDirs(baseDir);
+  const langs = new Set();
+  for (const d of dirs) {
+    try {
+      if (!fs.existsSync(d)) continue;
+      for (const f of fs.readdirSync(d)) {
+        if (f.endsWith('.json')) langs.add(path.basename(f, '.json'));
+      }
+      for (const f of fs.readdirSync(d, { withFileTypes: true })) {
+        if (f.isDirectory() && fs.existsSync(path.join(d, f.name, `${f.name}.json`))) {
+          langs.add(f.name);
+        }
+      }
+    } catch {}
   }
-  return ['en']; // Default fallback
+  return Array.from(langs.size ? langs : new Set(['en']));
 }
 
 /**
@@ -266,10 +272,12 @@ function deepMerge(target, source) {
  * This ensures translations stay in sync with settings changes
  */
 function refreshLanguageFromSettings() {
-  const settings = configManager.getConfig();
+  const cfg = safeRequireConfig();
+  const settings = cfg?.getConfig?.() || {};
   const configuredLanguage = settings.language || settings.uiLanguage || 'en';
   
   if (configuredLanguage !== currentLanguage) {
+    isInitialized = false;
     loadTranslations(configuredLanguage);
   }
 }
