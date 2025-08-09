@@ -28,30 +28,20 @@ async function askHidden(query) {
       terminal: true
     });
 
-    const stdin = process.stdin;
-    const onData = char => {
-      char = char + '';
-      switch (char) {
-        case '\n':
-        case '\r':
-        case '\u0004':
-          stdin.removeListener('data', onData);
-          rl.output.write('\n');
-          rl.close();
-          resolve(value.trim());
-          break;
-        case '\u0003':
-          process.exit();
-          break;
-        default:
-          rl.output.write('*');
-          value += char;
-          break;
+    rl.question(query, answer => {
+      rl.close();
+      resolve(answer.trim());
+    });
+
+    // Mask user input by replacing characters with asterisks
+    rl.stdoutMuted = true;
+    rl._writeToOutput = function _writeToOutput(stringToWrite) {
+      if (rl.stdoutMuted) {
+        rl.output.write('*');
+      } else {
+        rl.output.write(stringToWrite);
       }
     };
-    let value = '';
-    stdin.on('data', onData);
-    rl.question(query, () => {});
   });
 }
 
