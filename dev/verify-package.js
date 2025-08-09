@@ -11,7 +11,10 @@ const REQUIRED = [
   'package.json',
   'README.md',
   'LICENSE',
-  'CHANGELOG.md'
+  'CHANGELOG.md',
+  'ui-locales/en.json',
+  'utils/i18n-helper.js',
+  'main/i18ntk-manage.js'
 ];
 
 const OPTIONAL = [

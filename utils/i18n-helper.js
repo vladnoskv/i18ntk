@@ -36,24 +36,42 @@ function projectUiLocalesDir() {
 
 function resolveLocalesDirs(baseDir) {
   const dirs = [];
-  if (typeof baseDir === 'string' && baseDir.trim()) dirs.push(path.resolve(baseDir.trim()));
+  const addDir = dir => {
+    if (typeof dir === 'string' && dir.trim())
+      dirs.push(path.resolve(dir.trim()));
+  };
+
+  // If a baseDir is provided, normalise it. Handle file paths gracefully.
+  if (typeof baseDir === 'string' && baseDir.trim()) {
+    const resolved = path.resolve(baseDir.trim());
+    addDir(fs.existsSync(resolved) && fs.statSync(resolved).isFile()
+      ? path.dirname(resolved)
+      : resolved);
+  }
+
+  // Environment override
   if (process.env.I18NTK_UI_LOCALE_DIR && process.env.I18NTK_UI_LOCALE_DIR.trim())
-    dirs.push(path.resolve(process.env.I18NTK_UI_LOCALE_DIR.trim()));
+        addDir(process.env.I18NTK_UI_LOCALE_DIR);
+
+  // Settings configuration
 
   const cfg = safeRequireConfig();
   if (cfg) {
     try {
       const settings = cfg.getConfig?.() || {};
       if (typeof settings.uiLocalesDir === 'string' && settings.uiLocalesDir.trim())
-        dirs.push(path.resolve(settings.uiLocalesDir.trim()));
+        addDir(settings.uiLocalesDir);
     } catch {}
   }
 
-  dirs.push(projectUiLocalesDir());
+// Package directories take precedence over project directories
   const pkgA = pkgUiLocalesDirViaThisFile();
-  dirs.push(pkgA);
+  addDir(pkgA);
   const pkgB = pkgUiLocalesDirViaResolve();
-  if (pkgB && pkgB !== pkgA) dirs.push(pkgB);
+  if (pkgB && pkgB !== pkgA) addDir(pkgB);
+
+  // Finally fall back to project directory
+  addDir(projectUiLocalesDir());
 
   return [...new Set(dirs)];
 }
@@ -66,14 +84,17 @@ function candidatesForLang(dir, lang) {
   ];
 }
 
-function findLocaleFileAllDirs(lang, baseDir) {
+function findLocaleFilesAllDirs(lang, baseDir) {
   const dirs = resolveLocalesDirs(baseDir);
+  const files = [];
   for (const d of dirs) {
     for (const p of candidatesForLang(d, lang)) {
-      if (fs.existsSync(p)) return p;
+      try {
+        if (fs.existsSync(p) && fs.statSync(p).isFile()) files.push(p);
+      } catch {}
     }
   }
-  return null;
+  return files;
 }
 
 let translations = {};
@@ -90,18 +111,19 @@ function loadTranslations(language, baseDir) {
   const tryOrder = [requested, short, 'en'];
 
   for (const lang of tryOrder) {
-    const file = findLocaleFileAllDirs(lang, baseDir);
-    if (!file) continue;
-    try {
-      translations = readJsonSafe(file);
-      currentLanguage = lang;
-      isInitialized = true;
-      if (process.env.I18NTK_DEBUG_LOCALES === '1') {
-        console.log(`🗂 Loaded UI locale → ${file}`);
+   const files = findLocaleFilesAllDirs(lang, baseDir);
+    for (const file of files) {
+      try {
+        translations = readJsonSafe(file);
+        currentLanguage = lang;
+        isInitialized = true;
+        if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+          console.log(`🗂 Loaded UI locale → ${file}`);
+        }
+        return translations;
+      } catch (e) {
+        console.warn(`⚠️ Failed to parse ${file}: ${e.message}. Trying next fallback...`);
       }
-      return translations;
-    } catch (e) {
-      console.warn(`⚠️ Failed to parse ${file}: ${e.message}. Trying next fallback...`);
     }
   }
 
