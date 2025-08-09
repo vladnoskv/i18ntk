@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), advanced security with PIN protection, comprehensive backup & recovery, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
@@ -65,6 +65,7 @@
   "files": [
     "main/",
     "utils/",
+    "scripts/",
     "settings/",
     "ui-locales/",
     "LICENSE",
@@ -88,7 +89,6 @@
     "summary": "node main/i18ntk-summary.js",
     "full-coverage": "npm run complete && npm run analyze",
     "verify-package": "node dev/verify-package.js",
-    "smoke:pack": "node scripts/smoke-pack.js",
     "smoke:pack": "node scripts/smoke-pack.js",
     "prepublishOnly": "npm run verify-package && npm run smoke:pack",
     "test": "node scripts/test-runner.js",

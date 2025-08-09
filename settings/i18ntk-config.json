@@ -3,10 +3,10 @@
   "uiLanguage": "en",
   "theme": "system",
   "projectRoot": ".",
-  "sourceDir": "./locales",
-  "i18nDir": "./locales",
-  "outputDir": "./i18ntk-reports",
-  "uiLocalesDir": "./ui-locales",
+  "sourceDir": "locales",
+  "i18nDir": "locales",
+  "outputDir": "i18ntk-reports",
+  "uiLocalesDir": "ui-locales",
   "scriptDirectories": {
     "init": null,
     "analyze": null,
@@ -126,17 +126,17 @@
     "stringInterning": true
   },
   "backup": {
-    "enabled": false,
+    "enabled": true,
     "singleFileMode": false,
     "singleBackupFile": "i18ntk-central-backup.json",
     "retentionDays": 30,
     "maxBackups": 100
   },
   "security": {
-    "adminPinEnabled": false,
+    "adminPinEnabled": true,
     "adminPinPromptOnInit": true,
     "keepAuthenticatedUntilExit": true,
-    "sessionTimeout": 30,
+    "sessionTimeout": 1800000,
     "maxFailedAttempts": 3,
     "lockoutDuration": 15,
     "enablePathValidation": true,
@@ -181,7 +181,7 @@
     "verboseLogging": false,
     "logLevel": "info",
     "saveDebugLogs": false,
-    "debugLogPath": "./debug.log"
+    "debugLogPath": "debug.log"
   },
   "sourceLanguage": "en",
   "defaultLanguages": [
@@ -194,5 +194,26 @@
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto"
+  "timezone": "auto",
+  "version": "1.6.2",
+  "defaultLanguage": "en",
+  "supportedLanguages": [
+    "en",
+    "es",
+    "fr",
+    "de",
+    "ja",
+    "ru",
+    "zh"
+  ],
+  "performance": {
+    "mode": "extreme",
+    "cacheEnabled": true,
+    "batchSize": 1000,
+    "streaming": true,
+    "compression": "brotli",
+    "parallelProcessing": true,
+    "memoryLimit": "256MB",
+    "gcInterval": 250
+  }
 }

@@ -1,6 +1,6 @@
 #i18ntk
 
-/node_modules
+
 .env
 /src
 /test

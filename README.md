@@ -2,13 +2,13 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.6.1 (1.6 IS CURRENTLY FACING ISSUES, PLEASE USE 1.5.3 UNTIL FIXED)  
-**Last Updated:** 2025-08-08  
+**Version:** 1.6.2 
+**Last Updated:** 2025-08-09  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
-> **🚨 Latest Update (v1.6.1)**: Critical npm package installation bug, update to fix soon. Use 1.5.3
+> **🚨 Latest Update (v1.6.2)**: Critical npm package installation bug resolved from 1.6.0 and 1.6.1.
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
@@ -77,21 +77,21 @@ i18ntk validate --source ./locales
 
 ## 🔧 Configuration
 
-Create `.i18ntk.config.js`:
+Configuration is managed through the `settings/i18ntk-config.json` file:
 
-```javascript
-module.exports = {
-    // All paths are relative to your project root
-  sourceDir: './locales',
-  outputDir: './i18ntk-reports',
-  defaultLanguage: 'en',
-  supportedLanguages: ['en', 'es', 'fr', 'de'],
-  performance: {
-    mode: 'extreme', // extreme | ultra | optimized
-    batchSize: 1000,
-    concurrency: 16
+```json
+{
+  "version": "1.6.2",
+  "sourceDir": "./locales",
+  "outputDir": "./i18ntk-reports",
+  "defaultLanguage": "en",
+  "supportedLanguages": ["en", "es", "fr", "de"],
+  "performance": {
+    "mode": "extreme",
+    "batchSize": 1000,
+    "concurrency": 16
   }
-};
+}
 ```
 
 ## 🌍 Language Optimization
@@ -150,8 +150,9 @@ your-project/
 │   ├── en.json
 │   ├── es.json
 │   └── ...
-├── i18ntk-reports/      # Generated reports
-└── .i18ntk.config.js  # Configuration
+├── i18ntk-reports/    # Generated reports
+└── settings/          # Configuration directory
+    └── i18ntk-config.json  # Main configuration file
 ```
 
 ## 🚨 Important Notes

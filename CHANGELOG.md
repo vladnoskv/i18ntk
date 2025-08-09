@@ -1,11 +1,12 @@
 # Changelog
 
-## [1.6.1] - 2025-08-08 - **CRITICAL NPM PACKAGE FIX**
+## [1.6.2] - 2025-08-08 - **CRITICAL NPM PACKAGE FIX**
 
 > **🚨 CRITICAL BUG FIX**: Resolved npm package installation issues affecting global installations
 
 ### 🔧 **NPM Package Path Resolution Fix**
 - **Fixed**: Critical path resolution failures when installed as npm global package
+- **Resolved**: Issues with locating `ui-locales` directory in global installations
 - **Enhanced**: Robust fallback mechanisms for locating `ui-locales` directory
 - **Improved**: Package structure validation and file accessibility
 - **Added**: Multiple fallback strategies for translation file discovery

@@ -11,7 +11,7 @@ const newSettings = { ...settingsManager.settings, language: 'fr' };
 settingsManager.saveSettings(newSettings);
 settingsManager.resetToDefaults();
 
-const configPath = path.join(tmpDir, '.i18ntk', 'config.json');
+const configPath = path.join(tmpDir, 'settings', 'i18ntk-config.json');
 const saved = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 assert.deepStrictEqual(saved, settingsManager.defaultConfig, 'Config should match DEFAULT_CONFIG');
 

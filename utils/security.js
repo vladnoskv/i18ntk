@@ -278,13 +278,13 @@ class SecurityUtils {
 
     const validatedConfig = {};
     const allowedKeys = [
-      'sourceDir', 'outputDir', 'defaultLanguage', 'supportedLanguages',
+      'version', 'sourceDir', 'outputDir', 'defaultLanguage', 'supportedLanguages',
       'filePattern', 'excludePatterns', 'reportFormat', 'logLevel',
       'i18nDir', 'sourceLanguage', 'excludeDirs', 'includeExtensions', 
       'translationPatterns', 'notTranslatedMarker', 'excludeFiles', 'strictMode',
       'uiLanguage', 'language', 'sizeLimit', 'defaultLanguages', 'reportLanguage',
       'theme', 'autoSave', 'notifications', 'dateFormat', 'timeFormat', 'timezone',
-      'processing', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
+      'processing', 'performance', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
       'supportedExtensions', 'settings', 'backupDir', 'tempDir', 'cacheDir', 'configDir',
       'uiLocalesDir', 'displayPaths', 'reports', 'ui', 'behavior', 'dateTime', 'backup'
     ];
