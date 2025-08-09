@@ -2,7 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const configManager = require('./config-manager');
-const i18n = require('./i18n-helper');
+
+// Lazy load i18n to prevent initialization race conditions
+let i18n;
+function getI18n() {
+  if (!i18n) {
+    i18n = require('./i18n-helper');
+  }
+  return i18n;
+}
 
 /**
  * Security utility module for i18nTK

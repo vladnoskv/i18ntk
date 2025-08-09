@@ -255,7 +255,8 @@ class SettingsCLI {
             'language': this.t('settings.fields.language.label'),
             'theme': this.t('settings.fields.theme.label'),
             'dateFormat': this.t('settings.fields.dateFormat.label'),
-            'notifications.enabled': this.t('settings.fields.notifications.enabled.label')
+            'notifications.enabled': this.t('settings.fields.notifications.enabled.label'),
+            'removeUiLanguages': this.t('settings.fields.removeUiLanguages.label')
         };
 
         await this.showSettingsCategory(uiSettings);
@@ -538,7 +539,6 @@ class SettingsCLI {
         }
         
         const validOptions = {
-            'language': ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'],
             'theme': ['light', 'dark', 'auto'],
             'dateFormat': ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM-DD-YYYY'],
             'notifications.enabled': ['true', 'false'],
@@ -551,7 +551,9 @@ class SettingsCLI {
             'backup.enabled': ['true', 'false'],
             'backup.singleFileMode': ['true', 'false']
         };
-        
+        if (key === 'language') {
+            return settingsManager.getAvailableLanguages().map(l => l.code);
+        }
         return validOptions[key] || null;
     }
 
@@ -563,6 +565,9 @@ class SettingsCLI {
         
         if (validOptions) {
             if (!validOptions.includes(value.toLowerCase())) {
+                 if (key === 'language') {
+                    return { valid: false, message: 'Language not installed. Reinstall package to use.' };
+                }
                 return { valid: false, message: `Invalid option. Valid options: ${validOptions.join(', ')}` };
             }
         }
@@ -618,6 +623,17 @@ class SettingsCLI {
         // Special handling for PIN protection configuration
         if (key === '_configurePinProtection') {
             await this.configurePinProtection();
+            return;
+        }
+               if (key === 'removeUiLanguages') {
+            if (this.rl && this.rl.pause) this.rl.pause();
+            const LocaleOptimizer = require('../scripts/locale-optimizer.js');
+            const optimizer = new LocaleOptimizer();
+            await optimizer.interactiveSelect();
+            if (typeof this.rl.resume === 'function') this.rl.resume();
+            if (typeof uiI18n.refreshAvailableLanguages === 'function') {
+                uiI18n.refreshAvailableLanguages();
+            }
             return;
         }
         

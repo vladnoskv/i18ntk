@@ -9,6 +9,7 @@ const path = require('path');
 const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
 const {t, loadTranslations} = require('./i18n-helper');
+const settingsManager = require('../settings/settings-manager');
 
 const readline = require('readline');
 const { spawnSync } = require('child_process');
@@ -135,7 +136,8 @@ function displayBasicConfig() {
  */
 function parseCommonArgs(args) {
   const parsed = {};
-  
+  const availableLangCodes = settingsManager.getAvailableLanguages().map(l => l.code);
+
   args.forEach(arg => {
     if (arg.startsWith('--')) {
       const [key, value] = arg.substring(2).split('=');
@@ -176,7 +178,7 @@ function parseCommonArgs(args) {
           break;
         default:
           // Handle language shorthand flags like --de, --fr
-          if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(sanitizedKey)) {
+          if (availableLangCodes.includes(sanitizedKey)) {
             parsed.uiLanguage = sanitizedKey;
           }
           break;

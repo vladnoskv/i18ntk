@@ -1648,6 +1648,11 @@
         "description": "Reset all PIN protection settings to defaults",
         "help": "Reset all individual script PIN protections to default values"
       },
+      "removeUiLanguages": {
+        "label": "Remove UI Languages",
+        "description": "Remove UI languages that are not installed",
+        "help": "Remove UI languages that are not installed on the system"
+      },
       "${helperKey}": {
         "help": "Help"
       }

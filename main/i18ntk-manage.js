@@ -43,12 +43,8 @@ class I18nManager {
     this.rl = null;
     this.isReadlineClosed = false;
     this.isAuthenticated = false;
-    
-    // Initialize UI localization system
-    this.ui = new UIi18n();
-    
-    // Initialize admin authentication
-    this.adminAuth = new AdminAuth();
+    this.ui = null;
+    this.adminAuth = null;
     
     // Initialize readline interface
     this.initializeReadline();
@@ -85,6 +81,12 @@ class I18nManager {
       
       const baseConfig = await getUnifiedConfig('manage', args);
       this.config = { ...baseConfig, ...this.config };
+      
+      // Initialize UI localization system after configuration is loaded
+      this.ui = new UIi18n();
+      
+      // Initialize admin authentication
+      this.adminAuth = new AdminAuth();
       
       const uiLanguage = this.config.uiLanguage || 'en';
       this.ui.loadLanguage(uiLanguage);
@@ -320,7 +322,11 @@ class I18nManager {
       await this.showInteractiveMenu();
       
     } catch (error) {
-      console.error(this.ui.t('common.genericError', { error: error.message }));
+      if (this.ui && this.ui.t) {
+        console.error(this.ui.t('common.genericError', { error: error.message }));
+      } else {
+        console.error(`Error: ${error.message}`);
+      }
       process.exit(1);
     } finally {
       this.safeClose();
@@ -328,22 +334,45 @@ class I18nManager {
   }
 
   showHelp() {
-    console.log(this.ui.t('help.usage'));
-    console.log(this.ui.t('help.interactiveMode'));
-    console.log(this.ui.t('help.initProject'));
-    console.log(this.ui.t('help.analyzeTranslations'));
-    console.log(this.ui.t('help.validateTranslations'));
-    console.log(this.ui.t('help.checkUsage'));
-    console.log(this.ui.t('help.showHelp'));
-    console.log(this.ui.t('help.availableCommands'));
-    console.log(this.ui.t('help.initCommand'));
-    console.log(this.ui.t('help.analyzeCommand'));
-    console.log(this.ui.t('help.validateCommand'));
-    console.log(this.ui.t('help.usageCommand'));
-    console.log(this.ui.t('help.sizingCommand'));
-    console.log(this.ui.t('help.completeCommand'));
-    console.log(this.ui.t('help.summaryCommand'));
-    console.log(this.ui.t('help.debugCommand'));
+    const t = this.ui && this.ui.t ? (key) => this.ui.t(key) : (key) => {
+      // Fallback help text when UI is not initialized
+      const helpTexts = {
+        'help.usage': 'Usage: npm run i18ntk [command] [options]',
+        'help.interactiveMode': 'Run without arguments for interactive mode',
+        'help.initProject': '  init    - Initialize i18n project structure',
+        'help.analyzeTranslations': '  analyze - Analyze translation files',
+        'help.validateTranslations': '  validate - Validate translations for errors',
+        'help.checkUsage': '  usage   - Check translation usage in code',
+        'help.showHelp': '  help    - Show this help message',
+        'help.availableCommands': '\nAvailable commands:',
+        'help.initCommand': '  --command=init    Initialize i18n project',
+        'help.analyzeCommand': '  --command=analyze Analyze translations',
+        'help.validateCommand': '  --command=validate Validate translations',
+        'help.usageCommand': '  --command=usage   Check translation usage',
+        'help.sizingCommand': '  --command=sizing  Analyze translation sizing',
+        'help.completeCommand': '  --command=complete Run complete analysis',
+        'help.summaryCommand': '  --command=summary Generate summary report',
+        'help.debugCommand': '  --command=debug   Run debug utilities'
+      };
+      return helpTexts[key] || key;
+    };
+    
+    console.log(t('help.usage'));
+    console.log(t('help.interactiveMode'));
+    console.log(t('help.initProject'));
+    console.log(t('help.analyzeTranslations'));
+    console.log(t('help.validateTranslations'));
+    console.log(t('help.checkUsage'));
+    console.log(t('help.showHelp'));
+    console.log(t('help.availableCommands'));
+    console.log(t('help.initCommand'));
+    console.log(t('help.analyzeCommand'));
+    console.log(t('help.validateCommand'));
+    console.log(t('help.usageCommand'));
+    console.log(t('help.sizingCommand'));
+    console.log(t('help.completeCommand'));
+    console.log(t('help.summaryCommand'));
+    console.log(t('help.debugCommand'));
 
     // Ensure proper exit for direct command execution
     if (process.argv.includes('--help') || process.argv.includes('-h')) {

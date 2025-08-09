@@ -9,24 +9,61 @@ const configManager = require('../utils/config-manager');
 
 class UIi18n {
     constructor() {
-        const config = configManager.getConfig();
-        const paths = configManager.resolvePaths();
         this.currentLanguage = 'en';
         this.translations = {};
-        this.availableLanguages = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
-        this.uiLocalesDir = paths.uiLocalesDir;
+        this.uiLocalesDir = null;
+        this.availableLanguages = [];
         this.configFile = path.resolve(configManager.CONFIG_PATH);
+        
+        // Initialize with safe defaults
+        this.initialize();
+    }
+    
+    initialize() {
+        try {
+            const config = configManager.getConfig();
+            const paths = configManager.resolvePaths();
+            
+            // Use safe defaults if config is not available
+            this.uiLocalesDir = paths?.uiLocalesDir || path.resolve(__dirname, '..', 'ui-locales');
+            this.availableLanguages = this.detectAvailableLanguages();
+            
+            const configuredLanguage = config?.language || config?.uiLanguage || 'en';
 
-        const configuredLanguage = config.language || config.uiLanguage;
-
-        // Load language from settings manager or fallback
-        if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
-            this.loadLanguage(configuredLanguage);
-        } else {
+            // Load language from settings manager or fallback
+            if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
+                this.loadLanguage(configuredLanguage);
+            } else {
+                this.loadLanguage('en');
+            }
+        } catch (error) {
+            console.warn('UIi18n: Failed to initialize with config, using defaults:', error.message);
+            this.uiLocalesDir = path.resolve(__dirname, '..', 'ui-locales');
+            this.availableLanguages = this.detectAvailableLanguages();
             this.loadLanguage('en');
         }
     }
+    /**
+     * Detect which UI locales are currently installed
+     * @returns {string[]} Array of available language codes
+     */
+    detectAvailableLanguages() {
+        const all = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
+        return all.filter(lang => {
+            const filePath = path.join(this.uiLocalesDir, `${lang}.json`);
+            return fs.existsSync(filePath);
+        });
+    }
 
+    /**
+     * Refresh the list of available languages and ensure current language is valid
+     */
+    refreshAvailableLanguages() {
+        this.availableLanguages = this.detectAvailableLanguages();
+        if (!this.availableLanguages.includes(this.currentLanguage)) {
+            this.loadLanguage('en');
+        }
+    }
     /**
      * Load translations for a specific language
      * @param {string} language - Language code (e.g., 'en', 'de', 'es')

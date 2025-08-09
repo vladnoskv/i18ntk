@@ -1,44 +1,44 @@
 {
   "version": "1.4.2",
-  "timestamp": "2025-08-08T02:28:59.606Z",
+  "timestamp": "2025-08-09T01:24:22.949Z",
   "totalTests": 5,
   "passed": 4,
   "failed": 1,
-  "duration": 72267,
+  "duration": 62286,
   "results": [
     {
       "name": "Admin PIN Tests",
       "success": true,
-      "duration": 1316,
+      "duration": 1314,
       "output": "🔐 Starting Admin PIN Test Suite\n\n============================================================\n🛠️  Setting up test environment...\n\n📋 Testing PIN Setup...\n✅ Valid PIN setup test passed\n✅ Invalid PIN \"123\" correctly rejected\n✅ Invalid PIN \"12345\" correctly rejected with error\n✅ Invalid PIN \"abcd\" correctly rejected\n✅ Invalid PIN \"12\" correctly rejected\n✅ Invalid PIN \"1234567\" correctly rejected\n✅ Invalid PIN \"\" correctly rejected\n\n🔍 Testing PIN Validation...\n✅ Correct PIN validation test passed\n✅ Incorrect PIN correctly rejected\n✅ Basic PIN validation test passed\n\n⏱️  Testing Session Management...\n✅ Session creation test passed\n✅ Session validation test passed\n✅ Session timeout test passed\n✅ Session cleanup test passed\n\n🎯 Testing Edge Cases...\n✅ Empty PIN test passed\n✅ Special characters test passed\n✅ Null PIN test passed\n✅ Very long PIN test passed\n\n🔒 Testing Security Features...\n✅ Basic security features test passed\n\n🔗 Testing Integration...\n✅ CLI integration test passed\n✅ Settings integration test passed\n🧹 Cleaning up test environment...\n\n📊 Admin PIN Test Results\n============================================================\n✅ Passed: 17\n❌ Failed: 0\n⚠️  Warnings: 0\n\n🎯 Overall Status: READY\n============================================================\n",
       "error": null
     },
     {
       "name": "Comprehensive Tests",
       "success": false,
-      "duration": 60009,
-      "output": "🧪 Starting Comprehensive Test Suite for v1.4.2\n\n================================================================================\n🛠️  Setting up test environment...\n✅ Test environment ready\n\n📋 Running Test Categories...\n\n\n🔐 Testing Admin PIN System...\n✅ PIN setup: 4-digit PIN\n✅ Session management working correctly\n✅ PIN verification test passed\n✅ Admin PIN comprehensive tests passed\n\n⚙️  Testing All Configuration Options...\n",
+      "duration": 60010,
+      "output": "🧪 Starting Comprehensive Test Suite for v1.4.2\n\n================================================================================\n🛠️  Setting up test environment...\n✅ Test environment ready\n\n📋 Running Test Categories...\n\n\n🔐 Testing Admin PIN System...\n✅ PIN setup: 4-digit PIN\n✅ Session management working correctly\n✅ PIN verification test passed\n✅ Admin PIN comprehensive tests passed\n\n⚙️  Testing All Configuration Options...\n✅ All configuration options tested\n\n🎯 Testing Edge Cases...\n✅ Empty file structure validated\n✅ Invalid JSON correctly detected\n✅ Large file structure validated\n✅ Nested structure validated\n\n🔒 Testing Security Features...\n",
       "error": "spawnSync C:\\WINDOWS\\system32\\cmd.exe ETIMEDOUT"
     },
     {
       "name": "System Tests",
       "success": true,
-      "duration": 10689,
-      "output": "🧪 Starting Complete System Test\n\n============================================================\n\n📝 Testing UI Translations...\n✅ Translation found: operations.settings.title\n✅ Translation found: operations.settings.separator\n✅ Translation found: operations.init.title\n✅ Translation found: operations.analyze.title\n✅ Translation found: operations.validate.title\n✅ Translation found: menu.title\n✅ Translation found: common.success\n✅ Translation found: common.error\n\n⚙️  Testing Settings Manager...\n⚠️  Settings manager test skipped - using default configuration\n\n🔧 Testing Main Scripts...\n✅ Init script working\n✅ Analyze script working\n✅ Validate script working\n✅ Usage Check script working\n⚠️  Complete script check skipped\n✅ Sizing script working\n⚠️  Summary script check skipped\n✅ Core scripts verified: 5/7\n\n🌐 Checking Translation Consistency...\n⚠️  Missing language directories: en, de, fr, es, ru, ja, zh\n⚠️  English locale directory not found, creating minimal structure\n✅ Found 1 keys across 1 English files\n⚠️  de: directory not found\n⚠️  fr: directory not found\n⚠️  es: directory not found\n⚠️  ru: directory not found\n⚠️  ja: directory not found\n⚠️  zh: directory not found\n\n📊 Generating Report...\n✅ Report saved to E:\\i18n-management-toolkit-main\\i18n-management-toolkit-main\\dev\\tests\\test-report.json\n\n============================================================\n📋 FINAL TEST REPORT\n============================================================\n✅ Passed: 17\n❌ Failed: 0\n⚠️  Warnings: 11\n\n📊 Overall Status: 🟢 READY\n============================================================\n",
+      "duration": 716,
+      "output": "🧪 Starting Complete System Test\n\n============================================================\n\n📝 Testing UI Translations...\n✅ Translation found: operations.settings.title\n✅ Translation found: operations.settings.separator\n✅ Translation found: operations.init.title\n✅ Translation found: operations.analyze.title\n✅ Translation found: operations.validate.title\n✅ Translation found: menu.title\n✅ Translation found: common.success\n✅ Translation found: common.error\n\n⚙️  Testing Settings Manager...\n⚠️  Settings manager test skipped - using default configuration\n\n🔧 Testing Main Scripts...\n✅ Init script working\n✅ Analyze script working\n✅ Validate script working\n⚠️  Usage Check script check skipped\n⚠️  Complete script check skipped\n⚠️  Sizing script check skipped\n✅ Summary script working\n✅ Core scripts verified: 4/7\n\n🌐 Checking Translation Consistency...\n⚠️  Missing language directories: de, fr, es, ru, ja, zh\n✅ Found 1 keys across 1 English files\n⚠️  de: directory not found\n⚠️  fr: directory not found\n⚠️  es: directory not found\n⚠️  ru: directory not found\n⚠️  ja: directory not found\n⚠️  zh: directory not found\n\n📊 Generating Report...\n✅ Report saved to E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\dev\\tests\\test-report.json\n\n============================================================\n📋 FINAL TEST REPORT\n============================================================\n✅ Passed: 16\n❌ Failed: 0\n⚠️  Warnings: 11\n\n📊 Overall Status: 🟢 READY\n============================================================\n",
       "error": null
     },
     {
       "name": "Console i18n Tests",
       "success": true,
-      "duration": 88,
-      "output": "I18n console translation checker\n====================================\nScript description line1\nScript description line2\nScanning files for console statements\nFound javascript files\nConsole i18n analysis results\n============================================================\nTotal console statements\nTranslated statements\nHardcoded statements\nTranslation coverage\nCoverage by file\n-------------------\nPerfect translation coverage\n============================================================\nAll statements using translation\nAnalysis completed in duration\nReport saved to path\nAll console messages use translation\n",
+      "duration": 85,
+      "output": "consoleI18nTester.i18n_console_translation_checker\n====================================\nconsoleI18nTester.script_description_line1\nconsoleI18nTester.script_description_line2\nconsoleI18nTester.scanning_files_for_console_statements\nconsoleI18nTester.found_javascript_files\nconsoleI18nTester.console_i18n_analysis_results\n============================================================\nconsoleI18nTester.total_console_statements\nconsoleI18nTester.translated_statements\nconsoleI18nTester.hardcoded_statements\nconsoleI18nTester.translation_coverage\nconsoleI18nTester.coverage_by_file\n-------------------\nconsoleI18nTester.perfect_translation_coverage\n============================================================\nconsoleI18nTester.all_statements_using_translation\nconsoleI18nTester.analysis_completed_in_duration\nconsoleI18nTester.report_saved_to_path\nconsoleI18nTester.all_console_messages_use_translation\n",
       "error": null
     },
     {
       "name": "Translation Validation",
       "success": true,
-      "duration": 137,
-      "output": "🔍 Validating translations in: E:\\i18n-management-toolkit-main\\i18n-management-toolkit-main\\ui-locales\n🌐 Languages: en, de, es, fr, ru, ja, zh\n\n📄 EN:\n   Missing: 0\n   Extra: 0\n   Markers: 0\n\n📄 DE:\n   Missing: 18\n   Extra: 0\n   Markers: 0\n   Country code leftovers: 105\n   English leftovers: 67\n\n📄 ES:\n   Missing: 18\n   Extra: 0\n   Markers: 0\n   Country code leftovers: 109\n   English leftovers: 82\n\n📄 FR:\n   Missing: 178\n   Extra: 151\n   Markers: 0\n   Country code leftovers: 91\n   English leftovers: 84\n\n📄 RU:\n   Missing: 18\n   Extra: 0\n   Markers: 0\n   Country code leftovers: 109\n   English leftovers: 84\n\n📄 JA:\n   Missing: 18\n   Extra: 0\n   Markers: 0\n   Country code leftovers: 108\n   English leftovers: 76\n\n📄 ZH:\n   Missing: 18\n   Extra: 0\n   Markers: 0\n   Country code leftovers: 100\n   English leftovers: 63\n\n✅ Validation report saved: E:\\i18n-management-toolkit-main\\i18n-management-toolkit-main\\ui-locales\\validation-purity-report.json\n   Review this file for full details of problematic keys.\n",
+      "duration": 123,
+      "output": "🔍 Validating translations in: E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\ui-locales\n🌐 Languages: en, de, es, fr, ru, ja, zh\n\n📄 EN:\n   Missing: 0\n   Extra: 0\n   Markers: 0\n\n📄 DE:\n   Missing: 21\n   Extra: 1\n   Markers: 0\n   Country code leftovers: 0\n   English leftovers: 87\n\n📄 ES:\n   Missing: 21\n   Extra: 2\n   Markers: 0\n   Country code leftovers: 0\n   English leftovers: 104\n\n📄 FR:\n   Missing: 181\n   Extra: 152\n   Markers: 0\n   Country code leftovers: 0\n   English leftovers: 110\n\n📄 RU:\n   Missing: 22\n   Extra: 5\n   Markers: 0\n   Country code leftovers: 0\n   English leftovers: 115\n\n📄 JA:\n   Missing: 21\n   Extra: 1\n   Markers: 0\n   Country code leftovers: 0\n   English leftovers: 96\n\n📄 ZH:\n   Missing: 21\n   Extra: 1\n   Markers: 0\n   Country code leftovers: 0\n   English leftovers: 80\n\n✅ Validation report saved: E:\\i18n-management-toolkit-main\\i18ntk-1.6.0\\ui-locales\\validation-purity-report.json\n   Review this file for full details of problematic keys.\n",
       "error": null
     }
   ],

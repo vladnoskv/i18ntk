@@ -54,7 +54,9 @@ INDEX.md
 .github/
 
 # Development scripts and tools
-scripts/debug/
+scripts/debug/*
+!scripts/debug/debug-translation.js
+!scripts/debug/debugger.js
 scripts/test-runner.js
 scripts/verify-package.js
 

@@ -596,7 +596,8 @@ class SettingsManager {
      * @returns {Array} Array of language objects
      */
     getAvailableLanguages() {
-        return [
+        const uiLocalesDir = this.settings.uiLocalesDir || path.join(__dirname, '..', 'ui-locales');
+        const languages = [
             { code: 'en', name: 'English', flag: '🇺🇸' },
             { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪' },
             { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸' },
@@ -605,6 +606,9 @@ class SettingsManager {
             { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },
             { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' }
         ];
+                return languages.filter(lang =>
+            fs.existsSync(path.join(uiLocalesDir, `${lang.code}.json`))
+        );
     }
 
     /**
