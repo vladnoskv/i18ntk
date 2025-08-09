@@ -77,6 +77,7 @@ class I18nValidator {
       
       // Use the i18n directory for language files
       this.sourceDir = this.config.i18nDir || this.config.sourceDir;
+      this.i18nDir = this.config.i18nDir || this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
       try {

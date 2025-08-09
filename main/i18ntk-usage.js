@@ -29,7 +29,7 @@ const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 
-const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir } = require('../utils/config-helper');
+const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
 
 async function getConfig() {

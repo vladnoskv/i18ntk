@@ -260,7 +260,8 @@ class SecurityUtils {
       'uiLanguage', 'language', 'sizeLimit', 'defaultLanguages', 'reportLanguage',
       'theme', 'autoSave', 'notifications', 'dateFormat', 'timeFormat', 'timezone',
       'processing', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
-      'supportedExtensions', 'settings', 'backupDir', 'tempDir', 'cacheDir', 'configDir'
+      'supportedExtensions', 'settings', 'backupDir', 'tempDir', 'cacheDir', 'configDir',
+      'uiLocalesDir', 'displayPaths'
     ];
 
     for (const [key, value] of Object.entries(config)) {

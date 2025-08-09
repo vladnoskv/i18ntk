@@ -30,21 +30,19 @@ function loadTranslations(language, baseDir) {
   const configuredLanguage = settings.uiLanguage || settings.language || 'en';
   currentLanguage = language || configuredLanguage;
   
-  // Use provided directory, environment variable, or default
-  let localesDir = baseDir;
+  // Ensure we always have a valid string path
+  let localesDir = path.join(__dirname, '..', 'ui-locales');
 
-  // Ensure we have a string path to resolve
-  if (typeof localesDir !== 'string' || localesDir.trim() === '') {
+  // Use provided directory if it's a valid string
+  if (typeof baseDir === 'string' && baseDir.trim() !== '') {
+    localesDir = baseDir;
+  } else if (typeof process.env.I18NTK_UI_LOCALE_DIR === 'string' && process.env.I18NTK_UI_LOCALE_DIR.trim() !== '') {
     localesDir = process.env.I18NTK_UI_LOCALE_DIR;
-  }
-  if (typeof localesDir !== 'string' || localesDir.trim() === '') {
+  } else {
     const config = getConfig();
-    localesDir = config.uiLocalesDir || path.join(__dirname, '..', 'ui-locales');
-  }
-
-  // Ensure localesDir is a valid string
-  if (typeof localesDir !== 'string' || localesDir.trim() === '') {
-    localesDir = path.join(__dirname, '..', 'ui-locales');
+    if (config.uiLocalesDir && typeof config.uiLocalesDir === 'string') {
+      localesDir = config.uiLocalesDir;
+    }
   }
 
   try {
