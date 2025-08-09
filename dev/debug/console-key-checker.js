@@ -56,22 +56,6 @@ class ConsoleKeyChecker {
         return keys;
     }
     
-    /**
-     * Check if a key exists in the object using dot notation
-     */
-    keyExists(obj, keyPath) {
-        const keys = keyPath.split('.');
-        let current = obj;
-        
-        for (const key of keys) {
-            if (current === null || current === undefined || !(key in current)) {
-                return false;
-            }
-            current = current[key];
-        }
-        
-        return true;
-    }
     
     /**
      * Get a value from an object using dot notation
@@ -213,9 +197,10 @@ class ConsoleKeyChecker {
         
         // Get current keys using proper nested key extraction
         const currentKeys = this.getKeysFromObject(currentTranslations);
-        
+        const currentKeysSet = new Set(currentKeys);
+
         // Find missing keys by checking if each source key exists in current translations
-        const missingKeys = sourceKeys.filter(key => !this.keyExists(currentTranslations, key));
+        const missingKeys = sourceKeys.filter(key => !currentKeysSet.has(key));
         
         if (missingKeys.length === 0) {
             console.log(`✅ ${languageCode.toUpperCase()}: No missing keys found`);
@@ -252,8 +237,9 @@ class ConsoleKeyChecker {
             // Add missing keys in their proper nested locations
             missingKeys.forEach(key => {
                 // Double-check the key doesn't exist before adding
-                if (!this.keyExists(currentTranslations, key)) {
+                if (!currentKeysSet.has(key)) {
                     this.setValueByPath(currentTranslations, key, '[NOT TRANSLATED]');
+                    currentKeysSet.add(key);
                     addedKeys++;
                     
                     if (this.verbose) {

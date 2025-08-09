@@ -66,19 +66,15 @@
   "files": [
     "main/",
     "utils/",
-    "!utils/ultra-performance-optimizer.js",
-    "scripts/export-translations.js",
-    "scripts/fix-all-i18n.js",
-    "scripts/fix-and-purify-i18n.js",
-    "scripts/locale-optimizer.js",
-    "scripts/sync-translations.js",
-    "scripts/update-checker.js",
-    "scripts/validate-all-translations.js",
+    "scripts/",
     "settings/",
     "ui-locales/",
-    "!ui-locales/validation-purity-report.json",
+    "LICENSE",
     "README.md",
-    "LICENSE"
+    "!scripts/prepublish.js",
+    "!scripts/test-runner.js",
+    "!scripts/path-utils.test.js",
+    "!scripts/reset-defaults.test.js"
   ],
   "scripts": {
     "start": "node main/i18ntk-manage.js",
@@ -152,10 +148,9 @@
     "majorChanges": [
       "Ultra-extreme performance: 97% improvement - 15.38ms processing for 200k keys",
       "Enhanced security: Advanced PIN protection with exponential backoff",
-      "Comprehensive backup & recovery: Encrypted incremental backups with cloud integration",
       "Edge case handling: Robust handling of corrupt files, encoding issues, and network failures",
       "Memory optimization: 1.62MB memory usage for 200k keys (67% reduction)",
-      "Scalability: Linear scaling up to 1M keys with ultra-extreme settings",
+      "Scalability: Linear scaling up to 5M keys with ultra-extreme settings",
       "Fixed translation file inclusion - resolved ui-locales exclusion issue",
       "Updated documentation - corrected package size claims and improved accuracy",
       "Enhanced examples - added detailed use cases throughout documentation",
