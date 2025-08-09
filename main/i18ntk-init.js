@@ -603,15 +603,7 @@ class I18nInitializer {
 
   // Interactive admin PIN setup
   async promptAdminPinSetup() {
-    const readline = require('readline');
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      terminal: true,
-      historySize: 0
-    });
-    
-    const question = (query) => new Promise(resolve => rl.question(query, resolve));
+    const question = (query) => new Promise(resolve => this.rl.question(query, resolve));
     
     console.log('\n' + this.ui.t('init.adminPinSetupOptional'));
     console.log(this.ui.t('init.adminPinSeparator'));
@@ -620,14 +612,22 @@ class I18nInitializer {
     console.log(this.ui.t('init.adminPinDescription3'));
     console.log(this.ui.t('init.adminPinDescription4'));
     
-    const setupPin = await question('\n' + this.ui.t('init.adminPinSetupPrompt'));
-    
-    if (setupPin.toLowerCase() === 'y' || setupPin.toLowerCase() === 'yes') {
+    const enableProtection = await question('\n' + this.ui.t('adminPin.setup_prompt'));
+
+    if (enableProtection.toLowerCase() === 'y' || enableProtection.toLowerCase() === 'yes') {
       try {
         const adminAuth = new AdminAuth();
         
-        // Enable admin PIN in settings
-        configManager.updateConfig({ security: { adminPinEnabled: true, adminPinPromptOnInit: true } });
+        await adminAuth.initialize();
+
+        // Enable admin PIN and PIN protection in settings
+        configManager.updateConfig({
+          security: {
+            adminPinEnabled: true,
+            adminPinPromptOnInit: true,
+            pinProtection: { enabled: true }
+          }
+        });
         
         console.log('\n' + this.ui.t('init.settingUpAdminPin'));
         
@@ -647,9 +647,13 @@ class I18nInitializer {
           }
         } while (pin1 !== pin2 || !/^\d{4,8}$/.test(pin1));
         
-        await adminAuth.setupPin(pin1);
-        console.log(this.ui.t('init.adminPinSetupSuccess'));
-        console.log(this.ui.t('init.adminProtectionEnabled'));
+       const success = await adminAuth.setupPin(pin1);
+        if (success) {
+          console.log(this.ui.t('init.adminPinSetupSuccess'));
+          console.log(this.ui.t('init.adminProtectionEnabled'));
+        } else {
+          console.error(this.ui.t('init.errorSettingUpAdminPin', { error: 'Failed to save PIN' }));
+        }
         
       } catch (error) {
         console.error(this.ui.t('init.errorSettingUpAdminPin', { error: error.message }));
@@ -658,8 +662,6 @@ class I18nInitializer {
     } else {
       console.log(this.ui.t('init.skippingAdminPinSetup'));
     }
-    
-    rl.close();
   }
 
   // Interactive language selection

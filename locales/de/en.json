@@ -1,0 +1,10 @@
+{
+  "welcome": "[DE] Welcome",
+  "hello": "[DE] Hello World",
+  "common": {
+    "save": "[DE] Save",
+    "cancel": "[DE] Cancel",
+    "delete": "[DE] Delete",
+    "edit": "[DE] Edit"
+  }
+}

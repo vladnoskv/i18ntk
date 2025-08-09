@@ -50,13 +50,17 @@ i18ntk validate --source ./locales
 
 ### 📸 Screenshots
 
-| **Management Interface** | **Usage Analysis** |
-|:------------------------:|:------------------:|
-| ![i18ntk Management](docs/screenshots/i18ntk-manage.PNG) | ![i18ntk Usage](docs/screenshots/i18ntk-usage.PNG) |
+| **Logo & Branding** | **Framework Detection** |
+|:-------------------:|:----------------------:|
+| ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG) | ![Framework Check](docs/screenshots/i18ntk-check-framwork.PNG) |
 
-| **Admin Initialization** | **Language Configuration** |
-|:------------------------:|:---------------------------:|
-| ![Admin Setup](docs/screenshots/i18ntk-init-admin-1.PNG) | ![Language Config](docs/screenshots/i18ntk-init-langconfig.PNG) |
+| **Management Interface** | **Initialization Menu** |
+|:------------------------:|:------------------------:|
+| ![i18ntk Management](docs/screenshots/i18ntk-manage-menu.PNG) | ![Init Menu](docs/screenshots/i18ntk-menu-init.PNG) |
+
+| **Language Selection** | **Language Change** |
+|:----------------------:|:-------------------:|
+| ![Language Selection](docs/screenshots/i18ntk-menu-init-language.PNG) | ![Language Change](docs/screenshots/i18ntk-menu-language-change.PNG) |
 
 ## 📊 Commands
 
