@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Test Runner for i18n Management Toolkit v1.4.2
+ * Test Runner for i18n Management Toolkit v1.6.0
  * Runs all test suites and provides comprehensive reporting
  */
 
@@ -13,6 +13,7 @@ class TestRunner {
     constructor() {
         this.testSuites = [
             { name: 'Admin PIN Tests', script: 'dev/tests/test-admin-pin.js' },
+            { name: 'Admin PIN Edge Case Tests', script: 'dev/tests/test-admin-pin-edge.js' },
             { name: 'Comprehensive Tests', script: 'dev/tests/test-comprehensive.js' },
             { name: 'System Tests', script: 'dev/tests/test-complete-system.js' },
             { name: 'Console i18n Tests', script: 'dev/tests/test-console-i18n.js' },
@@ -124,7 +125,7 @@ class TestRunner {
 
         // Generate detailed report
         const report = {
-            version: '1.4.2',
+            version: '1.6.0',
             timestamp: endTime.toISOString(),
             totalTests: this.testSuites.length,
             passed,

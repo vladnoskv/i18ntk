@@ -7,7 +7,13 @@ const configManager = require('./config-manager');
 let i18n;
 function getI18n() {
   if (!i18n) {
-    i18n = require('./i18n-helper');
+    try {
+      i18n = require('./i18n-helper');
+    } catch (error) {
+      // Fallback to simple identity function if i18n fails to load
+      console.warn('i18n-helper not available, using fallback messages');
+      return { t: (key, params = {}) => key };
+    }
   }
   return i18n;
 }
@@ -27,7 +33,8 @@ class SecurityUtils {
   static validatePath(filePath, basePath = process.cwd()) {
     try {
       if (!filePath || typeof filePath !== 'string') {
-        SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationFailed'), 'error', { inputPath: filePath, reason: i18n.t('security.invalidInputType') });
+        const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationFailed'), 'error', { inputPath: filePath, reason: i18n.t('security.invalidInputType') });
         return null;
       }
 
@@ -40,14 +47,17 @@ class SecurityUtils {
       // Check if the resolved path is within the base path
       const relativePath = path.relative(basePath, resolvedPath);
       if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+        const i18n = getI18n();
         SecurityUtils.logSecurityEvent(i18n.t('security.pathTraversalAttempt'), 'warning', { inputPath: filePath, resolvedPath, basePath });
         return null;
       }
       
+      const i18n = getI18n();
       SecurityUtils.logSecurityEvent(i18n.t('security.pathValidated'), 'info', { inputPath: filePath, resolvedPath });
       
       return resolvedPath;
     } catch (error) {
+      const i18n = getI18n();
       SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationError'), 'error', { inputPath: filePath, error: error.message });
       return null;
     }
@@ -73,12 +83,14 @@ class SecurityUtils {
       // Read file with size limit (10MB max)
       const stats = await fs.promises.stat(validatedPath);
       if (stats.size > 10 * 1024 * 1024) {
+        const i18n = getI18n();
         console.warn(i18n.t('security.file_too_large', { filePath: validatedPath }));
         return null;
       }
       
       return await fs.promises.readFile(validatedPath, encoding);
     } catch (error) {
+      const i18n = getI18n();
       console.warn(i18n.t('security.file_read_error', { errorMessage: error.message }));
       return null;
     }
@@ -132,6 +144,7 @@ class SecurityUtils {
     try {
       // Validate content size (10MB max)
       if (typeof content === 'string' && content.length > 10 * 1024 * 1024) {
+        const i18n = getI18n();
         console.warn(i18n.t('security.content_too_large_for_file', { filePath: validatedPath }));
         return false;
       }
@@ -144,6 +157,7 @@ class SecurityUtils {
       await fs.promises.writeFile(validatedPath, content, { encoding, mode: 0o644 });
       return true;
     } catch (error) {
+      const i18n = getI18n();
       console.warn(i18n.t('security.file_write_error', { errorMessage: error.message }));
       return false;
     }
@@ -161,6 +175,7 @@ class SecurityUtils {
     }
 
     if (jsonString.length > maxSize) {
+      const i18n = getI18n();
       console.warn(i18n.t('security.json_string_too_large'));
       return null;
     }
@@ -168,6 +183,7 @@ class SecurityUtils {
     try {
       return JSON.parse(jsonString);
     } catch (error) {
+      const i18n = getI18n();
       console.warn(i18n.t('security.json_parse_error', { errorMessage: error.message }));
       return null;
     }

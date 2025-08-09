@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
-const {t, loadTranslations} = require('./i18n-helper');
+const {loadTranslations} = require('./i18n-helper');
 const settingsManager = require('../settings/settings-manager');
 
 const readline = require('readline');
@@ -247,11 +247,7 @@ function ensureDirectory(dirPath) {
  */
 function validateSourceDir(sourceDir, scriptName) {
   if (!fs.existsSync(sourceDir)) {
-    // Ensure translations loaded for error message
-    try { loadTranslations(); } catch (e) {}
-    const message = t('config.dirInvalidError', { dir: sourceDir }) ||
-      `Source directory not found: ${sourceDir}`;
-    throw new Error(message);
+    throw new Error(`Source directory not found: ${sourceDir}`);
   }
 }
 

@@ -7,7 +7,21 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const i18n = require('./i18n-helper');
+
+// Lazy load i18n to prevent initialization race conditions
+let i18n;
+function getI18n() {
+  if (!i18n) {
+    try {
+      i18n = require('./i18n-helper');
+    } catch (error) {
+      // Fallback to simple identity function if i18n fails to load
+      console.warn('i18n-helper not available, using fallback messages');
+      return { t: (key, params = {}) => key };
+    }
+  }
+  return i18n;
+}
 
 // Use environment variables for configuration
 const SALT_LENGTH = 32;
@@ -147,31 +161,32 @@ class AdminPinManager {
         });
 
         try {
-            console.log('\n' + i18n.t('adminPin.setup_title'));
-            console.log(i18n.t('adminPin.setup_separator'));
-            console.log(i18n.t('adminPin.setup_description'));
-            console.log(i18n.t('adminPin.required_for_title'));
-            console.log(i18n.t('adminPin.required_for_1'));
-            console.log(i18n.t('adminPin.required_for_2'));
-            console.log(i18n.t('adminPin.required_for_3'));
-            console.log(i18n.t('adminPin.required_for_4'));
-            console.log('\n' + i18n.t('adminPin.setup_note'));
-            console.log(i18n.t('adminPin.setup_digits_only'));
+            const i18nHelper = getI18n();
+            console.log('\n' + i18nHelper.t('adminPin.setup_title'));
+            console.log(i18nHelper.t('adminPin.setup_separator'));
+            console.log(i18nHelper.t('adminPin.setup_description'));
+            console.log(i18nHelper.t('adminPin.required_for_title'));
+            console.log(i18nHelper.t('adminPin.required_for_1'));
+            console.log(i18nHelper.t('adminPin.required_for_2'));
+            console.log(i18nHelper.t('adminPin.required_for_3'));
+            console.log(i18nHelper.t('adminPin.required_for_4'));
+            console.log('\n' + i18nHelper.t('adminPin.setup_note'));
+            console.log(i18nHelper.t('adminPin.setup_digits_only'));
             
-            const pin = await this.promptPin(rl, i18n.t('adminPin.enter_new_pin'), false);
+            const pin = await this.promptPin(rl, i18nHelper.t('adminPin.enter_new_pin'), false);
             
             if (!this.validatePin(pin)) {
-                console.log(i18n.t('adminPin.invalid_pin_length'));
-                console.log(i18n.t('adminPin.invalid_pin_example'));
+                console.log(i18nHelper.t('adminPin.invalid_pin_length'));
+                console.log(i18nHelper.t('adminPin.invalid_pin_example'));
                 if (!externalRl) rl.close();
                 return false;
             }
 
             if (this.isWeakPin(pin)) {
-                console.log(i18n.t('adminPin.weak_pin_warning'));
-                console.log(i18n.t('adminPin.weak_pin_suggestion'));
+                console.log(i18nHelper.t('adminPin.weak_pin_warning'));
+                console.log(i18nHelper.t('adminPin.weak_pin_suggestion'));
                 const proceed = await new Promise(resolve => {
-                    rl.question(i18n.t('adminPin.use_anyway_prompt'), resolve);
+                    rl.question(i18nHelper.t('adminPin.use_anyway_prompt'), resolve);
                 });
                 if (proceed.toLowerCase() !== 'yes') {
                     if (!externalRl) rl.close();
@@ -213,14 +228,16 @@ class AdminPinManager {
             
             fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
             
-            console.log(i18n.t('adminPin.setup_success'));
-            console.log(i18n.t('adminPin.setup_warning'));
-            
-            if (!externalRl) rl.close();
-            return true;
-            
-        } catch (error) {
-            console.error(i18n.t('adminPin.setup_error'), error.message);
+            const i18n = getI18n();
+                console.log(i18n.t('adminPin.setup_success'));
+                console.log(i18n.t('adminPin.setup_warning'));
+                
+                if (!externalRl) rl.close();
+                return true;
+                
+            } catch (error) {
+                const i18n = getI18n();
+                console.error(i18n.t('adminPin.setup_error'), error.message);
             if (!externalRl) rl.close();
             return false;
         }
@@ -387,9 +404,11 @@ class AdminPinManager {
     async verifyPin(forceSetup = false, externalRl = null) {
         if (!this.isPinSet()) {
             if (forceSetup) {
+                const i18n = getI18n();
                 console.log(i18n.t('adminPin.no_pin_set_setting_up'));
                 return await this.setupPin(externalRl);
             } else {
+                const i18n = getI18n();
                 console.log(i18n.t('adminPin.no_pin_configured_access_denied'));
                 console.log(i18n.t('adminPin.use_admin_settings_to_set_pin'));
                 return false;
@@ -405,13 +424,14 @@ class AdminPinManager {
             const pinData = JSON.parse(fs.readFileSync(this.pinFile, 'utf8'));
             
             if (pinData.locked) {
+                const i18n = getI18n();
                 console.log(i18n.t('adminPin.locked_out'));
                 console.log(i18n.t('adminPin.wait_before_retry'));
                 if (!externalRl) rl.close();
                 return false;
             }
             
-            const enteredPin = await this.promptPin(rl, i18n.t('adminCli.enterPin'));
+            const enteredPin = await this.promptPin(rl, getI18n().t('adminCli.enterPin'));
             
             // Recompute hash with stored salt
             const salt = Buffer.from(pinData.salt, 'hex');
@@ -435,6 +455,7 @@ class AdminPinManager {
                 pinData.attempts = 0;
                 fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
+                const i18n = getI18n();
                 console.log(i18n.t('adminPin.access_granted'));
                 if (!externalRl) rl.close();
                 return true;
@@ -452,12 +473,14 @@ class AdminPinManager {
                 
                 fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
+                const i18n = getI18n();
                 console.log(i18n.t('adminPin.incorrect_pin', { attempts: 3 - pinData.attempts }));
                 if (!externalRl) rl.close();
                 return false;
             }
             
         } catch (error) {
+            const i18n = getI18n();
             console.error(i18n.t('adminPin.verify_pin_error'), error.message);
             if (!externalRl) rl.close();
             return false;
@@ -479,6 +502,7 @@ class AdminPinManager {
         });
 
         try {
+            const i18n = getI18n();
             console.log(i18n.t('adminPin.optional_setup_title'));
             console.log(i18n.t('adminPin.setup_separator'));
             console.log(i18n.t('adminPin.optional_setup_description'));
@@ -489,7 +513,7 @@ class AdminPinManager {
             console.log('');
             
             const response = await new Promise(resolve => {
-                rl.question(i18n.t('adminPin.setup_prompt'), resolve);
+                rl.question(getI18n().t('adminPin.setup_prompt'), resolve);
             });
             
             rl.close();
@@ -497,12 +521,12 @@ class AdminPinManager {
             if (response.toLowerCase() === 'y' || response.toLowerCase() === 'yes') {
                 return await this.setupPin();
             } else {
-                console.log(i18n.t('adminPin.skipping_setup'));
+                console.log(getI18n().t('adminPin.skipping_setup'));
                 return false;
             }
         } catch (error) {
             rl.close();
-            console.error(i18n.t('adminPin.setup_prompt_error'), error.message);
+            console.error(getI18n().t('adminPin.setup_prompt_error'), error.message);
             return false;
         }
     }

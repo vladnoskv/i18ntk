@@ -105,8 +105,8 @@ class AdminAuth {
   async setupPin(pin) {
     try {
       // Validate PIN format (4-6 digits)
-      if (!/^\d{4,6}$/.test(pin)) {
-        throw new Error('PIN must be 4-6 digits');
+      if (!/^\d{4}$/.test(pin)) {
+        throw new Error('PIN must be 4 digits');
       }
 
       // Generate salt and hash
@@ -123,6 +123,8 @@ class AdminAuth {
 
       const success = await this.saveConfig(config);
       if (success) {
+                // Reset failed attempts on successful PIN setup
+        this.failedAttempts.clear();
         SecurityUtils.logSecurityEvent('admin_pin_setup', 'info', 'Admin PIN configured successfully');
       }
       return success;
@@ -157,7 +159,7 @@ class AdminAuth {
       }
 
       // Validate PIN format
-      if (!/^\d{4,6}$/.test(pin)) {
+        if (!/^\d{4}$/.test(pin)) {
         this.recordFailedAttempt(clientId);
         SecurityUtils.logSecurityEvent('admin_auth_invalid_format', 'warning', 'Invalid PIN format attempted');
         return false;
@@ -459,44 +461,6 @@ class AdminAuth {
     this.failedAttempts.set(clientId, recentAttempts);
     
     return recentAttempts.length >= this.maxAttempts;
-  }
-
-  /**
-   * Create authenticated session
-   */
-  createSession() {
-    const sessionId = crypto.randomBytes(32).toString('hex');
-    const expiresAt = Date.now() + this.sessionTimeout;
-    
-    this.activeSessions.set(sessionId, {
-      createdAt: Date.now(),
-      expiresAt,
-      lastActivity: Date.now()
-    });
-    
-    SecurityUtils.logSecurityEvent('admin_session_created', 'info', 'Admin session created');
-    return sessionId;
-  }
-
-  /**
-   * Validate session
-   */
-  validateSession(sessionId) {
-    const session = this.activeSessions.get(sessionId);
-    if (!session) {
-      return false;
-    }
-    
-    const now = Date.now();
-    if (now > session.expiresAt) {
-      this.activeSessions.delete(sessionId);
-      SecurityUtils.logSecurityEvent('admin_session_expired', 'info', 'Admin session expired');
-      return false;
-    }
-    
-    // Update last activity
-    session.lastActivity = now;
-    return true;
   }
 
   /**
