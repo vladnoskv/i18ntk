@@ -48,6 +48,16 @@ i18ntk validate --source ./locales
 - **7 Languages**: English, Spanish, French, German, Japanese, Russian, Chinese 
 - **Framework Support**: Auto-detects React i18next, Vue i18n, Angular, Next i18next, Nuxt i18n, Svelte i18n
 
+### 📸 Screenshots
+
+| **Management Interface** | **Usage Analysis** |
+|:------------------------:|:------------------:|
+| ![i18ntk Management](docs/screenshots/i18ntk-manage.PNG) | ![i18ntk Usage](docs/screenshots/i18ntk-usage.PNG) |
+
+| **Admin Initialization** | **Language Configuration** |
+|:------------------------:|:---------------------------:|
+| ![Admin Setup](docs/screenshots/i18ntk-init-admin-1.PNG) | ![Language Config](docs/screenshots/i18ntk-init-langconfig.PNG) |
+
 ## 📊 Commands
 
 | Command | Purpose | Example |
