@@ -341,7 +341,7 @@ class I18nInitializer {
       fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });
       
       // Create a sample translation file only if no files exist
-      this.createSampleTranslationFile(validatedSourceLanguageDir);
+      await this.createSampleTranslationFile(validatedSourceLanguageDir);
     } else {
       // Directory exists, check if we need to create a sample file
       const existingFiles = fs.readdirSync(validatedSourceLanguageDir)
@@ -349,7 +349,7 @@ class I18nInitializer {
       
       if (existingFiles.length === 0) {
         // No JSON files exist, create sample file
-        this.createSampleTranslationFile(validatedSourceLanguageDir);
+        await this.createSampleTranslationFile(validatedSourceLanguageDir);
       }
     }
 
@@ -604,24 +604,23 @@ class I18nInitializer {
 
   // Interactive admin PIN setup
   async promptAdminPinSetup() {
-    const question = (query) => new Promise(resolve => this.rl.question(query, resolve));
-    
+    const { ask, askHidden, flushStdout } = require('../utils/cli');
+
     console.log('\n' + this.ui.t('init.adminPinSetupOptional'));
     console.log(this.ui.t('init.adminPinSeparator'));
     console.log(this.ui.t('init.adminPinDescription1'));
     console.log(this.ui.t('init.adminPinDescription2'));
     console.log(this.ui.t('init.adminPinDescription3'));
     console.log(this.ui.t('init.adminPinDescription4'));
-    
-    const enableProtection = await question('\n' + this.ui.t('adminPin.setup_prompt'));
+
+    await flushStdout();
+    const enableProtection = await ask('\n' + this.ui.t('adminPin.setup_prompt'));
 
     if (enableProtection.toLowerCase() === 'y' || enableProtection.toLowerCase() === 'yes') {
       try {
         const adminAuth = new AdminAuth();
-        
         await adminAuth.initialize();
 
-        // Enable admin PIN and PIN protection in settings
         configManager.updateConfig({
           security: {
             adminPinEnabled: true,
@@ -629,33 +628,28 @@ class I18nInitializer {
             pinProtection: { enabled: true }
           }
         });
-        
-        console.log('\n' + this.ui.t('init.settingUpAdminPin'));
-        
-        let pin1, pin2;
+
+        let pin = null;
         do {
-          pin1 = await question(this.ui.t('init.enterAdminPin'));
-          
-          if (!/^\d{4,8}$/.test(pin1)) {
-            console.log(this.ui.t('init.pinMustBe4To8Digits'));
+          pin = await askHidden(this.ui.t('init.enterAdminPin'));
+          if (!/^\d{4}$/.test(pin)) {
+            console.log(this.ui.t('init.pinMustBe4Digits'));
+            pin = null;
             continue;
           }
-          
-          pin2 = await question(this.ui.t('init.confirmAdminPin'));
-          
-          if (pin1 !== pin2) {
+          const confirm = await askHidden(this.ui.t('init.confirmAdminPin'));
+          if (pin !== confirm) {
             console.log(this.ui.t('init.pinsDoNotMatch'));
+            pin = null;
           }
-        } while (pin1 !== pin2 || !/^\d{4,8}$/.test(pin1));
-        
-       const success = await adminAuth.setupPin(pin1);
-        if (success) {
+        } while (!pin);
+
+        const saved = await SecurityUtils.saveEncryptedPin(pin);
+        if (saved) {
           console.log(this.ui.t('init.adminPinSetupSuccess'));
-          console.log(this.ui.t('init.adminProtectionEnabled'));
         } else {
           console.error(this.ui.t('init.errorSettingUpAdminPin', { error: 'Failed to save PIN' }));
         }
-        
       } catch (error) {
         console.error(this.ui.t('init.errorSettingUpAdminPin', { error: error.message }));
         console.log(this.ui.t('init.continuingWithoutAdminPin'));
@@ -797,6 +791,8 @@ class I18nInitializer {
     const securitySettings = configManager.getConfig().security || {};
     
     if (!securitySettings.adminPinEnabled && securitySettings.adminPinPromptOnInit !== false && !args.noPrompt) {
+      const { flushStdout } = require('../utils/cli');
+      await flushStdout();
       await this.promptAdminPinSetup();
     }
 

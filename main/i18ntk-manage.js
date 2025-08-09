@@ -26,6 +26,7 @@ const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const configManager = require('../utils/config-manager');
+const { session } = require('../utils/config');
 const I18nInitializer = require('./i18ntk-init');
 const { I18nAnalyzer } = require('./i18ntk-analyze');
 const I18nValidator = require('./i18ntk-validate');
@@ -202,12 +203,18 @@ class I18nManager {
         this.ui.t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') });
         return true;
       } else {
+        const cfg = configManager.getConfig();
+        if (cfg.framework === 'none' || session.frameworkWarned) {
+          return true;
+        }
         console.log(this.ui.t('init.suggestions.noFramework'));
         console.log(this.ui.t('init.frameworks.react'));
         console.log(this.ui.t('init.frameworks.vue'));
         console.log(this.ui.t('init.frameworks.i18next'));
         console.log(this.ui.t('init.frameworks.nuxt'));
         console.log(this.ui.t('init.frameworks.svelte'));
+        session.frameworkWarned = true;
+
         return await this.promptContinueWithoutI18n();
       }
     } catch (error) {

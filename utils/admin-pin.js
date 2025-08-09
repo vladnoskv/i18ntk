@@ -155,10 +155,12 @@ class AdminPinManager {
      * Set up a new admin PIN with security checks
      */
     async setupPin(externalRl = null) {
-        const rl = externalRl || readline.createInterface({
+        // Use global readline interface if available
+        const rl = externalRl || global.activeReadlineInterface || readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
+        const shouldCloseRL = !externalRl && !global.activeReadlineInterface;
 
         try {
             const i18nHelper = getI18n();
@@ -178,7 +180,7 @@ class AdminPinManager {
             if (!this.validatePin(pin)) {
                 console.log(i18nHelper.t('adminPin.invalid_pin_length'));
                 console.log(i18nHelper.t('adminPin.invalid_pin_example'));
-                if (!externalRl) rl.close();
+                if (shouldCloseRL) rl.close();
                 return false;
             }
 
@@ -189,7 +191,7 @@ class AdminPinManager {
                     rl.question(i18nHelper.t('adminPin.use_anyway_prompt'), resolve);
                 });
                 if (proceed.toLowerCase() !== 'yes') {
-                    if (!externalRl) rl.close();
+                    if (shouldCloseRL) rl.close();
                     return false;
                 }
             }
@@ -198,7 +200,7 @@ class AdminPinManager {
             
             if (pin !== confirmPin) {
                 console.log(i18n.t('adminPin.pins_do_not_match'));
-                if (!externalRl) rl.close();
+                if (shouldCloseRL) rl.close();
                 return false;
             }
             
@@ -232,13 +234,13 @@ class AdminPinManager {
                 console.log(i18n.t('adminPin.setup_success'));
                 console.log(i18n.t('adminPin.setup_warning'));
                 
-                if (!externalRl) rl.close();
+                if (shouldCloseRL) rl.close();
                 return true;
                 
             } catch (error) {
                 const i18n = getI18n();
                 console.error(i18n.t('adminPin.setup_error'), error.message);
-            if (!externalRl) rl.close();
+            if (shouldCloseRL) rl.close();
             return false;
         }
     }
@@ -246,7 +248,7 @@ class AdminPinManager {
     /**
      * Prompt for PIN with configurable display mode
      */
-    promptPin(rl, message, hideInput = true) {
+    promptPin(rl, message, hideInput = false) {
         return new Promise((resolve) => {
             process.stdout.write(message);
             
@@ -266,11 +268,7 @@ class AdminPinManager {
                     // Backspace
                     if (pin.length > 0) {
                         pin = pin.slice(0, -1);
-                        if (hideInput) {
-                            process.stdout.write('\b \b');
-                        } else {
-                            process.stdout.write('\b \b');
-                        }
+                        process.stdout.write('\b \b');
                     }
                 } else if (/^[0-9]$/.test(charStr) && pin.length < 6) {
                     // Only allow digits 0-9, max 6 digits
@@ -415,10 +413,12 @@ class AdminPinManager {
             }
         }
 
-        const rl = externalRl || readline.createInterface({
+        // Use global readline interface if available
+        const rl = externalRl || global.activeReadlineInterface || readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
+        const shouldCloseRL = !externalRl && !global.activeReadlineInterface;
 
         try {
             const pinData = JSON.parse(fs.readFileSync(this.pinFile, 'utf8'));
@@ -427,11 +427,11 @@ class AdminPinManager {
                 const i18n = getI18n();
                 console.log(i18n.t('adminPin.locked_out'));
                 console.log(i18n.t('adminPin.wait_before_retry'));
-                if (!externalRl) rl.close();
+                if (shouldCloseRL) rl.close();
                 return false;
             }
             
-            const enteredPin = await this.promptPin(rl, getI18n().t('adminCli.enterPin'));
+            const enteredPin = await this.promptPin(rl, getI18n().t('adminCli.enterPin'), true);
             
             // Recompute hash with stored salt
             const salt = Buffer.from(pinData.salt, 'hex');
@@ -457,7 +457,7 @@ class AdminPinManager {
                 
                 const i18n = getI18n();
                 console.log(i18n.t('adminPin.access_granted'));
-                if (!externalRl) rl.close();
+                if (shouldCloseRL) rl.close();
                 return true;
             } else {
                 pinData.attempts = (pinData.attempts || 0) + 1;
@@ -475,14 +475,14 @@ class AdminPinManager {
                 
                 const i18n = getI18n();
                 console.log(i18n.t('adminPin.incorrect_pin', { attempts: 3 - pinData.attempts }));
-                if (!externalRl) rl.close();
+                if (shouldCloseRL) rl.close();
                 return false;
             }
             
         } catch (error) {
             const i18n = getI18n();
             console.error(i18n.t('adminPin.verify_pin_error'), error.message);
-            if (!externalRl) rl.close();
+            if (shouldCloseRL) rl.close();
             return false;
         }
     }
@@ -496,10 +496,12 @@ class AdminPinManager {
             return true;
         }
 
-        const rl = readline.createInterface({
+        // Use global readline interface if available
+        const rl = global.activeReadlineInterface || readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
+        const shouldCloseRL = !global.activeReadlineInterface;
 
         try {
             const i18n = getI18n();
@@ -516,7 +518,7 @@ class AdminPinManager {
                 rl.question(getI18n().t('adminPin.setup_prompt'), resolve);
             });
             
-            rl.close();
+            if (shouldCloseRL) rl.close();
             
             if (response.toLowerCase() === 'y' || response.toLowerCase() === 'yes') {
                 return await this.setupPin();
@@ -525,7 +527,7 @@ class AdminPinManager {
                 return false;
             }
         } catch (error) {
-            rl.close();
+            if (shouldCloseRL) rl.close();
             console.error(getI18n().t('adminPin.setup_prompt_error'), error.message);
             return false;
         }

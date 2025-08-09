@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.6.4",
+  "version": "1.6.42",
   "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), advanced security with PIN protection, comprehensive backup & recovery, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
@@ -79,7 +79,6 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "docs:cleanup-deprecated": "node dev/cleanup-deprecated-notices.js",
     "i18ntk": "node main/i18ntk-manage.js",
     "i18ntk:init": "node main/i18ntk-init.js",
     "i18ntk:analyze": "node main/i18ntk-analyze.js",
@@ -193,5 +192,6 @@
       "formatjs": ">=2.0.0",
       "i18next": ">=21.0.0"
     }
-  }
+  },
+  "devDependencies": {}
 }

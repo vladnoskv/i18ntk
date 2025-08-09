@@ -341,6 +341,24 @@ class SecurityUtils {
   }
 
   /**
+   * Securely saves an encrypted PIN to the settings directory
+   * @param {string} pin - 4 digit PIN
+   * @returns {Promise<boolean>} - success status
+   */
+  static async saveEncryptedPin(pin) {
+    try {
+      const hash = crypto.createHash('sha256').update(pin).digest('hex');
+      const settingsDir = path.join(process.cwd(), 'settings');
+      const pinFile = path.join(settingsDir, 'admin-pin.hash');
+      await fs.promises.mkdir(settingsDir, { recursive: true });
+      await fs.promises.writeFile(pinFile, hash, 'utf8');
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Checks if a file path is safe for operations
    * @param {string} filePath - File path to check
    * @returns {boolean} - Whether the path is safe

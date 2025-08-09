@@ -382,6 +382,9 @@ class I18nUsageAnalyzer {
         this.sourceDir = this.config.sourceDir;
         this.i18nDir = this.config.i18nDir;
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+        if (fromMenu && (!this.config.sourceDir || this.config.sourceDir === this.config.i18nDir)) {
+          console.log('⚠️  Go to Settings → Directory Settings or run with --source-dir');
+        }
       } else {
         await this.initialize();
       }
@@ -439,6 +442,13 @@ class I18nUsageAnalyzer {
         this.config.i18nDir = args.i18nDir;
         this.i18nDir = path.resolve(args.i18nDir);
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+      }
+      
+      if (this.sourceDir || this.i18nDir) {
+        configManager.updateConfig({
+          sourceDir: configManager.toRelative(this.sourceDir || this.config.sourceDir),
+          i18nDir: configManager.toRelative(this.i18nDir || this.config.i18nDir)
+        });
       }
       
       // Ensure sourceDir points to source code, not locales

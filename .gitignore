@@ -3,8 +3,7 @@
 
 .env
 /src
-/test
-/test-i18ntk-local
+/test-i18ntk*
 .trae
 
 # Security and configuration files
