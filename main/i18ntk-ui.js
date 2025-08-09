@@ -10,45 +10,27 @@ const configManager = require('../utils/config-manager');
 class UIi18n {
     constructor() {
         this.currentLanguage = 'en';
-        this.translations = {};
+this.translations = {};
         this.uiLocalesDir = null;
+        this.uiLocalesDir = path.resolve(__dirname, '..', 'ui-locales');
         this.availableLanguages = [];
         this.configFile = path.resolve(configManager.CONFIG_PATH);
         
+
         // Initialize with safe defaults
         this.initialize();
     }
     
+
     initialize() {
         try {
             const config = configManager.getConfig();
             const paths = configManager.resolvePaths();
-
-            const bundledDir = path.resolve(__dirname, '..', 'ui-locales');
-
-            // Start with path from configuration if it exists, otherwise fallback to bundled
-            let resolvedDir = paths?.uiLocalesDir;
-            if (resolvedDir) {
-                try {
-                    resolvedDir = path.resolve(resolvedDir);
-                    if (!fs.existsSync(resolvedDir)) {
-                        resolvedDir = bundledDir;
-                    }
-                } catch {
-                    resolvedDir = bundledDir;
-                }
-            } else {
-                resolvedDir = bundledDir;
-            }
-
-            this.uiLocalesDir = resolvedDir;
+            
+            // Use safe defaults if config is not available
+            this.uiLocalesDir = paths?.uiLocalesDir || path.resolve(__dirname, '..', 'ui-locales');
             this.availableLanguages = this.detectAvailableLanguages();
-
-            // If configured directory has no locales, fallback to bundled one
-            if (this.availableLanguages.length === 0 && resolvedDir !== bundledDir) {
-                this.uiLocalesDir = bundledDir;
-                this.availableLanguages = this.detectAvailableLanguages();
-            }
+            
 
             const configuredLanguage = config?.language || config?.uiLanguage || 'en';
 
@@ -65,6 +47,7 @@ class UIi18n {
             this.loadLanguage('en');
         }
     }
+    /**
     /**
      * Detect which UI locales are currently installed
      * @returns {string[]} Array of available language codes
@@ -243,7 +226,7 @@ class UIi18n {
                 this.currentLanguage = configuredLanguage;
                 // Force reload translations in i18n-helper
                 const { loadTranslations } = require('../utils/i18n-helper');
-                loadTranslations(configuredLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+                loadTranslations(configuredLanguage);
             }
         }
     }

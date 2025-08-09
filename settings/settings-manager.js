@@ -29,7 +29,6 @@ class SettingsManager {
             "sourceDir": "./locales",
             "i18nDir": "./locales",
             "outputDir": "./i18ntk-reports",
-            "uiLocalesDir": "./ui-locales",
             "scriptDirectories": {
                 "init": null,
                 "analyze": null,
@@ -346,7 +345,7 @@ class SettingsManager {
      */
     updateDirectorySettings(directorySettings) {
         try {
-            const allowedKeys = ['projectRoot', 'sourceDir', 'i18nDir', 'outputDir', 'uiLocalesDir'];
+            const allowedKeys = ['projectRoot', 'sourceDir', 'i18nDir', 'outputDir'];
             const updates = {};
             
             for (const [key, value] of Object.entries(directorySettings)) {
@@ -377,7 +376,6 @@ class SettingsManager {
             sourceDir: this.settings.sourceDir,
             i18nDir: this.settings.i18nDir,
             outputDir: this.settings.outputDir,
-            uiLocalesDir: this.settings.uiLocalesDir
         };
     }
 
@@ -596,7 +594,7 @@ class SettingsManager {
      * @returns {Array} Array of language objects
      */
     getAvailableLanguages() {
-        const uiLocalesDir = this.settings.uiLocalesDir || path.join(__dirname, '..', 'ui-locales');
+        const uiLocalesDir = path.join(__dirname, '..', 'ui-locales');
         const languages = [
             { code: 'en', name: 'English', flag: '🇺🇸' },
             { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪' },

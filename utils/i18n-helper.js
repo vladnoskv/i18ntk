@@ -36,19 +36,15 @@ function pkgUiLocalesDirViaResolve() {
   } catch { return null; }
 }
 
-function projectUiLocalesDir() {
-  return path.resolve(process.cwd(), 'ui-locales');
-}
-
-function resolveLocalesDirs(baseDir) {
+function resolveLocalesDirs() {
   const dirs = [];
-  const addDir = (dir, source) => {
+  const addDir = (dir) => {
     if (typeof dir === 'string' && dir.trim()) {
       try {
         const normalized = path.normalize(path.resolve(dir.trim()));
-        // Skip if directory doesn't exist or isn't accessible
+
         if (fs.existsSync(normalized) && fs.statSync(normalized).isDirectory()) {
-          dirs.push({ path: normalized, source });
+          dirs.push(normalized);
         }
       } catch {
         // Silently ignore invalid paths
@@ -56,53 +52,21 @@ function resolveLocalesDirs(baseDir) {
     }
   };
 
-  // Priority 1: Environment override (highest priority)
-  if (process.env.I18NTK_UI_LOCALE_DIR && process.env.I18NTK_UI_LOCALE_DIR.trim()) {
-    addDir(process.env.I18NTK_UI_LOCALE_DIR, 'env');
-  }
-
-  // Priority 2: Settings configuration
-  const cfg = safeRequireConfig();
-  if (cfg) {
-    try {
-      const settings = cfg.getConfig?.() || {};
-      if (typeof settings.uiLocalesDir === 'string' && settings.uiLocalesDir.trim()) {
-        addDir(settings.uiLocalesDir, 'settings');
-      }
-    } catch {}
-  }
-
-  // Priority 3: Bundled package directories (preferred over project)
   const pkgA = pkgUiLocalesDirViaThisFile();
-  addDir(pkgA, 'bundled');
+  addDir(pkgA);
   
   const pkgB = pkgUiLocalesDirViaResolve();
   if (pkgB && pkgB !== pkgA) {
-    addDir(pkgB, 'bundled');
+    addDir(pkgB);
   }
 
-  // Priority 4: Project directory (fallback)
-  if (typeof baseDir === 'string' && baseDir.trim()) {
-    const resolved = path.resolve(baseDir.trim());
-    const dirPath = fs.existsSync(resolved) && fs.statSync(resolved).isFile()
-      ? path.dirname(resolved)
-      : resolved;
-    addDir(dirPath, 'project');
-  }
-  
-  addDir(projectUiLocalesDir(), 'project');
-
-  // Deduplicate by path while preserving priority order
+  // Deduplicate while preserving order
   const seen = new Set();
-  const uniqueDirs = [];
-  for (const { path: dirPath, source } of dirs) {
-    if (!seen.has(dirPath)) {
-      seen.add(dirPath);
-      uniqueDirs.push(dirPath);
-    }
-  }
-
-  return uniqueDirs;
+    return dirs.filter(dir => {
+    if (seen.has(dir)) return false;
+    seen.add(dir);
+    return true;
+  });
 }
 
 function candidatesForLang(dir, lang) {
@@ -112,8 +76,8 @@ function candidatesForLang(dir, lang) {
   ];
 }
 
-function findLocaleFilesAllDirs(lang, baseDir) {
-  const dirs = resolveLocalesDirs(baseDir);
+function findLocaleFilesAllDirs(lang) {
+  const dirs = resolveLocalesDirs();
   
   if (process.env.I18NTK_DEBUG_LOCALES === '1') {
     console.log('🔎 i18ntk locale search dirs:', dirs);
@@ -156,7 +120,7 @@ let translations = {};
 let currentLanguage = 'en';
 let isInitialized = false;
 
-function loadTranslations(language, baseDir) {
+function loadTranslations(language) {
   const cfg = safeRequireConfig();
   const settings = cfg?.getConfig?.() || {};
   const configuredLanguage = settings.uiLanguage || settings.language || 'en';
@@ -168,7 +132,7 @@ function loadTranslations(language, baseDir) {
   const loadErrors = [];
   
   for (const lang of tryOrder) {
-    const files = findLocaleFilesAllDirs(lang, baseDir);
+    const files = findLocaleFilesAllDirs(lang);
     
     // Prioritize bundled locales over project ones
       const prioritizedFiles = files.sort((a, b) => Number(isBundledPath(b)) - Number(isBundledPath(a)));
@@ -335,8 +299,8 @@ function getCurrentLanguage() {
  * Get all available languages
  * @returns {string[]} - Array of available language codes
  */
-function getAvailableLanguages(baseDir) {
-  const dirs = resolveLocalesDirs(baseDir);
+function getAvailableLanguages() {
+  const dirs = resolveLocalesDirs();
   const langs = new Set();
   for (const d of dirs) {
     try {
