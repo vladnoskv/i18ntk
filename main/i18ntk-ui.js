@@ -23,11 +23,33 @@ class UIi18n {
         try {
             const config = configManager.getConfig();
             const paths = configManager.resolvePaths();
-            
-            // Use safe defaults if config is not available
-            this.uiLocalesDir = paths?.uiLocalesDir || path.resolve(__dirname, '..', 'ui-locales');
+
+            const bundledDir = path.resolve(__dirname, '..', 'ui-locales');
+
+            // Start with path from configuration if it exists, otherwise fallback to bundled
+            let resolvedDir = paths?.uiLocalesDir;
+            if (resolvedDir) {
+                try {
+                    resolvedDir = path.resolve(resolvedDir);
+                    if (!fs.existsSync(resolvedDir)) {
+                        resolvedDir = bundledDir;
+                    }
+                } catch {
+                    resolvedDir = bundledDir;
+                }
+            } else {
+                resolvedDir = bundledDir;
+            }
+
+            this.uiLocalesDir = resolvedDir;
             this.availableLanguages = this.detectAvailableLanguages();
-            
+
+            // If configured directory has no locales, fallback to bundled one
+            if (this.availableLanguages.length === 0 && resolvedDir !== bundledDir) {
+                this.uiLocalesDir = bundledDir;
+                this.availableLanguages = this.detectAvailableLanguages();
+            }
+
             const configuredLanguage = config?.language || config?.uiLanguage || 'en';
 
             // Load language from settings manager or fallback

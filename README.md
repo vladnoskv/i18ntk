@@ -8,24 +8,22 @@
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
-> **🚨 Latest Update (v1.6.3)**: Critical npm package installation bug resolved from 1.6.0 onwards.
-
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
 **Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translations on pages.
 
-> **Zero dependencies** | **Optimized smaller package** | **Works with any framework** | **Enterprise-grade security**
+> **Zero dependencies** | **Works with any framework** | **Enterprise-grade security**
 
-> **v1.6.3** - **Ultra-extreme performance improvements to the i18ntk toolkit with 97% speed improvement** ⚡ Under 30ms for 200k keys (vs 1.2 seconds), up to 86% package size reduction, zero runtime dependencies.
+> **v1.6.0** - **Ultra-extreme performance improvements to the i18ntk toolkit with 97% speed improvement** ⚡ Under 30ms for 200k keys (vs 1.2 seconds), up to 86% package size reduction, zero runtime dependencies.
 
 ## 🚀 Quick Start
 
 ```bash
 # Install globally
-npm install i18ntk@1.6.3
+npm i i18ntk
 
 # Interactive setup
-npx i18ntk@1.6.3 init
+npx i18ntk init
 
 # Basic commands
 i18ntk analyze --source ./src

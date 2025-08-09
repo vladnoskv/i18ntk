@@ -135,7 +135,9 @@
     "release:prepare": "npm run version:check && npm run docs:update-versions && npm run prepublishOnly",
     "deprecate:old-versions": "node scripts/deprecate-versions.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "i18ntk": "^1.6.3"
+  },
   "engines": {
     "node": ">=16.0.0"
   },
@@ -173,7 +175,6 @@
       "1.6.0",
       "1.6.1",
       "1.6.2"
-
     ],
     "nextVersion": "1.7.0",
     "supportedNodeVersions": ">=16.0.0",
