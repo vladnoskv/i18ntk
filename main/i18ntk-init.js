@@ -62,20 +62,9 @@ class I18nInitializer {
     // Ensure defaultLanguages is properly initialized from config
     this.config.defaultLanguages = this.config.defaultLanguages || ['de', 'es', 'fr', 'ru'];
     
-    // Use global readline interface to prevent doubling
-    if (global.activeReadlineInterface) {
-      this.rl = global.activeReadlineInterface;
-      this.shouldCloseRL = false;
-    } else {
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: true,
-        historySize: 0
-      });
-      global.activeReadlineInterface = this.rl;
-      this.shouldCloseRL = true;
-    }
+    // No longer create readline interface here - use CLI helpers
+    this.rl = null;
+    this.shouldCloseRL = false;
   }
 
   // Add the missing checkI18nDependencies method
@@ -137,11 +126,8 @@ class I18nInitializer {
 
   // Add the missing prompt method
   async prompt(question) {
-    return new Promise((resolve) => {
-      this.rl.question(question, (answer) => {
-        resolve(answer.trim());
-      });
-    });
+    const { ask } = require('../utils/cli');
+    return await ask(question);
   }
 
   // Parse command line arguments
@@ -665,22 +651,7 @@ class I18nInitializer {
       return this.config.defaultLanguages;
     }
 
-    // Use the global readline interface if available, otherwise create one
-    let rl = this.rl;
-    let shouldClose = false;
-
-    if (!rl) {
-      const readline = require('readline');
-      rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: true,
-        historySize: 0
-      });
-      shouldClose = true;
-    }
-
-    const question = (query) => new Promise(resolve => rl.question(query, resolve));
+    const { ask } = require('../utils/cli');
 
     console.log('\n' + this.ui.t('init.languageSelectionTitle'));
     console.log(this.ui.t('common.separator'));
@@ -692,12 +663,7 @@ class I18nInitializer {
 
     console.log('\n' + this.ui.t('init.defaultLanguages', { languages: this.config.defaultLanguages.join(', ') }));
 
-    const answer = await question('\n' + this.ui.t('init.enterLanguageCodes'));
-
-    // Only close if we created our own readline interface
-    if (shouldClose) {
-      rl.close();
-    }
+    const answer = await ask('\n' + this.ui.t('init.enterLanguageCodes'));
 
     if (answer.trim() === '') {
       return this.config.defaultLanguages;
@@ -738,10 +704,6 @@ class I18nInitializer {
       if (!hasI18n) {
         console.log(this.t('init.errors.noFramework'));
         console.log(this.t('init.suggestions.installFramework'));
-        if (this.shouldCloseRL) {
-          this.rl.close();
-          global.activeReadlineInterface = null;
-        }
         process.exit(0);
       }
       
@@ -757,10 +719,7 @@ class I18nInitializer {
       console.error(this.ui.t('init.errors.initializationFailed', { error: error.message }));
       throw error;
     } finally {
-      if (this.shouldCloseRL && this.rl) {
-        this.rl.close();
-        global.activeReadlineInterface = null;
-      }
+      // No explicit readline cleanup needed; CLI helpers manage a shared interface
     }
   }
 
@@ -996,10 +955,6 @@ class I18nInitializer {
         
         if (!isValid) {
           console.log(this.ui.t('adminCli.invalidPin'));
-          if (this.shouldCloseRL) {
-            this.rl.close();
-            global.activeReadlineInterface = null;
-          }
           if (!fromMenu) process.exit(1);
           return;
         }
@@ -1030,10 +985,7 @@ class I18nInitializer {
         process.exit(1);
       }
     } finally {
-      if (this.shouldCloseRL && this.rl) {
-        this.rl.close();
-        global.activeReadlineInterface = null;
-      }
+      // No explicit readline cleanup needed; CLI helpers manage a shared interface
     }
   }
 
@@ -1064,10 +1016,7 @@ class I18nInitializer {
       console.error('Error in non-interactive mode:', error.message);
       throw error;
     } finally {
-      if (this.shouldCloseRL && this.rl) {
-        this.rl.close();
-        global.activeReadlineInterface = null;
-      }
+      // No explicit readline cleanup needed; CLI helpers manage a shared interface
     }
   }
 }

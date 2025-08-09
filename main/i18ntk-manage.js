@@ -50,28 +50,13 @@ class I18nManager {
     this.ui = null;
     this.adminAuth = null;
     
-    // Initialize readline interface
-    this.initializeReadline();
+    // No longer create readline interface here - use CLI helpers
   }
   
   initializeReadline() {
-    if (!this.rl || this.isReadlineClosed) {
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: true,
-        historySize: 0
-      });
-      this.isReadlineClosed = false;
-      
-      // Handle readline close events
-      this.rl.on('close', () => {
-        this.isReadlineClosed = true;
-      });
-      
-      // Make readline interface globally available
-      global.activeReadlineInterface = this.rl;
-    }
+    // Deprecated: readline is centralized in utils/cli
+    this.rl = null;
+    this.isReadlineClosed = false;
   }
 
   // Initialize configuration using unified system
@@ -1135,26 +1120,13 @@ class I18nManager {
 
 
   prompt(question) {
-    return new Promise((resolve) => {
-      // Check if readline is available and not closed
-      if (!this.rl || this.isReadlineClosed) {
-        this.initializeReadline();
-      }
-      
-      // Double check if stdin is available
-      if (!process.stdin.isTTY || process.stdin.destroyed) {
-        console.log('\n⚠️ Interactive input not available, using default response.');
-        resolve('');
-        return;
-      }
-      
-      try {
-        this.rl.question(question, resolve);
-      } catch (error) {
-        console.log('\n⚠️ Readline error, using default response.');
-        resolve('');
-      }
-    });
+    const { ask } = require('../utils/cli');
+    // If interactive not available, return empty string to avoid hangs
+    if (!process.stdin.isTTY || process.stdin.destroyed) {
+      console.log('\n⚠️ Interactive input not available, using default response.');
+      return Promise.resolve('');
+    }
+    return ask(question);
   }
   
   // Safe method to check if we're in non-interactive mode
