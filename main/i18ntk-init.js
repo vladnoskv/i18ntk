@@ -603,14 +603,6 @@ class I18nInitializer {
         const adminAuth = new AdminAuth();
         await adminAuth.initialize();
 
-        await configManager.updateConfig({
-          security: {
-            adminPinEnabled: true,
-            adminPinPromptOnInit: true,
-            pinProtection: { enabled: true }
-          }
-        });
-
         let pin = null;
         do {
           pin = await askHidden(t('init.enterAdminPin'));
@@ -626,8 +618,15 @@ class I18nInitializer {
           }
         } while (!pin);
 
-        const saved = await SecurityUtils.saveEncryptedPin(pin);
+        const saved = await adminAuth.setupPin(pin);
         if (saved) {
+          await configManager.updateConfig({
+            security: {
+              adminPinEnabled: true,
+              adminPinPromptOnInit: true,
+              pinProtection: { enabled: true }
+            }
+          });
           console.log(t('init.adminPinSetupSuccess'));
         } else {
           console.error(t('init.errorSettingUpAdminPin', { error: 'Failed to save PIN' }));

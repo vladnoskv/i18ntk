@@ -453,7 +453,16 @@ class I18nUsageAnalyzer {
         const fallback = path.resolve(this.config.projectRoot || '.', 'src');
         console.warn(t('usage.sourceEqualsI18nWarn') ||
           `⚠️ sourceDir equals i18nDir (${this.sourceDir}). Falling back to ${fallback} for source scanning.`);
-        this.sourceDir = fallback;
+        if (fs.existsSync(fallback)) {
+          this.sourceDir = fallback;
+        } else {
+          console.warn(`⚠️ Fallback directory ${fallback} does not exist. Using project root for source scanning.`);
+          this.sourceDir = path.resolve(this.config.projectRoot || '.');
+        }
+        this.config.sourceDir = this.sourceDir;
+        await configManager.updateConfig({
+          sourceDir: configManager.toRelative(this.sourceDir)
+        });
       }
       
       console.log(t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir }));
@@ -741,7 +750,7 @@ Analysis Features:
       
       // Check if source directory exists
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+        throw new Error(this.t('usage.sourceDirectoryDoesNotExist', { dir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
       const sourceFiles = await this.getAllFiles(this.sourceDir);
@@ -1241,11 +1250,12 @@ Analysis Features:
       await SecurityUtils.validatePath(this.i18nDir);
       
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+        throw new Error(this.t('usage.sourceDirectoryDoesNotExist', { dir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+
       }
       
       if (!fs.existsSync(this.i18nDir)) {
-        throw new Error(t('validate.i18nDirectoryNotFound', { i18nDir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
+        throw new Error(this.t('usage.i18nDirectoryDoesNotExist', { dir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
       }
       
       // Load available keys
