@@ -254,7 +254,6 @@ class VersionDeprecator {
 If you encounter issues during migration:
 1. Check the [troubleshooting guide](docs/TROUBLESHOOTING.md)
 2. Open an issue on [GitHub](https://github.com/vladnoskv/i18ntk/issues)
-3. Join our [Discord community](https://discord.gg/i18ntk)
 
 `;
       

@@ -267,13 +267,42 @@ function displayPaths(cfg = {}) {
 // Ensure project has been initialized with source language files
 async function ensureInitialized(cfg) {
   try {
+    // Check if initialization has been marked as complete
+    const configPath = path.join(process.cwd(), '.i18ntk', 'initialization.json');
+    let initStatus = { initialized: false, version: null, timestamp: null };
+    
+    if (fs.existsSync(configPath)) {
+      try {
+        initStatus = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        // If initialized and version matches current, skip further checks
+        if (initStatus.initialized && initStatus.version === '1.7.1') {
+          return true;
+        }
+      } catch (e) {
+        // Invalid initialization file, proceed with normal check
+      }
+    }
+
     const sourceDir = cfg.sourceDir;
     const sourceLanguage = cfg.sourceLanguage || 'en';
     const langDir = path.join(sourceDir, sourceLanguage);
 
-    const initialized = fs.existsSync(langDir) &&
+    const hasLanguageFiles = fs.existsSync(langDir) &&
       fs.readdirSync(langDir).some(f => f.endsWith('.json'));
-    if (initialized) return true;
+    
+    // If language files exist and we're upgrading, mark as initialized
+    if (hasLanguageFiles) {
+      const initDir = path.dirname(configPath);
+      ensureDirectory(initDir);
+      fs.writeFileSync(configPath, JSON.stringify({
+        initialized: true,
+        version: '1.7.1',
+        timestamp: new Date().toISOString(),
+        sourceDir: sourceDir,
+        sourceLanguage: sourceLanguage
+      }, null, 2));
+      return true;
+    }
 
     const nonInteractive = !process.stdin.isTTY;
     const initScript = path.join(__dirname, '..', 'main', 'i18ntk-init.js');
@@ -281,6 +310,18 @@ async function ensureInitialized(cfg) {
     if (nonInteractive) {
       console.warn(`Missing source language files in ${langDir}. Running initialization...`);
       const result = spawnSync(process.execPath, [initScript, '--yes', `--source-dir=${sourceDir}`, `--source-language=${sourceLanguage}`], { stdio: 'inherit', windowsHide: true });
+      if (result.status === 0) {
+        // Mark initialization as complete
+        const initDir = path.dirname(configPath);
+        ensureDirectory(initDir);
+        fs.writeFileSync(configPath, JSON.stringify({
+          initialized: true,
+          version: '1.7.1',
+          timestamp: new Date().toISOString(),
+          sourceDir: sourceDir,
+          sourceLanguage: sourceLanguage
+        }, null, 2));
+      }
       return result.status === 0;
     }
 
@@ -290,6 +331,18 @@ async function ensureInitialized(cfg) {
 
     if (answer.trim().toLowerCase().startsWith('y')) {
       const result = spawnSync(process.execPath, [initScript, `--source-dir=${sourceDir}`, `--source-language=${sourceLanguage}`], { stdio: 'inherit', windowsHide: true });
+      if (result.status === 0) {
+        // Mark initialization as complete
+        const initDir = path.dirname(configPath);
+        ensureDirectory(initDir);
+        fs.writeFileSync(configPath, JSON.stringify({
+          initialized: true,
+          version: '1.7.1',
+          timestamp: new Date().toISOString(),
+          sourceDir: sourceDir,
+          sourceLanguage: sourceLanguage
+        }, null, 2));
+      }
       return result.status === 0;
     }
     return false;

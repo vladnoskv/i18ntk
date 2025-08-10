@@ -6,8 +6,8 @@
 **Last Updated:** 2025-08-10  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
-[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
- [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.0)](https://socket.dev/npm/package/i18ntk/overview/1.7.0)
+[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk) 
+[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.1)](https://socket.dev/npm/package/i18ntk/overview/1.7.1)
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
@@ -201,51 +201,10 @@ your-project/
 
 - **Locale files are backed up automatically** before optimization
 - **Use interactive optimizer** for safe locale management
-- **Zero breaking changes** from v1.6.x to v1.7.0
-- **All versions prior to 1.7.0 are deprecated**
+- **Zero breaking changes** from v1.6.x to v1.7.1
+- **All versions prior to 1.7.1 are deprecated**
 - **All improvements applied automatically** on update
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/vladnoskv/i18ntk/issues)
-- **Documentation**: [Complete docs](./docs)
-- **Performance**: [Benchmark results](./benchmarks/results)
-- **Version**: `i18ntk --version`
-
----
-
-**Made for the global development community** ❤️
-
-## Migration Guide
-
-### Upgrading from Deprecated Versions
-
-#### From any version < 1.7.0 (DEPRECATED - use latest version)
-1. **Backup your current configuration**:
-   ```bash
-   cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
-   ```
-
-2. **Install the latest version**:
-   ```bash
-   npm install i18ntk@1.7.0
-   ```
-
-3. **Verify installation**:
-   ```bash
-   i18ntk --version
-   i18ntk doctor
-   ```
-
-3. **Run configuration migration**:
-   ```bash
-   npx i18ntk@1.6.3 --migrate
-   ```
-
-4. **Verify installation**:
-   ```bash
-   npx i18ntk@1.6.3--validate
-   ```
 
 #### Preserved Features from 1.6.3
 - ✅ Ultra-extreme performance improvements
@@ -258,9 +217,12 @@ your-project/
 #### Breaking Changes
 - **None** - 1.6.3 is fully backward compatible
 
-### Migration Support
-If you encounter issues during migration:
-1. Check the [troubleshooting guide](docs/TROUBLESHOOTING.md)
-2. Open an issue on [GitHub](https://github.com/vladnoskv/i18ntk/issues)
-3. Join our [Discord community](https://discord.gg/i18ntk)
+## 📞 Support
 
+- **Issues**: [GitHub Issues](https://github.com/vladnoskv/i18ntk/issues)
+- **Documentation**: [Complete docs](./docs)
+- **Performance**: [Benchmark results](./benchmarks/results)
+- **Version**: `i18ntk --version`
+---
+
+**Made for the global development community** ❤️

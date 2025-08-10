@@ -48,7 +48,7 @@ class I18nManager {
     this.isReadlineClosed = false;
     this.isAuthenticated = false;
     this.ui = null;
-    this.adminAuth = null;
+    this.adminAuth = new AdminAuth();
     
     // No longer create readline interface here - use CLI helpers
   }

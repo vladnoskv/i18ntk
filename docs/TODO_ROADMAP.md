@@ -31,7 +31,7 @@ Contributions and suggestions are welcome. Please refer to the following resourc
 
 ### Upgrading from Deprecated Versions
 
-#### From any version < 1.7.0 (DEPRECATED - use latest version)
+#### From any version < 1.7.1 (DEPRECATED - use latest version)
 1. **Backup your current configuration**:
    ```bash
    cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
@@ -39,18 +39,18 @@ Contributions and suggestions are welcome. Please refer to the following resourc
 
 2. **Install the latest version**:
    ```bash
-   npm install i18ntk@1.7.0
+   npm install i18ntk@1.7.1
    ```
 
 3. **Run configuration migration**:
    ```bash
-   npx i18ntk@1.7.0 --migrate
+   npx i18ntk@1.7.1 --migrate
    ```
 
 4. **Verify installation**:
    ```bash
-   npx i18ntk@1.7.0 --version
-   npx i18ntk@1.7.0 --validate
+   npx i18ntk@1.7.1 --version
+   npx i18ntk@1.7.1 --validate
    ```
 
 #### Preserved Features from 1.6.x
@@ -62,11 +62,10 @@ Contributions and suggestions are welcome. Please refer to the following resourc
 - ✅ Advanced configuration management
 
 #### Breaking Changes
-- **None** - 1.7.0 is fully backward compatible
+- **None** - 1.7.1 is fully backward compatible
 
 ### Migration Support
 If you encounter issues during migration:
 1. Check the [troubleshooting guide](docs/TROUBLESHOOTING.md)
 2. Open an issue on [GitHub](https://github.com/vladnoskv/i18ntk/issues)
-3. Join our [Discord community](https://discord.gg/i18ntk)
 
