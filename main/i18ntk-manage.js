@@ -25,7 +25,7 @@ const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const configManager = require('../utils/config-manager');
-const { session } = require('../utils/config');
+const { showFrameworkWarningOnce } = require('../utils/cli-helper');
 const I18nInitializer = require('./i18ntk-init');
 const { I18nAnalyzer } = require('./i18ntk-analyze');
 const I18nValidator = require('./i18ntk-validate');
@@ -36,6 +36,7 @@ const I18nDebugger = require('../scripts/debug/debugger');
 
 const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
+const cliHelper = require('../utils/cli-helper');
 
 // Use unified configuration system
 const { getUnifiedConfig, ensureInitialized, validateSourceDir } = require('../utils/config-helper');
@@ -53,7 +54,7 @@ class I18nManager {
   }
   
   initializeReadline() {
-    // Deprecated: readline is centralized in utils/cli
+    // Use centralized CLI helper instead of direct readline
     this.rl = null;
     this.isReadlineClosed = false;
   }
@@ -86,7 +87,7 @@ class I18nManager {
       } catch (err) {
         console.log(this.ui.t('init.requiredTitle'));
         console.log(this.ui.t('init.requiredBody'));
-        const answer = await new Promise(resolve => this.rl.question(this.ui.t('init.promptRunNow'), resolve));
+        const answer = await cliHelper.prompt(this.ui.t('init.promptRunNow'));
         if (answer.trim().toLowerCase() === 'y') {
           const initializer = new I18nInitializer(this.config);
           await initializer.run({ fromMenu: true });
@@ -188,16 +189,10 @@ class I18nManager {
         return true;
       } else {
         const cfg = configManager.getConfig();
-        if (cfg.framework === 'none' || session.frameworkWarned) {
+        if (cfg.framework === 'none') {
           return true;
         }
-        console.log(this.ui.t('init.suggestions.noFramework'));
-        console.log(this.ui.t('init.frameworks.react'));
-        console.log(this.ui.t('init.frameworks.vue'));
-        console.log(this.ui.t('init.frameworks.i18next'));
-        console.log(this.ui.t('init.frameworks.nuxt'));
-        console.log(this.ui.t('init.frameworks.svelte'));
-        session.frameworkWarned = true;
+        showFrameworkWarningOnce(this.ui);
 
         return await this.promptContinueWithoutI18n();
       }

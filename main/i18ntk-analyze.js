@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
+const cliHelper = require('../utils/cli-helper');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
@@ -63,22 +63,19 @@ class I18nAnalyzer {
     }
   }
   
-  // Initialize readline interface
+  // Initialize readline interface (deprecated - use cliHelper directly)
   initReadline() {
-    return getGlobalReadline();
-
+    return cliHelper.getInterface();
   }
   
-  // Close readline interface
+  // Close readline interface (deprecated - use cliHelper.close directly)
   closeReadline() {
-    closeGlobalReadline();
-
+    cliHelper.close();
   }
   
   // Prompt for user input
   async prompt(question) {
-    const rl = getGlobalReadline();
-    return new Promise(resolve => rl.question(question, resolve));
+    return cliHelper.prompt(question);
   }
 
   // Parse command line arguments

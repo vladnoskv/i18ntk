@@ -17,10 +17,12 @@ const path = require('path');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
-const UIi18n = require('./i18ntk-ui');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+// Ensure UIi18n is available for this initializer class
+const UIi18n = require('./i18ntk-ui');
 loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+const { showFrameworkWarningOnce } = require('../utils/cli-helper');
 
 // Language configurations with native names
 const LANGUAGE_CONFIG = {
@@ -100,12 +102,7 @@ class I18nInitializer {
         console.log(this.ui.t('init.detectedI18nFrameworks', { frameworks: installedFrameworks.join(', ') }));
         return true;
       } else {
-        console.log(this.ui.t('init.suggestions.noFramework'));
-        console.log(this.ui.t('init.frameworks.react'));
-        console.log(this.ui.t('init.frameworks.vue'));
-        console.log(this.ui.t('init.frameworks.i18next'));
-        console.log(this.ui.t('init.frameworks.nuxt'));
-        console.log(this.ui.t('init.frameworks.svelte'));
+        showFrameworkWarningOnce(this.ui);
         return await this.promptContinueWithoutI18n(noPrompt);
       }
     } catch (error) {

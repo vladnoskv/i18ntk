@@ -4,7 +4,7 @@
  * No external dependencies - uses Node.js built-in readline
  */
 
-const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
+const cliHelper = require('../utils/cli-helper');
 const fs = require('fs');
 const path = require('path');
 const settingsManager = require('./settings-manager');
@@ -40,7 +40,7 @@ function isAdminPinEnabled() {
 
 class SettingsCLI {
     constructor() {
-        this.rl = getGlobalReadline();
+        this.rl = null; // Use cliHelper instead
         this.settings = null;
         this.schema = null;
         this.modified = false;
@@ -861,17 +861,14 @@ class SettingsCLI {
      * Prompt for PIN input with masking
      */
     async promptPin(prompt) {
-        return new Promise((resolve) => {
-            this.rl.question(prompt, (input) => {
-                const pin = input.trim();
-                if (/^\d{4,6}$/.test(pin)) {
-                    resolve(pin);
-                } else {
-                    console.log('❌ PIN must be 4-6 digits.');
-                    resolve(null);
-                }
-            });
-        });
+        const input = await cliHelper.prompt(prompt, true);
+        const pin = input.trim();
+        if (/^\d{4,6}$/.test(pin)) {
+            return pin;
+        } else {
+            console.log('❌ PIN must be 4-6 digits.');
+            return null;
+        }
     }
 
     /**
@@ -1859,9 +1856,7 @@ ${colors.dim}${this.t('settings.updatePackage.command')}: npm update i18ntk -g${
      * Prompt user for input
      */
     prompt(question) {
-        return new Promise(resolve => {
-            this.rl.question(question, resolve);
-        });
+        return cliHelper.prompt(question);
     }
 
     /**

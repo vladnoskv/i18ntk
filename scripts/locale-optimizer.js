@@ -15,7 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
+const cliHelper = require('../utils/cli-helper');
 
 class LocaleOptimizer {
   constructor() {
@@ -239,52 +239,46 @@ class LocaleOptimizer {
     console.log('\n💡 Type locale codes separated by commas (e.g., en,es,de)');
     console.log('   Press Enter to keep all, or type "cancel" to abort\n');
     
-    return new Promise((resolve) => {
-      this.rl.question('Select locales to keep: ', (answer) => {
-        if (answer.toLowerCase() === 'cancel') {
-          console.log('❌ Operation cancelled');
-          closeGlobalReadline();
-          resolve(false);
-          return;
-        }
-        
-        if (answer.trim() === '') {
-          console.log('✅ Keeping all locales');
-          closeGlobalReadline();
-          resolve(true);
-          return;
-        }
-        
-        const selected = answer.split(',').map(l => l.trim().toLowerCase());
-        const valid = selected.filter(l => available.includes(l));
-        
-        if (valid.length === 0) {
-          console.log('⚠️  No valid locales selected, keeping all');
-          closeGlobalReadline();
-          resolve(true);
-          return;
-        }
-        
-        // Always include English
-        valid.push('en');
-        const unique = [...new Set(valid)];
-        
-        console.log(`\n🎯 Selected: ${unique.join(', ').toUpperCase()}`);
-        this.showImpact(unique);
-        
-        this.rl.question('\nProceed? (y/N): ', (confirm) => {
-          if (confirm.toLowerCase() === 'y' || confirm.toLowerCase() === 'yes') {
-            this.keepLocales(unique.join(','));
-            console.log('\n🎉 Package optimized successfully!');
-            console.log('💡 Use --restore to bring back removed locales');
-          } else {
-            console.log('❌ Operation cancelled');
-          }
-          closeGlobalReadline();
-          resolve(true);
-        });
-      });
-    });
+    const answer = await cliHelper.prompt('Select locales to keep: ');
+    
+    if (answer.toLowerCase() === 'cancel') {
+      console.log('❌ Operation cancelled');
+      cliHelper.close();
+      return false;
+    }
+    
+    if (answer.trim() === '') {
+      console.log('✅ Keeping all locales');
+      cliHelper.close();
+      return true;
+    }
+    
+    const selected = answer.split(',').map(l => l.trim().toLowerCase());
+    const valid = selected.filter(l => available.includes(l));
+    
+    if (valid.length === 0) {
+      console.log('⚠️  No valid locales selected, keeping all');
+      cliHelper.close();
+      return true;
+    }
+    
+    // Always include English
+    valid.push('en');
+    const unique = [...new Set(valid)];
+    
+    console.log(`\n🎯 Selected: ${unique.join(', ').toUpperCase()}`);
+    this.showImpact(unique);
+    
+    const confirm = await cliHelper.prompt('\nProceed? (y/N): ');
+    if (confirm.toLowerCase() === 'y' || confirm.toLowerCase() === 'yes') {
+      this.keepLocales(unique.join(','));
+      console.log('\n🎉 Package optimized successfully!');
+      console.log('💡 Use --restore to bring back removed locales');
+    } else {
+      console.log('❌ Operation cancelled');
+    }
+    cliHelper.close();
+    return true;
   }
 
   /**
@@ -383,20 +377,14 @@ async function main() {
     console.log('═'.repeat(30));
     optimizer.listLocales();
     
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-    
-    rl.question('\nOptimize package size now? (Y/n): ', (answer) => {
-      if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
-        console.log('   Skipping optimization (you can run later with --interactive)');
-        closeGlobalReadline();
-      } else {
-        closeGlobalReadline();
-        optimizer.interactiveSelect();
-      }
-    });
+    const answer = await cliHelper.prompt('\nOptimize package size now? (Y/n): ');
+    if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
+      console.log('   Skipping optimization (you can run later with --interactive)');
+      cliHelper.close();
+    } else {
+      cliHelper.close();
+      await optimizer.interactiveSelect();
+    }
   } else if (args.includes('--dry-run')) {
     optimizer.dryRun();
   } else {

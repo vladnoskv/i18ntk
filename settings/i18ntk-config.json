@@ -1,11 +1,10 @@
 {
-  "version": "1.7.0",
   "language": "en",
   "uiLanguage": "en",
   "theme": "system",
   "projectRoot": ".",
-  "sourceDir": "./locales",
-  "i18nDir": "./locales",
+  "sourceDir": "./src/i18n/locales",
+  "i18nDir": "./src/i18n/locales",
   "outputDir": "./i18ntk-reports",
   "scriptDirectories": {
     "init": null,
@@ -90,6 +89,8 @@
       "warning": true,
       "error": true,
       "info": true,
+      "warnings": true,
+      "errors": true,
       "progress": true
     },
     "sound": false,
@@ -108,14 +109,21 @@
     "performanceTracking": true,
     "memoryLimit": "256MB",
     "enableExperimental": true,
+    "batchSize": 2000,
     "maxConcurrentFiles": 32,
     "enableProgressBars": true,
     "enableColorOutput": true,
+    "strictMode": false,
     "enableAuditLog": true,
     "validateOnSave": true,
     "sizingThreshold": 50,
     "sizingFormat": "table",
     "timeout": 3000,
+    "performanceMode": "ultra-extreme",
+    "gcInterval": 250,
+    "streaming": true,
+    "compression": "brotli",
+    "parallelProcessing": true,
     "aggressiveGC": true,
     "memoryPooling": true,
     "stringInterning": true
@@ -149,6 +157,13 @@
       ".md",
       ".txt"
     ],
+    "notTranslatedMarker": "[NOT TRANSLATED]",
+    "excludeFiles": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build"
+    ],
     "strictMode": false,
     "pinProtection": {
       "enabled": true,
@@ -177,11 +192,25 @@
     "debugLogPath": "./debug.log"
   },
   "sourceLanguage": "en",
-  "supportedLanguages": ["en", "es", "fr", "de", "ja", "ru", "zh"],
-  "defaultLanguages": ["en", "es", "fr", "de"],
+  "defaultLanguages": [
+    "en",
+    "es",
+    "fr",
+    "de"
+  ],
   "reportLanguage": "auto",
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto"
+  "timezone": "auto",
+  "version": "1.7.0",
+  "supportedLanguages": [
+    "en",
+    "es",
+    "fr",
+    "de",
+    "ja",
+    "ru",
+    "zh"
+  ]
 }
