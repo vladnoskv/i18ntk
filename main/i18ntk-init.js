@@ -73,7 +73,7 @@ class I18nInitializer {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
-      console.log(this.ui.t('init.noPackageJson'));
+      console.log(t('init.noPackageJson'));
       return await this.promptContinueWithoutI18n(noPrompt);
     }
     
@@ -99,14 +99,14 @@ class I18nInitializer {
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
       
       if (installedFrameworks.length > 0) {
-        console.log(this.ui.t('init.detectedI18nFrameworks', { frameworks: installedFrameworks.join(', ') }));
+        console.log(t('init.detectedI18nFrameworks', { frameworks: installedFrameworks.join(', ') }));
         return true;
       } else {
         showFrameworkWarningOnce(this.ui);
         return await this.promptContinueWithoutI18n(noPrompt);
       }
     } catch (error) {
-      console.log(this.ui.t('init.errors.packageJsonRead'));
+      console.log(t('init.errors.packageJsonRead'));
       return await this.promptContinueWithoutI18n(noPrompt);
     }
   }
@@ -116,7 +116,7 @@ class I18nInitializer {
     if (noPrompt || !process.stdin.isTTY) {
       return true;
     }
-    const answer = await this.prompt('\n' + this.ui.t('init.continueWithoutI18nPrompt'));
+    const answer = await this.prompt('\n' + t('init.continueWithoutI18nPrompt'));
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
   }
 
@@ -225,8 +225,8 @@ class I18nInitializer {
         return selectedDir;
       }
 
-      console.log('\n' + this.ui.t('init.existingDirectoriesFound'));
-      console.log(this.ui.t('common.separator'));
+      console.log('\n' + t('init.existingDirectoriesFound'));
+      console.log(t('common.separator'));
 
       existingLocations.forEach((location, index) => {
         console.log(`  ${index + 1}. ${location}`);
@@ -234,12 +234,12 @@ class I18nInitializer {
 
       console.log(`  ${existingLocations.length + 1}. Create new directory`);
 
-      const answer = await this.prompt('\n' + this.ui.t('init.selectDirectoryPrompt') + ' (Enter number):');
+      const answer = await this.prompt('\n' + t('init.selectDirectoryPrompt') + ' (Enter number):');
       const selectedIndex = parseInt(answer) - 1;
 
       if (selectedIndex >= 0 && selectedIndex < existingLocations.length) {
         const selectedDir = existingLocations[selectedIndex];
-        console.log(this.ui.t('init.usingExistingDirectory', { dir: selectedDir }));
+        console.log(t('init.usingExistingDirectory', { dir: selectedDir }));
 
         this.config.sourceDir = selectedDir;
         this.sourceDir = path.resolve(selectedDir);
@@ -250,21 +250,21 @@ class I18nInitializer {
 
         return selectedDir;
       } else if (selectedIndex === existingLocations.length) {
-        const newDirName = await this.prompt('\n' + this.ui.t('init.enterNewDirectoryName') + ': ');
+        const newDirName = await this.prompt('\n' + t('init.enterNewDirectoryName') + ': ');
         if (newDirName && newDirName.trim()) {
           const newDirPath = path.resolve(newDirName.trim());
 
           if (!fs.existsSync(newDirPath)) {
             fs.mkdirSync(newDirPath, { recursive: true });
-            console.log(this.ui.t('init.createdNewDirectory', { dir: newDirPath }));
+            console.log(t('init.createdNewDirectory', { dir: newDirPath }));
           } else {
-            console.log(this.ui.t('init.directoryAlreadyExists', { dir: newDirPath }));
+            console.log(t('init.directoryAlreadyExists', { dir: newDirPath }));
           }
 
           const sourceLangDir = path.join(newDirPath, this.config.sourceLanguage);
           if (!fs.existsSync(sourceLangDir)) {
             fs.mkdirSync(sourceLangDir, { recursive: true });
-            console.log(this.ui.t('init.createdSourceLanguageDirectory', { dir: sourceLangDir }));
+            console.log(t('init.createdSourceLanguageDirectory', { dir: sourceLangDir }));
             await this.createSampleTranslationFile(sourceLangDir);
           }
 
@@ -277,7 +277,7 @@ class I18nInitializer {
 
           return newDirPath;
         } else {
-          console.log(this.ui.t('init.invalidDirectoryName'));
+          console.log(t('init.invalidDirectoryName'));
           return null;
         }
       }
@@ -296,7 +296,7 @@ class I18nInitializer {
     const usedExisting = await this.detectAndSelectDirectory(skipPrompt);
     
     if (usedExisting) {
-      console.log(this.ui.t('init.usingExistingStructure', { dir: this.sourceDir }));
+      console.log(t('init.usingExistingStructure', { dir: this.sourceDir }));
       // When using existing, sourceLanguageDir might already be set to English directory
       return;
     }
@@ -307,19 +307,19 @@ class I18nInitializer {
     
     if (!validatedSourceDir || !validatedSourceLanguageDir) {
       SecurityUtils.logSecurityEvent('Invalid directory paths in setupInitialStructure', 'error', { sourceDir: this.sourceDir, sourceLanguageDir: this.sourceLanguageDir });
-      throw new Error(this.ui.t('validate.invalidDirectoryPaths') || 'Invalid directory paths detected');
+      throw new Error(t('validate.invalidDirectoryPaths') || 'Invalid directory paths detected');
     }
     
     // Create source directory only if it doesn't exist and no existing was detected
     if (!fs.existsSync(validatedSourceDir)) {
-      console.log(this.ui.t('init.creatingSourceDirectory', { dir: validatedSourceDir }));
+      console.log(t('init.creatingSourceDirectory', { dir: validatedSourceDir }));
       fs.mkdirSync(validatedSourceDir, { recursive: true });
       SecurityUtils.logSecurityEvent('Source directory created', 'info', { dir: validatedSourceDir });
     }
     
     // Create source language directory only if it doesn't exist
     if (!fs.existsSync(validatedSourceLanguageDir)) {
-      console.log(this.ui.t('init.creatingSourceLanguageDirectory', { dir: validatedSourceLanguageDir }));
+      console.log(t('init.creatingSourceLanguageDirectory', { dir: validatedSourceLanguageDir }));
       fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });
       
       // Create a sample translation file only if no files exist
@@ -377,28 +377,28 @@ class I18nInitializer {
     
     if (!validatedSampleFilePath) {
       SecurityUtils.logSecurityEvent('Invalid sample file path', 'error', { path: sampleFilePath });
-      throw new Error(this.ui.t('validate.invalidSampleFilePath') || 'Invalid sample file path');
+      throw new Error(t('validate.invalidSampleFilePath') || 'Invalid sample file path');
     }
     
     const success = await SecurityUtils.safeWriteFile(validatedSampleFilePath, JSON.stringify(sampleTranslations, null, 2), process.cwd());
     
     if (success) {
-      console.log(this.ui.t('init.createdSampleTranslationFile', { file: validatedSampleFilePath }));
+      console.log(t('init.createdSampleTranslationFile', { file: validatedSampleFilePath }));
       SecurityUtils.logSecurityEvent('Sample translation file created', 'info', { file: validatedSampleFilePath });
     } else {
       SecurityUtils.logSecurityEvent('Failed to create sample translation file', 'error', { file: validatedSampleFilePath });
-      throw new Error(this.ui.t('validate.failedToCreateSampleTranslationFile') || 'Failed to create sample translation file');
+      throw new Error(t('validate.failedToCreateSampleTranslationFile') || 'Failed to create sample translation file');
     }
   }
   
   // Check if source directory and language exist
   validateSource() {
     if (!fs.existsSync(this.sourceDir)) {
-      throw new Error(this.ui.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+      throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
     }
     
     if (!fs.existsSync(this.sourceLanguageDir)) {
-      throw new Error(this.ui.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || `Source language directory not found: ${this.sourceLanguageDir}`);
+      throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || `Source language directory not found: ${this.sourceLanguageDir}`);
     }
     
     return true;
@@ -433,7 +433,7 @@ class I18nInitializer {
             }
           }
         }
-        throw new Error(this.ui.t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
+        throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
       }
       
       const files = fs.readdirSync(this.sourceLanguageDir)
@@ -443,12 +443,12 @@ class I18nInitializer {
         });
       
       if (files.length === 0) {
-        throw new Error(this.ui.t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
+        throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
       }
       
       return files;
     } catch (error) {
-      console.warn(this.ui.t('init.warningCannotReadSourceDir', { dir: this.sourceLanguageDir, error: error.message }));
+      console.warn(t('init.warningCannotReadSourceDir', { dir: this.sourceLanguageDir, error: error.message }));
       throw error;
     }
   }
@@ -485,7 +485,7 @@ class I18nInitializer {
     
     if (!validatedTargetDir || !validatedTargetFile) {
       SecurityUtils.logSecurityEvent('Invalid path detected in createLanguageFile', 'error', { targetDir, targetFile });
-      throw new Error(this.ui.t('validate.invalidFilePathDetected') || 'Invalid file path detected');
+      throw new Error(t('validate.invalidFilePathDetected') || 'Invalid file path detected');
     }
     
     // Create target directory if it doesn't exist
@@ -518,7 +518,7 @@ class I18nInitializer {
     
     if (!success) {
       SecurityUtils.logSecurityEvent('Failed to write language file', 'error', { file: validatedTargetFile });
-      throw new Error(this.ui.t('validate.failedToWriteFile', { filePath: validatedTargetFile }) || `Failed to write file: ${validatedTargetFile}`);
+      throw new Error(t('validate.failedToWriteFile', { filePath: validatedTargetFile }) || `Failed to write file: ${validatedTargetFile}`);
     }
     
     SecurityUtils.logSecurityEvent('Language file created/updated', 'info', { file: validatedTargetFile, language: targetLanguage });
@@ -588,15 +588,15 @@ class I18nInitializer {
   async promptAdminPinSetup() {
     const { ask, askHidden, flushStdout } = require('../utils/cli');
 
-    console.log('\n' + this.ui.t('init.adminPinSetupOptional'));
-    console.log(this.ui.t('init.adminPinSeparator'));
-    console.log(this.ui.t('init.adminPinDescription1'));
-    console.log(this.ui.t('init.adminPinDescription2'));
-    console.log(this.ui.t('init.adminPinDescription3'));
-    console.log(this.ui.t('init.adminPinDescription4'));
+    console.log('\n' + t('init.adminPinSetupOptional'));
+    console.log(t('init.adminPinSeparator'));
+    console.log(t('init.adminPinDescription1'));
+    console.log(t('init.adminPinDescription2'));
+    console.log(t('init.adminPinDescription3'));
+    console.log(t('init.adminPinDescription4'));
 
     await flushStdout();
-    const enableProtection = await ask('\n' + this.ui.t('adminPin.setup_prompt'));
+    const enableProtection = await ask('\n' + t('adminPin.setup_prompt'));
 
     if (enableProtection.toLowerCase() === 'y' || enableProtection.toLowerCase() === 'yes') {
       try {
@@ -613,31 +613,31 @@ class I18nInitializer {
 
         let pin = null;
         do {
-          pin = await askHidden(this.ui.t('init.enterAdminPin'));
+          pin = await askHidden(t('init.enterAdminPin'));
           if (!/^\d{4}$/.test(pin)) {
-            console.log(this.ui.t('init.pinMustBe4Digits'));
+            console.log(t('init.pinMustBe4Digits'));
             pin = null;
             continue;
           }
-          const confirm = await askHidden(this.ui.t('init.confirmAdminPin'));
+          const confirm = await askHidden(t('init.confirmAdminPin'));
           if (pin !== confirm) {
-            console.log(this.ui.t('init.pinsDoNotMatch'));
+            console.log(t('init.pinsDoNotMatch'));
             pin = null;
           }
         } while (!pin);
 
         const saved = await SecurityUtils.saveEncryptedPin(pin);
         if (saved) {
-          console.log(this.ui.t('init.adminPinSetupSuccess'));
+          console.log(t('init.adminPinSetupSuccess'));
         } else {
-          console.error(this.ui.t('init.errorSettingUpAdminPin', { error: 'Failed to save PIN' }));
+          console.error(t('init.errorSettingUpAdminPin', { error: 'Failed to save PIN' }));
         }
       } catch (error) {
-        console.error(this.ui.t('init.errorSettingUpAdminPin', { error: error.message }));
-        console.log(this.ui.t('init.continuingWithoutAdminPin'));
+        console.error(t('init.errorSettingUpAdminPin', { error: error.message }));
+        console.log(t('init.continuingWithoutAdminPin'));
       }
     } else {
-      console.log(this.ui.t('init.skippingAdminPinSetup'));
+      console.log(t('init.skippingAdminPinSetup'));
     }
   }
 
@@ -649,17 +649,17 @@ class I18nInitializer {
 
     const { ask } = require('../utils/cli');
 
-    console.log('\n' + this.ui.t('init.languageSelectionTitle'));
-    console.log(this.ui.t('common.separator'));
-    console.log(this.ui.t('language.available'));
+    console.log('\n' + t('init.languageSelectionTitle'));
+    console.log(t('common.separator'));
+    console.log(t('language.available'));
 
     Object.entries(LANGUAGE_CONFIG).forEach(([code, config], index) => {
       console.log(`  ${(index + 1).toString().padStart(2)}. ${code} - ${config.name} (${config.nativeName})`);
     });
 
-    console.log('\n' + this.ui.t('init.defaultLanguages', { languages: this.config.defaultLanguages.join(', ') }));
+    console.log('\n' + t('init.defaultLanguages', { languages: this.config.defaultLanguages.join(', ') }));
 
-    const answer = await ask('\n' + this.ui.t('init.enterLanguageCodes'));
+    const answer = await ask('\n' + t('init.enterLanguageCodes'));
 
     if (answer.trim() === '') {
       return this.config.defaultLanguages;
@@ -670,7 +670,7 @@ class I18nInitializer {
     const invalidLanguages = selectedLanguages.filter(lang => !LANGUAGE_CONFIG[lang]);
 
     if (invalidLanguages.length > 0) {
-      console.warn(this.ui.t('init.warningInvalidLanguageCodes', { languages: invalidLanguages.join(', ') }));
+      console.warn(t('init.warningInvalidLanguageCodes', { languages: invalidLanguages.join(', ') }));
     }
 
     return validLanguages.length > 0 ? validLanguages : this.config.defaultLanguages;
@@ -679,8 +679,8 @@ class I18nInitializer {
   // Main initialization process
   async init() {
     try {
-      console.log(this.ui.t('init.initializationTitle'));
-      console.log(this.ui.t('common.separator'));
+      console.log(t('init.initializationTitle'));
+      console.log(t('common.separator'));
       
       // Parse command line arguments
       const args = this.parseArgs();
@@ -691,8 +691,8 @@ class I18nInitializer {
       this.sourceDir = path.resolve(this.config.sourceDir);
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
-      console.log(this.ui.t('init.sourceDirectoryLabel', { dir: this.sourceDir }));
-      console.log(this.ui.t('init.sourceLanguageLabel', { language: this.config.sourceLanguage }));
+      console.log(t('init.sourceDirectoryLabel', { dir: this.sourceDir }));
+      console.log(t('init.sourceLanguageLabel', { language: this.config.sourceLanguage }));
       
       // Check i18n dependencies first and exit if user chooses not to continue
       const hasI18n = await this.checkI18nDependencies(args.noPrompt);
@@ -712,7 +712,7 @@ class I18nInitializer {
       }
       
     } catch (error) {
-      console.error(this.ui.t('init.errors.initializationFailed', { error: error.message }));
+      console.error(t('init.errors.initializationFailed', { error: error.message }));
       throw error;
     } finally {
       // No explicit readline cleanup needed; CLI helpers manage a shared interface
@@ -721,11 +721,11 @@ class I18nInitializer {
 
   // Enhanced initialization with dependency checking
   async initialize(hasI18n = true, args = {}) {
-    console.log(this.ui.t('init.initializingProject'));
+    console.log(t('init.initializingProject'));
     
     if (!hasI18n) {
-      console.log(this.ui.t('init.warningProceedingWithoutFramework'));
-      console.log(this.ui.t('init.translationFilesCreatedWarning'));
+      console.log(t('init.warningProceedingWithoutFramework'));
+      console.log(t('init.translationFilesCreatedWarning'));
     }
     
       // Handle directory selection and structure setup
@@ -734,7 +734,7 @@ class I18nInitializer {
       this.config.sourceDir = selectedDir;
       this.sourceDir = path.resolve(selectedDir);
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
-      console.log(this.ui.t('init.usingExistingDirectory', { dir: selectedDir }));
+      console.log(t('init.usingExistingDirectory', { dir: selectedDir }));
     } else {
       await this.setupInitialStructure(args.noPrompt);
     }
@@ -758,21 +758,21 @@ class I18nInitializer {
     targetLanguages = Array.isArray(targetLanguages) ? targetLanguages : [];
     
     if (targetLanguages.length === 0) {
-      console.log(this.ui.t('init.noTargetLanguagesSpecified'));
+      console.log(t('init.noTargetLanguagesSpecified'));
       return;
     }
     
-    console.log('\n' + this.ui.t('init.targetLanguages', { languages: targetLanguages.map(lang => `${lang} (${LANGUAGE_CONFIG[lang]?.name || 'Unknown'})`).join(', ') }));
+    console.log('\n' + t('init.targetLanguages', { languages: targetLanguages.map(lang => `${lang} (${LANGUAGE_CONFIG[lang]?.name || 'Unknown'})`).join(', ') }));
     
     // Get source files
     const sourceFiles = this.getSourceFiles();
-    console.log('\n' + this.ui.t('init.foundSourceFiles', { count: sourceFiles.length }));
+    console.log('\n' + t('init.foundSourceFiles', { count: sourceFiles.length }));
     
     // Process each language
     const results = {};
     
     for (const targetLanguage of targetLanguages) {
-      console.log('\n' + this.ui.t('init.processingLanguage', { language: targetLanguage, name: LANGUAGE_CONFIG[targetLanguage]?.name || 'Unknown' }));
+      console.log('\n' + t('init.processingLanguage', { language: targetLanguage, name: LANGUAGE_CONFIG[targetLanguage]?.name || 'Unknown' }));
       
       const languageResults = {
         files: [],
@@ -819,7 +819,7 @@ class I18nInitializer {
         languageResults.totalStats.translated += stats.translated;
         languageResults.totalStats.missing += stats.missing;
         
-        console.log(this.ui.t('init.fileProcessingResult', { file: sourceFile, translated: stats.translated, total: stats.total, percentage: stats.percentage }));
+        console.log(t('init.fileProcessingResult', { file: sourceFile, translated: stats.translated, total: stats.total, percentage: stats.percentage }));
       }
       
       // Calculate overall percentage
@@ -829,29 +829,29 @@ class I18nInitializer {
       
       results[targetLanguage] = languageResults;
       
-      console.log(this.ui.t('init.overallProgress', { translated: languageResults.totalStats.translated, total: languageResults.totalStats.total, percentage: languageResults.totalStats.percentage }));
+      console.log(t('init.overallProgress', { translated: languageResults.totalStats.translated, total: languageResults.totalStats.total, percentage: languageResults.totalStats.percentage }));
     }
     
     // Summary report
     console.log('\n' + '=' .repeat(50));
-    console.log(this.ui.t('init.initializationSummaryTitle'));
-    console.log(this.ui.t('common.separator'));
+    console.log(t('init.initializationSummaryTitle'));
+    console.log(t('common.separator'));
     
     Object.entries(results).forEach(([lang, data]) => {
       const langName = LANGUAGE_CONFIG[lang]?.name || 'Unknown';
       const statusIcon = data.totalStats.percentage === 100 ? '✅' : data.totalStats.percentage >= 80 ? '🟡' : '🔴';
       
-      console.log(this.ui.t('init.languageSummary', { icon: statusIcon, name: langName, code: lang, percentage: data.totalStats.percentage }));
-      console.log(this.ui.t('init.languageFiles', { count: data.files.length }));
-      console.log(this.ui.t('init.languageKeys', { translated: data.totalStats.translated, total: data.totalStats.total }));
-      console.log(this.ui.t('init.languageMissing', { count: data.totalStats.missing }));
+      console.log(t('init.languageSummary', { icon: statusIcon, name: langName, code: lang, percentage: data.totalStats.percentage }));
+      console.log(t('init.languageFiles', { count: data.files.length }));
+      console.log(t('init.languageKeys', { translated: data.totalStats.translated, total: data.totalStats.total }));
+      console.log(t('init.languageMissing', { count: data.totalStats.missing }));
     });
     
-    console.log('\n' + this.ui.t('init.initializationCompletedSuccessfully'));
-    console.log('\n' + this.ui.t('init.nextStepsTitle'));
-    console.log(this.ui.t('init.nextStep1'));
-    console.log(this.ui.t('init.nextStep2'));
-    console.log(this.ui.t('init.nextStep3'));
+    console.log('\n' + t('init.initializationCompletedSuccessfully'));
+    console.log('\n' + t('init.nextStepsTitle'));
+    console.log(t('init.nextStep1'));
+    console.log(t('init.nextStep2'));
+    console.log(t('init.nextStep3'));
   }
 
   // Offer interactive locale optimization after initialization
@@ -945,25 +945,25 @@ class I18nInitializer {
       const isCalledDirectly = require.main === module;
       const isRequired = await adminAuth.isAuthRequired();
       if (isRequired && isCalledDirectly && !args.noPrompt && !fromMenu) {
-        console.log('\n' + this.ui.t('adminCli.authRequiredForOperation', { operation: 'initialize i18n project' }));
-        const pin = await this.prompt(this.ui.t('adminCli.enterPin'));
+        console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'initialize i18n project' }));
+        const pin = await this.prompt(t('adminCli.enterPin'));
         const isValid = await adminAuth.verifyPin(pin);
         
         if (!isValid) {
-          console.log(this.ui.t('adminCli.invalidPin'));
+          console.log(t('adminCli.invalidPin'));
           if (!fromMenu) process.exit(1);
           return;
         }
         
-        console.log(this.ui.t('adminCli.authenticationSuccess'));
+        console.log(t('adminCli.authenticationSuccess'));
       }
 
       // Check i18n dependencies first and exit if user chooses not to continue
       const hasI18n = await this.checkI18nDependencies(args.noPrompt);
       
       if (!hasI18n) {
-        console.log(this.ui.t('init.errors.noFramework'));
-        console.log(this.ui.t('init.suggestions.installFramework'));
+        console.log(t('init.errors.noFramework'));
+        console.log(t('init.suggestions.installFramework'));
         if (this.shouldCloseRL) {
           this.rl.close();
           global.activeReadlineInterface = null;
@@ -976,7 +976,7 @@ class I18nInitializer {
       await this.initialize(hasI18n, args);
       
     } catch (error) {
-      console.error(this.ui.t('init.errors.initializationFailed', { error: error.message }));
+      console.error(t('init.errors.initializationFailed', { error: error.message }));
       if (!fromMenu && require.main === module) {
         process.exit(1);
       }

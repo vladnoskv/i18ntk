@@ -193,7 +193,7 @@ class I18nFeatureTester {
       for (const lang of testLanguages) {
         try {
           await uiI18n.changeLanguage(lang);
-          const translated = uiI18n.t('menu.title');
+          const translated = t('menu.title');
           
           if (translated && translated !== 'menu.title') {
             this.log(`Language ${lang} loaded successfully`, 'success');
@@ -210,7 +210,7 @@ class I18nFeatureTester {
       
       // Test interpolation
       try {
-        const interpolated = uiI18n.t('status.i18nSetup', { status: 'Yes' });
+        const interpolated = t('status.i18nSetup', { status: 'Yes' });
         if (interpolated.includes('Yes')) {
           this.log('String interpolation working', 'success');
           passed++;
@@ -247,6 +247,7 @@ class I18nFeatureTester {
     
     try {
       const I18nSizingAnalyzer = require('./06-analyze-sizing');
+const { loadTranslations, t } = require('../../utils/i18n-helper');
       
       const analyzer = new I18nSizingAnalyzer({
         sourceDir: path.join(this.testDataDir, 'locales'),

@@ -52,7 +52,7 @@ class SettingsCLI {
      * Translation helper function
      */
     t(key, params = {}) {
-        return uiI18n.t(key, params);
+        return t(key, params);
     }
 
     /**
@@ -105,8 +105,8 @@ class SettingsCLI {
             uiI18n.refreshLanguageFromSettings();
         }
         
-        const title = uiI18n.t('operations.settings.title') || 'Settings Management';
-        const separator = uiI18n.t('operations.settings.separator') || '============================================================';
+        const title = t('operations.settings.title') || 'Settings Management';
+        const separator = t('operations.settings.separator') || '============================================================';
         
         console.log(`${colors.cyan}${colors.bright}`);
         console.log(`${title}`);

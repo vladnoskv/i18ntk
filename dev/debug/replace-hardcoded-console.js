@@ -22,177 +22,177 @@ class HardcodedConsoleReplacer {
         // Common console message patterns and their translation keys
         this.replacements.set(
             /console\.log\('⚠️\s*No package\.json found\. This toolkit works independently but is recommended to be used with i18n frameworks\.'/g,
-            "console.log(this.ui.t('init.warnings.noPackageJson'))"
+            "console.log(t('init.warnings.noPackageJson'))"
         );
         
         this.replacements.set(
             /console\.log\('💡 No i18n framework detected\. Consider installing one of:'/g,
-            "console.log(this.ui.t('init.suggestions.noFramework'))"
+            "console.log(t('init.suggestions.noFramework'))"
         );
         
         this.replacements.set(
             /console\.log\('\s*- react-i18next \(for React\)'/g,
-            "console.log(this.ui.t('init.frameworks.react'))"
+            "console.log(t('init.frameworks.react'))"
         );
         
         this.replacements.set(
             /console\.log\('\s*- vue-i18n \(for Vue\)'/g,
-            "console.log(this.ui.t('init.frameworks.vue'))"
+            "console.log(t('init.frameworks.vue'))"
         );
         
         this.replacements.set(
             /console\.log\('\s*- i18next \(universal\)'/g,
-            "console.log(this.ui.t('init.frameworks.i18next'))"
+            "console.log(t('init.frameworks.i18next'))"
         );
         
         this.replacements.set(
             /console\.log\('\s*- @nuxtjs\/i18n \(for Nuxt\)'/g,
-            "console.log(this.ui.t('init.frameworks.nuxt'))"
+            "console.log(t('init.frameworks.nuxt'))"
         );
         
         this.replacements.set(
             /console\.log\('\s*- svelte-i18n \(for Svelte\)'/g,
-            "console.log(this.ui.t('init.frameworks.svelte'))"
+            "console.log(t('init.frameworks.svelte'))"
         );
         
         this.replacements.set(
             /console\.log\('⚠️\s*Could not read package\.json'/g,
-            "console.log(this.ui.t('init.errors.packageJsonRead'))"
+            "console.log(t('init.errors.packageJsonRead'))"
         );
         
         this.replacements.set(
             /console\.log\('🎛️\s*I18N Management Toolkit'/g,
-            "console.log(this.ui.t('menu.title'))"
+            "console.log(t('menu.title'))"
         );
         
         this.replacements.set(
             /console\.log\('\\n📦 Please install an i18n framework and try again\.'/g,
-            "console.log(this.ui.t('init.errors.noFramework'))"
+            "console.log(t('init.errors.noFramework'))"
         );
         
         this.replacements.set(
             /console\.log\('💡 Recommended: npm install react-i18next \(or your preferred framework\)'/g,
-            "console.log(this.ui.t('init.suggestions.installFramework'))"
+            "console.log(t('init.suggestions.installFramework'))"
         );
         
         this.replacements.set(
             /console\.log\('\\n🚀 Starting automated workflow\.\.\.'\);/g,
-            "console.log(this.ui.t('workflow.starting'));"
+            "console.log(t('workflow.starting'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n✅ Workflow completed successfully!'\);/g,
-            "console.log(this.ui.t('workflow.completed'));"
+            "console.log(t('workflow.completed'));"
         );
         
         this.replacements.set(
             /console\.log\('📋 Check the generated reports in the i18ntk-reports directory\.'\);/g,
-            "console.log(this.ui.t('workflow.checkReports'));"
+            "console.log(t('workflow.checkReports'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n📝 Returning to main menu\.\.\.'\);/g,
-            "console.log(this.ui.t('menu.returning'));"
+            "console.log(t('menu.returning'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n📝 Workflow completed\. Exiting\.\.\.'\);/g,
-            "console.log(this.ui.t('workflow.exitingCompleted'));"
+            "console.log(t('workflow.exitingCompleted'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n✅ Operation completed successfully!'\);/g,
-            "console.log(this.ui.t('operations.completed'));"
+            "console.log(t('operations.completed'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n🔐 Admin authentication required'\);/g,
-            "console.log(this.ui.t('admin.authRequired'));"
+            "console.log(t('admin.authRequired'));"
         );
         
         this.replacements.set(
             /console\.log\('❌ Invalid PIN\. Access denied\.'\);/g,
-            "console.log(this.ui.t('admin.invalidPin'));"
+            "console.log(t('admin.invalidPin'));"
         );
         
         this.replacements.set(
             /console\.log\('✅ Authentication successful\.'\);/g,
-            "console.log(this.ui.t('admin.authSuccess'));"
+            "console.log(t('admin.authSuccess'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n📊 Generating Status Summary\.\.\.'\);/g,
-            "console.log(this.ui.t('status.generating'));"
+            "console.log(t('status.generating'));"
         );
         
         this.replacements.set(
             /console\.log\('✅ Status summary completed successfully!'\);/g,
-            "console.log(this.ui.t('status.completed'));"
+            "console.log(t('status.completed'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n📝 Status summary completed\. Exiting\.\.\.'\);/g,
-            "console.log(this.ui.t('status.exitingCompleted'));"
+            "console.log(t('status.exitingCompleted'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n📝 Error occurred\. Exiting\.\.\.'\);/g,
-            "console.log(this.ui.t('common.errorExiting'));"
+            "console.log(t('common.errorExiting'));"
         );
         
         this.replacements.set(
             /console\.log\('❌ Invalid option\. Please try again\.'\);/g,
-            "console.log(this.ui.t('menu.invalidChoice'));"
+            "console.log(t('menu.invalidChoice'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n🗑️\s*Deletion Options:'\);/g,
-            "console.log(this.ui.t('delete.options.title'));"
+            "console.log(t('delete.options.title'));"
         );
         
         this.replacements.set(
             /console\.log\('\s*1\. Delete all reports'\);/g,
-            "console.log(this.ui.t('delete.options.all'));"
+            "console.log(t('delete.options.all'));"
         );
         
         this.replacements.set(
             /console\.log\('\s*2\. Keep last 3 reports \(delete older ones\)'\);/g,
-            "console.log(this.ui.t('delete.options.keepLast3'));"
+            "console.log(t('delete.options.keepLast3'));"
         );
         
         this.replacements.set(
             /console\.log\('\s*0\. Cancel'\);/g,
-            "console.log(this.ui.t('common.options.cancel'));"
+            "console.log(t('common.options.cancel'));"
         );
         
         this.replacements.set(
             /console\.log\('❌ Operation cancelled\.'\);/g,
-            "console.log(this.ui.t('operations.cancelled'));"
+            "console.log(t('operations.cancelled'));"
         );
         
         this.replacements.set(
             /console\.log\('❌ Invalid option\.'\);/g,
-            "console.log(this.ui.t('menu.invalidOption'));"
+            "console.log(t('menu.invalidOption'));"
         );
         
         this.replacements.set(
             /console\.log\('✅ No files to delete\.'\);/g,
-            "console.log(this.ui.t('delete.noFiles'));"
+            "console.log(t('delete.noFiles'));"
         );
         
         this.replacements.set(
             /console\.log\('\\n🌍 CHANGE UI LANGUAGE'\);/g,
-            "console.log(this.ui.t('language.changeTitle'));"
+            "console.log(t('language.changeTitle'));"
         );
         
         this.replacements.set(
             /console\.log\('Available languages:'\);/g,
-            "console.log(this.ui.t('language.available'));"
+            "console.log(t('language.available'));"
         );
         
         this.replacements.set(
             /console\.log\('❌ Invalid selection\.'\);/g,
-            "console.log(this.ui.t('language.invalidSelection'));"
+            "console.log(t('language.invalidSelection'));"
         );
     }
 
@@ -268,6 +268,7 @@ class HardcodedConsoleReplacer {
             if (fileModified && !modifiedContent.includes('UIi18n')) {
                 const relativePath = path.relative(path.dirname(filePath), path.join(this.projectRoot, 'i18ntk-ui.js'));
                 const importStatement = `const UIi18n = require('${relativePath}');\n`;
+const { loadTranslations, t } = require('../../utils/i18n-helper');
                 
                 // Add import after existing requires or at the top
                 const requireRegex = /(const .* = require\(.*\);\n)+/;
@@ -293,7 +294,7 @@ class HardcodedConsoleReplacer {
                             functionMatch[0] + '\n    const ui = new UIi18n();'
                         );
                         // Update console.log calls to use ui instead of this.ui
-                        modifiedContent = modifiedContent.replace(/this\.ui\.t\(/g, 'ui.t(');
+                        modifiedContent = modifiedContent.replace(/this\.ui\.t\(/g, 't(');
                     }
                 } else {
                     // Add at the top level
@@ -302,7 +303,7 @@ class HardcodedConsoleReplacer {
                         '$1const ui = new UIi18n();\n'
                     );
                     // Update console.log calls to use ui instead of this.ui
-                    modifiedContent = modifiedContent.replace(/this\.ui\.t\(/g, 'ui.t(');
+                    modifiedContent = modifiedContent.replace(/this\.ui\.t\(/g, 't(');
                 }
             }
             

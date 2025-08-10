@@ -85,9 +85,9 @@ class I18nManager {
        try {
         validateSourceDir(this.config.sourceDir, 'i18ntk-manage');
       } catch (err) {
-        console.log(this.ui.t('init.requiredTitle'));
-        console.log(this.ui.t('init.requiredBody'));
-        const answer = await cliHelper.prompt(this.ui.t('init.promptRunNow'));
+        console.log(t('init.requiredTitle'));
+        console.log(t('init.requiredBody'));
+        const answer = await cliHelper.prompt(t('init.promptRunNow'));
         if (answer.trim().toLowerCase() === 'y') {
           const initializer = new I18nInitializer(this.config);
           await initializer.run({ fromMenu: true });
@@ -144,7 +144,7 @@ class I18nManager {
           
           if (hasLanguageDirs) {
             this.config.sourceDir = possiblePath;
-            this.ui.t('init.autoDetectedI18nDirectory', { path: possiblePath });
+            t('init.autoDetectedI18nDirectory', { path: possiblePath });
             break;
           }
         } catch (error) {
@@ -159,7 +159,7 @@ class I18nManager {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
-      console.log(this.ui.t('init.noPackageJson'));
+      console.log(t('init.noPackageJson'));
       return await this.promptContinueWithoutI18n();
     }
     
@@ -185,7 +185,7 @@ class I18nManager {
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
       
       if (installedFrameworks.length > 0) {
-        this.ui.t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') });
+        t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') });
         return true;
       } else {
         const cfg = configManager.getConfig();
@@ -197,7 +197,7 @@ class I18nManager {
         return await this.promptContinueWithoutI18n();
       }
     } catch (error) {
-      console.log(this.ui.t('init.errors.packageJsonRead'));
+      console.log(t('init.errors.packageJsonRead'));
       return await this.promptContinueWithoutI18n();
     }
   }
@@ -206,7 +206,7 @@ class I18nManager {
    * Prompt user to continue without i18n framework
    */
   async promptContinueWithoutI18n() {
-    const answer = await this.prompt('\n🤔 ' + this.ui.t('init.continueWithoutI18nPrompt'));
+    const answer = await this.prompt('\n🤔 ' + t('init.continueWithoutI18nPrompt'));
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
   }
 
@@ -293,7 +293,7 @@ class I18nManager {
       }
 
       if (commandToExecute) {
-        console.log(this.ui.t('ui.executingCommand', { command: commandToExecute }));
+        console.log(t('ui.executingCommand', { command: commandToExecute }));
         await this.executeCommand(commandToExecute);
         this.safeClose();
         return;
@@ -302,8 +302,8 @@ class I18nManager {
       // Check dependencies and exit if user chooses not to continue
       const shouldContinue = await this.checkI18nDependencies();
       if (!shouldContinue) {
-        console.log(this.ui.t('init.errorsNoFramework'));
-        console.log(this.ui.t('init.suggestions.installFramework'));
+        console.log(t('init.errorsNoFramework'));
+        console.log(t('init.suggestions.installFramework'));
         process.exit(0);
       }
       
@@ -312,7 +312,7 @@ class I18nManager {
       
     } catch (error) {
       if (this.ui && this.ui.t) {
-        console.error(this.ui.t('common.genericError', { error: error.message }));
+        console.error(t('common.genericError', { error: error.message }));
       } else {
         console.error(`Error: ${error.message}`);
       }
@@ -323,7 +323,7 @@ class I18nManager {
   }
 
   showHelp() {
-    const t = this.ui && this.ui.t ? (key) => this.ui.t(key) : (key) => {
+    const t = this.ui && this.ui.t ? (key) => t(key) : (key) => {
       // Fallback help text when UI is not initialized
       const helpTexts = {
         'help.usage': 'Usage: npm run i18ntk [command] [options]',
@@ -396,7 +396,7 @@ class I18nManager {
   }
 
   async executeCommand(command, options = {}) {
-    console.log(this.ui.t('menu.executingCommand', { command }));
+    console.log(t('menu.executingCommand', { command }));
     
     // Enhanced context detection
     const executionContext = this.getExecutionContext(options);
@@ -415,7 +415,7 @@ class I18nManager {
       const authPassed = await this.checkAdminAuth();
       if (!authPassed) {
         if (!this.isNonInteractiveMode() && !isDirectCommand) {
-          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+          await this.prompt(t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
         }
         return;
@@ -450,7 +450,7 @@ class I18nManager {
                 await tool.run({fromMenu: isManagerExecution});
                 break;
             case 'workflow':
-                console.log(this.ui.t('workflow.starting'));
+                console.log(t('workflow.starting'));
                 const AutoRunner = require('./i18ntk-autorun');
                 const runner = new AutoRunner(this.config);
                 // Ensure autorun initializes its translations and config before running
@@ -458,22 +458,22 @@ class I18nManager {
                 await runner.runAll(true); // Pass true for quiet mode
                 
                 // Show workflow completion message and return to menu
-                console.log(this.ui.t('workflow.completed'));
-                console.log(this.ui.t('workflow.checkReports'));
+                console.log(t('workflow.completed'));
+                console.log(t('workflow.checkReports'));
                 
                 // Check execution context for proper exit handling
                 if (isManagerExecution && !this.isNonInteractiveMode()) {
                     try {
-                        await this.prompt(this.ui.t('usage.pressEnterToReturnToMenu'));
+                        await this.prompt(t('usage.pressEnterToReturnToMenu'));
                         await this.showInteractiveMenu();
                     } catch (error) {
                         // If readline fails, just exit gracefully
-                        console.log(this.ui.t('menu.returning'));
+                        console.log(t('menu.returning'));
                         process.exit(0);
                     }
                 } else {
                     // For direct commands or workflow execution, exit gracefully
-                    console.log(this.ui.t('workflow.exitingCompleted'));
+                    console.log(t('workflow.exitingCompleted'));
                     process.exit(0);
                 }
                 return;
@@ -484,46 +484,46 @@ class I18nManager {
             case 'help':
                 this.showHelp();
                 if (isManagerExecution && !this.isNonInteractiveMode()) {
-                  await this.prompt(this.ui.t('usage.pressEnterToReturnToMenu'));
+                  await this.prompt(t('usage.pressEnterToReturnToMenu'));
                   await this.showInteractiveMenu();
                 } else {
-                  console.log(this.ui.t('workflow.exitingCompleted'));
+                  console.log(t('workflow.exitingCompleted'));
                   this.safeClose();
                   process.exit(0);
                 }
                 return;
                 break;
             default:
-                console.log(this.ui.t('menu.unknownCommand', { command }));
+                console.log(t('menu.unknownCommand', { command }));
                 this.showHelp();
                 // No return here, let the completion logic handle the exit/menu return
                 break;
         }
         
         // Handle command completion based on execution context
-        console.log(this.ui.t('operations.completed'));
+        console.log(t('operations.completed'));
         
         if (isManagerExecution && !this.isNonInteractiveMode()) {
           // Interactive menu execution - return to menu
-          await this.prompt(this.ui.t('menu.returnToMainMenu'));
+          await this.prompt(t('menu.returnToMainMenu'));
           await this.showInteractiveMenu();
         } else {
           // Direct commands, non-interactive mode, or workflow execution - exit immediately
-          console.log(this.ui.t('workflow.exitingCompleted'));
+          console.log(t('workflow.exitingCompleted'));
           this.safeClose();
           process.exit(0);
         }
         
     } catch (error) {
-        console.error(this.ui.t('common.errorExecutingCommand', { error: error.message }));
+        console.error(t('common.errorExecutingCommand', { error: error.message }));
         
         if (isManagerExecution && !this.isNonInteractiveMode()) {
           // Interactive menu execution - show error and return to menu
-          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+          await this.prompt(t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
         } else if (isDirectCommand && !this.isNonInteractiveMode()) {
           // Direct command execution - show "enter to continue" and exit with error
-          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+          await this.prompt(t('menu.pressEnterToContinue'));
           this.safeClose();
           process.exit(1);
         } else {
@@ -541,64 +541,64 @@ class I18nManager {
       return true;
     }
 
-    console.log(this.ui.t('adminCli.authRequired'));
-    const pin = await this.prompt(this.ui.t('adminCli.enterPin'));
+    console.log(t('adminCli.authRequired'));
+    const pin = await this.prompt(t('adminCli.enterPin'));
     const isValid = await this.adminAuth.verifyPin(pin);
     
     if (!isValid) {
-      console.log(this.ui.t('adminCli.invalidPin'));
+      console.log(t('adminCli.invalidPin'));
       return false;
     }
     
-    console.log(this.ui.t('adminCli.authSuccess'));
+    console.log(t('adminCli.authSuccess'));
     return true;
   }
 
   async showInteractiveMenu() {
     // Check if we're in non-interactive mode (like echo 0 | node script)
     if (this.isNonInteractiveMode()) {
-      console.log(`\n${this.ui.t('menu.title')}`);
-      console.log(this.ui.t('menu.separator'));
-      console.log(`1. ${this.ui.t('menu.options.init')}`);
-      console.log(`2. ${this.ui.t('menu.options.analyze')}`);
-      console.log(`3. ${this.ui.t('menu.options.validate')}`);
-      console.log(`4. ${this.ui.t('menu.options.usage')}`);
-      console.log(`5. ${this.ui.t('menu.options.complete')}`);
-      console.log(`6. ${this.ui.t('menu.options.sizing')}`);
-      console.log(`7. ${this.ui.t('menu.options.workflow')}`);
-      console.log(`8. ${this.ui.t('menu.options.status')}`);
-      console.log(`9. ${this.ui.t('menu.options.delete')}`);
-      console.log(`10. ${this.ui.t('menu.options.settings')}`);
-      console.log(`11. ${this.ui.t('menu.options.help')}`);
-      console.log(`12. ${this.ui.t('menu.options.debug')}`);
-      console.log(`13. ${this.ui.t('menu.options.language')}`);
-      console.log(`0. ${this.ui.t('menu.options.exit')}`);
-      console.log('\n' + this.ui.t('menu.nonInteractiveModeWarning'));
-      console.log(this.ui.t('menu.useDirectExecution'));
-      console.log(this.ui.t('menu.useHelpForCommands'));
+      console.log(`\n${t('menu.title')}`);
+      console.log(t('menu.separator'));
+      console.log(`1. ${t('menu.options.init')}`);
+      console.log(`2. ${t('menu.options.analyze')}`);
+      console.log(`3. ${t('menu.options.validate')}`);
+      console.log(`4. ${t('menu.options.usage')}`);
+      console.log(`5. ${t('menu.options.complete')}`);
+      console.log(`6. ${t('menu.options.sizing')}`);
+      console.log(`7. ${t('menu.options.workflow')}`);
+      console.log(`8. ${t('menu.options.status')}`);
+      console.log(`9. ${t('menu.options.delete')}`);
+      console.log(`10. ${t('menu.options.settings')}`);
+      console.log(`11. ${t('menu.options.help')}`);
+      console.log(`12. ${t('menu.options.debug')}`);
+      console.log(`13. ${t('menu.options.language')}`);
+      console.log(`0. ${t('menu.options.exit')}`);
+      console.log('\n' + t('menu.nonInteractiveModeWarning'));
+      console.log(t('menu.useDirectExecution'));
+      console.log(t('menu.useHelpForCommands'));
       this.safeClose();
       process.exit(0);
       return;
     }
     
-    console.log(`\n${this.ui.t('menu.title')}`);
-    console.log(this.ui.t('menu.separator'));
-    console.log(`1. ${this.ui.t('menu.options.init')}`);
-    console.log(`2. ${this.ui.t('menu.options.analyze')}`);
-    console.log(`3. ${this.ui.t('menu.options.validate')}`);
-    console.log(`4. ${this.ui.t('menu.options.usage')}`);
-    console.log(`5. ${this.ui.t('menu.options.complete')}`);
-    console.log(`6. ${this.ui.t('menu.options.sizing')}`);
-    console.log(`7. ${this.ui.t('menu.options.workflow')}`);
-    console.log(`8. ${this.ui.t('menu.options.status')}`);
-    console.log(`9. ${this.ui.t('menu.options.delete')}`);
-    console.log(`10. ${this.ui.t('menu.options.settings')}`);
-    console.log(`11. ${this.ui.t('menu.options.help')}`);
-    console.log(`12. ${this.ui.t('menu.options.debug')}`);
-    console.log(`13. ${this.ui.t('menu.options.language')}`);
-    console.log(`0. ${this.ui.t('menu.options.exit')}`);
+    console.log(`\n${t('menu.title')}`);
+    console.log(t('menu.separator'));
+    console.log(`1. ${t('menu.options.init')}`);
+    console.log(`2. ${t('menu.options.analyze')}`);
+    console.log(`3. ${t('menu.options.validate')}`);
+    console.log(`4. ${t('menu.options.usage')}`);
+    console.log(`5. ${t('menu.options.complete')}`);
+    console.log(`6. ${t('menu.options.sizing')}`);
+    console.log(`7. ${t('menu.options.workflow')}`);
+    console.log(`8. ${t('menu.options.status')}`);
+    console.log(`9. ${t('menu.options.delete')}`);
+    console.log(`10. ${t('menu.options.settings')}`);
+    console.log(`11. ${t('menu.options.help')}`);
+    console.log(`12. ${t('menu.options.debug')}`);
+    console.log(`13. ${t('menu.options.language')}`);
+    console.log(`0. ${t('menu.options.exit')}`);
     
-    const choice = await this.prompt('\n' + this.ui.t('menu.selectOptionPrompt'));
+    const choice = await this.prompt('\n' + t('menu.selectOptionPrompt'));
     
     switch (choice.trim()) {
       case '1':
@@ -626,54 +626,54 @@ class I18nManager {
         // Check for PIN protection
         const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
         if (authRequired) {
-          console.log(`\n${this.ui.t('adminCli.protectedAccess')}`);
-          const pin = await this.prompt(this.ui.t('adminCli.enterPin') + ': ');
+          console.log(`\n${t('adminCli.protectedAccess')}`);
+          const pin = await this.prompt(t('adminCli.enterPin') + ': ');
           const isValid = await this.adminAuth.verifyPin(pin);
           
           if (!isValid) {
-            console.log(this.ui.t('adminCli.invalidPin'));
-            await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+            console.log(t('adminCli.invalidPin'));
+            await this.prompt(t('menu.pressEnterToContinue'));
             await this.showInteractiveMenu();
             return;
           }
           
-          console.log(this.ui.t('adminCli.accessGranted'));
+          console.log(t('adminCli.accessGranted'));
         }
         
-        console.log(this.ui.t('summary.status.generating'));
+        console.log(t('summary.status.generating'));
         try {
           const summaryTool = require('./i18ntk-summary');
           const summary = new summaryTool();
           await summary.run({ fromMenu: true });
-          console.log(this.ui.t('summary.status.completed'));
+          console.log(t('summary.status.completed'));
           
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {
             try {
-              await this.prompt('\n' + this.ui.t('debug.pressEnterToContinue'));
+              await this.prompt('\n' + t('debug.pressEnterToContinue'));
               await this.showInteractiveMenu();
             } catch (error) {
-              console.log(this.ui.t('menu.returning'));
+              console.log(t('menu.returning'));
               process.exit(0);
             }
           } else {
-            console.log(this.ui.t('status.exitingCompleted'));
+            console.log(t('status.exitingCompleted'));
             process.exit(0);
           }
         } catch (error) {
-          console.error(this.ui.t('common.errorGeneratingStatusSummary', { error: error.message }));
+          console.error(t('common.errorGeneratingStatusSummary', { error: error.message }));
           
           // Check if we're in interactive mode before prompting
           if (!this.isNonInteractiveMode()) {
             try {
-              await this.prompt('\n' + this.ui.t('debug.pressEnterToContinue'));
+              await this.prompt('\n' + t('debug.pressEnterToContinue'));
               await this.showInteractiveMenu();
             } catch (error) {
-              console.log(this.ui.t('menu.returning'));
+              console.log(t('menu.returning'));
               process.exit(0);
             }
           } else {
-            console.log(this.ui.t('common.errorExiting'));
+            console.log(t('common.errorExiting'));
             process.exit(1);
           }
         }
@@ -686,7 +686,7 @@ class I18nManager {
         break;
       case '11':
         this.showHelp();
-        await this.prompt(this.ui.t('menu.returnToMainMenu'));
+        await this.prompt(t('menu.returnToMainMenu'));
         await this.showInteractiveMenu();
         break;
       case '12':
@@ -696,31 +696,31 @@ class I18nManager {
         await this.showLanguageMenu();
         break;
       case '0':
-        console.log(this.ui.t('menu.goodbye'));
+        console.log(t('menu.goodbye'));
         this.safeClose();
         process.exit(0);
       default:
-        console.log(this.ui.t('menu.invalidChoice'));
+        console.log(t('menu.invalidChoice'));
         await this.showInteractiveMenu();
     }
   }
 
   // Language Menu
   async showLanguageMenu() {
-    console.log(`\n${this.ui.t('language.title')}`);
-    console.log(this.ui.t('language.separator'));
-    console.log(this.ui.t('language.current', { language: this.ui.getLanguageDisplayName(this.ui.getCurrentLanguage()) }));
-    console.log('\n' + this.ui.t('language.available'));
+    console.log(`\n${t('language.title')}`);
+    console.log(t('language.separator'));
+    console.log(t('language.current', { language: this.ui.getLanguageDisplayName(this.ui.getCurrentLanguage()) }));
+    console.log('\n' + t('language.available'));
     
     this.ui.availableLanguages.forEach((lang, index) => {
       const displayName = this.ui.getLanguageDisplayName(lang);
       const current = lang === this.ui.getCurrentLanguage() ? ' ✓' : '';
-      console.log(this.ui.t('language.languageOption', { index: index + 1, displayName, current }));
+      console.log(t('language.languageOption', { index: index + 1, displayName, current }));
     });
     
-    console.log(`0. ${this.ui.t('language.backToMainMenu')}`);
+    console.log(`0. ${t('language.backToMainMenu')}`);
     
-    const choice = await this.prompt('\n' + this.ui.t('language.prompt'));
+    const choice = await this.prompt('\n' + t('language.prompt'));
     const choiceNum = parseInt(choice);
     
     if (choiceNum === 0) {
@@ -729,17 +729,17 @@ class I18nManager {
     } else if (choiceNum >= 1 && choiceNum <= this.ui.availableLanguages.length) {
       const selectedLang = this.ui.availableLanguages[choiceNum - 1];
       this.ui.changeLanguage(selectedLang);
-      console.log(this.ui.t('language.changed', { language: this.ui.getLanguageDisplayName(selectedLang) }));
+      console.log(t('language.changed', { language: this.ui.getLanguageDisplayName(selectedLang) }));
       
       // Refresh the UI with new language
       this.ui.refreshLanguageFromSettings();
       
       // Return to main menu with new language
-      await this.prompt('\n' + this.ui.t('language.pressEnterToContinue'));
+      await this.prompt('\n' + t('language.pressEnterToContinue'));
       await this.showInteractiveMenu();
     } else {
-      console.log(this.ui.t('language.invalid'));
-      await this.prompt('\n' + this.ui.t('language.pressEnterToContinue'));
+      console.log(t('language.invalid'));
+      await this.prompt('\n' + t('language.pressEnterToContinue'));
       await this.showLanguageMenu();
     }
   }
@@ -749,27 +749,27 @@ class I18nManager {
     // Check for PIN protection
     const authRequired = await this.adminAuth.isAuthRequiredForScript('debugMenu');
     if (authRequired) {
-      console.log(`\n${this.ui.t('adminPin.protectedAccess')}`);
-      const pin = await this.prompt(this.ui.t('adminPin.enterPin') + ': ');
+      console.log(`\n${t('adminPin.protectedAccess')}`);
+      const pin = await this.prompt(t('adminPin.enterPin') + ': ');
       const isValid = await this.adminAuth.verifyPin(pin);
       
       if (!isValid) {
-        console.log(this.ui.t('adminPin.invalidPin'));
-        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+        console.log(t('adminPin.invalidPin'));
+        await this.prompt(t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
       
-      console.log(this.ui.t('adminPin.accessGranted'));
+      console.log(t('adminPin.accessGranted'));
     }
 
-    console.log(`\n${this.ui.t('debug.title')}`);
-    console.log(this.ui.t('debug.separator'));
-    console.log(this.ui.t('debug.mainDebuggerSystemDiagnostics'));
-    console.log(this.ui.t('debug.debugLogs'));
-    console.log(this.ui.t('debug.backToMainMenu'));
+    console.log(`\n${t('debug.title')}`);
+    console.log(t('debug.separator'));
+    console.log(t('debug.mainDebuggerSystemDiagnostics'));
+    console.log(t('debug.debugLogs'));
+    console.log(t('debug.backToMainMenu'));
     
-    const choice = await this.prompt('\n' + this.ui.t('debug.selectOption'));
+    const choice = await this.prompt('\n' + t('debug.selectOption'));
     
     switch (choice.trim()) {
       case '1':
@@ -782,14 +782,14 @@ class I18nManager {
         await this.showInteractiveMenu();
         return;
       default:
-        console.log(this.ui.t('debug.invalidChoiceSelectRange'));
+        console.log(t('debug.invalidChoiceSelectRange'));
         await this.showDebugMenu();
     }
   }
 
   // Run a debug tool
   async runDebugTool(toolName, displayName) {
-  console.log(this.ui.t('debug.runningDebugTool', { displayName }));
+  console.log(t('debug.runningDebugTool', { displayName }));
     try {
       const toolPath = path.join(__dirname, '..', 'scripts', 'debug', toolName);
       if (fs.existsSync(toolPath)) {
@@ -801,20 +801,20 @@ class I18nManager {
         });
         console.log(output);
       } else {
-      console.log(this.ui.t('debug.debugToolNotFound', { toolName }));
+      console.log(t('debug.debugToolNotFound', { toolName }));
       }
     } catch (error) {
-      console.error(this.ui.t('debug.errorRunningDebugTool', { displayName, error: error.message }));
+      console.error(t('debug.errorRunningDebugTool', { displayName, error: error.message }));
 
     }
     
-    await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
+    await this.prompt('\n' + t('menu.pressEnterToContinue'));
     await this.showDebugMenu();
   }
 
   // View debug logs
   async viewDebugLogs() {
-    console.log(`\n${this.ui.t('debug.recentDebugLogs')}`);
+    console.log(`\n${t('debug.recentDebugLogs')}`);
     console.log('============================================================');
     
     try {
@@ -836,27 +836,27 @@ class I18nManager {
             console.log(`${index + 1}. ${file} (${stats.mtime.toLocaleString()})`);
           });
           
-          const choice = await this.prompt('\n' + this.ui.t('debug.selectLogPrompt', { count: files.length }));
+          const choice = await this.prompt('\n' + t('debug.selectLogPrompt', { count: files.length }));
           const fileIndex = parseInt(choice) - 1;
           
           if (fileIndex >= 0 && fileIndex < files.length) {
             const logContent = fs.readFileSync(path.join(logsDir, files[fileIndex]), 'utf8');
-            console.log(`\n${this.ui.t('debug.contentOf', { filename: files[fileIndex] })}:`);
+            console.log(`\n${t('debug.contentOf', { filename: files[fileIndex] })}:`);
             console.log('============================================================');
             console.log(logContent.slice(-2000)); // Show last 2000 characters
             console.log('============================================================');
           }
         } else {
-          console.log(this.ui.t('debug.noDebugLogsFound'));
+          console.log(t('debug.noDebugLogsFound'));
         }
       } else {
-        console.log(this.ui.t('debug.debugLogsDirectoryNotFound'));
+        console.log(t('debug.debugLogsDirectoryNotFound'));
       }
     } catch (error) {
-      console.error(this.ui.t('errors.errorReadingDebugLogs', { error: error.message }));
+      console.error(t('errors.errorReadingDebugLogs', { error: error.message }));
     }
     
-    await this.prompt('\n' + this.ui.t('menu.pressEnterToContinue'));
+    await this.prompt('\n' + t('menu.pressEnterToContinue'));
       await this.showInteractiveMenu();
   }
 
@@ -865,21 +865,21 @@ class I18nManager {
     // Check for PIN protection
     const authRequired = await this.adminAuth.isAuthRequiredForScript('deleteReports');
     if (authRequired) {
-      console.log(`\n${this.ui.t('adminPin.protectedAccess')}`);
-      const pin = await this.prompt(this.ui.t('adminPin.enterPin') + ': ');
+      console.log(`\n${t('adminPin.protectedAccess')}`);
+      const pin = await this.prompt(t('adminPin.enterPin') + ': ');
       const isValid = await this.adminAuth.verifyPin(pin);
       
       if (!isValid) {
-        console.log(this.ui.t('adminPin.invalidPin'));
-        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+        console.log(t('adminPin.invalidPin'));
+        await this.prompt(t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
       
-      console.log(this.ui.t('adminPin.accessGranted'));
+      console.log(t('adminPin.accessGranted'));
     }
 
-    console.log(`\n${this.ui.t('operations.deleteReportsTitle')}`);
+    console.log(`\n${t('operations.deleteReportsTitle')}`);
     console.log('============================================================');
     
     const targetDirs = [
@@ -893,7 +893,7 @@ class I18nManager {
     ];
     
     try {
-     console.log(this.ui.t('operations.scanningForFiles'));
+     console.log(t('operations.scanningForFiles'));
       
       let availableDirs = [];
       
@@ -912,19 +912,19 @@ class I18nManager {
       }
       
       if (availableDirs.length === 0) {
-       console.log(this.ui.t('operations.noFilesFoundToDelete'));
-        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+       console.log(t('operations.noFilesFoundToDelete'));
+        await this.prompt(t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
       
       // Show available directories
-      console.log(this.ui.t('operations.availableDirectories'));
+      console.log(t('operations.availableDirectories'));
       availableDirs.forEach((dir, index) => {
         console.log(`  ${index + 1}. ${dir.name} (${dir.count} files)`);
       });
-     console.log(`  ${availableDirs.length + 1}. ${this.ui.t('operations.allDirectories')}`);
-     console.log(`  0. ${this.ui.t('operations.cancelOption')}`);
+     console.log(`  ${availableDirs.length + 1}. ${t('operations.allDirectories')}`);
+     console.log(`  0. ${t('operations.cancelOption')}`);
       
       const dirChoice = await this.prompt(`\nSelect directory to clean (0-${availableDirs.length + 1}): `);
       const dirIndex = parseInt(dirChoice) - 1;
@@ -932,8 +932,8 @@ class I18nManager {
       let selectedDirs = [];
       
       if (dirChoice.trim() === '0') {
-        console.log(this.ui.t('operations.cancelled'));
-        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+        console.log(t('operations.cancelled'));
+        await this.prompt(t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       } else if (dirIndex === availableDirs.length) {
@@ -941,8 +941,8 @@ class I18nManager {
       } else if (dirIndex >= 0 && dirIndex < availableDirs.length) {
         selectedDirs = [availableDirs[dirIndex]];
       } else {
-       console.log(this.ui.t('operations.invalidSelection'));
-        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+       console.log(t('operations.invalidSelection'));
+        await this.prompt(t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
@@ -953,17 +953,17 @@ class I18nManager {
         allFiles.push(...dir.files);
       });
       
-      console.log(this.ui.t('operations.foundFilesInSelectedDirectories', { count: allFiles.length }));
+      console.log(t('operations.foundFilesInSelectedDirectories', { count: allFiles.length }));
       selectedDirs.forEach(dir => {
         console.log(`  📁 ${dir.name}: ${dir.count} files`);
       });
       
       // Show deletion options
-      console.log(this.ui.t('operations.deletionOptions'));
-      console.log(`  1. ${this.ui.t('operations.deleteAllFiles')}`);
-      console.log(`  2. ${this.ui.t('operations.keepLast3Files')}`);
-      console.log(`  3. ${this.ui.t('operations.keepLast5Files')}`);
-      console.log(`  0. ${this.ui.t('operations.cancelReportOption')}`);
+      console.log(t('operations.deletionOptions'));
+      console.log(`  1. ${t('operations.deleteAllFiles')}`);
+      console.log(`  2. ${t('operations.keepLast3Files')}`);
+      console.log(`  3. ${t('operations.keepLast5Files')}`);
+      console.log(`  0. ${t('operations.cancelReportOption')}`);
       
       const option = await this.prompt('\nSelect option (0-3): ');
       
@@ -980,28 +980,28 @@ class I18nManager {
           filesToDelete = this.getFilesToDeleteKeepLast(allFiles, 5);
           break;
         case '0':
-          console.log(this.ui.t('operations.cancelled'));
-          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+          console.log(t('operations.cancelled'));
+          await this.prompt(t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
           return;
         default:
-          console.log(this.ui.t('menu.invalidOption'));
-          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+          console.log(t('menu.invalidOption'));
+          await this.prompt(t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
           return;
       }
       
       if (filesToDelete.length === 0) {
-       console.log(this.ui.t('operations.noFilesToDelete'));
-        await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+       console.log(t('operations.noFilesToDelete'));
+        await this.prompt(t('menu.pressEnterToContinue'));
         await this.showInteractiveMenu();
         return;
       }
       
-      console.log(this.ui.t('operations.filesToDeleteCount', { count: filesToDelete.length }));
-      console.log(this.ui.t('operations.filesToKeepCount', { count: allFiles.length - filesToDelete.length }));
+      console.log(t('operations.filesToDeleteCount', { count: filesToDelete.length }));
+      console.log(t('operations.filesToKeepCount', { count: allFiles.length - filesToDelete.length }));
       
-     const confirm = await this.prompt(this.ui.t('operations.confirmDeletion'));
+     const confirm = await this.prompt(t('operations.confirmDeletion'));
       
       if (confirm.toLowerCase() === 'y' || confirm.toLowerCase() === 'yes') {
         let deletedCount = 0;
@@ -1009,23 +1009,23 @@ class I18nManager {
         for (const fileInfo of filesToDelete) {
           try {
             fs.unlinkSync(fileInfo.path);
-           console.log(this.ui.t('operations.deletedFile', { filename: path.basename(fileInfo.path) }));
+           console.log(t('operations.deletedFile', { filename: path.basename(fileInfo.path) }));
             deletedCount++;
           } catch (error) {
-          console.log(this.ui.t('operations.failedToDeleteFile', { filename: path.basename(fileInfo.path), error: error.message }));
+          console.log(t('operations.failedToDeleteFile', { filename: path.basename(fileInfo.path), error: error.message }));
           }
         }
         
         console.log(`\n🎉 Successfully deleted ${deletedCount} files!`);
       } else {
-        console.log(this.ui.t('operations.cancelled'));
+        console.log(t('operations.cancelled'));
       }
       
     } catch (error) {
       console.error(`❌ Error during deletion process: ${error.message}`);
     }
     
-    await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+    await this.prompt(t('menu.pressEnterToContinue'));
     await this.showInteractiveMenu();
   }
   
@@ -1087,18 +1087,18 @@ class I18nManager {
       // Check for PIN protection
       const authRequired = await this.adminAuth.isAuthRequiredForScript('settingsMenu');
       if (authRequired) {
-        console.log(`\n${this.ui.t('adminPin.protectedAccess')}`);
-        const pin = await this.prompt(this.ui.t('adminPin.enterPin') + ': ');
+        console.log(`\n${t('adminPin.protectedAccess')}`);
+        const pin = await this.prompt(t('adminPin.enterPin') + ': ');
         const isValid = await this.adminAuth.verifyPin(pin);
         
         if (!isValid) {
-          console.log(this.ui.t('adminPin.invalidPin'));
-          await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+          console.log(t('adminPin.invalidPin'));
+          await this.prompt(t('menu.pressEnterToContinue'));
           await this.showInteractiveMenu();
           return;
         }
         
-        console.log(this.ui.t('adminPin.accessGranted'));
+        console.log(t('adminPin.accessGranted'));
       }
 
       const SettingsCLI = require('../settings/settings-cli');
@@ -1106,7 +1106,7 @@ class I18nManager {
       await settingsCLI.run();
     } catch (error) {
       console.error('❌ Error opening settings:', error.message);
-      await this.prompt(this.ui.t('menu.pressEnterToContinue'));
+      await this.prompt(t('menu.pressEnterToContinue'));
     }
     await this.showInteractiveMenu();
   }

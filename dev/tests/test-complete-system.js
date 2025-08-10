@@ -81,7 +81,7 @@ class SystemTester {
             ];
             
             for (const key of criticalKeys) {
-                const translation = uiI18n.t(key);
+                const translation = t(key);
                 if (translation === key) {
                     this.missingTranslations.push(key);
                     this.logWarning(`Missing translation: ${key}`);
@@ -103,6 +103,7 @@ class SystemTester {
         
         try {
             const settingsManager = require('../../settings/settings-manager');
+const { loadTranslations, t } = require('../../utils/i18n-helper');
             
             // Test settings loading
             const settings = settingsManager.getSettings();
@@ -298,19 +299,19 @@ class SystemTester {
         const recommendations = [];
         
         if (this.missingTranslations.length > 0) {
-            recommendations.push(this.ui.t('hardcodedTexts.addMissingTranslationKeys'));
+            recommendations.push(t('hardcodedTexts.addMissingTranslationKeys'));
         }
         
         if (this.results.failed > 0) {
-            recommendations.push(this.ui.t('hardcodedTexts.fixFailingScripts'));
+            recommendations.push(t('hardcodedTexts.fixFailingScripts'));
         }
         
         if (this.results.warnings > 5) {
-            recommendations.push(this.ui.t('hardcodedTexts.reviewWarningMessages'));
+            recommendations.push(t('hardcodedTexts.reviewWarningMessages'));
         }
         
         if (recommendations.length === 0) {
-            recommendations.push(this.ui.t('hardcodedTexts.systemReadyForDeployment'));
+            recommendations.push(t('hardcodedTexts.systemReadyForDeployment'));
         }
         
         return recommendations;
