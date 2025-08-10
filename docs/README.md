@@ -1,7 +1,10 @@
 # Documentation Overview
 
-**Version:** 1.6.3**Last Updated:** 2025-08-08
+**Version:** 1.7.0
+**Last Updated:** 2025-08-10
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
+Version 1.7.0 introduces a watch helper for real-time translation updates and a framework for building a lite English-only UI locale package.
 
 ## Structure
 
@@ -19,13 +22,14 @@
 - [AI Agent Guidelines](./development/AGENTS.md) - Instructions for AI-assisted changes
 
 ### Additional Resources
-- [Release Notes](./release-notes/) - Version history and upgrade notes
-- [Reports](./reports/) - Analysis and validation reports
-- [Screenshots](./screenshots/) - Visual examples
-- [Version 1.6.3 Docs](./version-1.6.3/) - Archived documentation for v1.6.3 (DEPRECATED - use latest version) - [TODO & Roadmap](./TODO_ROADMAP.md) - Planned features and upcoming work
-- [License](./LICENSE) - MIT License information
-- [Contributing](./CONTRIBUTING.md) - Guidelines for contributing to i18ntk
-- [Development Scripts and Tools](./dev/) - Scripts and tools for development
+ - [Release Notes](./release-notes/) - Version history and upgrade notes
+ - [Reports](./reports/) - Analysis and validation reports
+ - [Screenshots](./screenshots/) - Visual examples
+ - [Version 1.6.3 Docs](./version-1.6.3/) - Archived documentation for v1.6.3 (deprecated)
+ - [TODO & Roadmap](./TODO_ROADMAP.md) - Planned features and upcoming work
+ - [License](./LICENSE) - MIT License information
+ - [Contributing](./CONTRIBUTING.md) - Guidelines for contributing to i18ntk
+ - [Development Scripts and Tools](./dev/) - Scripts and tools for development
 
 
 
@@ -35,27 +39,28 @@
 
 ### Upgrading from Deprecated Versions
 
-#### From any version < 1.6.3 (DEPRECATED - use latest version) 1. **Backup your current configuration**:
+#### From any version < 1.7.0 (DEPRECATED - use latest version)
+1. **Backup your current configuration**:
    ```bash
    cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
    ```
 
 2. **Install the latest version**:
-   ```bash
-   npm install i18ntk@1.6.3```
+    ```bash
+    npm install i18ntk@1.7.0```
 
 3. **Run configuration migration**:
-   ```bash
-   npx i18ntk@1.6.3--migrate
-   ```
+    ```bash
+    npx i18ntk@1.7.0 --migrate
+    ```
 
 4. **Verify installation**:
-   ```bash
-   npx i18ntk@1.6.3--version
-   npx i18ntk@1.6.3--validate
-   ```
+    ```bash
+    npx i18ntk@1.7.0 --version
+    npx i18ntk@1.7.0 --validate
+    ```
 
-#### Preserved Features from 1.6.3
+#### Preserved Features from 1.6.x
 - ✅ Ultra-extreme performance improvements
 - ✅ Enhanced security with PIN protection
 - ✅ Comprehensive backup & recovery
@@ -64,7 +69,7 @@
 - ✅ Advanced configuration management
 
 #### Breaking Changes
-- **None** - 1.6.3 is fully backward compatible
+- **None** - 1.7.0 is fully backward compatible
 
 ### Migration Support
 If you encounter issues during migration:

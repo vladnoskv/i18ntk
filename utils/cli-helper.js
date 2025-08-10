@@ -65,6 +65,7 @@ class CliHelper {
    */
   close() {
     if (this.isInitialized) {
+      const { closeGlobalReadline } = require('./cli');
       closeGlobalReadline();
       this.rl = null;
       this.isInitialized = false;

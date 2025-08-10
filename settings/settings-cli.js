@@ -1841,6 +1841,7 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
         }
 
         console.log(`\n${colors.green}${t('settings.goodbyeMessage')}${colors.reset}`);
+        const { closeGlobalReadline } = require('../utils/cli');
         closeGlobalReadline();
         process.exit(0);
     }

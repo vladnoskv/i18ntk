@@ -2,7 +2,7 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.7.0 
+**Version:** 1.7.0
 **Last Updated:** 2025-08-10  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
@@ -14,7 +14,7 @@
 
 > **Zero dependencies** | **Works with any framework** | **Enterprise-grade security**
 
-> **v1.7.0** - **Ultra-extreme performance improvements to the i18ntk toolkit with 97% speed improvement** ⚡ **15.38ms** for 200k keys (vs 1.2 seconds), up to 86% package size reduction, zero runtime dependencies, enhanced security with PIN protection, and comprehensive edge case handling.
+> **v1.7.0** – 97% speed improvement (**15.38ms** for 200k keys), new watch helper, and a lite English-only UI locale framework; up to 86% package size reduction, zero runtime dependencies, enhanced security with PIN protection, and comprehensive edge case handling.
 
 ## 🚀 Quick Start
 
@@ -23,11 +23,11 @@
 npm i i18ntk
 
 # Interactive setup
-npx i18ntk init
+npx i18ntk
 
 # Basic commands
 i18ntk analyze --source ./src
-i18ntk complete --config=extreme
+i18ntk complete --source ./src
 i18ntk validate --source ./locales
 ```
 
@@ -48,6 +48,8 @@ i18ntk validate --source ./locales
 - **Smart Sizing**: Interactive locale optimizer (up to 86% size reduction)
 - **Enterprise Backup**: Automated encrypted backups with cloud integration
 - **Zero Dependencies**: Lightweight, production-ready
+- **Watch Helper**: Optional `--watch` mode keeps translations synced in real time
+- **Lite Package Framework**: Build an English-only UI locale bundle for minimal footprint
 - **8 Languages**: English, Spanish, French, German, Japanese, Russian, Chinese, and more
 - **Framework Support**: Auto-detects React i18next, Vue i18n, Angular, Next i18next, Nuxt i18next, Svelte i18n
 - **Memory Optimization**: 67% memory reduction with streaming processing
@@ -163,7 +165,6 @@ import { createI18n } from 'vue-i18n';
 const i18n = createI18n({ locale: 'en', messages: translations });
 ```
 
-
 ## 🔒 Security Features
 
 - **Admin PIN Protection**: AES-256-GCM encryption with 30-min sessions
@@ -173,6 +174,11 @@ const i18n = createI18n({ locale: 'en', messages: translations });
 - **File Validation**: Safe file operations with permission checks
 - **Edge Case Security**: Robust handling of security edge cases
 - **Encrypted Backups**: AES-256 encrypted backup storage
+
+### 🎯 **NEW INTERACTIVE LOCALE OPTIMIZER** - up to 86% Package Size Reduction
+- **Package Size**: 830.4KB → 115.3KB (86% reduction for English only)
+- **Smart Management**: Interactive selection with automatic backups
+- **Zero Breaking Changes**: Safe restoration from backups
 
 ## 📋 Project Structure
 
@@ -193,7 +199,8 @@ your-project/
 
 - **Locale files are backed up automatically** before optimization
 - **Use interactive optimizer** for safe locale management
-- **Zero breaking changes** from v1.5.x to v1.6.3
+- **Zero breaking changes** from v1.6.x to v1.7.0
+- **All versions prior to 1.7.0 are deprecated**
 - **All improvements applied automatically** on update
 
 ## 📞 Support

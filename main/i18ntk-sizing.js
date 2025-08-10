@@ -36,14 +36,14 @@ const path = require('path');
 const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
-const configManager = require('../utils/config-manager');
+const configManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig } = require('../utils/config-helper');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = configManager.getConfig();
+  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
   
   // Check for per-script directory override, fallback to global sourceDir
   const sourceDir = settings.scriptDirectories?.sizing || settings.sourceDir || './locales';

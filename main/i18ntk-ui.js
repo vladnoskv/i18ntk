@@ -5,7 +5,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const configManager = require('../utils/config-manager');
+const SettingsManager = require('../settings/settings-manager');
+const configManager = SettingsManager;
 
 class UIi18n {
     constructor() {
@@ -14,7 +15,7 @@ this.translations = {};
         this.uiLocalesDir = null;
         this.uiLocalesDir = path.resolve(__dirname, '..', 'ui-locales');
         this.availableLanguages = [];
-        this.configFile = path.resolve(configManager.CONFIG_PATH);
+        this.configFile = path.resolve(configManager.configFile);
         
 
         // Initialize with safe defaults
@@ -24,11 +25,10 @@ this.translations = {};
 
     initialize() {
         try {
-            const config = configManager.getConfig();
-            const paths = configManager.resolvePaths();
+            const config = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
             
             // Use safe defaults if config is not available
-            this.uiLocalesDir = paths?.uiLocalesDir || path.resolve(__dirname, '..', 'ui-locales');
+            this.uiLocalesDir = path.resolve(__dirname, '..', 'ui-locales');
             this.availableLanguages = this.detectAvailableLanguages();
             
 
@@ -81,7 +81,7 @@ this.translations = {};
 
         this.translations = {}; // Reset translations for the new language
 
-        const settings = configManager.getConfig();
+        const settings = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
         const debugEnabled = settings.debug?.enabled || false;
         
         if (debugEnabled) {
@@ -198,7 +198,7 @@ this.translations = {};
      * @returns {string} Current language code
      */
     getCurrentLanguageFromSettings() {
-        const settings = configManager.getConfig();
+        const settings = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
         return settings.language || settings.uiLanguage || 'en';
     }
 
@@ -208,7 +208,21 @@ this.translations = {};
      */
     async saveLanguagePreference(language) {
         try {
-            await configManager.updateConfig({ language });
+            // Use setSetting method which properly persists individual settings
+            if (configManager.setSetting) {
+                await configManager.setSetting('language', language);
+                await configManager.setSetting('uiLanguage', language);
+            } else {
+                // Fallback to manual update for backward compatibility
+                const settings = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
+                settings.language = language;
+                settings.uiLanguage = language;
+                if (configManager.saveSettings) {
+                    await configManager.saveSettings(settings);
+                } else if (configManager.updateConfig) {
+                    await configManager.updateConfig(settings);
+                }
+            }
         } catch (error) {
            console.error(`Error saving language preference: ${error.message}`);
         }
@@ -232,18 +246,20 @@ this.translations = {};
     }
 
     /**
-     * Run language selector on first run or when forced
-     * @returns {Promise<string>} Selected language code
+     * Initialize language from settings on startup
+     * @returns {Promise<string>} Current language code
      */
     async initializeLanguage() {
         const currentLanguage = this.getCurrentLanguageFromSettings();
-        if (!currentLanguage || currentLanguage === 'en') {
-            const selectedLang = await this.selectLanguage();
-            await this.changeLanguage(selectedLang);
-            return selectedLang;
-        } else {
+        
+        // Always load the saved language preference on startup
+        if (currentLanguage && this.availableLanguages.includes(currentLanguage)) {
             await this.changeLanguage(currentLanguage);
             return currentLanguage;
+        } else {
+            // Fallback to English if saved language is invalid
+            await this.changeLanguage('en');
+            return 'en';
         }
     }
 
@@ -428,12 +444,16 @@ this.translations = {};
      * Call this after settings changes to update UI language
      */
     refreshLanguageFromSettings() {
-        const settings = configManager.getConfig();
-        const configuredLanguage = settings.language;
+        const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        const configuredLanguage = settings.language || settings.uiLanguage || 'en';
         
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {
             if (configuredLanguage !== this.currentLanguage) {
                 this.loadLanguage(configuredLanguage);
+                this.currentLanguage = configuredLanguage;
+                // Force reload translations in i18n-helper
+                const { loadTranslations } = require('../utils/i18n-helper');
+                loadTranslations(configuredLanguage);
                console.log(this.t('ui.uiLanguageUpdated', { language: this.getLanguageDisplayName(configuredLanguage) }));
             }
         }

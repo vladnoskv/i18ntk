@@ -206,7 +206,7 @@ class AdminCLI {
       const authRequired = await this.adminAuth.isAuthRequired();
       
       console.log(i18n.t('adminCli.adminProtectionStatusTitle'));
-      console.log('=' .repeat(30));
+      console.log('='.repeat(30));
       
       if (authRequired) {
         console.log(i18n.t('adminCli.statusEnabled'));

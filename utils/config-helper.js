@@ -11,7 +11,7 @@ const SecurityUtils = require('./security');
 const {loadTranslations} = require('./i18n-helper');
 const settingsManager = require('../settings/settings-manager');
 
-const { ask, closeGlobalReadline } = require('./cli');
+const { ask } = require('./cli');
 const { spawnSync } = require('child_process');
 
 /**
@@ -285,6 +285,7 @@ async function ensureInitialized(cfg) {
     }
 
     const answer = await ask(`Source language files not found in ${langDir}. Run initialization now? (y/N) `);
+    const { closeGlobalReadline } = require('./cli');
     closeGlobalReadline();
 
     if (answer.trim().toLowerCase().startsWith('y')) {

@@ -31,27 +31,29 @@ Contributions and suggestions are welcome. Please refer to the following resourc
 
 ### Upgrading from Deprecated Versions
 
-#### From any version < 1.6.3 (DEPRECATED - use latest version) 1. **Backup your current configuration**:
+#### From any version < 1.7.0 (DEPRECATED - use latest version)
+1. **Backup your current configuration**:
    ```bash
    cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
    ```
 
 2. **Install the latest version**:
    ```bash
-   npm install i18ntk@1.6.3```
+   npm install i18ntk@1.7.0
+   ```
 
 3. **Run configuration migration**:
    ```bash
-   npx i18ntk@1.6.3--migrate
+   npx i18ntk@1.7.0 --migrate
    ```
 
 4. **Verify installation**:
    ```bash
-   npx i18ntk@1.6.3--version
-   npx i18ntk@1.6.3--validate
+   npx i18ntk@1.7.0 --version
+   npx i18ntk@1.7.0 --validate
    ```
 
-#### Preserved Features from 1.6.3
+#### Preserved Features from 1.6.x
 - ✅ Ultra-extreme performance improvements
 - ✅ Enhanced security with PIN protection
 - ✅ Comprehensive backup & recovery
@@ -60,7 +62,7 @@ Contributions and suggestions are welcome. Please refer to the following resourc
 - ✅ Advanced configuration management
 
 #### Breaking Changes
-- **None** - 1.6.3 is fully backward compatible
+- **None** - 1.7.0 is fully backward compatible
 
 ### Migration Support
 If you encounter issues during migration:

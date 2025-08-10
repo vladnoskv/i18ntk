@@ -21,6 +21,7 @@ loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 
 
+
 class I18nCompletionTool {
   constructor(config = {}) {
     this.config = config;
@@ -549,11 +550,15 @@ class I18nCompletionTool {
 if (require.main === module) {
   const tool = new I18nCompletionTool();
   tool.run().then(() => {
+    const { closeGlobalReadline } = require('../utils/cli');
+    closeGlobalReadline();
     process.exit(0);
   }).catch(error => {
     const UIi18n = require('./i18ntk-ui');
-        console.error(t('complete.errorDuringCompletion', { error: error.message }));
+    console.error(t('complete.errorDuringCompletion', { error: error.message }));
     SecurityUtils.logSecurityEvent('I18n completion tool failed', 'error', { error: error.message });
+    const { closeGlobalReadline } = require('../utils/cli');
+    closeGlobalReadline();
     process.exit(1);
   });
 }

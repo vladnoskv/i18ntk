@@ -13,7 +13,8 @@ class AdminAuth {
     this.configPath = path.join(process.cwd(), 'settings', '.i18n-admin-config.json');
 
     // Get settings from config manager
-    const securitySettings = configManager.getConfig().security || {};
+    const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+    const securitySettings = settings.security || {};
     this.sessionTimeout = (securitySettings.sessionTimeout || 30) * 60 * 1000; // Convert minutes to milliseconds
     this.maxAttempts = securitySettings.maxFailedAttempts || 3;
     this.lockoutDuration = (securitySettings.lockoutDuration || 15) * 60 * 1000; // Convert minutes to milliseconds
@@ -197,7 +198,8 @@ class AdminAuth {
    */
   async isAuthRequired() {
     // Check if admin PIN is enabled in settings
-    if (!(configManager.getConfig().security?.adminPinEnabled)) {
+    const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+    if (!(settings.security?.adminPinEnabled)) {
       return false;
     }
     
@@ -210,7 +212,8 @@ class AdminAuth {
    */
   async isAuthRequiredForScript(scriptName) {
     // Check if admin PIN is enabled globally
-    if (!(configManager.getConfig().security?.adminPinEnabled)) {
+    const globalSettings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+    if (!(globalSettings.security?.adminPinEnabled)) {
       return false;
     }
 
@@ -221,7 +224,7 @@ class AdminAuth {
     }
 
     // Check if PIN protection is enabled
-    const pinProtection = configManager.getConfig().security?.pinProtection;
+    const pinProtection = globalSettings.security?.pinProtection;
     if (!pinProtection || !pinProtection.enabled) {
       return false; // Don't require PIN if protection is disabled
     }

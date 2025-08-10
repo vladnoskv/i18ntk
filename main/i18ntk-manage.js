@@ -24,7 +24,7 @@ const UIi18n = require('./i18ntk-ui');
 const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
-const configManager = require('../utils/config-manager');
+const configManager = require('../settings/settings-manager');
 const { showFrameworkWarningOnce } = require('../utils/cli-helper');
 const I18nInitializer = require('./i18ntk-init');
 const { I18nAnalyzer } = require('./i18ntk-analyze');
@@ -77,7 +77,9 @@ class I18nManager {
       // Initialize admin authentication
       this.adminAuth = new AdminAuth();
       
-      const uiLanguage = this.config.uiLanguage || 'en';
+      // Load language from saved configuration, not just CLI args
+      const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+      const uiLanguage = settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
       this.ui.loadLanguage(uiLanguage);
       
       // Validate source directory exists
@@ -104,7 +106,7 @@ class I18nManager {
 
   // Auto-detect i18n directory from common locations only if not configured in settings
   detectI18nDirectory() {
-    const settings = configManager.getConfig();
+    const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
     const projectRoot = path.resolve(settings.projectRoot || this.config.projectRoot || '.');
     
     // Use per-script directory configuration if available, fallback to global sourceDir
@@ -188,7 +190,7 @@ class I18nManager {
         t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') });
         return true;
       } else {
-        const cfg = configManager.getConfig();
+        const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
         if (cfg.framework === 'none') {
           return true;
         }
@@ -728,11 +730,12 @@ class I18nManager {
       return;
     } else if (choiceNum >= 1 && choiceNum <= this.ui.availableLanguages.length) {
       const selectedLang = this.ui.availableLanguages[choiceNum - 1];
-      this.ui.changeLanguage(selectedLang);
+      await this.ui.changeLanguage(selectedLang);
       console.log(t('language.changed', { language: this.ui.getLanguageDisplayName(selectedLang) }));
       
-      // Refresh the UI with new language
-      this.ui.refreshLanguageFromSettings();
+      // Force reload translations for the entire system
+      const { loadTranslations } = require('../utils/i18n-helper');
+      loadTranslations(selectedLang);
       
       // Return to main menu with new language
       await this.prompt('\n' + t('language.pressEnterToContinue'));

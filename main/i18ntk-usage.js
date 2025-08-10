@@ -65,8 +65,8 @@ class I18nUsageAnalyzer {
   
   // Close readline interface
   closeReadline() {
+    const { closeGlobalReadline } = require('../utils/cli');
     closeGlobalReadline();
-
   }
   
   // Prompt for user input

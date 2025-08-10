@@ -816,6 +816,8 @@ if (require.main === module) {
         const authenticated = await AdminCLI.authenticate();
         if (!authenticated) {
           console.log(t('validate.authenticationFailed'));
+          const { closeGlobalReadline } = require('../utils/cli');
+          closeGlobalReadline();
           process.exit(1);
         }
       }

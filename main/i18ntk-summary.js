@@ -70,8 +70,8 @@ class I18nSummaryReporter {
 
   // Close readline interface
   closeReadline() {
+    const { closeGlobalReadline } = require('../utils/cli');
     closeGlobalReadline();
-
   }
 
 
