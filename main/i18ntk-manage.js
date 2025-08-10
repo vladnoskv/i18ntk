@@ -323,7 +323,7 @@ class I18nManager {
   }
 
   showHelp() {
-    const t = this.ui && this.ui.t ? (key) => t(key) : (key) => {
+    const localT = this.ui && this.ui.t ? this.ui.t.bind(this.ui) : (key) => {
       // Fallback help text when UI is not initialized
       const helpTexts = {
         'help.usage': 'Usage: npm run i18ntk [command] [options]',

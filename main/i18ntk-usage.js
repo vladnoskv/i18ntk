@@ -52,9 +52,6 @@ class I18nUsageAnalyzer {
     this.translationStats = new Map(); // New: Track translation completeness
     
     // Use global translation function
-    this.t = t;
-    
-    // Initialize readline interface
     this.rl = null;
   }
 
@@ -88,16 +85,13 @@ class I18nUsageAnalyzer {
       // Load translations for UI
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-      this.t = t;
-      
-      // Resolve paths using projectRoot as base
       const projectRoot = path.resolve(this.config.projectRoot || '.');
       this.sourceDir = this.config.sourceDir;
       this.i18nDir = this.config.i18nDir;
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
 
       if (!fs.existsSync(this.i18nDir)) {
-        console.warn(this.t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
+        console.warn(t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         this.i18nDir = this.sourceDir;
         this.config.i18nDir = this.i18nDir;
         await configManager.updateConfig({ i18nDir: configManager.toRelative(this.sourceDir) });
@@ -132,9 +126,9 @@ class I18nUsageAnalyzer {
         this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx'];
       }
       
-      await SecurityUtils.logSecurityEvent(this.t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
+      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
     } catch (error) {
-      await SecurityUtils.logSecurityEvent(this.t('usage.analyzerInitFailed'), { component: 'i18ntk-usage', error: error.message });
+      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitFailed'), { component: 'i18ntk-usage', error: error.message });
       throw error;
     }
   }
@@ -239,7 +233,7 @@ class I18nUsageAnalyzer {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent(this.t('usage.translationDiscoveryError'), { 
+        await SecurityUtils.logSecurityEvent(t('usage.translationDiscoveryError'), { 
           component: 'i18ntk-usage', 
           directory: currentDir, 
           error: error.message 
@@ -313,7 +307,7 @@ class I18nUsageAnalyzer {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent(this.t('usage.fileTraversalError'), { 
+        await SecurityUtils.logSecurityEvent(t('usage.fileTraversalError'), { 
           component: 'i18ntk-usage', 
           directory: currentDir, 
           error: error.message 
@@ -352,9 +346,6 @@ class I18nUsageAnalyzer {
         
         const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
         loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-        this.t = t;
-        
-        // ✅ ensure defaults when skipping initialize()
         if (!Array.isArray(this.config.translationPatterns)) {
           this.config.translationPatterns = [
             /t\(['"`]([^'"`]+)['"`]/g,
@@ -394,19 +385,19 @@ class I18nUsageAnalyzer {
           
           const isRequired = await adminAuth.isAuthRequired();
           if (isRequired) {
-            console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'analyze usage' }));
+            console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'analyze usage' }));
             
-            const pin = await askHidden(this.t('adminCli.enterPin'));
+            const pin = await askHidden(t('adminCli.enterPin'));
 
             const isValid = await adminAuth.verifyPin(pin);
             
             if (!isValid) {
-              console.log(this.t('adminCli.invalidPin'));
+              console.log(t('adminCli.invalidPin'));
               if (!fromMenu) process.exit(1);
               return { success: false, error: 'Authentication failed' };
             }
             
-            console.log(this.t('adminCli.authenticationSuccess'));
+            console.log(t('adminCli.authenticationSuccess'));
           }
         }
       }
@@ -460,13 +451,13 @@ class I18nUsageAnalyzer {
       // 🚧 prevent scanning locales as source
       if (path.resolve(this.sourceDir) === path.resolve(this.i18nDir)) {
         const fallback = path.resolve(this.config.projectRoot || '.', 'src');
-        console.warn(this.t('usage.sourceEqualsI18nWarn') ||
+        console.warn(t('usage.sourceEqualsI18nWarn') ||
           `⚠️ sourceDir equals i18nDir (${this.sourceDir}). Falling back to ${fallback} for source scanning.`);
         this.sourceDir = fallback;
       }
       
-      console.log(this.t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir }));
-      console.log(this.t('usage.detectedI18nDirectory', { i18nDir: this.i18nDir }));
+      console.log(t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir }));
+      console.log(t('usage.detectedI18nDirectory', { i18nDir: this.i18nDir }));
       
       // Load available translation keys first
       await this.loadAvailableKeys();
@@ -482,23 +473,23 @@ class I18nUsageAnalyzer {
       const missingKeys = this.findMissingKeys();
       const notTranslatedStats = this.getNotTranslatedStats();
       
-      console.log('\n' + this.t('usage.analysisResults'));
-      console.log('   ' + this.t('usage.availableKeysCount', { count: this.availableKeys.size }));
-      console.log('   ' + this.t('usage.usedKeysCount', { count: this.usedKeys.size }));
-      console.log(this.t('usage.unusedKeysCount', { count: unusedKeys.length }));
-      console.log(this.t('usage.missingKeysCount', { count: missingKeys.length }));
-      console.log(this.t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
+      console.log('\n' + t('usage.analysisResults'));
+      console.log('   ' + t('usage.availableKeysCount', { count: this.availableKeys.size }));
+      console.log('   ' + t('usage.usedKeysCount', { count: this.usedKeys.size }));
+      console.log(t('usage.unusedKeysCount', { count: unusedKeys.length }));
+      console.log(t('usage.missingKeysCount', { count: missingKeys.length }));
+      console.log(t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
       
       // Sanity check: warn if 0 used keys but available keys exist
       if (this.availableKeys.size > 0 && this.usedKeys.size === 0) {
-        console.warn('\n⚠️  ' + (this.t('operations.usage.noUsedKeysHint') || 'Found translations but no usage in source. Check --source-dir and translationPatterns.'));
+        console.warn('\n⚠️  ' + (t('operations.usage.noUsedKeysHint') || 'Found translations but no usage in source. Check --source-dir and translationPatterns.'));
       }
       
       // Display translation completeness by language
-      console.log(this.t('usage.translationCompletenessTitle'));
+      console.log(t('usage.translationCompletenessTitle'));
       for (const [language, stats] of this.translationStats) {
         const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
-        console.log(this.t('usage.languageCompletenessStats', { language, completeness, translated: stats.translated, total: stats.total }));
+        console.log(t('usage.languageCompletenessStats', { language, completeness, translated: stats.translated, total: stats.total }));
       }
       
       if (args.outputReport) {
@@ -506,7 +497,7 @@ class I18nUsageAnalyzer {
         await this.saveReport(report, args.outputDir);
       }
       
-      console.log('\n' + this.t('usage.analysisCompletedSuccessfully'));
+      console.log('\n' + t('usage.analysisCompletedSuccessfully'));
     
       if (require.main === module && !args.noPrompt) {
         await this.prompt('\nPress Enter to continue...');
@@ -514,9 +505,9 @@ class I18nUsageAnalyzer {
       this.closeReadline();
       
     } catch (error) {
-      console.error(this.t('usage.analysisFailedError'), error.message);
+      console.error(t('usage.analysisFailedError'), error.message);
       this.closeReadline();
-      await SecurityUtils.logSecurityEvent(this.t('usage.usageAnalysisFailed'), { 
+      await SecurityUtils.logSecurityEvent(t('usage.usageAnalysisFailed'), { 
         component: 'i18ntk-usage', 
         error: error.message 
       });
@@ -568,7 +559,7 @@ Analysis Features:
       // Discover all translation files in the i18n directory
       const translationFiles = await this.discoverTranslationFiles(this.i18nDir, this.config.sourceLanguage);
       
-      console.log(this.t('usage.foundTranslationFiles', { count: translationFiles.length }));
+      console.log(t('usage.foundTranslationFiles', { count: translationFiles.length }));
       
       for (const fileInfo of translationFiles) {
         try {
@@ -623,7 +614,7 @@ Analysis Features:
           fileKeys.forEach(key => keys.add(key));
           
           if (isDebug) {
-            console.log(this.t('usage.fileInfo', { namespace: fileInfo.namespace, keys: fileKeys.length }));
+            console.log(t('usage.fileInfo', { namespace: fileInfo.namespace, keys: fileKeys.length }));
           }
         } catch (error) {
           if (isDebug || isStrict) {
@@ -632,7 +623,7 @@ Analysis Features:
           if (isDebug) {
             console.error(error.stack);
           }
-          await SecurityUtils.logSecurityEvent(this.t('usage.translationFileParseError'), {
+          await SecurityUtils.logSecurityEvent(t('usage.translationFileParseError'), {
             component: 'i18ntk-usage',
             file: fileInfo.filePath,
             error: error.message
@@ -640,7 +631,7 @@ Analysis Features:
         }
       }
     } catch (error) {
-      await SecurityUtils.logSecurityEvent(this.t('usage.translationKeysLoadError'), {
+      await SecurityUtils.logSecurityEvent(t('usage.translationKeysLoadError'), {
         component: 'i18ntk-usage',
         error: error.message
       });
@@ -701,7 +692,7 @@ Analysis Features:
           }
           return new RegExp(pattern.source, 'g');
         } catch (patternError) {
-          console.warn(`${this.t('usage.invalidPattern')} ${pattern}`);
+          console.warn(`${t('usage.invalidPattern')} ${pattern}`);
           return null;
         }
       }).filter(Boolean);
@@ -728,17 +719,17 @@ Analysis Features:
           }
           
           if (matchCount >= maxMatches) {
-            console.warn(`${this.t('usage.patternMatchLimitReached')} ${filePath}`);
+            console.warn(`${t('usage.patternMatchLimitReached')} ${filePath}`);
           }
         } catch (execError) {
           // Skip patterns that fail to execute
-          console.warn(`${this.t('usage.patternExecutionFailed')} ${filePath}: ${execError.message}`);
+          console.warn(`${t('usage.patternExecutionFailed')} ${filePath}: ${execError.message}`);
         }
       });
       
       return keys;
     } catch (error) {
-      console.warn(`${this.t('usage.failedToExtractKeys')} ${filePath}: ${error.message}`);
+      console.warn(`${t('usage.failedToExtractKeys')} ${filePath}: ${error.message}`);
       return [];
     }
   }
@@ -746,19 +737,19 @@ Analysis Features:
   // Analyze usage in source files
   async analyzeUsage() {
     try {
-      console.log(this.t('usage.checkUsage.analyzing_source_files'));
+      console.log(t('usage.checkUsage.analyzing_source_files'));
       
       // Check if source directory exists
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+        throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
       const sourceFiles = await this.getAllFiles(this.sourceDir);
-      console.log(this.t('usage.checkUsage.found_files_in_source', { numFiles: sourceFiles.length }));
+      console.log(t('usage.checkUsage.found_files_in_source', { numFiles: sourceFiles.length }));
       
       // If no files found, exit gracefully
       if (sourceFiles.length === 0) {
-        console.warn(this.t('usage.noSourceFilesFound'));
+        console.warn(t('usage.noSourceFilesFound'));
         return;
       }
       
@@ -783,42 +774,42 @@ Analysis Features:
           
           // Progress indicator for large numbers of files
           if (sourceFiles.length > 10 && processedFiles % Math.ceil(sourceFiles.length / 10) === 0) {
-            console.log(this.t('usage.processedFiles', { processedFiles, totalFiles: sourceFiles.length }));
+            console.log(t('usage.processedFiles', { processedFiles, totalFiles: sourceFiles.length }));
           }
         } catch (fileError) {
-          console.warn(`${this.t('usage.failedToProcessFile')} ${filePath}: ${fileError.message}`);
+          console.warn(`${t('usage.failedToProcessFile')} ${filePath}: ${fileError.message}`);
           continue;
         }
       }
       
-      console.log(this.t("usage.checkUsage.found_thisusedkeyssize_unique_", { usedKeysSize: this.usedKeys.size }));
-      console.log(this.t("usage.checkUsage.total_key_usages_totalkeysfoun", { totalKeysFound }));
+      console.log(t("usage.checkUsage.found_thisusedkeyssize_unique_", { usedKeysSize: this.usedKeys.size }));
+      console.log(t("usage.checkUsage.total_key_usages_totalkeysfoun", { totalKeysFound }));
       
     } catch (error) {
-     console.error(this.t('usage.failedToAnalyzeUsage', { error: error.message }));
+     console.error(t('usage.failedToAnalyzeUsage', { error: error.message }));
       throw error;
     }
   }
 
   // Load available translation keys
   async loadAvailableKeys() {
-    console.log(this.t("usage.checkUsage.loading_available_translation_"));
+    console.log(t("usage.checkUsage.loading_available_translation_"));
     
     this.availableKeys = await this.getAllTranslationKeys();
-    console.log(this.t("usage.checkUsage.found_thisavailablekeyssize_av", { availableKeysSize: this.availableKeys.size }));
+    console.log(t("usage.checkUsage.found_thisavailablekeyssize_av", { availableKeysSize: this.availableKeys.size }));
   }
 
   // NEW: Analyze translation completeness across all languages
   async analyzeTranslationCompleteness() {
     try {
-      console.log('\n' + this.t('usage.analyzingTranslationCompleteness'));
+      console.log('\n' + t('usage.analyzingTranslationCompleteness'));
       
       const isDebug = process.argv.includes('--debug');
       const isStrict = process.argv.includes('--strict');
       
       // Check if i18n directory exists
       if (!fs.existsSync(this.i18nDir)) {
-        console.warn(this.t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
+        console.warn(t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         return;
       }
       
@@ -851,7 +842,7 @@ Analysis Features:
         
         directFiles.forEach(lang => languages.add(lang));
       } catch (error) {
-        console.warn(`${this.t('usage.errorReadingI18nDirectory')} ${error.message}`);
+        console.warn(`${t('usage.errorReadingI18nDirectory')} ${error.message}`);
         return;
       }
       
@@ -1070,56 +1061,56 @@ Analysis Features:
     
     const timestamp = new Date().toISOString();
     
-    let report = `${this.t('summary.usageReportTitle')}\n`;
-    report += `${this.t('summary.usageReportGenerated', { timestamp })}\n`;
-    report += `${this.t('summary.usageReportSourceDir', { sourceDir: this.sourceDir })}\n`;
-    report += `${this.t('summary.usageReportI18nDir', { i18nDir: this.i18nDir })}\n\n`;
+    let report = `${t('summary.usageReportTitle')}\n`;
+    report += `${t('summary.usageReportGenerated', { timestamp })}\n`;
+    report += `${t('summary.usageReportSourceDir', { sourceDir: this.sourceDir })}\n`;
+    report += `${t('summary.usageReportI18nDir', { i18nDir: this.i18nDir })}\n\n`;
     
     // Summary
-    report += `${this.t('summary.usageReportSummary')}\n`;
+    report += `${t('summary.usageReportSummary')}\n`;
     report += `${'='.repeat(50)}\n`;
-    report += `${this.t('summary.usageReportSourceFilesScanned', { count: this.fileUsage.size })}\n`;
-    report += `${this.t('summary.usageReportTranslationFilesFound', { count: this.translationFiles.size })}\n`;
-    report += `${this.t('summary.usageReportAvailableKeys', { count: this.availableKeys.size })}\n`;
-    report += `${this.t('summary.usageReportUsedKeys', { count: this.usedKeys.size - dynamicKeys.length })}\n`;
-    report += `${this.t('summary.usageReportDynamicKeys', { count: dynamicKeys.length })}\n`;
-    report += `${this.t('summary.usageReportUnusedKeys', { count: unusedKeys.length })}\n`;
-    report += `${this.t('summary.usageReportMissingKeys', { count: missingKeys.length })}\n`;
-    report += `${this.t('summary.usageReportNotTranslatedKeys', { count: notTranslatedStats.total })}\n\n`;
+    report += `${t('summary.usageReportSourceFilesScanned', { count: this.fileUsage.size })}\n`;
+    report += `${t('summary.usageReportTranslationFilesFound', { count: this.translationFiles.size })}\n`;
+    report += `${t('summary.usageReportAvailableKeys', { count: this.availableKeys.size })}\n`;
+    report += `${t('summary.usageReportUsedKeys', { count: this.usedKeys.size - dynamicKeys.length })}\n`;
+    report += `${t('summary.usageReportDynamicKeys', { count: dynamicKeys.length })}\n`;
+    report += `${t('summary.usageReportUnusedKeys', { count: unusedKeys.length })}\n`;
+    report += `${t('summary.usageReportMissingKeys', { count: missingKeys.length })}\n`;
+    report += `${t('summary.usageReportNotTranslatedKeys', { count: notTranslatedStats.total })}\n\n`;
     
     // Translation completeness
-    report += `${this.t('summary.usageReportTranslationCompleteness')}\n`;
+    report += `${t('summary.usageReportTranslationCompleteness')}\n`;
     report += `${'='.repeat(50)}\n`;
     for (const [language, stats] of this.translationStats) {
       const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
-      report += `${this.t('summary.usageReportLanguageCompleteness', { language: language.toUpperCase(), completeness, translated: stats.translated, total: stats.total })}\n`;
+      report += `${t('summary.usageReportLanguageCompleteness', { language: language.toUpperCase(), completeness, translated: stats.translated, total: stats.total })}\n`;
       if (stats.notTranslated > 0) {
-        report += `${this.t('summary.usageReportNotTranslatedInLanguage', { count: stats.notTranslated })}\n`;
+        report += `${t('summary.usageReportNotTranslatedInLanguage', { count: stats.notTranslated })}\n`;
       }
     }
     report += `\n`;
     
     // Translation files discovered
-    report += `${this.t('summary.usageReportTranslationFilesDiscovered')}\n`;
+    report += `${t('summary.usageReportTranslationFilesDiscovered')}\n`;
     report += `${'='.repeat(50)}\n`;
     for (const [filePath, fileInfo] of this.translationFiles) {
       const relativePath = path.relative(this.i18nDir, filePath);
-      report += `${this.t('summary.usageReportFileInfo', { relativePath, namespace: fileInfo.namespace, type: fileInfo.type })}\n`;
+      report += `${t('summary.usageReportFileInfo', { relativePath, namespace: fileInfo.namespace, type: fileInfo.type })}\n`;
     }
     report += `\n`;
     
     // Unused keys
     if (unusedKeys.length > 0) {
-      report += `${this.t('summary.usageReportUnusedTranslationKeys')}\n`;
+      report += `${t('summary.usageReportUnusedTranslationKeys')}\n`;
       report += `${'='.repeat(50)}\n`;
-      report += `${this.t('summary.usageReportUnusedKeysDescription')}\n\n`;
+      report += `${t('summary.usageReportUnusedKeysDescription')}\n\n`;
       
       unusedKeys.slice(0, 100).forEach(key => {
-        report += `${this.t('summary.usageReportUnusedKey', { key })}\n`;
+        report += `${t('summary.usageReportUnusedKey', { key })}\n`;
       });
       
       if (unusedKeys.length > 100) {
-        report += `${this.t('summary.usageReportMoreUnusedKeys', { count: unusedKeys.length - 100 })}\n`;
+        report += `${t('summary.usageReportMoreUnusedKeys', { count: unusedKeys.length - 100 })}\n`;
       }
       
       report += `\n`;
@@ -1127,21 +1118,21 @@ Analysis Features:
     
     // Missing keys
     if (missingKeys.length > 0) {
-      report += `${this.t('summary.usageReportMissingTranslationKeys')}\n`;
+      report += `${t('summary.usageReportMissingTranslationKeys')}\n`;
       report += `${'='.repeat(50)}\n`;
-      report += `${this.t('summary.usageReportMissingKeysDescription')}\n\n`;
+      report += `${t('summary.usageReportMissingKeysDescription')}\n\n`;
       
       missingKeys.forEach(key => {
-        report += `${this.t('summary.usageReportMissingKey', { key })}\n`;
+        report += `${t('summary.usageReportMissingKey', { key })}\n`;
         
         // Show where it's used
         const usage = this.findKeyUsage(key);
         usage.slice(0, 3).forEach(({ filePath }) => {
-          report += `   ${this.t('summary.usageReportUsedIn', { filePath })}\n`;
+          report += `   ${t('summary.usageReportUsedIn', { filePath })}\n`;
         });
         
         if (usage.length > 3) {
-          report += `   ${this.t('summary.usageReportMoreFiles', { count: usage.length - 3 })}\n`;
+          report += `   ${t('summary.usageReportMoreFiles', { count: usage.length - 3 })}\n`;
         }
         
         report += `\n`;
@@ -1150,17 +1141,17 @@ Analysis Features:
     
     // Dynamic keys
     if (dynamicKeys.length > 0) {
-      report += `${this.t('summary.usageReportDynamicTranslationKeys')}\n`;
+      report += `${t('summary.usageReportDynamicTranslationKeys')}\n`;
       report += `${'='.repeat(50)}\n`;
-      report += `${this.t('summary.usageReportDynamicKeysDescription')}\n\n`;
+      report += `${t('summary.usageReportDynamicKeysDescription')}\n\n`;
       
       dynamicKeys.forEach(key => {
-        report += `${this.t('summary.usageReportDynamicKey', { key })}\n`;
+        report += `${t('summary.usageReportDynamicKey', { key })}\n`;
         
         // Show where it's used
         const usage = this.findKeyUsage(key);
         usage.slice(0, 2).forEach(({ filePath }) => {
-          report += `   ${this.t('summary.usageReportUsedIn', { filePath })}\n`;
+          report += `   ${t('summary.usageReportUsedIn', { filePath })}\n`;
         });
         
         report += `\n`;
@@ -1168,7 +1159,7 @@ Analysis Features:
     }
     
     // File usage breakdown
-    report += `${this.t('summary.usageReportFileUsageBreakdown')}\n`;
+    report += `${t('summary.usageReportFileUsageBreakdown')}\n`;
     report += `${'='.repeat(50)}\n`;
     
     const sortedFiles = Array.from(this.fileUsage.entries())
@@ -1176,11 +1167,11 @@ Analysis Features:
       .slice(0, 20);
     
     sortedFiles.forEach(([filePath, keys]) => {
-      report += `${this.t('summary.usageReportFileUsage', { filePath, count: keys.length })}\n`;
+      report += `${t('summary.usageReportFileUsage', { filePath, count: keys.length })}\n`;
     });
     
     if (this.fileUsage.size > 20) {
-      report += `${this.t('summary.usageReportMoreFiles', { count: this.fileUsage.size - 20 })}\n`;
+      report += `${t('summary.usageReportMoreFiles', { count: this.fileUsage.size - 20 })}\n`;
     }
     
     return report;
@@ -1199,10 +1190,10 @@ Analysis Features:
       const filepath = path.join(outputDir, filename);
       
       await SecurityUtils.safeWriteFile(filepath, report);
-      console.log(this.t('usage.reportSavedTo', { reportPath: filepath }));
+      console.log(t('usage.reportSavedTo', { reportPath: filepath }));
       return filepath;
     } catch (error) {
-      console.error(this.t('usage.failedToSaveReport', { error: error.message }));
+      console.error(t('usage.failedToSaveReport', { error: error.message }));
     }
   }
 
@@ -1216,8 +1207,8 @@ Analysis Features:
       
       await SecurityUtils.logSecurityEvent('analysis_started', { component: 'i18ntk-usage' });
       
-      console.log(this.t('usage.checkUsage.title'));
-      console.log(this.t("usage.checkUsage.message"));
+      console.log(t('usage.checkUsage.title'));
+      console.log(t("usage.checkUsage.message"));
       
       // Parse command line arguments
       const args = await this.parseArgs();
@@ -1242,19 +1233,19 @@ Analysis Features:
         this.outputDir = path.resolve(this.config.outputDir);
       }
       
-      console.log(this.t("usage.checkUsage.source_directory_thissourcedir", { sourceDir: this.sourceDir }));
-      console.log(this.t("usage.checkUsage.i18n_directory_thisi18ndir", { i18nDir: this.i18nDir }));
+      console.log(t("usage.checkUsage.source_directory_thissourcedir", { sourceDir: this.sourceDir }));
+      console.log(t("usage.checkUsage.i18n_directory_thisi18ndir", { i18nDir: this.i18nDir }));
       
       // Validate directories
       await SecurityUtils.validatePath(this.sourceDir);
       await SecurityUtils.validatePath(this.i18nDir);
       
       if (!fs.existsSync(this.sourceDir)) {
-        throw new Error(this.t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+        throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
       if (!fs.existsSync(this.i18nDir)) {
-        throw new Error(this.t('validate.i18nDirectoryNotFound', { i18nDir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
+        throw new Error(t('validate.i18nDirectoryNotFound', { i18nDir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
       }
       
       // Load available keys
@@ -1277,27 +1268,27 @@ Analysis Features:
       
       // Prepare output lines
       const outputLines = [];
-      outputLines.push(this.t("usage.checkUsage.n"));
-      outputLines.push(this.t("usage.checkUsage.usage_analysis_results"));
-      outputLines.push(this.t("usage.checkUsage.message"));
+      outputLines.push(t("usage.checkUsage.n"));
+      outputLines.push(t("usage.checkUsage.usage_analysis_results"));
+      outputLines.push(t("usage.checkUsage.message"));
       
-      outputLines.push(this.t("usage.checkUsage.source_files_scanned_thisfileu", { fileUsageSize: this.fileUsage.size }));
-      outputLines.push(this.t("usage.checkUsage.available_translation_keys_thi", { availableKeysSize: this.availableKeys.size }));
-      outputLines.push(this.t("usage.checkUsage.used_translation_keys_thisused", { usedKeysSize: this.usedKeys.size - dynamicKeys.length }));
-      outputLines.push(this.t("usage.checkUsage.dynamic_keys_detected_dynamick", { dynamicKeysLength: dynamicKeys.length }));
-      outputLines.push(this.t("usage.checkUsage.unused_keys_unusedkeyslength", { unusedKeysLength: unusedKeys.length }));
-      outputLines.push(this.t("usage.checkUsage.missing_keys_missingkeyslength", { missingKeysLength: missingKeys.length }));
-      outputLines.push(this.t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
+      outputLines.push(t("usage.checkUsage.source_files_scanned_thisfileu", { fileUsageSize: this.fileUsage.size }));
+      outputLines.push(t("usage.checkUsage.available_translation_keys_thi", { availableKeysSize: this.availableKeys.size }));
+      outputLines.push(t("usage.checkUsage.used_translation_keys_thisused", { usedKeysSize: this.usedKeys.size - dynamicKeys.length }));
+      outputLines.push(t("usage.checkUsage.dynamic_keys_detected_dynamick", { dynamicKeysLength: dynamicKeys.length }));
+      outputLines.push(t("usage.checkUsage.unused_keys_unusedkeyslength", { unusedKeysLength: unusedKeys.length }));
+      outputLines.push(t("usage.checkUsage.missing_keys_missingkeyslength", { missingKeysLength: missingKeys.length }));
+      outputLines.push(t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
 
       // Removed redundant hardcoded console output to avoid duplication
 // The translation completeness and not translated keys count are already logged below
 
       
       // Display translation completeness
-      outputLines.push(this.t("usage.checkUsage.translation_completeness_title"));
+      outputLines.push(t("usage.checkUsage.translation_completeness_title"));
       for (const [language, stats] of this.translationStats) {
         const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
-        outputLines.push(this.t("usage.checkUsage.language_completeness_stats", {
+        outputLines.push(t("usage.checkUsage.language_completeness_stats", {
           language: language.toUpperCase(),
           completeness,
           translated: stats.translated,
@@ -1307,66 +1298,66 @@ Analysis Features:
       
       // Show some examples
       if (unusedKeys.length > 0) {
-        outputLines.push(this.t("usage.checkUsage.n_sample_unused_keys"));
+        outputLines.push(t("usage.checkUsage.n_sample_unused_keys"));
         unusedKeys.slice(0, 5).forEach(key => {
-          outputLines.push(this.t("usage.checkUsage.key", { key }));
+          outputLines.push(t("usage.checkUsage.key", { key }));
         });
         if (unusedKeys.length > 5) {
-          outputLines.push(this.t("usage.checkUsage.and_unusedkeyslength_5_more", { count: unusedKeys.length - 5 }));
+          outputLines.push(t("usage.checkUsage.and_unusedkeyslength_5_more", { count: unusedKeys.length - 5 }));
         }
       }
       
       if (missingKeys.length > 0) {
-        outputLines.push(this.t("usage.checkUsage.n_sample_missing_keys"));
+        outputLines.push(t("usage.checkUsage.n_sample_missing_keys"));
         missingKeys.slice(0, 5).forEach(key => {
-          outputLines.push(this.t("usage.checkUsage.key", { key }));
+          outputLines.push(t("usage.checkUsage.key", { key }));
         });
         if (missingKeys.length > 5) {
-          outputLines.push(this.t("usage.checkUsage.and_missingkeyslength_5_more", { count: missingKeys.length - 5 }));
+          outputLines.push(t("usage.checkUsage.and_missingkeyslength_5_more", { count: missingKeys.length - 5 }));
         }
       }
       
       // Generate and save report if requested
       if (args.outputReport) {
-        outputLines.push(this.t("usage.checkUsage.n_generating_detailed_report"));
+        outputLines.push(t("usage.checkUsage.n_generating_detailed_report"));
         const report = this.generateUsageReport();
         const reportPath = await this.saveReport(report);
-        outputLines.push(this.t("usage.checkUsage.report_saved_reportpath", { reportPath }));
+        outputLines.push(t("usage.checkUsage.report_saved_reportpath", { reportPath }));
       }
       
       // Recommendations
-      outputLines.push(this.t("usage.checkUsage.n_recommendations"));
-      outputLines.push(this.t("usage.checkUsage.message"));
+      outputLines.push(t("usage.checkUsage.n_recommendations"));
+      outputLines.push(t("usage.checkUsage.message"));
       
       if (unusedKeys.length > 0) {
-        outputLines.push(this.t("usage.checkUsage.consider_removing_unused_trans"));
+        outputLines.push(t("usage.checkUsage.consider_removing_unused_trans"));
       }
       
       if (missingKeys.length > 0) {
-        outputLines.push(this.t("usage.checkUsage.add_missing_translation_keys_t"));
+        outputLines.push(t("usage.checkUsage.add_missing_translation_keys_t"));
       }
       
       if (dynamicKeys.length > 0) {
-        outputLines.push(this.t("usage.checkUsage.review_dynamic_keys_manually_t"));
+        outputLines.push(t("usage.checkUsage.review_dynamic_keys_manually_t"));
       }
       
       if (notTranslatedStats.total > 0) {
-        outputLines.push(this.t('usage.reviewNotTranslatedKeys', { total: notTranslatedStats.total }));
+        outputLines.push(t('usage.reviewNotTranslatedKeys', { total: notTranslatedStats.total }));
       }
       
       if (unusedKeys.length === 0 && missingKeys.length === 0 && notTranslatedStats.total === 0) {
-        outputLines.push(this.t("usage.checkUsage.all_translation_keys_are_prope"));
+        outputLines.push(t("usage.checkUsage.all_translation_keys_are_prope"));
       }
       
-      outputLines.push(this.t("usage.checkUsage.n_next_steps"));
-      outputLines.push(this.t("usage.checkUsage.1_review_the_analysis_results"));
+      outputLines.push(t("usage.checkUsage.n_next_steps"));
+      outputLines.push(t("usage.checkUsage.1_review_the_analysis_results"));
       if (args.outputReport) {
-        outputLines.push(this.t("usage.checkUsage.2_check_the_detailed_report_fo"));
+        outputLines.push(t("usage.checkUsage.2_check_the_detailed_report_fo"));
       } else {
-        outputLines.push(this.t("usage.checkUsage.2_run_with_outputreport_for_de"));
+        outputLines.push(t("usage.checkUsage.2_run_with_outputreport_for_de"));
       }
-      outputLines.push(this.t("usage.checkUsage.3_remove_unused_keys_or_add_mi"));
-      outputLines.push(this.t("usage.checkUsage.4_rerun_analysis_to_verify_imp"));
+      outputLines.push(t("usage.checkUsage.3_remove_unused_keys_or_add_mi"));
+      outputLines.push(t("usage.checkUsage.4_rerun_analysis_to_verify_imp"));
       
       // Display output with truncation if too long
       const maxLines = 100;
@@ -1413,7 +1404,7 @@ Analysis Features:
       };
       
     } catch (error) {
-      console.error(this.t("checkUsage.usage_analysis_failed"));
+      console.error(t("checkUsage.usage_analysis_failed"));
       console.error(error.message);
       
       await SecurityUtils.logSecurityEvent('analysis_failed', {

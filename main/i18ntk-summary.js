@@ -13,7 +13,6 @@ const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 class I18nSummaryReporter {
   constructor() {
     this.config = null; // Will be set from getUnifiedConfig
-    this.t = t; // Use global translation function
     this.stats = {
       languages: [],
       totalFiles: 0,
@@ -79,22 +78,22 @@ class I18nSummaryReporter {
 
   // Show help information
   showHelp() {
-    console.log(`\n${this.t('summary.helpTitle')}\n`);
-    console.log(this.t('summary.helpDescription') + '\n');
-    console.log(this.t('summary.helpUsage') + '\n');
-    console.log(this.t('summary.helpOptions'));
-    console.log(this.t('summary.helpSourceDir'));
-    console.log(this.t('summary.helpOutput'));
-    console.log(this.t('summary.helpVerbose'));
-    console.log(this.t('summary.helpKeepReports'));
-    console.log(this.t('summary.helpDeleteReports'));
-    console.log(this.t('summary.helpHelp') + '\n');
-    console.log(this.t('summary.helpExamples'));
-    console.log(this.t('summary.helpExample1'));
-    console.log(this.t('summary.helpExample2'));
-    console.log(this.t('summary.helpExample3'));
-    console.log(this.t('summary.helpExample4'));
-    console.log(this.t('summary.helpExample5') + '\n');
+    console.log(`\n${t('summary.helpTitle')}\n`);
+    console.log(t('summary.helpDescription') + '\n');
+    console.log(t('summary.helpUsage') + '\n');
+    console.log(t('summary.helpOptions'));
+    console.log(t('summary.helpSourceDir'));
+    console.log(t('summary.helpOutput'));
+    console.log(t('summary.helpVerbose'));
+    console.log(t('summary.helpKeepReports'));
+    console.log(t('summary.helpDeleteReports'));
+    console.log(t('summary.helpHelp') + '\n');
+    console.log(t('summary.helpExamples'));
+    console.log(t('summary.helpExample1'));
+    console.log(t('summary.helpExample2'));
+    console.log(t('summary.helpExample3'));
+    console.log(t('summary.helpExample4'));
+    console.log(t('summary.helpExample5') + '\n');
   }
 
 
@@ -187,7 +186,7 @@ class I18nSummaryReporter {
     try {
       const content = await SecurityUtils.safeReadFile(filePath, this.config.sourceDir);
       if (!content) {
-        console.warn(this.t('summary.couldNotReadFile', { filePath }));
+        console.warn(t('summary.couldNotReadFile', { filePath }));
         return [];
       }
       
@@ -204,7 +203,7 @@ class I18nSummaryReporter {
             const data = eval(`(${objStr})`);
             return this.extractKeysFromObject(data);
           } catch (e) {
-            console.warn(this.t('summary.couldNotParseJSFile', { filePath }));
+            console.warn(t('summary.couldNotParseJSFile', { filePath }));
             return [];
           }
         }
@@ -212,7 +211,7 @@ class I18nSummaryReporter {
       
       return [];
     } catch (error) {
-      console.warn(this.t('summary.errorReadingFile', { filePath, error: error.message }));
+      console.warn(t('summary.errorReadingFile', { filePath, error: error.message }));
       return [];
     }
   }
@@ -307,16 +306,16 @@ class I18nSummaryReporter {
 
   // Analyze folder structure and collect statistics
   async analyzeStructure() {
-    console.log(this.t('summary.analyzingFolder'));
+    console.log(t('summary.analyzingFolder'));
     
     this.stats.languages = this.getAvailableLanguages();
     
     if (this.stats.languages.length === 0) {
-      console.log(this.t('summary.noLanguageDirectoriesFound'));
+      console.log(t('summary.noLanguageDirectoriesFound'));
       return;
     }
     
-    console.log(this.t('summary.foundLanguages', {count: this.stats.languages.length, languages: this.stats.languages.join(', ')}));
+    console.log(t('summary.foundLanguages', {count: this.stats.languages.length, languages: this.stats.languages.join(', ')}));
     
     // Calculate folder sizes for each language
     for (const language of this.stats.languages) {
@@ -330,11 +329,11 @@ class I18nSummaryReporter {
     const referenceLanguage = this.stats.languages[0];
     const referenceFiles = this.getLanguageFiles(referenceLanguage);
     
-    console.log(this.t('summary.referenceLanguageFiles', {language: referenceLanguage, count: referenceFiles.length}));
+    console.log(t('summary.referenceLanguageFiles', {language: referenceLanguage, count: referenceFiles.length}));
     
     // Analyze each language
     for (const language of this.stats.languages) {
-      console.log(this.t('summary.analyzingLanguage', {language}));
+      console.log(t('summary.analyzingLanguage', {language}));
       
       const files = this.getLanguageFiles(language);
       this.stats.filesByLanguage[language] = files;
@@ -388,7 +387,7 @@ class I18nSummaryReporter {
       }
       
       this.stats.totalKeys += totalKeysForLanguage;
-      console.log(this.t('summary.keysInFiles', {keys: totalKeysForLanguage, files: files.length}));
+      console.log(t('summary.keysInFiles', {keys: totalKeysForLanguage, files: files.length}));
     }
     
     // Find inconsistent keys across languages
@@ -397,7 +396,7 @@ class I18nSummaryReporter {
 
   // Find keys that are inconsistent across languages
   findInconsistentKeys() {
-    console.log(this.t('summary.checkingInconsistentKeys'));
+    console.log(t('summary.checkingInconsistentKeys'));
     
     const referenceLanguage = this.stats.languages[0];
     const referenceKeys = this.stats.keysByLanguage[referenceLanguage];
@@ -491,19 +490,19 @@ class I18nSummaryReporter {
     const report = [];
     const timestamp = new Date().toISOString();
     
-    report.push(this.t('summary.reportTitle'));
+    report.push(t('summary.reportTitle'));
     report.push('='.repeat(50));
-    report.push(this.t('summary.generated', {timestamp}));
-    report.push(this.t('summary.sourceDirectory', {dir: this.config.sourceDir}));
+    report.push(t('summary.generated', {timestamp}));
+    report.push(t('summary.sourceDirectory', {dir: this.config.sourceDir}));
     report.push('');
     
     // Overview with sizing
-    report.push(this.t('summary.overview'));
+    report.push(t('summary.overview'));
     report.push('='.repeat(30));
-    report.push(this.t('summary.languagesCount', {count: this.stats.languages.length}));
-    report.push(this.t('summary.totalFiles', {count: this.stats.totalFiles}));
-    report.push(this.t('summary.totalKeys', {count: this.stats.totalKeys}));
-    report.push(this.t('summary.avgKeysPerLanguage', {count: Math.round(this.stats.totalKeys / this.stats.languages.length)}));
+    report.push(t('summary.languagesCount', {count: this.stats.languages.length}));
+    report.push(t('summary.totalFiles', {count: this.stats.totalFiles}));
+    report.push(t('summary.totalKeys', {count: this.stats.totalKeys}));
+    report.push(t('summary.avgKeysPerLanguage', {count: Math.round(this.stats.totalKeys / this.stats.languages.length)}));
     
     // Calculate total size
     const totalSize = Object.values(this.stats.folderSizes).reduce((sum, size) => sum + size, 0);
@@ -511,7 +510,7 @@ class I18nSummaryReporter {
     report.push('');
     
     // Languages breakdown with sizing
-    report.push(this.t('summary.languagesBreakdown'));
+    report.push(t('summary.languagesBreakdown'));
     report.push('='.repeat(30));
     
     const langTableWidths = [12, 8, 8, 12, 12];
@@ -536,7 +535,7 @@ class I18nSummaryReporter {
     report.push('');
     
     // File structure with sizing
-    report.push(this.t('summary.fileStructure'));
+    report.push(t('summary.fileStructure'));
     report.push('='.repeat(30));
     
     const fileTableWidths = [20, 8, 12, 15, 15];
@@ -581,11 +580,11 @@ class I18nSummaryReporter {
         this.stats.duplicateKeys.length > 0 || 
         this.stats.inconsistentKeys.length > 0) {
       
-      report.push(this.t('summary.issuesFound'));
+      report.push(t('summary.issuesFound'));
       report.push('='.repeat(30));
       
       if (this.stats.missingFiles.length > 0) {
-        report.push(this.t('summary.missingFiles'));
+        report.push(t('summary.missingFiles'));
         for (const item of this.stats.missingFiles) {
           report.push(`   ${item.language}: ${item.files.join(', ')}`);
         }
@@ -593,7 +592,7 @@ class I18nSummaryReporter {
       }
       
       if (this.stats.emptyFiles.length > 0) {
-        report.push(this.t('summary.emptyFiles'));
+        report.push(t('summary.emptyFiles'));
         for (const item of this.stats.emptyFiles) {
           report.push(`   ${item.language}/${item.file}`);
         }
@@ -601,7 +600,7 @@ class I18nSummaryReporter {
       }
       
       if (this.stats.malformedFiles.length > 0) {
-        report.push(this.t('summary.malformedFiles'));
+        report.push(t('summary.malformedFiles'));
         for (const item of this.stats.malformedFiles) {
           report.push(`   ${item.language}/${item.file}`);
         }
@@ -620,7 +619,7 @@ class I18nSummaryReporter {
         report.push('');
       } else if (this.stats.duplicateKeys.length > 0) {
         // Show limited display for small number of duplicates
-        report.push(this.t('summary.duplicateKeys'));
+        report.push(t('summary.duplicateKeys'));
         let totalDuplicates = 0;
         for (const item of this.stats.duplicateKeys) {
           const displayKeys = item.duplicates.slice(0, 25);
@@ -634,22 +633,22 @@ class I18nSummaryReporter {
       }
       
       if (this.stats.inconsistentKeys.length > 0) {
-        report.push(this.t('summary.inconsistentKeys'));
+        report.push(t('summary.inconsistentKeys'));
         for (const item of this.stats.inconsistentKeys) {
           report.push(`   ${item.language}/${item.file}:`);
           if (item.missing.length > 0) {
-            report.push(this.t('summary.missingKeys', {keys: item.missing.slice(0, 5).join(', '), more: item.missing.length > 5 ? '...' : ''}));
+            report.push(t('summary.missingKeys', {keys: item.missing.slice(0, 5).join(', '), more: item.missing.length > 5 ? '...' : ''}));
           }
           if (item.extra.length > 0) {
-            report.push(this.t('summary.extraKeys', {keys: item.extra.slice(0, 5).join(', '), more: item.extra.length > 5 ? '...' : ''}));
+            report.push(t('summary.extraKeys', {keys: item.extra.slice(0, 5).join(', '), more: item.extra.length > 5 ? '...' : ''}));
           }
         }
         report.push('');
       }
     } else {
-      report.push(this.t('summary.noIssuesFound'));
+      report.push(t('summary.noIssuesFound'));
       report.push('='.repeat(30));
-      report.push(this.t('summary.allFilesConsistent'));
+      report.push(t('summary.allFilesConsistent'));
       report.push('');
       report.push('Note: Keys with the same name but in different nested structures are not considered duplicates.');
       report.push('');
@@ -730,28 +729,28 @@ class I18nSummaryReporter {
     report.push('');
     
     // Recommendations
-    report.push(this.t('summary.recommendations'));
+    report.push(t('summary.recommendations'));
     report.push('='.repeat(30));
     if (this.stats.missingFiles.length > 0) {
-      report.push(this.t('summary.createMissingFiles'));
+      report.push(t('summary.createMissingFiles'));
     }
     if (this.stats.emptyFiles.length > 0) {
-      report.push(this.t('summary.addContentToEmptyFiles'));
+      report.push(t('summary.addContentToEmptyFiles'));
     }
     if (this.stats.malformedFiles.length > 0) {
-      report.push(this.t('summary.fixMalformedFiles'));
+      report.push(t('summary.fixMalformedFiles'));
     }
     if (this.stats.duplicateKeys.length > 0) {
-      report.push(this.t('summary.removeDuplicateKeys'));
+      report.push(t('summary.removeDuplicateKeys'));
     }
     if (this.stats.inconsistentKeys.length > 0) {
-      report.push(this.t('summary.synchronizeKeys'));
+      report.push(t('summary.synchronizeKeys'));
     }
     if (this.stats.totalKeys > 10000) {
-      report.push(this.t('summary.splitLargeFiles'));
+      report.push(t('summary.splitLargeFiles'));
     }
     if (this.stats.languages.length === 1) {
-      report.push(this.t('summary.addMoreLanguages'));
+      report.push(t('summary.addMoreLanguages'));
     }
     
     // Sizing-specific recommendations
@@ -762,11 +761,11 @@ class I18nSummaryReporter {
     }
     
     report.push('');
-    report.push(this.t('summary.nextSteps'));
-    report.push(this.t('summary.nextStep1'));
-    report.push(this.t('summary.nextStep2'));
-    report.push(this.t('summary.nextStep3'));
-    report.push(this.t('summary.nextStep4'));
+    report.push(t('summary.nextSteps'));
+    report.push(t('summary.nextStep1'));
+    report.push(t('summary.nextStep2'));
+    report.push(t('summary.nextStep3'));
+    report.push(t('summary.nextStep4'));
     return report.join('\n');
   }
 
@@ -812,9 +811,6 @@ class I18nSummaryReporter {
     
     const uiLanguage = this.config.uiLanguage || 'en';
     loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-    this.t = t;
-    
-    // Use settings configuration, only fall back to detection if absolutely necessary
     if (!this.config.sourceDir) {
       this.config.sourceDir = this.detectI18nDirectory();
     }
@@ -828,18 +824,18 @@ class I18nSummaryReporter {
       const isCalledDirectly = require.main === module;
       const isRequired = await adminAuth.isAuthRequired();
       if (isRequired && isCalledDirectly && !noPrompt && !fromMenu && !args.noPrompt) {
-        console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'generate summary' }));
+        console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'generate summary' }));
         
-        const pin = await askHidden(this.t('adminCli.enterPin'));
+        const pin = await askHidden(t('adminCli.enterPin'));
         
         const isValid = await adminAuth.verifyPin(pin);
         
         if (!isValid) {
-          console.log(this.t('adminCli.invalidPin'));
+          console.log(t('adminCli.invalidPin'));
           process.exit(1);
         }
         
-        console.log(this.t('adminCli.authenticationSuccess'));
+        console.log(t('adminCli.authenticationSuccess'));
       }
       
       if (args.help) {
@@ -849,20 +845,20 @@ class I18nSummaryReporter {
       
       // Validate source directory exists
       if (!fs.existsSync(this.config.sourceDir)) {
-        console.error(this.t('summary.sourceDirectoryDoesNotExist', { sourceDir: this.config.sourceDir }));
+        console.error(t('summary.sourceDirectoryDoesNotExist', { sourceDir: this.config.sourceDir }));
         process.exit(1);
       }
     }
     
-    console.log(this.t('summary.i18nSummaryReportGenerator'));
-    console.log(this.t('summary.separator'));
-    console.log(this.t('summary.sourceDirectory', {dir: this.config.sourceDir}));
+    console.log(t('summary.i18nSummaryReportGenerator'));
+    console.log(t('summary.separator'));
+    console.log(t('summary.sourceDirectory', {dir: this.config.sourceDir}));
     
     if (args.verbose) {
-      console.log(this.t('summary.configurationTitle'));
-      console.log(this.t('summary.sourceLanguage', { sourceLanguage: this.config.sourceLanguage }));
-      console.log(this.t('summary.supportedExtensions', { extensions: this.config.supportedExtensions.join(', ') }));
-      console.log(this.t('summary.excludedFiles', { files: this.config.excludeFiles.join(', ') }));
+      console.log(t('summary.configurationTitle'));
+      console.log(t('summary.sourceLanguage', { sourceLanguage: this.config.sourceLanguage }));
+      console.log(t('summary.supportedExtensions', { extensions: this.config.supportedExtensions.join(', ') }));
+      console.log(t('summary.excludedFiles', { files: this.config.excludeFiles.join(', ') }));
     }
     
     try {
@@ -870,7 +866,7 @@ class I18nSummaryReporter {
       await this.analyzeStructure();
       
       // Generate report
-      console.log(this.t('summary.generatingSummaryReport'));
+      console.log(t('summary.generatingSummaryReport'));
       const report = this.generateReport();
       
       // Always generate detailed report when duplicates exist
@@ -913,17 +909,17 @@ class I18nSummaryReporter {
         const outputPath = path.join(reportsDir, outputFileName);
         const success = await SecurityUtils.safeWriteFile(outputPath, report, reportsDir);
         if (success) {
-          console.log(this.t('summary.reportSaved', { reportPath: outputPath }));
+          console.log(t('summary.reportSaved', { reportPath: outputPath }));
         } else {
-          console.log(this.t('summary.reportSaveFailed', { reportPath: outputPath }));
+          console.log(t('summary.reportSaveFailed', { reportPath: outputPath }));
         }
       } else {
-        console.log(this.t('summary.reportContent', { report }));
+        console.log(t('summary.reportContent', { report }));
       }
       
       // Handle report file management
       if (args.deleteReports && !args.keepReports) {
-        console.log(this.t('summary.cleaningUpReportFiles'));
+        console.log(t('summary.cleaningUpReportFiles'));
         try {
           const reportsDir = path.join(this.config.sourceDir, 'scripts', 'i18n', 'reports');
           if (fs.existsSync(reportsDir)) {
@@ -939,30 +935,30 @@ class I18nSummaryReporter {
                 fs.unlinkSync(path.join(reportsDir, file));
                 deletedCount++;
               } catch (error) {
-                console.log(this.t('summary.couldNotDelete', { file, error: error.message }));
+                console.log(t('summary.couldNotDelete', { file, error: error.message }));
               }
             }
             
             if (deletedCount > 0) {
-              console.log(this.t('summary.deletedOldReportFiles', { count: deletedCount }));
+              console.log(t('summary.deletedOldReportFiles', { count: deletedCount }));
             } else {
-              console.log(this.t('summary.noOldReportFilesToDelete'));
+              console.log(t('summary.noOldReportFilesToDelete'));
             }
           }
         } catch (error) {
-          console.log(this.t('summary.errorCleaningUpReports', { error: error.message }));
+          console.log(t('summary.errorCleaningUpReports', { error: error.message }));
         }
       } else if (args.keepReports) {
-        console.log(this.t('summary.reportFilesPreserved'));
+        console.log(t('summary.reportFilesPreserved'));
       }
       
       // Summary
-      console.log(this.t('summary.separator'));
-      console.log(this.t('summary.analysisComplete'));
-      console.log(this.t('summary.separator'));
-      console.log(this.t('summary.analyzedLanguages', { count: this.stats.languages.length }));
-      console.log(this.t('summary.processedFiles', { count: this.stats.totalFiles }));
-      console.log(this.t('summary.foundTranslationKeys', { count: this.stats.totalKeys }));
+      console.log(t('summary.separator'));
+      console.log(t('summary.analysisComplete'));
+      console.log(t('summary.separator'));
+      console.log(t('summary.analyzedLanguages', { count: this.stats.languages.length }));
+      console.log(t('summary.processedFiles', { count: this.stats.totalFiles }));
+      console.log(t('summary.foundTranslationKeys', { count: this.stats.totalKeys }));
       
       const totalIssues = this.stats.missingFiles.length + 
                          this.stats.emptyFiles.length + 
@@ -971,13 +967,13 @@ class I18nSummaryReporter {
                          this.stats.inconsistentKeys.length;
       
       if (totalIssues > 0) {
-        console.log(this.t('summary.foundIssues', {count: totalIssues}));
+        console.log(t('summary.foundIssues', {count: totalIssues}));
       } else {
-        console.log(this.t('summary.noIssuesConsole'));
+        console.log(t('summary.noIssuesConsole'));
       }
       
     } catch (error) {
-      console.error(this.t('summary.errorDuringAnalysis', { error: error.message }));
+      console.error(t('summary.errorDuringAnalysis', { error: error.message }));
       if (args.verbose) {
         console.error(error.stack);
       }

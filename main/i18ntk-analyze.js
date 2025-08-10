@@ -22,7 +22,6 @@ const PROJECT_ROOT = process.cwd();
 class I18nAnalyzer {
   constructor(config = {}) {
     this.config = config;
-    this.t = t; // Use global translation function
     
     // Don't set defaults here - let getUnifiedConfig handle it
     // This ensures we use the configuration from settings files
@@ -387,19 +386,19 @@ try {
     const { language } = analysis;
     const timestamp = new Date().toISOString();
     
-    let report = `${this.t('analyze.reportTitle', { language: language.toUpperCase() })}
+    let report = `${t('analyze.reportTitle', { language: language.toUpperCase() })}
     `;
-    report += `${this.t('analyze.generated', { timestamp })}
+    report += `${t('analyze.generated', { timestamp })}
     `;
-    report += `${this.t('analyze.status', { translated: analysis.summary.translatedKeys, total: analysis.summary.totalKeys, percentage: analysis.summary.percentage })}
+    report += `${t('analyze.status', { translated: analysis.summary.translatedKeys, total: analysis.summary.totalKeys, percentage: analysis.summary.percentage })}
     `;
-    report += `${this.t('analyze.filesAnalyzed', { analyzed: analysis.summary.analyzedFiles, total: analysis.summary.totalFiles })}
+    report += `${t('analyze.filesAnalyzed', { analyzed: analysis.summary.analyzedFiles, total: analysis.summary.totalFiles })}
     `;
-    report += `${this.t('analyze.keysNeedingTranslation', { count: analysis.summary.missingKeys })}
+    report += `${t('analyze.keysNeedingTranslation', { count: analysis.summary.missingKeys })}
     
     `;
     
-    report += `${this.t('analyze.fileBreakdown')}
+    report += `${t('analyze.fileBreakdown')}
     `;
     report += `${'='.repeat(50)}\n\n`;
     
@@ -407,32 +406,32 @@ try {
       report += `\uD83D\uDCC4 ${fileName}\n`;
       
       if (fileData.error) {
-        report += `   \u274C ${this.t('analyze.error')}: ${fileData.error}\n\n`;
+        report += `   \u274C ${t('analyze.error')}: ${fileData.error}\n\n`;
         return;
       }
       
       if (fileData.status === 'missing') {
-        report += `   \u274C ${this.t('analyze.statusFileMissing')}\n`;
-        report += `   📊 ${this.t('analyze.sourceKeys', { count: fileData.sourceKeys })}\n\n`;
+        report += `   \u274C ${t('analyze.statusFileMissing')}\n`;
+        report += `   📊 ${t('analyze.sourceKeys', { count: fileData.sourceKeys })}\n\n`;
         return;
       }
       
       const { stats, structural, issues } = fileData;
       
-      report += `   \uD83D\uDCCA ${this.t('analyze.translation', { translated: stats.translated, total: stats.total, percentage: stats.percentage })}\n`;
-      report += `   \uD83C\uDFD7️  ${this.t('analyze.structure', { status: structural.isConsistent ? this.t('analyze.consistent') : this.t('analyze.inconsistent') })}\n`;
+      report += `   \uD83D\uDCCA ${t('analyze.translation', { translated: stats.translated, total: stats.total, percentage: stats.percentage })}\n`;
+      report += `   \uD83C\uDFD7️  ${t('analyze.structure', { status: structural.isConsistent ? t('analyze.consistent') : t('analyze.inconsistent') })}\n`;
       
       if (!structural.isConsistent) {
         if (structural.missingKeys.length > 0) {
-          report += `      ${this.t('analyze.missingKeys', { count: structural.missingKeys.length })}\n`;
+          report += `      ${t('analyze.missingKeys', { count: structural.missingKeys.length })}\n`;
         }
         if (structural.extraKeys.length > 0) {
-          report += `      ${this.t('analyze.extraKeys', { count: structural.extraKeys.length })}\n`;
+          report += `      ${t('analyze.extraKeys', { count: structural.extraKeys.length })}\n`;
         }
       }
       
       if (issues.length > 0) {
-        report += `   ⚠️  ${this.t('analyze.issues', { count: issues.length })}\n`;
+        report += `   ⚠️  ${t('analyze.issues', { count: issues.length })}\n`;
         
         const issueTypes = {
           not_translated: issues.filter(i => i.type === 'not_translated').length,
@@ -443,7 +442,7 @@ try {
         
         Object.entries(issueTypes).forEach(([type, count]) => {
           if (count > 0) {
-            report += `      ${this.t('analyze.issueType.' + type, { count })}\n`;
+            report += `      ${t('analyze.issueType.' + type, { count })}\n`;
           }
         });
       }
@@ -457,17 +456,17 @@ try {
     );
     
     if (notTranslatedIssues.length > 0) {
-      report += `${this.t('analyze.keysToTranslate')}\n`;
+      report += `${t('analyze.keysToTranslate')}\n`;
       report += `${'='.repeat(50)}\n\n`;
       
       notTranslatedIssues.slice(0, 50).forEach(issue => {
-        report += `${this.t('analyze.key')}: ${issue.key}\n`;
-        report += `${this.t('analyze.english')}: "${issue.sourceValue}"\n`;
-        report += `${language}: [${this.t('analyze.needsTranslation')}]\n\n`;
+        report += `${t('analyze.key')}: ${issue.key}\n`;
+        report += `${t('analyze.english')}: "${issue.sourceValue}"\n`;
+        report += `${language}: [${t('analyze.needsTranslation')}]\n\n`;
       });
       
       if (notTranslatedIssues.length > 50) {
-        report += `${this.t('analyze.andMoreKeys', { count: notTranslatedIssues.length - 50 })}\n\n`;
+        report += `${t('analyze.andMoreKeys', { count: notTranslatedIssues.length - 50 })}\n\n`;
       }
     }
     
@@ -480,12 +479,12 @@ try {
     const validatedPath = SecurityUtils.validatePath(reportPath, this.outputDir);
     
     if (!validatedPath) {
-      throw new Error(this.t('analyze.invalidReportFilePath') || 'Invalid report file path');
+      throw new Error(t('analyze.invalidReportFilePath') || 'Invalid report file path');
     }
     
     const success = await SecurityUtils.safeWriteFile(validatedPath, report, this.outputDir);
     if (!success) {
-      throw new Error(this.t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
+      throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
     }
     
     return validatedPath;
@@ -493,7 +492,7 @@ try {
 
   // Show help message
   showHelp() {
-    console.log(this.t('analyze.help_message'));
+    console.log(t('analyze.help_message'));
   }
 
   // Main analyze method
@@ -501,10 +500,10 @@ try {
     try {
       const results = []; // Add this line to declare the results array
       
-      console.log(this.t('analyze.starting') || '🔍 Starting translation analysis...');
-      console.log(this.t('analyze.sourceDirectoryLabel', { sourceDir: path.resolve(this.sourceDir) }));
-      console.log(this.t('analyze.sourceLanguageLabel', { sourceLanguage: this.config.sourceLanguage }));
-      console.log(this.t('analyze.strictModeLabel', { mode: this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF' }));
+      console.log(t('analyze.starting') || '🔍 Starting translation analysis...');
+      console.log(t('analyze.sourceDirectoryLabel', { sourceDir: path.resolve(this.sourceDir) }));
+      console.log(t('analyze.sourceLanguageLabel', { sourceLanguage: this.config.sourceLanguage }));
+      console.log(t('analyze.strictModeLabel', { mode: this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF' }));
       
       // Ensure output directory exists
       if (!fs.existsSync(this.outputDir)) {
@@ -514,14 +513,14 @@ try {
       const languages = this.getAvailableLanguages();
       
       if (languages.length === 0) {
-        console.log(this.t('analyze.noLanguages') || '⚠️  No target languages found.');
+        console.log(t('analyze.noLanguages') || '⚠️  No target languages found.');
         return;
       }
       
-      console.log(this.t('analyze.foundLanguages', { count: languages.length, languages: languages.join(', ') }) || `📋 Found ${languages.length} languages to analyze: ${languages.join(', ')}`);
+      console.log(t('analyze.foundLanguages', { count: languages.length, languages: languages.join(', ') }) || `📋 Found ${languages.length} languages to analyze: ${languages.join(', ')}`);
       
       for (const language of languages) {
-        console.log(this.t('analyze.analyzing', { language }) || `\n🔄 Analyzing ${language}...`);
+        console.log(t('analyze.analyzing', { language }) || `\n🔄 Analyzing ${language}...`);
         
         const analysis = this.analyzeLanguage(language);
         const report = this.generateLanguageReport(analysis);
@@ -529,12 +528,12 @@ try {
         // Save report
         const reportPath = await this.saveReport(language, report);
         
-        console.log(this.t('analyze.completed', { language }) || `✅ Analysis completed for ${language}`);
-        console.log(this.t('analyze.progress', { 
+        console.log(t('analyze.completed', { language }) || `✅ Analysis completed for ${language}`);
+        console.log(t('analyze.progress', { 
           translated: results.length, 
           total: languages.length 
         }) || `   Progress: ${results.length}/${languages.length} languages processed`);
-        console.log(this.t('analyze.reportSaved', { reportPath }) || `   Report saved: ${reportPath}`);
+        console.log(t('analyze.reportSaved', { reportPath }) || `   Report saved: ${reportPath}`);
         
         results.push({
           language,
@@ -544,11 +543,11 @@ try {
       }
       
       // Summary
-      console.log(this.t('analyze.summary') || '\n📊 ANALYSIS SUMMARY');
+      console.log(t('analyze.summary') || '\n📊 ANALYSIS SUMMARY');
       console.log('='.repeat(50));
       
       results.forEach(({ language, analysis }) => {
-        console.log(this.t('analyze.languageStats', { 
+        console.log(t('analyze.languageStats', { 
           language, 
           percentage: analysis.summary.percentage, 
           translated: analysis.summary.translatedKeys, 
@@ -556,7 +555,7 @@ try {
         }) || `${language}: ${analysis.summary.percentage}% complete (${analysis.summary.translatedKeys}/${analysis.summary.totalKeys} keys)`);
       });
       
-      console.log(this.t('analyze.finished') || '\n✅ Analysis completed successfully!');
+      console.log(t('analyze.finished') || '\n✅ Analysis completed successfully!');
       
       // Only prompt for input if running standalone and not in no-prompt mode
       if (require.main === module && !this.noPrompt) {
@@ -567,7 +566,7 @@ try {
       return results;
       
     } catch (error) {
-      console.error(this.t('analyze.error') || '❌ Analysis failed:', error.message);
+      console.error(t('analyze.error') || '❌ Analysis failed:', error.message);
       this.closeReadline();
       throw error;
     }
@@ -609,18 +608,18 @@ try {
         
         const isRequired = await adminAuth.isAuthRequired();
         if (isRequired) {
-          console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'analyze translations' }));
-          const pin = await this.prompt(this.t('adminCli.enterPin'));
+          console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'analyze translations' }));
+          const pin = await this.prompt(t('adminCli.enterPin'));
           const isValid = await adminAuth.verifyPin(pin);
           
           if (!isValid) {
-            console.log(this.t('adminCli.invalidPin'));
+            console.log(t('adminCli.invalidPin'));
             this.closeReadline();
             if (!fromMenu) process.exit(1);
             return;
           }
           
-          console.log(this.t('adminCli.authenticationSuccess'));
+          console.log(t('adminCli.authenticationSuccess'));
         }
       }
       
@@ -629,9 +628,7 @@ try {
       
       // Handle UI language change
       if (args.uiLanguage) {
-        loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-        this.t = t;
-      }
+        loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));}
       
       // Update config if source directory is provided
       if (args.sourceDir) {
@@ -668,7 +665,7 @@ try {
         }
       }
     } catch (error) {
-      console.error(this.t('analyze.error') || '❌ Analysis failed:', error.message);
+      console.error(t('analyze.error') || '❌ Analysis failed:', error.message);
       this.closeReadline();
       if (!fromMenu && require.main === module) {
         process.exit(1);

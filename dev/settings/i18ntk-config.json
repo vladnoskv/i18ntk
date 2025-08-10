@@ -1,0 +1,107 @@
+{
+  "projectRoot": ".",
+  "sourceDir": "./locales",
+  "i18nDir": "./locales",
+  "outputDir": "./i18ntk-reports",
+  "sourceLanguage": "en",
+  "uiLanguage": "en",
+  "defaultLanguages": [
+    "de",
+    "es",
+    "fr",
+    "ru"
+  ],
+  "notTranslatedMarker": "NOT_TRANSLATED",
+  "excludeFiles": [
+    ".DS_Store",
+    "Thumbs.db"
+  ],
+  "excludeDirs": [
+    "node_modules",
+    ".git",
+    "dist",
+    "build"
+  ],
+  "includeExtensions": [
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".vue",
+    ".json"
+  ],
+  "strictMode": false,
+  "notifications": {
+    "enabled": true,
+    "sound": true,
+    "desktop": true,
+    "webhook": null
+  },
+  "dateTime": {
+    "format": "YYYY-MM-DD HH:mm:ss",
+    "timezone": "local"
+  },
+  "processing": {
+    "notTranslatedMarker": "NOT_TRANSLATED",
+    "excludeFiles": [
+      ".DS_Store",
+      "Thumbs.db"
+    ],
+    "excludeDirs": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build"
+    ],
+    "includeExtensions": [
+      ".js",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".vue",
+      ".json"
+    ],
+    "strictMode": false,
+    "defaultLanguages": [
+      "de",
+      "es",
+      "fr",
+      "ru"
+    ],
+    "translationPatterns": {
+      "t": [
+        "t(\"",
+        "t('"
+      ],
+      "i18n": [
+        "i18n.t(\"",
+        "i18n.t('"
+      ],
+      "translate": [
+        "translate(\"",
+        "translate('"
+      ]
+    }
+  },
+  "advanced": {
+    "performance": {
+      "maxWorkers": 4,
+      "cacheEnabled": true,
+      "cacheTTL": 3600000
+    },
+    "security": {
+      "pinProtection": {
+        "enabled": false,
+        "pin": null,
+        "attempts": 3,
+        "lockoutDuration": 300000
+      }
+    },
+    "debug": {
+      "enabled": false,
+      "logLevel": "info",
+      "saveLogs": true,
+      "logPath": "./logs/i18ntk-debug.log"
+    }
+  }
+}

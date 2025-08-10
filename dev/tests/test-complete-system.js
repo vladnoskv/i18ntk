@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { loadTranslations, t } = require('../../utils/i18n-helper');
 
 class SystemTester {
     constructor() {
@@ -16,6 +17,9 @@ class SystemTester {
             errors: []
         };
         this.missingTranslations = [];
+        
+        // Load translations
+        loadTranslations();
         
         // Initialize UI i18n for translations with error handling
         try {

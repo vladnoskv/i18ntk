@@ -30,8 +30,8 @@ class I18nCompletionTool {
     
     // Initialize UI i18n for console messages
     const UIi18n = require('./i18ntk-ui');
-    this.ui = new UIi18n();
-    this.t = this.ui.t.bind(this.ui);
+    // Using shared t() helper from i18n-helper instead of UIi18n for translations
+    // Using shared t() helper from i18n-helper
   }
   
   async initialize() {
@@ -54,9 +54,9 @@ class I18nCompletionTool {
       const { validateSourceDir } = require('../utils/config-helper');
       validateSourceDir(this.sourceDir, 'i18ntk-complete');
       
-      SecurityUtils.logSecurityEvent(this.t('complete.configLoadedSuccessfully'), 'info');
+      SecurityUtils.logSecurityEvent(t('complete.configLoadedSuccessfully'), 'info');
     } catch (error) {
-      SecurityUtils.logSecurityEvent(this.t('complete.configLoadingFailed'), 'error', { error: error.message });
+      SecurityUtils.logSecurityEvent(t('complete.configLoadingFailed'), 'error', { error: error.message });
       throw error;
     }
   }
@@ -223,7 +223,7 @@ class I18nCompletionTool {
         try {
           fileContent = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         } catch (error) {
-          console.warn(this.t("completeTranslations.warning_could_not_parse_filepa", { filePath })); ;
+          console.warn(t("completeTranslations.warning_could_not_parse_filepa", { filePath })); ;
           fileContent = {};
         }
       } else {
@@ -315,7 +315,7 @@ class I18nCompletionTool {
     const missingKeys = [];
     
     if (!fs.existsSync(this.sourceLanguageDir)) {
-      console.log(this.t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
+      console.log(t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
       return [];
     }
     
@@ -340,7 +340,7 @@ class I18nCompletionTool {
               const targetContent = JSON.parse(fs.readFileSync(targetFilePath, 'utf8'));
               targetKeys = this.getAllKeys(targetContent);
             } catch (error) {
-              console.warn(this.t("complete.couldNotParseTarget", { file: targetFilePath }));
+              console.warn(t("complete.couldNotParseTarget", { file: targetFilePath }));
             }
           }
           
@@ -349,13 +349,13 @@ class I18nCompletionTool {
           missingKeys.push(...missingInTarget);
         }
       } catch (error) {
-        console.warn(this.t("complete.couldNotParseSource", { file: sourceFilePath }));
+        console.warn(t("complete.couldNotParseSource", { file: sourceFilePath }));
       }
     }
     
     // Remove duplicates
     const uniqueMissingKeys = [...new Set(missingKeys)];
-    console.log(this.t("complete.foundMissingKeys", { count: uniqueMissingKeys.length }));
+    console.log(t("complete.foundMissingKeys", { count: uniqueMissingKeys.length }));
     return uniqueMissingKeys;
   }
 
@@ -391,7 +391,7 @@ class I18nCompletionTool {
     };
     
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
-    console.log(this.t("complete.reportGenerated", { path: reportPath }));
+    console.log(t("complete.reportGenerated", { path: reportPath }));
     return reportPath;
   }
 
@@ -417,18 +417,18 @@ class I18nCompletionTool {
       const isCalledDirectly = require.main === module;
       const isRequired = await adminAuth.isAuthRequired();
       if (isRequired && isCalledDirectly && !args.noPrompt) {
-        console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'complete translations' }));
+        console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'complete translations' }));
         
-        const pin = await this.prompt(this.t('adminCli.enterPin'));
+        const pin = await this.prompt(t('adminCli.enterPin'));
         const isValid = await adminAuth.verifyPin(pin);
         
         if (!isValid) {
-          console.log(this.t('adminCli.invalidPin'));
+          console.log(t('adminCli.invalidPin'));
           if (!fromMenu) process.exit(1);
           return { success: false, error: 'Authentication failed' };
         }
         
-        console.log(this.t('adminCli.authenticationSuccess'));
+        console.log(t('adminCli.authenticationSuccess'));
       }
     }
     
@@ -438,10 +438,7 @@ class I18nCompletionTool {
       this.config = { ...baseConfig, ...(this.config || {}) };
       
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-      this.t = t;
-      
-      this.sourceDir = this.config.sourceDir;
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));this.sourceDir = this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     } else {
       await this.initialize();
@@ -458,23 +455,23 @@ class I18nCompletionTool {
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     }
     
-    console.log(this.t("complete.title"));
-    console.log(this.t("complete.separator"));
-    console.log(this.t("complete.sourceDir", { sourceDir: this.sourceDir }));
-    console.log(this.t("complete.sourceLanguage", { sourceLanguage: this.config.sourceLanguage }));
+    console.log(t("complete.title"));
+    console.log(t("complete.separator"));
+    console.log(t("complete.sourceDir", { sourceDir: this.sourceDir }));
+    console.log(t("complete.sourceLanguage", { sourceLanguage: this.config.sourceLanguage }));
     
     if (args.dryRun) {
-      console.log(this.t("complete.dryRunMode"));
+      console.log(t("complete.dryRunMode"));
     }
     
     try {
       // Get available languages
       const languages = this.getAvailableLanguages();
-      console.log(this.t("complete.languages", { languages: languages.join(', ') }));
+      console.log(t("complete.languages", { languages: languages.join(', ') }));
       
       // Get missing keys by comparing source language with others
       const missingKeys = this.getMissingKeysFromComparison();
-      console.log(this.t("complete.addingMissingKeys"));
+      console.log(t("complete.addingMissingKeys"));
       
       let totalChanges = 0;
       
@@ -482,39 +479,39 @@ class I18nCompletionTool {
       const targetLanguages = languages.filter(lang => lang !== this.config.sourceLanguage);
       const allChanges = [];
       for (const language of targetLanguages) {
-        console.log(this.t("complete.processing", { language }));
+        console.log(t("complete.processing", { language }));
         
         const changes = this.addMissingKeysToLanguage(language, missingKeys, args.dryRun);
         
         if (changes.length > 0) {
-          console.log(this.t("complete.addedKeys", { count: changes.length }));
+          console.log(t("complete.addedKeys", { count: changes.length }));
           totalChanges += changes.length;
           allChanges.push({ language, changes });
           
           // Show sample of changes
           const sampleChanges = changes.slice(0, 3);
           sampleChanges.forEach(change => {
-            console.log(this.t("complete.changeDetails", { file: change.file, key: change.key }));
+            console.log(t("complete.changeDetails", { file: change.file, key: change.key }));
           });
           
           if (changes.length > 3) {
-            console.log(this.t("complete.andMore", { count: changes.length - 3 }));
+            console.log(t("complete.andMore", { count: changes.length - 3 }));
           }
         } else {
-          console.log(this.t("complete.noChangesNeeded", { language }));
+          console.log(t("complete.noChangesNeeded", { language }));
         }
       }
       
       console.log('\n');
-      console.log(this.t("complete.summaryTitle"));
-      console.log(this.t("complete.separator"));
-      console.log(this.t("complete.totalChanges", { totalChanges }));
-      console.log(this.t("complete.languagesProcessed", { languagesProcessed: languages.length }));
-      console.log(this.t("complete.missingKeysAdded", { missingKeysAdded: missingKeys.length }));
+      console.log(t("complete.summaryTitle"));
+      console.log(t("complete.separator"));
+      console.log(t("complete.totalChanges", { totalChanges }));
+      console.log(t("complete.languagesProcessed", { languagesProcessed: languages.length }));
+      console.log(t("complete.missingKeysAdded", { missingKeysAdded: missingKeys.length }));
       
       if (!args.dryRun && allChanges.length > 0) {
         const rl = this.rl || this.initReadline();
-        const answer = await this.prompt('\n' + this.t('complete.generateReportPrompt') + ' (Y/N): ');
+        const answer = await this.prompt('\n' + t('complete.generateReportPrompt') + ' (Y/N): ');
         
         if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
           await this.generateReport(allChanges, languages);
@@ -522,27 +519,27 @@ class I18nCompletionTool {
       }
       
       if (!args.dryRun) {
-        console.log('\n' + this.t("complete.nextStepsTitle"));
-        console.log(this.t("complete.separator"));
-        console.log(this.t("complete.nextStep1"));
+        console.log('\n' + t("complete.nextStepsTitle"));
+        console.log(t("complete.separator"));
+        console.log(t("complete.nextStep1"));
         console.log('   node i18ntk-usage.js --output-report');
-        console.log(this.t("complete.nextStep2"));
+        console.log(t("complete.nextStep2"));
         console.log('   node i18ntk-validate.js');
-        console.log(this.t("complete.nextStep3"));
+        console.log(t("complete.nextStep3"));
         console.log('   node i18ntk-analyze.js');
-        console.log('\n' + this.t("complete.allKeysAvailable"));
+        console.log('\n' + t("complete.allKeysAvailable"));
       } else {
-        console.log('\n' + this.t("complete.runWithoutDryRun"));
+        console.log('\n' + t("complete.runWithoutDryRun"));
       }
       
       // Only prompt when run from the menu (i.e., when a callback or menu context is present)
       if (typeof this.prompt === "function" && args.fromMenu) {
-        console.log(this.t('common.completed'));
-        await this.prompt(this.t('pressEnterToContinue'));
+        console.log(t('common.completed'));
+        await this.prompt(t('pressEnterToContinue'));
       }
       
     } catch (error) {
-      console.error(this.t('complete.errorDuringCompletion', { error: error.message }));
+      console.error(t('complete.errorDuringCompletion', { error: error.message }));
       process.exit(1);
     }
   }
@@ -555,8 +552,7 @@ if (require.main === module) {
     process.exit(0);
   }).catch(error => {
     const UIi18n = require('./i18ntk-ui');
-    const ui = new UIi18n();
-    console.error(this.t('complete.errorDuringCompletion', { error: error.message }));
+        console.error(t('complete.errorDuringCompletion', { error: error.message }));
     SecurityUtils.logSecurityEvent('I18n completion tool failed', 'error', { error: error.message });
     process.exit(1);
   });
