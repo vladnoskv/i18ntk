@@ -1,14 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const CONFIG_DIR = 'settings';
+const settingsManager = require('../settings/settings-manager');
 const CONFIG_FILE = 'i18ntk-config.json';
 
-function getConfigPath(cwd = process.cwd()) {
-  return path.join(cwd, CONFIG_DIR, CONFIG_FILE);
+function getConfigPath(cwd = settingsManager.configDir) {
+  return path.join(cwd, CONFIG_FILE);
 }
 
-function loadConfig(cwd = process.cwd()) {
+function loadConfig(cwd = settingsManager.configDir) {
   const p = getConfigPath(cwd);
   try {
     const raw = fs.readFileSync(p, 'utf8');
@@ -18,8 +18,8 @@ function loadConfig(cwd = process.cwd()) {
   }
 }
 
-function saveConfig(cfg, cwd = process.cwd()) {
-  const dir = path.join(cwd, CONFIG_DIR);
+function saveConfig(cfg, cwd = settingsManager.configDir) {
+  const dir = cwd;
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, CONFIG_FILE), JSON.stringify(cfg, null, 2), 'utf8');
 }

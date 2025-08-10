@@ -64,6 +64,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       outputDir: configManager.toRelative(cfg.outputDir),
     };
 
+    const settingsDir = settingsManager.configDir;
     const config = {
       ...cfg,
       sourceLanguage: cliArgs.sourceLanguage || cfg.sourceLanguage || 'en',
@@ -73,10 +74,10 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       excludeFiles: cfg.excludeFiles || cfg.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
       excludeDirs: cfg.excludeDirs || cfg.processing?.excludeDirs || ['node_modules', '.next', '.git', 'dist', 'build'],
       strictMode: cliArgs.strictMode || cfg.strictMode || false,
-      backupDir: path.resolve(cfg.projectRoot, path.join('settings', 'backups')),
-    tempDir: path.resolve(cfg.projectRoot, path.join('settings', 'temp')),
-    cacheDir: path.resolve(cfg.projectRoot, path.join('settings', '.cache')),
-    configDir: path.resolve(cfg.projectRoot, 'settings'),
+      backupDir: path.join(settingsDir, 'backups'),
+      tempDir: path.join(settingsDir, 'temp'),
+      cacheDir: path.join(settingsDir, '.cache'),
+      configDir: settingsDir,
       settings: {
         defaultLanguages: cfg.defaultLanguages || ['de', 'es', 'fr', 'ru'],
         processing: { ...cfg.processing },
@@ -268,14 +269,14 @@ function displayPaths(cfg = {}) {
 async function ensureInitialized(cfg) {
   try {
     // Check if initialization has been marked as complete
-    const configPath = path.join(process.cwd(), 'settings', 'initialization.json');
+    const configPath = path.join(settingsManager.configDir, 'initialization.json');
     let initStatus = { initialized: false, version: null, timestamp: null };
     
     if (fs.existsSync(configPath)) {
       try {
         initStatus = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         // If initialized and version matches current, skip further checks
-        if (initStatus.initialized && initStatus.version === '1.7.1') {
+        if (initStatus.initialized && initStatus.version === '1.7.2') {
           return true;
         }
       } catch (e) {
@@ -296,7 +297,7 @@ async function ensureInitialized(cfg) {
       ensureDirectory(initDir);
       fs.writeFileSync(configPath, JSON.stringify({
         initialized: true,
-        version: '1.7.1',
+        version: '1.7.2',
         timestamp: new Date().toISOString(),
         sourceDir: sourceDir,
         sourceLanguage: sourceLanguage
@@ -316,7 +317,7 @@ async function ensureInitialized(cfg) {
         ensureDirectory(initDir);
         fs.writeFileSync(configPath, JSON.stringify({
           initialized: true,
-          version: '1.7.1',
+          version: '1.7.2',
           timestamp: new Date().toISOString(),
           sourceDir: sourceDir,
           sourceLanguage: sourceLanguage
@@ -337,7 +338,7 @@ async function ensureInitialized(cfg) {
         ensureDirectory(initDir);
         fs.writeFileSync(configPath, JSON.stringify({
           initialized: true,
-          version: '1.7.1',
+          version: '1.7.2',
           timestamp: new Date().toISOString(),
           sourceDir: sourceDir,
           sourceLanguage: sourceLanguage

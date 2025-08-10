@@ -1,10 +1,10 @@
 # Documentation Overview
 
-**Version:** 1.7.1
+**Version:** 1.7.2
 **Last Updated:** 2025-08-10
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
-Version 1.7.1 introduces enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support.
+Version 1.7.2 introduces enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support.
 
 ## Structure
 
@@ -39,7 +39,7 @@ Version 1.7.1 introduces enhanced security logging, flexible 4-6 digit PIN authe
 
 ### Upgrading from Deprecated Versions
 
-#### From any version < 1.7.1 (DEPRECATED - use latest version)
+#### From any version < 1.7.2 (DEPRECATED - use latest version)
 1. **Backup your current configuration**:
    ```bash
    cp -r ./settings ./settings-backup-$(date +%Y%m%d)
@@ -47,17 +47,17 @@ Version 1.7.1 introduces enhanced security logging, flexible 4-6 digit PIN authe
 
 2. **Install the latest version**:
     ```bash
-    npm install i18ntk@1.7.1```
+    npm install i18ntk@1.7.2```
 
 3. **Run configuration migration**:
     ```bash
-    npx i18ntk@1.7.1 --migrate
+    npx i18ntk@1.7.2 --migrate
     ```
 
 4. **Verify installation**:
     ```bash
-    npx i18ntk@1.7.1 --version
-    npx i18ntk@1.7.1 --validate
+    npx i18ntk@1.7.2 --version
+    npx i18ntk@1.7.2 --validate
     ```
 
 #### Preserved Features from 1.6.x
@@ -69,7 +69,7 @@ Version 1.7.1 introduces enhanced security logging, flexible 4-6 digit PIN authe
 - ✅ Advanced configuration management
 
 #### Breaking Changes
-- **None** - 1.7.1 is fully backward compatible
+- **None** - 1.7.2 is fully backward compatible
 
 ### Migration Support
 If you encounter issues during migration:

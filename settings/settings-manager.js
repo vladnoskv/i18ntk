@@ -9,8 +9,8 @@ const path = require('path');
 
 class SettingsManager {
     constructor() {
-        const projectRoot = process.cwd();
-        this.configDir = path.join(projectRoot, 'settings');
+        const packageDir = __dirname;
+        this.configDir = packageDir;
         this.configFile = path.join(this.configDir, 'i18ntk-config.json');
         this.lastBackupTime = 0;
         this.backupDebounceMs = 5000; // 5 seconds debounce

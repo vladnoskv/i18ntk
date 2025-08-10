@@ -69,13 +69,13 @@ async function ensureInitializedOrExit(rl) {
   };
   
   // Check if already initialized using new tracking system
-  const initFilePath = path.join(process.cwd(), 'settings', 'initialization.json');
+  const initFilePath = path.join(settingsManager.configDir, 'initialization.json');
   
   let isInitialized = false;
   if (fs.existsSync(initFilePath)) {
     try {
       const initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
-      isInitialized = initStatus.initialized && initStatus.version === '1.7.1';
+      isInitialized = initStatus.initialized && initStatus.version === '1.7.2';
     } catch (e) {
       // Invalid init file, proceed with check
     }
@@ -97,7 +97,7 @@ async function ensureInitializedOrExit(rl) {
     ensureDirectory(initDir);
     fs.writeFileSync(initFilePath, JSON.stringify({
       initialized: true,
-      version: '1.7.1',
+      version: '1.7.2',
       timestamp: new Date().toISOString(),
       sourceDir: cfg.sourceDir,
       sourceLanguage: cfg.sourceLanguage
@@ -118,7 +118,7 @@ async function ensureInitializedOrExit(rl) {
   ensureDirectory(initDir);
   fs.writeFileSync(initFilePath, JSON.stringify({
     initialized: true,
-    version: '1.7.1',
+    version: '1.7.2',
     timestamp: new Date().toISOString(),
     sourceDir: result.sourceDir || cfg.sourceDir,
     sourceLanguage: cfg.sourceLanguage
@@ -143,6 +143,12 @@ async function maybePromptFramework(rl, cfg, currentVersion) {
       prompt: 'always',
       lastPromptedVersion: null
     };
+  }
+  
+  // Reload settings to ensure we have latest framework detection results
+  const freshSettings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  if (freshSettings.framework) {
+    settings.framework = freshSettings.framework;
   }
   
   // Check if framework is already detected or preference is set to none
@@ -340,23 +346,38 @@ class I18nManager {
       ];
       
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
-      
+
       if (installedFrameworks.length > 0) {
         if (this.ui && this.ui.t) {
           console.log(this.ui.t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') }));
         } else {
           console.log(`Detected frameworks: ${installedFrameworks.join(', ')}`);
         }
+        const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        cfg.framework = cfg.framework || {};
+        cfg.framework.detected = true;
+        cfg.framework.installed = installedFrameworks;
+        if (configManager.saveSettings) {
+          configManager.saveSettings(cfg);
+        } else if (configManager.saveConfig) {
+          configManager.saveConfig(cfg);
+        }
         return true;
       } else {
-        // Check configuration for framework preference
         const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
-        
+        if (cfg.framework) {
+          cfg.framework.detected = false;
+          if (configManager.saveSettings) {
+            configManager.saveSettings(cfg);
+          } else if (configManager.saveConfig) {
+            configManager.saveConfig(cfg);
+          }
+        }
         // If framework preference is already set to 'none', skip warning
         if (cfg.framework === 'none' || (cfg.framework && cfg.framework.preference === 'none')) {
           return true;
         }
-        
+
         // Framework detection is handled by maybePromptFramework, so just return true here
         return true;
       }
@@ -435,6 +456,7 @@ class I18nManager {
 
       const rl = cliHelper.getInterface();
       const cfgAfterInitCheck = await ensureInitializedOrExit(rl);
+      await this.checkI18nDependencies();
       await maybePromptFramework(rl, cfgAfterInitCheck, pkg.version);
 
       // Update this.config with the configuration from ensureInitializedOrExit
@@ -1065,7 +1087,7 @@ class I18nManager {
       { path: path.join(process.cwd(), 'reports', 'backups'), name: 'Reports Backups', type: 'backups' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
-      { path: path.join(process.cwd(), 'settings', 'backups'), name: 'Settings Backups', type: 'backups' },
+      { path: path.join(configManager.configDir, 'backups'), name: 'Settings Backups', type: 'backups' },
       { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' }
     ];
     

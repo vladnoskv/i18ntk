@@ -4,7 +4,7 @@ const path = require('path');
 const AdminAuth = require('../utils/admin-auth');
 
 (async () => {
-  const configPath = path.join(process.cwd(), 'settings', '.i18n-admin-config.json');
+  const configPath = path.join(require('../settings/settings-manager').configDir, '.i18n-admin-config.json');
   const auth = new AdminAuth();
 
   try {

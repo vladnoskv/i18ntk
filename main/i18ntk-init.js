@@ -101,8 +101,26 @@ class I18nInitializer {
       
       if (installedFrameworks.length > 0) {
         console.log(t('init.detectedI18nFrameworks', { frameworks: installedFrameworks.join(', ') }));
+        const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        cfg.framework = cfg.framework || {};
+        cfg.framework.detected = true;
+        cfg.framework.installed = installedFrameworks;
+        if (configManager.saveSettings) {
+          configManager.saveSettings(cfg);
+        } else if (configManager.saveConfig) {
+          configManager.saveConfig(cfg);
+        }
         return true;
       } else {
+        const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        if (cfg.framework) {
+          cfg.framework.detected = false;
+          if (configManager.saveSettings) {
+            configManager.saveSettings(cfg);
+          } else if (configManager.saveConfig) {
+            configManager.saveConfig(cfg);
+          }
+        }
         // Framework detection is now handled by maybePromptFramework in i18ntk-manage.js
         // Skip prompting here to avoid double prompts
         return true;

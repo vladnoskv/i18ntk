@@ -1,3 +1,9 @@
+## [1.7.2] - 2025-08-11 - **FRAMEWORK DETECTION FIX & SETTINGS UPDATE**
+
+### 🛠 Fixes
+- Improved i18n framework detection to correctly recognize installed libraries
+- Store toolkit settings within `node_modules/i18ntk/settings` to avoid creating project root folders
+
 ## [1.7.1] - 2025-08-10 - **SECURITY LOGGING & CONFIGURATION STABILITY RELEASE**
 
 > **🔒 SECURITY & STABILITY PATCH**: Version 1.7.1 delivers **enhanced security logging**, **flexible PIN authentication**, and **configuration stability improvements**.

@@ -1,6 +1,6 @@
 # Installation Guide
 
-**Version:** 1.7.1
+**Version:** 1.7.2
 **Last Updated:** 2025-08-10
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
@@ -8,20 +8,20 @@
 
 ```bash
 # Install locally (recommended)
-npm install i18ntk@1.7.1 --save-dev
+npm install i18ntk@1.7.2 --save-dev
 
 # Initialize project
-npx i18ntk@1.7.1 init
+npx i18ntk@1.7.2 init
 
 # Run analysis
-npx i18ntk@1.7.1 analyze
+npx i18ntk@1.7.2 analyze
 ```
 
 ### Watch Helper & Lite Package
 
 ```bash
 # Watch for changes and re-run analysis automatically
-npx i18ntk@1.7.1 analyze --watch
+npx i18ntk@1.7.2 analyze --watch
 
 # Build a lite English-only UI locale bundle
 npm run build:lite
@@ -37,17 +37,17 @@ npm run build:lite
 
 ### Local Installation (Recommended)
 ```bash
-npm install i18ntk@1.7.1 --save-dev
+npm install i18ntk@1.7.2 --save-dev
 ```
 
 ### Global Installation
 ```bash
-npm install -g i18ntk@1.7.1
+npm install -g i18ntk@1.7.2
 ```
 
 ### Using npx (No Installation)
 ```bash
-npx i18ntk@1.7.1 <command>
+npx i18ntk@1.7.2 <command>
 ```
 
 ### Using Yarn
@@ -63,32 +63,32 @@ yarn global add i18ntk
 
 ### React
 ```bash
-npm install i18ntk@1.7.1 --save-dev
-npx i18ntk@1.7.1 init
+npm install i18ntk@1.7.2 --save-dev
+npx i18ntk@1.7.2 init
 ```
 
 ### Vue.js
 ```bash
-npm install i18ntk@1.7.1 --save-dev
-npx i18ntk@1.7.1 init
+npm install i18ntk@1.7.2 --save-dev
+npx i18ntk@1.7.2 init
 ```
 
 ### Angular
 ```bash
-npm install i18ntk@1.7.1 --save-dev
-npx i18ntk@1.7.1 init
+npm install i18ntk@1.7.2 --save-dev
+npx i18ntk@1.7.2 init
 ```
 
 ### Next.js
 ```bash
-npm install i18ntk@1.7.1 --save-dev
-npx i18ntk@1.7.1 init
+npm install i18ntk@1.7.2 --save-dev
+npx i18ntk@1.7.2 init
 ```
 
 ### Framework-Free Usage
 ```bash
-npm install i18ntk@1.7.1 --save-dev
-npx i18ntk@1.7.1 init --no-framework
+npm install i18ntk@1.7.2 --save-dev
+npx i18ntk@1.7.2 init --no-framework
 ```
 
 ## Configuration
@@ -106,10 +106,10 @@ Create `i18ntk-config.json` in your project root:
 
 ## Next Steps
 
-1. **Initialize:** Run `npx i18ntk@1.7.1 init` to set up project structure
-2. **Analyze:** Run `npx i18ntk@1.7.1 analyze` to check translation completeness
-3. **Configure:** Adjust settings via `npx i18ntk@1.7.1` → Settings menu
-4. **Automate:** Use `npx i18ntk@1.7.1 autorun` for complete workflow
+1. **Initialize:** Run `npx i18ntk@1.7.2 init` to set up project structure
+2. **Analyze:** Run `npx i18ntk@1.7.2 analyze` to check translation completeness
+3. **Configure:** Adjust settings via `npx i18ntk@1.7.2` → Settings menu
+4. **Automate:** Use `npx i18ntk@1.7.2 autorun` for complete workflow
 
 ## Support
 
@@ -121,7 +121,7 @@ Create `i18ntk-config.json` in your project root:
 
 ### Upgrading from Deprecated Versions
 
-#### From any version < 1.7.1 (DEPRECATED - use latest version)
+#### From any version < 1.7.2 (DEPRECATED - use latest version)
 1. **Backup your current configuration**:
    ```bash
    cp -r ./settings ./settings-backup-$(date +%Y%m%d)
@@ -129,18 +129,18 @@ Create `i18ntk-config.json` in your project root:
 
 2. **Install the latest version**:
    ```bash
-   npm install i18ntk@1.7.1
+   npm install i18ntk@1.7.2
    ```
 
 3. **Run configuration migration**:
    ```bash
-   npx i18ntk@1.7.1 --migrate
+   npx i18ntk@1.7.2 --migrate
    ```
 
 4. **Verify installation**:
    ```bash
-   npx i18ntk@1.7.1 --version
-   npx i18ntk@1.7.1 --validate
+   npx i18ntk@1.7.2 --version
+   npx i18ntk@1.7.2 --validate
    ```
 
 #### Preserved Features from 1.6.x
@@ -152,7 +152,7 @@ Create `i18ntk-config.json` in your project root:
 - ✅ Advanced configuration management
 
 #### Breaking Changes
-- **None** - 1.7.1 is fully backward compatible
+- **None** - 1.7.2 is fully backward compatible
 
 ### Migration Support
 If you encounter issues during migration:

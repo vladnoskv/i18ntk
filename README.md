@@ -2,18 +2,18 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.7.1
+**Version:** 1.7.2
 **Last Updated:** 2025-08-10  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk) 
-[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.1)](https://socket.dev/npm/package/i18ntk/overview/1.7.1)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.1)](https://socket.dev/npm/package/i18ntk/overview/1.7.2)
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
 **Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translation logic like i18next or Vue i18n.
 
-> **v1.7.1** – Enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support; maintains 97% speed improvement (**15.38ms** for 200k keys up to 5/M keys per second).
+> **v1.7.2** – Enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support; maintains 97% speed improvement (**15.38ms** for 200k keys up to 5/M keys per second).
 
 ## 🚀 Quick Start
 
@@ -87,7 +87,7 @@ Configuration is managed through the `settings/i18ntk-config.json` file:
 
 ```json
 {
-  "version": "1.7.1",
+  "version": "1.7.2",
   "sourceDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "defaultLanguage": "en",

@@ -356,7 +356,7 @@ class SecurityUtils {
   static async saveEncryptedPin(pin) {
     try {
       const hash = crypto.createHash('sha256').update(pin).digest('hex');
-      const settingsDir = path.join(process.cwd(), 'settings');
+      const settingsDir = require('../settings/settings-manager').configDir;
       const pinFile = path.join(settingsDir, 'admin-pin.hash');
       await fs.promises.mkdir(settingsDir, { recursive: true });
       await fs.promises.writeFile(pinFile, hash, 'utf8');

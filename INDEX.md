@@ -46,4 +46,4 @@ i18ntk sizing        # Optimize package size
 - **[AI Agent Guidelines](docs/development/AGENTS.md)** - AI development tools
 
 ---
-*Last updated: 08/10/2025 for v1.7.1*
+*Last updated: 08/10/2025 for v1.7.2*

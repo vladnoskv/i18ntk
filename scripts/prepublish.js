@@ -316,7 +316,7 @@ class PrepublishCleaner {
     }
     
     async resetSecuritySettings() {
-        const configPath = path.join(this.projectRoot, 'settings', '.i18n-admin-config.json');
+        const configPath = path.join(require('../settings/settings-manager').configDir, '.i18n-admin-config.json');
         
         if (fs.existsSync(configPath)) {
             const defaultConfig = {
