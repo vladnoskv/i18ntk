@@ -1,6 +1,6 @@
 {
-  "language": "en",
-  "uiLanguage": "en",
+  "language": "de",
+  "uiLanguage": "de",
   "theme": "system",
   "projectRoot": ".",
   "sourceDir": "./locales",
@@ -132,7 +132,7 @@
     "maxBackups": 100
   },
   "security": {
-    "adminPinEnabled": false,
+    "adminPinEnabled": true,
     "adminPinPromptOnInit": true,
     "keepAuthenticatedUntilExit": true,
     "sessionTimeout": 30,

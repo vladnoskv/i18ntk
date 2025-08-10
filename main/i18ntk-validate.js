@@ -38,7 +38,7 @@ if (isUppercase) {
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG || 'en');
+loadTranslations(process.env.I18NTK_LANG);
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');

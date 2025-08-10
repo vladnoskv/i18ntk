@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG || 'en');
+loadTranslations(process.env.I18NTK_LANG);
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');

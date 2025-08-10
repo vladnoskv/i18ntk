@@ -35,7 +35,6 @@ const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
 
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG || 'en');
 const cliHelper = require('../utils/cli-helper');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../utils/config');
 const pkg = require('../package.json');
@@ -164,14 +163,14 @@ async function maybePromptFramework(rl, cfg, currentVersion) {
   if (settings.framework.prompt === 'always') {
     const ans = await new Promise(res =>
       rl.question([
-        'No i18n framework detected. Consider using one of the following:',
-        '- React i18next (react-i18next)',
-        '- Vue i18n (vue-i18n)',
-        '- i18next (i18next)',
-        '- Nuxt i18n (@nuxtjs/i18n)',
-        '- Svelte i18n (svelte-i18n)',
+        this.ui.t('init.suggestions.noFramework'),
+        this.ui.t('init.frameworks.react'),
+        this.ui.t('init.frameworks.vue'),
+        this.ui.t('init.frameworks.i18next'),
+        this.ui.t('init.frameworks.nuxt'),
+        this.ui.t('init.frameworks.svelte'),
         '',
-        'Proceed without a framework? (y/N/dnr = do not remind until next update): '
+        this.ui.t('init.continueWithoutI18nPrompt') + ' (y/N/dnr = do not remind until next update): '
       ].join('\n'), a => res(a.trim().toLowerCase()))
     );
 

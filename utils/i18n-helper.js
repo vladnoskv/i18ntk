@@ -125,7 +125,8 @@ function loadTranslations(language) {
   const settings = cfg?.getConfig?.() || {};
   const configuredLanguage = settings.uiLanguage || settings.language || 'en';
 
-  const requested = (language || configuredLanguage || 'en').toString();
+  // Prioritize settings file language over environment variable
+  const requested = (configuredLanguage || language || 'en').toString();
   const short = requested.split('-')[0].toLowerCase();
   const tryOrder = [requested, short, 'en'];
 

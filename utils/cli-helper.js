@@ -160,16 +160,56 @@ function showFrameworkWarningOnce(ui) {
           throw new Error('Locale file not found');
         }
       } catch (fallbackError) {
-        // Final fallback: hardcoded English
-        const messages = {
-          'init.suggestions.noFramework': 'No i18n framework detected. Consider using one of the following:',
-          'init.frameworks.react': ' - React i18next (react-i18next)',
-          'init.frameworks.vue': ' - Vue i18n (vue-i18n)',
-          'init.frameworks.i18next': ' - i18next (i18next)',
-          'init.frameworks.nuxt': ' - Nuxt i18n (@nuxtjs/i18n)',
-          'init.frameworks.svelte': ' - Svelte i18n (svelte-i18n)'
-        };
-        t = (key) => messages[key] || key;
+        // Final fallback: load from current UI locale or English
+        try {
+          const path = require('path');
+          const fs = require('fs');
+          
+          // Try to determine current language from settings
+          const settingsManager = require('../settings/settings-manager');
+          const settings = settingsManager.loadSettings();
+          const currentLang = settings.uiLanguage || 'en';
+          
+          const localePath = path.join(__dirname, '..', 'ui-locales', `${currentLang}.json`);
+          if (fs.existsSync(localePath)) {
+            const translations = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+            t = (key) => {
+              const keys = key.split('.');
+              let result = translations;
+              for (const k of keys) {
+                result = result && result[k];
+              }
+              return result || key;
+            };
+          } else {
+            // Fallback to English
+            const enLocalePath = path.join(__dirname, '..', 'ui-locales', 'en.json');
+            if (fs.existsSync(enLocalePath)) {
+              const translations = JSON.parse(fs.readFileSync(enLocalePath, 'utf8'));
+              t = (key) => {
+                const keys = key.split('.');
+                let result = translations;
+                for (const k of keys) {
+                  result = result && result[k];
+                }
+                return result || key;
+              };
+            } else {
+              throw new Error('No locale files found');
+            }
+          }
+        } catch (finalError) {
+          // Absolute last resort: basic hardcoded fallback
+          const messages = {
+            'init.suggestions.noFramework': 'No i18n framework detected. Consider using one of the following:',
+            'init.frameworks.react': ' - React i18next (react-i18next)',
+            'init.frameworks.vue': ' - Vue i18n (vue-i18next)',
+            'init.frameworks.i18next': ' - i18next (i18next)',
+            'init.frameworks.nuxt': ' - Nuxt i18n (@nuxtjs/i18next)',
+            'init.frameworks.svelte': ' - Svelte i18n (svelte-i18next)'
+          };
+          t = (key) => messages[key] || key;
+        }
       }
     }
   }

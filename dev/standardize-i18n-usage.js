@@ -169,7 +169,7 @@ class I18nStandardizer {
     }
     
     if (insertIndex !== -1) {
-      lines.splice(insertIndex, 0, "loadTranslations(process.env.I18NTK_LANG || 'en');");
+      lines.splice(insertIndex, 0, "loadTranslations(process.env.I18NTK_LANG);");
       return lines.join('\n');
     }
     

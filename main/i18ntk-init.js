@@ -20,7 +20,7 @@ const AdminAuth = require('../utils/admin-auth');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 // Ensure UIi18n is available for this initializer class
 const UIi18n = require('./i18ntk-ui');
-loadTranslations(process.env.I18NTK_LANG || 'en');
+loadTranslations(process.env.I18NTK_LANG);
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const { showFrameworkWarningOnce } = require('../utils/cli-helper');
 
