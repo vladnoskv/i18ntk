@@ -1,6 +1,7 @@
 ## [1.7.2] - 2025-08-11 - **FRAMEWORK DETECTION FIX & SETTINGS UPDATE**
 
 ### 🛠 Fixes
+- **Fixed framework detection prompt issue**: System now correctly skips the "No i18n framework detected" prompt when i18next or other frameworks are already detected
 - Improved i18n framework detection to correctly recognize installed libraries
 - Store toolkit settings within `node_modules/i18ntk/settings` to avoid creating project root folders
 

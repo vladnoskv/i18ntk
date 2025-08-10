@@ -13,7 +13,7 @@
 
 **Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translation logic like i18next or Vue i18n.
 
-> **v1.7.2** – Enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support; maintains 97% speed improvement (**15.38ms** for 200k keys up to 5/M keys per second).
+> **v1.7.2** – Enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, **fixed framework detection prompt**, and CI/CD silent mode support; maintains 97% speed improvement (**15.38ms** for 200k keys up to 5/M keys per second).
 
 ## 🚀 Quick Start
 
@@ -53,6 +53,7 @@ i18ntk validate --source ./locales
 - **Framework Support**: Auto-detects React i18next, Vue i18n, Angular, Next i18next, Nuxt i18next, Svelte i18n
 - **Memory Optimization**: 67% memory reduction with streaming processing
 - **Scalability**: Linear scaling up to 5M keys with ultra-extreme settings
+- **Smart Framework Detection**: Automatically skips unnecessary prompts when i18n frameworks are detected
 
 ### 📸 Screenshots
 
