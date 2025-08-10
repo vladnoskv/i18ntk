@@ -1,5 +1,5 @@
 $tarball = npm pack
-mkdir test-i18ntk4; cd test-i18ntk4
+mkdir test-i18ntk2; cd test-i18ntk2
 npm init -y
 npm i ..\$tarball
 npx i18ntk --help

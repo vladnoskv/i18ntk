@@ -39,6 +39,7 @@ loadTranslations(process.env.I18NTK_LANG || 'en');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig } = require('../utils/config-helper');
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 
 // Get configuration from settings manager
 function getConfig() {
@@ -84,30 +85,18 @@ class I18nSizingAnalyzer {
 
   // Initialize readline interface
   initReadline() {
-    if (!this.rl) {
-      const readline = require('readline');
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-    }
-    return this.rl;
+    return getGlobalReadline();
   }
 
   // Prompt for user input
   async prompt(question) {
-    const rl = this.rl || this.initReadline();
-    return new Promise((resolve) => {
-      rl.question(question, resolve);
-    });
+    const rl = getGlobalReadline();
+    return new Promise(resolve => rl.question(question, resolve));
   }
 
   // Close readline interface
   closeReadline() {
-    if (this.rl) {
-      this.rl.close();
-      this.rl = null;
-    }
+    closeGlobalReadline();
   }
 
   // Get available language files

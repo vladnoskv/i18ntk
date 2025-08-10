@@ -14,7 +14,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');

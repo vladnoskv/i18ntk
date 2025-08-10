@@ -15,7 +15,6 @@ function getGlobalReadline() {
       terminal: true,
       historySize: 0
     });
-    
     // Store globally for other modules to check
     global.activeReadlineInterface = globalReadline;
   }
@@ -129,4 +128,4 @@ async function askHidden(query) {
   });
 }
 
-module.exports = { ask, askHidden, flushStdout, closeGlobalReadline };
+module.exports = { ask, askHidden, flushStdout, closeGlobalReadline, getGlobalReadline };

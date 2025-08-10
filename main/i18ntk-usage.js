@@ -23,8 +23,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+const { getGlobalReadline, closeGlobalReadline, askHidden } = require('../utils/cli');
 loadTranslations(process.env.I18NTK_LANG || 'en');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
@@ -61,28 +61,22 @@ class I18nUsageAnalyzer {
   // Initialize readline interface
   initReadline() {
     if (!this.rl) {
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
+      return getGlobalReadline();
     }
-    return this.rl;
+
   }
   
   // Close readline interface
   closeReadline() {
-    if (this.rl) {
-      this.rl.close();
-      this.rl = null;
-    }
+    closeGlobalReadline();
+
   }
   
   // Prompt for user input
   async prompt(question) {
-    const rl = this.rl || this.initReadline();
-    return new Promise((resolve) => {
-      rl.question(question, resolve);
-    });
+    const rl = getGlobalReadline();
+    return new Promise(resolve => rl.question(question, resolve));
+
   }
 
   async initialize() {
@@ -402,19 +396,9 @@ class I18nUsageAnalyzer {
           if (isRequired) {
             console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'analyze usage' }));
             
-            // Create readline interface for PIN input
-            const readline = require('readline');
-            const rl = readline.createInterface({
-              input: process.stdin,
-              output: process.stdout
-            });
-            
-            const pin = await new Promise(resolve => {
-              rl.question(this.t('adminCli.enterPin'), resolve);
-            });
-            
+            const pin = await askHidden(this.t('adminCli.enterPin'));
+
             const isValid = await adminAuth.verifyPin(pin);
-            rl.close();
             
             if (!isValid) {
               console.log(this.t('adminCli.invalidPin'));

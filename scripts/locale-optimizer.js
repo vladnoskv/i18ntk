@@ -15,17 +15,15 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 
 class LocaleOptimizer {
   constructor() {
     this.uiLocalesDir = path.join(__dirname, '..', 'ui-locales');
     this.allLocales = ['en', 'de', 'es', 'fr', 'ja', 'ru', 'zh'];
     this.backupDir = path.join(__dirname, '..', 'backups', 'locales');
-    this.rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
+    this.rl = getGlobalReadline();
+
   }
 
   /**
@@ -245,14 +243,14 @@ class LocaleOptimizer {
       this.rl.question('Select locales to keep: ', (answer) => {
         if (answer.toLowerCase() === 'cancel') {
           console.log('❌ Operation cancelled');
-          this.rl.close();
+          closeGlobalReadline();
           resolve(false);
           return;
         }
         
         if (answer.trim() === '') {
           console.log('✅ Keeping all locales');
-          this.rl.close();
+          closeGlobalReadline();
           resolve(true);
           return;
         }
@@ -262,7 +260,7 @@ class LocaleOptimizer {
         
         if (valid.length === 0) {
           console.log('⚠️  No valid locales selected, keeping all');
-          this.rl.close();
+          closeGlobalReadline();
           resolve(true);
           return;
         }
@@ -282,7 +280,7 @@ class LocaleOptimizer {
           } else {
             console.log('❌ Operation cancelled');
           }
-          this.rl.close();
+          closeGlobalReadline();
           resolve(true);
         });
       });
@@ -393,9 +391,9 @@ async function main() {
     rl.question('\nOptimize package size now? (Y/n): ', (answer) => {
       if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
         console.log('   Skipping optimization (you can run later with --interactive)');
-        rl.close();
+        closeGlobalReadline();
       } else {
-        rl.close();
+        closeGlobalReadline();
         optimizer.interactiveSelect();
       }
     });

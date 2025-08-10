@@ -7,6 +7,8 @@ loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
+
 
 class I18nSummaryReporter {
   constructor() {
@@ -56,30 +58,21 @@ class I18nSummaryReporter {
 
   // Initialize readline interface
   initReadline() {
-    if (!this.rl) {
-      const readline = require('readline');
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-    }
-    return this.rl;
+    return getGlobalReadline();
+
   }
 
   // Prompt for user input
   async prompt(question) {
-    const rl = this.rl || this.initReadline();
-    return new Promise((resolve) => {
-      rl.question(question, resolve);
-    });
+    const rl = getGlobalReadline();
+    return new Promise(resolve => rl.question(question, resolve));
+
   }
 
   // Close readline interface
   closeReadline() {
-    if (this.rl) {
-      this.rl.close();
-      this.rl = null;
-    }
+    closeGlobalReadline();
+
   }
 
 
@@ -837,19 +830,9 @@ class I18nSummaryReporter {
       if (isRequired && isCalledDirectly && !noPrompt && !fromMenu && !args.noPrompt) {
         console.log('\n' + this.t('adminCli.authRequiredForOperation', { operation: 'generate summary' }));
         
-        // Create readline interface for PIN input
-        const readline = require('readline');
-        const rl = readline.createInterface({
-          input: process.stdin,
-          output: process.stdout
-        });
-        
-        const pin = await new Promise(resolve => {
-          rl.question(this.t('adminCli.enterPin'), resolve);
-        });
+        const pin = await askHidden(this.t('adminCli.enterPin'));
         
         const isValid = await adminAuth.verifyPin(pin);
-        rl.close();
         
         if (!isValid) {
           console.log(this.t('adminCli.invalidPin'));

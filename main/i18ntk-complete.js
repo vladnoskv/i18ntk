@@ -18,7 +18,7 @@ const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
-
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 
 
 class I18nCompletionTool {
@@ -63,30 +63,18 @@ class I18nCompletionTool {
 
   // Initialize readline interface
   initReadline() {
-    if (!this.rl) {
-      const readline = require('readline');
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-    }
-    return this.rl;
+    return getGlobalReadline();
   }
 
   // Prompt for user input
   async prompt(question) {
-    const rl = this.rl || this.initReadline();
-    return new Promise((resolve) => {
-      rl.question(question, resolve);
-    });
+    const rl = getGlobalReadline();
+    return new Promise(resolve => rl.question(question, resolve));
   }
 
   // Close readline interface
   closeReadline() {
-    if (this.rl) {
-      this.rl.close();
-      this.rl = null;
-    }
+    closeGlobalReadline();
   }
 
   // Parse command line arguments

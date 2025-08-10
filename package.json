@@ -132,7 +132,8 @@
     "version:bump": "node scripts/version-bump.js",
     "docs:update-versions": "node scripts/update-docs-versions.js",
     "release:prepare": "npm run version:check && npm run docs:update-versions && npm run prepublishOnly",
-    "deprecate:old-versions": "node scripts/deprecate-versions.js"
+    "deprecate:old-versions": "node scripts/deprecate-versions.js",
+    "build:lite": "node scripts/build-lite.js"
   },
   "dependencies": {
     "i18ntk": "file:i18ntk-1.6.4.tgz"

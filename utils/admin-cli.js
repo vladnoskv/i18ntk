@@ -1,7 +1,7 @@
-const readline = require('readline');
 const i18n = require('./i18n-helper');
 const AdminAuth = require('./admin-auth');
 const SecurityUtils = require('./security');
+const { getGlobalReadline, closeGlobalReadline, askHidden, ask } = require('./cli');
 
 /**
  * CLI Helper for Admin Authentication
@@ -17,12 +17,7 @@ class AdminCLI {
    */
   initReadline() {
     if (!this.rl) {
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: true,
-        historySize: 0
-      });
+      this.rl = getGlobalReadline();
     }
     return this.rl;
   }
@@ -32,7 +27,7 @@ class AdminCLI {
    */
   closeReadline() {
     if (this.rl) {
-      this.rl.close();
+      closeGlobalReadline();
       this.rl = null;
     }
   }
@@ -42,80 +37,14 @@ class AdminCLI {
    */
   async promptPin(message = null) {
     if (!message) message = i18n.t('adminCli.enterPin');
-    return new Promise((resolve) => {
-      const rl = this.initReadline();
-      
-      // Check if stdin is a TTY (interactive terminal)
-      const stdin = process.stdin;
-      const isTTY = stdin && stdin.isTTY;
-      
-      if (isTTY) {
-        // Interactive mode with hidden input
-        let pin = '';
-        process.stdout.write(message);
-        
-        // Ensure raw mode is properly set and cleaned up
-        stdin.setRawMode(true);
-        stdin.resume();
-        stdin.setEncoding('utf8');
-        
-        const cleanup = () => {
-          stdin.setRawMode(false);
-          stdin.pause();
-          stdin.removeAllListeners('data');
-        };
-        
-        const onData = (char) => {
-          switch (char) {
-            case '\n':
-            case '\r':
-            case '\u0004': // Ctrl+D
-              cleanup();
-              process.stdout.write('\n');
-              resolve(pin);
-              break;
-            case '\u0003': // Ctrl+C
-              cleanup();
-              process.stdout.write('\n');
-              process.exit(1);
-              break;
-            case '\u007f': // Backspace
-              if (pin.length > 0) {
-                pin = pin.slice(0, -1);
-                process.stdout.write('\b \b');
-              }
-              break;
-            default:
-              if (char >= '0' && char <= '9' && pin.length < 6) {
-                pin += char;
-                process.stdout.write('*');
-              }
-              break;
-          }
-        };
-        
-        stdin.on('data', onData);
-      } else {
-        // Non-interactive mode (piped input)
-        // Close readline after use to prevent hanging
-        rl.question(message, (answer) => {
-          this.closeReadline();
-          resolve(answer.trim());
-        });
-      }
-    });
+    return askHidden(message);
   }
 
   /**
    * Prompt for yes/no confirmation
    */
   async promptConfirm(message) {
-    return new Promise((resolve) => {
-      const rl = this.initReadline();
-      rl.question(`${message} (y/N): `, (answer) => {
-        resolve(answer.toLowerCase().startsWith('y'));
-      });
-    });
+        return ask(`${message} (y/N): `).then(answer => answer.toLowerCase().startsWith('y'));
   }
 
   /**

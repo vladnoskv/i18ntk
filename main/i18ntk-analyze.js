@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
@@ -22,7 +22,6 @@ const PROJECT_ROOT = process.cwd();
 class I18nAnalyzer {
   constructor(config = {}) {
     this.config = config;
-    this.rl = null;
     this.t = t; // Use global translation function
     
     // Don't set defaults here - let getUnifiedConfig handle it
@@ -66,29 +65,20 @@ class I18nAnalyzer {
   
   // Initialize readline interface
   initReadline() {
-    if (!this.rl) {
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-    }
-    return this.rl;
+    return getGlobalReadline();
+
   }
   
   // Close readline interface
   closeReadline() {
-    if (this.rl) {
-      this.rl.close();
-      this.rl = null;
-    }
+    closeGlobalReadline();
+
   }
   
   // Prompt for user input
   async prompt(question) {
-    const rl = this.rl || this.initReadline();
-    return new Promise((resolve) => {
-      rl.question(question, resolve);
-    });
+    const rl = getGlobalReadline();
+    return new Promise(resolve => rl.question(question, resolve));
   }
 
   // Parse command line arguments

@@ -1,12 +1,5 @@
 {
-  "0": "l",
-  "1": "a",
-  "2": "n",
-  "3": "g",
-  "4": "u",
-  "5": "a",
-  "6": "g",
-  "7": "e",
+  "version": "1.7.0",
   "language": "en",
   "uiLanguage": "en",
   "theme": "system",
@@ -29,15 +22,15 @@
     "concurrency": 32,
     "maxFileSize": 524288,
     "timeout": 3000,
-    "retryAttempts": 0,
-    "retryDelay": 0,
+    "retryAttempts": 3,
+    "retryDelay": 1000,
     "cacheEnabled": true,
     "cacheTTL": 180000,
-    "validateOnSave": false,
-    "autoBackup": false,
-    "validateOnLoad": false,
+    "validateOnSave": true,
+    "autoBackup": true,
+    "validateOnLoad": true,
     "fileFilter": "**/*.json",
-    "notTranslatedMarker": "NOT_TRANSLATED",
+    "notTranslatedMarker": "[NOT TRANSLATED]",
     "excludeFiles": [
       ".DS_Store",
       "Thumbs.db",
@@ -45,7 +38,11 @@
       "*.bak",
       "*.log",
       "~*",
-      "*.swp"
+      "*.swp",
+      "node_modules",
+      ".git",
+      "dist",
+      "build"
     ],
     "performanceMode": "ultra-extreme",
     "memoryLimit": "256MB",
@@ -53,7 +50,7 @@
     "streaming": true,
     "compression": "brotli",
     "parallelProcessing": true,
-    "minimalLogging": true
+    "minimalLogging": false
   },
   "reports": {
     "format": "json",
@@ -70,7 +67,7 @@
   },
   "ui": {
     "showProgress": true,
-    "showDetailedOutput": false,
+    "showDetailedOutput": true,
     "colorOutput": true,
     "interactive": true,
     "confirmActions": true,
@@ -84,7 +81,7 @@
     "ignoreComments": false,
     "ignoreWhitespace": true,
     "normalizeKeys": true,
-    "validateOnStartup": false
+    "validateOnStartup": true
   },
   "notifications": {
     "enabled": true,
@@ -93,8 +90,6 @@
       "warning": true,
       "error": true,
       "info": true,
-      "warnings": true,
-      "errors": true,
       "progress": true
     },
     "sound": false,
@@ -109,40 +104,35 @@
   "advanced": {
     "backupBeforeChanges": true,
     "validateSettings": true,
-    "logLevel": "error",
+    "logLevel": "info",
     "performanceTracking": true,
     "memoryLimit": "256MB",
     "enableExperimental": true,
-    "batchSize": 2000,
     "maxConcurrentFiles": 32,
-    "enableProgressBars": false,
-    "enableColorOutput": false,
-    "strictMode": false,
-    "enableAuditLog": false,
-    "validateOnSave": false,
+    "enableProgressBars": true,
+    "enableColorOutput": true,
+    "enableAuditLog": true,
+    "validateOnSave": true,
     "sizingThreshold": 50,
     "sizingFormat": "table",
     "timeout": 3000,
-    "performanceMode": "ultra-extreme",
-    "gcInterval": 250,
-    "streaming": true,
-    "compression": "brotli",
-    "parallelProcessing": true,
     "aggressiveGC": true,
     "memoryPooling": true,
     "stringInterning": true
   },
   "backup": {
-    "enabled": false,
+    "enabled": true,
     "singleFileMode": false,
     "singleBackupFile": "i18ntk-central-backup.json",
     "retentionDays": 30,
-    "maxBackups": 100
+    "maxBackups": 100,
+    "compression": true,
+    "encryption": true
   },
   "security": {
-    "adminPinEnabled": false,
+    "adminPinEnabled": true,
     "adminPinPromptOnInit": true,
-    "keepAuthenticatedUntilExit": true,
+    "keepAuthenticatedUntilExit": false,
     "sessionTimeout": 30,
     "maxFailedAttempts": 3,
     "lockoutDuration": 15,
@@ -155,14 +145,9 @@
       ".ts",
       ".tsx",
       ".vue",
-      ".svelte"
-    ],
-    "notTranslatedMarker": "[NOT TRANSLATED]",
-    "excludeFiles": [
-      "node_modules",
-      ".git",
-      "dist",
-      "build"
+      ".svelte",
+      ".md",
+      ".txt"
     ],
     "strictMode": false,
     "pinProtection": {
@@ -178,7 +163,8 @@
         "complete": false,
         "manage": false,
         "sizing": false,
-        "usage": false
+        "usage": false,
+        "doctor": false
       }
     }
   },
@@ -191,12 +177,8 @@
     "debugLogPath": "./debug.log"
   },
   "sourceLanguage": "en",
-  "defaultLanguages": [
-    "de",
-    "es",
-    "fr",
-    "ru"
-  ],
+  "supportedLanguages": ["en", "es", "fr", "de", "ja", "ru", "zh"],
+  "defaultLanguages": ["en", "es", "fr", "de"],
   "reportLanguage": "auto",
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",

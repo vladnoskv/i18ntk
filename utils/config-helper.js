@@ -11,7 +11,7 @@ const SecurityUtils = require('./security');
 const {loadTranslations} = require('./i18n-helper');
 const settingsManager = require('../settings/settings-manager');
 
-const readline = require('readline');
+const { ask, closeGlobalReadline } = require('./cli');
 const { spawnSync } = require('child_process');
 
 /**
@@ -284,9 +284,9 @@ async function ensureInitialized(cfg) {
       return result.status === 0;
     }
 
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    const answer = await new Promise(res => rl.question(`Source language files not found in ${langDir}. Run initialization now? (y/N) `, res));
-    rl.close();
+    const answer = await ask(`Source language files not found in ${langDir}. Run initialization now? (y/N) `);
+    closeGlobalReadline();
+
     if (answer.trim().toLowerCase().startsWith('y')) {
       const result = spawnSync(process.execPath, [initScript, `--source-dir=${sourceDir}`, `--source-language=${sourceLanguage}`], { stdio: 'inherit', windowsHide: true });
       return result.status === 0;

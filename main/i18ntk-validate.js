@@ -43,6 +43,7 @@ const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const watchLocales = require('../utils/watch-locales');
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
@@ -110,32 +111,21 @@ class I18nValidator {
   }
 
   initReadline() {
-    const readline = require('readline');
-    return readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
+    return getGlobalReadline();
+
   }
 
   prompt(question) {
-    return new Promise((resolve) => {
-      const rl = this.rl || this.initReadline();
-      if (!this.rl) this.rl = rl;
-      
-      rl.question(question, (answer) => {
-        if (!this.rl) {
-          rl.close();
-        }
+    return new Promise(resolve => {
+      const rl = getGlobalReadline();
+      rl.question(question, answer => {
         resolve(answer);
       });
     });
   }
 
   closeReadline() {
-    if (this.rl) {
-      this.rl.close();
-      this.rl = null;
-    }
+    closeGlobalReadline();
   }
 
   // Parse command line arguments

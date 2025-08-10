@@ -6,7 +6,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
+const { getGlobalReadline, askHidden, ask } = require('./cli');
 
 // Lazy load i18n to prevent initialization race conditions
 let i18n;
@@ -155,12 +155,10 @@ class AdminPinManager {
      * Set up a new admin PIN with security checks
      */
     async setupPin(externalRl = null) {
-        // Use global readline interface if available
-        const rl = externalRl || global.activeReadlineInterface || readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        const shouldCloseRL = !externalRl && !global.activeReadlineInterface;
+        // Use shared readline interface
+        const hadGlobal = !!global.activeReadlineInterface;
+        const rl = externalRl || getGlobalReadline();
+        const shouldCloseRL = !externalRl && !hadGlobal;
 
         try {
             const i18nHelper = getI18n();
@@ -249,44 +247,7 @@ class AdminPinManager {
      * Prompt for PIN with configurable display mode
      */
     promptPin(rl, message, hideInput = false) {
-        return new Promise((resolve) => {
-            process.stdout.write(message);
-            
-            let pin = '';
-            
-            const onData = (char) => {
-                const charStr = char.toString();
-                
-                if (charStr === '\r' || charStr === '\n') {
-                    if (hideInput) {
-                        process.stdin.setRawMode(false);
-                    }
-                    process.stdin.removeListener('data', onData);
-                    process.stdout.write('\n');
-                    resolve(pin);
-                } else if (charStr === '\u0008' || charStr === '\u007f') {
-                    // Backspace
-                    if (pin.length > 0) {
-                        pin = pin.slice(0, -1);
-                        process.stdout.write('\b \b');
-                    }
-                } else if (/^[0-9]$/.test(charStr) && pin.length < 6) {
-                    // Only allow digits 0-9, max 6 digits
-                    pin += charStr;
-                    if (hideInput) {
-                        process.stdout.write('*');
-                    } else {
-                        process.stdout.write(charStr);
-                    }
-                }
-                // Ignore all other characters
-            };
-            
-            if (hideInput) {
-                process.stdin.setRawMode(true);
-            }
-            process.stdin.on('data', onData);
-        });
+        return hideInput ? askHidden(message) : ask(message);
     }
 
     /**
@@ -413,12 +374,10 @@ class AdminPinManager {
             }
         }
 
-        // Use global readline interface if available
-        const rl = externalRl || global.activeReadlineInterface || readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        const shouldCloseRL = !externalRl && !global.activeReadlineInterface;
+        // Use shared readline interface if available
+        const hadGlobal = !!global.activeReadlineInterface;
+        const rl = externalRl || getGlobalReadline();
+        const shouldCloseRL = !externalRl && !hadGlobal;
 
         try {
             const pinData = JSON.parse(fs.readFileSync(this.pinFile, 'utf8'));
@@ -496,12 +455,10 @@ class AdminPinManager {
             return true;
         }
 
-        // Use global readline interface if available
-        const rl = global.activeReadlineInterface || readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        const shouldCloseRL = !global.activeReadlineInterface;
+        // Use shared readline interface if available
+        const hadGlobal = !!global.activeReadlineInterface;
+        const rl = getGlobalReadline();
+        const shouldCloseRL = !hadGlobal;
 
         try {
             const i18n = getI18n();

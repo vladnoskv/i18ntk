@@ -4,7 +4,7 @@
  * No external dependencies - uses Node.js built-in readline
  */
 
-const readline = require('readline');
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 const fs = require('fs');
 const path = require('path');
 const settingsManager = require('./settings-manager');
@@ -40,20 +40,7 @@ function isAdminPinEnabled() {
 
 class SettingsCLI {
     constructor() {
-        // Check if there's already an active readline interface
-        if (global.activeReadlineInterface) {
-            this.rl = global.activeReadlineInterface;
-            this.shouldCloseRL = false;
-        } else {
-            this.rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout,
-                terminal: true,
-                historySize: 0
-            });
-            this.shouldCloseRL = true;
-            global.activeReadlineInterface = this.rl;
-        }
+        this.rl = getGlobalReadline();
         this.settings = null;
         this.schema = null;
         this.modified = false;
@@ -1862,7 +1849,7 @@ ${colors.dim}${this.t('settings.updatePackage.command')}: npm update i18ntk -g${
         }
 
         console.log(`\n${colors.green}${this.t('settings.goodbyeMessage')}${colors.reset}`);
-        this.rl.close();
+        closeGlobalReadline();
         process.exit(0);
     }
 

@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 
 class VersionBumper {
   constructor() {
@@ -66,16 +67,12 @@ class VersionBumper {
     this.newVersion = parts.join('.');
   }
 
-  async confirmBump() {
-    const readline = require('readline');
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
+  async confirmBump() {  
+    const rl = getGlobalReadline();
 
     return new Promise((resolve, reject) => {
       rl.question(`\n⚠️  Are you sure you want to bump from ${this.currentVersion} to ${this.newVersion}? (y/N): `, (answer) => {
-        rl.close();
+        closeGlobalReadline();
         if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
           resolve();
         } else {

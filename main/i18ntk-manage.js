@@ -20,7 +20,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 const UIi18n = require('./i18ntk-ui');
 const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
