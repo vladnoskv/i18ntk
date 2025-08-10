@@ -132,7 +132,7 @@
     "maxBackups": 100
   },
   "security": {
-    "adminPinEnabled": true,
+    "adminPinEnabled": false,
     "adminPinPromptOnInit": true,
     "keepAuthenticatedUntilExit": true,
     "sessionTimeout": 30,
