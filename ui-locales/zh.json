@@ -453,6 +453,8 @@
       "addingMissingKeys": "➕ 正在向翻译文件添加缺失键...",
       "processing": "🔄 正在处理 {language}...",
       "addedKeys": "✅ 已添加 {count} 个缺失键",
+      "changeDetails": "📝 {file}：{key}",
+      "andMore": "...以及 {count} 个更多",
       "noChangesNeeded": "✅ {language} 无需更改",
       "summaryTitle": "📊 完成摘要",
       "totalChanges": "📝 总更改: {totalChanges}",

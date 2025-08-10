@@ -453,6 +453,8 @@
       "addingMissingKeys": "➕ 翻訳ファイルに不足しているキーを追加中...",
       "processing": "🔄 {language} を処理中...",
       "addedKeys": "✅ {count} 件の不足しているキーを追加しました",
+      "changeDetails": "📝 {file}: {key}",
+      "andMore": "...さらに {count} 件",
       "noChangesNeeded": "✅ {language} には変更の必要がありません",
       "summaryTitle": "📊 補完サマリー",
       "totalChanges": "📝 合計変更: {totalChanges}",

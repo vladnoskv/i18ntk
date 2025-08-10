@@ -2,12 +2,12 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.7.0
+**Version:** 1.7.1
 **Last Updated:** 2025-08-10  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
-[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.0)](https://socket.dev/npm/package/i18ntk/overview/1.7.0)
+ [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.0)](https://socket.dev/npm/package/i18ntk/overview/1.7.0)
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
@@ -15,7 +15,7 @@
 
 > **Zero dependencies** | **Works with any framework** | **Enterprise-grade security**
 
-> **v1.7.0** – 97% speed improvement (**15.38ms** for 200k keys), new watch helper, and a lite English-only UI locale framework; up to 86% package size reduction, zero runtime dependencies, enhanced security with PIN protection, and comprehensive edge case handling.
+> **v1.7.1** – Enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support; maintains 97% speed improvement (**15.38ms** for 200k keys) with zero breaking changes.
 
 ## 🚀 Quick Start
 
@@ -89,7 +89,7 @@ Configuration is managed through the `settings/i18ntk-config.json` file:
 
 ```json
 {
-  "version": "1.7.0",
+  "version": "1.7.1",
   "sourceDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "defaultLanguage": "en",
@@ -177,6 +177,7 @@ const i18n = createI18n({ locale: 'en', messages: translations });
 - **Encrypted Backups**: AES-256 encrypted backup storage
 
 ### 🎯 **NEW INTERACTIVE LOCALE OPTIMIZER** - up to 86% Package Size Reduction
+
 - **Package Size**: 830.4KB → 115.3KB (86% reduction for English only)
 - **Smart Management**: Interactive selection with automatic backups
 - **Zero Breaking Changes**: Safe restoration from backups

@@ -453,6 +453,8 @@
       "addingMissingKeys": "➕ Agregando claves faltantes a los archivos de traducción...",
       "processing": "🔄 Procesando {language}...",
       "addedKeys": "✅ Agregadas {count} claves faltantes",
+      "changeDetails": "📝 {file}: {key}",
+      "andMore": "...y {count} más",
       "noChangesNeeded": "✅ No se necesitan cambios para {language}",
       "summaryTitle": "📊 RESUMEN DE COMPLETADO",
       "totalChanges": "📝 Cambios totales: {totalChanges}",

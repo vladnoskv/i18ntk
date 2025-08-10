@@ -62,34 +62,35 @@ class I18nManager {
   // Initialize configuration using unified system
   async initialize() {
     try {
+      // Parse args here for other initialization needs (but language is already loaded)
       const args = this.parseArgs();
       if (args.help) {
         this.showHelp();
         process.exit(0);
       }
       
+      // Ensure UI is initialized (it should already be loaded in run())
+      if (!this.ui) {
+        const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
+        this.ui = new UIi18n();
+        this.ui.loadLanguage(uiLanguage);
+      }
+      
       const baseConfig = await getUnifiedConfig('manage', args);
       this.config = { ...baseConfig, ...this.config };
       
-      // Initialize UI localization system after configuration is loaded
-      this.ui = new UIi18n();
-      
       // Initialize admin authentication
       this.adminAuth = new AdminAuth();
-      
-      // Load language from saved configuration, not just CLI args
-      const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
-      const uiLanguage = settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
-      this.ui.loadLanguage(uiLanguage);
       
       // Validate source directory exists
       const {validateSourceDir, displayPaths} = require('../utils/config-helper');
        try {
         validateSourceDir(this.config.sourceDir, 'i18ntk-manage');
       } catch (err) {
-        console.log(t('init.requiredTitle'));
-        console.log(t('init.requiredBody'));
-        const answer = await cliHelper.prompt(t('init.promptRunNow'));
+        console.log(this.ui.t('init.requiredTitle'));
+        console.log(this.ui.t('init.requiredBody'));
+        const answer = await cliHelper.prompt(this.ui.t('init.promptRunNow'));
         if (answer.trim().toLowerCase() === 'y') {
           const initializer = new I18nInitializer(this.config);
           await initializer.run({ fromMenu: true });
@@ -161,7 +162,7 @@ class I18nManager {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
-      console.log(t('init.noPackageJson'));
+      console.log(this.ui ? this.ui.t('init.noPackageJson') : 'No package.json found');
       return await this.promptContinueWithoutI18n();
     }
     
@@ -187,14 +188,29 @@ class I18nManager {
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
       
       if (installedFrameworks.length > 0) {
-        t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') });
+        if (this.ui && this.ui.t) {
+          console.log(this.ui.t('init.detectedFrameworks', { frameworks: installedFrameworks.join(', ') }));
+        } else {
+          console.log(`Detected frameworks: ${installedFrameworks.join(', ')}`);
+        }
         return true;
       } else {
         const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
         if (cfg.framework === 'none') {
           return true;
         }
-        showFrameworkWarningOnce(this.ui);
+        
+        // Ensure we use the properly initialized UI
+        if (this.ui && this.ui.t) {
+          console.log(this.ui.t('init.suggestions.noFramework'));
+          console.log(this.ui.t('init.frameworks.react'));
+          console.log(this.ui.t('init.frameworks.vue'));
+          console.log(this.ui.t('init.frameworks.i18next'));
+          console.log(this.ui.t('init.frameworks.nuxt'));
+          console.log(this.ui.t('init.frameworks.svelte'));
+        } else {
+          showFrameworkWarningOnce(this.ui);
+        }
 
         return await this.promptContinueWithoutI18n();
       }
@@ -208,7 +224,8 @@ class I18nManager {
    * Prompt user to continue without i18n framework
    */
   async promptContinueWithoutI18n() {
-    const answer = await this.prompt('\n🤔 ' + t('init.continueWithoutI18nPrompt'));
+    const promptText = this.ui && this.ui.t ? this.ui.t('init.continueWithoutI18nPrompt') : 'Do you want to continue without one? (y/N)';
+    const answer = await this.prompt('\n' + promptText);
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
   }
 
@@ -259,11 +276,20 @@ class I18nManager {
   // Add this run method after the checkI18nDependencies method
   async run() {
     try {
+      // Parse command line arguments first
+      const args = this.parseArgs();
+      
+      // Load settings to get language preference BEFORE any messages
+      const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+      
+      // Initialize UI localization system with language from settings
+      this.ui = new UIi18n();
+      const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
+      this.ui.loadLanguage(uiLanguage);
+      
       // Initialize configuration using unified system
       await this.initialize();
       
-      // Parse command line arguments
-      const args = this.parseArgs();
       const rawArgs = process.argv.slice(2); // Preserve original CLI args array for positional checks
       let commandToExecute = null;
 

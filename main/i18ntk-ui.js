@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const SettingsManager = require('../settings/settings-manager');
+const legacyConfigManager = require('../utils/config-manager');
 const configManager = SettingsManager;
 
 class UIi18n {
@@ -222,6 +223,11 @@ this.translations = {};
                 } else if (configManager.updateConfig) {
                     await configManager.updateConfig(settings);
                 }
+            }
+
+            // Keep legacy config-manager in sync for modules using it directly
+            if (legacyConfigManager && legacyConfigManager.updateConfig) {
+                await legacyConfigManager.updateConfig({ language, uiLanguage: language });
             }
         } catch (error) {
            console.error(`Error saving language preference: ${error.message}`);

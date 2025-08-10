@@ -1,0 +1,39 @@
+{
+  "name": "i18ntk-test",
+  "version": "1.7.0-test",
+  "description": "i18n Management Toolkit - Test Package (No Overlap)",
+  "main": "main/i18ntk-manage.js",
+  "bin": {
+    "i18ntk-test": "./main/i18ntk-manage.js",
+    "i18ntk-test-init": "./main/i18ntk-init.js",
+    "i18ntk-test-analyze": "./main/i18ntk-analyze.js",
+    "i18ntk-test-validate": "./main/i18ntk-validate.js",
+    "i18ntk-test-ui": "./main/i18ntk-ui.js",
+    "i18ntk-test-summary": "./main/i18ntk-summary.js",
+    "i18ntk-test-usage": "./main/i18ntk-usage.js",
+    "i18ntk-test-sizing": "./main/i18ntk-sizing.js",
+    "i18ntk-test-complete": "./main/i18ntk-complete.js",
+    "i18ntk-test-autorun": "./main/i18ntk-autorun.js"
+  },
+  "files": [
+    "main/",
+    "utils/",
+    "scripts/",
+    "settings/",
+    "ui-locales/",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "translation",
+    "localization",
+    "performance",
+    "enterprise",
+    "test"
+  ]
+}

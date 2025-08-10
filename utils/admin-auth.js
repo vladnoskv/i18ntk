@@ -50,10 +50,18 @@ class AdminAuth {
                 await this.saveConfig(defaultConfig);
             }
             
-            SecurityUtils.logSecurityEvent('admin_auth_initialized', 'info', 'Admin authentication system initialized');
+            SecurityUtils.logSecurityEvent(
+                'admin_auth_initialized',
+                'info',
+                { message: 'Admin authentication system initialized' }
+            );
             return true;
         } catch (error) {
-            SecurityUtils.logSecurityEvent('admin_auth_init_error', 'error', `Failed to initialize admin auth: ${error.message}`);
+            SecurityUtils.logSecurityEvent(
+                'admin_auth_init_error',
+                'error',
+                { message: `Failed to initialize admin auth: ${error.message}` }
+            );
             return false;
         }
     }
@@ -80,7 +88,11 @@ class AdminAuth {
       const content = await fs.promises.readFile(this.configPath, 'utf8');
       return SecurityUtils.safeParseJSON(content);
     } catch (error) {
-      SecurityUtils.logSecurityEvent('admin_config_load_error', 'error', `Failed to load admin config: ${error.message}`);
+      SecurityUtils.logSecurityEvent(
+        'admin_config_load_error',
+        'error',
+        { message: `Failed to load admin config: ${error.message}` }
+      );
       return null;
     }
   }
@@ -92,10 +104,18 @@ class AdminAuth {
     try {
       const content = JSON.stringify(config, null, 2);
       await fs.promises.writeFile(this.configPath, content, { mode: 0o600 }); // Restrict permissions
-      SecurityUtils.logSecurityEvent('admin_config_saved', 'info', 'Admin configuration saved');
+      SecurityUtils.logSecurityEvent(
+        'admin_config_saved',
+        'info',
+        { message: 'Admin configuration saved' }
+      );
       return true;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('admin_config_save_error', 'error', `Failed to save admin config: ${error.message}`);
+      SecurityUtils.logSecurityEvent(
+        'admin_config_save_error',
+        'error',
+        { message: `Failed to save admin config: ${error.message}` }
+      );
       return false;
     }
   }
@@ -126,11 +146,19 @@ class AdminAuth {
       if (success) {
                 // Reset failed attempts on successful PIN setup
         this.failedAttempts.clear();
-        SecurityUtils.logSecurityEvent('admin_pin_setup', 'info', 'Admin PIN configured successfully');
+        SecurityUtils.logSecurityEvent(
+          'admin_pin_setup',
+          'info',
+          { message: 'Admin PIN configured successfully' }
+        );
       }
       return success;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('admin_pin_setup_error', 'error', `Failed to setup PIN: ${error.message}`);
+      SecurityUtils.logSecurityEvent(
+        'admin_pin_setup_error',
+        'error',
+        { message: `Failed to setup PIN: ${error.message}` }
+      );
       return false;
     }
   }
@@ -155,14 +183,22 @@ class AdminAuth {
       // Check for lockout
       const clientId = 'local'; // In a real app, this would be client IP or session ID
       if (this.isLockedOut(clientId)) {
-        SecurityUtils.logSecurityEvent('admin_auth_lockout', 'warning', 'Authentication attempt during lockout period');
+        SecurityUtils.logSecurityEvent(
+          'admin_auth_lockout',
+          'warning',
+          { message: 'Authentication attempt during lockout period' }
+        );
         return false;
       }
 
       // Validate PIN format
-        if (!/^\d{4}$/.test(pin)) {
+        if (!/^\d{4,6}$/.test(pin)) {
         this.recordFailedAttempt(clientId);
-        SecurityUtils.logSecurityEvent('admin_auth_invalid_format', 'warning', 'Invalid PIN format attempted');
+        SecurityUtils.logSecurityEvent(
+          'admin_auth_invalid_format',
+          'warning',
+          { message: 'Invalid PIN format attempted' }
+        );
         return false;
       }
 
@@ -172,15 +208,27 @@ class AdminAuth {
 
       if (isValid) {
         this.clearFailedAttempts(clientId);
-        SecurityUtils.logSecurityEvent('admin_auth_success', 'info', 'Admin authentication successful');
+        SecurityUtils.logSecurityEvent(
+          'admin_auth_success',
+          'info',
+          { message: 'Admin authentication successful' }
+        );
         return true;
       } else {
         this.recordFailedAttempt(clientId);
-        SecurityUtils.logSecurityEvent('admin_auth_failure', 'warning', 'Admin authentication failed');
+        SecurityUtils.logSecurityEvent(
+          'admin_auth_failure',
+          'warning',
+          { message: 'Admin authentication failed' }
+        );
         return false;
       }
     } catch (error) {
-      SecurityUtils.logSecurityEvent('admin_auth_error', 'error', `Authentication error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(
+        'admin_auth_error',
+        'error',
+        { message: `Authentication error: ${error.message}` }
+      );
       return false;
     }
   }
@@ -281,7 +329,11 @@ class AdminAuth {
     this.currentSession = session;
     this.sessionStartTime = new Date();
     
-    SecurityUtils.logSecurityEvent('session_created', 'info', `Session ${sessionId} created`);
+    SecurityUtils.logSecurityEvent(
+        'session_created',
+        'info',
+        { message: `Session ${sessionId} created` }
+      );
     return sessionId;
   }
 
@@ -309,7 +361,11 @@ class AdminAuth {
     if (now > expires) {
       this.activeSessions.delete(sessionId);
       this.clearCurrentSession();
-      SecurityUtils.logSecurityEvent('session_expired', 'info', `Session ${sessionId} expired`);
+      SecurityUtils.logSecurityEvent(
+        'session_expired',
+        'info',
+        { message: `Session ${sessionId} expired` }
+      );
       return false;
     }
     
@@ -327,7 +383,11 @@ class AdminAuth {
   clearCurrentSession() {
     if (this.currentSession) {
       this.activeSessions.delete(this.currentSession.id);
-      SecurityUtils.logSecurityEvent('session_cleared', 'info', `Session ${this.currentSession.id} cleared`);
+      SecurityUtils.logSecurityEvent(
+        'session_cleared',
+        'info',
+        { message: `Session ${this.currentSession.id} cleared` }
+      );
     }
     this.currentSession = null;
     this.sessionStartTime = null;
@@ -376,13 +436,21 @@ class AdminAuth {
         config.lastModified = new Date().toISOString();
         const success = await this.saveConfig(config);
         if (success) {
-          SecurityUtils.logSecurityEvent('admin_auth_disabled', 'info', 'Admin authentication disabled');
+          SecurityUtils.logSecurityEvent(
+          'admin_auth_disabled',
+          'info',
+          { message: 'Admin authentication disabled' }
+        );
         }
         return success;
       }
       return true;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('admin_auth_disable_error', 'error', `Failed to disable auth: ${error.message}`);
+      SecurityUtils.logSecurityEvent(
+        'admin_auth_disable_error',
+        'error',
+        { message: `Failed to disable auth: ${error.message}` }
+      );
       return false;
     }
   }

@@ -84,7 +84,11 @@ class AdminCLI {
       if (success) {
         console.log(i18n.t('adminCli.pinProtectionEnabledSuccess'));
         console.log(i18n.t('adminCli.pinRecoveryWarning'));
-        SecurityUtils.logSecurityEvent(i18n.t('adminCli.adminPinSetupCli'), 'info', 'Admin PIN setup completed via CLI');
+        SecurityUtils.logSecurityEvent(
+          i18n.t('adminCli.adminPinSetupCli'),
+          'info',
+          { message: 'Admin PIN setup completed via CLI' }
+        );
       } else {
         console.log(i18n.t('adminCli.setupPinProtectionFailed'));
       }
@@ -140,7 +144,11 @@ class AdminCLI {
       }
       
       console.log(i18n.t('adminCli.authenticationFailedAccessDenied'));
-      SecurityUtils.logSecurityEvent(i18n.t('adminCli.adminAuthFailedCli'), 'warning', `Admin authentication failed after ${maxAttempts} attempts`);
+      SecurityUtils.logSecurityEvent(
+        i18n.t('adminCli.adminAuthFailedCli'),
+        'warning',
+        { message: `Admin authentication failed after ${maxAttempts} attempts` }
+      );
       this.closeReadline();
       return false;
     } catch (error) {
@@ -182,7 +190,11 @@ class AdminCLI {
       
       if (success) {
         console.log(i18n.t('adminCli.pinProtectionDisabledSuccess'));
-        SecurityUtils.logSecurityEvent(i18n.t('adminCli.adminAuthDisabledCli'), 'info', 'Admin PIN protection disabled via CLI');
+        SecurityUtils.logSecurityEvent(
+          i18n.t('adminCli.adminAuthDisabledCli'),
+          'info',
+          { message: 'Admin PIN protection disabled via CLI' }
+        );
       } else {
         console.log(i18n.t('adminCli.disablePinProtectionFailed'));
       }

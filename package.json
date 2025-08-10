@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), advanced security with PIN protection, comprehensive backup & recovery, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
@@ -65,7 +65,8 @@
     "i18ntk-doctor": "main/i18ntk-doctor.js"
   },
   "directories": {
-    "doc": "docs"
+    "doc": "docs",
+    "test": "tests"
   },
   "files": [
     "main/",
@@ -135,8 +136,6 @@
     "deprecate:old-versions": "node scripts/deprecate-versions.js",
     "build:lite": "node scripts/build-lite.js"
   },
-  "dependencies": {
-  },
   "engines": {
     "node": ">=16.0.0"
   },
@@ -145,7 +144,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.7.0",
+    "version": "1.7.1",
     "releaseDate": "27/07/2025",
     "lastUpdated": "10/08/2025",
     "maintainer": "Vladimir Noskov",
@@ -176,7 +175,7 @@
       "1.6.2",
       "1.6.3"
     ],
-    "nextVersion": "1.7.0",
+    "nextVersion": "1.8.0",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -194,5 +193,7 @@
       "i18next": ">=21.0.0"
     }
   },
-  "devDependencies": {}
+  "dependencies": {
+    "i18ntk": "file:i18ntk-1.7.1.tgz"
+  }
 }

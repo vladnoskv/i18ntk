@@ -1,6 +1,6 @@
 {
-  "language": "en",
-  "uiLanguage": "en",
+  "language": "de",
+  "uiLanguage": "de",
   "theme": "system",
   "projectRoot": ".",
   "sourceDir": "./locales",
@@ -182,7 +182,6 @@
     "saveDebugLogs": false,
     "debugLogPath": "./debug.log"
   },
-  "sizeLimit": null,
   "sourceLanguage": "en",
   "defaultLanguages": [
     "de",

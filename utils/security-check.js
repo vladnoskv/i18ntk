@@ -20,8 +20,12 @@ class SecurityChecker {
      * Check if we should suppress output (e.g., during npm install)
      */
     shouldBeSilent() {
-        // Check if we're running in silent mode or specific contexts
-        return this.isSilent;
+        // Determine silent mode based on environment variables
+        return (
+            process.env.npm_config_loglevel === 'silent' ||
+            process.env.I18NTK_SILENT === 'true' ||
+            process.env.CI === 'true'
+        );
     }
 
     /**

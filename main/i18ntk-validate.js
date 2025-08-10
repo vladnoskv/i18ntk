@@ -75,7 +75,11 @@ class I18nValidator {
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
-      SecurityUtils.logSecurityEvent('I18n validator initializing', 'info', 'Initializing I18n validator');
+      SecurityUtils.logSecurityEvent(
+        'I18n validator initializing',
+        'info',
+        { message: 'Initializing I18n validator' }
+      );
       
       // Use the i18n directory for language files
       this.sourceDir = this.config.i18nDir || this.config.sourceDir;
@@ -102,9 +106,17 @@ class I18nValidator {
 
       displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
       
-      SecurityUtils.logSecurityEvent('I18n validator initialized successfully', 'info', 'I18n validator initialized successfully');
+      SecurityUtils.logSecurityEvent(
+        'I18n validator initialized successfully',
+        'info',
+        { message: 'I18n validator initialized successfully' }
+      );
     } catch (error) {
-      SecurityUtils.logSecurityEvent('I18n validator initialization error', 'error', `Validator initialization error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(
+        'I18n validator initialization error',
+        'error',
+        { message: `Validator initialization error: ${error.message}` }
+      );
       throw error;
     }
   }
@@ -240,10 +252,18 @@ class I18nValidator {
       const content = fs.readFileSync(filePath, 'utf8');
       const parsed = SecurityUtils.safeParseJSON(content);
       
-      SecurityUtils.logSecurityEvent(t('validate.jsonValidated'), 'info', `JSON syntax validated: ${filePath}`);
+      SecurityUtils.logSecurityEvent(
+        t('validate.jsonValidated'),
+        'info',
+        { message: `JSON syntax validated: ${filePath}` }
+      );
       return { valid: true, data: parsed };
     } catch (error) {
-      SecurityUtils.logSecurityEvent(t('validate.jsonValidationError'), 'error', `JSON validation error: ${error.message}`);
+      SecurityUtils.logSecurityEvent(
+        t('validate.jsonValidationError'),
+        'error',
+        { message: `JSON validation error: ${error.message}` }
+      );
       return { 
         valid: false, 
         error: error.message,
@@ -338,7 +358,11 @@ class I18nValidator {
   // Validate a single language
   async validateLanguage(language) {
     try {
-      SecurityUtils.logSecurityEvent(t('validate.languageValidation'), 'info', `Validating language: ${language}`);
+      SecurityUtils.logSecurityEvent(
+        t('validate.languageValidation'),
+        'info',
+        { message: `Validating language: ${language}` }
+      );
       
       const sanitizedLanguage = SecurityUtils.sanitizeInput(language);
       const languageDir = path.join(this.sourceDir, sanitizedLanguage);
@@ -737,12 +761,20 @@ class I18nValidator {
       const execute = async () => {
 
       console.log(t('validate.startingValidationProcess'));
-      SecurityUtils.logSecurityEvent(t('validate.runStarted'), 'info', 'Starting validation run');
+      SecurityUtils.logSecurityEvent(
+        t('validate.runStarted'),
+        'info',
+        { message: 'Starting validation run' }
+      );
 
       const result = await this.validate();
 
       console.log(t('validate.validationProcessCompletedSuccessfully'));
-      SecurityUtils.logSecurityEvent(t('validate.runCompleted'), 'info', 'Validation run completed successfully');
+      SecurityUtils.logSecurityEvent(
+        t('validate.runCompleted'),
+        'info',
+        { message: 'Validation run completed successfully' }
+      );
       return result;
     };
 
@@ -766,7 +798,11 @@ class I18nValidator {
   } catch (error) {
     console.error(t('validate.validationError', { error: error.message }));
     console.error(t('validate.stackTrace', { stack: error.stack }));
-    SecurityUtils.logSecurityEvent(t('validate.runError'), 'error', `Validation run failed: ${error.message}`);
+    SecurityUtils.logSecurityEvent(
+      t('validate.runError'),
+      'error',
+      { message: `Validation run failed: ${error.message}` }
+    );
     throw error;
   }
 }
