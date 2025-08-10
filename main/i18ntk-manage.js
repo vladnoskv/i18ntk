@@ -37,6 +37,166 @@ const I18nDebugger = require('../scripts/debug/debugger');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
 const cliHelper = require('../utils/cli-helper');
+const { loadConfig, saveConfig, ensureConfigDefaults } = require('../utils/config');
+const pkg = require('../package.json');
+
+async function runInitFlow(rl) {
+  const initializer = new I18nInitializer();
+  await initializer.run({ fromMenu: true });
+  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  return { i18nDir: settings.i18nDir, sourceDir: settings.sourceDir };
+}
+
+function askYesNo(rl, prompt) {
+  return new Promise(res => {
+    rl.question(prompt, a => res(/^y(es)?$/i.test(a.trim())));
+  });
+}
+
+async function ensureInitializedOrExit(rl) {
+  const path = require('path');
+  const fs = require('fs');
+  const { ensureDirectory } = require('../utils/config-helper');
+  const settingsManager = require('../settings/settings-manager');
+  
+  // Get configuration from settings manager
+  const settings = settingsManager.getAllSettings();
+  
+  const cfg = {
+    sourceDir: path.resolve(settings.sourceDir || './locales'),
+    sourceLanguage: settings.sourceLanguage || 'en',
+    projectRoot: path.resolve('.'),
+    framework: settings.framework || { detected: false, prompt: 'always' }
+  };
+  
+  // Check if already initialized using new tracking system
+  const initFilePath = path.join(process.cwd(), '.i18ntk', 'initialization.json');
+  
+  let isInitialized = false;
+  if (fs.existsSync(initFilePath)) {
+    try {
+      const initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
+      isInitialized = initStatus.initialized && initStatus.version === '1.7.1';
+    } catch (e) {
+      // Invalid init file, proceed with check
+    }
+  }
+  
+  if (isInitialized) {
+    return cfg;
+  }
+
+  // Check if source language files exist
+  const langDir = path.join(cfg.sourceDir, cfg.sourceLanguage);
+  
+  const hasLanguageFiles = fs.existsSync(langDir) &&
+    fs.readdirSync(langDir).some(f => f.endsWith('.json'));
+  
+  // If language files exist, mark as initialized
+  if (hasLanguageFiles) {
+    const initDir = path.dirname(initFilePath);
+    ensureDirectory(initDir);
+    fs.writeFileSync(initFilePath, JSON.stringify({
+      initialized: true,
+      version: '1.7.1',
+      timestamp: new Date().toISOString(),
+      sourceDir: cfg.sourceDir,
+      sourceLanguage: cfg.sourceLanguage
+    }, null, 2));
+    return cfg;
+  }
+
+  const answer = await askYesNo(rl, 'Initialization Required\nThis project must be initialized before running this command.\nWould you like to run initialization now? (y/N): ');
+  if (!answer) {
+    console.log('Operation cancelled.');
+    process.exit(0);
+  }
+
+  const result = await runInitFlow(rl);
+  
+  // Mark as initialized after successful init
+  const initDir = path.dirname(initFilePath);
+  ensureDirectory(initDir);
+  fs.writeFileSync(initFilePath, JSON.stringify({
+    initialized: true,
+    version: '1.7.1',
+    timestamp: new Date().toISOString(),
+    sourceDir: result.sourceDir || cfg.sourceDir,
+    sourceLanguage: cfg.sourceLanguage
+  }, null, 2));
+  
+  return {
+    ...cfg,
+    sourceDir: result.sourceDir || cfg.sourceDir,
+    i18nDir: result.i18nDir || cfg.i18nDir
+  };
+}
+
+async function maybePromptFramework(rl, cfg, currentVersion) {
+  // Load current settings to check framework configuration
+  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  
+  // Ensure framework configuration exists
+  if (!settings.framework) {
+    settings.framework = {
+      detected: false,
+      preference: null,
+      prompt: 'always',
+      lastPromptedVersion: null
+    };
+  }
+  
+  // Check if framework is already detected or preference is set to none
+  if (settings.framework.detected || settings.framework.preference === 'none') {
+    return cfg;
+  }
+
+  // Check if dnr (do not remind) is active for this version
+  if (settings.framework.prompt === 'suppress' && settings.framework.lastPromptedVersion === currentVersion) {
+    return cfg;
+  }
+
+  // Reset suppress if version changed
+  if (settings.framework.prompt === 'suppress' && settings.framework.lastPromptedVersion !== currentVersion) {
+    settings.framework.prompt = 'always';
+  }
+
+  if (settings.framework.prompt === 'always') {
+    const ans = await new Promise(res =>
+      rl.question([
+        'No i18n framework detected. Consider using one of the following:',
+        '- React i18next (react-i18next)',
+        '- Vue i18n (vue-i18n)',
+        '- i18next (i18next)',
+        '- Nuxt i18n (@nuxtjs/i18n)',
+        '- Svelte i18n (svelte-i18n)',
+        '',
+        'Proceed without a framework? (y/N/dnr = do not remind until next update): '
+      ].join('\n'), a => res(a.trim().toLowerCase()))
+    );
+
+    if (ans === 'y' || ans === 'yes') {
+      settings.framework.preference = 'none';
+      settings.framework.prompt = 'always'; // Keep asking until explicitly suppressed
+    } else if (ans === 'dnr') {
+      settings.framework.preference = 'none';
+      settings.framework.prompt = 'suppress';
+      settings.framework.lastPromptedVersion = currentVersion;
+    } else {
+      console.log('Operation cancelled.');
+      process.exit(0);
+    }
+    
+    // Save configuration using settings manager
+    if (configManager.saveSettings) {
+      configManager.saveSettings(settings);
+    } else if (configManager.saveConfig) {
+      configManager.saveConfig(settings);
+    }
+  }
+
+  return cfg;
+}
 
 // Use unified configuration system
 const { getUnifiedConfig, ensureInitialized, validateSourceDir } = require('../utils/config-helper');
@@ -152,13 +312,13 @@ class I18nManager {
     }
   }
 
-  // Check if i18n framework is installed
+  // Check if i18n framework is installed - configuration-based check without prompts
   async checkI18nDependencies() {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
       console.log(this.ui ? this.ui.t('init.noPackageJson') : 'No package.json found');
-      return await this.promptContinueWithoutI18n();
+      return true; // Allow to continue without framework
     }
     
     try {
@@ -190,28 +350,20 @@ class I18nManager {
         }
         return true;
       } else {
+        // Check configuration for framework preference
         const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
-        if (cfg.framework === 'none') {
+        
+        // If framework preference is already set to 'none', skip warning
+        if (cfg.framework === 'none' || (cfg.framework && cfg.framework.preference === 'none')) {
           return true;
         }
         
-        // Ensure we use the properly initialized UI
-        if (this.ui && this.ui.t) {
-          console.log(this.ui.t('init.suggestions.noFramework'));
-          console.log(this.ui.t('init.frameworks.react'));
-          console.log(this.ui.t('init.frameworks.vue'));
-          console.log(this.ui.t('init.frameworks.i18next'));
-          console.log(this.ui.t('init.frameworks.nuxt'));
-          console.log(this.ui.t('init.frameworks.svelte'));
-        } else {
-          showFrameworkWarningOnce(this.ui);
-        }
-
-        return await this.promptContinueWithoutI18n();
+        // Framework detection is handled by maybePromptFramework, so just return true here
+        return true;
       }
     } catch (error) {
       console.log(t('init.errors.packageJsonRead'));
-      return await this.promptContinueWithoutI18n();
+      return true; // Allow to continue on error
     }
   }
 
@@ -281,6 +433,13 @@ class I18nManager {
       this.ui = new UIi18n();
       const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
       this.ui.loadLanguage(uiLanguage);
+
+      const rl = cliHelper.getInterface();
+      const cfgAfterInitCheck = await ensureInitializedOrExit(rl);
+      await maybePromptFramework(rl, cfgAfterInitCheck, pkg.version);
+
+      // Update this.config with the configuration from ensureInitializedOrExit
+      this.config = { ...this.config, ...cfgAfterInitCheck };
       
       // Initialize configuration using unified system
       await this.initialize();
@@ -322,13 +481,8 @@ class I18nManager {
         return;
       }
 
-      // Check dependencies and exit if user chooses not to continue
-      const shouldContinue = await this.checkI18nDependencies();
-      if (!shouldContinue) {
-        console.log(t('init.errorsNoFramework'));
-        console.log(t('init.suggestions.installFramework'));
-        process.exit(0);
-      }
+      // Framework detection is now handled by maybePromptFramework above
+      // Skip the redundant checkI18nDependencies prompt
       
       // Interactive mode - showInteractiveMenu will handle the title
       await this.showInteractiveMenu();

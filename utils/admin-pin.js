@@ -6,7 +6,8 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { getGlobalReadline, askHidden, ask } = require('./cli');
+const { getGlobalReadline, ask } = require('./cli');
+const { promptPin: rawPromptPin, promptPinConfirm } = require('./promptPin');
 
 // Lazy load i18n to prevent initialization race conditions
 let i18n;
@@ -173,8 +174,8 @@ class AdminPinManager {
             console.log('\n' + i18nHelper.t('adminPin.setup_note'));
             console.log(i18nHelper.t('adminPin.setup_digits_only'));
             
-            const pin = await this.promptPin(rl, i18nHelper.t('adminPin.enter_new_pin'), false);
-            
+            const pin = await promptPinConfirm(rl, i18nHelper.t('adminPin.enter_new_pin'), i18n.t('adminPin.confirm_pin'));
+
             if (!this.validatePin(pin)) {
                 console.log(i18nHelper.t('adminPin.invalid_pin_length'));
                 console.log(i18nHelper.t('adminPin.invalid_pin_example'));
@@ -192,14 +193,6 @@ class AdminPinManager {
                     if (shouldCloseRL) rl.close();
                     return false;
                 }
-            }
-            
-            const confirmPin = await this.promptPin(rl, i18n.t('adminPin.confirm_pin'), false);
-            
-            if (pin !== confirmPin) {
-                console.log(i18n.t('adminPin.pins_do_not_match'));
-                if (shouldCloseRL) rl.close();
-                return false;
             }
             
             // Generate encryption key and encrypt PIN
@@ -247,7 +240,7 @@ class AdminPinManager {
      * Prompt for PIN with configurable display mode
      */
     promptPin(rl, message, hideInput = false) {
-        return hideInput ? askHidden(message) : ask(message);
+        return hideInput ? rawPromptPin({ rl, label: message }) : ask(message);
     }
 
     /**

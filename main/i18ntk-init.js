@@ -66,15 +66,16 @@ class I18nInitializer {
     // No longer create readline interface here - use CLI helpers
     this.rl = null;
     this.shouldCloseRL = false;
+    this.announcedExistingDir = false;
   }
 
-  // Add the missing checkI18nDependencies method
+  // Updated checkI18nDependencies method that uses configuration
   async checkI18nDependencies(noPrompt = false) {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
       console.log(t('init.noPackageJson'));
-      return await this.promptContinueWithoutI18n(noPrompt);
+      return true; // Allow to continue without framework
     }
     
     try {
@@ -102,12 +103,13 @@ class I18nInitializer {
         console.log(t('init.detectedI18nFrameworks', { frameworks: installedFrameworks.join(', ') }));
         return true;
       } else {
-        showFrameworkWarningOnce(this.ui);
-        return await this.promptContinueWithoutI18n(noPrompt);
+        // Framework detection is now handled by maybePromptFramework in i18ntk-manage.js
+        // Skip prompting here to avoid double prompts
+        return true;
       }
     } catch (error) {
       console.log(t('init.errors.packageJsonRead'));
-      return await this.promptContinueWithoutI18n(noPrompt);
+      return true; // Allow to continue on error
     }
   }
 
@@ -239,7 +241,10 @@ class I18nInitializer {
 
       if (selectedIndex >= 0 && selectedIndex < existingLocations.length) {
         const selectedDir = existingLocations[selectedIndex];
-        console.log(t('init.usingExistingDirectory', { dir: selectedDir }));
+        if (!this.announcedExistingDir) {
+          console.log(t('init.usingExistingDirectory', { dir: selectedDir }));
+          this.announcedExistingDir = true;
+        }
 
         this.config.sourceDir = selectedDir;
         this.sourceDir = path.resolve(selectedDir);
@@ -733,7 +738,10 @@ class I18nInitializer {
       this.config.sourceDir = selectedDir;
       this.sourceDir = path.resolve(selectedDir);
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
-      console.log(t('init.usingExistingDirectory', { dir: selectedDir }));
+      if (!this.announcedExistingDir) {
+        console.log(t('init.usingExistingDirectory', { dir: selectedDir }));
+        this.announcedExistingDir = true;
+      }
     } else {
       await this.setupInitialStructure(args.noPrompt);
     }
