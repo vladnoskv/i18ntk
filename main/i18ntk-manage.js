@@ -34,7 +34,7 @@ const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
 
-const { loadTranslations, t } = require('../utils/i18n-helper');
+const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG || 'en');
 const cliHelper = require('../utils/cli-helper');
 
@@ -73,15 +73,9 @@ class I18nManager {
       if (!this.ui) {
         const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
         const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
-        this.ui = new UIi18n();
         this.ui.loadLanguage(uiLanguage);
+        loadTranslations(uiLanguage);
       }
-      
-      const baseConfig = await getUnifiedConfig('manage', args);
-      this.config = { ...baseConfig, ...this.config };
-      
-      // Initialize admin authentication
-      this.adminAuth = new AdminAuth();
       
       // Validate source directory exists
       const {validateSourceDir, displayPaths} = require('../utils/config-helper');
@@ -100,13 +94,14 @@ class I18nManager {
       }
       
     } catch (error) {
-      console.error(`Error initializing i18n manager: ${error.message}`);
+
       throw error;
     }
   }
 
   // Auto-detect i18n directory from common locations only if not configured in settings
   detectI18nDirectory() {
+      
     const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
     const projectRoot = path.resolve(settings.projectRoot || this.config.projectRoot || '.');
     

@@ -1,6 +1,6 @@
 {
-  "language": "de",
-  "uiLanguage": "de",
+  "language": "en",
+  "uiLanguage": "en",
   "theme": "system",
   "projectRoot": ".",
   "sourceDir": "./locales",

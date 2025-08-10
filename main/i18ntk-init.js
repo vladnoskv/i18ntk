@@ -907,7 +907,14 @@ class I18nInitializer {
     try {
       // Parse command line arguments
       const args = this.parseArgs();
-      
+
+      // On first run, prompt user for preferred UI language
+      if (!fs.existsSync(configManager.CONFIG_PATH)) {
+        const { getGlobalReadline } = require('../utils/cli');
+        getGlobalReadline();
+        const selectedLang = await this.ui.selectLanguage();
+        loadTranslations(selectedLang);
+      }
       // Initialize configuration properly when called from menu
       if (fromMenu && !this.sourceDir) {
         const baseConfig = await getUnifiedConfig('init', args);
