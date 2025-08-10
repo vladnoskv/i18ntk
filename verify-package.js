@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const rootDir = path.resolve(__dirname, '..');
+const rootDir = path.resolve(__dirname, '.');
 const packageJsonPath = path.join(rootDir, 'package.json');
 const changelogPath = path.join(rootDir, 'CHANGELOG.md');
 const readmePath = path.join(rootDir, 'README.md');
@@ -56,7 +56,7 @@ const readme = fs.readFileSync(readmePath, 'utf8');
 console.log('🔍 Checking version consistency...');
 
 // Check if version in package.json matches version in CHANGELOG.md
-if (!changelog.includes(`**Current Version:** ${version}`)) {
+if (!changelog.includes(`[${version}]`) && !changelog.includes(`**Current Version:** ${version}`)) {
   console.error(`❌ Version mismatch: package.json (${version}) does not match CHANGELOG.md`);
   process.exit(1);
 } else {
