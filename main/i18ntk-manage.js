@@ -163,14 +163,14 @@ async function maybePromptFramework(rl, cfg, currentVersion) {
   if (settings.framework.prompt === 'always') {
     const ans = await new Promise(res =>
       rl.question([
-        this.ui.t('init.suggestions.noFramework'),
-        this.ui.t('init.frameworks.react'),
-        this.ui.t('init.frameworks.vue'),
-        this.ui.t('init.frameworks.i18next'),
-        this.ui.t('init.frameworks.nuxt'),
-        this.ui.t('init.frameworks.svelte'),
+        t('init.suggestions.noFramework'),
+        t('init.frameworks.react'),
+        t('init.frameworks.vue'),
+        t('init.frameworks.i18next'),
+        t('init.frameworks.nuxt'),
+        t('init.frameworks.svelte'),
         '',
-        this.ui.t('init.continueWithoutI18nPrompt') + ' (y/N/dnr = do not remind until next update): '
+        t('init.continueWithoutI18nPrompt') + ' (y/N/dnr = do not remind until next update): '
       ].join('\n'), a => res(a.trim().toLowerCase()))
     );
 
