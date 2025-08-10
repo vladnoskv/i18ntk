@@ -15,7 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const readline = require('readline');
-const cliHelper = require('../utils/cli-helper');
+const cliHelper = require('../../utils/cli-helper');
 
 describe('CLI Helper Tests', () => {
   let mockReadline;

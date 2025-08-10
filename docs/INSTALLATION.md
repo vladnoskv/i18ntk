@@ -124,7 +124,7 @@ Create `i18ntk-config.json` in your project root:
 #### From any version < 1.7.1 (DEPRECATED - use latest version)
 1. **Backup your current configuration**:
    ```bash
-   cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
+   cp -r ./settings ./settings-backup-$(date +%Y%m%d)
    ```
 
 2. **Install the latest version**:

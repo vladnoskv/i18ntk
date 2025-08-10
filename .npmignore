@@ -1,7 +1,7 @@
 # Development files and directories
 /dev/
 /benchmarks/
-/.i18ntk/
+/settings/backups/
 /.github/
 /docs/
 /reports/
@@ -12,6 +12,7 @@
 /archive/
 .trae
 /utils/ultra-performance-optimizer.js
+test-*
 
 # Debug directory and files
 /scripts/debug/

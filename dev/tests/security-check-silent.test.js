@@ -4,7 +4,7 @@ const path = require('path');
 // Preserve original env variable
 const originalLogLevel = process.env.npm_config_loglevel;
 
-const SecurityChecker = require('../utils/security-check');
+const SecurityChecker = require('../../utils/security-check');
 
 function testSilentMode() {
   process.env.npm_config_loglevel = 'silent';

@@ -69,7 +69,7 @@ async function ensureInitializedOrExit(rl) {
   };
   
   // Check if already initialized using new tracking system
-  const initFilePath = path.join(process.cwd(), '.i18ntk', 'initialization.json');
+  const initFilePath = path.join(process.cwd(), 'settings', 'initialization.json');
   
   let isInitialized = false;
   if (fs.existsSync(initFilePath)) {

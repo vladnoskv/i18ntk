@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const CONFIG_DIR = '.i18ntk';
-const CONFIG_FILE = 'config.json';
+const CONFIG_DIR = 'settings';
+const CONFIG_FILE = 'i18ntk-config.json';
 
 function getConfigPath(cwd = process.cwd()) {
   return path.join(cwd, CONFIG_DIR, CONFIG_FILE);

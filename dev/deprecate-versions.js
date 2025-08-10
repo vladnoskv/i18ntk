@@ -220,7 +220,7 @@ class VersionDeprecator {
 #### From any version < ${this.currentVersion}
 1. **Backup your current configuration**:
    \`\`\`bash
-   cp -r ./.i18ntk ./.i18ntk-backup-$(date +%Y%m%d)
+   cp -r ./settings ./settings-backup-$(date +%Y%m%d)
    \`\`\`
 
 2. **Install the latest version**:
