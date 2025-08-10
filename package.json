@@ -103,7 +103,7 @@
     "sizing": "node main/i18ntk-sizing.js",
     "summary": "node main/i18ntk-summary.js",
     "full-coverage": "npm run complete && npm run analyze",
-    "verify-package": "node dev/verify-package.js",
+    "verify-package": "node verify-package.js",
     "smoke:pack": "node scripts/smoke-pack.js",
     "prepublishOnly": "npm run verify-package && npm run smoke:pack",
     "test": "node scripts/test-runner.js",
@@ -193,7 +193,5 @@
       "i18next": ">=21.0.0"
     }
   },
-  "dependencies": {
-    "i18ntk": "file:i18ntk-1.7.1.tgz"
-  }
+  "dependencies": {}
 }

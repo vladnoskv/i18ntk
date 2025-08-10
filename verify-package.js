@@ -27,7 +27,7 @@ let ok = true;
 
 // Check required files
 REQUIRED.forEach(f => {
-  if (!fs.existsSync(path.resolve(__dirname, '..', f))) {
+  if (!fs.existsSync(path.resolve(__dirname, f))) {
     console.error(`❌ Missing required file: ${f}`);
     ok = false;
   }
@@ -35,13 +35,13 @@ REQUIRED.forEach(f => {
 
 // Check optional files (warn only)
 OPTIONAL.forEach(f => {
-  if (!fs.existsSync(path.resolve(__dirname, '..', f))) {
+  if (!fs.existsSync(path.resolve(__dirname, f))) {
     console.warn(`⚠️  Missing optional file: ${f}`);
   }
 });
 
 // Read package.json version
-const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf8'));
+const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8'));
 console.log(`✅ Package version: ${pkg.version}`);
 
 if (ok) {
