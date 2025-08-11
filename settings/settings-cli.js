@@ -1781,18 +1781,12 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
 
         if (confirm.toLowerCase() === 'y') {
             try {
-                const { exec } = require('child_process');
                 console.log(t('settings.updatePackage.updating'));
-                exec('npm update i18ntk -g', (error, stdout, stderr) => {
-                    if (error) {
-                        this.error(`${t('settings.updatePackage.error')}: ${error.message}`);
-                        console.error(stderr);
-                    } else {
-                        this.success(t('settings.updatePackage.success'));
-                        console.log(stdout);
-                    }
-                    this.pause();
-                });
+                console.log('📦 To update i18ntk, run:');
+                console.log('   npm update -g i18ntk');
+                console.log('');
+                console.log('💡 This ensures you have the latest security and performance improvements.');
+                await this.pause();
             } catch (error) {
                 this.error(`${t('settings.updatePackage.error')}: ${error.message}`);
                 this.pause();

@@ -16,6 +16,7 @@ const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/con
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const watchLocales = require('../utils/watch-locales');
+const JsonOutput = require('../utils/json-output');
 
 const PROJECT_ROOT = process.cwd();
 
@@ -100,6 +101,14 @@ class I18nAnalyzer {
             parsed.disableAdmin = true;
           } else if (sanitizedKey === 'admin-status') {
             parsed.adminStatus = true;
+          } else if (sanitizedKey === 'json') {
+            parsed.json = true;
+          } else if (sanitizedKey === 'sort-keys') {
+            parsed.sortKeys = true;
+          } else if (sanitizedKey === 'indent') {
+            parsed.indent = parseInt(value) || 2;
+          } else if (sanitizedKey === 'newline') {
+            parsed.newline = value || 'lf';
           }
         }
       });
@@ -500,12 +509,16 @@ try {
   // Main analyze method
   async analyze() {
     try {
-      const results = []; // Add this line to declare the results array
-      
-      console.log(t('analyze.starting') || '🔍 Starting translation analysis...');
-      console.log(t('analyze.sourceDirectoryLabel', { sourceDir: path.resolve(this.sourceDir) }));
-      console.log(t('analyze.sourceLanguageLabel', { sourceLanguage: this.config.sourceLanguage }));
-      console.log(t('analyze.strictModeLabel', { mode: this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF' }));
+      const results = [];
+      const args = this.parseArgs();
+      const jsonOutput = new JsonOutput('analyze');
+
+      if (!args.json) {
+        console.log(t('analyze.starting') || '🔍 Starting translation analysis...');
+        console.log(t('analyze.sourceDirectoryLabel', { sourceDir: path.resolve(this.sourceDir) }));
+        console.log(t('analyze.sourceLanguageLabel', { sourceLanguage: this.config.sourceLanguage }));
+        console.log(t('analyze.strictModeLabel', { mode: this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF' }));
+      }
       
       // Ensure output directory exists
       if (!fs.existsSync(this.outputDir)) {
@@ -515,14 +528,28 @@ try {
       const languages = this.getAvailableLanguages();
       
       if (languages.length === 0) {
-        console.log(t('analyze.noLanguages') || '⚠️  No target languages found.');
+        const error = t('analyze.noLanguages') || '⚠️  No target languages found.';
+        if (args.json) {
+          jsonOutput.setStatus('error', error);
+          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+          return;
+        }
+        console.log(error);
         return;
       }
       
-      console.log(t('analyze.foundLanguages', { count: languages.length, languages: languages.join(', ') }) || `📋 Found ${languages.length} languages to analyze: ${languages.join(', ')}`);
+      if (!args.json) {
+        console.log(t('analyze.foundLanguages', { count: languages.length, languages: languages.join(', ') }) || `📋 Found ${languages.length} languages to analyze: ${languages.join(', ')}`);
+      }
+      
+      let totalMissing = 0;
+      let totalExtra = 0;
+      let totalFiles = 0;
       
       for (const language of languages) {
-        console.log(t('analyze.analyzing', { language }) || `\n🔄 Analyzing ${language}...`);
+        if (!args.json) {
+          console.log(t('analyze.analyzing', { language }) || `\n🔄 Analyzing ${language}...`);
+        }
         
         const analysis = this.analyzeLanguage(language);
         const report = this.generateLanguageReport(analysis);
@@ -530,18 +557,54 @@ try {
         // Save report
         const reportPath = await this.saveReport(language, report);
         
-        console.log(t('analyze.completed', { language }) || `✅ Analysis completed for ${language}`);
-        console.log(t('analyze.progress', { 
-          translated: results.length, 
-          total: languages.length 
-        }) || `   Progress: ${results.length}/${languages.length} languages processed`);
-        console.log(t('analyze.reportSaved', { reportPath }) || `   Report saved: ${reportPath}`);
+        if (!args.json) {
+          console.log(t('analyze.completed', { language }) || `✅ Analysis completed for ${language}`);
+          console.log(t('analyze.progress', { 
+            translated: results.length, 
+            total: languages.length 
+          }) || `   Progress: ${results.length}/${languages.length} languages processed`);
+          console.log(t('analyze.reportSaved', { reportPath }) || `   Report saved: ${reportPath}`);
+        }
         
         results.push({
           language,
           analysis,
           reportPath
         });
+        
+        // Add issues to JSON output
+        Object.values(analysis.files).forEach(fileData => {
+          if (fileData.structural) {
+            fileData.structural.missingKeys?.forEach(key => {
+              jsonOutput.addIssue('missing', key, language);
+              totalMissing++;
+            });
+            fileData.structural.extraKeys?.forEach(key => {
+              jsonOutput.addIssue('extra', key, language);
+              totalExtra++;
+            });
+          }
+        });
+        totalFiles += analysis.summary.analyzedFiles;
+      }
+      
+      // Set JSON output
+      jsonOutput.setStats({
+        missing: totalMissing,
+        extra: totalExtra,
+        files: totalFiles,
+        languages: languages.length
+      });
+      
+      if (totalMissing > 0 || totalExtra > 0) {
+        jsonOutput.setStatus('warn');
+      } else {
+        jsonOutput.setStatus('ok');
+      }
+      
+      if (args.json) {
+        console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+        return results;
       }
       
       // Summary

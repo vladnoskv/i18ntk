@@ -1,0 +1,6 @@
+module.exports = {
+  SUCCESS: 0,
+  CONFIG_ERROR: 1,
+  VALIDATION_FAILED: 2,
+  SECURITY_VIOLATION: 3,
+};

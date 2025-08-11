@@ -18,6 +18,8 @@ const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+const { detectFramework } = require('../utils/framework-detector');
+const { getFormatAdapter } = require('../utils/format-manager');
 // Ensure UIi18n is available for this initializer class
 const UIi18n = require('./i18ntk-ui');
 loadTranslations(process.env.I18NTK_LANG);
@@ -57,6 +59,12 @@ class I18nInitializer {
       notTranslatedMarker: '[NOT_TRANSLATED]',
       ...config
     };
+        this.format = getFormatAdapter(this.config.format);
+    this.config.supportedExtensions = [this.format.extension];
+    this.detectedFramework = detectFramework(process.cwd());
+    if (this.detectedFramework && !this.config.translationPatterns) {
+      this.config.translationPatterns = this.detectedFramework.patterns;
+    }
     this.sourceDir = this.config.sourceDir || './locales';
     this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     
@@ -207,7 +215,7 @@ class I18nInitializer {
           for (const format of englishFormats) {
             const englishPath = path.join(location, format);
             if (fs.existsSync(englishPath) && fs.statSync(englishPath).isDirectory()) {
-              const englishFiles = fs.readdirSync(englishPath).filter(file => file.endsWith('.json'));
+              const englishFiles = fs.readdirSync(englishPath).filter(file => file.endsWith(this.format.extension));
               if (englishFiles.length > 0) {
                 // Found English files, prioritize this
                 existingLocations.unshift(location);
@@ -216,13 +224,13 @@ class I18nInitializer {
             }
           }
           
-          // Also check for any language directories or JSON files
+          // Also check for any language directories or format files
           const hasLanguageDirs = items.some(item => {
             const itemPath = path.join(location, item);
             if (fs.statSync(itemPath).isDirectory()) {
               return ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh', 'en-US', 'en-GB'].includes(item);
             }
-            return item.endsWith('.json');
+            return item.endsWith(this.format.extension);
           });
           
           if (hasLanguageDirs && !existingLocations.includes(location)) {
@@ -350,10 +358,10 @@ class I18nInitializer {
     } else {
       // Directory exists, check if we need to create a sample file
       const existingFiles = fs.readdirSync(validatedSourceLanguageDir)
-        .filter(file => file.endsWith('.json'));
+        .filter(file => file.endsWith(this.format.extension));
       
       if (existingFiles.length === 0) {
-        // No JSON files exist, create sample file
+        // No format files exist, create sample file
         await this.createSampleTranslationFile(validatedSourceLanguageDir);
       }
     }
@@ -386,8 +394,8 @@ class I18nInitializer {
     };
     
     // Determine filename: use common.json if it doesn't exist, otherwise i18ntk-common.json
-    const commonFilePath = path.join(validatedSourceLanguageDir, 'common.json');
-    const i18ntkCommonFilePath = path.join(validatedSourceLanguageDir, 'i18ntk-common.json');
+    const commonFilePath = path.join(validatedSourceLanguageDir, `common${this.format.extension}`);
+    const i18ntkCommonFilePath = path.join(validatedSourceLanguageDir, `i18ntk-common${this.format.extension}`);
     
     let sampleFilePath;
     if (!fs.existsSync(commonFilePath)) {
@@ -403,7 +411,7 @@ class I18nInitializer {
       throw new Error(t('validate.invalidSampleFilePath') || 'Invalid sample file path');
     }
     
-    const success = await SecurityUtils.safeWriteFile(validatedSampleFilePath, JSON.stringify(sampleTranslations, null, 2), process.cwd());
+    const success = await SecurityUtils.safeWriteFile(validatedSampleFilePath, this.format.serialize(sampleTranslations), process.cwd());
     
     if (success) {
       console.log(t('init.createdSampleTranslationFile', { file: validatedSampleFilePath }));
@@ -444,14 +452,14 @@ class I18nInitializer {
             const englishDir = path.join(parentDir, subdir);
             if (fs.existsSync(englishDir)) {
               const files = fs.readdirSync(englishDir);
-              const jsonFiles = files.filter(file => 
-                file.endsWith('.json') && 
+              const formatFiles = files.filter(file =>
+                file.endsWith(this.format.extension) &&
                 !this.config.excludeFiles.includes(file)
               );
-              if (jsonFiles.length > 0) {
+              if (formatFiles.length > 0) {
                 // Found English files, use this directory
                 this.sourceLanguageDir = englishDir;
-                return jsonFiles;
+                return formatFiles;
               }
             }
           }
@@ -461,7 +469,7 @@ class I18nInitializer {
       
       const files = fs.readdirSync(this.sourceLanguageDir)
         .filter(file => {
-          return file.endsWith('.json') && 
+          return file.endsWith(this.format.extension) && 
                  !this.config.excludeFiles.includes(file);
         });
       
@@ -523,7 +531,7 @@ class I18nInitializer {
       try {
         const existingContent = await SecurityUtils.safeReadFile(validatedTargetFile, this.sourceDir);
         if (existingContent) {
-          targetContent = this.mergeTranslations(sourceContent, JSON.parse(existingContent), targetLanguage);
+          targetContent = this.mergeTranslations(sourceContent, this.format.read(existingContent), targetLanguage);
         } else {
           targetContent = this.markWithCountryCode(sourceContent, targetLanguage);
         }
@@ -537,7 +545,7 @@ class I18nInitializer {
     }
     
     // Write the file securely
-    const success = await SecurityUtils.safeWriteFile(validatedTargetFile, JSON.stringify(targetContent, null, 2), this.sourceDir);
+    const success = await SecurityUtils.safeWriteFile(validatedTargetFile, this.format.serialize(targetContent), this.sourceDir);
     
     if (!success) {
       SecurityUtils.logSecurityEvent('Failed to write language file', 'error', { file: validatedTargetFile });
@@ -819,7 +827,7 @@ class I18nInitializer {
           continue;
         }
         
-        const sourceContent = JSON.parse(sourceContentRaw);
+        const sourceContent = this.format.read(sourceContentRaw);
         
         const targetFilePath = await this.createLanguageFile(sourceFile, targetLanguage, sourceContent);
         
@@ -830,7 +838,7 @@ class I18nInitializer {
           continue;
         }
         
-        const targetContent = JSON.parse(targetContentRaw);
+        const targetContent = this.format.read(targetContentRaw);
         const stats = this.getTranslationStats(targetContent);
         
         languageResults.files.push({
@@ -886,38 +894,29 @@ class I18nInitializer {
       console.log('🎯 **PACKAGE SIZE OPTIMIZATION**');
       console.log('='.repeat(60));
       
-      // First run dry run to show current state
-      console.log('\n🔍 Running locale optimization preview...');
-      const { spawn } = require('child_process');
-      const path = require('path');
-      
-      const dryRun = spawn('node', [path.join(__dirname, '..', 'scripts', 'locale-optimizer.js'), '--dry-run'], {
-        stdio: 'inherit',
-        cwd: process.cwd()
-      });
-
-      await new Promise(resolve => {
-        dryRun.on('close', resolve);
-      });
-
-      console.log('\n💡 You can reduce package size by selecting only the languages you need');
-      
-      const answer = await this.prompt('\n🤖 Would you like to run interactive optimization now? (y/n): ');
-      
-      if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
-        console.log('\n🚀 Starting interactive locale optimization...');
+      try {
+        // Import locale optimizer directly
+        const LocaleOptimizer = require('../scripts/locale-optimizer');
         
-        const optimizer = spawn('node', [path.join(__dirname, '..', 'scripts', 'locale-optimizer.js'), '--interactive'], {
-          stdio: 'inherit',
-          cwd: process.cwd()
-        });
+        // First run dry run to show current state
+        console.log('\n🔍 Running locale optimization preview...');
+        const optimizer = new LocaleOptimizer();
+        await optimizer.run({ dryRun: true });
 
-        await new Promise(resolve => {
-          optimizer.on('close', resolve);
-        });
+        console.log('\n💡 You can reduce package size by selecting only the languages you need');
         
-        console.log('\n✅ Package optimization completed!');
-      } else {
+        const answer = await this.prompt('\n🤖 Would you like to run interactive optimization now? (y/n): ');
+        
+        if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+          console.log('\n🚀 Starting interactive locale optimization...');
+          await optimizer.run({ interactive: true });
+          console.log('\n✅ Package optimization completed!');
+        } else {
+          console.log('\n💡 You can run locale optimization later with:');
+          console.log('   node scripts/locale-optimizer.js --interactive');
+        }
+      } catch (error) {
+        console.log('\n⚠️ Could not offer locale optimization:', error.message);
         console.log('\n💡 You can run locale optimization later with:');
         console.log('   node scripts/locale-optimizer.js --interactive');
       }

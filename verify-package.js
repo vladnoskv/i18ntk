@@ -8,7 +8,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 const rootDir = path.resolve(__dirname, '.');
 const packageJsonPath = path.join(rootDir, 'package.json');

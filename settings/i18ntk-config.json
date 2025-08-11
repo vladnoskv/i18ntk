@@ -3,8 +3,8 @@
   "uiLanguage": "en",
   "theme": "system",
   "projectRoot": ".",
-  "sourceDir": "./locales",
-  "i18nDir": "./locales",
+  "sourceDir": "./src",
+  "i18nDir": "./src",
   "outputDir": "./i18ntk-reports",
   "scriptDirectories": {
     "init": null,
@@ -193,5 +193,35 @@
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto"
+  "timezone": "auto",
+  "sizeLimit": null,
+  "placeholderStyles": {
+    "en": [
+      "\\{\\{[^}]+\\}\\}"
+    ],
+    "de": [
+      "%s"
+    ],
+    "es": [
+      "%s"
+    ],
+    "fr": [
+      "{\\d+}"
+    ],
+    "ru": [
+      "{\\d+}"
+    ],
+    "zh": [
+      "{\\d+}"
+    ],
+    "ja": [
+      "{\\d+}"
+    ]
+  },
+  "framework": {
+    "detected": false,
+    "preference": "none",
+    "prompt": "always",
+    "lastPromptedVersion": null
+  }
 }

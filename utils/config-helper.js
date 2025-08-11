@@ -214,6 +214,11 @@ function displayHelp(scriptName, additionalOptions = {}) {
     'watch': 'Watch for changes in source files',
     'dry-run': 'Run validation without modifying files',
     'auto-translate': 'Automatically translate missing keys',
+    'json': 'Output results in JSON format',
+    'sort-keys': 'Sort JSON keys alphabetically',
+    'indent': 'JSON indentation level (default: 2)',
+    'newline': 'Newline format: lf|cr|crlf (default: lf)',
+    'yes': 'Skip confirmation prompts for mutating operations',
   };
   
   const allOptions = { ...commonOptions, ...additionalOptions };

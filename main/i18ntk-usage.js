@@ -25,6 +25,8 @@ const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getGlobalReadline, closeGlobalReadline, askHidden } = require('../utils/cli');
+const { detectFramework } = require('../utils/framework-detector');
+const { getExtractor } = require('../utils/extractor-manager');
 loadTranslations(process.env.I18NTK_LANG);
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
@@ -32,6 +34,7 @@ const AdminCLI = require('../utils/admin-cli');
 
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
+const JsonOutput = require('../utils/json-output');
 
 async function getConfig() {
   return await getUnifiedConfig('usage');
@@ -50,6 +53,7 @@ class I18nUsageAnalyzer {
     this.fileUsage = new Map();
     this.translationFiles = new Map(); // New: Track all translation files
     this.translationStats = new Map(); // New: Track translation completeness
+    this.extractor = getExtractor(config.extractor);
     
     // Use global translation function
     this.rl = null;
@@ -86,6 +90,16 @@ class I18nUsageAnalyzer {
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       const projectRoot = path.resolve(this.config.projectRoot || '.');
+            const detected = detectFramework(projectRoot);
+      if (detected) {
+        this.config.translationPatterns = detected.patterns;
+        if (!this.config.includeExtensions) {
+          this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx'];
+        }
+        if (!this.config.excludeDirs) {
+          this.config.excludeDirs = [];
+        }
+      }
       this.sourceDir = this.config.sourceDir;
       this.i18nDir = this.config.i18nDir;
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
@@ -104,19 +118,16 @@ class I18nUsageAnalyzer {
       // Ensure translation patterns are defined
       this.config = this.config || {};
       this.config.translationPatterns = this.config.translationPatterns || [
-        // React i18next patterns
         /t\(['"`]([^'"`]+)['"`]/g,
         /i18n\.t\(['"`]([^'"`]+)['"`]/g,
         /useTranslation\(\)\.t\(['"`]([^'"`]+)['"`]/g,
-        // Template literal patterns
         /t\(`([^`]+)`\)/g,
-        // JSX patterns
         /i18nKey=['"`]([^'"`]+)['"`]/g,
-        // Common patterns
         /\$t\(['"`]([^'"`]+)['"`]/g,
         /getTranslation\(['"`]([^'"`]+)['"`]/g
       ];
-      
+            this.extractor = getExtractor(this.config.extractor);
+
       // Ensure defaults for other config values
       this.config = this.config || {};
       if (!Array.isArray(this.config.excludeDirs)) {
@@ -686,57 +697,12 @@ Analysis Features:
       
       // Skip JSON files entirely to prevent scanning translation files
       if (filePath.endsWith('.json')) return [];
-      
-      const keys = [];
+      const rawPatterns = Array.isArray(this.config.translationPatterns) ? this.config.translationPatterns : [];
+      if (rawPatterns.length === 0) return [];
+
+      return this.extractor.extract(content, rawPatterns);
       
       // Null-safe translation patterns handling
-      const rawPatterns = Array.isArray(this.config.translationPatterns) ? this.config.translationPatterns : [];
-      if (rawPatterns.length === 0) return []; // nothing to match
-      
-      // Ensure patterns are RegExp objects with better error handling
-      const patterns = rawPatterns.map(pattern => {
-        try {
-          if (typeof pattern === 'string') {
-            return new RegExp(pattern, 'g');
-          }
-          return new RegExp(pattern.source, 'g');
-        } catch (patternError) {
-          console.warn(`${t('usage.invalidPattern')} ${pattern}`);
-          return null;
-        }
-      }).filter(Boolean);
-      
-      patterns.forEach(pattern => {
-        try {
-          let match;
-          let matchCount = 0;
-          const maxMatches = 10000; // Safety limit to prevent infinite loops
-          
-          // Reset regex lastIndex to ensure clean start
-          pattern.lastIndex = 0;
-          
-          while ((match = pattern.exec(content)) !== null && matchCount < maxMatches) {
-            if (match && match[1]) {
-              keys.push(match[1]);
-            }
-            matchCount++;
-            
-            // Additional safety: if lastIndex doesn't advance, break to prevent infinite loop
-            if (pattern.lastIndex === 0) {
-              break;
-            }
-          }
-          
-          if (matchCount >= maxMatches) {
-            console.warn(`${t('usage.patternMatchLimitReached')} ${filePath}`);
-          }
-        } catch (execError) {
-          // Skip patterns that fail to execute
-          console.warn(`${t('usage.patternExecutionFailed')} ${filePath}: ${execError.message}`);
-        }
-      });
-      
-      return keys;
     } catch (error) {
       console.warn(`${t('usage.failedToExtractKeys')} ${filePath}: ${error.message}`);
       return [];

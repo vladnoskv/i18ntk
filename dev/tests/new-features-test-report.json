@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-08-11T15:18:35.466Z",
+  "version": "1.8.1",
+  "results": {
+    "total": 8,
+    "passed": 5,
+    "failed": 3,
+    "skipped": 0,
+    "categories": {
+      "exit-codes": {
+        "passed": 0,
+        "failed": 1
+      },
+      "doctor": {
+        "passed": 1,
+        "failed": 0
+      },
+      "validator": {
+        "passed": 1,
+        "failed": 0
+      },
+      "framework-detection": {
+        "passed": 0,
+        "failed": 1
+      },
+      "plugins": {
+        "passed": 0,
+        "failed": 0
+      },
+      "security": {
+        "passed": 0,
+        "failed": 0
+      }
+    },
+    "tests": [
+      {
+        "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\new-features.test.js",
+        "category": "exit-codes",
+        "description": "Exit Codes Standardization Tests",
+        "status": "failed",
+        "duration": 5616,
+        "error": "Command failed: node \"E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\new-features.test.js\"\n^C",
+        "stderr": "^C"
+      },
+      {
+        "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\integration\\doctor-enhanced.test.js",
+        "category": "doctor",
+        "description": "Enhanced Doctor Tool Tests",
+        "status": "passed",
+        "duration": 173,
+        "output": "🏥 Doctor Integration Tests\n\n==================================================\n🔍 Testing path traversal detection..."
+      },
+      {
+        "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\integration\\validator-enhanced.test.js",
+        "category": "validator",
+        "description": "Enhanced Validator Tests",
+        "status": "passed",
+        "duration": 191,
+        "output": "🔍 Validator Integration Tests\n\n==================================================\n🔍 Testing placeholder style enforcement..."
+      },
+      {
+        "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\integration\\framework-detection.test.js",
+        "category": "framework-detection",
+        "description": "Framework Detection Tests",
+        "status": "failed",
+        "duration": 7810,
+        "error": "Command failed: node \"E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\integration\\framework-detection.test.js\"\n^C",
+        "stderr": "^C"
+      }
+    ]
+  },
+  "duration": 7813,
+  "summary": {
+    "success": false,
+    "successRate": 63,
+    "categories": [
+      "exit-codes",
+      "doctor",
+      "validator",
+      "framework-detection"
+    ]
+  }
+}

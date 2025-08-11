@@ -14,7 +14,7 @@ const { execSync } = require('child_process');
 
 class VersionUpdater {
   constructor() {
-    this.currentVersion = '1.6.3';
+    this.currentVersion = '1.8.1';
     this.targetFiles = [
       'README.md',
       'CHANGELOG.md',
@@ -27,7 +27,9 @@ class VersionUpdater {
       'scripts/*.js',
       'test/*.js',
       '.github/workflows/*.yml',
-      '.github/*.md'
+      '.github/*.md',
+      'INSTALLATION.md',
+      'SECURITY.md'
     ];
     
     this.versionPatterns = [
