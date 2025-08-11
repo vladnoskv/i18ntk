@@ -62,12 +62,22 @@ class I18nSizingAnalyzer {
   constructor(options = {}) {
     const config = getConfig();
     const projectRoot = path.resolve(config.projectRoot || '.');
-    this.sourceDir = path.resolve(projectRoot, options.sourceDir || config.sourceDir);
-    this.outputDir = path.resolve(projectRoot, options.outputDir || config.outputDir);
+    
+    // Always prioritize provided options over config
+    const sourceDir = options.sourceDir 
+      ? path.resolve(projectRoot, options.sourceDir)
+      : path.resolve(projectRoot, config.sourceDir);
+    
+    const outputDir = options.outputDir 
+      ? path.resolve(projectRoot, options.outputDir)
+      : path.resolve(projectRoot, config.outputDir);
+    
+    this.sourceDir = sourceDir;
+    this.outputDir = outputDir;
     this.languages = options.languages || [];
-    this.threshold = options.threshold || config.threshold; // Size difference threshold in percentage
+    this.threshold = options.threshold !== undefined ? options.threshold : config.threshold;
     this.format = options.format || 'table';
-    this.outputReport = options.outputReport || false;
+    this.outputReport = options.outputReport !== undefined ? options.outputReport : false;
     this.rl = null;
     
     // Initialize i18n with UI language from config
@@ -499,7 +509,7 @@ class I18nSizingAnalyzer {
     }
     
     let textReport = this.generateTextReport(timestamp);
-    const textSuccess = SecurityUtils.safeWriteFileSync(textReportPath, textReport, process.cwd());
+    const textSuccess = await SecurityUtils.safeWriteFile(textReportPath, textReport, process.cwd());
     if (textSuccess) {
       console.log(t("sizing.human_report_saved", { reportPath: textReportPath }));
     }
@@ -525,7 +535,7 @@ class I18nSizingAnalyzer {
       }
     };
     
-    const jsonSuccess = SecurityUtils.safeWriteFileSync(jsonReportPath, JSON.stringify(report, null, 2), process.cwd());
+    const jsonSuccess = await SecurityUtils.safeWriteFile(jsonReportPath, JSON.stringify(report, null, 2), process.cwd());
     if (jsonSuccess) {
       SecurityUtils.logSecurityEvent('Sizing report saved', 'info', { jsonReportPath });
     }
@@ -645,7 +655,7 @@ Generated: ${new Date().toISOString()}
       csvContent += `${lang},${fileData.sizeKB},${fileData.lines},${fileData.characters},${langData.totalKeys},${langData.averageKeyLength.toFixed(1)},${langData.maxKeyLength},${langData.emptyKeys},${langData.longKeys}\n`;
     });
     
-    const success = SecurityUtils.safeWriteFileSync(csvPath, csvContent, process.cwd());
+    const success = await SecurityUtils.safeWriteFile(csvPath, csvContent, process.cwd());
     if (success) {
       console.log(t("sizing.csv_report_saved_to", { csvPath }));
       SecurityUtils.logSecurityEvent('CSV report saved', 'info', { csvPath });
@@ -692,61 +702,153 @@ Generated: ${new Date().toISOString()}
     }
   }
 
-  // Parse command line arguments
+  // Parse command line arguments without yargs
   parseArgs() {
-    const yargs = require('yargs/yargs');
-    const { hideBin } = require('yargs/helpers');
+    const args = process.argv.slice(2);
+    const options = {
+      'source-dir': './locales',
+      'languages': '',
+      'output-report': true,
+      'format': 'table',
+      'threshold': 50,
+      'detailed': false,
+      'detailed-keys': false,
+      'output-dir': './i18ntk-reports',
+      'help': false,
+      's': './locales',
+      'l': '',
+      'o': true,
+      'f': 'table',
+      't': 50,
+      'd': false
+    };
+
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      
+      if (arg === '--help' || arg === '-h') {
+        options.help = true;
+        continue;
+      }
+      
+      // Handle --key=value format
+      const keyValueMatch = arg.match(/^--?([^=]+)=(.+)$/);
+      if (keyValueMatch) {
+        const key = keyValueMatch[1];
+        const value = keyValueMatch[2];
+        
+        if (key === 'source-dir' || key === 's') {
+          options['source-dir'] = value;
+          options.s = value;
+        } else if (key === 'languages' || key === 'l') {
+          options.languages = value;
+          options.l = value;
+        } else if (key === 'output-report' || key === 'o') {
+          options['output-report'] = value.toLowerCase() !== 'false';
+          options.o = options['output-report'];
+        } else if (key === 'format' || key === 'f') {
+          if (['json', 'csv', 'table'].includes(value)) {
+            options.format = value;
+            options.f = value;
+          }
+        } else if (key === 'threshold' || key === 't') {
+          const numValue = parseInt(value);
+          if (!isNaN(numValue)) {
+            options.threshold = numValue;
+            options.t = numValue;
+          }
+        } else if (key === 'detailed' || key === 'd') {
+          options.detailed = value.toLowerCase() !== 'false';
+          options.d = options.detailed;
+        } else if (key === 'detailed-keys') {
+          options['detailed-keys'] = value.toLowerCase() !== 'false';
+        } else if (key === 'output-dir') {
+          options['output-dir'] = value;
+        }
+        continue;
+      }
+      
+      // Handle --key value format
+      const match = arg.match(/^--?(.+)/);
+      if (match) {
+        const key = match[1];
+        const nextArg = args[i + 1];
+        
+        if (key === 'source-dir' || key === 's') {
+          options['source-dir'] = nextArg || options['source-dir'];
+          options.s = options['source-dir'];
+          if (nextArg && !nextArg.startsWith('-')) i++;
+        } else if (key === 'languages' || key === 'l') {
+          options.languages = nextArg || options.languages;
+          options.l = options.languages;
+          if (nextArg && !nextArg.startsWith('-')) i++;
+        } else if (key === 'output-report' || key === 'o') {
+          if (nextArg && !nextArg.startsWith('-') && ['true', 'false'].includes(nextArg.toLowerCase())) {
+            options['output-report'] = nextArg.toLowerCase() !== 'false';
+            options.o = options['output-report'];
+            i++;
+          } else {
+            options['output-report'] = true;
+            options.o = true;
+          }
+        } else if (key === 'format' || key === 'f') {
+          const value = nextArg || options.format;
+          if (['json', 'csv', 'table'].includes(value)) {
+            options.format = value;
+            options.f = value;
+          }
+          if (nextArg && !nextArg.startsWith('-') && ['json', 'csv', 'table'].includes(nextArg)) i++;
+        } else if (key === 'threshold' || key === 't') {
+          const value = parseInt(nextArg);
+          if (!isNaN(value)) {
+            options.threshold = value;
+            options.t = value;
+          }
+          if (nextArg && !nextArg.startsWith('-') && !isNaN(parseInt(nextArg))) i++;
+        } else if (key === 'detailed' || key === 'd') {
+          if (nextArg && !nextArg.startsWith('-') && ['true', 'false'].includes(nextArg.toLowerCase())) {
+            options.detailed = nextArg.toLowerCase() !== 'false';
+            options.d = options.detailed;
+            i++;
+          } else {
+            options.detailed = true;
+            options.d = true;
+          }
+        } else if (key === 'detailed-keys') {
+          if (nextArg && !nextArg.startsWith('-') && ['true', 'false'].includes(nextArg.toLowerCase())) {
+            options['detailed-keys'] = nextArg.toLowerCase() !== 'false';
+            i++;
+          } else {
+            options['detailed-keys'] = true;
+          }
+        } else if (key === 'output-dir') {
+          options['output-dir'] = nextArg || options['output-dir'];
+          if (nextArg && !nextArg.startsWith('-')) i++;
+        }
+      }
+    }
     
-    return yargs(hideBin(process.argv))
-      .option('source-dir', {
-        alias: 's',
-        type: 'string',
-        description: 'Source directory containing translation files',
-        default: './locales'
-      })
-      .option('languages', {
-        alias: 'l',
-        type: 'string',
-        description: 'Comma-separated list of languages to analyze',
-        default: ''
-      })
-      .option('output-report', {
-        alias: 'o',
-        type: 'boolean',
-        description: 'Generate detailed sizing report',
-        default: true
-      })
-      .option('format', {
-        alias: 'f',
-        type: 'string',
-        choices: ['json', 'csv', 'table'],
-        description: 'Output format: json, csv, table',
-        default: 'table'
-      })
-      .option('threshold', {
-        alias: 't',
-        type: 'number',
-        description: 'Size difference threshold for warnings (%)',
-        default: 50
-      })
-      .option('detailed', {
-        alias: 'd',
-        type: 'boolean',
-        description: 'Generate detailed report with more information',
-        default: false
-      })
-      .option('detailed-keys', {
-        type: 'boolean',
-        description: 'Show detailed key-level analysis',
-        default: false
-      })
-      .option('output-dir', {
-        type: 'string',
-        description: 'Output directory for reports',
-        default: './i18ntk-reports'
-      })
-      .help()
-      .argv;
+    if (options.help) {
+      console.log(`
+I18N Sizing Analysis Tool
+
+Usage: i18ntk-sizing [options]
+
+Options:
+  -s, --source-dir <dir>      Source directory containing translation files (default: ./locales)
+  -l, --languages <langs>     Comma-separated list of languages to analyze
+  -o, --output-report         Generate detailed sizing report (default: true)
+  -f, --format <format>       Output format: json, csv, table (default: table)
+  -t, --threshold <number>    Size difference threshold for warnings (%) (default: 50)
+  -d, --detailed              Generate detailed report with more information
+  --detailed-keys             Show detailed key-level analysis
+  --output-dir <dir>          Output directory for reports (default: ./i18ntk-reports)
+  -h, --help                  Show this help message
+`);
+      process.exit(0);
+    }
+    
+    return options;
   }
 
   // Add run method for compatibility with manager
@@ -802,7 +904,17 @@ Generated: ${new Date().toISOString()}
 
 // Update the execution block at the end
 if (require.main === module) {
-  const analyzer = new I18nSizingAnalyzer();
+  const args = new I18nSizingAnalyzer().parseArgs();
+  const analyzer = new I18nSizingAnalyzer({
+    sourceDir: args['source-dir'],
+    languages: args.languages ? args.languages.split(',').map(l => l.trim()) : [],
+    outputReport: args['output-report'],
+    format: args.format,
+    threshold: args.threshold,
+    detailed: args.detailed,
+    outputDir: args['output-dir']
+  });
+  
   analyzer.analyze().then(() => {
     process.exit(0);
   }).catch(error => {
