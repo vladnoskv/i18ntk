@@ -56,10 +56,11 @@ async function ensureInitializedOrExit(prompt) {
   const path = require('path');
   const fs = require('fs');
   const { ensureDirectory } = require('../utils/config-helper');
-  const settingsManager = require('../settings/settings-manager');
+  const SettingsManager = require('../settings/settings-manager');
+  const settingsManager = new SettingsManager();
   
   // Get configuration from settings manager
-  const settings = settingsManager.getAllSettings();
+  const settings = settingsManager.getSettings();
   
   const cfg = {
     sourceDir: path.resolve(settings.sourceDir || './locales'),

@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const SettingsManager = require('../settings/settings-manager');
 const legacyConfigManager = require('../utils/config-manager');
-const configManager = SettingsManager;
+const configManager = new SettingsManager();
 
 class UIi18n {
     constructor() {

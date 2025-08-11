@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // Project root is where commands are executed
 const projectRoot = process.cwd();
-const settingsManager = require('../settings/settings-manager');
-const CONFIG_DIR = settingsManager.configDir;
+const CONFIG_DIR = path.join(os.homedir(), '.i18ntk');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'i18ntk-config.json');
 
 // Default configuration values - comprehensive configuration

@@ -12,7 +12,8 @@
 
 **Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translation logic like i18next or Vue i18n.
 
-With over **2,000 downloads**, we thank you for your patience up until this point. I am proud to release version **1.8.1** with **1.8.0** marking our first fully stable release. Expect fewer updates as the core toolkit has matured. Future efforts may explore optional translation runtime features and a companion web UI for AI-assisted translations while keeping this package dependency-free. Keep an eye out!
+
+With over **2,000 downloads**, we thank you for your patience. I am proud to release version **1.8.1** with **1.8.0** marking our first fully stable release. Expect fewer updates as the core toolkit has matured. Future efforts may explore optional translation runtime features and a companion web UI for AI-assisted translations while keeping this package dependency-free.
 
 > **v1.8.1** – A major release delivering:
 > - 🔍 **Smarter Framework Detection**: Automatically identifies and configures for popular i18n frameworks
@@ -54,8 +55,6 @@ i18ntk validate --format json
 | Optimized         | 847.9ms          | 0.45MB | Full package |
 
 > Benchmarks are internal; actual results vary by CPU, filesystem, and dataset.
-
-**✅ Tested Environments:** Successfully tested on React 19 and Next.js environments with full compatibility and successful operations across all CLI commands and features.
 
 ---
 

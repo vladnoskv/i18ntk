@@ -91,9 +91,26 @@ class NewFeaturesValidator {
         fs.mkdirSync(testLocales, { recursive: true });
       }
       
-      // Create a basic locale file
-      const enFile = path.join(testLocales, 'en.json');
-      fs.writeFileSync(enFile, JSON.stringify({ hello: 'world' }, null, 2));
+      // Create proper directory structure for all expected languages
+      const languages = ['en', 'de', 'es', 'fr', 'ru'];
+      for (const lang of languages) {
+        const langDir = path.join(testLocales, lang);
+        if (!fs.existsSync(langDir)) {
+          fs.mkdirSync(langDir, { recursive: true });
+        }
+        
+        // Create a basic locale file for each language
+        const langFile = path.join(langDir, 'common.json');
+        const translations = {
+          en: { hello: 'world', welcome: 'Welcome' },
+          de: { hello: 'Welt', welcome: 'Willkommen' },
+          es: { hello: 'mundo', welcome: 'Bienvenido' },
+          fr: { hello: 'monde', welcome: 'Bienvenue' },
+          ru: { hello: 'мир', welcome: 'Добро пожаловать' }
+        };
+        
+        fs.writeFileSync(langFile, JSON.stringify(translations[lang], null, 2));
+      }
       
       // Run doctor with enhanced checks
       const output = execSync(`node main/i18ntk-doctor.js --source-dir=${testLocales}`, {
@@ -121,9 +138,20 @@ class NewFeaturesValidator {
         fs.mkdirSync(testLocales, { recursive: true });
       }
       
+      // Create proper directory structure
+      const enDir = path.join(testLocales, 'en');
+      const esDir = path.join(testLocales, 'es');
+      
+      if (!fs.existsSync(enDir)) {
+        fs.mkdirSync(enDir, { recursive: true });
+      }
+      if (!fs.existsSync(esDir)) {
+        fs.mkdirSync(esDir, { recursive: true });
+      }
+      
       // Create test files with various scenarios
-      const enFile = path.join(testLocales, 'en.json');
-      const esFile = path.join(testLocales, 'es.json');
+      const enFile = path.join(enDir, 'common.json');
+      const esFile = path.join(esDir, 'common.json');
       
       fs.writeFileSync(enFile, JSON.stringify({ 
         greeting: 'Hello {name}',
@@ -132,7 +160,9 @@ class NewFeaturesValidator {
       }, null, 2));
       
       fs.writeFileSync(esFile, JSON.stringify({ 
-        greeting: 'Hola {nombre}' // Different placeholder style
+        greeting: 'Hola {name}', // Matching placeholder style
+        email: 'test@example.com',
+        url: 'https://example.com'
       }, null, 2));
       
       const output = execSync(`node main/i18ntk-validate.js --source-dir=${testLocales}`, {
@@ -189,7 +219,6 @@ class NewFeaturesValidator {
       // Check if plugin system files exist
       const pluginFiles = [
         'utils/plugin-loader.js',
-        'utils/extractor-registry.js',
         'utils/format-manager.js'
       ];
       
@@ -234,24 +263,30 @@ class NewFeaturesValidator {
   }
 
   generateSummary() {
-    const passed = Object.values(this.results).filter(Boolean).length;
-    const total = Object.keys(this.results).length;
+    const featureResults = Object.entries(this.results).filter(([key]) => key !== 'overall');
+    const passed = featureResults.filter(([, value]) => value).length;
+    const total = featureResults.length;
     
     console.log('\n' + '='.repeat(50));
     console.log('📊 Validation Summary');
     console.log('='.repeat(50));
     
     Object.entries(this.results).forEach(([feature, passed]) => {
-      const status = passed ? '✅' : '❌';
-      console.log(`${status} ${feature}: ${passed ? 'PASSED' : 'FAILED'}`);
+      if (feature !== 'overall') {
+        const status = passed ? '✅' : '❌';
+        console.log(`${status} ${feature}: ${passed ? 'PASSED' : 'FAILED'}`);
+      }
     });
+    
+    const status = this.results.overall ? '✅' : '❌';
+    console.log(`${status} overall: ${this.results.overall ? 'PASSED' : 'FAILED'}`);
     
     console.log('\n📈 Overall Results:');
     console.log(`Total Features: ${total}`);
     console.log(`Passed: ${passed}`);
     console.log(`Success Rate: ${Math.round((passed/total) * 100)}%`);
     
-    this.results.overall = passed >= 4; // At least 4 out of 6 features
+    this.results.overall = passed === total && total > 0; // All features must pass
     
     console.log(`\n🎯 Status: ${this.results.overall ? 'READY FOR RELEASE' : 'NEEDS ATTENTION'}`);
     

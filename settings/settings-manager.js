@@ -1,223 +1,291 @@
-/**
- * Settings Manager
- * Central configuration management for i18n toolkit
- * Handles loading, saving, and managing all settings with backup support
- */
-
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const { I18nError } = require('../utils/i18n-helper');
+const SecurityUtils = require('../utils/security');
 
 class SettingsManager {
     constructor() {
-        const packageDir = __dirname;
-        this.configDir = packageDir;
+        this.configDir = path.join(os.homedir(), '.i18ntk');
         this.configFile = path.join(this.configDir, 'i18ntk-config.json');
-        this.lastBackupTime = 0;
-        this.backupDebounceMs = 5000; // 5 seconds debounce
-        this.settings = {};
-        
-        // Ensure config directory exists
-        if (!fs.existsSync(this.configDir)) {
-            fs.mkdirSync(this.configDir, { recursive: true });
-        }
+        this.backupDir = path.join(this.configDir, 'backups');
         
         this.defaultConfig = {
+            "version": "1.8.1",
             "language": "en",
             "uiLanguage": "en",
-            "theme": "light",
-            "projectRoot": ".",
+            "theme": "dark",
+            "projectRoot": process.cwd(),
             "sourceDir": "./locales",
-            "i18nDir": "./locales",
+            "i18nDir": "./i18n",
             "outputDir": "./i18ntk-reports",
             "scriptDirectories": {
-                "init": null,
-                "analyze": null,
-                "validate": null,
-                "usage": null,
-                "sizing": null,
-                "summary": null,
-                "complete": null,
-                "manage": null
+                "main": "./main",
+                "utils": "./utils",
+                "scripts": "./scripts",
+                "settings": "./settings",
+                "uiLocales": "./ui-locales"
             },
             "processing": {
-                "batchSize": 2000,
-                "concurrency": 32,
-                "maxFileSize": 524288,
-                "timeout": 3000,
-                "retryAttempts": 0,
-                "retryDelay": 0,
+                "mode": "extreme",
                 "cacheEnabled": true,
-                "cacheTTL": 180000,
-                "validateOnSave": false,
-                "autoBackup": false,
-                "validateOnLoad": false,
-                "fileFilter": "**/*.json",
-                "notTranslatedMarker": "NOT_TRANSLATED",
-                "excludeFiles": [
-                    ".DS_Store",
-                    "Thumbs.db",
-                    "*.tmp",
-                    "*.bak",
-                    "*.log",
-                    "~*",
-                    "*.swp"
-                ],
-                "performanceMode": "ultra-extreme",
-                "memoryLimit": "256MB",
-                "gcInterval": 250,
-                "streaming": true,
-                "compression": "brotli",
+                "batchSize": 1000,
+                "maxWorkers": 4,
+                "timeout": 30000,
+                "retryAttempts": 3,
                 "parallelProcessing": true,
-                "minimalLogging": true
+                "memoryOptimization": true,
+                "compression": true
             },
             "reports": {
                 "format": "json",
+                "includeSource": false,
                 "includeStats": true,
-                "includeMissingKeys": true,
-                "includeUnusedKeys": true,
-                "includeUsageStats": true,
-                "includeValidationErrors": true,
-                "outputFormat": "both",
-                "generateSummary": true,
-                "generateDetailed": true,
+                "includeRecommendations": true,
+                "includeSecurity": true,
+                "includePerformance": true,
                 "saveToFile": true,
-                "filenameTemplate": "i18n-report-{timestamp}"
+                "fileName": "i18n-report-[timestamp].json",
+                "outputPath": "./i18ntk-reports",
+                "compress": true
             },
             "ui": {
                 "showProgress": true,
-                "showDetailedOutput": false,
-                "colorOutput": true,
+                "showColors": true,
+                "showTimestamps": true,
+                "showTips": true,
+                "showWarnings": true,
+                "showErrors": true,
                 "interactive": true,
                 "confirmActions": true,
-                "autoSave": true,
-                "autoLoad": true
+                "autoComplete": true,
+                "syntaxHighlighting": true
             },
             "behavior": {
-                "autoDetectLanguage": true,
+                "autoSave": true,
+                "autoBackup": true,
+                "backupFrequency": "weekly",
+                "maxBackups": 10,
+                "confirmDestructive": true,
+                "validateOnSave": true,
+                "formatOnSave": true,
+                "lintOnSave": true,
+                "autoFix": false,
                 "strictMode": false,
-                "caseSensitive": true,
-                "ignoreComments": false,
-                "ignoreWhitespace": true,
-                "normalizeKeys": true,
-                "validateOnStartup": false
+                "devMode": false
             },
             "notifications": {
                 "enabled": true,
+                "desktop": true,
+                "sound": false,
                 "types": {
                     "success": true,
                     "warning": true,
                     "error": true,
                     "info": true,
-                    "warnings": true,
-                    "errors": true,
-                    "progress": true
+                    "debug": false
                 },
-                "sound": false,
-                "desktop": false,
-                "webhook": null
+                "timeout": 5000,
+                "maxNotifications": 5
             },
             "dateTime": {
+                "timezone": "auto",
                 "format": "YYYY-MM-DD HH:mm:ss",
-                "timezone": "local",
-                "locale": "en-US"
+                "locale": "en-US",
+                "dateFormat": "YYYY-MM-DD",
+                "timeFormat": "HH:mm:ss",
+                "use24Hour": true,
+                "showTimezone": false
             },
             "advanced": {
-                "backupBeforeChanges": true,
-                "validateSettings": true,
-                "logLevel": "error",
+                "debugMode": false,
+                "verboseLogging": false,
                 "performanceTracking": true,
-                "memoryLimit": "256MB",
-                "enableExperimental": true,
-                "batchSize": 2000,
-                "maxConcurrentFiles": 32,
-                "enableProgressBars": false,
-                "enableColorOutput": false,
-                "strictMode": false,
-                "enableAuditLog": false,
-                "validateOnSave": false,
-                "sizingThreshold": 50,
-                "sizingFormat": "table",
-                "timeout": 3000,
-                "performanceMode": "ultra-extreme",
-                "gcInterval": 250,
-                "streaming": true,
-                "compression": "brotli",
-                "parallelProcessing": true,
-                "aggressiveGC": true,
-                "memoryPooling": true,
-                "stringInterning": true
+                "memoryProfiling": false,
+                "stackTraces": false,
+                "experimentalFeatures": false,
+                "customExtractors": [],
+                "customValidators": [],
+                "customFormatters": []
             },
             "backup": {
-                "enabled": false,
-                "singleFileMode": false,
-                "singleBackupFile": "i18ntk-central-backup.json",
-                "retentionDays": 30,
-                "maxBackups": 100
+                "enabled": true,
+                "location": "./backups",
+                "frequency": "daily",
+                "retention": 7,
+                "compression": true,
+                "encryption": true,
+                "autoCleanup": true,
+                "maxSize": "100MB",
+                "includeReports": true,
+                "includeLogs": true
             },
             "security": {
+                "enabled": true,
                 "adminPinEnabled": false,
-                "adminPinPromptOnInit": true,
-                "keepAuthenticatedUntilExit": true,
-                "sessionTimeout": 30,
+                "sessionTimeout": 1800000,
                 "maxFailedAttempts": 3,
-                "lockoutDuration": 15,
-                "enablePathValidation": true,
-                "maxFileSize": 10485760,
-                "allowedExtensions": [
-                    ".json",
-                    ".js",
-                    ".jsx",
-                    ".ts",
-                    ".tsx",
-                    ".vue",
-                    ".svelte"
-                ],
-                "notTranslatedMarker": "[NOT TRANSLATED]",
-                "excludeFiles": [
-                    "node_modules",
-                    ".git",
-                    "dist",
-                    "build"
-                ],
-                "strictMode": false,
-                "pinProtection": {
+                "lockoutDuration": 300000,
+                "encryption": {
                     "enabled": true,
+                    "algorithm": "aes-256-gcm",
+                    "keyDerivation": "pbkdf2",
+                    "iterations": 100000
+                },
+                "pinProtection": {
+                    "enabled": false,
+                    "pin": null,
                     "protectedScripts": {
-                        "debugMenu": true,
-                        "deleteReports": true,
-                        "summaryReports": true,
-                        "settingsMenu": true,
                         "init": false,
                         "analyze": false,
                         "validate": false,
-                        "complete": false,
-                        "manage": false,
-                        "sizing": false,
-                        "usage": false
+                        "fix": false,
+                        "manage": true,
+                        "settings": true,
+                        "admin": true
                     }
-                }
+                },
+                "auditLog": true,
+                "sanitizeInput": true,
+                "validatePaths": true,
+                "restrictAccess": false
             },
             "debug": {
                 "enabled": false,
-                "showSecurityLogs": false,
-                "verboseLogging": false,
                 "logLevel": "info",
-                "saveDebugLogs": false,
-                "debugLogPath": "./debug.log"
+                "logFile": "./i18ntk-debug.log",
+                "maxFileSize": "10MB",
+                "maxFiles": 5,
+                "includeStackTrace": false,
+                "includeMemoryUsage": false,
+                "performanceMetrics": false
             },
             "sizeLimit": null,
-            "sourceLanguage": "en",
-            "defaultLanguages": [
-                "de",
-                "es",
-                "fr",
-                "ru"
-            ],
-            "reportLanguage": "auto",
-            "autoSave": true,
-            "dateFormat": "DD/MM/YYYY",
-            "timeFormat": "24h",
-            "timezone": "auto"
+            "placeholderStyles": {
+                "en": [
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}",
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\{t\\\\s+['\"][^'\"]*['\"]\\\\}\\\\}",
+                    "t\\\\(['\"][^'\"]*['\"]",
+                    "i18n\\\\.t\\\\(['\"][^'\"]*['\"]"
+                ],
+                "de": [
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}"
+                ],
+                "es": [
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}"
+                ],
+                "fr": [
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}",
+                    "\\\\{\\\\d+\\\\}"
+                ],
+                "ru": [
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}",
+                    "\\\\{\\\\d+\\\\}"
+                ],
+                "zh": [
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}",
+                    "\\\\{\\\\d+\\\\}"
+                ],
+                "ja": [
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}",
+                    "\\\\{\\\\d+\\\\}"
+                ],
+                "universal": [
+                    "\\\\{\\\\{[^}]+\\\\}\\\\}",
+                    "%\\\\{[^}]+\\\\}",
+                    "%[sdif]",
+                    "\\\\$\\\\{[^}]+\\\\}",
+                    "\\\\$[a-zA-Z_][a-zA-Z0-9_]*",
+                    "__\\\\w+__",
+                    "\\\\{\\\\w+\\\\}",
+                    "\\\\[\\\\[\\\\w+\\\\]\\\\]",
+                    "\\\\{\\\\d+\\\\}",
+                    "\\\\{\\\\d*\\\\}"
+                ],
+                "frameworks": {
+                    "react": [
+                        "\\\\{\\\\{[^}]+\\\\}\\\\}",
+                        "\\\\$\\\\{[^}]+\\\\}",
+                        "t\\\\(['\"][^'\"]*['\"]",
+                        "i18n\\\\.t\\\\(['\"][^'\"]*['\"]",
+                        "useTranslation\\\\s*\\\\([^)]*\\\\)",
+                        "<Trans[^>]*>.*?</Trans>"
+                    ],
+                    "vue": [
+                        "\\\\$t\\\\(['\"][^'\"]*['\"]",
+                        "\\\\$tc\\\\(['\"][^'\"]*['\"]",
+                        "\\\\{\\\\{\\\\$t\\\\([^)]+\\\\)\\\\}\\\\}",
+                        "v-t=['\"][^'\"]*['\"]"
+                    ],
+                    "angular": [
+                        "'[^']*'\\\\s*\\\\|\\\\s*translate",
+                        "\\\\{[^}]*'[^']*'\\\\s*\\\\|\\\\s*translate[^}]*\\\\}",
+                        "translate\\\\s*:\\s*['\"][^'\"]*['\"]"
+                    ],
+                    "nextjs": [
+                        "t\\\\(['\"][^'\"]*['\"]",
+                        "router\\\\.locale",
+                        "useTranslation\\\\s*\\\\([^)]*\\\\)",
+                        "getStaticProps\\\\s*\\\\([^)]*\\\\)",
+                        "getServerSideProps\\\\s*\\\\([^)]*\\\\)"
+                    ]
+                }
+            },
+            "framework": {
+                "detected": false,
+                "preference": "none",
+                "prompt": "always",
+                "lastPromptedVersion": null
+            }
         };
         
         this.settings = this.loadSettings();
@@ -294,487 +362,159 @@ class SettingsManager {
 
     /**
      * Save settings to file
-     * @param {object} newSettings - Settings to save
-     * @returns {boolean} Success status
+     * @param {object} settings - Settings to save
      */
-    saveSettings(newSettings = null) {
+    saveSettings(settings = null) {
+        if (settings) {
+            this.settings = settings;
+        }
+        
         try {
-            const settingsToSave = newSettings || this.settings;
-            
-            // Validate settings before saving
-            if (!this.validateSettings(settingsToSave)) {
-                throw new Error('Invalid settings provided');
+            if (!fs.existsSync(this.configDir)) {
+                fs.mkdirSync(this.configDir, { recursive: true });
             }
             
-            // Check if settings have actually changed before creating backup
-            const currentSettingsStr = JSON.stringify(this.settings);
-            const newSettingsStr = JSON.stringify(settingsToSave);
-            const hasChanges = currentSettingsStr !== newSettingsStr;
+            const content = JSON.stringify(this.settings, null, 4);
+            fs.writeFileSync(this.configFile, content, 'utf8');
             
-            // Only create backup if settings have changed and backup is enabled
-            if (hasChanges && settingsToSave.advanced?.backupBeforeChanges) {
+            // Create backup if enabled
+            if (this.settings.backup?.enabled) {
                 this.createBackup();
             }
             
-            // Skip saving if no changes
-            if (!hasChanges) {
-                return true;
-            }
-            
-            fs.writeFileSync(this.configFile, JSON.stringify(settingsToSave, null, 2), 'utf8');
-            this.settings = settingsToSave;
-            return true;
+            console.log('Settings saved successfully');
         } catch (error) {
             console.error('Error saving settings:', error.message);
-            return false;
         }
+    }
+
+    /**
+     * Create backup of current settings
+     */
+    createBackup() {
+        try {
+            if (!fs.existsSync(this.backupDir)) {
+                fs.mkdirSync(this.backupDir, { recursive: true });
+            }
+            
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const backupFile = path.join(this.backupDir, `config-${timestamp}.json`);
+            
+            fs.copyFileSync(this.configFile, backupFile);
+            
+            // Clean old backups
+            this.cleanupOldBackups();
+        } catch (error) {
+            console.error('Error creating backup:', error.message);
+        }
+    }
+
+    /**
+     * Clean old backup files
+     */
+    cleanupOldBackups() {
+        try {
+            const files = fs.readdirSync(this.backupDir)
+                .filter(file => file.startsWith('config-') && file.endsWith('.json'))
+                .map(file => ({
+                    name: file,
+                    path: path.join(this.backupDir, file),
+                    mtime: fs.statSync(path.join(this.backupDir, file)).mtime
+                }))
+                .sort((a, b) => b.mtime - a.mtime);
+            
+            const maxBackups = this.settings.backup?.maxBackups || 10;
+            if (files.length > maxBackups) {
+                files.slice(maxBackups).forEach(file => {
+                    fs.unlinkSync(file.path);
+                });
+            }
+        } catch (error) {
+            console.error('Error cleaning backups:', error.message);
+        }
+    }
+
+    /**
+     * Reset settings to defaults
+     */
+    resetToDefaults() {
+        this.settings = { ...this.defaultConfig };
+        this.saveSettings();
+        console.log('Settings reset to defaults');
     }
 
     /**
      * Get current settings
      * @returns {object} Current settings
      */
-    getAllSettings() {
-        return { ...this.settings };
+    getSettings() {
+        return this.settings;
     }
 
     /**
-     * Update directory settings globally
-     * @param {object} directorySettings - Object containing directory settings to update
-     * @returns {boolean} Success status
+     * Get default settings
+     * @returns {object} Default settings
      */
-    updateDirectorySettings(directorySettings) {
-        try {
-            const allowedKeys = ['projectRoot', 'sourceDir', 'i18nDir', 'outputDir'];
-            const updates = {};
-            
-            for (const [key, value] of Object.entries(directorySettings)) {
-                if (allowedKeys.includes(key) && typeof value === 'string') {
-                    updates[key] = value;
-                }
+    getDefaultSettings() {
+        return this.defaultConfig;
+    }
+
+    /**
+     * Update specific setting
+     * @param {string} key - Setting key (dot notation supported)
+     * @param {*} value - New value
+     */
+    updateSetting(key, value) {
+        const keys = key.split('.');
+        let current = this.settings;
+        
+        for (let i = 0; i < keys.length - 1; i++) {
+            if (!current[keys[i]]) {
+                current[keys[i]] = {};
             }
-            
-            if (Object.keys(updates).length > 0) {
-                const newSettings = { ...this.settings, ...updates };
-                return this.saveSettings(newSettings);
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('Error updating directory settings:', error.message);
-            return false;
+            current = current[keys[i]];
         }
+        
+        current[keys[keys.length - 1]] = value;
+        this.saveSettings();
     }
 
     /**
-     * Get directory settings for validation
-     * @returns {object} Directory settings
-     */
-    getDirectorySettings() {
-        return {
-            projectRoot: this.settings.projectRoot,
-            sourceDir: this.settings.sourceDir,
-            i18nDir: this.settings.i18nDir,
-            outputDir: this.settings.outputDir,
-        };
-    }
-
-    /**
-     * Get specific setting value
-     * @param {string} keyPath - Dot-separated key path (e.g., 'backup.enabled')
-     * @param {*} defaultValue - Default value to return if key not found
+     * Get specific setting
+     * @param {string} key - Setting key (dot notation supported)
+     * @param {*} defaultValue - Default value if key doesn't exist
      * @returns {*} Setting value
      */
-    getSetting(keyPath, defaultValue = null) {
-        const keys = keyPath.split('.');
-        let value = this.settings;
+    getSetting(key, defaultValue = undefined) {
+        const keys = key.split('.');
+        let current = this.settings;
         
-        for (const key of keys) {
-            if (value && typeof value === 'object' && key in value) {
-                value = value[key];
+        for (const k of keys) {
+            if (current && typeof current === 'object' && k in current) {
+                current = current[k];
             } else {
                 return defaultValue;
             }
         }
         
-        return value;
+        return current;
     }
 
     /**
-     * Set specific setting value
-     * @param {string} keyPath - Dot-separated key path
-     * @param {*} value - Value to set
-     * @returns {boolean} Success status
-     */
-    setSetting(keyPath, value) {
-        try {
-            // Create a deep copy of current settings to avoid modifying the original
-            const newSettings = JSON.parse(JSON.stringify(this.settings));
-            
-            const keys = keyPath.split('.');
-            const lastKey = keys.pop();
-            let target = newSettings;
-            
-            // Navigate to the parent object
-            for (const key of keys) {
-                if (!(key in target) || typeof target[key] !== 'object') {
-                    target[key] = {};
-                }
-                target = target[key];
-            }
-            
-            target[lastKey] = value;
-            return this.saveSettings(newSettings);
-        } catch (error) {
-            console.error('Error setting setting:', error.message);
-            return false;
-        }
-    }
-
-    /**
-     * Reset settings to defaults
-     * @returns {boolean} Success status
-     */
-    resetToDefaults() {
-        try {
-            const defaults = JSON.parse(JSON.stringify(this.defaultConfig));
-            this.saveSettings(defaults);
-            console.log('Settings reset to defaults');
-            return true;
-        } catch (error) {
-            console.error('Error resetting to defaults:', error.message);
-            return false;
-        }
-    }
-
-    /**
-     * Validate settings structure
-     * @param {object} settings - Settings to validate
-     * @returns {Array} Array of validation errors, empty if valid
-     */
-    validateSettings(settings) {
-        const errors = [];
-        
-        try {
-            // Basic validation - ensure it's an object
-            if (!settings || typeof settings !== 'object') {
-                errors.push('Settings must be an object');
-                return errors;
-            }
-            
-            // Validate required fields
-            if (!settings.language) {
-                errors.push('Language is required');
-            }
-            
-            if (!settings.sourceDir) {
-                errors.push('Source directory is required');
-            }
-
-            // Validate directory paths exist
-            const sourceDir = path.resolve(settings.projectRoot || '.', settings.sourceDir || '');
-            if (!fs.existsSync(sourceDir)) {
-                errors.push(`Source directory does not exist: ${sourceDir}`);
-            }
-
-            if (!settings.i18nDir) {
-                errors.push('i18n directory is required');
-            } else {
-                const i18nDir = path.resolve(settings.projectRoot || '.', settings.i18nDir);
-                if (!fs.existsSync(i18nDir)) {
-                    try {
-                        fs.mkdirSync(i18nDir, { recursive: true });
-                    } catch (error) {
-                        errors.push(`Cannot create i18n directory: ${i18nDir}`);
-                    }
-                }
-            }
-
-            if (settings.outputDir) {
-                const outputDir = path.resolve(settings.projectRoot || '.', settings.outputDir);
-                if (!fs.existsSync(outputDir)) {
-                    try {
-                        fs.mkdirSync(outputDir, { recursive: true });
-                    } catch (error) {
-                        errors.push(`Cannot create output directory: ${outputDir}`);
-                    }
-                }
-            }
-            
-            return errors;
-        } catch (error) {
-            errors.push(`Error validating settings: ${error.message}`);
-            return errors;
-        }
-    }
-
-    /**
-     * Create a backup of current settings
-     * @returns {boolean} Success status
-     */
-    createBackup() {
-        try {
-            // Check if backup system is enabled
-            if (!this.settings.backup?.enabled) {
-                return true;
-            }
-            
-            // Debounce backup creation to prevent duplicates
-            const now = Date.now();
-            if (now - this.lastBackupTime < this.backupDebounceMs) {
-                return true; // Skip if backup was created recently
-            }
-            this.lastBackupTime = now;
-            
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const backupDir = path.join(path.dirname(this.configFile), 'backups');
-            
-            // Ensure backup directory exists
-            if (!fs.existsSync(backupDir)) {
-                fs.mkdirSync(backupDir, { recursive: true });
-            }
-            
-            const backupFile = path.join(backupDir, `${path.basename(this.configFile, '.json')}-backup-${timestamp}.json`);
-            
-            if (fs.existsSync(this.configFile)) {
-                fs.copyFileSync(this.configFile, backupFile);
-                console.log(`Backup created: ${path.relative(process.cwd(), backupFile)}`);
-                
-                // Clean up old backups after creating new one
-                this.cleanupOldBackups();
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('Error creating backup:', error.message);
-            return false;
-        }
-    }
-
-    /**
-     * Clean up old backup files based on retention settings
-     */
-    cleanupOldBackups() {
-        try {
-            const backupDir = path.join(path.dirname(this.configFile), 'backups');
-            
-            if (!fs.existsSync(backupDir)) {
-                return;
-            }
-            
-            const backupFiles = fs.readdirSync(backupDir)
-                .filter(file => file.endsWith('.json') && file.includes('-backup-'))
-                .map(file => ({
-                    name: file,
-                    path: path.join(backupDir, file),
-                    created: fs.statSync(path.join(backupDir, file)).mtime
-                }))
-                .sort((a, b) => b.created - a.created);
-            
-            const maxBackups = this.settings.backup?.maxBackups || 100;
-            const retentionDays = this.settings.backup?.retentionDays || 30;
-            
-            // Filter by retention days
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-            
-            const filesToDelete = backupFiles.filter(file => 
-                file.created < cutoffDate || backupFiles.indexOf(file) >= maxBackups
-            );
-            
-            if (filesToDelete.length > 0) {
-                console.log(`\n⚠️  Found ${backupFiles.length} backup files. Cleaning up old backups...`);
-                console.log(`Keeping ${Math.min(maxBackups, backupFiles.length)} most recent backups within ${retentionDays} days.`);
-                
-                filesToDelete.forEach(file => {
-                    try {
-                        fs.unlinkSync(file.path);
-                        console.log(`Deleted old backup: ${file.name}`);
-                    } catch (error) {
-                        console.warn(`Could not delete backup ${file.name}: ${error.message}`);
-                    }
-                });
-                
-                console.log(`Cleanup completed. ${filesToDelete.length} old backup(s) removed.`);
-            }
-        } catch (error) {
-            console.warn('Error during backup cleanup:', error.message);
-        }
-    }
-
-    /**
-     * Get available language options
-     * @returns {Array} Array of language objects
+     * Get available languages
+     * @returns {Array} Array of language objects with code and name
      */
     getAvailableLanguages() {
-        const uiLocalesDir = path.join(__dirname, '..', 'ui-locales');
-        const languages = [
-            { code: 'en', name: 'English', flag: '🇺🇸' },
-            { code: 'de', name: 'Deutsch (German)', flag: '🇩🇪' },
-            { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸' },
-            { code: 'fr', name: 'Français (French)', flag: '🇫🇷' },
-            { code: 'ru', name: 'Русский (Russian)', flag: '🇷🇺' },
-            { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },
-            { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' }
+        return [
+            { code: 'en', name: 'English' },
+            { code: 'de', name: 'Deutsch' },
+            { code: 'es', name: 'Español' },
+            { code: 'fr', name: 'Français' },
+            { code: 'ru', name: 'Русский' },
+            { code: 'ja', name: '日本語' },
+            { code: 'zh', name: '中文' }
         ];
-                return languages.filter(lang =>
-            fs.existsSync(path.join(uiLocalesDir, `${lang.code}.json`))
-        );
-    }
-
-    /**
-     * Set security settings
-     * @param {Object} securitySettings - Security settings object
-     */
-    setSecurity(securitySettings) {
-        if (typeof securitySettings !== 'object' || securitySettings === null) {
-            throw new Error('Security settings must be an object');
-        }
-        
-        this.settings.security = { ...this.settings.security, ...securitySettings };
-        this.saveSettings();
-    }
-
-    /**
-     * Set debug settings
-     * @param {Object} debugSettings - Debug settings object
-     */
-    setDebug(debugSettings) {
-        if (typeof debugSettings !== 'object' || debugSettings === null) {
-            throw new Error('Debug settings must be an object');
-        }
-        
-        this.settings.debug = { ...this.settings.debug, ...debugSettings };
-        this.saveSettings();
-    }
-
-    /**
-     * Get security settings
-     * @returns {Object} Security settings
-     */
-    getSecurity() {
-        return this.settings.security || this.defaultConfig.security;
-    }
-
-    /**
-     * Get debug settings
-     * @returns {Object} Debug settings
-     */
-    getDebug() {
-        return this.settings.debug || this.defaultConfig.debug;
-    }
-
-    /**
-     * Check if admin PIN is enabled
-     * @returns {boolean} True if admin PIN is enabled
-     */
-    isAdminPinEnabled() {
-        return this.getSecurity().adminPinEnabled || false;
-    }
-
-    /**
-     * Check if debug mode is enabled
-     * @returns {boolean} True if debug mode is enabled
-     */
-    isDebugEnabled() {
-        return this.getDebug().enabled || false;
-    }
-
-    /**
-     * Check if security logs should be shown
-     * @returns {boolean} True if security logs should be shown
-     */
-    shouldShowSecurityLogs() {
-        const debug = this.getDebug();
-        return debug.enabled && debug.showSecurityLogs;
-    }
-
-    /**
-     * Get settings schema for UI generation
-     * @returns {object} Settings schema
-     */
-    getSettingsSchema() {
-        return {
-            basic: {
-                title: 'Basic Settings',
-                fields: {
-                    language: {
-                        type: 'select',
-                        label: 'UI Language',
-                        options: this.getAvailableLanguages(),
-                        description: 'Language for the user interface'
-                    },
-                    projectRoot: {
-                        type: 'text',
-                        label: 'Project Root',
-                        description: 'Root directory of your project (all other paths are relative to this)'
-                    },
-                    sourceDir: {
-                        type: 'text',
-                        label: 'Source Directory',
-                        description: 'Directory containing translation files (relative to project root)'
-                    },
-                    i18nDir: {
-                        type: 'text',
-                        label: 'i18n Directory',
-                        description: 'Directory for i18n files (relative to project root)'
-                    },
-                    sourceLanguage: {
-                        type: 'select',
-                        label: 'Source Language',
-                        options: this.getAvailableLanguages(),
-                        description: 'Primary language for translations'
-                    },
-                    outputDir: {
-                        type: 'text',
-                        label: 'Output Directory',
-                        description: 'Directory for generated reports (relative to project root)'
-                    },
-                    theme: {
-                        type: 'select',
-                        label: 'Theme',
-                        options: [
-                            { code: 'light', name: 'Light' },
-                            { code: 'dark', name: 'Dark' }
-                        ],
-                        description: 'UI theme preference'
-                    }
-                }
-            },
-            advanced: {
-                title: 'Advanced Settings',
-                fields: {
-                    'advanced.batchSize': {
-                        type: 'number',
-                        label: 'Batch Size',
-                        min: 1,
-                        max: 1000,
-                        description: 'Number of files to process in each batch'
-                    },
-                    'advanced.concurrency': {
-                        type: 'number',
-                        label: 'Concurrency',
-                        min: 1,
-                        max: 8,
-                        description: 'Number of concurrent processing threads'
-                    },
-                    'advanced.backupBeforeChanges': {
-                        type: 'boolean',
-                        label: 'Backup Before Changes',
-                        description: 'Create backup before making changes to settings'
-                    },
-                    'advanced.validateSettings': {
-                        type: 'boolean',
-                        label: 'Validate Settings',
-                        description: 'Validate settings on load and save'
-                    }
-                }
-            }
-        };
     }
 }
 
-// Create singleton instance
-const settingsManager = new SettingsManager();
-
-module.exports = settingsManager;
+module.exports = SettingsManager;

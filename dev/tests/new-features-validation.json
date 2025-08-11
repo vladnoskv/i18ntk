@@ -1,17 +1,17 @@
 {
-  "timestamp": "2025-08-11T15:16:34.340Z",
+  "timestamp": "2025-08-11T21:10:00.687Z",
   "results": {
     "exitCodes": true,
-    "doctorEnhancements": false,
-    "validatorEnhancements": false,
+    "doctorEnhancements": true,
+    "validatorEnhancements": true,
     "frameworkDetection": true,
-    "pluginSystem": false,
+    "pluginSystem": true,
     "securityFeatures": true,
-    "overall": false
+    "overall": true
   },
   "summary": {
-    "total": 7,
-    "passed": 3,
-    "successRate": 43
+    "total": 6,
+    "passed": 6,
+    "successRate": 100
   }
 }

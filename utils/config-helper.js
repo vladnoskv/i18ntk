@@ -9,7 +9,8 @@ const path = require('path');
 const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
 const {loadTranslations} = require('./i18n-helper');
-const settingsManager = require('../settings/settings-manager');
+const SettingsManager = require('../settings/settings-manager');
+const settingsManager = new SettingsManager();
 
 const { ask } = require('./cli');
 

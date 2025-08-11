@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-11T17:44:01.922Z",
+  "timestamp": "2025-08-11T21:03:17.796Z",
   "version": "1.8.1",
   "results": {
     "total": 9,
@@ -38,7 +38,7 @@
         "category": "exit-codes",
         "description": "Exit Codes Standardization Tests",
         "status": "failed",
-        "duration": 1067,
+        "duration": 1105,
         "error": "Command failed: node \"E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\new-features.test.js\"",
         "stderr": ""
       },
@@ -47,7 +47,7 @@
         "category": "doctor",
         "description": "Enhanced Doctor Tool Tests",
         "status": "passed",
-        "duration": 306,
+        "duration": 335,
         "output": "🏥 Doctor Integration Tests\n\n==================================================\n🔍 Testing path traversal detection...\n✅ Path traversal detection test passed\n🔍 Testing permission validation..."
       },
       {
@@ -55,7 +55,7 @@
         "category": "validator",
         "description": "Enhanced Validator Tests",
         "status": "passed",
-        "duration": 382,
+        "duration": 400,
         "output": "🔍 Validator Integration Tests\n\n==================================================\n🔍 Testing placeholder style enforcement...\n✅ Placeholder style enforcement test passed\n🔍 Testing placeholder parity validation..."
       },
       {
@@ -63,22 +63,22 @@
         "category": "framework-detection",
         "description": "Framework Detection Tests",
         "status": "failed",
-        "duration": 61769,
-        "error": "spawnSync C:\\WINDOWS\\system32\\cmd.exe ETIMEDOUT",
-        "stderr": ""
+        "duration": 17831,
+        "error": "Command failed: node \"E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\framework-detection.test.js\"\n^C",
+        "stderr": "^C"
       },
       {
         "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\security-features.test.js",
         "category": "security",
         "description": "Security Features Tests",
         "status": "failed",
-        "duration": 120879,
+        "duration": 20150,
         "error": "Command failed: node \"E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\security-features.test.js\"\n^C",
         "stderr": "^C"
       }
     ]
   },
-  "duration": 120883,
+  "duration": 20153,
   "summary": {
     "success": false,
     "successRate": 67,
