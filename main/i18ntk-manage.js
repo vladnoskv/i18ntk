@@ -512,6 +512,12 @@ class I18nManager {
         return;
       }
 
+      // If no command provided and --no-prompt is set, exit gracefully
+      if (args.noPrompt) {
+        this.safeClose();
+        process.exit(0);
+      }
+
       // Framework detection is now handled by maybePromptFramework above
       // Skip the redundant checkI18nDependencies prompt
       
@@ -727,6 +733,19 @@ class I18nManager {
     const isRequired = await this.adminAuth.isAuthRequired();
     if (!isRequired) {
       return true;
+    }
+
+    // Check if admin PIN was provided via command line
+    const args = this.parseArgs();
+    if (args.adminPin) {
+      const isValid = await this.adminAuth.verifyPin(args.adminPin);
+      if (isValid) {
+        console.log(t('adminCli.authSuccess'));
+        return true;
+      } else {
+        console.log(t('adminCli.invalidPin'));
+        return false;
+      }
     }
 
     console.log(t('adminCli.authRequired'));
