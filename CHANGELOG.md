@@ -51,6 +51,12 @@ With over **2,000 downloads** since release, we thank you for your patience with
 - **Path separator fixes** - Proper handling of Windows path separators
 - **Cross-platform testing** - Comprehensive testing on Windows, macOS, and Linux
 
+#### **Argument Parsing Fixes**
+- **Fixed sizing script argument parsing** - Resolved issue where `--source-dir` and other command-line arguments were not being respected
+- **Enhanced argument format support** - Now properly handles both `--key=value` and `--key value` argument formats
+- **Improved path resolution** - Command-line arguments now correctly override default configuration values
+- **Better error reporting** - Clearer error messages when invalid arguments are provided
+
 ### 🏗️ **Architecture Improvements**
 
 #### **Directory Structure**
