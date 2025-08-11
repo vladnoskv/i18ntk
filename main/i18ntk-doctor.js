@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { getUnifiedConfig } = require('../utils/config-helper');
+const { getUnifiedConfig, parseCommonArgs } = require('../utils/config-helper');
 
 const ExitCodes = require('../utils/exit-codes');
 
@@ -40,7 +40,8 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
 }
 
 (async () => {
-  const config = await getUnifiedConfig('doctor');
+  const args = parseCommonArgs(process.argv.slice(2));
+  const config = await getUnifiedConfig('doctor', args);
   const dirs = {
     projectRoot: config.projectRoot,
     sourceDir: config.sourceDir,
@@ -53,15 +54,20 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
 
   console.log('i18ntk doctor');
   for (const [name, dir] of Object.entries(dirs)) {
+    const rel = path.relative(config.projectRoot, dir);
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
+      issues.push(`path traversal detected: ${dir}`);
+      exitCode = Math.max(exitCode, ExitCodes.SECURITY_VIOLATION);
+      continue;
+    }
     const exists = fs.existsSync(dir);
     console.log(`${name}: ${dir} ${exists ? '✅' : '❌'}`);
-  if (!exists) {
-      issues.push(`Missing directory: ${dir}`);
-      exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-    }
-    if (dir.includes('..')) {
-      issues.push(`Path traversal detected: ${dir}`);
-      exitCode = Math.max(exitCode, ExitCodes.SECURITY_VIOLATION);
+    if (!exists) {
+      if (name !== 'outputDir') {
+        issues.push(`Missing directory: ${dir}`);
+        exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+      }
+      continue;
     }
     try {
       fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);

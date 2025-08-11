@@ -1,14 +1,22 @@
-const { loadOptionalModule } = require('./plugin-loader');
+
 const defaultFormat = require('./formats/json');
 
-function getFormatAdapter(name) {
-  if (name && name !== 'json') {
-    const plugin = loadOptionalModule(name) || loadOptionalModule(`i18ntk-format-${name}`);
-    if (plugin && typeof plugin.read === 'function' && typeof plugin.serialize === 'function') {
-      return plugin;
-    }
+class FormatManager {
+  constructor() {
+    this.formats = new Map();
+    this.registerFormat(defaultFormat);
   }
-  return defaultFormat;
+
+  registerFormat(format) {
+    if (!format || !Array.isArray(format.extensions)) return;
+    format.extensions.forEach(ext => {
+      this.formats.set(ext, format);
+    });
+  }
+
+  getFormat(ext) {
+    return this.formats.get(ext) || this.formats.get('.json');
+  }
 }
 
-module.exports = { getFormatAdapter };
+module.exports = FormatManager;

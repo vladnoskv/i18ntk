@@ -21,50 +21,71 @@ const { ask } = require('./cli');
  */
 async function getUnifiedConfig(scriptName, cliArgs = {}) {
   try {
-    let cfg = configManager.getConfig();
-    const projectRoot = path.resolve(cfg.projectRoot || '.');
+    let cfg;
+    let projectRoot;
+    let settingsDir;
 
-    const updates = {};
-    if (cliArgs.sourceDir) {
-      const abs = path.resolve(projectRoot, cliArgs.sourceDir);
-      updates.sourceDir = configManager.toRelative(abs);
-    }
-    if (cliArgs.i18nDir) {
-      const abs = path.resolve(projectRoot, cliArgs.i18nDir);
-      updates.i18nDir = configManager.toRelative(abs);
-    }
-    if (cliArgs.outputDir) {
-      const abs = path.resolve(projectRoot, cliArgs.outputDir);
-      updates.outputDir = configManager.toRelative(abs);
-    }
-    if (Object.keys(updates).length > 0) {
-      await configManager.updateConfig(updates);
+    if (cliArgs.configDir) {
+      settingsDir = path.resolve(cliArgs.configDir);
+      const configFile = path.join(settingsDir, 'i18ntk-config.json');
+      cfg = fs.existsSync(configFile) ? JSON.parse(fs.readFileSync(configFile, 'utf8')) : {};
+      projectRoot = settingsDir;
+      cfg.projectRoot = projectRoot;
+      cfg.sourceDir = path.resolve(projectRoot, cfg.sourceDir || './locales');
+      cfg.i18nDir = path.resolve(projectRoot, cfg.i18nDir || cfg.sourceDir);
+      cfg.outputDir = path.resolve(projectRoot, cfg.outputDir || './i18ntk-reports');
+    } else {
       cfg = configManager.getConfig();
-    }
+      projectRoot = path.resolve(cfg.projectRoot || '.');
 
-    // Resolve all paths to absolute
-    cfg = configManager.resolvePaths(cfg);
+      const updates = {};
+      if (cliArgs.sourceDir) {
+        const abs = path.resolve(projectRoot, cliArgs.sourceDir);
+        updates.sourceDir = configManager.toRelative(abs);
+      }
+      if (cliArgs.i18nDir) {
+        const abs = path.resolve(projectRoot, cliArgs.i18nDir);
+        updates.i18nDir = configManager.toRelative(abs);
+      }
+      if (cliArgs.outputDir) {
+        const abs = path.resolve(projectRoot, cliArgs.outputDir);
+        updates.outputDir = configManager.toRelative(abs);
+      }
+      if (Object.keys(updates).length > 0) {
+        await configManager.updateConfig(updates);
+        cfg = configManager.getConfig();
+      }
 
-    // Script-specific override for sourceDir
-    if (cfg.scriptDirectories?.[scriptName]) {
-      cfg.sourceDir = path.resolve(cfg.projectRoot, cfg.scriptDirectories[scriptName]);
-    }
+      // Resolve all paths to absolute
+      cfg = configManager.resolvePaths(cfg);
 
-    // Auto-fix i18nDir if missing but sourceDir exists
-    if (!fs.existsSync(cfg.i18nDir) && fs.existsSync(cfg.sourceDir)) {
-      await configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
-      cfg.i18nDir = cfg.sourceDir;
+      // Script-specific override for sourceDir
+      if (cfg.scriptDirectories?.[scriptName]) {
+        cfg.sourceDir = path.resolve(cfg.projectRoot, cfg.scriptDirectories[scriptName]);
+      }
+
+      // Auto-fix i18nDir if missing but sourceDir exists
+      if (!fs.existsSync(cfg.i18nDir) && fs.existsSync(cfg.sourceDir)) {
+        await configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
+        cfg.i18nDir = cfg.sourceDir;
+      }
+
+      settingsDir = settingsManager.configDir;
     }
 
     const displayPaths = {
       projectRoot: '.',
-      sourceDir: configManager.toRelative(cfg.sourceDir),
-      i18nDir: configManager.toRelative(cfg.i18nDir),
-      outputDir: configManager.toRelative(cfg.outputDir),
+      sourceDir: path.relative(projectRoot, cfg.sourceDir) || '.',
+      i18nDir: path.relative(projectRoot, cfg.i18nDir) || '.',
+      outputDir: path.relative(projectRoot, cfg.outputDir) || '.',
     };
 
-    const settingsDir = settingsManager.configDir;
-    const rawMarkers = cfg.notTranslatedMarkers || cfg.processing?.notTranslatedMarkers || cfg.notTranslatedMarker || cfg.processing?.notTranslatedMarker || 'NOT_TRANSLATED';
+    const rawMarkers =
+      cfg.notTranslatedMarkers ||
+      cfg.processing?.notTranslatedMarkers ||
+      cfg.notTranslatedMarker ||
+      cfg.processing?.notTranslatedMarker ||
+      'NOT_TRANSLATED';
     const markerList = Array.isArray(rawMarkers) ? rawMarkers : [rawMarkers];
 
     const config = {
@@ -157,6 +178,9 @@ function parseCommonArgs(args) {
           break;
         case 'output-dir':
           parsed.outputDir = sanitizedValue;
+          break;
+        case 'config-dir':
+          parsed.configDir = sanitizedValue;
           break;
         case 'source-language':
           parsed.sourceLanguage = sanitizedValue;

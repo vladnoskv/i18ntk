@@ -320,23 +320,33 @@ class I18nValidator {
   }
 
   getGenericPlaceholders(value) {
-    return new Set(value.match(/%s|\{\d+\}|\{\{[^}]+\}\}/g) || []);
+    return new Set(value.match(/%s|\{\d+\}|\{\{[^}]+\}\}|\{[^}]+\}/g) || []);
   }
 
   checkPlaceholders(source, target, language, fileName, prefix = '') {
     if (typeof source === 'string' && typeof target === 'string') {
       const srcPatterns = (this.config.placeholderStyles && this.config.placeholderStyles[this.config.sourceLanguage]) || [];
       const tgtPatterns = (this.config.placeholderStyles && this.config.placeholderStyles[language]) || [];
-      const srcPH = this.extractPlaceholders(source, srcPatterns);
-      const tgtPH = this.extractPlaceholders(target, tgtPatterns);
-      const generic = this.getGenericPlaceholders(target);
-      generic.forEach(ph => {
-        if (!tgtPH.has(ph)) {
-          this.addError(`Disallowed placeholder in ${language}/${fileName}`, { key: prefix, placeholder: ph });
-        }
-      });
+      const srcPH = new Set([
+        ...this.extractPlaceholders(source, srcPatterns),
+        ...this.getGenericPlaceholders(source)
+      ]);
+      const tgtPH = new Set([
+        ...this.extractPlaceholders(target, tgtPatterns),
+        ...this.getGenericPlaceholders(target)
+      ]);
+
+      if (tgtPatterns.length) {
+        const allowed = this.extractPlaceholders(target, tgtPatterns);
+        this.getGenericPlaceholders(target).forEach(ph => {
+          if (!allowed.has(ph)) {
+            this.addError(`Disallowed placeholder style in ${language}/${fileName}`, { key: prefix, placeholder: ph });
+          }
+        });
+      }
+
       if (srcPH.size !== tgtPH.size || [...srcPH].some(p => !tgtPH.has(p))) {
-        this.addError(`Placeholder mismatch in ${language}/${fileName}`, { key: prefix });
+        this.addError(`Placeholder style mismatch in ${language}/${fileName}`, { key: prefix });
       }
     } else if (source && typeof source === 'object' && !Array.isArray(source)) {
       for (const key of Object.keys(source)) {
@@ -358,7 +368,8 @@ class I18nValidator {
       const fullKey = prefix ? `${prefix}.${key}` : key;
       if (typeof value === 'string') {
         if (/https?:\/\//.test(value) || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(value) || /(api[_-]?key|secret|token)/i.test(value)) {
-          this.addWarning(`Risky content in ${language}/${fileName}`, { key: fullKey, value });
+          const reporter = this.config.strictMode ? this.addError.bind(this) : this.addWarning.bind(this);
+          reporter(`Risky content in ${language}/${fileName}`, { key: fullKey, value });
         }
       } else if (value && typeof value === 'object' && !Array.isArray(value)) {
         this.detectRiskyKeys(value, language, fileName, fullKey);
@@ -510,9 +521,7 @@ class I18nValidator {
       
      // Validate translations
       const translations = this.validateTranslation(targetContent, language, fileName);
-      if (this.config.placeholderStyles) {
-        this.checkPlaceholders(sourceContent, targetContent, language, fileName);
-      }
+      this.checkPlaceholders(sourceContent, targetContent, language, fileName);
       this.detectRiskyKeys(targetContent, language, fileName);
 
       
@@ -659,23 +668,11 @@ class I18nValidator {
         throw new Error(error);
       }
       
-      // Get available languages
-      const availableLanguages = this.getAvailableLanguages();
-      
-      if (availableLanguages.length === 0) {
-        if (!args.json) {
-          console.log(t('validate.noTargetLanguages'));
-        }
-        const result = { success: true, message: 'No languages to validate' };
-        if (args.json) {
-          jsonOutput.setStatus('ok', result.message);
-          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
-        }
-        return result;
-      }
-      
+      // Get available languages including source language
+      const availableLanguages = [this.config.sourceLanguage, ...this.getAvailableLanguages()];
+
       // Filter languages if specified
-      const targetLanguages = args.language 
+      const targetLanguages = args.language
         ? [args.language].filter(lang => availableLanguages.includes(lang))
         : availableLanguages;
       

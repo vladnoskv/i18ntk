@@ -96,7 +96,7 @@ class NewFeaturesValidator {
       fs.writeFileSync(enFile, JSON.stringify({ hello: 'world' }, null, 2));
       
       // Run doctor with enhanced checks
-      const output = execSync(`node main/i18ntk-doctor.js --source-dir ${testLocales}`, { 
+      const output = execSync(`node main/i18ntk-doctor.js --source-dir=${testLocales}`, {
         encoding: 'utf8',
         timeout: 8000
       });
@@ -135,7 +135,7 @@ class NewFeaturesValidator {
         greeting: 'Hola {nombre}' // Different placeholder style
       }, null, 2));
       
-      const output = execSync(`node main/i18ntk-validate.js --source-dir ${testLocales}`, { 
+      const output = execSync(`node main/i18ntk-validate.js --source-dir=${testLocales}`, {
         encoding: 'utf8',
         timeout: 8000
       });
