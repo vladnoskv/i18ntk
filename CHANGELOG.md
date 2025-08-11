@@ -1,6 +1,6 @@
 ## [1.7.4] - 2025-08-11 - **INTERACTIVE TRANSLATION FIXER WITH MULTI-MARKER SUPPORT**
 
-### ✨ **MAJOR FEATURE: Interactive Translation Fixer Tool**
+### ✨ **MAJOR FEATURE FOR 1.7.4: Interactive Translation Fixer Tool**
 
 #### **Interactive Mode with Multi-Language Support**
 - **🎯 Interactive Translation Fixer**: New `i18ntk fixer` command with step-by-step guided fixing process

@@ -41,10 +41,13 @@ i18ntk validate --source ./locales
 
 ## 🎯 Key Features
 
+### ✨ **MAJOR FEATURE FOR 1.7.4: Interactive Translation Fixer Tool**
+
 - **Ultra-Extreme Performance**: 97% speed improvement - **15.38ms** for 200k keys
 - **Enhanced Security**: Advanced PIN protection with exponential backoff & AES-256 encryption
 - **Edge Case Handling**: Robust handling of corrupt files, encoding issues, and network failures
 - **Smart Sizing**: Interactive locale optimizer (up to 86% size reduction)
+- **Interactive Translation Fixer**: New `i18ntk fixer` command with step-by-step guided fixing process
 - **Enterprise Backup**: Automated encrypted backups with cloud integration
 - **Zero Dependencies**: Lightweight, production-ready
 - **Watch Helper**: Optional `--watch` mode keeps translations synced in real time
@@ -52,7 +55,7 @@ i18ntk validate --source ./locales
 - **7 UI Languages**: English, Spanish, French, German, Japanese, Russian, Chinese
 - **Framework Support**: Auto-detects React i18next, Vue i18n, Angular, Next i18next, Nuxt i18next, Svelte i18n
 - **Memory Optimization**: 67% memory reduction with streaming processing
-- **Scalability**: Linear scaling up to 5M keys with ultra-extreme settings
+- **Scalability**: Linear scaling up to 5M keys per second with ultra-extreme settings
 - **Smart Framework Detection**: Automatically skips unnecessary prompts when i18n frameworks are detected
 
 ### 📸 Screenshots
