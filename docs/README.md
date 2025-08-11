@@ -1,10 +1,10 @@
 # Documentation Overview
 
-**Version:** 1.7.5
+**Version:** 1.8.1
 **Last Updated:** 2025-08-11
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
-Version 1.7.5 introduces **critical security fixes** eliminating shell access vulnerabilities, enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support.
+Version 1.8.1 delivers smart framework detection, a plugin architecture for custom workflows, enhanced security with PIN authentication and AES encryption, and major performance gains. With over 2,000 downloads, this release is considered fully stable.
 
 ## Structure
 
@@ -32,27 +32,18 @@ Version 1.7.5 introduces **critical security fixes** eliminating shell access vu
  - [Development Scripts and Tools](./dev/) - Scripts and tools for development
 
 
-## Security Updates in 1.7.5
+## Highlights in 1.8.1
 
-### Critical Security Fixes
-Version 1.7.5 addresses **shell access vulnerabilities** by eliminating direct shell execution across the entire production codebase:
-
-- **Eliminated `child_process.execSync()`**: Replaced with direct file system operations
-- **Removed `child_process.spawnSync()`**: Replaced with safe module execution
-- **Zero shell access**: No direct shell commands in production code
-- **Maintained functionality**: All features work identically with enhanced security
-
-### Security Improvements
-- **File system security**: All operations use validated file system paths
-- **Input sanitization**: Enhanced validation for all user inputs
-- **Module execution**: Scripts execute as modules instead of shell commands
-- **Cross-platform safety**: Eliminated platform-specific shell dependencies
+- **Smart Framework Detection** automatically configures rules for i18next, Lingui, and FormatJS projects.
+- **Extensible Plugin System** enables custom extractors and format managers.
+- **Enhanced Security** with PIN authentication, AES-256-GCM encryption, and strict path validation.
+- **Performance Boost** delivering up to 97% faster processing while keeping memory usage under 1MB.
 
 ## Migration Guide
 
-### Upgrading to 1.7.5 (Recommended)
+### Upgrading to 1.8.1 (Recommended)
 
-#### From any version < 1.7.5
+#### From any version < 1.8.1
 1. **Backup your current configuration**:
    ```bash
    cp -r ./settings ./settings-backup-$(date +%Y%m%d)
@@ -60,21 +51,21 @@ Version 1.7.5 addresses **shell access vulnerabilities** by eliminating direct s
 
 2. **Install the latest secure version**:
     ```bash
-    npm install i18ntk@1.7.5
+    npm install i18ntk@1.8.1
     ```
 
 3. **Run security validation**:
     ```bash
-    npx i18ntk@1.7.5 --security-check
+    npx i18ntk@1.8.1 --security-check
     ```
 
 4. **Verify installation**:
     ```bash
-    npx i18ntk@1.7.5 --version
-    npx i18ntk@1.7.5 --validate
+    npx i18ntk@1.8.1 --version
+    npx i18ntk@1.8.1 --validate
     ```
 
-#### Preserved Features from 1.7.2
+#### Preserved Features from 1.7.x
 - ✅ Ultra-extreme performance improvements
 - ✅ Enhanced security with PIN protection
 - ✅ Comprehensive backup & recovery
@@ -84,7 +75,7 @@ Version 1.7.5 addresses **shell access vulnerabilities** by eliminating direct s
 - ✅ **Zero shell access security**
 
 #### Breaking Changes
-- **None** - 1.7.5 is fully backward compatible with enhanced security
+- **None** - 1.8.1 is fully backward compatible with enhanced security
 
 ### Migration Support
 If you encounter issues during migration:

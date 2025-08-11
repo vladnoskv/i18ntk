@@ -207,7 +207,7 @@
       "1.7.6"
 
     ],
-    "nextVersion": "1.8.0",
+    "nextVersion": "1.8.2",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",

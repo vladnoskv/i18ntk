@@ -1,6 +1,7 @@
 # I18N Management Toolkit - Configuration Guide
 
-**Version:** 1.7.4**Last Updated:** 2025-08-11
+**Version:** 1.8.1
+**Last Updated:** 2025-08-11
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 📋 Overview
@@ -18,7 +19,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.7.4",
+  "version": "1.8.1",
   "lastUpdated": "2025-07-27",
   "project": {
     "name": "My Project",
@@ -77,8 +78,8 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.7.4",
-  "lastUpdated": "2025-07-27",
+  "version": "1.8.1",
+  "lastUpdated": "2025-08-11",
   "security": {
     "adminMode": false,
     "encryptionEnabled": true,

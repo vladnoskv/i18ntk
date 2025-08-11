@@ -12,8 +12,10 @@
 
 **Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translation logic like i18next or Vue i18n.
 
-> **v1.8.1** – A groundbreaking release delivering:
-> - 🔍 **Smart Framework Detection**: Automatically identifies and configures for popular i18n frameworks
+With over **2,000 downloads**, we thank you for your patience up until this point. I am proud to release version **1.8.1** with **1.8.0** marking our first fully stable release. Expect fewer updates as the core toolkit has matured. Future efforts may explore optional translation runtime features and a companion web UI for AI-assisted translations while keeping this package dependency-free. Keep an eye out!
+
+> **v1.8.1** – A major release delivering:
+> - 🔍 **Smarter Framework Detection**: Automatically identifies and configures for popular i18n frameworks
 > - 🔌 **Extensible Plugin System**: Powerful architecture for custom extractors and formats
 > - 🔒 **Enhanced Security**: Advanced protection with PIN authentication and AES encryption
 > - ⚡  **Performance Boost**: Up to 97% faster processing with optimized algorithms
@@ -52,6 +54,8 @@ i18ntk validate --format json
 | Optimized         | 847.9ms          | 0.45MB | Full package |
 
 > Benchmarks are internal; actual results vary by CPU, filesystem, and dataset.
+
+**✅ Tested Environments:** Successfully tested on React 19 and Next.js environments with full compatibility and successful operations across all CLI commands and features.
 
 ---
 
@@ -378,7 +382,16 @@ your-project/
 - Locale files are **auto‑backed up** before optimization.
 - Prefer the **interactive optimizer** for safe locale management.
 - Versions **prior to 1.7.1** are deprecated.
-- Upgrades apply improvements automatically; no migration steps required for 1.7.5.
+- Upgrades apply improvements automatically; no migration steps required for 1.8.1.
+
+---
+
+## 🧭 Future Plans
+
+- Investigate adding optional translation runtime logic to make i18ntk an all-in-one solution for any framework.
+- Explore a lightweight web-based companion for AI-assisted translations with a clean UI.
+- Maintain a zero-dependency core package while keeping future extensions optional.
+- Fewer, stability-focused releases as we refine long-term direction.
 
 ---
 

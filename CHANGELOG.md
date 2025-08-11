@@ -4,7 +4,9 @@
 
 > **🚀 MAJOR FEATURE RELEASE**: Version 1.8.1 introduces comprehensive framework detection, a powerful plugin system, enhanced security features, and significant performance improvements with 87% faster processing.
 
-### ✨ **New Features**
+With over **2,000 downloads** since release, we thank you for your patience with previously bugged versions. I am proud to release version **1.8.1** with some additional improvements over **1.8.0**, with 1.8.0 marking our first fully stable release. Expect fewer updates as the core toolkit has matured, tested and working. Future efforts may explore optional translation runtime features and a companion web UI for AI-assisted translations while keeping this package dependency-free.
+
+### ✨ **New Features** (If you encounter any issues, please report them on GitHub and revert to 1.8.0)
 
 #### **🎯 Enhanced Framework Detection**
 - **Smart Framework Detection** - Automatically detects i18next, Lingui, and FormatJS frameworks
