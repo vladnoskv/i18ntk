@@ -94,6 +94,12 @@
     "settings": "设置",
     "confirm": "确认"
   },
+    "errors": {
+    "readlineClosed": "输入流已关闭；正在以非交互模式运行。",
+    "noPackageJson": "未找到 package.json 文件。无法自动检测 i18n 框架。",
+    "noI18nDir": "未在项目根目录找到 i18n 目录。",
+    "noI18nConfig": "未在项目根目录找到 i18n 配置文件。"
+  },
   "fixer": {
     "help_message": "\nI18n 翻译修复工具\n\n用法: node i18ntk-fixer.js [选项]\n\n选项:\n  --source-dir <dir>     要扫描的源目录（默认: ./locales）\n  --languages <langs>    要修复的语言列表，用逗号分隔\n  --markers <markers>    视为未翻译的标记列表，用逗号分隔\n  --no-backup           跳过自动备份创建\n  --help                显示此帮助信息\n\n示例:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
     "starting": "🚀 开始修复翻译，语言: {languages}",
@@ -552,7 +558,7 @@
     "sourceDirectory": "📁 源目录: {dir}",
     "sourceLanguage": "🌍 源语言: {sourceLanguage}",
     "strictMode": "⚙️  严格模式: {mode}",
-    "noTargetLanguages": "⚠️  未找到需要验证的目标语言",
+    "noTargetLanguages": "未配置目标语言；跳过目标验证。通过 \"i18ntk init --languages=de,fr\" 添加语言。",
     "validatingLanguages": "🌍 正在验证语言: {langs}",
     "validatingLanguage": "🔍 正在验证语言: {lang}",
     "filesCount": "📄 文件数: {count}",

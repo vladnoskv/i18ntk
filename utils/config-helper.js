@@ -14,6 +14,16 @@ const settingsManager = require('../settings/settings-manager');
 const { ask } = require('./cli');
 
 /**
+ * Normalize path to ensure consistent format
+ * @param {string} dirPath - Directory path to normalize
+ * @returns {string} Normalized absolute path
+ */
+function normalizePath(dirPath) {
+  if (!dirPath) return path.resolve('./locales');
+  return path.resolve(dirPath);
+}
+
+/**
  * Get unified configuration for any script
  * @param {string} scriptName - Name of the script (e.g., 'complete', 'analyze', 'validate')
  * @param {object} cliArgs - Command line arguments parsed from the script
@@ -25,30 +35,52 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
     let projectRoot;
     let settingsDir;
 
-    if (cliArgs.configDir) {
-      settingsDir = path.resolve(cliArgs.configDir);
+    const toStr = v => (typeof v === 'string' ? v : null);
+
+    const configDirArg = toStr(cliArgs.configDir);
+    if (configDirArg) {
+      const safeConfigDir = SecurityUtils.validatePath(configDirArg, process.cwd());
+      if (!safeConfigDir) {
+        throw new Error('Invalid config directory');
+      }
+      settingsDir = safeConfigDir;
       const configFile = path.join(settingsDir, 'i18ntk-config.json');
       cfg = fs.existsSync(configFile) ? JSON.parse(fs.readFileSync(configFile, 'utf8')) : {};
       projectRoot = settingsDir;
       cfg.projectRoot = projectRoot;
-      cfg.sourceDir = path.resolve(projectRoot, cfg.sourceDir || './locales');
-      cfg.i18nDir = path.resolve(projectRoot, cfg.i18nDir || cfg.sourceDir);
-      cfg.outputDir = path.resolve(projectRoot, cfg.outputDir || './i18ntk-reports');
+      cfg.sourceDir = path.resolve(projectRoot, toStr(cfg.sourceDir) || './locales');
+      cfg.i18nDir = path.resolve(projectRoot, toStr(cfg.i18nDir) || cfg.sourceDir);
+      cfg.outputDir = path.resolve(projectRoot, toStr(cfg.outputDir) || './i18ntk-reports');
     } else {
       cfg = configManager.getConfig();
       projectRoot = path.resolve(cfg.projectRoot || '.');
 
       const updates = {};
-      if (cliArgs.sourceDir) {
-        const abs = path.resolve(projectRoot, cliArgs.sourceDir);
+      const sourceDirArg = toStr(cliArgs.sourceDir);
+      if (sourceDirArg) {
+        const safe = SecurityUtils.validatePath(sourceDirArg, projectRoot);
+        if (!safe) {
+          throw new Error('Invalid source directory');
+        }
+        const abs = safe;
         updates.sourceDir = configManager.toRelative(abs);
       }
-      if (cliArgs.i18nDir) {
-        const abs = path.resolve(projectRoot, cliArgs.i18nDir);
+      const i18nDirArg = toStr(cliArgs.i18nDir);
+      if (i18nDirArg) {
+        const safe = SecurityUtils.validatePath(i18nDirArg, projectRoot);
+        if (!safe) {
+          throw new Error('Invalid i18n directory');
+        }
+        const abs = safe;
         updates.i18nDir = configManager.toRelative(abs);
       }
-      if (cliArgs.outputDir) {
-        const abs = path.resolve(projectRoot, cliArgs.outputDir);
+      const outputDirArg = toStr(cliArgs.outputDir);
+      if (outputDirArg) {
+        const safe = SecurityUtils.validatePath(outputDirArg, projectRoot);
+        if (!safe) {
+          throw new Error('Invalid output directory');
+        }
+        const abs = safe;
         updates.outputDir = configManager.toRelative(abs);
       }
       if (Object.keys(updates).length > 0) {
@@ -72,6 +104,9 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
 
       settingsDir = settingsManager.configDir;
     }
+    const chosenDir = normalizePath(cliArgs.i18nDir || cliArgs.sourceDir || cfg.sourceDir || './locales');
+    cfg.sourceDir = chosenDir;
+    cfg.i18nDir = chosenDir;
 
     const displayPaths = {
       projectRoot: '.',
@@ -162,10 +197,15 @@ function displayBasicConfig() {
 function parseCommonArgs(args) {
   const parsed = {};
   const availableLangCodes = settingsManager.getAvailableLanguages().map(l => l.code);
-
-  args.forEach(arg => {
+  
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
     if (arg.startsWith('--')) {
-      const [key, value] = arg.substring(2).split('=');
+      let [key, value] = arg.substring(2).split('=');
+      if (value === undefined && i + 1 < args.length && !args[i + 1].startsWith('--')) {
+        value = args[i + 1];
+        i++;
+      }
       const sanitizedKey = key?.trim();
       const sanitizedValue = value !== undefined ? value.trim() : true;
       
@@ -215,7 +255,7 @@ function parseCommonArgs(args) {
           break;
       }
     }
-  });
+  }
   
   return parsed;
 }
@@ -285,9 +325,7 @@ function ensureDirectory(dirPath) {
  * @param {string} scriptName - Script name for error messages
  */
 function validateSourceDir(sourceDir, scriptName) {
-  if (!fs.existsSync(sourceDir)) {
-    throw new Error(`Source directory not found: ${sourceDir}`);
-  }
+  ensureDirectory(sourceDir);
 }
 
 // Display commonly used directories

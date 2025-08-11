@@ -669,14 +669,14 @@ class I18nValidator {
       }
       
       // Get available languages including source language
-      const availableLanguages = [this.config.sourceLanguage, ...this.getAvailableLanguages()];
+      const availableLanguages = this.getAvailableLanguages();
 
       // Filter languages if specified
       const targetLanguages = args.language
         ? [args.language].filter(lang => availableLanguages.includes(lang))
         : availableLanguages;
-      
-      if (targetLanguages.length === 0) {
+
+      if (args.language && targetLanguages.length === 0) {
         const error = `Specified language '${args.language}' not found`;
         this.addError(error, { requestedLanguage: args.language, availableLanguages });
         if (args.json) {
@@ -685,6 +685,17 @@ class I18nValidator {
           return { success: false, error };
         }
         throw new Error(error);
+      }
+
+      if (!args.language && targetLanguages.length === 0) {
+        const message = t('validate.noTargetLanguages') || 'No target languages configured; skipping target validation.';
+        if (args.json) {
+          jsonOutput.setStatus('ok', message);
+          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+          return { success: true, message };
+        }
+        console.log(message);
+        return { success: true, message };
       }
       
       if (!args.json) {

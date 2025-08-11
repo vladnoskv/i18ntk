@@ -1,15 +1,15 @@
 {
-  "timestamp": "2025-08-11T15:58:47.399Z",
+  "timestamp": "2025-08-11T17:44:01.922Z",
   "version": "1.8.1",
   "results": {
     "total": 9,
-    "passed": 9,
-    "failed": 0,
+    "passed": 6,
+    "failed": 3,
     "skipped": 0,
     "categories": {
       "exit-codes": {
-        "passed": 1,
-        "failed": 0
+        "passed": 0,
+        "failed": 1
       },
       "doctor": {
         "passed": 1,
@@ -20,16 +20,16 @@
         "failed": 0
       },
       "framework-detection": {
-        "passed": 1,
-        "failed": 0
+        "passed": 0,
+        "failed": 1
       },
       "plugins": {
         "passed": 0,
         "failed": 0
       },
       "security": {
-        "passed": 1,
-        "failed": 0
+        "passed": 0,
+        "failed": 1
       }
     },
     "tests": [
@@ -37,16 +37,17 @@
         "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\new-features.test.js",
         "category": "exit-codes",
         "description": "Exit Codes Standardization Tests",
-        "status": "passed",
-        "duration": 1030,
-        "output": "🧪 Running i18ntk 1.8.1 Feature Tests...\n\n✅ Exit codes are properly defined\n✅ Doctor detects path traversal attempts\n✅ Doctor validates directory permissions\n✅ Validator enforces placeholder style consistency\n✅ Validator detects suspicious content\n✅ Framework detection identifies i18next projects\n✅ Framework detection identifies Lingui projects\n✅ Plugin system allows extractor registration\n✅ Plugin system supports format managers\n✅ Doctor detects configuration drift\n✅ Doctor detects missing locale directories\n✅ Doctor detects BOM and JSON type issues\n✅ Usage analyzer uses framework detection\n✅ Security events are properly logged\n\n📊 Results: 14 passed, 0 failed\n\n🎯 Test Summary:\nTotal Tests: 14\nPassed: 14\nFailed: 0"
+        "status": "failed",
+        "duration": 1067,
+        "error": "Command failed: node \"E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\new-features.test.js\"",
+        "stderr": ""
       },
       {
         "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\integration\\doctor-enhanced.test.js",
         "category": "doctor",
         "description": "Enhanced Doctor Tool Tests",
         "status": "passed",
-        "duration": 259,
+        "duration": 306,
         "output": "🏥 Doctor Integration Tests\n\n==================================================\n🔍 Testing path traversal detection...\n✅ Path traversal detection test passed\n🔍 Testing permission validation..."
       },
       {
@@ -54,31 +55,33 @@
         "category": "validator",
         "description": "Enhanced Validator Tests",
         "status": "passed",
-        "duration": 364,
+        "duration": 382,
         "output": "🔍 Validator Integration Tests\n\n==================================================\n🔍 Testing placeholder style enforcement...\n✅ Placeholder style enforcement test passed\n🔍 Testing placeholder parity validation..."
       },
       {
         "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\framework-detection.test.js",
         "category": "framework-detection",
         "description": "Framework Detection Tests",
-        "status": "passed",
-        "duration": 700,
-        "output": "Testing: Basic project structure validation\n✅ Basic project structure validation\nTesting: i18next project structure\n✅ i18next project structure\nTesting: Custom pattern recognition\n✅ Custom pattern recognition\n\nFramework Detection Tests: 3/3 passed"
+        "status": "failed",
+        "duration": 61769,
+        "error": "spawnSync C:\\WINDOWS\\system32\\cmd.exe ETIMEDOUT",
+        "stderr": ""
       },
       {
         "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\security-features.test.js",
         "category": "security",
         "description": "Security Features Tests",
-        "status": "passed",
-        "duration": 818,
-        "output": "Testing: Path validation prevents directory traversal\n✅ Path validation prevents directory traversal\nTesting: Configuration file validation\n✅ Configuration file validation\nTesting: Input sanitization in CLI arguments\n✅ Input sanitization in CLI arguments\nTesting: File permissions and access control\n✅ File permissions and access control\n\nSecurity Features Tests: 4/4 passed"
+        "status": "failed",
+        "duration": 120879,
+        "error": "Command failed: node \"E:\\i18n-management-toolkit-main\\i18ntk-1.8.0\\dev\\tests\\security-features.test.js\"\n^C",
+        "stderr": "^C"
       }
     ]
   },
-  "duration": 3181,
+  "duration": 120883,
   "summary": {
-    "success": true,
-    "successRate": 100,
+    "success": false,
+    "successRate": 67,
     "categories": [
       "exit-codes",
       "doctor",

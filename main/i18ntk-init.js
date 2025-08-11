@@ -25,6 +25,7 @@ const UIi18n = require('./i18ntk-ui');
 loadTranslations(process.env.I18NTK_LANG);
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const { showFrameworkWarningOnce } = require('../utils/cli-helper');
+const { createPrompt, isInteractive } = require('../utils/prompt-helper');
 
 // Language configurations with native names
 const LANGUAGE_CONFIG = {
@@ -57,6 +58,7 @@ class I18nInitializer {
       excludeFiles: ['.DS_Store', 'Thumbs.db'],
       supportedExtensions: ['.json'],
       notTranslatedMarker: '[NOT_TRANSLATED]',
+      noPrompt: false,
       ...config
     };
         this.format = getFormatAdapter(this.config.format);
@@ -75,6 +77,7 @@ class I18nInitializer {
     this.rl = null;
     this.shouldCloseRL = false;
     this.announcedExistingDir = false;
+    this.promptInstance = null;
   }
 
   // Updated checkI18nDependencies method that uses configuration
@@ -82,7 +85,7 @@ class I18nInitializer {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
-      console.log(t('init.noPackageJson'));
+      console.log(t('errors.noPackageJson'));
       return true; // Allow to continue without framework
     }
     
@@ -141,7 +144,7 @@ class I18nInitializer {
 
   // Add the missing promptContinueWithoutI18n method
   async promptContinueWithoutI18n(noPrompt = false) {
-    if (noPrompt || !process.stdin.isTTY) {
+    if (!isInteractive({ noPrompt: noPrompt || this.config.noPrompt })) {
       return true;
     }
     const answer = await this.prompt('\n' + t('init.continueWithoutI18nPrompt'));
@@ -150,8 +153,13 @@ class I18nInitializer {
 
   // Add the missing prompt method
   async prompt(question) {
-    const { ask } = require('../utils/cli');
-    return await ask(question);
+    if (!this.promptInstance) {
+      this.promptInstance = createPrompt({ noPrompt: this.config.noPrompt });
+    }
+    if (!isInteractive({ noPrompt: this.config.noPrompt })) {
+      return '';
+    }
+    return this.promptInstance.question(question);
   }
 
   // Parse command line arguments
@@ -1053,9 +1061,9 @@ module.exports = I18nInitializer;
 // Run if called directly
 if (require.main === module) {
   async function main() {
+    const args = parseCommonArgs(process.argv.slice(2));
+    const prompt = createPrompt({ noPrompt: args.noPrompt });
     try {
-      const args = parseCommonArgs(process.argv.slice(2));
-      
       if (args.help) {
         displayHelp('i18ntk-init', {
           'languages': 'Comma-separated list of target languages',
@@ -1065,7 +1073,7 @@ if (require.main === module) {
         });
         return;
       }
-      
+
       // Handle legacy language flags
       if (args.languages && typeof args.languages === 'string') {
         args.languages = args.languages.split(',').map(l => l.trim());
@@ -1073,27 +1081,30 @@ if (require.main === module) {
       if (args['target-languages'] && typeof args['target-languages'] === 'string') {
         args.languages = args['target-languages'].split(',').map(l => l.trim());
       }
-      
+
       const config = await getUnifiedConfig('init', args);
-      
-      // Override with CLI arguments
       if (args.languages) {
         config.defaultLanguages = args.languages;
       }
-      
-      const initializer = new I18nInitializer(config);
-      
+
+      const initializer = new I18nInitializer({ ...config, noPrompt: args.noPrompt });
+      initializer.promptInstance = prompt;
+
       if (args.noPrompt) {
         await initializer.runNonInteractive();
       } else {
         await initializer.run();
       }
-      
+
     } catch (error) {
       console.error('Error:', error.message);
       process.exit(1);
+    } finally {
+      if (prompt && typeof prompt.close === 'function') {
+        prompt.close();
+      }
     }
   }
-  
+
   main();
 }

@@ -94,6 +94,12 @@
     "settings": "設定",
     "confirm": "確認"
   },
+    "errors": {
+    "readlineClosed": "入力ストリームが閉じられています。非対話モードで実行中です。",
+    "noPackageJson": "package.jsonが見つかりません。i18nフレームワークを自動検出できません。",
+    "noI18nDir": "プロジェクトルートにi18nディレクトリが見つかりません。",
+    "noI18nConfig": "プロジェクトルートにi18n設定ファイルが見つかりません。"
+  },
   "fixer": {
     "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
     "starting": "🚀 翻訳修正を開始します。言語: {languages}",
@@ -552,7 +558,7 @@
     "sourceDirectory": "📁 ソースディレクトリ: {dir}",
     "sourceLanguage": "🌍 ソース言語: {sourceLanguage}",
     "strictMode": "⚙️  厳密モード: {mode}",
-    "noTargetLanguages": "⚠️  バリデートする対象言語が見つかりませんでした",
+    "noTargetLanguages": "ターゲット言語が設定されていません。ターゲットの検証をスキップします。\"i18ntk init --languages=de,fr\" で言語を追加してください。",
     "validatingLanguages": "🌍 バリデート中の言語: {langs}",
     "validatingLanguage": "🔍 言語をバリデートしています: {lang}",
     "filesCount": "📄 ファイル数: {count}",

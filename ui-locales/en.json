@@ -3,6 +3,7 @@
     "version": "1.6.0",
     "updated": "2025-08-08"
   },
+  
   "common": {
     "welcome": "Welcome",
     "hello": "Hello",
@@ -93,6 +94,12 @@
     "home": "Home",
     "settings": "Settings",
     "confirm": "Confirm"
+  },
+    "errors": {
+    "readlineClosed": "Input stream is closed; running in non-interactive mode.",
+    "noPackageJson": "No package.json found. Cannot auto-detect i18n framework.",
+    "noI18nDir": "No i18n directory found in the project root.",
+    "noI18nConfig": "No i18n configuration file found in the project root."
   },
   "fixer": {
     "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -552,7 +559,7 @@
     "sourceDirectory": "📁 Source directory: {dir}",
     "sourceLanguage": "🌍 Source language: {sourceLanguage}",
     "strictMode": "⚙️  Strict mode: {mode}",
-    "noTargetLanguages": "⚠️  No target languages found to validate",
+    "noTargetLanguages": "No target languages configured; skipping target validation. Add languages via \"i18ntk init --languages=de,fr\".",
     "validatingLanguages": "🌍 Validating languages: {langs}",
     "validatingLanguage": "🔍 Validating language: {lang}",
     "filesCount": "📄 Files: {count}",

@@ -94,6 +94,12 @@
     "settings": "Einstellungen",
     "confirm": "Bestätigen"
   },
+    "errors": {
+    "readlineClosed": "Eingabestrom ist geschlossen; läuft im nicht-interaktiven Modus.",
+    "noPackageJson": "Keine package.json gefunden. Kann i18n-Framework nicht automatisch erkennen.",
+    "noI18nDir": "Kein i18n-Verzeichnis im Projekt-Root gefunden.",
+    "noI18nConfig": "Keine i18n-Konfigurationsdatei im Projekt-Root gefunden."
+  },
   "fixer": {
     "help_message": "\nI18n Übersetzungs-Fixer\n\nVerwendung: node i18ntk-fixer.js [optionen]\n\nOptionen:\n  --source-dir <dir>     Quellverzeichnis zu analysieren (Standard: ./locales)\n  --languages <langs>    Komma-getrennte Liste der zu korrigierenden Sprachen\n  --markers <markers>    Komma-getrennte Liste der als nicht übersetzt zu behandelnden Markierungen\n  --no-backup           Automatische Backup-Erstellung überspringen\n  --help                Diese Hilfe anzeigen\n\nBeispiele:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
     "starting": "🚀 Starte Übersetzungskorrektur für Sprachen: {languages}",
@@ -552,7 +558,7 @@
     "sourceDirectory": "📁 Quellverzeichnis: {dir}",
     "sourceLanguage": "🌍 Quellsprache: {sourceLanguage}",
     "strictMode": "⚙️  Strikter Modus: {mode}",
-    "noTargetLanguages": "⚠️  Keine Zielsprache zum Validieren gefunden",
+    "noTargetLanguages": "Keine Zielsprachen konfiguriert; überspringe Zielvalidierung. Fügen Sie Sprachen hinzu über \"i18ntk init --languages=de,fr\".",
     "validatingLanguages": "🌍 Validiere Sprachen: {langs}",
     "validatingLanguage": "🔍 Validiere Sprache: {lang}",
     "filesCount": "📄 Dateien: {count}",

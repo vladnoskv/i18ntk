@@ -119,6 +119,7 @@ function findLocaleFilesAllDirs(lang) {
 let translations = {};
 let currentLanguage = 'en';
 let isInitialized = false;
+const missingWarned = new Set();
 
 function loadTranslations(language) {
   const cfg = safeRequireConfig();
@@ -251,7 +252,10 @@ function t(key, params = {}) {
   }
 
   if (typeof value === 'undefined') {
-    console.warn(`Translation not found for key: ${key}`);
+    if (!missingWarned.has(key)) {
+      missingWarned.add(key);
+      console.warn(`Translation key not found: ${key}`);
+    }
     return key;
   }
   

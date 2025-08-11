@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), NEW interactive translation fixer with custom placeholder markers, selective language/file fixing, mass fix capabilities, advanced security with PIN protection, comprehensive backup & recovery, **zero shell access security fixes**, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
@@ -58,6 +58,7 @@
   },
   "bin": {
     "i18ntk": "main/i18ntk-manage.js",
+    "i18ntk-manage": "main/i18ntk-manage.js",
     "i18ntk-init": "main/i18ntk-init.js",
     "i18ntk-analyze": "main/i18ntk-analyze.js",
     "i18ntk-validate": "main/i18ntk-validate.js",

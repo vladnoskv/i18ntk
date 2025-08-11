@@ -94,6 +94,12 @@
     "settings": "Paramètres",
     "confirm": "Confirmer"
   },
+  "errors": {
+    "readlineClosed": "Flux d'entrée fermé; exécution en mode non interactif.",
+    "noPackageJson": "Aucun fichier package.json trouvé. Impossible de détecter automatiquement le framework i18n.",
+    "noI18nDir": "Aucun répertoire i18n trouvé dans la racine du projet.",
+    "noI18nConfig": "Aucun fichier de configuration i18n trouvé dans la racine du projet."
+  },
   "fixer": {
     "help_message": "\nCorrecteur de Traduction I18n\n\nUtilisation: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Répertoire source à analyser (par défaut: ./locales)\n  --languages <langs>    Liste séparée par virgules des langues à corriger\n  --markers <markers>    Liste séparée par virgules des marqueurs à traiter comme non traduits\n  --no-backup           Sauter la création de sauvegarde automatique\n  --help                Afficher cette aide\n\nExemples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
     "starting": "🚀 Démarrage de la correction de traduction pour les langues: {languages}",
@@ -552,7 +558,7 @@
     "sourceDirectory": "📁 Répertoire source : {dir}",
     "sourceLanguage": "🌍 Langue source : {sourceLanguage}",
     "strictMode": "⚙️  Mode strict : {mode}",
-    "noTargetLanguages": "⚠️  Aucune langue cible trouvée à valider",
+    "noTargetLanguages": "Aucune langue cible configurée ; validation des cibles ignorée. Ajoutez des langues via \"i18ntk init --languages=de,fr\".",
     "validatingLanguages": "🌍 Validation des langues : {langs}",
     "validatingLanguage": "🔍 Validation de la langue : {lang}",
     "filesCount": "📄 Fichiers : {count}",

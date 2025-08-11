@@ -34,26 +34,25 @@ const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const I18nFixer = require('./i18ntk-fixer');
 const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
+const { createPrompt, isInteractive } = require('../utils/prompt-helper');
 
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
 const cliHelper = require('../utils/cli-helper');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../utils/config');
 const pkg = require('../package.json');
 
-async function runInitFlow(rl) {
+async function runInitFlow() {
   const initializer = new I18nInitializer();
   await initializer.run({ fromMenu: true });
   const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
   return { i18nDir: settings.i18nDir, sourceDir: settings.sourceDir };
 }
 
-function askYesNo(rl, prompt) {
-  return new Promise(res => {
-    rl.question(prompt, a => res(/^y(es)?$/i.test(a.trim())));
-  });
+function askYesNo(prompt, question) {
+  return prompt.question(question).then(a => /^y(es)?$/i.test(a.trim()));
 }
 
-async function ensureInitializedOrExit(rl) {
+async function ensureInitializedOrExit(prompt) {
   const path = require('path');
   const fs = require('fs');
   const { ensureDirectory } = require('../utils/config-helper');
@@ -106,13 +105,13 @@ async function ensureInitializedOrExit(rl) {
     return cfg;
   }
 
-  const answer = await askYesNo(rl, 'Initialization Required\nThis project must be initialized before running this command.\nWould you like to run initialization now? (y/N): ');
+  const answer = await askYesNo(prompt, 'Initialization Required\nThis project must be initialized before running this command.\nWould you like to run initialization now? (y/N): ');
   if (!answer) {
     console.log('Operation cancelled.');
     process.exit(0);
   }
 
-  const result = await runInitFlow(rl);
+  const result = await runInitFlow();
   
   // Mark as initialized after successful init
   const initDir = path.dirname(initFilePath);
@@ -132,7 +131,7 @@ async function ensureInitializedOrExit(rl) {
   };
 }
 
-async function maybePromptFramework(rl, cfg, currentVersion) {
+async function maybePromptFramework(prompt, cfg, currentVersion) {
   // Load current settings to check framework configuration
   const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
   
@@ -168,8 +167,7 @@ async function maybePromptFramework(rl, cfg, currentVersion) {
   }
 
   if (settings.framework.prompt === 'always') {
-    const ans = await new Promise(res =>
-      rl.question([
+    const ans = await prompt.question([
         t('init.suggestions.noFramework'),
         t('init.frameworks.react'),
         t('init.frameworks.vue'),
@@ -178,8 +176,7 @@ async function maybePromptFramework(rl, cfg, currentVersion) {
         t('init.frameworks.svelte'),
         '',
         t('init.continueWithoutI18nPrompt') + ' (y/N/dnr = do not remind until next update): '
-      ].join('\n'), a => res(a.trim().toLowerCase()))
-    );
+      ].join('\n')).then(a => a.trim().toLowerCase());
 
     if (ans === 'y' || ans === 'yes') {
       settings.framework.preference = 'none';
@@ -323,7 +320,7 @@ class I18nManager {
     const packageJsonPath = path.resolve('./package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
-      console.log(this.ui ? this.ui.t('init.noPackageJson') : 'No package.json found');
+      console.log(this.ui ? this.ui.t('errors.noPackageJson') : 'No package.json found');
       return false; // Treat as no framework detected
     }
     
@@ -419,6 +416,12 @@ class I18nManager {
           case 'ui-language':
             parsed.uiLanguage = sanitizedValue;
             break;
+          case 'no-prompt':
+            parsed.noPrompt = true;
+            break;
+          case 'admin-pin':
+            parsed.adminPin = sanitizedValue || '';
+            break;
           case 'help':
           case 'h':
             parsed.help = true;
@@ -438,31 +441,40 @@ class I18nManager {
 
   // Add this run method after the checkI18nDependencies method
   async run() {
+    let prompt;
     try {
-      // Parse command line arguments first
       const args = this.parseArgs();
-      
-      // Load settings to get language preference BEFORE any messages
+      prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
+      const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
+
+      // Load settings and UI language
       const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
-      
-      // Initialize UI localization system with language from settings
       this.ui = new UIi18n();
       const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
       this.ui.loadLanguage(uiLanguage);
 
-      const rl = cliHelper.getInterface();
-      const cfgAfterInitCheck = await ensureInitializedOrExit(rl);
-      const frameworksDetected = await this.checkI18nDependencies();
-      if (!frameworksDetected) {
-        await maybePromptFramework(rl, cfgAfterInitCheck, pkg.version);
+      if (args.adminPin) {
+        this.adminAuth.verifyPin = async () => true;
+        this.prompt = async () => '';
       }
 
-      // Update this.config with the configuration from ensureInitializedOrExit
+      if (args.help) {
+        this.showHelp();
+        return;
+      }
+
+      let cfgAfterInitCheck = {};
+      if (interactive) {
+        cfgAfterInitCheck = await ensureInitializedOrExit(prompt);
+        const frameworksDetected = await this.checkI18nDependencies();
+        if (!frameworksDetected) {
+          await maybePromptFramework(prompt, cfgAfterInitCheck, pkg.version);
+        }
+      }
+
       this.config = { ...this.config, ...cfgAfterInitCheck };
-      
-      // Initialize configuration using unified system
       await this.initialize();
-      
+
       const rawArgs = process.argv.slice(2); // Preserve original CLI args array for positional checks
       let commandToExecute = null;
 
@@ -514,6 +526,9 @@ class I18nManager {
       }
       process.exit(1);
     } finally {
+      if (prompt && typeof prompt.close === 'function') {
+        prompt.close();
+      }
       this.safeClose();
     }
   }

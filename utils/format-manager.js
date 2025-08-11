@@ -19,4 +19,17 @@ class FormatManager {
   }
 }
 
+// Export both the class and utility functions
 module.exports = FormatManager;
+module.exports.getFormatAdapter = function(format) {
+  const manager = new FormatManager();
+  const adapter = manager.getFormat(format);
+  // Ensure we always return a valid adapter with all required methods
+  return adapter || {
+    extension: '.json',
+    read: (content) => JSON.parse(content),
+    write: (data) => JSON.stringify(data, null, 2),
+    serialize: (data) => JSON.stringify(data, null, 2),
+    deserialize: (content) => JSON.parse(content)
+  };
+};

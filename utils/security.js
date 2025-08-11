@@ -295,12 +295,16 @@ class SecurityUtils {
       'processing', 'performance', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
       'supportedExtensions', 'settings', 'backupDir', 'tempDir', 'cacheDir', 'configDir',
       'displayPaths', 'reports', 'ui', 'behavior', 'dateTime', 'backup', 'framework',
-      'notTranslatedMarkers'
+      'notTranslatedMarkers', 'placeholderStyles'
     ];
+
+    const strict = config.security?.strictConfig || false;
 
     for (const [key, value] of Object.entries(config)) {
       if (!allowedKeys.includes(key)) {
-        console.warn(i18n.t('security.unknown_config_key', { key }));
+        if (strict) {
+          console.warn(i18n.t('security.unknown_config_key', { key }));
+        }
         continue;
       }
 

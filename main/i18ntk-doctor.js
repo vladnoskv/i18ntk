@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const { getUnifiedConfig, parseCommonArgs } = require('../utils/config-helper');
+const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 
 const ExitCodes = require('../utils/exit-codes');
 
@@ -41,6 +41,10 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
 
 (async () => {
   const args = parseCommonArgs(process.argv.slice(2));
+  if (args.help) {
+    displayHelp('i18ntk-doctor');
+    process.exit(0);
+  }
   const config = await getUnifiedConfig('doctor', args);
   const dirs = {
     projectRoot: config.projectRoot,

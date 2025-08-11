@@ -92,7 +92,13 @@
     "partialKeys": "Claves parciales:",
     "home": "Inicio",
     "settings": "Configuración",
-"confirm": "Confirmar"
+    "confirm": "Confirmar"
+  },
+    "errors": {
+    "readlineClosed": "El flujo de entrada está cerrado; ejecutando en modo no interactivo.",
+    "noPackageJson": "No se encontró package.json. No se puede detectar automáticamente el framework i18n.",
+    "noI18nDir": "No se encontró el directorio i18n en la raíz del proyecto.",
+    "noI18nConfig": "No se encontró el archivo de configuración i18n en la raíz del proyecto."
   },
   "fixer": {
     "help_message": "\nCorrector de Traducción I18n\n\nUso: node i18ntk-fixer.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente para escanear (predeterminado: ./locales)\n  --languages <langs>    Lista separada por comas de idiomas a corregir\n  --markers <markers>    Lista separada por comas de marcadores a tratar como sin traducir\n  --no-backup           Omitir creación de respaldo automático\n  --help                Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -552,7 +558,7 @@
     "sourceDirectory": "📁 Directorio fuente: {dir}",
     "sourceLanguage": "🌍 Idioma fuente: {sourceLanguage}",
     "strictMode": "⚙️  Modo estricto: {mode}",
-    "noTargetLanguages": "⚠️  No se encontraron idiomas de destino para validar",
+    "noTargetLanguages": "No hay idiomas destino configurados; omitiendo validación de destino. Agregue idiomas mediante \"i18ntk init --languages=de,fr\".",
     "validatingLanguages": "🌍 Validando idiomas: {langs}",
     "validatingLanguage": "🔍 Validando idioma: {lang}",
     "filesCount": "📄 Archivos: {count}",
