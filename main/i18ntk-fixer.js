@@ -631,6 +631,10 @@ class I18nFixer {
     } finally {
       // Ensure readline is properly closed to prevent hanging
       closeGlobalReadline();
+      // Ensure process exits cleanly
+      if (require.main === module) {
+        process.exit(0);
+      }
     }
   }
 }

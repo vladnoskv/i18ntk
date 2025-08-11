@@ -29,6 +29,14 @@ function closeGlobalReadline() {
     globalReadline = null;
     global.activeReadlineInterface = null;
   }
+  
+  // Ensure terminal is properly reset
+  if (process.stdin && process.stdin.isTTY) {
+    try {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+    } catch (_) {}
+  }
 }
 
 async function ask(query) {
@@ -37,6 +45,12 @@ async function ask(query) {
   
   return new Promise(resolve => {
     rl.question(query, answer => {
+      // Ensure terminal is reset after input
+      if (process.stdin && process.stdin.isTTY) {
+        try {
+          process.stdin.setRawMode(false);
+        } catch (_) {}
+      }
       resolve(answer.trim());
     });
   });

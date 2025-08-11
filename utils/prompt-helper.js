@@ -1,4 +1,4 @@
-const readline = require('readline');
+const { getGlobalReadline, closeGlobalReadline, ask } = require('./cli');
 
 function isInteractive(opts={}) {
   const envSilent = process.env.CI === 'true' || process.env.I18NTK_SILENT === '1' || (process.env.npm_config_loglevel||'').toLowerCase()==='silent';
@@ -15,17 +15,22 @@ class NoopPrompt {
 
 class RLPrompt {
   constructor() {
-    this.rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    this.rl = getGlobalReadline();
     this.closed = false;
   }
   question(q) {
     if (this.closed) return Promise.resolve('');
     return new Promise(res => this.rl.question(q, ans => res(ans)));
   }
-  close() { if (!this.closed) { this.rl.close(); this.closed = true; } }
+  close() { 
+    if (!this.closed) { 
+      closeGlobalReadline(); 
+      this.closed = true; 
+    } 
+  }
   async pressEnterToContinue(msg='\nPress Enter to continue...') {
     if (this.closed) return;
-    await this.question(msg);
+    await ask(msg);
   }
 }
 

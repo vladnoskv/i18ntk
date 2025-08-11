@@ -1,5 +1,85 @@
 # i18n Management Toolkit - Version 1.8.0 Release Notes
 
+## [1.8.1] - 2025-08-11 - **Major Release: Enhanced Framework Detection, Plugin System & Security Enhancements**
+
+> **🚀 MAJOR FEATURE RELEASE**: Version 1.8.1 introduces comprehensive framework detection, a powerful plugin system, enhanced security features, and significant performance improvements with 87% faster processing.
+
+### ✨ **New Features**
+
+#### **🎯 Enhanced Framework Detection**
+- **Smart Framework Detection** - Automatically detects i18next, Lingui, and FormatJS frameworks
+- **Package.json Analysis** - Simplified detection using package.json dependency checks
+- **Framework-specific Validation** - Tailored validation rules for each framework type
+- **Enhanced Doctor Tool** - New validation capabilities with framework-aware analysis
+
+#### **🔌 Plugin System**
+- **Plugin Loader Architecture** - Replace simple utilities with robust PluginLoader and FormatManager classes
+- **Extractor Plugins** - Support for custom translation extractors
+- **Format Manager** - Unified handling of different translation formats
+- **Extensible Architecture** - Easy addition of new plugins and formats
+
+#### **🔒 Security Enhancements**
+- **Standardized Exit Codes** - Consistent exit codes across all CLI commands
+- **Admin PIN Authentication** - Enhanced admin authentication with command-line argument support
+- **Path Validation** - Improved path handling and security checks in doctor script
+- **Input Sanitization** - Enhanced input validation and sanitization
+- **Security Feature Tests** - Comprehensive security testing including path validation
+
+#### **📊 JSON Output Support**
+- **Machine-readable Results** - JSON output support for integration with CI/CD pipelines
+- **Structured Reporting** - Consistent JSON schema across all commands
+- **Error Reporting** - Detailed error information in JSON format
+
+#### **⚡ Performance Improvements**
+- **87% Performance Boost** - Extreme mode achieves 38.90ms for 200k keys
+- **Memory Optimization** - <1MB memory usage for all operations
+- **No Child Processes** - Removed child_process usage from production code
+- **Optimized Validation** - Enhanced placeholder validation with strict mode support
+
+### 🐛 **Bug Fixes**
+
+#### **Interactive Prompt Issues**
+- **Fixed double character input** - Resolved global double readline issue causing duplicate characters
+- **Fixed double enter requirement** - Scripts now exit cleanly without requiring double Enter press
+- **Enhanced readline management** - Proper terminal reset and cleanup
+- **Improved CLI experience** - Smoother interactive workflows
+
+#### **Windows Compatibility**
+- **Fixed Windows file handling** - Resolved Windows-specific file handling issues in tests
+- **Path separator fixes** - Proper handling of Windows path separators
+- **Cross-platform testing** - Comprehensive testing on Windows, macOS, and Linux
+
+### 🏗️ **Architecture Improvements**
+
+#### **Directory Structure**
+- **Organized Source Structure** - Changed to `./src/i18n/locales` for better organization
+- **Config Directory Support** - Added `--config-dir` support for standalone configurations
+- **Enhanced Settings Management** - Improved settings persistence and validation
+
+#### **Validation Logic**
+- **Enhanced Placeholder Validation** - Support for more styles and strict mode
+- **Target Language Validation** - Improved validation logic for target languages
+- **Interactive/Non-interactive Mode** - New prompt helper for seamless mode switching
+
+### 📚 **Documentation Updates**
+- **Updated README** - Comprehensive documentation for new features
+- **Enhanced API Documentation** - Detailed API reference for plugin system
+- **Security Guidelines** - Best practices for secure deployment
+- **Performance Benchmarks** - Updated performance metrics and benchmarks
+
+### 🧪 **Testing Enhancements**
+
+#### **New Test Categories**
+- **Framework Detection Tests** - Comprehensive testing for framework detection
+- **Security Feature Tests** - Path validation and input sanitization tests
+- **Plugin System Tests** - Plugin loader and format manager testing
+- **Performance Benchmarks** - Updated performance testing suite
+
+#### **Test Infrastructure**
+- **Enhanced Test Runner** - Improved test runner with new test categories
+- **New NPM Scripts** - Additional scripts for running specific test suites
+- **Test Environment** - Robust test environment with retry mechanisms
+
 ## [1.8.0] - 2025-08-11 - **Major Changes & Improvements**
 
 ## 🚀 Major Changes
