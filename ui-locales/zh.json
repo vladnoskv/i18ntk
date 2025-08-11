@@ -94,6 +94,71 @@
     "settings": "设置",
     "confirm": "确认"
   },
+  "fixer": {
+    "help_message": "\nI18n 翻译修复工具\n\n用法: node i18ntk-fixer.js [选项]\n\n选项:\n  --source-dir <dir>     要扫描的源目录（默认: ./locales）\n  --languages <langs>    要修复的语言列表，用逗号分隔\n  --markers <markers>    视为未翻译的标记列表，用逗号分隔\n  --no-backup           跳过自动备份创建\n  --help                显示此帮助信息\n\n示例:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
+    "starting": "🚀 开始修复翻译，语言: {languages}",
+    "sourceDirectory": "📁 源目录: {sourceDir}",
+    "sourceLanguage": "🔤 源语言: {sourceLanguage}",
+    "markers": "🏷️  要修复的标记: {markers}",
+    "scanningLanguage": "📊 正在扫描 {language}...",
+    "noLanguages": "❌ 未指定要修复的语言。",
+    "allComplete": "🎉 所有翻译已经完成！",
+    "fullReportSaved": "📊 完整报告已保存到: {reportPath}",
+    "reviewReport": "请查看报告后再继续。",
+    "backupCreated": "💾 备份已成功创建。",
+    "applyingFixes": "🔄 正在应用修复...",
+    "fixingComplete": "✅ 翻译修复完成！",
+    "operationCancelled": "❌ 用户取消了操作。",
+    "analysisTitle": "🔍 翻译修复分析",
+    "analysisSeparator": "==================================================",
+    "totalIssues": "发现的问题总数: {totalIssues}",
+    "missingTranslations": "缺失的翻译: {missing}",
+    "placeholderTranslations": "带有标记的翻译: {placeholder}",
+    "noIssues": "✅ 未发现任何问题，所有翻译都已完成。",
+    "detailedIssues": "📋 详细问题:",
+    "detailedSeparator": "--------------------------------------------------",
+    "filePath": "📄 {file} → {path}",
+    "missingKey": "❌ 缺失: {source} → {new}",
+    "placeholderKey": "⚠️  标记: \"{target}\" → \"{new}\"",
+    "moreIssues": "... 还有 {count} 个问题。查看报告文件获取完整详情。",
+    "confirmationTitle": "🤔 要继续进行这些修复吗？",
+    "confirmationOptions": "选项:",
+    "optionYes": "y - 是，应用所有修复",
+    "optionNo": "n - 否，取消操作",
+    "optionShow": "s - 显示详细问题",
+    "choicePrompt": "请选择 (y/n/s): ",
+    "nonInteractiveMode": "⚡ 检测到非交互模式 - 自动应用修复...",
+    "reportGenerated": "📊 修复报告已生成: {path}",
+    "summary": {
+      "totalIssues": "问题总数: {total}",
+      "missingKeys": "缺失的键: {missing}",
+      "placeholderKeys": "带有标记的键: {placeholder}",
+      "languages": "语言: {languages}"
+    },
+    "welcome": {
+      "title": "🎯 欢迎使用翻译修复工具！",
+      "description": "此工具将帮助您修复语言文件中损坏的翻译和占位符标记。"
+    },
+    "markerPrompt": {
+      "title": "🏷️ 配置占位符标记",
+      "description": "输入指示未翻译文本的标记（用逗号分隔）：",
+      "currentDefaults": "默认标记：{markers}",
+      "input": "标记（或按Enter使用默认值）："
+    },
+    "languagePrompt": {
+      "title": "🌍 选择要修复的语言",
+      "available": "可用语言：{languages}",
+      "description": "输入要修复的语言（用逗号分隔）或按Enter选择全部：",
+      "input": "语言：",
+      "noLanguages": "未找到需要修复的语言。"
+    },
+    "directoryPrompt": {
+      "title": "📁 选择目录",
+      "current": "当前目录：{dir}",
+      "description": "输入包含语言文件的目录（或按Enter使用当前目录）：",
+      "input": "目录："
+    }
+  },
   "autorun": {
     "stepAnalyzeTranslations": "分析翻译",
     "stepCompletedWithIcon": "✅ 步骤“{stepName}”已完成。",
@@ -950,6 +1015,7 @@
       "usage": "📊 检查键使用情况",
       "complete": "🎯 完成翻译（100% 覆盖）",
       "sizing": "📏 分析大小差异",
+      "fix": "🛠️  修复占位翻译",     
       "workflow": "🔄 运行完整工作流",
       "status": "📋 显示项目状态",
       "delete": "🗑️  删除全部报告",
@@ -961,7 +1027,7 @@
     },
     "update": "📦 更新软件包",
     "goodbye": "👋 再见！",
-    "invalidChoice": "❌ 无效选择。请选择 0-13。",
+    "invalidChoice": "❌ 无效选择。请选择 0-14。",
     "returning": "🔄 正在返回主菜单…",
     "invalidOption": "❌ 无效选项，请重试。",
     "nonInteractiveModeWarning": "⚠️ 检测到非交互模式，仅供参考显示菜单。",

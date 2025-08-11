@@ -1,7 +1,7 @@
 {
   "name": "i18ntk",
-  "version": "1.7.2",
-  "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), advanced security with PIN protection, comprehensive backup & recovery, and edge case handling for JavaScript/TypeScript projects",
+  "version": "1.7.4",
+  "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), NEW interactive translation fixer with custom placeholder markers, selective language/file fixing, mass fix capabilities, advanced security with PIN protection, comprehensive backup & recovery, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
     "internationalization",
@@ -62,7 +62,8 @@
     "i18ntk-sizing": "main/i18ntk-sizing.js",
     "i18ntk-autorun": "main/i18ntk-autorun.js",
     "i18ntk-summary": "main/i18ntk-summary.js",
-    "i18ntk-doctor": "main/i18ntk-doctor.js"
+    "i18ntk-doctor": "main/i18ntk-doctor.js",
+    "i18ntk-fixer": "main/i18ntk-fixer.js"
   },
   "directories": {
     "doc": "docs",
@@ -86,6 +87,7 @@
     "i18ntk:validate": "main/i18ntk-validate.js",
     "i18ntk:usage": "node main/i18ntk-usage.js",
     "i18ntk:complete": "node main/i18ntk-complete.js",
+    "i18ntk:fix": "node main/i18ntk-fixer.js",
     "i18ntk-sizing": "main/i18ntk-sizing.js",
     "start": "node main/i18ntk-manage.js",
     "settings": "node settings/settings-cli.js",
@@ -100,6 +102,7 @@
     "validate": "node main/i18ntk-validate.js",
     "usage": "node main/i18ntk-usage.js",
     "complete": "node main/i18ntk-complete.js",
+    "fix": "node main/i18ntk-fixer.js",
     "sizing": "node main/i18ntk-sizing.js",
     "summary": "node main/i18ntk-summary.js",
     "full-coverage": "npm run complete && npm run analyze",
@@ -144,14 +147,18 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.7.2",
-    "releaseDate": "27/07/2025",
-    "lastUpdated": "10/08/2025",
+    "version": "1.7.4",
+    "releaseDate": "12/08/2025",
+    "lastUpdated": "12/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "NEW Interactive Translation Fixer Tool with custom placeholder markers and selective language/file fixing",
+      "Mass fix capabilities for thousands of broken translations",
+      "8-language UI support for all interactive fixer operations",
+      "Ultra-extreme performance: 97% improvement - 15.38ms processing for 200k keys",
       "Ultra-extreme performance: 97% improvement - 15.38ms processing for 200k keys",
       "Enhanced security: Advanced PIN protection with exponential backoff",
       "Edge case handling: Robust handling of corrupt files, encoding issues, and network failures",

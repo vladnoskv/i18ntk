@@ -294,7 +294,8 @@ class SecurityUtils {
       'theme', 'autoSave', 'notifications', 'dateFormat', 'timeFormat', 'timezone',
       'processing', 'performance', 'advanced', 'security', 'debug', 'projectRoot', 'scriptDirectories',
       'supportedExtensions', 'settings', 'backupDir', 'tempDir', 'cacheDir', 'configDir',
-      'displayPaths', 'reports', 'ui', 'behavior', 'dateTime', 'backup'
+      'displayPaths', 'reports', 'ui', 'behavior', 'dateTime', 'backup', 'framework',
+      'notTranslatedMarkers'
     ];
 
     for (const [key, value] of Object.entries(config)) {

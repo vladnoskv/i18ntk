@@ -94,6 +94,71 @@
     "settings": "Einstellungen",
     "confirm": "Bestätigen"
   },
+  "fixer": {
+    "help_message": "\nI18n Übersetzungs-Fixer\n\nVerwendung: node i18ntk-fixer.js [optionen]\n\nOptionen:\n  --source-dir <dir>     Quellverzeichnis zu analysieren (Standard: ./locales)\n  --languages <langs>    Komma-getrennte Liste der zu korrigierenden Sprachen\n  --markers <markers>    Komma-getrennte Liste der als nicht übersetzt zu behandelnden Markierungen\n  --no-backup           Automatische Backup-Erstellung überspringen\n  --help                Diese Hilfe anzeigen\n\nBeispiele:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
+    "starting": "🚀 Starte Übersetzungskorrektur für Sprachen: {languages}",
+    "sourceDirectory": "📁 Quellverzeichnis: {sourceDir}",
+    "sourceLanguage": "🔤 Quellsprache: {sourceLanguage}",
+    "markers": "🏷️  Zu korrigierende Markierungen: {markers}",
+    "scanningLanguage": "📊 Analysiere {language}...",
+    "noLanguages": "❌ Keine Sprachen für Korrektur angegeben.",
+    "allComplete": "🎉 Alle Übersetzungen sind bereits vollständig!",
+    "fullReportSaved": "📊 Vollständiger Bericht gespeichert in: {reportPath}",
+    "reviewReport": "Bitte überprüfen Sie den Bericht, bevor Sie fortfahren.",
+    "backupCreated": "💾 Backup erfolgreich erstellt.",
+    "applyingFixes": "🔄 Wende Korrekturen an...",
+    "fixingComplete": "✅ Übersetzungskorrektur abgeschlossen!",
+    "operationCancelled": "❌ Vorgang vom Benutzer abgebrochen.",
+    "analysisTitle": "🔍 ÜBERSETZUNGSKORREKTUR-ANALYSE",
+    "analysisSeparator": "==================================================",
+    "totalIssues": "Gefundene Probleme gesamt: {totalIssues}",
+    "missingTranslations": "Fehlende Übersetzungen: {missing}",
+    "placeholderTranslations": "Übersetzungen mit Markierungen: {placeholder}",
+    "noIssues": "✅ Keine Probleme gefunden. Alle Übersetzungen sind vollständig.",
+    "detailedIssues": "📋 DETAillierte PROBLEME:",
+    "detailedSeparator": "--------------------------------------------------",
+    "filePath": "📄 {file} → {path}",
+    "missingKey": "❌ FEHLT: {source} → {new}",
+    "placeholderKey": "⚠️  MARKIERUNG: \"{target}\" → \"{new}\"",
+    "moreIssues": "... und {count} weitere Probleme. Siehe Berichtsdatei für vollständige Details.",
+    "confirmationTitle": "🤔 Möchten Sie mit diesen Korrekturen fortfahren?",
+    "confirmationOptions": "Optionen:",
+    "optionYes": "j - Ja, alle Korrekturen anwenden",
+    "optionNo": "n - Nein, Vorgang abbrechen",
+    "optionShow": "d - Detaillierte Probleme anzeigen",
+    "choicePrompt": "Ihre Wahl (j/n/d): ",
+    "nonInteractiveMode": "⚡ Nicht-interaktiver Modus erkannt - wende Korrekturen automatisch an...",
+    "reportGenerated": "📊 Korrekturbericht generiert: {path}",
+    "summary": {
+      "totalIssues": "Gesamtprobleme: {total}",
+      "missingKeys": "Fehlende Schlüssel: {missing}",
+      "placeholderKeys": "Schlüssel mit Markern: {placeholder}",
+      "languages": "Sprachen: {languages}"
+    },
+    "welcome": {
+      "title": "🎯 Willkommen beim Übersetzungs-Fixer!",
+      "description": "Dieses Tool hilft Ihnen, beschädigte Übersetzungen und Markierungen in Ihren Sprachdateien zu reparieren."
+    },
+    "markerPrompt": {
+      "title": "🏷️ Platzhalter-Markierungen konfigurieren",
+      "description": "Geben Sie die Markierungen ein, die nicht übersetzten Text anzeigen (durch Kommas getrennt):",
+      "currentDefaults": "Standardmarkierungen: {markers}",
+      "input": "Markierungen (oder Enter für Standardwerte): "
+    },
+    "languagePrompt": {
+      "title": "🌍 Sprachen zur Reparatur auswählen",
+      "available": "Verfügbare Sprachen: {languages}",
+      "description": "Geben Sie die zu reparierenden Sprachen ein (durch Kommas getrennt) oder Enter für alle:",
+      "input": "Sprachen: ",
+      "noLanguages": "Keine Sprachen zur Reparatur gefunden."
+    },
+    "directoryPrompt": {
+      "title": "📁 Verzeichnis auswählen",
+      "current": "Aktuelles Verzeichnis: {dir}",
+      "description": "Geben Sie das Verzeichnis mit Ihren Sprachdateien ein (oder Enter für aktuelles Verzeichnis):",
+      "input": "Verzeichnis: "
+    }
+  },
   "autorun": {
     "stepAnalyzeTranslations": "Übersetzungen analysieren",
     "stepCompletedWithIcon": "✅ Schritt '{stepName}' abgeschlossen.",
@@ -950,6 +1015,7 @@
       "usage": "📊 Schlüsselverwendung prüfen",
       "complete": "🎯 Übersetzungen vervollständigen (100% Abdeckung)",
       "sizing": "📏 Größenanalyse",
+      "fix": "🛠️  Platzhalterübersetzungen reparieren",
       "workflow": "🔄 Gesamten Workflow ausführen",
       "status": "📋 Projektstatus anzeigen",
       "delete": "🗑️  Alle Berichte löschen",
@@ -961,7 +1027,7 @@
     },
     "update": "📦 Paket aktualisieren",
     "goodbye": "👋 Auf Wiedersehen!",
-    "invalidChoice": "❌ Ungültige Auswahl. Bitte wähle 0–13.",
+    "invalidChoice": "❌ Ungültige Auswahl. Bitte wähle 0–14.",
     "returning": "🔄 Zurück zum Hauptmenü...",
     "invalidOption": "❌ Ungültige Option. Bitte erneut versuchen.",
     "nonInteractiveModeWarning": "⚠️ Nicht-interaktiver Modus erkannt. Menü dient nur zur Referenz.",

@@ -2,18 +2,18 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.7.2
-**Last Updated:** 2025-08-10  
+**Version:** 1.7.4
+**Last Updated:** 2025-08-11  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 [![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk) 
-[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.1)](https://socket.dev/npm/package/i18ntk/overview/1.7.2)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.1)](https://socket.dev/npm/package/i18ntk/overview/1.7.4)
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
 **Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translation logic like i18next or Vue i18n.
 
-> **v1.7.2** – Enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, **fixed framework detection prompt**, and CI/CD silent mode support; maintains 97% speed improvement (**15.38ms** for 200k keys up to 5/M keys per second).
+> **v1.7.4** – **NEW Interactive Translation Fixer Tool** with custom placeholder markers, selective language/file fixing, mass fix capabilities, and 7-language UI support; enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support; maintains 97% speed improvement (**15.38ms** for 200k keys)
 
 ## 🚀 Quick Start
 
@@ -49,7 +49,7 @@ i18ntk validate --source ./locales
 - **Zero Dependencies**: Lightweight, production-ready
 - **Watch Helper**: Optional `--watch` mode keeps translations synced in real time
 - **Lite Package Framework**: Build an English-only UI locale bundle for minimal footprint
-- **8 Languages**: English, Spanish, French, German, Japanese, Russian, Chinese, and more
+- **7 UI Languages**: English, Spanish, French, German, Japanese, Russian, Chinese
 - **Framework Support**: Auto-detects React i18next, Vue i18n, Angular, Next i18next, Nuxt i18next, Svelte i18n
 - **Memory Optimization**: 67% memory reduction with streaming processing
 - **Scalability**: Linear scaling up to 5M keys with ultra-extreme settings
@@ -81,6 +81,7 @@ i18ntk validate --source ./locales
 | `usage` | Analyze usage patterns | `i18ntk usage --format=json` |
 | `doctor` | Diagnose configuration issues | `i18ntk doctor` |
 | `sizing` | Optimize package size | `i18ntk sizing --interactive` |
+| `fixer` | Fix broken translations & placeholders | `i18ntk fixer --interactive` |
 
 ## 🔧 Configuration
 
@@ -88,7 +89,7 @@ Configuration is managed through the `settings/i18ntk-config.json` file:
 
 ```json
 {
-  "version": "1.7.2",
+  "version": "1.7.4",
   "sourceDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "defaultLanguage": "en",
@@ -181,6 +182,73 @@ const i18n = createI18n({ locale: 'en', messages: translations });
 - **Smart Management**: Interactive selection with automatic backups
 - **Zero Breaking Changes**: Safe restoration from backups
 
+### 🔧 **NEW TRANSLATION FIXER TOOL** - Mass Fix Broken Translations
+
+**Interactive Translation Fixer with Multi-Marker Support**
+
+- **Interactive Mode**: Step-by-step guided fixing process
+- **Custom Placeholder Markers**: Configure any markers (e.g., `{{NOT_TRANSLATED}}`, `__UNTRANSLATED__`, `[PLACEHOLDER]`)
+- **Selective Language Fixing**: Choose specific languages or fix all
+- **Selective File Fixing**: Target specific files or directories
+- **Mass Fix Capability**: Fix thousands of broken translations at once
+- **Comprehensive Reports**: Detailed analysis and fix reports
+- **8 Language Support**: Full internationalization for all UI interactions
+
+**Usage Examples:**
+
+```bash
+# Interactive mode with guided prompts
+i18ntk fixer --interactive
+
+# Fix specific languages with custom markers
+i18ntk fixer --languages en,es,fr --markers "{{NOT_TRANSLATED}},__MISSING__"
+
+# Fix specific directory with auto-fix
+i18ntk fixer --source ./src/locales --auto-fix --report
+
+# Custom placeholder detection
+i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
+
+# Fix all available languages
+i18ntk fixer --languages all --markers "[PLACEHOLDER],{{UNTRANSLATED}}"
+```i18ntk fixer --interactive
+
+# Fix specific languages with custom markers
+i18ntk fixer --languages en,es,fr --markers "{{NOT_TRANSLATED}},__MISSING__"
+
+# Fix specific directory with default settings
+i18ntk fixer --source ./src/locales --languages all
+
+# Non-interactive mode with auto-fix
+i18ntk fixer --source ./locales --auto-fix --report
+
+# Custom placeholder detection
+i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
+```
+
+**Interactive Features:**
+- **Welcome Screen**: Introduction and tool overview
+- **Marker Configuration**: Custom placeholder marker setup
+- **Language Selection**: Choose specific languages to fix
+- **Directory Selection**: Target specific directories
+- **Progress Tracking**: Real-time progress and statistics
+- **Fix Confirmation**: Review before applying changes
+- **Report Generation**: Detailed fix reports with before/after analysis
+
+**Supported Placeholder Types:**
+- **Standard Markers**: `{{NOT_TRANSLATED}}`, `__UNTRANSLATED__`
+- **Custom Markers**: Any user-defined placeholder text
+- **Framework Markers**: Framework-specific placeholders
+- **Legacy Markers**: Support for old translation systems
+
+**Output Reports Include:**
+- Total issues found and fixed
+- Missing translations identified
+- Placeholder translations detected
+- Language-specific statistics
+- File-by-file analysis
+- Before/after comparison
+
 ## 📋 Project Structure
 
 ```
@@ -200,21 +268,9 @@ your-project/
 
 - **Locale files are backed up automatically** before optimization
 - **Use interactive optimizer** for safe locale management
-- **Zero breaking changes** from v1.6.x to v1.7.1
 - **All versions prior to 1.7.1 are deprecated**
 - **All improvements applied automatically** on update
 
-
-#### Preserved Features from 1.6.3
-- ✅ Ultra-extreme performance improvements
-- ✅ Enhanced security with PIN protection
-- ✅ Comprehensive backup & recovery
-- ✅ Edge case handling
-- ✅ Memory optimization
-- ✅ Advanced configuration management
-
-#### Breaking Changes
-- **None** - 1.6.3 is fully backward compatible
 
 ## 📞 Support
 

@@ -94,6 +94,71 @@
     "settings": "Configuración",
 "confirm": "Confirmar"
   },
+  "fixer": {
+    "help_message": "\nCorrector de Traducción I18n\n\nUso: node i18ntk-fixer.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente para escanear (predeterminado: ./locales)\n  --languages <langs>    Lista separada por comas de idiomas a corregir\n  --markers <markers>    Lista separada por comas de marcadores a tratar como sin traducir\n  --no-backup           Omitir creación de respaldo automático\n  --help                Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
+    "starting": "🚀 Iniciando corrección de traducción para idiomas: {languages}",
+    "sourceDirectory": "📁 Directorio fuente: {sourceDir}",
+    "sourceLanguage": "🔤 Idioma fuente: {sourceLanguage}",
+    "markers": "🏷️  Marcadores a corregir: {markers}",
+    "scanningLanguage": "📊 Escaneando {language}...",
+    "noLanguages": "❌ No se especificaron idiomas para corregir.",
+    "allComplete": "🎉 ¡Todas las traducciones ya están completas!",
+    "fullReportSaved": "📊 Informe completo guardado en: {reportPath}",
+    "reviewReport": "Por favor revise el informe antes de proceder.",
+    "backupCreated": "💾 Respaldo creado exitosamente.",
+    "applyingFixes": "🔄 Aplicando correcciones...",
+    "fixingComplete": "✅ ¡Corrección de traducción completada!",
+    "operationCancelled": "❌ Operación cancelada por el usuario.",
+    "analysisTitle": "🔍 ANÁLISIS DE CORRECCIÓN DE TRADUCCIÓN",
+    "analysisSeparator": "==================================================",
+    "totalIssues": "Total de problemas encontrados: {totalIssues}",
+    "missingTranslations": "Traducciones faltantes: {missing}",
+    "placeholderTranslations": "Traducciones con marcadores: {placeholder}",
+    "noIssues": "✅ No se encontraron problemas. Todas las traducciones están completas.",
+    "detailedIssues": "📋 PROBLEMAS DETALLADOS:",
+    "detailedSeparator": "--------------------------------------------------",
+    "filePath": "📄 {file} → {path}",
+    "missingKey": "❌ FALTANTE: {source} → {new}",
+    "placeholderKey": "⚠️  MARCADOR: \"{target}\" → \"{new}\"",
+    "moreIssues": "... y {count} problemas más. Consulte el archivo de informe para detalles completos.",
+    "confirmationTitle": "🤔 ¿Desea proceder con estas correcciones?",
+    "confirmationOptions": "Opciones:",
+    "optionYes": "s - Sí, aplicar todas las correcciones",
+    "optionNo": "n - No, cancelar operación",
+    "optionShow": "m - Mostrar problemas detallados",
+    "choicePrompt": "Su elección (s/n/m): ",
+    "nonInteractiveMode": "⚡ Modo no interactivo detectado - aplicando correcciones automáticamente...",
+    "reportGenerated": "📊 Informe de corrección generado: {path}",
+    "summary": {
+      "totalIssues": "Total de problemas: {total}",
+      "missingKeys": "Claves faltantes: {missing}",
+      "placeholderKeys": "Claves con marcadores: {placeholder}",
+      "languages": "Idiomas: {languages}"
+    },
+    "welcome": {
+      "title": "🎯 ¡Bienvenido al Arreglador de Traducciones!",
+      "description": "Esta herramienta te ayudará a corregir traducciones rotas y marcadores en tus archivos de idiomas."
+    },
+    "markerPrompt": {
+      "title": "🏷️ Configurar Marcadores de Placeholder",
+      "description": "Ingresa los marcadores que indican texto sin traducir (separados por comas):",
+      "currentDefaults": "Marcadores predeterminados: {markers}",
+      "input": "Marcadores (o presiona Enter para usar predeterminados): "
+    },
+    "languagePrompt": {
+      "title": "🌍 Seleccionar Idiomas para Corregir",
+      "available": "Idiomas disponibles: {languages}",
+      "description": "Ingresa los idiomas a corregir (separados por comas) o presiona Enter para todos:",
+      "input": "Idiomas: ",
+      "noLanguages": "No se encontraron idiomas para corregir."
+    },
+    "directoryPrompt": {
+      "title": "📁 Seleccionar Directorio",
+      "current": "Directorio actual: {dir}",
+      "description": "Ingresa el directorio que contiene tus archivos de idiomas (o presiona Enter para el actual):",
+      "input": "Directorio: "
+    }
+  },
   "autorun": {
     "stepAnalyzeTranslations": "Analizar archivos de traducción",
     "stepCompletedWithIcon": "{icon} Paso '{stepName}' completado.",
@@ -950,6 +1015,7 @@
       "usage": "📊 Comprobar uso de claves",
       "complete": "🎯 Completar traducciones (100% cobertura)",
       "sizing": "📏 Analizar tamaños",
+      "fix": "🛠️  Corregir traducciones de marcador",
       "workflow": "🔄 Ejecutar flujo completo",
       "status": "📋 Mostrar estado del proyecto",
       "delete": "🗑️  Eliminar todos los informes",
@@ -961,7 +1027,7 @@
     },
     "update": "📦 Actualizar paquete",
     "goodbye": "👋 ¡Hasta luego!",
-    "invalidChoice": "❌ Opción inválida. Por favor selecciona entre 0-13.",
+    "invalidChoice": "❌ Opción inválida. Por favor selecciona entre 0-14.",
     "returning": "🔄 Volviendo al menú principal...",
     "invalidOption": "❌ Opción inválida. Inténtalo de nuevo.",
     "nonInteractiveModeWarning": "⚠️ Modo no interactivo detectado. Menú mostrado solo como referencia.",

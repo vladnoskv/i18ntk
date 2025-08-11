@@ -322,7 +322,8 @@ class I18nValidator {
       } else if (typeof value === 'string') {
         totalKeys++;
         
-        if (value === this.config.notTranslatedMarker) {
+        const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
+        if (markers.some(m => value === m)) {
           issues.push({
             type: 'not_translated',
             key: fullKey,
@@ -338,7 +339,7 @@ class I18nValidator {
             language,
             fileName
           });
-        } else if (value.includes(this.config.notTranslatedMarker)) {
+        } else if (markers.some(m => value.includes(m))) {
           issues.push({
             type: 'partial_translation',
             key: fullKey,

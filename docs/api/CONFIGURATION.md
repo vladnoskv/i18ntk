@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Configuration Guide
 
-**Version:** 1.6.3**Last Updated:** 2025-08-08
+**Version:** 1.7.4**Last Updated:** 2025-08-11
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 📋 Overview
@@ -18,7 +18,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.6.3 (DEPRECATED - use latest version) ",
+  "version": "1.7.4",
   "lastUpdated": "2025-07-27",
   "project": {
     "name": "My Project",
@@ -77,7 +77,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.6.3 (DEPRECATED - use latest version) ",
+  "version": "1.7.4",
   "lastUpdated": "2025-07-27",
   "security": {
     "adminMode": false,
@@ -134,10 +134,10 @@ This guide provides comprehensive information about configuring the I18N Managem
     "i18ntk:complete": "npx i18ntk complete",
     "i18ntk:sizing": "npx i18ntk sizing",
     "i18ntk:summary": "npx i18ntk summary",
-    "i18ntk:autorun": "npx i18ntk autorun"
+    "i18ntk:autorun": "npx i18ntk autorun",
+    "i18ntk:fixer": "npx i18ntk fixer"
   }
-}
-```
+}```
 
 ## 🌍 Environment Variables
 
@@ -155,6 +155,9 @@ This guide provides comprehensive information about configuring the I18N Managem
 | `I18N_REPORT_FORMAT` | Default report format | `html` | `json` |
 | `I18N_UI_LANGUAGE` | UI language | `en` | `es` |
 | `I18N_VERBOSE` | Enable verbose output | `false` | `true` |
+| `I18N_FIXER_MARKERS` | Default placeholder markers for fixer | `__NOT_TRANSLATED__` | `{{NOT_TRANSLATED}},__MISSING__,[PLACEHOLDER]` |
+| `I18N_FIXER_LANGUAGES` | Default languages for fixer | `all` | `en,es,fr` |
+| `I18N_FIXER_AUTO` | Auto-fix mode for fixer | `false` | `true` |
 
 ### UI Language Configuration
 

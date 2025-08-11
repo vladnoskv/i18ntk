@@ -65,11 +65,15 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
     };
 
     const settingsDir = settingsManager.configDir;
+    const rawMarkers = cfg.notTranslatedMarkers || cfg.processing?.notTranslatedMarkers || cfg.notTranslatedMarker || cfg.processing?.notTranslatedMarker || 'NOT_TRANSLATED';
+    const markerList = Array.isArray(rawMarkers) ? rawMarkers : [rawMarkers];
+
     const config = {
       ...cfg,
       sourceLanguage: cliArgs.sourceLanguage || cfg.sourceLanguage || 'en',
       uiLanguage: cliArgs.uiLanguage || cfg.uiLanguage || 'en',
-      notTranslatedMarker: cfg.notTranslatedMarker || 'NOT_TRANSLATED',
+      notTranslatedMarker: markerList[0],
+      notTranslatedMarkers: markerList,
       supportedExtensions: cfg.supportedExtensions || cfg.processing?.supportedExtensions || ['.json', '.js', '.ts'],
       excludeFiles: cfg.excludeFiles || cfg.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
       excludeDirs: cfg.excludeDirs || cfg.processing?.excludeDirs || ['node_modules', '.next', '.git', 'dist', 'build'],

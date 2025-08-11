@@ -94,6 +94,71 @@
     "settings": "Settings",
     "confirm": "Confirm"
   },
+  "fixer": {
+    "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
+    "starting": "🚀 Starting translation fixing for languages: {languages}",
+    "sourceDirectory": "📁 Source directory: {sourceDir}",
+    "sourceLanguage": "🔤 Source language: {sourceLanguage}",
+    "markers": "🏷️  Markers to fix: {markers}",
+    "scanningLanguage": "📊 Scanning {language}...",
+    "noLanguages": "❌ No languages specified for fixing.",
+    "allComplete": "🎉 All translations are already complete!",
+    "fullReportSaved": "📊 Full report saved to: {reportPath}",
+    "reviewReport": "Please review the report before proceeding.",
+    "backupCreated": "💾 Backup created successfully.",
+    "applyingFixes": "🔄 Applying fixes...",
+    "fixingComplete": "✅ Translation fixing complete!",
+    "operationCancelled": "❌ Operation cancelled by user.",
+    "analysisTitle": "🔍 TRANSLATION FIXING ANALYSIS",
+    "analysisSeparator": "==================================================",
+    "totalIssues": "Total issues found: {totalIssues}",
+    "missingTranslations": "Missing translations: {missing}",
+    "placeholderTranslations": "Placeholder translations: {placeholder}",
+    "noIssues": "✅ No issues found. All translations are complete.",
+    "detailedIssues": "📋 DETAILED ISSUES:",
+    "detailedSeparator": "--------------------------------------------------",
+    "filePath": "📄 {file} → {path}",
+    "missingKey": "❌ MISSING: {source} → {new}",
+    "placeholderKey": "⚠️  PLACEHOLDER: \"{target}\" → \"{new}\"",
+    "moreIssues": "... and {count} more issues. Check the report file for complete details.",
+    "confirmationTitle": "🤔 Do you want to proceed with these fixes?",
+    "confirmationOptions": "Options:",
+    "optionYes": "y - Yes, apply all fixes",
+    "optionNo": "n - No, cancel operation",
+    "optionShow": "s - Show detailed issues",
+    "choicePrompt": "Your choice (y/n/s): ",
+    "nonInteractiveMode": "⚡ Non-interactive mode detected - applying fixes automatically...",
+    "reportGenerated": "📊 Fixer report generated: {path}",
+    "summary": {
+      "totalIssues": "Total issues: {total}",
+      "missingKeys": "Missing keys: {missing}",
+      "placeholderKeys": "Placeholder keys: {placeholder}",
+      "languages": "Languages: {languages}"
+    },
+    "welcome": {
+      "title": "🎯 Welcome to the Translation Fixer!",
+      "description": "This tool will help you fix broken translations and placeholders across your locale files."
+    },
+    "markerPrompt": {
+      "title": "🏷️ Configure Placeholder Markers",
+      "description": "Enter the markers that indicate untranslated text (comma-separated):",
+      "currentDefaults": "Default markers: {markers}",
+      "input": "Markers (or press Enter for defaults): "
+    },
+    "languagePrompt": {
+      "title": "🌍 Select Languages to Fix",
+      "available": "Available languages: {languages}",
+      "description": "Enter languages to fix (comma-separated) or press Enter for all:",
+      "input": "Languages: ",
+      "noLanguages": "No languages found to fix."
+    },
+    "directoryPrompt": {
+      "title": "📁 Select Directory",
+      "current": "Current directory: {dir}",
+      "description": "Enter the directory containing your locale files (or press Enter for current):",
+      "input": "Directory: "
+    }
+  },
   "autorun": {
     "stepAnalyzeTranslations": "Analyze translations",
     "stepCompletedWithIcon": "✅ Completed: {stepName}",
@@ -950,6 +1015,7 @@
       "usage": "📊 Check key usage",
       "complete": "🎯 Complete translations (100% coverage)",
       "sizing": "📏 Analyze sizing",
+      "fix": "🛠️  Fix placeholder translations",
       "workflow": "🔄 Run full workflow",
       "status": "📋 Show project status",
       "delete": "🗑️  Delete all reports",
@@ -961,7 +1027,7 @@
     },
     "update": "📦 Update Package",
     "goodbye": "👋 Goodbye!",
-    "invalidChoice": "❌ Invalid choice. Please select 0-13.",
+    "invalidChoice": "❌ Invalid choice. Please select 0-14.",
     "returning": "🔄 Returning to main menu...",
     "invalidOption": "❌ Invalid option. Please try again.",
     "nonInteractiveModeWarning": "⚠️ Non-interactive mode detected. Menu displayed for reference only.",

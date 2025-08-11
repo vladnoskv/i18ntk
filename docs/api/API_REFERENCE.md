@@ -1,6 +1,6 @@
 # i18ntk API Reference
 
-**Version:** 1.6.3**Last Updated:** 2025-08-08
+**Version:** 1.7.4**Last Updated:** 2025-08-11
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## Overview
@@ -77,6 +77,53 @@ npx i18ntk complete --auto --language es --provider google
 - `--language <code>` - Target specific language
 - `--provider <name>` - Translation provider (google, deepl, openai)
 - `--no-prompt` - Skip interactive prompts (CI/CD mode)
+
+#### `i18ntk fixer` (NEW in v1.7.4)
+Interactive translation fixer with custom placeholder markers and mass fix capabilities
+```bash
+npx i18ntk fixer --interactive
+```
+
+**Interactive Mode:**
+- Step-by-step guided fixing process
+- Custom placeholder marker configuration
+- Selective language and directory targeting
+- Real-time progress tracking
+- Comprehensive fix reports
+
+**Advanced Options:**
+- `--interactive` - Enable interactive mode with guided prompts
+- `--markers <list>` - Comma-separated custom placeholder markers (e.g., "{{NOT_TRANSLATED}},__MISSING__,[PLACEHOLDER]")
+- `--languages <codes>` - Specific languages to process (e.g., "en,es,fr" or "all")
+- `--source <path>` - Target specific directory or file
+- `--auto-fix` - Skip confirmation prompts and auto-fix
+- `--report` - Generate detailed fix reports
+- `--no-backup` - Skip automatic backup creation
+
+**Usage Examples:**
+```bash
+# Interactive mode with guided prompts
+npx i18ntk fixer --interactive
+
+# Fix specific languages with custom markers
+npx i18ntk fixer --languages en,es,fr --markers "{{NOT_TRANSLATED}},__MISSING__"
+
+# Fix specific directory with auto-fix
+npx i18ntk fixer --source ./src/locales --auto-fix --report
+
+# Custom placeholder detection
+npx i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
+
+# Fix all available languages
+npx i18ntk fixer --languages all --markers "[PLACEHOLDER],{{UNTRANSLATED}}"
+```
+
+**Legacy Command:**
+#### `i18ntk fix` (Deprecated - use `fixer`)
+Replace placeholder translations with English text prefixed by the language code
+```bash
+npx i18ntk fix --markers "__NOT_TRANSLATED__,[FR]" --languages fr
+```
 
 #### `i18ntk sizing`
 Analyze file sizes and performance

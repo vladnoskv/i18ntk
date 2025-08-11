@@ -189,25 +189,26 @@ class I18nAnalyzer {
       if (value && typeof value === 'object' && !Array.isArray(value)) {
         issues.push(...this.analyzeTranslationIssues(value, sourceObj, fullKey));
       } else if (typeof value === 'string') {
-        if (value === this.config.notTranslatedMarker) {
-          issues.push({ 
-            type: 'not_translated', 
-            key: fullKey, 
-            value, 
+        const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
+        if (markers.some(m => value === m)) {
+          issues.push({
+            type: 'not_translated',
+            key: fullKey,
+            value,
             sourceValue: sourceValue || 'N/A'
           });
         } else if (value === '') {
-          issues.push({ 
-            type: 'empty_value', 
-            key: fullKey, 
-            value, 
+          issues.push({
+            type: 'empty_value',
+            key: fullKey,
+            value,
             sourceValue: sourceValue || 'N/A'
           });
-        } else if (value.includes(this.config.notTranslatedMarker)) {
-          issues.push({ 
-            type: 'partial_translation', 
-            key: fullKey, 
-            value, 
+        } else if (markers.some(m => value.includes(m))) {
+          issues.push({
+            type: 'partial_translation',
+            key: fullKey,
+            value,
             sourceValue: sourceValue || 'N/A'
           });
         } else if (sourceValue && value === sourceValue) {
@@ -232,14 +233,15 @@ class I18nAnalyzer {
     let empty = 0;
     let partial = 0;
     
+    const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
     const count = (item) => {
       if (typeof item === 'string') {
         total++;
-        if (item === this.config.notTranslatedMarker) {
+        if (markers.some(m => item === m)) {
           notTranslated++;
         } else if (item === '') {
           empty++;
-        } else if (item.includes(this.config.notTranslatedMarker)) {
+        } else if (markers.some(m => item.includes(m))) {
           partial++;
         } else {
           translated++;

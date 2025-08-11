@@ -3,14 +3,15 @@
 This document outlines planned features and improvements for upcoming versions of i18ntk.
 
 ## Near-Term
-- Expand test coverage for edge cases
-- Improve documentation and examples for additional frameworks
-- Streamline configuration through interactive prompts
+- ✅ **COMPLETED:** Expand test coverage for edge cases
+- ✅ **COMPLETED:** Improved documentation and examples
+- ✅ **COMPLETED:** Interactive translation fixer tool with mass fix capabilities
 
 ## Future Ideas
 - Plugin system for custom translation workflows
 - Web-based dashboard for viewing reports
 - Continuous integration helpers for automated localization checks
+- Enhanced AI-assisted translation suggestions
 
 ## Long-Term
 - AI-assisted translation tools
@@ -31,7 +32,7 @@ Contributions and suggestions are welcome. Please refer to the following resourc
 
 ### Upgrading from Deprecated Versions
 
-#### From any version < 1.7.2 (DEPRECATED - use latest version)
+#### From any version < 1.7.4 (DEPRECATED - use latest version)
 1. **Backup your current configuration**:
    ```bash
    cp -r ./settings ./settings-backup-$(date +%Y%m%d)
@@ -39,18 +40,18 @@ Contributions and suggestions are welcome. Please refer to the following resourc
 
 2. **Install the latest version**:
    ```bash
-   npm install i18ntk@1.7.2
+   npm install i18ntk@1.7.4
    ```
 
 3. **Run configuration migration**:
    ```bash
-   npx i18ntk@1.7.2 --migrate
+   npx i18ntk@1.7.4 --migrate
    ```
 
 4. **Verify installation**:
    ```bash
-   npx i18ntk@1.7.2 --version
-   npx i18ntk@1.7.2 --validate
+   npx i18ntk@1.7.4 --version
+   npx i18ntk@1.7.4 --validate
    ```
 
 #### Preserved Features from 1.6.x

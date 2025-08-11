@@ -31,6 +31,7 @@ const { I18nAnalyzer } = require('./i18ntk-analyze');
 const I18nValidator = require('./i18ntk-validate');
 const I18nUsageAnalyzer = require('./i18ntk-usage');
 const I18nSizingAnalyzer = require('./i18ntk-sizing');
+const I18nFixer = require('./i18ntk-fixer');
 const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
 
@@ -323,7 +324,7 @@ class I18nManager {
     
     if (!fs.existsSync(packageJsonPath)) {
       console.log(this.ui ? this.ui.t('init.noPackageJson') : 'No package.json found');
-      return true; // Allow to continue without framework
+      return false; // Treat as no framework detected
     }
     
     try {
@@ -373,17 +374,12 @@ class I18nManager {
             configManager.saveConfig(cfg);
           }
         }
-        // If framework preference is already set to 'none', skip warning
-        if (cfg.framework === 'none' || (cfg.framework && cfg.framework.preference === 'none')) {
-          return true;
-        }
-
-        // Framework detection is handled by maybePromptFramework, so just return true here
-        return true;
+        // Always signal that frameworks were not detected
+        return false;
       }
     } catch (error) {
       console.log(t('init.errors.packageJsonRead'));
-      return true; // Allow to continue on error
+      return false; // Treat as no framework detected on error
     }
   }
 
@@ -456,8 +452,10 @@ class I18nManager {
 
       const rl = cliHelper.getInterface();
       const cfgAfterInitCheck = await ensureInitializedOrExit(rl);
-      await this.checkI18nDependencies();
-      await maybePromptFramework(rl, cfgAfterInitCheck, pkg.version);
+      const frameworksDetected = await this.checkI18nDependencies();
+      if (!frameworksDetected) {
+        await maybePromptFramework(rl, cfgAfterInitCheck, pkg.version);
+      }
 
       // Update this.config with the configuration from ensureInitializedOrExit
       this.config = { ...this.config, ...cfgAfterInitCheck };
@@ -470,7 +468,7 @@ class I18nManager {
 
       // Define valid direct commands
       const directCommands = [
-        'init', 'analyze', 'validate', 'usage', 'sizing', 'complete', 'summary', 'debug', 'workflow'
+        'init', 'analyze', 'validate', 'usage', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow'
       ];
 
       // Handle help immediately without dependency checks
@@ -608,7 +606,7 @@ class I18nManager {
     }
     
     // Check admin authentication for all commands when PIN protection is enabled
-    const authRequiredCommands = ['init', 'analyze', 'validate', 'usage', 'complete', 'sizing', 'workflow', 'status', 'delete', 'settings', 'debug'];
+    const authRequiredCommands = ['init', 'analyze', 'validate', 'usage', 'complete', 'fix', 'sizing', 'workflow', 'status', 'delete', 'settings', 'debug'];
     if (authRequiredCommands.includes(command)) {
       const authPassed = await this.checkAdminAuth();
       if (!authPassed) {
@@ -646,6 +644,10 @@ class I18nManager {
                 const completeTool = require('./i18ntk-complete');
                 const tool = new completeTool();
                 await tool.run({fromMenu: isManagerExecution});
+                break;
+            case 'fix':
+                const fixerTool = new I18nFixer();
+                await fixerTool.run({fromMenu: isManagerExecution});
                 break;
             case 'workflow':
                 console.log(t('workflow.starting'));
@@ -763,13 +765,14 @@ class I18nManager {
       console.log(`4. ${t('menu.options.usage')}`);
       console.log(`5. ${t('menu.options.complete')}`);
       console.log(`6. ${t('menu.options.sizing')}`);
-      console.log(`7. ${t('menu.options.workflow')}`);
-      console.log(`8. ${t('menu.options.status')}`);
-      console.log(`9. ${t('menu.options.delete')}`);
-      console.log(`10. ${t('menu.options.settings')}`);
-      console.log(`11. ${t('menu.options.help')}`);
-      console.log(`12. ${t('menu.options.debug')}`);
-      console.log(`13. ${t('menu.options.language')}`);
+      console.log(`7. ${t('menu.options.fix')}`);
+      console.log(`8. ${t('menu.options.workflow')}`);
+      console.log(`9. ${t('menu.options.status')}`);
+      console.log(`10. ${t('menu.options.delete')}`);
+      console.log(`11. ${t('menu.options.settings')}`);
+      console.log(`12. ${t('menu.options.help')}`);
+      console.log(`13. ${t('menu.options.debug')}`);
+      console.log(`14. ${t('menu.options.language')}`);
       console.log(`0. ${t('menu.options.exit')}`);
       console.log('\n' + t('menu.nonInteractiveModeWarning'));
       console.log(t('menu.useDirectExecution'));
@@ -787,13 +790,14 @@ class I18nManager {
     console.log(`4. ${t('menu.options.usage')}`);
     console.log(`5. ${t('menu.options.complete')}`);
     console.log(`6. ${t('menu.options.sizing')}`);
-    console.log(`7. ${t('menu.options.workflow')}`);
-    console.log(`8. ${t('menu.options.status')}`);
-    console.log(`9. ${t('menu.options.delete')}`);
-    console.log(`10. ${t('menu.options.settings')}`);
-    console.log(`11. ${t('menu.options.help')}`);
-    console.log(`12. ${t('menu.options.debug')}`);
-    console.log(`13. ${t('menu.options.language')}`);
+    console.log(`7. ${t('menu.options.fix')}`);
+    console.log(`8. ${t('menu.options.workflow')}`);
+    console.log(`9. ${t('menu.options.status')}`);
+    console.log(`10. ${t('menu.options.delete')}`);
+    console.log(`11. ${t('menu.options.settings')}`);
+    console.log(`12. ${t('menu.options.help')}`);
+    console.log(`13. ${t('menu.options.debug')}`);
+    console.log(`14. ${t('menu.options.language')}`);
     console.log(`0. ${t('menu.options.exit')}`);
     
     const choice = await this.prompt('\n' + t('menu.selectOptionPrompt'));
@@ -818,9 +822,12 @@ class I18nManager {
         await this.executeCommand('sizing', {fromMenu: true});
         break;
       case '7':
-        await this.executeCommand('workflow', {fromMenu: true});
+        await this.executeCommand('fix', {fromMenu: true});
         break;
       case '8':
+        await this.executeCommand('workflow', {fromMenu: true});
+        break;
+      case '9':
         // Check for PIN protection
         const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
         if (authRequired) {
@@ -876,21 +883,21 @@ class I18nManager {
           }
         }
         break;
-      case '9':
+      case '10':
         await this.deleteReports();
         break;
-      case '10':
+      case '11':
         await this.showSettingsMenu();
         break;
-      case '11':
+      case '12':
         this.showHelp();
         await this.prompt(t('menu.returnToMainMenu'));
         await this.showInteractiveMenu();
         break;
-      case '12':
+      case '13':
         await this.showDebugMenu();
         break;
-      case '13':
+      case '14':
         await this.showLanguageMenu();
         break;
       case '0':

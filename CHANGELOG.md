@@ -1,3 +1,56 @@
+## [1.7.4] - 2025-08-11 - **INTERACTIVE TRANSLATION FIXER WITH MULTI-MARKER SUPPORT**
+
+### ✨ **MAJOR FEATURE: Interactive Translation Fixer Tool**
+
+#### **Interactive Mode with Multi-Language Support**
+- **🎯 Interactive Translation Fixer**: New `i18ntk fixer` command with step-by-step guided fixing process
+- **🏷️ Custom Placeholder Markers**: Support for any user-defined placeholder markers (e.g., `{{NOT_TRANSLATED}}`, `__MISSING__`, `[PLACEHOLDER]`)
+- **🌍 Selective Language Fixing**: Choose specific languages or fix all available languages
+- **📁 Selective Directory Targeting**: Target specific directories or files for fixing
+- **⚡ Mass Fix Capability**: Fix thousands of broken translations in a single operation
+- **📊 Comprehensive Reports**: Detailed before/after analysis with fix statistics
+
+#### **Interactive Features (8 Languages Supported)**
+- **Welcome Screen**: Introduction and tool overview in user's preferred language
+- **Marker Configuration**: Interactive setup of custom placeholder markers
+- **Language Selection**: Choose specific languages to process
+- **Directory Selection**: Target specific directories with language files
+- **Real-time Progress**: Live progress tracking and statistics
+- **Fix Confirmation**: Review changes before applying fixes
+- **Report Generation**: Detailed fix reports with complete analysis
+
+#### **Advanced Placeholder Detection**
+- **Standard Markers**: Built-in support for common placeholders
+- **Custom Markers**: Unlimited custom marker configuration
+- **Framework Markers**: Support for framework-specific placeholders
+- **Legacy Support**: Handle old translation system placeholders
+
+#### **Usage Examples**
+```bash
+# Interactive mode with guided prompts
+i18ntk fixer --interactive
+
+# Fix specific languages with custom markers
+i18ntk fixer --languages en,es,fr --markers "{{NOT_TRANSLATED}},__MISSING__"
+
+# Fix specific directory with auto-fix
+i18ntk fixer --source ./src/locales --auto-fix --report
+
+# Custom placeholder detection
+i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
+```
+
+## [1.7.3] - 2025-08-11 - **TRANSLATION FIXER & CONFIG ENHANCEMENTS**
+
+### ✨ Features
+- Added `i18ntk-fix` script to replace placeholder translations with English text and language code, with automatic backups
+- Integrated fixer into manage menu (option 7) for easy access
+- Support multiple not-translated markers via new `notTranslatedMarkers` configuration
+
+### 🛠 Fixes
+- Framework detection prompt now only appears when no frameworks are found
+- Added `framework` to security config validation to remove warnings
+
 ## [1.7.2] - 2025-08-11 - **FRAMEWORK DETECTION FIX & SETTINGS UPDATE**
 
 ### 🛠 Fixes

@@ -94,6 +94,71 @@
     "settings": "設定",
     "confirm": "確認"
   },
+  "fixer": {
+    "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
+    "starting": "🚀 翻訳修正を開始します。言語: {languages}",
+    "sourceDirectory": "📁 ソースディレクトリ: {sourceDir}",  
+    "sourceLanguage": "🔤 ソース言語: {sourceLanguage}",
+    "markers": "🏷️  修正するマーカー: {markers}",
+    "scanningLanguage": "📊 {language} をスキャン中...",
+    "noLanguages": "❌ 修正する言語が指定されていません。",
+    "allComplete": "🎉 すべての翻訳が既に完了しています！",
+    "fullReportSaved": "📊 完全なレポートが保存されました: {reportPath}", 
+    "reviewReport": "翻訳修正レポートを確認してください。",
+    "backupCreated": "💾 バックアップが正常に作成されました。",
+    "applyingFixes": "🔄 修正を適用中...",
+    "fixingComplete": "✅ 翻訳修正が完了しました！",
+    "operationCancelled": "❌ ユーザーによる操作がキャンセルされました。",
+    "analysisTitle": "🔍 翻訳修正分析",
+    "analysisSeparator": "==================================================",
+    "totalIssues": "🔍 修正可能な問題の合計: {totalIssues}",
+    "missingTranslations": "❌ 不足している翻訳: {missing}", 
+    "placeholderTranslations": "⚠️  プレースホルダー翻訳: {placeholder}",
+    "noIssues": "✅ 修正可能な問題が見つかりませんでした。すべての翻訳が完了しています。",
+    "detailedIssues": "📋 詳細な問題:",  
+    "detailedSeparator": "--------------------------------------------------",
+    "filePath": "📄 {file} → {path}",
+    "missingKey": "❌ 不足している翻訳: {source} → {new}",
+    "placeholderKey": "⚠️  プレースホルダー翻訳: \"{target}\" → \"{new}\"",
+    "moreIssues": "... その他 {count} 件の問題が見つかりました。詳細はレポートファイルを参照してください。",
+    "confirmationTitle": "🤔 修正を適用しますか？",
+    "confirmationOptions": "選択肢:",
+    "optionYes": "y - すべての修正を適用",
+    "optionNo": "n - 操作をキャンセル",
+    "optionShow": "s - 詳細な問題を表示",
+    "choicePrompt": "選択肢を入力 (y/n/s): ",
+    "nonInteractiveMode": "⚡ 非対話モードが検出されました。修正を自動的に適用します...",
+    "reportGenerated": "📊 修正レポートが生成されました: {path}",
+    "summary": {
+      "totalIssues": "総問題数: {total}",
+      "missingKeys": "不足キー: {missing}",
+      "placeholderKeys": "プレースホルダーキー: {placeholder}",
+      "languages": "言語: {languages}"
+    },
+    "welcome": {
+      "title": "🎯 翻訳フィクサーへようこそ！",
+      "description": "このツールは、壊れた翻訳やプレースホルダーマーカーを言語ファイルから修復するのに役立ちます。"
+    },
+    "markerPrompt": {
+      "title": "🏷️ プレースホルダーマーカーの設定",
+      "description": "未翻訳のテキストを示すマーカーを入力してください（カンマ区切り）:",
+      "currentDefaults": "デフォルトマーカー: {markers}",
+      "input": "マーカー（Enterでデフォルトを使用）: "
+    },
+    "languagePrompt": {
+      "title": "🌍 修復する言語の選択",
+      "available": "利用可能な言語: {languages}",
+      "description": "修復する言語を入力してください（カンマ区切り）またはEnterですべてを選択:",
+      "input": "言語: ",
+      "noLanguages": "修復する言語が見つかりませんでした。"
+    },
+    "directoryPrompt": {
+      "title": "📁 ディレクトリの選択",
+      "current": "現在のディレクトリ: {dir}",
+      "description": "言語ファイルを含むディレクトリを入力してください（またはEnterで現在のディレクトリを使用）:",
+      "input": "ディレクトリ: "
+    }
+  },
   "autorun": {
     "stepAnalyzeTranslations": "翻訳の分析",
     "stepCompletedWithIcon": "✅ ステップ「{stepName}」が完了しました。",
@@ -950,6 +1015,7 @@
       "usage": "📊 キー使用状況をチェック",
       "complete": "🎯 翻訳を完了 (100% カバレッジ)",
       "sizing": "📏 サイズを分析",
+      "fix": "🛠️  プレースホルダー翻訳を修正",
       "workflow": "🔄 フルワークフローを実行",
       "status": "📋 プロジェクトステータスを表示",
       "delete": "🗑️  すべてのレポートを削除",
@@ -961,7 +1027,7 @@
     },
     "update": "📦 パッケージを更新",
     "goodbye": "👋 さようなら！",
-    "invalidChoice": "❌ 無効な選択です。0〜13を選択してください。",
+    "invalidChoice": "❌ 無効な選択です。0〜14 を選択してください。",
     "returning": "🔄 メインメニューに戻ります…",
     "invalidOption": "❌ 無効なオプションです。もう一度お試しください。",
     "nonInteractiveModeWarning": "⚠️ 非対話モードが検出されました。メニューは参照用です。",

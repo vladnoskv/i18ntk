@@ -18,7 +18,8 @@ class TestRunner {
             { name: 'System Tests', script: 'dev/tests/test-complete-system.js' },
             { name: 'Console i18n Tests', script: 'dev/tests/test-console-i18n.js' },
             { name: 'Security i18n Tests', script: 'dev/tests/test-security-i18n.js' },
-            { name: 'Translation Validation', script: 'scripts/validate-all-translations.js' }
+            { name: 'Translation Validation', script: 'scripts/validate-all-translations.js' },
+            { name: 'Translation Fixer Tests', script: 'scripts/fixer.test.js' }
         ];
         this.results = [];
         this.startTime = new Date();

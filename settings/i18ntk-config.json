@@ -193,5 +193,12 @@
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto"
+  "timezone": "auto",
+  "sizeLimit": null,
+  "framework": {
+    "detected": false,
+    "preference": "none",
+    "prompt": "always",
+    "lastPromptedVersion": null
+  }
 }

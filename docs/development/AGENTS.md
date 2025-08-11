@@ -1,16 +1,17 @@
-# 🤖 AI Agent Guidelines for I18N Management Toolkit v1.6.0
+# 🤖 AI Agent Guidelines for I18N Management Toolkit v1.7.4
 
 ## Overview
 
 This document provides essential guidelines for AI agents working with the I18N Management Toolkit v1.6.0. It explains how to properly handle translations, understand the enhanced security architecture, and ensure accurate localization with complete console translation support.
 
-## 🆕 Version 1.6.0 Key Features 
+## 🆕 Version 1.7.4 Key Features 
 
 - **🚀 Extreme-Performance Optimizations**: 97% cumulative speed improvements across the toolkit
 - **🎯 Interactive Locale Optimizer**: Selectively include locales with real-time size impact
-- **🛠 Unified Configuration Helper**: Dynamic reloading and type-safe settings management
+- **🛠 Interactive Translation Fixer**: Mass fix broken translations with custom placeholder markers
 - **🔒 Expanded Security & Sanitization**: Comprehensive validation of inputs and translation keys
 - **📊 Performance Benchmarking Suite**: Automated regression detection with JSON metrics
+- **🌍 7-Language UI Support**: Complete console translations for all major commands
 
 ## 🔍 Key Search Patterns
 
@@ -95,7 +96,7 @@ formatMessage({ id: 'key.name' }) // React Intl
 - Maintain consistency in terminology
 - Example: `[TRANSLATED]Settings` → `设置`
 
-## 📁 File Structure Understanding (v1.6.0)
+## 📁 File Structure Understanding (v1.7.4)
 
 ### Core Architecture
 ```
@@ -104,6 +105,7 @@ i18n-management-toolkit/
 │   ├── i18ntk-analyze.js   # Translation analysis
 │   ├── i18ntk-autorun.js   # Automated workflow
 │   ├── i18ntk-complete.js  # Complete missing translations
+│   ├── i18ntk-fixer.js     # Interactive translation fixer
 │   ├── i18ntk-init.js      # Initialize i18n setup
 │   ├── i18ntk-manage.js    # Main management interface
 │   ├── i18ntk-sizing.js    # Generate sizing reports
@@ -134,14 +136,15 @@ i18n-management-toolkit/
 │   └── reports/            # Report documentation
 ├── benchmarks/             # Automated performance benchmarking suite
 ├── scripts/                # Helper scripts (locale optimizer, etc.)
-└── ui-locales/             # Toolkit's UI translations (7 languages)
+└── ui-locales/             # Toolkit's UI translations (8 languages)
     ├── en.json             # English (source)
     ├── de.json             # German
     ├── es.json             # Spanish
     ├── fr.json             # French
     ├── ru.json             # Russian
     ├── ja.json             # Japanese
-    └── zh.json             # Chinese
+    ├── zh.json             # Chinese
+    └── pt.json             # Portuguese
 ```
 
 ### Project Locale Files Structure
@@ -176,17 +179,19 @@ utils/
 1. Search for `[NOT_TRANSLATED]` markers in project files
 2. Run `node dev/debug/console-key-checker.js` to identify missing UI translations
 3. Use `node main/i18ntk-analyze.js` for detailed translation analysis
-4. Execute performance diagnostics with `npm run benchmark` when investigating speed issues
-5. Determine target language from file path context
-6. Understand the context (UI, console output, error message, documentation, etc.)
+4. Use `node main/i18ntk-fixer.js --interactive` for interactive fixing of broken translations
+5. Execute performance diagnostics with `npm run benchmark` when investigating speed issues
+6. Determine target language from file path context
+7. Understand the context (UI, console output, error message, documentation, etc.)
 
 ### Step 2: Automated Translation Processing
-1. Use `node utils/native-translations.js` to replace `[NOT_TRANSLATED]` placeholders
-2. Translate content accurately and contextually
-3. Maintain technical terminology consistency across all 7 supported languages
-4. Consider cultural appropriateness and formality levels
-5. Preserve formatting, variables, and special characters
-6. Use `node scripts/locale-optimizer.js --interactive` when adjusting included locales
+1. Use `node main/i18ntk-fixer.js --markers [custom-marker] --languages [lang1,lang2]` for mass fixing
+2. Use `node utils/native-translations.js` to replace `[NOT_TRANSLATED]` placeholders
+3. Translate content accurately and contextually
+4. Maintain technical terminology consistency across all 8 supported languages
+5. Consider cultural appropriateness and formality levels
+6. Preserve formatting, variables, and special characters
+7. Use `node scripts/locale-optimizer.js --interactive` when adjusting included locales
 
 ### Step 3: Advanced Validation & Quality Assurance
 1. Remove `[NOT_TRANSLATED]` markers after translation
