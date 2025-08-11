@@ -13,7 +13,6 @@ class UIi18n {
     constructor() {
         this.currentLanguage = 'en';
 this.translations = {};
-        this.uiLocalesDir = null;
         this.uiLocalesDir = path.resolve(__dirname, '..', 'ui-locales');
         this.availableLanguages = [];
         this.configFile = path.resolve(configManager.configFile);

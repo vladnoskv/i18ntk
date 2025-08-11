@@ -1,7 +1,7 @@
 {
   "name": "i18ntk",
-  "version": "1.7.4",
-  "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), NEW interactive translation fixer with custom placeholder markers, selective language/file fixing, mass fix capabilities, advanced security with PIN protection, comprehensive backup & recovery, and edge case handling for JavaScript/TypeScript projects",
+  "version": "1.7.5",
+  "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), NEW interactive translation fixer with custom placeholder markers, selective language/file fixing, mass fix capabilities, advanced security with PIN protection, comprehensive backup & recovery, **zero shell access security fixes**, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
     "internationalization",
@@ -49,6 +49,10 @@
   "main": "main/i18ntk-manage.js",
   "exports": {
     ".": "./main/i18ntk-manage.js",
+    "./main/*": "./main/*",
+    "./utils/*": "./utils/*",
+    "./settings/*": "./settings/*",
+    "./scripts/*": "./scripts/*",
     "./ui-locales/*": "./ui-locales/*",
     "./package.json": "./package.json"
   },
@@ -137,7 +141,16 @@
     "docs:update-versions": "node scripts/update-docs-versions.js",
     "release:prepare": "npm run version:check && npm run docs:update-versions && npm run prepublishOnly",
     "deprecate:old-versions": "node scripts/deprecate-versions.js",
-    "build:lite": "node scripts/build-lite.js"
+    "build:lite": "node scripts/build-lite.js",
+    "test:local": "node dev/test-local-package.js",
+    "test:enhanced": "node dev/test-local-package.js",
+    "test:performance": "node dev/test-local-package.js --performance",
+    "test:security": "node dev/test-local-package.js --security",
+    "test:memory": "node dev/test-local-package.js --memory",
+    "test:all-scripts": "node dev/test-local-package.js --all-scripts",
+    "test:bin-scripts": "node dev/test-local-package.js --bin-scripts",
+    "test:cleanup-local": "node cleanup-test.js",
+    "validate:package": "node dev/test-local-package.js --validate-only"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -147,27 +160,26 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.7.4",
-    "releaseDate": "12/08/2025",
-    "lastUpdated": "12/08/2025",
+    "version": "1.7.5",
+    "releaseDate": "11/08/2025",
+    "lastUpdated": "11/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "CRITICAL SECURITY FIXES: Zero shell access - eliminated all child_process.execSync() and spawnSync() calls",
+      "Enhanced security: Direct file system operations replacing shell commands",
       "NEW Interactive Translation Fixer Tool with custom placeholder markers and selective language/file fixing",
       "Mass fix capabilities for thousands of broken translations",
-      "8-language UI support for all interactive fixer operations",
+      "7-language UI support for all interactive fixer operations",
       "Ultra-extreme performance: 97% improvement - 15.38ms processing for 200k keys",
-      "Ultra-extreme performance: 97% improvement - 15.38ms processing for 200k keys",
-      "Enhanced security: Advanced PIN protection with exponential backoff",
       "Edge case handling: Robust handling of corrupt files, encoding issues, and network failures",
       "Memory optimization: 1.62MB memory usage for 200k keys (67% reduction)",
       "Scalability: Linear scaling up to 5M keys with ultra-extreme settings",
       "Fixed translation file inclusion - resolved ui-locales exclusion issue",
       "Updated documentation - corrected package size claims and improved accuracy",
-      "Enhanced examples - added detailed use cases throughout documentation",
-      "GitHub URL updates - changed all GitHub URLs to https://github.com/vladnoskv/i18ntk"
+      "Enhanced examples - added detailed use cases throughout documentation"
     ],
     "breakingChanges": [],
     "deprecations": [
@@ -180,7 +192,13 @@
       "1.6.0",
       "1.6.1",
       "1.6.2",
-      "1.6.3"
+      "1.6.3",
+      "1.7.0",
+      "1.7.1",
+      "1.7.2",
+      "1.7.3",
+      "1.7.4"
+
     ],
     "nextVersion": "1.8.0",
     "supportedNodeVersions": ">=16.0.0",

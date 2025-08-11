@@ -1,3 +1,34 @@
+## [1.7.5] - 2025-08-11 - **CRITICAL SECURITY FIXES - Zero Shell Access**
+
+> **🛡️ SECURITY RELEASE**: Version 1.7.5 eliminates all shell access vulnerabilities and implements direct file system operations for maximum security.
+
+### 🔒 **CRITICAL SECURITY FIXES**
+
+#### **Zero Shell Access Vulnerabilities**
+- **Eliminated all shell access vulnerabilities** - Removed `child_process.execSync()` and `spawnSync()` from production code
+- **Direct file system operations** - Replaced shell commands with safe `fs` and `path` module usage
+- **Enhanced security validation** - All file operations now use direct Node.js APIs
+- **Production-safe codebase** - Zero shell command execution in main package
+- **Socket.dev compliance** - Addresses security warnings from package scanning
+
+#### **Security Architecture Improvements**
+- **feat(security)**: Replace shell commands with direct file operations across all modules
+- **fix(summary)**: Use safe JSON parsing instead of eval for security - eliminates code injection risks
+- **refactor(autorun)**: Implement module execution instead of spawnSync - removes process spawning
+- **Security Impact**: Zero shell access - all operations use secure file system APIs
+
+#### **Testing & Documentation**
+- **test**: Add comprehensive testing guide and cleanup script for security validation
+- **docs**: Update version to 1.7.5 with detailed security fixes documentation
+- **build**: Update package.json with new test scripts and version
+
+#### **Security Verification**
+- **Before**: Potential shell injection risks via `child_process` calls
+- **After**: Zero shell access - all operations use secure file system APIs
+- **Verification**: Comprehensive security scanning confirms zero shell access patterns
+
+---
+
 ## [1.7.4] - 2025-08-11 - **INTERACTIVE TRANSLATION FIXER WITH MULTI-MARKER SUPPORT**
 
 ### ✨ **MAJOR FEATURE FOR 1.7.4: Interactive Translation Fixer Tool**

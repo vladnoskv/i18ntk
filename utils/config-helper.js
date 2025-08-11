@@ -12,7 +12,6 @@ const {loadTranslations} = require('./i18n-helper');
 const settingsManager = require('../settings/settings-manager');
 
 const { ask } = require('./cli');
-const { spawnSync } = require('child_process');
 
 /**
  * Get unified configuration for any script
@@ -310,24 +309,22 @@ async function ensureInitialized(cfg) {
     }
 
     const nonInteractive = !process.stdin.isTTY;
-    const initScript = path.join(__dirname, '..', 'main', 'i18ntk-init.js');
 
     if (nonInteractive) {
       console.warn(`Missing source language files in ${langDir}. Running initialization...`);
-      const result = spawnSync(process.execPath, [initScript, '--yes', `--source-dir=${sourceDir}`, `--source-language=${sourceLanguage}`], { stdio: 'inherit', windowsHide: true });
-      if (result.status === 0) {
-        // Mark initialization as complete
-        const initDir = path.dirname(configPath);
-        ensureDirectory(initDir);
-        fs.writeFileSync(configPath, JSON.stringify({
-          initialized: true,
-          version: '1.7.2',
-          timestamp: new Date().toISOString(),
-          sourceDir: sourceDir,
-          sourceLanguage: sourceLanguage
-        }, null, 2));
-      }
-      return result.status === 0;
+      await initializeSourceFiles(sourceDir, sourceLanguage);
+      
+      // Mark initialization as complete
+      const initDir = path.dirname(configPath);
+      ensureDirectory(initDir);
+      fs.writeFileSync(configPath, JSON.stringify({
+        initialized: true,
+        version: '1.7.5',
+        timestamp: new Date().toISOString(),
+        sourceDir: sourceDir,
+        sourceLanguage: sourceLanguage
+      }, null, 2));
+      return true;
     }
 
     const answer = await ask(`Source language files not found in ${langDir}. Run initialization now? (y/N) `);
@@ -335,25 +332,95 @@ async function ensureInitialized(cfg) {
     closeGlobalReadline();
 
     if (answer.trim().toLowerCase().startsWith('y')) {
-      const result = spawnSync(process.execPath, [initScript, `--source-dir=${sourceDir}`, `--source-language=${sourceLanguage}`], { stdio: 'inherit', windowsHide: true });
-      if (result.status === 0) {
-        // Mark initialization as complete
-        const initDir = path.dirname(configPath);
-        ensureDirectory(initDir);
-        fs.writeFileSync(configPath, JSON.stringify({
-          initialized: true,
-          version: '1.7.2',
-          timestamp: new Date().toISOString(),
-          sourceDir: sourceDir,
-          sourceLanguage: sourceLanguage
-        }, null, 2));
-      }
-      return result.status === 0;
+      await initializeSourceFiles(sourceDir, sourceLanguage);
+      
+      // Mark initialization as complete
+      const initDir = path.dirname(configPath);
+      ensureDirectory(initDir);
+      fs.writeFileSync(configPath, JSON.stringify({
+        initialized: true,
+        version: '1.7.2',
+        timestamp: new Date().toISOString(),
+        sourceDir: sourceDir,
+        sourceLanguage: sourceLanguage
+      }, null, 2));
+      return true;
     }
     return false;
   } catch (err) {
     console.error(`Initialization check failed: ${err.message}`);
     return false;
+  }
+}
+
+/**
+ * Initialize source language files directly (safe alternative to spawnSync)
+ */
+async function initializeSourceFiles(sourceDir, sourceLang) {
+  const sourceFile = path.join(sourceDir, `${sourceLang}.json`);
+  
+  // Create default source language file with basic structure
+  const defaultContent = {
+    app: {
+      title: "Application",
+      description: "Application description"
+    },
+    common: {
+      yes: "Yes",
+      no: "No",
+      cancel: "Cancel",
+      save: "Save"
+    },
+    navigation: {
+      home: "Home",
+      about: "About",
+      contact: "Contact"
+    }
+  };
+  
+  // Ensure source directory exists
+  ensureDirectory(sourceDir);
+  
+  // Write the default source language file
+  fs.writeFileSync(sourceFile, JSON.stringify(defaultContent, null, 2));
+  
+  // Create directories for supported languages
+  const supportedLanguages = ['es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'];
+  
+  supportedLanguages.forEach(lang => {
+    const langFile = path.join(sourceDir, `${lang}.json`);
+    if (!fs.existsSync(langFile)) {
+      // Create empty object structure for each language
+      const emptyStructure = {
+        app: {},
+        common: {},
+        navigation: {}
+      };
+      fs.writeFileSync(langFile, JSON.stringify(emptyStructure, null, 2));
+    }
+  });
+  
+  // Create i18ntk-config.json if it doesn't exist
+  const configFile = 'i18ntk-config.json';
+  if (!fs.existsSync(configFile)) {
+    const defaultConfig = {
+      version: "1.7.2",
+      sourceDir: sourceDir,
+      outputDir: "./i18ntk-reports",
+      defaultLanguage: sourceLang,
+      supportedLanguages: [sourceLang, 'es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'],
+      security: {
+        adminPinEnabled: true,
+        sessionTimeout: 1800000,
+        maxFailedAttempts: 3
+      },
+      performance: {
+        mode: "extreme",
+        cacheEnabled: true,
+        batchSize: 1000
+      }
+    };
+    fs.writeFileSync(configFile, JSON.stringify(defaultConfig, null, 2));
   }
 }
 

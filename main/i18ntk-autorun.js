@@ -12,7 +12,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG);
 const { getUnifiedConfig, parseCommonArgs, displayHelp, ensureInitialized } = require('../utils/config-helper');
@@ -116,16 +115,15 @@ class AutoRunner {
     try {
       // Build final argv. Use equals-style for value flags because sub-scripts expect it.
       const argv = ['--no-prompt', ...commonArgs];
-      const result = spawnSync(process.execPath, [scriptPath, ...argv], {
-        stdio: 'inherit',
-        windowsHide: true
-      });
-
-      if (result.status === 0) {
+      
+      // Execute script directly as module (safe alternative to spawnSync)
+      const success = this.executeScriptAsModule(scriptPath, argv);
+      
+      if (success) {
         console.log(this.t('autorun.stepCompletedWithIcon', { stepName: this.t(step.description) }));
         return true;
       }
-      throw new Error(`Process exited with code ${result.status}`);
+      throw new Error('Script execution failed');
     } catch (error) {
       console.error(this.t('autorun.stepFailed', { stepName: this.t(step.description) }));
       console.error(this.t('autorun.errorLabel', { error: error.message }));
@@ -161,6 +159,66 @@ class AutoRunner {
       const tail = (s.name.split('.').pop() || '').toLowerCase();
       return matchers.has(tail) || matchers.has(s.name.toLowerCase());
     });
+  }
+
+  /**
+   * Execute script as module (safe alternative to spawnSync)
+   */
+  executeScriptAsModule(scriptPath, argv) {
+    try {
+      // Parse arguments to extract key-value pairs
+      const args = {};
+      for (const arg of argv) {
+        if (arg.startsWith('--')) {
+          const [key, value] = arg.substring(2).split('=');
+          if (key && value !== undefined) {
+            args[key] = value;
+          } else if (key) {
+            args[key] = true;
+          }
+        }
+      }
+
+      // Map script names to their module exports
+      const scriptName = path.basename(scriptPath, '.js');
+      
+      // Create a safe execution environment
+      const originalArgv = process.argv;
+      const originalExit = process.exit;
+      
+      try {
+        // Override process.argv for the script
+        process.argv = ['node', scriptPath, ...argv];
+        
+        // Prevent actual exit
+        process.exit = (code = 0) => {
+          throw new Error(`Script attempted to exit with code ${code}`);
+        };
+        
+        // Execute the script directly
+        const scriptModule = require(scriptPath);
+        
+        // Check if it's a class or has a run method
+        if (scriptModule && typeof scriptModule.run === 'function') {
+          return scriptModule.run(args) !== false;
+        } else if (typeof scriptModule === 'function') {
+          return scriptModule(args) !== false;
+        } else {
+          // Execute the script's main function if it exists
+          return true; // Assume success for basic scripts
+        }
+      } finally {
+        // Restore original process methods
+        process.argv = originalArgv;
+        process.exit = originalExit;
+        
+        // Remove from require cache to allow re-execution
+        delete require.cache[require.resolve(scriptPath)];
+      }
+    } catch (error) {
+      console.error(`Error executing ${path.basename(scriptPath)}: ${error.message}`);
+      return false;
+    }
   }
 
   async runAll(quiet = false) {

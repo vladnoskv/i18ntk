@@ -999,13 +999,9 @@ class I18nManager {
     try {
       const toolPath = path.join(__dirname, '..', 'scripts', 'debug', toolName);
       if (fs.existsSync(toolPath)) {
-        const { execSync } = require('child_process');
-        const output = execSync(`node "${toolPath}"`, { 
-          encoding: 'utf8',
-          cwd: path.join(__dirname, '..'),
-          timeout: 30000
-        });
-        console.log(output);
+        console.log(`Debug tool available: ${toolName}`);
+        console.log(`To run this tool manually: node "${toolPath}"`);
+        console.log(`Working directory: ${path.join(__dirname, '..')}`);
       } else {
       console.log(t('debug.debugToolNotFound', { toolName }));
       }

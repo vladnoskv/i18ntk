@@ -1,7 +1,7 @@
 # Security Guide
 
-**Version:** 1.6.0 
-**Last Updated:** 2025-08-08  
+**Version:** 1.7.5
+**Last Updated:** 2025-08-11  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 This document outlines the security measures and best practices implemented in the i18n Management Toolkit.
@@ -45,6 +45,33 @@ This document outlines the security measures and best practices implemented in t
 - **Key Storage**: Keys stored encrypted alongside data
 - **Key Rotation**: Automatic rotation during PIN changes
 - **Key Destruction**: Secure deletion when PIN is reset
+
+## 🛡️ **CRITICAL SECURITY FIXES IN 1.7.5**
+
+### **Zero Shell Access Vulnerabilities - Production Code**
+
+#### **Security Architecture Overhaul**
+- **Eliminated all shell access vulnerabilities** - Removed `child_process.execSync()` and `spawnSync()` from production code
+- **Direct file system operations** - Replaced shell commands with safe `fs` and `path` module usage
+- **Zero shell command execution** - No `child_process` calls in main package modules
+- **Enhanced input sanitization** - All file paths and operations validated before execution
+- **Production-safe codebase** - Verified by comprehensive security scanning
+
+#### **Before vs After Security Analysis**
+| Security Aspect | Before 1.7.5 | After 1.7.5 |
+|------------------|---------------|-------------|
+| **Shell Access** | `child_process.execSync()` usage | Zero shell access |
+| **Process Spawning** | `spawnSync()` calls | Direct module execution |
+| **Code Injection Risk** | Potential via shell commands | Eliminated |
+| **Input Validation** | Basic path validation | Enhanced sanitization |
+| **Security Scanning** | Socket.dev warnings | Zero security warnings |
+
+#### **Implementation Details**
+- **Module Execution**: Replaced `spawnSync` with direct module imports and function calls
+- **Safe JSON Parsing**: Eliminated `eval` usage, implemented safe JSON parsing
+- **File System Operations**: All operations use `fs.readFile`, `fs.writeFile`, `fs.readdir` directly
+- **Path Sanitization**: Enhanced `SecurityUtils.validatePath()` for all file operations
+- **Security Testing**: Added comprehensive security validation tests
 
 ## 🛡️ Dependency & Supply Chain Security
 

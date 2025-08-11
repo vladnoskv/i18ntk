@@ -198,9 +198,15 @@ class I18nSummaryReporter {
         const match = content.match(/(?:export\s+default|module\.exports\s*=)\s*({[\s\S]*})/);;
         if (match) {
           const objStr = match[1];
-          // This is a simplified approach - in production, you might want to use a proper JS parser
+          // Use safe JSON parsing instead of eval for security
           try {
-            const data = eval(`(${objStr})`);
+            // Convert JS object literal to valid JSON by replacing single quotes and removing trailing commas
+            const jsonStr = objStr
+              .replace(/'/g, '"')
+              .replace(/,\s*}/g, '}')
+              .replace(/,\s*]/g, ']')
+              .replace(/([{,]\s*)(\w+):/g, '$1"$2":');
+            const data = JSON.parse(jsonStr);
             return this.extractKeysFromObject(data);
           } catch (e) {
             console.warn(t('summary.couldNotParseJSFile', { filePath }));
