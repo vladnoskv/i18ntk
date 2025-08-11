@@ -1260,6 +1260,16 @@
     "relativePathHint": "Use relative paths from this directory (e.g., ./src/i18n/locales)",
     "currentDirectory": "Current project directory",
     "pin": "PIN:",
+    "reportBug": {
+        "title": "Report Bug",
+        "description": "Report any issues or bugs you encounter",
+        "guidance": "To report issues effectively:",
+        "checkLogs": "1. Check debug logs in your project directory",
+        "documentIssue": "2. Document the issue with steps to reproduce",
+        "contactSupport": "3. Contact your system administrator or support team",
+        "completed": "Bug reporting guidance displayed",
+        "instructions": "Follow the above instructions to report the bug."
+      },
     "mainMenu": {
       "title": "Main Menu:",
       "uiSettings": "UI Settings",

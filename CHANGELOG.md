@@ -1,3 +1,183 @@
+# i18n Management Toolkit - Version 1.8.0 Release Notes
+
+## 🚀 Major Changes
+
+### Autorun Workflow Removed
+**Breaking Change**: The autorun workflow has been completely removed from the main toolkit interface and moved to development tools.
+
+#### Why This Change?
+- **Safety First**: Script-by-script operations are safer as some scripts require pre-setup before execution
+- **Setup Requirements**: Different scripts have varying setup requirements that make automated execution unreliable
+- **User Control**: Manual execution gives users full control over each step of the process
+- **Error Prevention**: Prevents accidental clearing of configuration files during autorun
+
+#### What Changed?
+- **Removed**: `i18ntk-autorun.js` moved from `main/` to `dev/` directory
+- **Removed**: All autorun-related commands from the interactive menu
+- **Removed**: `workflow` option (previously option 8) from main menu
+- **Removed**: `i18n:autorun`, `i18ntk:autorun`, and `workflow` scripts from package.json
+- **Removed**: `i18ntk-autorun` entry from package.json bin configuration
+
+## ✨ New Features & Improvements
+
+### Enhanced Automatic Fixer
+The automatic fixer has been significantly improved and is now the recommended way to handle translation fixes:
+
+#### Key Improvements
+- **Smart Detection**: Automatically detects placeholder translations and common issues
+- **Safe Operations**: Creates backups before applying any fixes
+- **Interactive Confirmation**: Prompts user before applying changes
+- **Comprehensive Fixes**: Handles missing translations, placeholder issues, and formatting problems
+- **Detailed Reporting**: Provides clear summary of changes made
+- **Backup Recognition**: Easily download backups after successful fix application
+
+#### How to Use
+1. Run `npm run i18ntk` to access the main menu
+2. Select option **7** "Fix translation issues automatically"
+3. Review detected issues and confirm fixes
+4. Check the generated reports for detailed results
+
+### Menu Updates
+- **Renumbered Options**: Removed workflow option, renumbered remaining options
+- **Cleaner Interface**: More focused menu with essential operations
+- **Better Organization**: Commands grouped by functionality
+
+#### Updated Menu Structure
+```
+📋 i18n Management Toolkit - Main Menu
+1. Initialize i18n project structure
+2. Analyze translation files
+3. Validate translations for errors
+4. Check translation usage in code
+5. Run complete analysis (init + analyze + validate + usage)
+6. Analyze translation sizing and memory usage
+7. Fix translation issues automatically  ← NEW
+8. Generate summary reports  ← Renumbered
+9. Delete reports and debug logs  ← Renumbered
+10. Settings and configuration  ← Renumbered
+11. Show help and documentation  ← Renumbered
+12. Debug utilities  ← Renumbered
+13. Language settings  ← Renumbered
+```
+
+## 🔧 Technical Changes
+
+### File Structure Updates
+```
+📁 Before (v1.7.0):
+├── main/
+│   ├── i18ntk-autorun.js    ← REMOVED
+│   └── ...
+└── package.json
+    └── "bin": {
+        "i18ntk-autorun": "./main/i18ntk-autorun.js"  ← REMOVED
+    }
+
+📁 After (v1.8.0):
+├── main/                    ← Cleaner, focused on essential scripts
+├── dev/
+│   └── i18ntk-autorun.js    ← Moved to development tools for local development, requires improvements and fixes.
+└── package.json
+    └── "bin": {
+        "i18ntk": "./main/i18ntk-manage.js"  ← Only essential entry points
+    }
+```
+
+### Script Changes
+- **Removed**: `npm run i18n:autorun`
+- **Removed**: `npm run i18ntk:autorun`
+- **Removed**: `npm run workflow`
+- **Updated**: `npm run i18ntk` now points to `i18ntk-manage.js` (safer interactive mode)
+
+## 📊 Performance & Safety
+
+### Safety Improvements
+- **Configuration Protection**: No more risk of i18ntk-config.json being cleared
+- **Step-by-Step Control**: Users can review each operation before proceeding
+- **Backup Creation**: All operations create automatic backups
+- **Error Recovery**: Better error handling with rollback capabilities
+
+### Performance Benefits
+- **Reduced Memory Usage**: No background autorun processes
+- **Faster Startup**: Cleaner codebase with fewer dependencies
+- **Focused Operations**: Each script optimized for its specific task
+
+## 🎯 Migration Guide
+
+### For Users Previously Using Autorun
+1. **Manual Workflow**: Use the new menu options in sequence:
+   - Option 1: Initialize project
+   - Option 2: Analyze translations
+   - Option 3: Validate translations
+   - Option 4: Check usage
+   - Option 7: Fix issues automatically
+
+2. **Development Use**: If you need autorun for development, access it directly:
+   ```bash
+   node dev/i18ntk-autorun.js
+   ```
+
+### For New Users
+- **Recommended Path**: Use the interactive menu (`npm run i18ntk`) for all operations
+- **Script-by-Script**: Each script is designed to be run independently
+- **Configuration**: Setup is now more straightforward with clear prompts
+
+## 🐛 Bug Fixes
+
+### Configuration Issues
+- **Fixed**: i18ntk-config.json no longer gets cleared during autorun
+- **Fixed**: Better configuration validation and error handling
+- **Fixed**: Settings persistence across toolkit sessions
+
+### Translation Fixes
+- **Improved**: Automatic detection of placeholder translations
+- **Enhanced**: Better handling of missing translation keys
+- **Fixed**: Formatting issues in generated reports
+
+## 📈 Version Information
+
+- **Previous Version**: 1.7.0 - 1.7.5
+- **Current Version**: 1.8.0
+- **Release Date**: 2025-08-11
+- **Compatibility**: Backward compatible for all existing configurations
+
+## 🔄 Next Steps
+
+### Immediate Actions
+1. **Update**: Run `npm update` to get the latest version
+2. **Test**: Use option 7 to test the new automatic fixer
+3. **Review**: Check your current configuration with option 10
+
+### Long-term Recommendations
+- **Use Interactive Mode**: Embrace the safer, more controlled approach
+- **Regular Maintenance**: Use individual scripts for ongoing maintenance
+- **Development**: Use development tools (dev/ directory) for advanced workflows
+
+---
+
+**Note**: This is a significant architectural change focused on safety and user control. While autorun was convenient, the new approach provides better reliability and prevents common issues that users experienced with automated execution.
+
+## [1.7.6] - 2025-08-11 - **Bug Fixes & User Experience Improvements**
+
+> **🐛 BUG FIX RELEASE**: Version 1.7.6 resolves interactive prompt issues and improves user experience with translation fixer and package URL corrections.
+
+### 🐛 **Bug Fixes**
+
+#### **Interactive Translation Fixer**
+- **Fixed double enter issues** - Resolved duplicate input prompts in interactive mode
+- **Fixed readline management** - Proper readline instance cleanup and management
+- **Enhanced user experience** - Smoother interactive workflow without redundant prompts
+
+#### **Package & URL Fixes**
+- **Fixed repository URLs** - Updated all package.json URLs to use correct i18ntk naming
+- **Fixed documentation links** - Updated all documentation references to point to correct repository
+
+#### **General Improvements**
+- **Fixed interactive prompt handling** - Prevents duplicate input issues across all commands
+- **Enhanced error handling** - Better user feedback for edge cases
+
+---
+
 ## [1.7.5] - 2025-08-11 - **CRITICAL SECURITY FIXES - Zero Shell Access**
 
 > **🛡️ SECURITY RELEASE**: Version 1.7.5 eliminates all shell access vulnerabilities and implements direct file system operations for maximum security.

@@ -1752,40 +1752,16 @@ class SettingsCLI {
         console.log(`${colors.bright}${t('settings.reportBug.title')}${colors.reset}\n`);
         console.log(t('settings.reportBug.description'));
         console.log(`
-${colors.dim}${t('settings.reportBug.link')}: https://github.com/vladnoskv/i18ntk/issues${colors.reset}
+${colors.dim}${t('settings.reportBug.instructions')}${colors.reset}
 `);
-
-        try {
-            const { exec } = require('child_process');
-            const url = 'https://github.com/vladnoskv/i18ntk/issues';
-            
-            // Try to open the URL in the default browser
-            let command;
-            switch (process.platform) {
-                case 'darwin': // macOS
-                    command = `open "${url}"`;
-                    break;
-                case 'win32': // Windows
-                    command = `start "" "${url}"`;
-                    break;
-                default: // Linux and others
-                    command = `xdg-open "${url}"`;
-                    break;
-            }
-            
-            exec(command, (error) => {
-                if (error) {
-                    console.log(`${colors.yellow}${t('settings.reportBug.browserOpenFailed')}${colors.reset}`);
-                    console.log(`${t('settings.reportBug.manualVisit', { url: url })}`);
-                } else {
-                    console.log(`${colors.green}${t('settings.reportBug.browserOpened')}${colors.reset}`);
-                }
-            });
-        } catch (error) {
-            console.log(`${colors.yellow}${t('settings.reportBug.browserOpenFailed')}${colors.reset}`);
-            console.log(`${t('settings.reportBug.manualVisit', { url: 'https://github.com/vladnoskv/i18ntk/issues' })}`);
-        }
         
+        // Generic bug reporting guidance without external URLs
+        console.log(`${colors.cyan}💡 ${t('settings.reportBug.guidance')}${colors.reset}`);
+        console.log(`${colors.dim}• ${t('settings.reportBug.checkLogs')}${colors.reset}`);
+        console.log(`${colors.dim}• ${t('settings.reportBug.documentIssue')}${colors.reset}`);
+        console.log(`${colors.dim}• ${t('settings.reportBug.contactSupport')}${colors.reset}`);
+        
+        console.log(`\n${colors.green}${t('settings.reportBug.completed')}${colors.reset}`);
         await this.pause();
     }
 

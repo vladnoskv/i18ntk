@@ -1260,6 +1260,16 @@
     "relativePathHint": "Usa rutas relativas desde este directorio (por ejemplo, ./src/i18n/locales)",
     "currentDirectory": "Directorio actual del proyecto",
     "pin": "🔒 PIN:",
+    "reportBug": {
+        "title": "Reportar error",
+        "description": "Reportar cualquier problema o error que encuentres",
+        "guidance": "Para reportar problemas de forma efectiva:",
+        "checkLogs": "1. Revisa los registros de depuración en tu directorio de proyecto",
+        "documentIssue": "2. Documenta el problema con los pasos para reproducirlo",
+        "contactSupport": "3. Contacta con tu administrador del sistema o equipo de soporte",
+        "completed": "Guía de reporte de errores mostrada",
+        "instructions": "Sigue las instrucciones para reportar el error."
+      },
     "mainMenu": {
       "title": "Menú principal:",
       "uiSettings": "Configuración de la interfaz",
@@ -1279,7 +1289,7 @@
       "resetToDefaults": "Restablecer a valores predeterminados",
       "resetToDefaultsDesc": "Restaurar la configuración de fábrica",
       "reportBug": "Reportar error",
-      "reportBugDesc": "Enviar un informe de error en GitHub",
+      "reportBugDesc": "Enviar informe de error en GitHub",
       "saveChanges": "Guardar cambios",
       "saveChangesDesc": "Guardar la configuración actual en un archivo",
       "backupSettings": "Configuración de respaldo",

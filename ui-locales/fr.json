@@ -1257,6 +1257,16 @@
     "relativePathHint": "Utilisez des chemins relatifs depuis ce répertoire (ex. : ./src/i18n/locales)",
     "currentDirectory": "Répertoire de projet actuel",
     "pin": "PIN :",
+    "reportBug": {
+        "title": "Signaler un bug",
+        "description": "Signaler tout problème ou bogue rencontré",
+        "guidance": "Pour signaler un bogue, veuillez suivre ces étapes :",
+        "checkLogs": "1. Vérifiez les journaux de débogage récents pour les erreurs",
+        "documentIssue": "2. Documentez le problème avec des étapes de reproduction",
+        "contactSupport": "3. Contactez le support ou utilisez le canal de rapport approprié",
+        "completed": "✅ Processus de rapport de bogue terminé",
+        "instructions": "Suivez les instructions ci-dessus pour signaler le bogue."
+      },
     "mainMenu": {
       "title": "Menu principal :",
       "uiSettings": "Paramètres UI",
@@ -1276,7 +1286,7 @@
       "resetToDefaults": "Réinitialiser aux valeurs par défaut",
       "resetToDefaultsDesc": "Restaurer les paramètres d’usine",
       "reportBug": "Signaler un bug",
-      "reportBugDesc": "Soumettre un rapport d’incident sur GitHub",
+      "reportBugDesc": "Signaler tout problème ou bogue rencontré",
       "backupSettings": "Paramètres de sauvegarde",
       "backupSettingsDesc": "Configurer les paramètres de sauvegarde automatique pour vos fichiers de traduction",
       "saveChanges": "Enregistrer les modifications",

@@ -182,6 +182,7 @@
     "saveDebugLogs": false,
     "debugLogPath": "./debug.log"
   },
+  "sizeLimit": null,
   "sourceLanguage": "en",
   "defaultLanguages": [
     "de",
@@ -194,7 +195,6 @@
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
   "timezone": "auto",
-  "sizeLimit": null,
   "framework": {
     "detected": false,
     "preference": "none",

@@ -202,7 +202,22 @@ class AutoRunner {
         if (scriptModule && typeof scriptModule.run === 'function') {
           return scriptModule.run(args) !== false;
         } else if (typeof scriptModule === 'function') {
-          return scriptModule(args) !== false;
+          // Check if it's a class constructor by looking at prototype
+          try {
+            // Try to instantiate with new for class constructors
+            const instance = new scriptModule(args);
+            if (instance && typeof instance.run === 'function') {
+              return instance.run() !== false;
+            }
+            return true; // Successfully instantiated
+          } catch (e) {
+            // If it's not a class, try calling as function (legacy support)
+            try {
+              return scriptModule(args) !== false;
+            } catch (funcError) {
+              throw new Error(`Cannot execute script: ${e.message} or ${funcError.message}`);
+            }
+          }
         } else {
           // Execute the script's main function if it exists
           return true; // Assume success for basic scripts

@@ -1260,6 +1260,16 @@
     "relativePathHint": "このディレクトリからの相対パスを使用 (例: ./src/i18n/locales)",
     "currentDirectory": "現在のプロジェクトディレクトリ",
     "pin": "PIN:",
+    "reportBug": {
+        "title": "バグを報告",
+        "description": "発生した問題やバグを報告する",
+        "guidance": "バグを報告するには、以下の手順に従ってください：",
+        "checkLogs": "1. 最近のデバッグログでエラーを確認する",
+        "documentIssue": "2. 再現手順と共に問題を文書化する",
+        "contactSupport": "3. サポートまたは適切な報告チャンネルに連絡する",
+        "completed": "✅ バグ報告プロセスが完了しました",
+        "instructions": "上記の手順に従ってバグを報告してください。"
+      },
     "mainMenu": {
       "title": "メインメニュー:",
       "uiSettings": "UI設定",
@@ -1279,7 +1289,7 @@
       "resetToDefaults": "デフォルトにリセット",
       "resetToDefaultsDesc": "工場出荷時設定に戻す",
       "reportBug": "バグを報告",
-      "reportBugDesc": "GitHubで問題を報告",
+      "reportBugDesc": "発生した問題やバグを報告する",
       "saveChanges": "変更を保存",
       "saveChangesDesc": "現在の設定をファイルに保存",
       "help": "ヘルプ",

@@ -2,17 +2,17 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.7.5
+**Version:** 1.8.0
 **Last Updated:** 2025-08-11  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
-[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.7.5)](https://socket.dev/npm/package/i18ntk/overview/1.7.5) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
+[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.8.0)](https://socket.dev/npm/package/i18ntk/overview/1.8.0) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
 **🚀 The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
 **Framework Support:** Auto-detects popular libraries (React i18next, Vue i18n, i18next, Nuxt i18n, Svelte i18n) or works without a framework. i18ntk manages translation files and validation—it does NOT implement translation logic like i18next or Vue i18n.
 
-> **v1.7.5** – **CRITICAL SECURITY FIXES** - Zero shell access vulnerabilities eliminated. NEW Interactive Translation Fixer Tool with custom placeholder markers, selective language/file fixing, mass fix capabilities, and 7-language UI support; enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support; maintains 97% speed improvement.
+> **v1.8.0** – **SAFER WORKFLOW** - Autorun workflow removed for enhanced safety. Enhanced Interactive Translation Fixer Tool with improved automatic detection, selective language/file fixing, mass fix capabilities, and 7-language UI support; enhanced security logging, flexible 4-6 digit PIN authentication, configuration stability improvements, and CI/CD silent mode support; maintains 97% speed improvement.
 
 ## 🚀 Quick Start
 
@@ -46,8 +46,8 @@ i18ntk validate --source ./locales
 
 ## 🎯 Highlights
 
-- **NEW in 1.7.5:** Security‑hardened codebase: zero shell execution in production.
-- **Interactive Translation Fixer:** `i18ntk fixer` with guided flows and custom marker detection.
+- **NEW in 1.8.0:** **SAFER WORKFLOW** - Autorun workflow removed for enhanced safety and configuration protection.
+- **Enhanced Interactive Translation Fixer:** Improved automatic detection with guided flows, selective language/file fixing, mass fix capabilities, and 7-language UI support.
 - **Ultra‑Extreme performance:** 97% speed improvement — **15.38ms** for 200k keys.
 - **Security & Privacy:** PIN protection with AES‑256‑GCM; strict path and input validation.
 - **Sizing tools:** Interactive locale optimizer (up to **86%** size reduction) and reports.
@@ -55,10 +55,11 @@ i18ntk validate --source ./locales
 - **Watch helper:** Optional `--watch` keeps translations in sync.
 - **Framework‑agnostic:** Works with React, Vue, Svelte, Nuxt, i18next, or plain JSON.
 - **Scale:** Linear scaling up to 5M keys/second with ultra‑extreme settings.
+- **Script-by-Script Safety:** Manual execution ensures proper setup before each operation.
 
 ---
 
-## 🛡️ Security in 1.7.5
+## 🛡️ Security in 1.8.0
 
 ### Summary
 
@@ -71,7 +72,7 @@ i18ntk validate --source ./locales
 
 ### Before → After
 
-| Area                  | Before (risk)                | After (1.7.5)                     |
+| Area                  | Before (risk)                | After (1.7.5+)                    |
 | --------------------- | ---------------------------- | --------------------------------- |
 | Shell execution       | Possible via `child_process` | **Removed entirely**              |
 | File ops              | Mixed shell + Node           | **Node fs/path only**             |
@@ -111,7 +112,25 @@ i18ntk validate --source ./locales
 | `usage`    | Analyze usage patterns          | `i18ntk usage --format=json`             |
 | `doctor`   | Diagnose configuration issues   | `i18ntk doctor`                          |
 | `sizing`   | Optimize package size           | `i18ntk sizing --interactive`            |
-| `fixer`    | Fix broken translations/markers | `i18ntk fixer --interactive`             |
+| `fixer`    | **Enhanced:** Fix broken translations/markers | `i18ntk fixer --interactive`             |
+
+---
+
+## 🔒 Safer Workflow (NEW in v1.8.0)
+
+**Enhanced security through manual script execution:**
+
+- **Autorun workflow removed** for enhanced safety and configuration protection
+- **Script-by-script safety** - Each operation requires explicit user initiation
+- **Enhanced validation** - All operations validated before execution
+- **Improved security logging** - Comprehensive audit trail for all operations
+- **Manual review encouraged** - Users maintain full control over each step
+
+**Migration from previous versions:**
+- The `workflow` command has been removed for security reasons
+- Use individual commands (`analyze`, `validate`, `fixer`) for safer operations
+- Enhanced fixer tool provides guided workflows for common tasks
+- All previous functionality remains available through safer individual commands
 
 ---
 
@@ -121,7 +140,7 @@ Create `settings/i18ntk-config.json` (auto‑generated by `init`):
 
 ```json
 {
-  "version": "1.7.5",
+  "version": "1.8.0",
   "sourceDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "defaultLanguage": "en",
@@ -162,14 +181,22 @@ You can override paths with environment variables:
 
 ---
 
-## 🔧 Translation Fixer (1.7.4+)
+## 🔧 Enhanced Translation Fixer (v1.8.0)
 
-Interactive tool to locate and repair placeholders such as `{{NOT_TRANSLATED}}`, `__UNTRANSLATED__`, or custom markers.
+Interactive tool with improved automatic detection to locate and repair placeholders such as `{{NOT_TRANSLATED}}`, `__UNTRANSLATED__`, or custom markers.
+
+**Enhanced Features:**
+- **Improved Auto-Detection:** Smarter detection of broken translations and markers
+- **Selective Fixing:** Choose specific languages or files to fix
+- **Mass Fix Capabilities:** Fix all broken translations at once
+- **7-Language UI Support:** Complete interface in 7 languages
+- **Script-by-Script Safety:** Manual execution ensures proper review
+- **Enhanced Security:** Creates encrypted backups before any changes
 
 **Examples:**
 
 ```bash
-# Guided mode
+# Enhanced guided mode
 i18ntk fixer --interactive
 
 # Fix specific languages with custom markers
@@ -187,12 +214,12 @@ i18ntk fixer --languages all
 
 **Interactive flow:**
 
-- Welcome & help panel
-- Marker configuration (built‑in + custom)
-- Language and directory selection
-- Preview & confirmation
-- Real‑time progress + stats
-- Report generation (before/after, per‑file, per‑language)
+- Welcome & help panel with 7-language support
+- Enhanced marker configuration (built‑in + custom)
+- Language and directory selection with smart filtering
+- Preview & confirmation with detailed change overview
+- Real‑time progress + comprehensive stats
+- Report generation (before/after, per‑file, per‑language, security log)
 
 ---
 

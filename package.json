@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.7.5",
+  "version": "1.8.0",
   "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), NEW interactive translation fixer with custom placeholder markers, selective language/file fixing, mass fix capabilities, advanced security with PIN protection, comprehensive backup & recovery, **zero shell access security fixes**, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
@@ -64,7 +64,6 @@
     "i18ntk-usage": "main/i18ntk-usage.js",
     "i18ntk-complete": "main/i18ntk-complete.js",
     "i18ntk-sizing": "main/i18ntk-sizing.js",
-    "i18ntk-autorun": "main/i18ntk-autorun.js",
     "i18ntk-summary": "main/i18ntk-summary.js",
     "i18ntk-doctor": "main/i18ntk-doctor.js",
     "i18ntk-fixer": "main/i18ntk-fixer.js"
@@ -98,9 +97,6 @@
     "i18ntk:doctor": "node main/i18ntk-doctor.js",
     "i18ntk:summary": "node main/i18ntk-summary.js",
     "i18ntk:manage": "node main/i18ntk-manage.js",
-    "i18n:autorun": "node main/i18ntk-autorun.js",
-    "i18ntk:autorun": "node main/i18ntk-autorun.js",
-    "workflow": "node main/i18ntk-autorun.js",
     "init": "node main/i18ntk-init.js",
     "analyze": "node main/i18ntk-analyze.js",
     "validate": "node main/i18ntk-validate.js",
@@ -160,7 +156,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.7.5",
+    "version": "1.8.0",
     "releaseDate": "11/08/2025",
     "lastUpdated": "11/08/2025",
     "maintainer": "Vladimir Noskov",
@@ -168,9 +164,10 @@
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "SAFER WORKFLOW: Autorun workflow removed for enhanced security and configuration protection",
       "CRITICAL SECURITY FIXES: Zero shell access - eliminated all child_process.execSync() and spawnSync() calls",
       "Enhanced security: Direct file system operations replacing shell commands",
-      "NEW Interactive Translation Fixer Tool with custom placeholder markers and selective language/file fixing",
+      "Enhanced Interactive Translation Fixer Tool with improved automatic detection",
       "Mass fix capabilities for thousands of broken translations",
       "7-language UI support for all interactive fixer operations",
       "Ultra-extreme performance: 97% improvement - 15.38ms processing for 200k keys",
@@ -179,7 +176,9 @@
       "Scalability: Linear scaling up to 5M keys with ultra-extreme settings",
       "Fixed translation file inclusion - resolved ui-locales exclusion issue",
       "Updated documentation - corrected package size claims and improved accuracy",
-      "Enhanced examples - added detailed use cases throughout documentation"
+      "Enhanced examples - added detailed use cases throughout documentation",
+      "FIXED: Translation fixer double enter and double readline issues",
+      "FIXED: Package URL strings - updated all repository URLs to use correct i18ntk naming"
     ],
     "breakingChanges": [],
     "deprecations": [
@@ -197,7 +196,9 @@
       "1.7.1",
       "1.7.2",
       "1.7.3",
-      "1.7.4"
+      "1.7.4",
+      "1.7.5",
+      "1.7.6"
 
     ],
     "nextVersion": "1.8.0",

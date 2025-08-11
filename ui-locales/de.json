@@ -1260,6 +1260,16 @@
     "relativePathHint": "Verwende relative Pfade ab diesem Verzeichnis (z. B. ./locales)",
     "currentDirectory": "Aktuelles Projektverzeichnis",
     "pin": "PIN:",
+    "reportBug": {
+      "title": "Fehler melden",
+      "description": "Melden Sie alle auftretenden Probleme oder Fehler",
+      "guidance": "Um einen Fehler zu melden, folgen Sie bitte diesen Schritten:",
+      "checkLogs": "1. Überprüfen Sie die letzten Debug-Logs auf Fehler",
+      "documentIssue": "2. Dokumentieren Sie das Problem mit Reproduktionsschritten",
+      "contactSupport": "3. Kontaktieren Sie den Support oder nutzen Sie den geeigneten Berichtskanal",
+      "completed": "✅ Fehlerbericht-Prozess abgeschlossen",
+      "instructions": "Folgen Sie den obigen Anweisungen, um den Fehler zu melden."
+    },
     "mainMenu": {
       "title": "Hauptmenü:",
       "uiSettings": "UI-Einstellungen",

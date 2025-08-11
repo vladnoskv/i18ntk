@@ -1260,6 +1260,16 @@
     "relativePathHint": "请使用相对路径（例如：./src/i18n/locales）",
     "currentDirectory": "当前项目目录",
     "pin": "PIN：",
+    "reportBug": {
+        "title": "报告错误",
+        "description": "报告您在使用 i18n 工具包时遇到的任何问题",
+        "guidance": "为帮助我们有效地解决问题，请提供：",
+        "checkLogs": "• 检查最近的调试日志",
+        "documentIssue": "• 记录问题详情和重现步骤",
+        "contactSupport": "• 联系支持并提供相关信息",
+        "completed": "✅ 错误报告流程已启动。请按照提供的指导操作。",
+        "instructions": "按照上述步骤报告错误。"
+      },
     "mainMenu": {
       "title": "主菜单：",
       "uiSettings": "界面设置",

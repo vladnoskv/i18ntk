@@ -123,86 +123,64 @@ class I18nFixer {
   }
 
   async promptForMarkers() {
-    const readline = require('readline');
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
+    const { ask } = require('../utils/cli.js');
 
-    return new Promise(resolve => {
-      const defaultMarkers = ['__NOT_TRANSLATED__', 'NOT_TRANSLATED', 'TODO_TRANSLATE'];
-      console.log(`\n${this.t('fixer.markerPrompt.title')}`);
-      console.log(this.t('fixer.markerPrompt.description'));
-      console.log(this.t('fixer.markerPrompt.currentDefaults', { markers: defaultMarkers.join(', ') }));
-      
-      rl.question(this.t('fixer.markerPrompt.input'), answer => {
-        rl.close();
-        if (answer.trim()) {
-          const markers = answer.split(',').map(m => m.trim()).filter(Boolean);
-          resolve(markers);
-        } else {
-          resolve(defaultMarkers);
-        }
-      });
-    });
+    const defaultMarkers = ['__NOT_TRANSLATED__', 'NOT_TRANSLATED', 'TODO_TRANSLATE'];
+    console.log(`\n${this.t('fixer.markerPrompt.title')}`);
+    console.log(this.t('fixer.markerPrompt.description'));
+    console.log(this.t('fixer.markerPrompt.currentDefaults', { markers: defaultMarkers.join(', ') }));
+    
+    const answer = await ask(this.t('fixer.markerPrompt.input'));
+    const cleanAnswer = answer.trim();
+    if (cleanAnswer) {
+      const markers = cleanAnswer.split(',').map(m => m.trim()).filter(Boolean);
+      return markers;
+    } else {
+      return defaultMarkers;
+    }
   }
 
   async promptForLanguages() {
-    const readline = require('readline');
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
+    const { ask } = require('../utils/cli.js');
 
-    return new Promise(resolve => {
-      const availableLanguages = this.getAvailableLanguages().filter(l => l !== this.config.sourceLanguage);
-      
-      if (availableLanguages.length === 0) {
-        console.log(this.t('fixer.languagePrompt.noLanguages'));
-        resolve([]);
-        return;
-      }
+    const availableLanguages = this.getAvailableLanguages().filter(l => l !== this.config.sourceLanguage);
+    
+    if (availableLanguages.length === 0) {
+      console.log(this.t('fixer.languagePrompt.noLanguages'));
+      return [];
+    }
 
-      console.log(`\n${this.t('fixer.languagePrompt.title')}`);
-      console.log(this.t('fixer.languagePrompt.available', { languages: availableLanguages.join(', ') }));
-      console.log(this.t('fixer.languagePrompt.description'));
-      
-      rl.question(this.t('fixer.languagePrompt.input'), answer => {
-        rl.close();
-        if (answer.trim()) {
-          const languages = answer.split(',').map(l => l.trim()).filter(Boolean);
-          // Validate languages exist
-          const validLanguages = languages.filter(l => availableLanguages.includes(l));
-          resolve(validLanguages);
-        } else {
-          resolve(availableLanguages);
-        }
-      });
-    });
+    console.log(`\n${this.t('fixer.languagePrompt.title')}`);
+    console.log(this.t('fixer.languagePrompt.available', { languages: availableLanguages.join(', ') }));
+    console.log(this.t('fixer.languagePrompt.description'));
+    
+    const answer = await ask(this.t('fixer.languagePrompt.input'));
+    const cleanAnswer = answer.trim();
+    if (cleanAnswer) {
+      const languages = cleanAnswer.split(',').map(l => l.trim()).filter(Boolean);
+      // Validate languages exist
+      const validLanguages = languages.filter(l => availableLanguages.includes(l));
+      return validLanguages;
+    } else {
+      return availableLanguages;
+    }
   }
 
   async promptForDirectory() {
-    const readline = require('readline');
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
+    const { ask } = require('../utils/cli.js');
 
-    return new Promise(resolve => {
-      const defaultDir = this.config.sourceDir || './locales';
-      console.log(`\n${this.t('fixer.directoryPrompt.title')}`);
-      console.log(this.t('fixer.directoryPrompt.current', { dir: defaultDir }));
-      console.log(this.t('fixer.directoryPrompt.description'));
-      
-      rl.question(this.t('fixer.directoryPrompt.input'), answer => {
-        rl.close();
-        if (answer.trim()) {
-          resolve(answer.trim());
-        } else {
-          resolve(defaultDir);
-        }
-      });
-    });
+    const defaultDir = this.config.sourceDir || './locales';
+    console.log(`\n${this.t('fixer.directoryPrompt.title')}`);
+    console.log(this.t('fixer.directoryPrompt.current', { dir: defaultDir }));
+    console.log(this.t('fixer.directoryPrompt.description'));
+    
+    const answer = await ask(this.t('fixer.directoryPrompt.input'));
+    const cleanAnswer = answer.trim();
+    if (cleanAnswer) {
+      return cleanAnswer;
+    } else {
+      return defaultDir;
+    }
   }
 
   async initialize() {
@@ -487,24 +465,27 @@ class I18nFixer {
   }
 
   async getUserConfirmation() {
-    const readline = require('readline');
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
+    const { ask } = require('../utils/cli.js');
 
-    return new Promise(resolve => {
+    const askQuestion = async () => {
       console.log(`\n${this.t('fixer.confirmationTitle')}`);
       console.log(this.t('fixer.confirmationOptions'));
       console.log(`  ${this.t('fixer.optionYes')}`);
       console.log(`  ${this.t('fixer.optionNo')}`);
       console.log(`  ${this.t('fixer.optionShow')}`);
       
-      rl.question(this.t('fixer.choicePrompt'), answer => {
-        rl.close();
-        resolve(answer.toLowerCase());
-      });
-    });
+      const answer = await ask(this.t('fixer.choicePrompt'));
+      const cleanAnswer = answer.toLowerCase().trim();
+      if (cleanAnswer === 's' || cleanAnswer === 'show') {
+        // Show detailed report and ask again
+        this.printDetailedReport();
+        return askQuestion();
+      } else {
+        return cleanAnswer;
+      }
+    };
+    
+    return askQuestion();
   }
 
   generateFixerReport(issues, report) {
@@ -581,72 +562,89 @@ class I18nFixer {
     }
   }
 
+  printDetailedReport() {
+    // This method is called when user selects 's' to show detailed issues
+    // Implementation can be added here if needed
+    console.log('\n📋 DETAILED REPORT - All issues shown above in the report file');
+  }
+
   async run() {
-    await this.initialize();
+    const { closeGlobalReadline } = require('../utils/cli.js');
     
-    if (this.languages.length === 0) {
-      console.log(this.t('fixer.noLanguages'));
-      return;
-    }
-
-    console.log(`\n${this.t('fixer.starting', { languages: this.languages.join(', ') })}`);
-    console.log(this.t('fixer.sourceDirectory', { sourceDir: this.sourceDir }));
-    console.log(this.t('fixer.sourceLanguage', { sourceLanguage: this.config.sourceLanguage }));
-    console.log(this.t('fixer.markers', { markers: this.markers.join(', ') }));
-
-    const allIssues = [];
-    for (const lang of this.languages) {
-      console.log(this.t('fixer.scanningLanguage', { language: lang }));
-      const issues = this.scanForIssues(lang);
-      allIssues.push(...issues);
-    }
-
-    const report = this.generateReport(allIssues);
-
-    if (report.totalIssues === 0) {
-      console.log(`\n${this.t('fixer.allComplete')}`);
-      return;
-    }
-
-    // Generate and save report
-    const reportInfo = this.generateFixerReport(allIssues, report);
-    
-    // Print limited report to console
-    this.printLimitedReport(allIssues, report);
-
-    // Non-interactive mode (for tests)
-    if (this.config.noBackup) {
-      console.log(`\n${this.t('fixer.nonInteractiveMode')}`);
-      this.languages.forEach(lang => this.processLanguage(lang));
-      console.log(this.t('fixer.fixingComplete'));
-      return;
-    }
-
-    // Interactive mode
-    console.log(this.t('fixer.fullReportSaved', { reportPath: reportInfo.relativePath }));
-    console.log(this.t('fixer.reviewReport'));
-    
-    const answer = await this.getUserConfirmation();
-    
-    if (answer === 'y' || answer === 'yes') {
-      this.createBackup();
-      console.log(this.t('fixer.backupCreated'));
+    try {
+      await this.initialize();
       
-      console.log(`\n${this.t('fixer.applyingFixes')}`);
-      this.languages.forEach(lang => this.processLanguage(lang));
-      console.log(this.t('fixer.fixingComplete'));
-    } else {
-      console.log(this.t('fixer.operationCancelled'));
+      if (this.languages.length === 0) {
+        console.log(this.t('fixer.noLanguages'));
+        return;
+      }
+
+      console.log(`\n${this.t('fixer.starting', { languages: this.languages.join(', ') })}`);
+      console.log(this.t('fixer.sourceDirectory', { sourceDir: this.sourceDir }));
+      console.log(this.t('fixer.sourceLanguage', { sourceLanguage: this.config.sourceLanguage }));
+      console.log(this.t('fixer.markers', { markers: this.markers.join(', ') }));
+
+      const allIssues = [];
+      for (const lang of this.languages) {
+        console.log(this.t('fixer.scanningLanguage', { language: lang }));
+        const issues = this.scanForIssues(lang);
+        allIssues.push(...issues);
+      }
+
+      const report = this.generateReport(allIssues);
+
+      if (report.totalIssues === 0) {
+        console.log(`\n${this.t('fixer.allComplete')}`);
+        return;
+      }
+
+      // Generate and save report
+      const reportInfo = this.generateFixerReport(allIssues, report);
+      
+      // Print limited report to console
+      this.printLimitedReport(allIssues, report);
+
+      // Non-interactive mode (for tests)
+      if (this.config.noBackup) {
+        console.log(`\n${this.t('fixer.nonInteractiveMode')}`);
+        this.languages.forEach(lang => this.processLanguage(lang));
+        console.log(this.t('fixer.fixingComplete'));
+        return;
+      }
+
+      // Interactive mode
+      console.log(this.t('fixer.fullReportSaved', { reportPath: reportInfo.relativePath }));
+      console.log(this.t('fixer.reviewReport'));
+      
+      const answer = await this.getUserConfirmation();
+      
+      if (answer === 'y' || answer === 'yes') {
+        this.createBackup();
+        console.log(this.t('fixer.backupCreated'));
+        
+        console.log(`\n${this.t('fixer.applyingFixes')}`);
+        this.languages.forEach(lang => this.processLanguage(lang));
+        console.log(this.t('fixer.fixingComplete'));
+      } else {
+        console.log(this.t('fixer.operationCancelled'));
+      }
+    } finally {
+      // Ensure readline is properly closed to prevent hanging
+      closeGlobalReadline();
     }
   }
 }
 
 // Run if executed directly
 if (require.main === module) {
+  const { closeGlobalReadline } = require('../utils/cli.js');
   const fixer = new I18nFixer();
   fixer.run().catch(err => {
     console.error(err.message);
     process.exit(1);
+  }).finally(() => {
+    // Ensure readline is properly closed
+    closeGlobalReadline();
   });
 }
 

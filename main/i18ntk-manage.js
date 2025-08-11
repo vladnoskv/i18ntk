@@ -649,34 +649,7 @@ class I18nManager {
                 const fixerTool = new I18nFixer();
                 await fixerTool.run({fromMenu: isManagerExecution});
                 break;
-            case 'workflow':
-                console.log(t('workflow.starting'));
-                const AutoRunner = require('./i18ntk-autorun');
-                const runner = new AutoRunner(this.config);
-                // Ensure autorun initializes its translations and config before running
-                await runner.init();
-                await runner.runAll(true); // Pass true for quiet mode
-                
-                // Show workflow completion message and return to menu
-                console.log(t('workflow.completed'));
-                console.log(t('workflow.checkReports'));
-                
-                // Check execution context for proper exit handling
-                if (isManagerExecution && !this.isNonInteractiveMode()) {
-                    try {
-                        await this.prompt(t('usage.pressEnterToReturnToMenu'));
-                        await this.showInteractiveMenu();
-                    } catch (error) {
-                        // If readline fails, just exit gracefully
-                        console.log(t('menu.returning'));
-                        process.exit(0);
-                    }
-                } else {
-                    // For direct commands or workflow execution, exit gracefully
-                    console.log(t('workflow.exitingCompleted'));
-                    process.exit(0);
-                }
-                return;
+
             case 'debug':
                 const debuggerTool = new I18nDebugger();
                 await debuggerTool.run();
@@ -760,20 +733,19 @@ class I18nManager {
       console.log(`\n${t('menu.title')}`);
       console.log(t('menu.separator'));
       console.log(`1. ${t('menu.options.init')}`);
-      console.log(`2. ${t('menu.options.analyze')}`);
-      console.log(`3. ${t('menu.options.validate')}`);
-      console.log(`4. ${t('menu.options.usage')}`);
-      console.log(`5. ${t('menu.options.complete')}`);
-      console.log(`6. ${t('menu.options.sizing')}`);
-      console.log(`7. ${t('menu.options.fix')}`);
-      console.log(`8. ${t('menu.options.workflow')}`);
-      console.log(`9. ${t('menu.options.status')}`);
-      console.log(`10. ${t('menu.options.delete')}`);
-      console.log(`11. ${t('menu.options.settings')}`);
-      console.log(`12. ${t('menu.options.help')}`);
-      console.log(`13. ${t('menu.options.debug')}`);
-      console.log(`14. ${t('menu.options.language')}`);
-      console.log(`0. ${t('menu.options.exit')}`);
+    console.log(`2. ${t('menu.options.analyze')}`);
+    console.log(`3. ${t('menu.options.validate')}`);
+    console.log(`4. ${t('menu.options.usage')}`);
+    console.log(`5. ${t('menu.options.complete')}`);
+    console.log(`6. ${t('menu.options.sizing')}`);
+    console.log(`7. ${t('menu.options.fix')}`);
+    console.log(`8. ${t('menu.options.status')}`);
+    console.log(`9. ${t('menu.options.delete')}`);
+    console.log(`10. ${t('menu.options.settings')}`);
+    console.log(`11. ${t('menu.options.help')}`);
+    console.log(`12. ${t('menu.options.debug')}`);
+    console.log(`13. ${t('menu.options.language')}`);
+    console.log(`0. ${t('menu.options.exit')}`);
       console.log('\n' + t('menu.nonInteractiveModeWarning'));
       console.log(t('menu.useDirectExecution'));
       console.log(t('menu.useHelpForCommands'));
@@ -791,13 +763,12 @@ class I18nManager {
     console.log(`5. ${t('menu.options.complete')}`);
     console.log(`6. ${t('menu.options.sizing')}`);
     console.log(`7. ${t('menu.options.fix')}`);
-    console.log(`8. ${t('menu.options.workflow')}`);
-    console.log(`9. ${t('menu.options.status')}`);
-    console.log(`10. ${t('menu.options.delete')}`);
-    console.log(`11. ${t('menu.options.settings')}`);
-    console.log(`12. ${t('menu.options.help')}`);
-    console.log(`13. ${t('menu.options.debug')}`);
-    console.log(`14. ${t('menu.options.language')}`);
+    console.log(`8. ${t('menu.options.status')}`);
+    console.log(`9. ${t('menu.options.delete')}`);
+    console.log(`10. ${t('menu.options.settings')}`);
+    console.log(`11. ${t('menu.options.help')}`);
+    console.log(`12. ${t('menu.options.debug')}`);
+    console.log(`13. ${t('menu.options.language')}`);
     console.log(`0. ${t('menu.options.exit')}`);
     
     const choice = await this.prompt('\n' + t('menu.selectOptionPrompt'));
@@ -825,9 +796,6 @@ class I18nManager {
         await this.executeCommand('fix', {fromMenu: true});
         break;
       case '8':
-        await this.executeCommand('workflow', {fromMenu: true});
-        break;
-      case '9':
         // Check for PIN protection
         const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
         if (authRequired) {
@@ -883,21 +851,21 @@ class I18nManager {
           }
         }
         break;
-      case '10':
+      case '9':
         await this.deleteReports();
         break;
-      case '11':
+      case '10':
         await this.showSettingsMenu();
         break;
-      case '12':
+      case '11':
         this.showHelp();
         await this.prompt(t('menu.returnToMainMenu'));
         await this.showInteractiveMenu();
         break;
-      case '13':
+      case '12':
         await this.showDebugMenu();
         break;
-      case '14':
+      case '13':
         await this.showLanguageMenu();
         break;
       case '0':
@@ -1367,8 +1335,8 @@ if (require.main === module) {
         });
       }
       
-      console.log(`\n📖 Documentation: ${packageJson.homepage || 'https://github.com/vladnoskv/i18n-management-toolkit#readme'}`);
-      console.log(`🐛 Report Issues: ${packageJson.bugs?.url || 'https://github.com/vladnoskv/i18n-management-toolkit/issues'}`);
+      console.log(`\n📖 Documentation: ${packageJson.homepage}`);
+      console.log(`🐛 Report Issues: ${packageJson.bugs?.url}`);
       
     } catch (error) {
       console.log(`\n❌ Version information unavailable`);
