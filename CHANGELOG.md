@@ -1,5 +1,7 @@
 # i18n Management Toolkit - Version 1.8.0 Release Notes
 
+## [1.8.0] - 2025-08-11 - **Major Changes & Improvements**
+
 ## 🚀 Major Changes
 
 ### Autorun Workflow Removed

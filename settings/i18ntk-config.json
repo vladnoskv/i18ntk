@@ -182,7 +182,6 @@
     "saveDebugLogs": false,
     "debugLogPath": "./debug.log"
   },
-  "sizeLimit": null,
   "sourceLanguage": "en",
   "defaultLanguages": [
     "de",
@@ -194,11 +193,5 @@
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto",
-  "framework": {
-    "detected": false,
-    "preference": "none",
-    "prompt": "always",
-    "lastPromptedVersion": null
-  }
+  "timezone": "auto"
 }
