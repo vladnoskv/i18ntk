@@ -114,6 +114,16 @@ class NewFeaturesTestRunner {
         path: path.join(testsDir, 'integration', 'validator-enhanced.test.js'),
         category: 'validator',
         description: 'Enhanced Validator Tests'
+      },
+      {
+        path: path.join(testsDir, 'framework-detection.test.js'),
+        category: 'framework-detection',
+        description: 'Framework Detection Tests'
+      },
+      {
+        path: path.join(testsDir, 'security-features.test.js'),
+        category: 'security',
+        description: 'Security Features Tests'
       }
     ];
 
