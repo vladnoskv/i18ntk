@@ -62,27 +62,18 @@ class I18nSizingAnalyzer {
   constructor(options = {}) {
     const config = getConfig();
     const projectRoot = path.resolve(config.projectRoot || '.');
-    
-    // Always prioritize provided options over config
-    const sourceDir = options.sourceDir 
-      ? path.resolve(projectRoot, options.sourceDir)
-      : path.resolve(projectRoot, config.sourceDir);
-    
-    const outputDir = options.outputDir 
-      ? path.resolve(projectRoot, options.outputDir)
-      : path.resolve(projectRoot, config.outputDir);
-    
-    this.sourceDir = sourceDir;
-    this.outputDir = outputDir;
+    this.sourceDir = path.resolve(projectRoot, options.sourceDir || config.sourceDir);
+    this.outputDir = path.resolve(projectRoot, options.outputDir || config.outputDir);
     this.languages = options.languages || [];
-    this.threshold = options.threshold !== undefined ? options.threshold : config.threshold;
+    this.threshold = options.threshold || config.threshold; // Size difference threshold in percentage
     this.format = options.format || 'table';
-    this.outputReport = options.outputReport !== undefined ? options.outputReport : false;
+    this.outputReport = options.outputReport || false;
     this.rl = null;
     
     // Initialize i18n with UI language from config
     const uiLanguage = options.uiLanguage || config.uiLanguage || 'en';
-    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));this.stats = {
+    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+    this.stats = {
       files: {},
       languages: {},
       keys: {},
@@ -855,17 +846,20 @@ Options:
   async run(options = {}) {
     const { fromMenu = false } = options;
     
-    // Initialize configuration properly when called from menu
-    if (fromMenu && !this.sourceDir) {
-      const args = this.parseArgs();
-      const config = await getUnifiedConfig('sizing', args);
-      this.sourceDir = path.resolve(config.projectRoot || '.', config.sourceDir || './locales');
-      this.outputDir = path.resolve(config.projectRoot || '.', config.outputDir || './i18ntk-reports');
-      this.threshold = config.threshold || 50;
-      
-      const uiLanguage = this.config.uiLanguage || 'en';
-    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));} else if (!fromMenu) {
-      const args = this.parseArgs();
+    const args = this.parseArgs();
+    const config = await getUnifiedConfig('sizing', args);
+
+    this.sourceDir = path.resolve(config.projectRoot || '.', config.sourceDir || './locales');
+    this.outputDir = path.resolve(config.projectRoot || '.', config.outputDir || './i18ntk-reports');
+    this.threshold = args.threshold ?? config.processing?.sizingThreshold ?? 50;
+    this.languages = args.languages ? args.languages.split(',').map(l => l.trim()) : [];
+    this.outputReport = args['output-report'] !== undefined ? args['output-report'] : false;
+    this.format = args.format || 'table';
+    this.detailed = args.detailed;
+    this.detailedKeys = args['detailed-keys'];
+
+    if (!fromMenu) {
+
       const AdminAuth = require('../utils/admin-auth');
       const adminAuth = new AdminAuth();
       await adminAuth.initialize();
@@ -875,8 +869,9 @@ Options:
       if (isRequired && isCalledDirectly && !args.noPrompt) {
         console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'analyze sizing' }));
         
-        const pin = await this.prompt(t('adminCli.enterPin'));
-        const isValid = await adminAuth.verifyPin(pin);
+        const cliHelper = require('../utils/cli-helper');
+        const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
+        const isValid = await this.adminAuth.verifyPin(pin);
         
         if (!isValid) {
           console.log(t('adminCli.invalidPin'));
@@ -886,39 +881,64 @@ Options:
         
         console.log(t('adminCli.authenticationSuccess'));
       }
-      
-      // Update instance properties from args
-      this.sourceDir = args['source-dir'];
-      this.languages = args.languages ? args.languages.split(',').map(l => l.trim()) : [];
-      this.outputReport = args['output-report'];
-      this.format = args.format;
-      this.threshold = args.threshold;
-      this.detailed = args.detailed;
-      this.detailedKeys = args['detailed-keys'];
-      this.outputDir = args['output-dir'];
     }
     
     return await this.analyze();
+  }
+
+  // Main analysis method
+  async analyze() {
+    try {
+      console.log(t("sizing.starting_analysis"));
+      console.log(t("sizing.source_directory", { sourceDir: this.sourceDir }));
+      
+      const startTime = performance.now();
+      
+      // Get language files
+      const files = this.getLanguageFiles();
+      if (files.length === 0) {
+        console.warn(t("sizing.no_translation_files_found"));
+        return { success: false, error: "No translation files found" };
+      }
+      
+      console.log(t("sizing.found_files", { count: files.length }));
+      
+      // Analyze file sizes
+      this.analyzeFileSizes(files);
+      
+      // Analyze translation content
+      this.analyzeTranslationContent(files);
+      
+      // Generate size comparison
+      this.generateSizeComparison();
+      
+      // Display results
+      this.displayFolderResults();
+      
+      // Generate reports if requested
+      await this.generateHumanReadableReport();
+      
+      const endTime = performance.now();
+      const duration = ((endTime - startTime) / 1000).toFixed(2);
+      
+      console.log(t("sizing.analysis_completed", { duration }));
+      
+      return { success: true, stats: this.stats };
+      
+    } catch (error) {
+      console.error(t("sizing.analysis_failed", { errorMessage: error.message }));
+      return { success: false, error: error.message };
+    }
   }
 }
 
 // Update the execution block at the end
 if (require.main === module) {
-  const args = new I18nSizingAnalyzer().parseArgs();
-  const analyzer = new I18nSizingAnalyzer({
-    sourceDir: args['source-dir'],
-    languages: args.languages ? args.languages.split(',').map(l => l.trim()) : [],
-    outputReport: args['output-report'],
-    format: args.format,
-    threshold: args.threshold,
-    detailed: args.detailed,
-    outputDir: args['output-dir']
-  });
-  
-  analyzer.analyze().then(() => {
+  const analyzer = new I18nSizingAnalyzer();
+  analyzer.run().then(() => {
     process.exit(0);
   }).catch(error => {
-    console.error(t("sizing.fatalError", { error: error.message }));
+    console.error(t('sizing.fatalError', { error: error.message }));
     process.exit(1);
   });
 }

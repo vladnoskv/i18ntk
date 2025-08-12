@@ -12,7 +12,7 @@ function getGlobalReadline() {
     globalReadline = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      terminal: true,
+      terminal: false,
       historySize: 0
     });
     // Store globally for other modules to check

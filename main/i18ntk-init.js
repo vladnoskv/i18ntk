@@ -985,8 +985,9 @@ class I18nInitializer {
       const isRequired = await adminAuth.isAuthRequired();
       if (isRequired && isCalledDirectly && !args.noPrompt && !fromMenu) {
         console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'initialize i18n project' }));
-        const pin = await this.prompt(t('adminCli.enterPin'));
-        const isValid = await adminAuth.verifyPin(pin);
+        const cliHelper = require('../utils/cli-helper');
+        const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
+        const isValid = await this.adminAuth.verifyPin(pin);
         
         if (!isValid) {
           console.log(t('adminCli.invalidPin'));

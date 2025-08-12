@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * i18nTK Frontend Debugger
- * Simple debugging tool for frontend developers to check their i18n setup
+ * i18nTK Frontend Package Debugger
+ * Optimized debugging tool for frontend users to validate their i18n package setup
  */
 
 const fs = require('fs');
@@ -22,70 +22,72 @@ class FrontendI18nDebugger {
         };
     }
 
-    log(message, type = 'info') {
-        const timestamp = new Date().toLocaleTimeString();
-        console.log(`[${timestamp}] ${message}`);
+    log(message) {
+        console.log(message);
     }
 
     async checkTranslationFiles() {
-        this.log('Checking translation files...');
+        this.log('📁 Checking your translation files...');
         
-        // Get configuration to determine translation directory
-        const config = configManager.getConfig();
-        let translationsDir = config.translationsPath || config.sourceDir || 'locales';
-        let languages = config.languages || config.defaultLanguages || [];
-        
+        // Use package.json to detect i18n setup
+        const packagePath = path.join(this.projectRoot, 'package.json');
+        let translationsDir = 'locales';
+        let languages = [];
+
+        if (fs.existsSync(packagePath)) {
+            try {
+                const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+                
+                // Check for i18nTK configuration
+                if (packageJson.i18n) {
+                    translationsDir = packageJson.i18n.sourceDir || translationsDir;
+                    languages = packageJson.i18n.languages || [];
+                }
+                
+                // Check for scripts that might indicate translation directory
+                const scripts = packageJson.scripts || {};
+                for (const [scriptName, scriptCommand] of Object.entries(scripts)) {
+                    if (scriptCommand.includes('locales')) {
+                        const match = scriptCommand.match(/--source-dir[=\s]([^\s]+)/);
+                        if (match) {
+                            translationsDir = match[1];
+                            break;
+                        }
+                    }
+                }
+            } catch (error) {
+                this.issues.push(`Could not read package.json: ${error.message}`);
+            }
+        }
+
         const fullTranslationsDir = path.join(this.projectRoot, translationsDir);
         
         if (fs.existsSync(fullTranslationsDir)) {
-            // If languages are specified in config, use those
-            if (languages.length > 0) {
-                const existingLanguages = languages.filter(lang => 
-                    fs.existsSync(path.join(fullTranslationsDir, lang, 'common.json'))
-                );
-                
-                for (const lang of existingLanguages) {
-                    const filePath = path.join(fullTranslationsDir, lang, 'common.json');
+            // Auto-detect languages from directory structure
+            const detectedLanguages = fs.readdirSync(fullTranslationsDir)
+                .filter(f => fs.statSync(path.join(fullTranslationsDir, f)).isDirectory());
+            
+            let foundLanguages = 0;
+            for (const lang of detectedLanguages) {
+                const filePath = path.join(fullTranslationsDir, lang, 'common.json');
+                if (fs.existsSync(filePath)) {
                     try {
                         const content = fs.readFileSync(filePath, 'utf8');
                         const translations = JSON.parse(content);
                         this.results.translations[lang] = translations;
+                        foundLanguages++;
                     } catch (error) {
                         this.issues.push(`Invalid JSON in ${lang}/common.json: ${error.message}`);
                     }
                 }
-                
-                this.results.fileStatus.translations = {
-                    exists: true,
-                    directory: translationsDir,
-                    languages: existingLanguages,
-                    count: existingLanguages.length
-                };
-            } else {
-                // Auto-detect languages from directory structure
-                const detectedLanguages = fs.readdirSync(fullTranslationsDir)
-                    .filter(f => fs.statSync(path.join(fullTranslationsDir, f)).isDirectory());
-                
-                for (const lang of detectedLanguages) {
-                    const filePath = path.join(fullTranslationsDir, lang, 'common.json');
-                    if (fs.existsSync(filePath)) {
-                        try {
-                            const content = fs.readFileSync(filePath, 'utf8');
-                            const translations = JSON.parse(content);
-                            this.results.translations[lang] = translations;
-                        } catch (error) {
-                            this.issues.push(`Invalid JSON in ${lang}/common.json: ${error.message}`);
-                        }
-                    }
-                }
-                
-                this.results.fileStatus.translations = {
-                    exists: true,
-                    directory: translationsDir,
-                    languages: detectedLanguages,
-                    count: detectedLanguages.length
-                };
             }
+            
+            this.results.fileStatus.translations = {
+                exists: true,
+                directory: translationsDir,
+                languages: Object.keys(this.results.translations),
+                count: foundLanguages
+            };
         } else {
             this.results.fileStatus.translations = { exists: false, directory: translationsDir };
             this.warnings.push(`Translations directory '${translationsDir}' not found`);
@@ -93,13 +95,13 @@ class FrontendI18nDebugger {
     }
 
     async checkMissingKeys() {
-        this.log('Checking for missing translation keys...');
+        this.log('🔍 Checking for missing translation keys...');
         
         const languages = Object.keys(this.results.translations);
         if (languages.length < 2) return;
 
-        // Use first language as reference
-        const referenceLang = languages[0];
+        // Use English as reference if available, otherwise first language
+        const referenceLang = languages.includes('en') ? 'en' : languages[0];
         const referenceKeys = this.extractAllKeys(this.results.translations[referenceLang]);
         
         for (const lang of languages) {
@@ -129,40 +131,33 @@ class FrontendI18nDebugger {
     }
 
     async checkConfiguration() {
-        this.log('Checking configuration...');
+        this.log('⚙️  Checking package configuration...');
 
-        const configPath = configManager.CONFIG_PATH;
         const packagePath = path.join(this.projectRoot, 'package.json');
+        const hasConfig = fs.existsSync(path.join(this.projectRoot, 'i18ntk-config.json'));
 
-        if (fs.existsSync(configPath)) {
-            try {
-                const config = configManager.getConfig();
-                this.results.fileStatus.config = {
-                    exists: true,
-                    path: configPath,
-                    languages: config.languages || [],
-                    defaultLanguage: config.defaultLanguage || 'en'
-                };
-            } catch (error) {
-                this.issues.push(`Invalid config file: ${error.message}`);
-                this.results.fileStatus.config = { exists: false };
-            }
-        } else {
-            this.results.fileStatus.config = { exists: false };
-        }
-
-        // Check package.json for i18n scripts
         if (fs.existsSync(packagePath)) {
             try {
                 const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
                 const scripts = packageJson.scripts || {};
+                
                 this.results.fileStatus.package = {
-                    hasI18nScripts: Object.keys(scripts).some(key => key.includes('i18n'))
+                    exists: true,
+                    hasI18nScripts: Object.keys(scripts).some(key => 
+                        key.includes('i18n') || scripts[key].includes('i18ntk')
+                    ),
+                    scripts: Object.entries(scripts).filter(([name, cmd]) => 
+                        name.includes('i18n') || cmd.includes('i18ntk')
+                    )
                 };
             } catch (error) {
                 this.issues.push(`Invalid package.json: ${error.message}`);
             }
+        } else {
+            this.issues.push('package.json not found');
         }
+
+        this.results.fileStatus.config = { exists: hasConfig };
     }
 
     generateFrontendReport() {
@@ -175,7 +170,7 @@ class FrontendI18nDebugger {
                 totalWarnings: this.warnings.length,
                 status: this.issues.length === 0 ? '✅ Ready for production' : '❌ Needs attention'
             },
-            translations: this.results.translations,
+            languages: Object.keys(this.results.translations),
             missingKeys: this.results.missingKeys,
             fileStatus: this.results.fileStatus,
             issues: this.issues,
@@ -186,7 +181,8 @@ class FrontendI18nDebugger {
     }
 
     async run() {
-        this.log('🚀 Starting i18n Frontend Debug Analysis...');
+        this.log('🔍 i18n Package Health Check');
+        this.log('─────────────────────────────────');
         
         try {
             await this.checkTranslationFiles();
@@ -195,45 +191,48 @@ class FrontendI18nDebugger {
             
             const report = this.generateFrontendReport();
             
-            // Display summary
-            console.log('\n' + '='.repeat(50));
-            console.log('📊 i18n Debug Report');
-            console.log('='.repeat(50));
-            console.log(`Status: ${report.summary.status}`);
+            // Simple, user-friendly output
+            console.log('\n📊 Package Status');
+            console.log('─────────────────');
+            console.log(`${report.summary.status}`);
             console.log(`Languages: ${report.summary.totalLanguages}`);
-            console.log(`Issues: ${report.summary.totalIssues}`);
-            console.log(`Warnings: ${report.summary.totalWarnings}`);
             
             if (report.issues.length > 0) {
-                console.log('\n❌ Issues to fix:');
+                console.log('\n❌ Problems Found:');
                 report.issues.forEach(issue => console.log(`  • ${issue}`));
             }
             
             if (report.warnings.length > 0) {
-                console.log('\n⚠️  Warnings:');
+                console.log('\n⚠️  Suggestions:');
                 report.warnings.forEach(warning => console.log(`  • ${warning}`));
             }
             
-            console.log('\n📁 File Status:');
-            Object.entries(report.fileStatus).forEach(([type, status]) => {
-                const icon = status.exists ? '✅' : '❌';
-                if (type === 'translations') {
-                    console.log(`  ${icon} ${status.directory || 'translations'}: ${status.exists ? `Found (${status.count} languages)` : 'Missing'}`);
-                } else {
-                    console.log(`  ${icon} ${type}: ${status.exists ? 'Found' : 'Missing'}`);
-                }
-            });
+            if (report.fileStatus.translations.exists) {
+                console.log(`\n📁 Translations: ${report.fileStatus.translations.directory}/`);
+                console.log(`Languages: ${report.languages.join(', ')}`);
+            } else {
+                console.log(`\n📁 Translations: Directory not found`);
+            }
             
-            console.log('\n🌍 Languages found:');
-            Object.keys(report.translations).forEach(lang => {
-                const keyCount = Object.keys(this.extractAllKeys(report.translations[lang])).length;
-                console.log(`  • ${lang}: ${keyCount} keys`);
-            });
+            if (report.fileStatus.package?.hasI18nScripts) {
+                console.log('\n🚀 Available Commands:');
+                report.fileStatus.package.scripts.forEach(([name, cmd]) => {
+                    console.log(`  • npm run ${name}`);
+                });
+            }
+            
+            if (Object.keys(report.missingKeys).length > 0) {
+                console.log('\n📝 Missing Keys:');
+                Object.entries(report.missingKeys).forEach(([lang, keys]) => {
+                    console.log(`  • ${lang}: ${keys.length} keys missing`);
+                });
+            }
             
             return report;
             
         } catch (error) {
-            console.error('❌ Debug failed:', error.message);
+            console.error('❌ Package check failed:', error.message);
+            console.log('\n💡 Try running: npm install i18ntk');
             return { error: error.message };
         }
     }

@@ -1,7 +1,7 @@
 # i18ntk API Reference
 
-**Version:** 1.8.1
-**Last Updated:** 2025-08-11
+**Version:** 1.8.2
+**Last Updated:** 2025-08-12
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## Overview
@@ -56,15 +56,18 @@ npx i18ntk validate --strict --fix
 - `--no-prompt` - Skip interactive prompts (CI/CD mode)
 
 #### `i18ntk usage`
-Check translation key usage
+Check translation key usage with enhanced analysis capabilities
 ```bash
-npx i18ntk usage --unused --missing
+npx i18ntk usage --unused --missing --validate-placeholders --framework-detect --performance-mode
 ```
 
 **Options:**
 - `--unused` - Show only unused keys
 - `--missing` - Show only missing keys
 - `--source-dir <path>` - Source directory to scan
+- `--validate-placeholders` - Enable placeholder validation across translations
+- `--framework-detect` - Enable automatic framework detection
+- `--performance-mode` - Enable performance metrics tracking
 - `--no-prompt` - Skip interactive prompts (CI/CD mode)
 
 #### `i18ntk complete`
@@ -173,6 +176,76 @@ Manage configuration
 ```bash
 npx i18ntk settings --reset --export settings.json
 ```
+
+## Enhanced Features (v1.8.2)
+
+### Placeholder Validation
+Enhanced placeholder validation ensures consistency across all translations:
+
+```bash
+# Validate placeholders across all translations
+npx i18ntk usage --validate-placeholders
+
+# Custom placeholder patterns
+npx i18ntk usage --validate-placeholders --placeholder-patterns "{{\\w+}},%s,{\\d+}"
+```
+
+**Validation includes:**
+- Missing placeholders in translations
+- Extra placeholders in translations  
+- Placeholder ordering consistency
+- Custom placeholder pattern support
+
+### Framework Detection
+Automatic detection of i18n frameworks with pattern analysis:
+
+```bash
+# Detect framework usage patterns
+npx i18ntk usage --framework-detect
+
+# Framework-specific analysis
+npx i18ntk usage --framework-detect --framework react
+```
+
+**Supported Frameworks:**
+- React (react-i18next)
+- Vue (vue-i18n)
+- Angular (@ngx-translate/core)
+- Vanilla i18next
+- Lingui
+- FormatJS
+
+### Performance Metrics
+Real-time performance tracking and optimization:
+
+```bash
+# Enable performance monitoring
+npx i18ntk usage --performance-mode
+
+# Generate performance report
+npx i18ntk usage --performance-mode --format json
+```
+
+**Metrics Tracked:**
+- Analysis duration
+- Keys processed per second
+- Memory usage
+- File processing time
+- Framework detection time
+
+### Key Complexity Analysis
+Advanced key complexity scoring for translation management:
+
+```bash
+# Analyze key complexity patterns
+npx i18ntk usage --complexity-analysis
+```
+
+**Complexity Factors:**
+- Key depth (dot notation levels)
+- Naming consistency
+- Translation completeness impact
+- Framework-specific patterns
 
 ## Configuration
 

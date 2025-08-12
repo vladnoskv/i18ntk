@@ -7,11 +7,12 @@
 const cliHelper = require('../utils/cli-helper');
 const fs = require('fs');
 const path = require('path');
-const settingsManager = require('./settings-manager');
+const SettingsManager = require('./settings-manager');
+const settingsManager = new SettingsManager();
 const UIi18n = require('../main/i18ntk-ui');
 const configManager = require('../utils/config-manager');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG);
+loadTranslations(process.env.I18NTK_LANG, path.resolve(__dirname, '..', 'ui-locales'));
 
 const AdminAuth = require('../utils/admin-auth');
 const uiI18n = new UIi18n();
@@ -236,8 +237,6 @@ class SettingsCLI {
         console.log(`${colors.bright}${t('settings.categories.uiSettings')}${colors.reset}\n`);
 
         const uiSettings = {
-            'language': t('settings.fields.language.label'),
-            'theme': t('settings.fields.theme.label'),
             'dateFormat': t('settings.fields.dateFormat.label'),
             'notifications.enabled': t('settings.fields.notifications.enabled.label'),
             'removeUiLanguages': t('settings.fields.removeUiLanguages.label')
@@ -1951,6 +1950,82 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
             
             default:
                 return input;
+        }
+    }
+
+    /**
+     * Export enhanced settings schema
+     */
+    async exportEnhancedSchema() {
+        try {
+            const enhancedSchema = settingsManager.getEnhancedSettingsSchema();
+            const fileName = `i18ntk-enhanced-schema-${Date.now()}.json`;
+            const filePath = path.join(process.cwd(), fileName);
+            
+            fs.writeFileSync(filePath, JSON.stringify(enhancedSchema, null, 2), 'utf8');
+            this.success(`Enhanced schema exported to: ${filePath}`);
+            
+            await this.pause();
+        } catch (error) {
+            this.error(`Failed to export enhanced schema: ${error.message}`);
+            await this.pause();
+        }
+    }
+
+    /**
+     * Validate all configured paths
+     */
+    async validateAllPaths() {
+        try {
+            const paths = [
+                { name: 'sourceDir', path: this.settings.sourceDir },
+                { name: 'outputDir', path: this.settings.outputDir },
+                { name: 'backupDir', path: this.settings.backupDir },
+                { name: 'customReportsDir', path: this.settings.customReportsDir }
+            ].filter(p => p.path);
+
+            console.log(`${colors.bright}${t('settings.validation.validatingPaths')}${colors.reset}\n`);
+            
+            let validCount = 0;
+            for (const { name, path: dirPath } of paths) {
+                const validation = this.validateDirectoryPath(dirPath);
+                if (validation.valid) {
+                    this.success(`${name}: ${dirPath} - ${t('settings.validation.valid')}`);
+                    validCount++;
+                } else {
+                    this.error(`${name}: ${dirPath} - ${validation.error}`);
+                }
+            }
+            
+            console.log(`\n${colors.bright}${t('settings.validation.validationComplete', { 
+                valid: validCount, 
+                total: paths.length 
+            })}${colors.reset}`);
+            
+            await this.pause();
+        } catch (error) {
+            this.error(`Failed to validate paths: ${error.message}`);
+            await this.pause();
+        }
+    }
+
+    /**
+     * Toggle path validation security feature
+     */
+    async togglePathValidation() {
+        try {
+            const current = this.settings.security?.validatePaths || false;
+            const newValue = !current;
+            
+            this.settings.security = this.settings.security || {};
+            this.settings.security.validatePaths = newValue;
+            this.modified = true;
+            
+            this.success(`Path validation ${newValue ? 'enabled' : 'disabled'}`);
+            await this.pause();
+        } catch (error) {
+            this.error(`Failed to toggle path validation: ${error.message}`);
+            await this.pause();
         }
     }
 

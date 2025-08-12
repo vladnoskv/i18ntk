@@ -460,6 +460,168 @@ class SettingsManager {
     }
 
     /**
+     * Get settings schema structure
+     * @returns {object} Simple schema based on default configuration
+     */
+    getSettingsSchema() {
+        return { properties: this.defaultConfig };
+    }
+
+    /**
+     * Get enhanced settings schema with validation rules
+     * @returns {object} Enhanced schema with validation rules and descriptions
+     */
+    getEnhancedSettingsSchema() {
+        return {
+            type: 'object',
+            properties: {
+                version: {
+                    type: 'string',
+                    description: 'Configuration version',
+                    default: '1.8.2',
+                    readOnly: true
+                },
+                language: {
+                    type: 'string',
+                    description: 'Default language for translations',
+                    enum: ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'],
+                    default: 'en'
+                },
+                uiLanguage: {
+                    type: 'string',
+                    description: 'UI language for toolkit interface',
+                    enum: ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'],
+                    default: 'en'
+                },
+                theme: {
+                    type: 'string',
+                    description: 'UI theme preference',
+                    enum: ['dark', 'light', 'auto'],
+                    default: 'dark'
+                },
+                projectRoot: {
+                    type: 'string',
+                    description: 'Root directory of the project',
+                    default: process.cwd()
+                },
+                sourceDir: {
+                    type: 'string',
+                    description: 'Directory containing translation files',
+                    default: './locales'
+                },
+                i18nDir: {
+                    type: 'string',
+                    description: 'Directory for i18n configuration files',
+                    default: './i18n'
+                },
+                outputDir: {
+                    type: 'string',
+                    description: 'Directory for generated reports',
+                    default: './i18ntk-reports'
+                },
+                processing: {
+                    type: 'object',
+                    properties: {
+                        mode: {
+                            type: 'string',
+                            description: 'Processing performance mode',
+                            enum: ['ultra-extreme', 'extreme', 'ultra', 'optimized'],
+                            default: 'extreme'
+                        },
+                        cacheEnabled: {
+                            type: 'boolean',
+                            description: 'Enable caching for better performance',
+                            default: true
+                        },
+                        batchSize: {
+                            type: 'number',
+                            description: 'Number of items to process in each batch',
+                            minimum: 100,
+                            maximum: 10000,
+                            default: 1000
+                        },
+                        maxWorkers: {
+                            type: 'number',
+                            description: 'Maximum number of worker processes',
+                            minimum: 1,
+                            maximum: 16,
+                            default: 4
+                        },
+                        timeout: {
+                            type: 'number',
+                            description: 'Timeout for processing operations in milliseconds',
+                            minimum: 1000,
+                            maximum: 300000,
+                            default: 30000
+                        },
+                        retryAttempts: {
+                            type: 'number',
+                            description: 'Number of retry attempts for failed operations',
+                            minimum: 0,
+                            maximum: 10,
+                            default: 3
+                        },
+                        parallelProcessing: {
+                            type: 'boolean',
+                            description: 'Enable parallel processing for better performance',
+                            default: true
+                        },
+                        memoryOptimization: {
+                            type: 'boolean',
+                            description: 'Enable memory optimization for large datasets',
+                            default: true
+                        },
+                        compression: {
+                            type: 'boolean',
+                            description: 'Enable compression for reports and backups',
+                            default: true
+                        }
+                    }
+                },
+                security: {
+                    type: 'object',
+                    properties: {
+                        enabled: {
+                            type: 'boolean',
+                            description: 'Enable security features',
+                            default: true
+                        },
+                        adminPinEnabled: {
+                            type: 'boolean',
+                            description: 'Enable admin PIN protection',
+                            default: false
+                        },
+                        sessionTimeout: {
+                            type: 'number',
+                            description: 'Session timeout in milliseconds',
+                            minimum: 60000,
+                            maximum: 3600000,
+                            default: 1800000
+                        },
+                        maxFailedAttempts: {
+                            type: 'number',
+                            description: 'Maximum failed login attempts',
+                            minimum: 1,
+                            maximum: 10,
+                            default: 3
+                        },
+                        sanitizeInput: {
+                            type: 'boolean',
+                            description: 'Enable input sanitization',
+                            default: true
+                        },
+                        validatePaths: {
+                            type: 'boolean',
+                            description: 'Enable path validation',
+                            default: true
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    /**
      * Update specific setting
      * @param {string} key - Setting key (dot notation supported)
      * @param {*} value - New value

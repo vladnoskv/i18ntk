@@ -203,9 +203,8 @@ class I18nDebugger {
         const availableLanguages = [];
         
         for (const lang of languages) {
-            const langDir = path.join(uiLocalesDir, lang);
-            const commonFile = path.join(langDir, 'common.json');
-            if (fs.existsSync(commonFile)) {
+            const langFile = path.join(uiLocalesDir, `${lang}.json`);
+            if (fs.existsSync(langFile)) {
                 availableLanguages.push(lang);
             }
         }
@@ -216,9 +215,9 @@ class I18nDebugger {
         }
 
         // Load English as reference
-        const enPath = path.join(uiLocalesDir, 'en', 'common.json');
+        const enPath = path.join(uiLocalesDir, 'en.json');
         if (!fs.existsSync(enPath)) {
-            this.addIssue('English locale file (en/common.json) not found');
+            this.addIssue('English locale file (en.json) not found');
             return;
         }
 
@@ -238,7 +237,7 @@ class I18nDebugger {
             const requiredKeys = this.extractAllKeys(enLocale);
 
             for (const language of availableLanguages) {
-                const filePath = path.join(uiLocalesDir, language, 'common.json');
+                const filePath = path.join(uiLocalesDir, `${language}.json`);
                 try {
                     const content = await SecurityUtils.safeReadFile(filePath, this.projectRoot);
                     if (!content) {

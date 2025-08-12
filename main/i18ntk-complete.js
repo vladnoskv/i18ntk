@@ -419,8 +419,9 @@ class I18nCompletionTool {
       if (isRequired && isCalledDirectly && !args.noPrompt) {
         console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'complete translations' }));
         
-        const pin = await this.prompt(t('adminCli.enterPin'));
-        const isValid = await adminAuth.verifyPin(pin);
+        const cliHelper = require('../utils/cli-helper');
+        const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
+        const isValid = await this.adminAuth.verifyPin(pin);
         
         if (!isValid) {
           console.log(t('adminCli.invalidPin'));

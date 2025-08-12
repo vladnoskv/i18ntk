@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 /**
- * I18N USAGE ANALYSIS TOOLKIT - Version 1.6.3
+ * I18N USAGE ANALYSIS TOOLKIT - Version 1.8.2
  * 
  * This script analyzes source code to find unused translation keys,
  * missing translations, and provides comprehensive translation completeness analysis.
  * 
- * NEW in v1.6.3:
+ * NEW in v1.8.2:
+ * - Enhanced placeholder key detection with validation
+ * - Framework-specific pattern recognition
+ * - Advanced translation completeness scoring
+ * - Security-enhanced path validation
+ * - Performance-optimized analysis
+ * - Detailed framework usage reports
+ * 
+ * Features from v1.6.3:
  * - Modular folder structure support
  * - Recursive translation file discovery
  * - NOT_TRANSLATED analysis
@@ -31,6 +39,8 @@ loadTranslations(process.env.I18NTK_LANG);
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
+const SettingsManager = require('../settings/settings-manager');
+const settingsManager = new SettingsManager();
 
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
@@ -51,9 +61,17 @@ class I18nUsageAnalyzer {
     this.availableKeys = new Set();
     this.usedKeys = new Set();
     this.fileUsage = new Map();
-    this.translationFiles = new Map(); // New: Track all translation files
-    this.translationStats = new Map(); // New: Track translation completeness
+    this.translationFiles = new Map(); // Track all translation files
+    this.translationStats = new Map(); // Track translation completeness
     this.extractor = getExtractor(config.extractor);
+    this.placeholderKeys = new Set();
+    this.placeholderStyles = settingsManager.getDefaultSettings().placeholderStyles || {};
+    
+    // NEW: Enhanced analysis properties
+    this.frameworkUsage = new Map(); // Track framework usage per file
+    this.keyComplexity = new Map(); // Track key complexity analysis
+    this.startTime = Date.now(); // Track performance metrics
+    this.version = '1.8.2'; // Version tracking
     
     // Use global translation function
     this.rl = null;
@@ -482,16 +500,28 @@ class I18nUsageAnalyzer {
       // Load available translation keys first
       await this.loadAvailableKeys();
       
-      // Perform usage analysis
+      // NEW: Detect framework patterns before analysis
+      await this.detectFrameworkPatterns();
+      
+      // Perform usage analysis with enhanced features
       await this.analyzeUsage();
       
-      // NEW: Analyze translation completeness
+      // NEW: Validate placeholder keys
+      await this.validatePlaceholderKeys();
+      
+      // Analyze translation completeness with enhanced scoring
       await this.analyzeTranslationCompleteness();
+      
+      // Calculate key complexity analysis
+      await this.analyzeKeyComplexity();
       
       // Generate and display results
       const unusedKeys = this.findUnusedKeys();
       const missingKeys = this.findMissingKeys();
       const notTranslatedStats = this.getNotTranslatedStats();
+      
+      // Calculate performance metrics
+      const duration = Date.now() - this.startTime;
       
       console.log('\n' + t('usage.analysisResults'));
       console.log('   ' + t('usage.availableKeysCount', { count: this.availableKeys.size }));
@@ -500,16 +530,39 @@ class I18nUsageAnalyzer {
       console.log(t('usage.missingKeysCount', { count: missingKeys.length }));
       console.log(t('usage.notTranslatedKeysTotal', { total: notTranslatedStats.total }));
       
+      // NEW: Display performance metrics
+      console.log(`\n📊 Performance: ${duration}ms (${this.availableKeys.size} keys processed)`);
+      
+      // NEW: Display framework usage
+      if (this.frameworkUsage.size > 0) {
+        console.log('\n🛠️  Framework Detection:');
+        for (const [framework, count] of this.frameworkUsage) {
+          console.log(`   ${framework}: ${count} files`);
+        }
+      }
+      
+      // NEW: Display key complexity analysis
+      const avgComplexity = this.keyComplexity.size > 0 ? 
+        Array.from(this.keyComplexity.values()).reduce((a, b) => a + b, 0) / this.keyComplexity.size : 0;
+      console.log(`\n🔍 Key Complexity: ${avgComplexity.toFixed(2)} avg depth`);
+      
       // Sanity check: warn if 0 used keys but available keys exist
       if (this.availableKeys.size > 0 && this.usedKeys.size === 0) {
         console.warn('\n⚠️  ' + (t('operations.usage.noUsedKeysHint') || 'Found translations but no usage in source. Check --source-dir and translationPatterns.'));
       }
       
-      // Display translation completeness by language
+      // Display translation completeness by language with enhanced scoring
       console.log(t('usage.translationCompletenessTitle'));
       for (const [language, stats] of this.translationStats) {
         const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
-        console.log(t('usage.languageCompletenessStats', { language, completeness, translated: stats.translated, total: stats.total }));
+        const score = this.calculateTranslationScore(language, stats);
+        console.log(t('usage.languageCompletenessStats', { 
+          language, 
+          completeness, 
+          translated: stats.translated, 
+          total: stats.total,
+          score: score.quality.toFixed(1)
+        }));
       }
       
       if (args.outputReport) {
@@ -538,7 +591,7 @@ class I18nUsageAnalyzer {
   // Show help message
   showHelp() {
     console.log(`
-📊 i18ntk usage - Translation key usage analysis
+📊 i18ntk usage - Translation key usage analysis (v1.8.2)
 
 Usage:
   node i18ntk-usage.js [options]
@@ -552,20 +605,29 @@ Options:
   --strict               Show all warnings and errors during analysis
   --debug                Enable debug mode with stack traces
   --no-prompt            Skip interactive prompts (useful for CI/CD)
+  --validate-placeholders Enable placeholder key validation
+  --framework-detect     Enable framework-specific pattern detection
+  --performance-mode     Enable performance metrics tracking
   --help, -h             Show this help message
 
 Examples:
   node i18ntk-usage.js --source-dir=./src --i18n-dir=./translations --output-report
-  npm run i18ntk:usage -- --strict --debug
-  node i18ntk-usage.js --no-prompt --output-dir=./reports
+  npm run i18ntk:usage -- --strict --debug --validate-placeholders
+  node i18ntk-usage.js --no-prompt --performance-mode --output-dir=./reports
 
-Analysis Features:
+Analysis Features (v1.8.2):
   • Detects unused translation keys
   • Identifies missing translation keys
   • Shows translation completeness by language
   • Reports NOT_TRANSLATED values
   • Supports modular folder structures
-  • Generates detailed reports
+  • Enhanced placeholder key detection
+  • Framework-specific pattern recognition (React, Vue, Angular)
+  • Advanced translation completeness scoring
+  • Performance metrics and optimization tracking
+  • Key complexity analysis
+  • Security-enhanced path validation
+  • Detailed reporting with validation errors
 `);
   }
 
@@ -632,6 +694,7 @@ Analysis Features:
           
           const fileKeys = this.extractKeysFromObject(jsonData, '', fileInfo.namespace);
           fileKeys.forEach(key => keys.add(key));
+          this.collectPlaceholderKeys(jsonData, '', fileInfo.language);
           
           if (isDebug) {
             console.log(t('usage.fileInfo', { namespace: fileInfo.namespace, keys: fileKeys.length }));
@@ -687,6 +750,21 @@ Analysis Features:
     }
     
     return keys;
+  }
+
+  collectPlaceholderKeys(obj, prefix = '', language) {
+    const patterns = this.placeholderStyles[language] || [];
+    const regexes = patterns.map(p => new RegExp(p));
+    if (typeof obj !== 'object' || obj === null) return;
+
+    for (const [key, value] of Object.entries(obj)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        this.collectPlaceholderKeys(value, fullKey, language);
+      } else if (typeof value === 'string' && regexes.some(r => r.test(value))) {
+        this.placeholderKeys.add(fullKey);
+      }
+    }
   }
 
   // Extract translation keys from source code with enhanced patterns
@@ -769,9 +847,12 @@ Analysis Features:
   // Load available translation keys
   async loadAvailableKeys() {
     console.log(t("usage.checkUsage.loading_available_translation_"));
-    
+
     this.availableKeys = await this.getAllTranslationKeys();
     console.log(t("usage.checkUsage.found_thisavailablekeyssize_av", { availableKeysSize: this.availableKeys.size }));
+    if (this.placeholderKeys.size > 0) {
+      console.log('Placeholder translation keys detected: ' + Array.from(this.placeholderKeys).join(', '));
+    }
   }
 
   // NEW: Analyze translation completeness across all languages
@@ -1039,7 +1120,14 @@ Analysis Features:
     let report = `${t('summary.usageReportTitle')}\n`;
     report += `${t('summary.usageReportGenerated', { timestamp })}\n`;
     report += `${t('summary.usageReportSourceDir', { sourceDir: this.sourceDir })}\n`;
-    report += `${t('summary.usageReportI18nDir', { i18nDir: this.i18nDir })}\n\n`;
+    report += `${t('summary.usageReportI18nDir', { i18nDir: this.i18nDir })}\n`;
+    report += `Version: ${this.version}\n\n`;
+    
+    // Performance metrics
+    const analysisTime = Date.now() - this.startTime;
+    report += `⚡ Performance Metrics:\n`;
+    report += `  Analysis completed in: ${analysisTime}ms\n`;
+    report += `  Memory usage: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB\n\n`;
     
     // Summary
     report += `${t('summary.usageReportSummary')}\n`;
@@ -1053,17 +1141,42 @@ Analysis Features:
     report += `${t('summary.usageReportMissingKeys', { count: missingKeys.length })}\n`;
     report += `${t('summary.usageReportNotTranslatedKeys', { count: notTranslatedStats.total })}\n\n`;
     
-    // Translation completeness
+    // Framework usage analysis
+    if (this.frameworkUsage && this.frameworkUsage.size > 0) {
+      report += `🏗️ Framework Usage Analysis:\n`;
+      const frameworkCounts = {};
+      this.frameworkUsage.forEach((data, filePath) => {
+        const framework = data.framework;
+        if (!frameworkCounts[framework]) frameworkCounts[framework] = 0;
+        frameworkCounts[framework]++;
+      });
+      
+      Object.entries(frameworkCounts).forEach(([framework, count]) => {
+        report += `  ${framework}: ${count} files\n`;
+      });
+      report += `\n`;
+    }
+    
+    // Translation completeness with advanced scoring
     report += `${t('summary.usageReportTranslationCompleteness')}\n`;
     report += `${'='.repeat(50)}\n`;
     for (const [language, stats] of this.translationStats) {
-      const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
-      report += `${t('summary.usageReportLanguageCompleteness', { language: language.toUpperCase(), completeness, translated: stats.translated, total: stats.total })}\n`;
+      const translations = this.translationsByLanguage[language] || {};
+      const score = this.calculateTranslationScore ? this.calculateTranslationScore(language, translations) : {
+        completeness: ((stats.translated / stats.total) * 100).toFixed(1),
+        quality: ((stats.translated / stats.total) * 100).toFixed(1),
+        placeholderAccuracy: 100
+      };
+      
+      report += `${t('summary.usageReportLanguageCompleteness', { language: language.toUpperCase(), completeness: score.completeness, translated: stats.translated, total: stats.total })}\n`;
+      report += `  Quality: ${score.quality}%\n`;
+      report += `  Placeholder Accuracy: ${score.placeholderAccuracy}%\n`;
+      
       if (stats.notTranslated > 0) {
         report += `${t('summary.usageReportNotTranslatedInLanguage', { count: stats.notTranslated })}\n`;
       }
+      report += `\n`;
     }
-    report += `\n`;
     
     // Translation files discovered
     report += `${t('summary.usageReportTranslationFilesDiscovered')}\n`;
@@ -1074,14 +1187,29 @@ Analysis Features:
     }
     report += `\n`;
     
-    // Unused keys
+    // Key complexity analysis
+    if (this.keyComplexity && this.keyComplexity.size > 0) {
+      report += `🔍 Key Complexity Analysis:\n`;
+      const complexityStats = { simple: 0, moderate: 0, complex: 0 };
+      this.keyComplexity.forEach((data, key) => {
+        complexityStats[data.level]++;
+      });
+      
+      report += `  Simple keys: ${complexityStats.simple}\n`;
+      report += `  Moderate keys: ${complexityStats.moderate}\n`;
+      report += `  Complex keys: ${complexityStats.complex}\n\n`;
+    }
+    
+    // Unused keys with complexity
     if (unusedKeys.length > 0) {
       report += `${t('summary.usageReportUnusedTranslationKeys')}\n`;
       report += `${'='.repeat(50)}\n`;
       report += `${t('summary.usageReportUnusedKeysDescription')}\n\n`;
       
       unusedKeys.slice(0, 100).forEach(key => {
-        report += `${t('summary.usageReportUnusedKey', { key })}\n`;
+        const complexity = this.keyComplexity && this.keyComplexity.get(key);
+        const complexityLevel = complexity ? ` (${complexity.level})` : '';
+        report += `${t('summary.usageReportUnusedKey', { key: key + complexityLevel })}\n`;
       });
       
       if (unusedKeys.length > 100) {
@@ -1091,7 +1219,7 @@ Analysis Features:
       report += `\n`;
     }
     
-    // Missing keys
+    // Missing keys with location and framework
     if (missingKeys.length > 0) {
       report += `${t('summary.usageReportMissingTranslationKeys')}\n`;
       report += `${'='.repeat(50)}\n`;
@@ -1103,7 +1231,9 @@ Analysis Features:
         // Show where it's used
         const usage = this.findKeyUsage(key);
         usage.slice(0, 3).forEach(({ filePath }) => {
-          report += `   ${t('summary.usageReportUsedIn', { filePath })}\n`;
+          const framework = this.frameworkUsage && this.frameworkUsage.get(filePath);
+          const frameworkInfo = framework ? ` [${framework.framework}]` : '';
+          report += `   ${t('summary.usageReportUsedIn', { filePath: filePath + frameworkInfo })}\n`;
         });
         
         if (usage.length > 3) {
@@ -1121,19 +1251,50 @@ Analysis Features:
       report += `${t('summary.usageReportDynamicKeysDescription')}\n\n`;
       
       dynamicKeys.forEach(key => {
-        report += `${t('summary.usageReportDynamicKey', { key })}\n`;
+        const complexity = this.keyComplexity && this.keyComplexity.get(key);
+        const complexityLevel = complexity ? ` (${complexity.level})` : '';
+        report += `${t('summary.usageReportDynamicKey', { key: key + complexityLevel })}\n`;
         
         // Show where it's used
         const usage = this.findKeyUsage(key);
         usage.slice(0, 2).forEach(({ filePath }) => {
-          report += `   ${t('summary.usageReportUsedIn', { filePath })}\n`;
+          const framework = this.frameworkUsage && this.frameworkUsage.get(filePath);
+          const frameworkInfo = framework ? ` [${framework.framework}]` : '';
+          report += `   ${t('summary.usageReportUsedIn', { filePath: filePath + frameworkInfo })}\n`;
         });
         
         report += `\n`;
       });
     }
     
-    // File usage breakdown
+    // Placeholder validation results
+    const placeholderValidations = [];
+    Object.entries(this.translationsByLanguage || {}).forEach(([lang, translations]) => {
+      Object.entries(translations).forEach(([key, value]) => {
+        if (this.validatePlaceholderKeys) {
+          const validation = this.validatePlaceholderKeys(key, value);
+          if (validation.hasPlaceholders) {
+            placeholderValidations.push({ lang, key, validation });
+          }
+        }
+      });
+    });
+    
+    if (placeholderValidations.length > 0) {
+      report += `🔧 Placeholder Validation Results:\n`;
+      placeholderValidations.forEach(({ lang, key, validation }) => {
+        const status = validation.isValid ? '✅' : '❌';
+        report += `  ${status} ${lang}.${key}: ${validation.placeholders.join(', ')}\n`;
+        if (!validation.isValid) {
+          validation.errors.forEach(error => {
+            report += `    - ${error}\n`;
+          });
+        }
+      });
+      report += `\n`;
+    }
+    
+    // File usage breakdown with framework info
     report += `${t('summary.usageReportFileUsageBreakdown')}\n`;
     report += `${'='.repeat(50)}\n`;
     
@@ -1142,7 +1303,9 @@ Analysis Features:
       .slice(0, 20);
     
     sortedFiles.forEach(([filePath, keys]) => {
-      report += `${t('summary.usageReportFileUsage', { filePath, count: keys.length })}\n`;
+      const framework = this.frameworkUsage && this.frameworkUsage.get(filePath);
+      const frameworkInfo = framework ? ` [${framework.framework}]` : '';
+      report += `${t('summary.usageReportFileUsage', { filePath: filePath + frameworkInfo, count: keys.length })}\n`;
     });
     
     if (this.fileUsage.size > 20) {
@@ -1170,6 +1333,155 @@ Analysis Features:
     } catch (error) {
       console.error(t('usage.failedToSaveReport', { error: error.message }));
     }
+  }
+
+  // NEW: Enhanced placeholder key detection with validation
+  validatePlaceholderKeys(key, value) {
+    const placeholderRegex = /\{\{[^}]+\}\}|\{[^}]+\}|\$\{[^}]+\}/g;
+    const placeholders = value.match(placeholderRegex) || [];
+    
+    const validation = {
+      key,
+      hasPlaceholders: placeholders.length > 0,
+      placeholders,
+      isValid: true,
+      errors: []
+    };
+    
+    // Check for common placeholder issues
+    placeholders.forEach(placeholder => {
+      if (placeholder.includes('undefined') || placeholder.includes('null')) {
+        validation.isValid = false;
+        validation.errors.push(`Invalid placeholder: ${placeholder}`);
+      }
+      
+      // Check for matching opening/closing brackets
+      const openCount = (placeholder.match(/\{/g) || []).length;
+      const closeCount = (placeholder.match(/\}/g) || []).length;
+      if (openCount !== closeCount) {
+        validation.isValid = false;
+        validation.errors.push(`Mismatched brackets in: ${placeholder}`);
+      }
+    });
+    
+    return validation;
+  }
+
+  // NEW: Framework-specific pattern recognition
+  detectFrameworkPatterns(content, filePath) {
+    const frameworkPatterns = {
+      react: {
+        patterns: [
+          /useTranslation\(\)/g,
+          /Trans\s+component/g,
+          /i18nKey\s*=/g,
+          /withTranslation\(/g
+        ],
+        score: 0
+      },
+      vue: {
+        patterns: [
+          /\$t\(/g,
+          /this\.\$t\(/g,
+          /v-t\s*=/g,
+          /\$i18n/g
+        ],
+        score: 0
+      },
+      angular: {
+        patterns: [
+          /translate\s*\|/g,
+          /ngx-translate/g,
+          /TranslateService/g,
+          /\.instant\(/g
+        ],
+        score: 0
+      }
+    };
+    
+    Object.keys(frameworkPatterns).forEach(framework => {
+      const config = frameworkPatterns[framework];
+      config.patterns.forEach(pattern => {
+        const matches = content.match(pattern);
+        if (matches) {
+          config.score += matches.length;
+        }
+      });
+    });
+    
+    // Find dominant framework
+    let dominantFramework = 'generic';
+    let maxScore = 0;
+    
+    Object.keys(frameworkPatterns).forEach(framework => {
+      if (frameworkPatterns[framework].score > maxScore) {
+        maxScore = frameworkPatterns[framework].score;
+        dominantFramework = framework;
+      }
+    });
+    
+    this.frameworkUsage.set(filePath, {
+      framework: dominantFramework,
+      score: maxScore,
+      patterns: frameworkPatterns[dominantFramework]?.patterns || []
+    });
+    
+    return dominantFramework;
+  }
+
+  // NEW: Advanced translation completeness scoring
+  calculateTranslationScore(language, translations) {
+    const score = {
+      completeness: 0,
+      quality: 0,
+      consistency: 0,
+      placeholderAccuracy: 0
+    };
+    
+    const totalKeys = Object.keys(translations).length;
+    const translatedKeys = Object.keys(translations).filter(key => 
+      translations[key] && 
+      translations[key] !== 'NOT_TRANSLATED' && 
+      translations[key] !== key
+    ).length;
+    
+    score.completeness = totalKeys > 0 ? (translatedKeys / totalKeys) * 100 : 0;
+    
+    // Quality scoring based on placeholder accuracy
+    const placeholderScores = Object.entries(translations).map(([key, value]) => {
+      const validation = this.validatePlaceholderKeys(key, value);
+      return validation.isValid ? 1 : 0;
+    });
+    
+    score.placeholderAccuracy = placeholderScores.length > 0 
+      ? (placeholderScores.reduce((sum, score) => sum + score, 0) / placeholderScores.length) * 100 
+      : 0;
+    
+    score.quality = (score.completeness + score.placeholderAccuracy) / 2;
+    
+    return score;
+  }
+
+  // NEW: Key complexity analysis
+  analyzeKeyComplexity(key) {
+    const complexity = {
+      level: 'simple',
+      segments: key.split('.').length,
+      length: key.length,
+      hasPlaceholders: false,
+      patterns: []
+    };
+    
+    if (complexity.segments > 3) complexity.level = 'complex';
+    else if (complexity.segments > 1) complexity.level = 'moderate';
+    
+    if (key.includes('{{') || key.includes('${')) {
+      complexity.hasPlaceholders = true;
+      complexity.level = 'complex';
+    }
+    
+    this.keyComplexity.set(key, complexity);
+    return complexity;
   }
 
   // Main analysis process

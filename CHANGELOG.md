@@ -1,4 +1,46 @@
-# i18n Management Toolkit - Version 1.8.0 Release Notes
+# i18n Management Toolkit - Version 1.8.2 Release Notes
+
+## [1.8.2] - 2025-08-12 - **Bug Fix Release**
+
+> **🔧 BUG FIX RELEASE**: Version 1.8.2 addresses several bugs accidentally introduced in 1.8.1 while maintaining all existing functionality and introducing improvements to settings management and translation handling.
+
+### 🐛 **Bug Fixes**
+
+#### **Settings Management Improvements**
+- **Enhanced Settings Schema**: Added new settings schema method to settings-manager for better configuration validation
+- **Improved Path Handling**: Better path resolution and validation in settings CLI
+- **Translation Support**: Enhanced translations for settings-related operations
+- **Configuration Stability**: Fixed issues with settings persistence and validation
+
+#### **Translation Analysis Enhancements**
+- **Placeholder Key Detection**: Enhanced i18n usage analyzer with improved placeholder key detection
+- **Better Error Handling**: Fixed path validation and error handling in report management
+- **Translation Completeness**: Improved detection of missing or incomplete translations
+
+#### **Development & Testing**
+- **New Cleanup Script**: Added cleanup-test script for better test directory management
+- **Test Reliability**: Enhanced test stability and directory cleanup procedures
+- **Debug Improvements**: Better error reporting and debugging capabilities
+
+#### **Documentation & Assets**
+- **Updated Screenshots**: Replaced outdated screenshots with new v1.8.2 screenshots
+- **Locale Updates**: Updated locale files with latest translations
+- **Documentation Accuracy**: Fixed documentation inconsistencies and improved clarity
+
+### 🔧 **Technical Improvements**
+
+#### **Code Quality**
+- **Error Handling**: Enhanced error handling across all modules
+- **Path Validation**: Improved security through better path validation
+- **Configuration Management**: More robust settings handling and validation
+
+#### **Performance**
+- **Memory Optimization**: Reduced memory usage in translation processing
+- **Faster Operations**: Improved performance in settings and configuration operations
+
+---
+
+# i18n Management Toolkit - Version 1.8.1 Release Notes
 
 ## [1.8.1] - 2025-08-11 - **Major Release: Enhanced Framework Detection, Plugin System & Security Enhancements**
 

@@ -832,7 +832,8 @@ class I18nSummaryReporter {
       if (isRequired && isCalledDirectly && !noPrompt && !fromMenu && !args.noPrompt) {
         console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'generate summary' }));
         
-        const pin = await askHidden(t('adminCli.enterPin'));
+        const cliHelper = require('../utils/cli-helper');
+        const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
         
         const isValid = await adminAuth.verifyPin(pin);
         

@@ -750,7 +750,8 @@ class I18nManager {
     }
 
     console.log(t('adminCli.authRequired'));
-    const pin = await this.prompt(t('adminCli.enterPin'));
+    const cliHelper = require('../utils/cli-helper');
+    const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
     const isValid = await this.adminAuth.verifyPin(pin);
     
     if (!isValid) {
@@ -835,8 +836,9 @@ class I18nManager {
         const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
         if (authRequired) {
           console.log(`\n${t('adminCli.protectedAccess')}`);
-          const pin = await this.prompt(t('adminCli.enterPin') + ': ');
-          const isValid = await this.adminAuth.verifyPin(pin);
+        const cliHelper = require('../utils/cli-helper');
+        const pin = await cliHelper.promptPin(t('adminCli.enterPin') + ': ');
+        const isValid = await this.adminAuth.verifyPin(pin);
           
           if (!isValid) {
             console.log(t('adminCli.invalidPin'));
@@ -959,7 +961,8 @@ class I18nManager {
     const authRequired = await this.adminAuth.isAuthRequiredForScript('debugMenu');
     if (authRequired) {
       console.log(`\n${t('adminPin.protectedAccess')}`);
-      const pin = await this.prompt(t('adminPin.enterPin') + ': ');
+      const cliHelper = require('../utils/cli-helper');
+      const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
       const isValid = await this.adminAuth.verifyPin(pin);
       
       if (!isValid) {
@@ -1071,7 +1074,8 @@ class I18nManager {
     const authRequired = await this.adminAuth.isAuthRequiredForScript('deleteReports');
     if (authRequired) {
       console.log(`\n${t('adminPin.protectedAccess')}`);
-      const pin = await this.prompt(t('adminPin.enterPin') + ': ');
+      const cliHelper = require('../utils/cli-helper');
+      const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
       const isValid = await this.adminAuth.verifyPin(pin);
       
       if (!isValid) {
@@ -1093,9 +1097,9 @@ class I18nManager {
       { path: path.join(process.cwd(), 'reports', 'backups'), name: 'Reports Backups', type: 'backups' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
-      { path: path.join(configManager.configDir, 'backups'), name: 'Settings Backups', type: 'backups' },
+      { path: path.join(require('os').homedir(), '.i18ntk', 'backups'), name: 'Settings Backups', type: 'backups' },
       { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' }
-    ];
+    ].filter(dir => dir.path && typeof dir.path === 'string');
     
     try {
      console.log(t('operations.scanningForFiles'));
@@ -1236,33 +1240,47 @@ class I18nManager {
   
   // Helper method to get all report and log files recursively
   getAllReportFiles(dir) {
+    if (!dir || typeof dir !== 'string') {
+      return [];
+    }
+    
     let files = [];
     
     try {
+      if (!fs.existsSync(dir)) {
+        return [];
+      }
+      
       const items = fs.readdirSync(dir);
       for (const item of items) {
         const fullPath = path.join(dir, item);
-        const stat = fs.statSync(fullPath);
         
-        if (stat.isDirectory()) {
-          files.push(...this.getAllReportFiles(fullPath));
-        } else if (
-          // Common report file extensions
-          item.endsWith('.json') || 
-          item.endsWith('.html') || 
-          item.endsWith('.txt') || 
-          item.endsWith('.log') || 
-          item.endsWith('.csv') || 
-          item.endsWith('.md') ||
-          // Specific report filename patterns
-          item.includes('-report.') || 
-          item.includes('_report.') || 
-          item.includes('report-') || 
-          item.includes('report_') ||
-          item.includes('analysis-') ||
-          item.includes('validation-')
-        ) {
-          files.push(fullPath);
+        try {
+          const stat = fs.statSync(fullPath);
+          
+          if (stat.isDirectory()) {
+            files.push(...this.getAllReportFiles(fullPath));
+          } else if (
+            // Common report file extensions
+            item.endsWith('.json') || 
+            item.endsWith('.html') || 
+            item.endsWith('.txt') || 
+            item.endsWith('.log') || 
+            item.endsWith('.csv') || 
+            item.endsWith('.md') ||
+            // Specific report filename patterns
+            item.includes('-report.') || 
+            item.includes('_report.') || 
+            item.includes('report-') || 
+            item.includes('report_') ||
+            item.includes('analysis-') ||
+            item.includes('validation-')
+          ) {
+            files.push(fullPath);
+          }
+        } catch (error) {
+          // Skip individual files that can't be accessed
+          continue;
         }
       }
     } catch (error) {
@@ -1277,9 +1295,16 @@ class I18nManager {
   getFilesToDeleteKeepLast(allFiles, keepCount = 3) {
     // Sort files by modification time (newest first)
     const sortedFiles = allFiles.sort((a, b) => {
-      const statA = fs.statSync(a.path);
-      const statB = fs.statSync(b.path);
-      return statB.mtime.getTime() - statA.mtime.getTime();
+      try {
+        const statA = fs.statSync(a.path || a);
+        const statB = fs.statSync(b.path || b);
+        return statB.mtime.getTime() - statA.mtime.getTime();
+      } catch (error) {
+        // If stat fails, sort by filename as fallback
+        const pathA = a.path || a;
+        const pathB = b.path || b;
+        return pathB.localeCompare(pathA);
+      }
     });
     
     // Keep the N newest files, delete the rest
@@ -1293,7 +1318,8 @@ class I18nManager {
       const authRequired = await this.adminAuth.isAuthRequiredForScript('settingsMenu');
       if (authRequired) {
         console.log(`\n${t('adminPin.protectedAccess')}`);
-        const pin = await this.prompt(t('adminPin.enterPin') + ': ');
+        const cliHelper = require('../utils/cli-helper');
+        const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
         const isValid = await this.adminAuth.verifyPin(pin);
         
         if (!isValid) {
@@ -1319,13 +1345,13 @@ class I18nManager {
 
 
   prompt(question) {
-    const { ask } = require('../utils/cli');
+    const cliHelper = require('../utils/cli-helper');
     // If interactive not available, return empty string to avoid hangs
     if (!process.stdin.isTTY || process.stdin.destroyed) {
       console.log('\n⚠️ Interactive input not available, using default response.');
       return Promise.resolve('');
     }
-    return ask(question);
+    return cliHelper.prompt(`${question} `);
   }
   
   // Safe method to check if we're in non-interactive mode

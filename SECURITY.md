@@ -1,7 +1,7 @@
 # Security Guide
 
-**Version:** 1.8.1
-**Last Updated:** 2025-08-11  
+**Version:** 1.8.2
+**Last Updated:** 2025-08-12  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 This document outlines the security measures and best practices implemented in the i18n Management Toolkit.
@@ -46,7 +46,7 @@ This document outlines the security measures and best practices implemented in t
 - **Key Rotation**: Automatic rotation during PIN changes
 - **Key Destruction**: Secure deletion when PIN is reset
 
-## 🛡️ **Security Enhancements in 1.8.1**
+## 🛡️ **Security Enhancements in 1.8.2**
 
 ### **Zero Shell Access Vulnerabilities - Production Code**
 
@@ -58,7 +58,7 @@ This document outlines the security measures and best practices implemented in t
 - **Production-safe codebase** - Verified by comprehensive security scanning
 
 #### **Before vs After Security Analysis**
-| Security Aspect | Before 1.8.1 | After 1.8.1 |
+| Security Aspect | Before 1.8.2 | After 1.8.2 |
 |------------------|---------------|-------------|
 | **Shell Access** | `child_process.execSync()` usage | Zero shell access |
 | **Process Spawning** | `spawnSync()` calls | Direct module execution |
@@ -154,6 +154,6 @@ When deploying as a web application, implement:
 
 ---
 
-**Last Updated**: 2025-08-11
-**Version**: 1.8.1
+**Last Updated**: 2025-08-12
+**Version**: 1.8.2
 **Maintainer**: Vladimir Noskov

@@ -93,7 +93,8 @@
     "partialKeys": "Partial keys:",
     "home": "Home",
     "settings": "Settings",
-    "confirm": "Confirm"
+  "startingSettings": "🎛️  Starting Settings CLI...",
+  "confirm": "Confirm"
   },
     "errors": {
     "readlineClosed": "Input stream is closed; running in non-interactive mode.",
@@ -421,6 +422,8 @@
     "no_translation_files_found": "No translation files found",
     "analysis_completed": "Analysis completed in {duration}ms",
     "analysis_failed": "Analysis failed: {errorMessage}",
+    "starting_analysis": "Starting analysis...",
+    "found_files": "Found {count} files",
     "failed_to_parse_language_error": "Failed to parse {language} translations: {errorMessage}",
     "recommendations": {
       "keys_have_significant_size_variations": "keys have significant size variations",
@@ -1266,6 +1269,7 @@
     "goodbyeMessage": "Thank you for using the i18ntk settings manager!",
     "relativePathHint": "Use relative paths from this directory (e.g., ./src/i18n/locales)",
     "currentDirectory": "Current project directory",
+    "startingSettings": "Starting Settings:",
     "pin": "PIN:",
     "reportBug": {
         "title": "Report Bug",
