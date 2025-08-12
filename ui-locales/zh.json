@@ -92,9 +92,16 @@
     "partialKeys": "部分键：",
     "home": "首页",
     "settings": "设置",
-    "confirm": "确认"
+    "confirm": "确认",
+    "analyzingTranslationCompleteness": "正在分析翻译完整性...",
+    "i18nDirectoryNotFound": "⚠️  i18n 目录未找到: {i18nDir}",
+    "translationCompletenessAnalysisFailed": "⚠️  翻译完整性分析失败: {error}",
+    "failedToAnalyzeLanguage": "❌  分析语言 {language} 失败: {error}",
+    "errorReadingI18nDirectory": "❌  读取 i18n 目录时出错: {error}",
+    "languageCompletenessTitle": "📈 翻译完整性按语言",
+    "startingSettings": "🎛️  开始设置 CLI..."
   },
-    "errors": {
+  "errors": {
     "readlineClosed": "输入流已关闭；正在以非交互模式运行。",
     "noPackageJson": "未找到 package.json 文件。无法自动检测 i18n 框架。",
     "noI18nDir": "未在项目根目录找到 i18n 目录。",
@@ -425,7 +432,9 @@
       "keys_have_significant_size_variations": "键有显著的大小变化",
       "consider_reviewing_translations": "考虑检查 ${lang} 翻译 - 它们比基准 ${comparison} ${percentageDifference}%",
       "long_translations_detected": "${lang} 有 ${data.longKeys} 个翻译超过 ${data.threshold} 个字符 - 考虑拆分它们"
-    }
+    },
+    "starting_analysis": "正在开始分析...",
+    "found_files": "找到 {count} 个文件"
   },
   "usage": {
     "help_message": "\n国际化使用分析器\n\n用法: node i18ntk-usage.js [选项]\n\n选项:\n  --source-dir <dir>     要扫描的源目录 (默认: ./src)\n  --i18n-dir <dir>       I18n 目录 (默认: ./src/locales)\n  --output-report        生成详细报告\n  --output-dir <dir>     报告输出目录 (默认: ./reports)\n  --help                 显示此帮助\n\n示例:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
@@ -462,7 +471,7 @@
     "sourceEqualsI18nWarn": "⚠️  源目录和 i18n 目录相同。这可能会导致分析问题。",
     "i18nEqualsSourceWarn": "⚠️  I18n 目录和源目录相同。这可能会导致分析问题。",
     "translationFileParseError": "⚠️  翻译文件解析错误: {error}",
-    "translationKeysLoadError": "⚠️  翻译键加载错误: {error}",  
+    "translationKeysLoadError": "⚠️  翻译键加载错误: {error}",
     "languageCompletenessStats": "🌍 {language}: {translated}/{total} ({completeness}% 已翻译)",
     "missingKeysCount": "⚠️  缺失键: {count}",
     "analyzingTranslationCompleteness": "正在分析翻译完整性...",
@@ -510,7 +519,17 @@
       "failedToAnalyzeFile": "分析文件 {filePath} 失败: {error}",
       "failedToAnalyzeLanguage": "分析语言 {language} 失败: {error}",
       "translationCompletenessAnalysisFailed": "翻译完整性分析失败: {error}",
-      "n": ""
+      "n": "",
+      "no_source_files_found": "⚠️  未找到源文件",
+      "failedToProcessFile": "❌  处理文件 {filePath} 失败: {error}",
+      "n_sample_missing_keys": "❌  示例缺失键 (前 5 个):",
+      "and_missingkeyslength_5_more": "...以及 {count} 个更多缺失键",
+      "n_generating_detailed_report": "\n📊 正在生成详细报告...",
+      "report_saved_reportpath": "📄 报告已保存: {reportPath}",
+      "add_missing_translation_keys_t": "    ➕ 向翻译文件添加缺失键以保持一致性",
+      "review_dynamic_keys_manually_t": "    🔍 手动检查动态键 (可能有效)",
+      "all_translation_keys_are_prope": "✅ 所有翻译键都已正确使用！",
+      "2_check_the_detailed_report_fo": "    2. 检查详细报告以获取特定问题"
     },
     "complete": {
       "configLoadedSuccessfully": "配置加载成功",
@@ -549,7 +568,9 @@
     },
     "noTranslationLanguagesFound": "未找到翻译语言。",
     "failedToAnalyzeLanguage": "分析语言 {language} 失败: {error}",
-    "translationCompletenessAnalysisFailed": "翻译完整性分析失败: {error}"
+    "translationCompletenessAnalysisFailed": "翻译完整性分析失败: {error}",
+    "errorReadingI18nDirectory": "⚠️  读取 i18n 目录时出错: {error}",
+    "analysisFailedError": "❌  分析失败: {error}"
   },
   "validate": {
     "help_message": "\nI18n翻译验证器\n\n用法: node i18ntk-validate.js [选项]\n\n选项:\n  --source-dir <dir>     要扫描的源目录 (默认: ./src)\n  --i18n-dir <dir>       I18n目录 (默认: ./src/locales)\n  --output-report        生成详细报告\n  --output-dir <dir>     报告输出目录 (默认: ./reports)\n  --help                 显示此帮助\n\n示例:\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
@@ -916,7 +937,7 @@
     "skippingAdminPinSetup": "跳过管理员 PIN 设置...",
     "settingUpAdminPin": "🔐 正在设置管理员 PIN...",
     "enterAdminPin": "请输入管理员 PIN：",
-    "confirmAdminPin": "请确认管理员 PIN：", 
+    "confirmAdminPin": "请确认管理员 PIN：",
     "pinMismatch": "PIN 不匹配，请重试。",
     "adminPinSetupSuccess": "🔐 管理员 PIN 设置成功！",
     "adminPinSetupFailure": "🔐 管理员 PIN 设置失败，请重试。",
@@ -1021,7 +1042,7 @@
       "usage": "📊 检查键使用情况",
       "complete": "🎯 完成翻译（100% 覆盖）",
       "sizing": "📏 分析大小差异",
-      "fix": "🛠️  修复占位翻译",     
+      "fix": "🛠️  修复占位翻译",
       "workflow": "🔄 运行完整工作流",
       "status": "📋 显示项目状态",
       "delete": "🗑️  删除全部报告",
@@ -1267,15 +1288,15 @@
     "currentDirectory": "当前项目目录",
     "pin": "PIN：",
     "reportBug": {
-        "title": "报告错误",
-        "description": "报告您在使用 i18n 工具包时遇到的任何问题",
-        "guidance": "为帮助我们有效地解决问题，请提供：",
-        "checkLogs": "• 检查最近的调试日志",
-        "documentIssue": "• 记录问题详情和重现步骤",
-        "contactSupport": "• 联系支持并提供相关信息",
-        "completed": "✅ 错误报告流程已启动。请按照提供的指导操作。",
-        "instructions": "按照上述步骤报告错误。"
-      },
+      "title": "报告错误",
+      "description": "报告您在使用 i18n 工具包时遇到的任何问题",
+      "guidance": "为帮助我们有效地解决问题，请提供：",
+      "checkLogs": "• 检查最近的调试日志",
+      "documentIssue": "• 记录问题详情和重现步骤",
+      "contactSupport": "• 联系支持并提供相关信息",
+      "completed": "✅ 错误报告流程已启动。请按照提供的指导操作。",
+      "instructions": "按照上述步骤报告错误。"
+    },
     "mainMenu": {
       "title": "主菜单：",
       "uiSettings": "界面设置",
@@ -1750,64 +1771,69 @@
       },
       "${helperKey}": {
         "help": "帮助"
+      },
+      "removeUiLanguages": {
+        "label": "删除 UI 语言",
+        "description": "删除未安装的 UI 语言",
+        "help": "删除未安装在系统上的 UI 语言"
       }
     },
-      "actions": {
-        "editSetting": "编辑 {setting}: ",
-        "settingUpdated": "✅ {setting} 更新成功！",
-        "invalidValue": "❌ 无效的值，请重试。",
-        "pressEnter": "按 Enter 继续...",
-        "backToMenu": "返回主菜单",
-        "saveSuccess": "✅ 设置保存成功！",
-        "saveFailed": "❌ 保存设置失败：{error}",
-        "resetConfirm": "您确定要将所有设置重置为默认值吗？(y/N): ",
-        "resetSuccess": "✅ 设置已成功重置为默认值！",
-        "importSuccess": "✅ 设置导入成功！",
-        "exportSuccess": "✅ 设置导出成功！",
-        "fileNotFound": "❌ 找不到文件：{path}",
-        "invalidFormat": "❌ 设置文件格式无效",
-        "pinProtectionUpdated": "✅ {script} 的 PIN 保护已成功更新！",
-        "pinProtectionReset": "✅ 所有 PIN 保护设置已重置为默认值！",
-        "pinProtectionConfigure": "为单个脚本配置 PIN 保护",
-        "pinProtectionSelectScript": "选择一个脚本以切换 PIN 保护：",
-        "pinProtectionCurrentStatus": "当前状态：{status}",
-        "pinProtectionEnabled": "已启用",
-        "pinProtectionDisabled": "已禁用",
-        "pinProtectionToggle": "切换 PIN 保护",
-        "pinProtectionResetAll": "全部重置为默认值",
-        "pinProtectionBack": "返回安全设置"
-      },
-      "themes": {
-        "light": "浅色",
-        "dark": "深色",
-        "system": "系统"
-      },
-      "languages": {
-        "en": "英语",
-        "de": "德语",
-        "es": "西班牙语",
-        "fr": "法语",
-        "ru": "俄语",
-        "ja": "日语",
-        "zh": "中文"
-      },
-      "viewAll": {
-        "title": "查看所有设置"
-      },
-      "current": "当前",
-      "back": "返回主菜单",
-      "selectSettingPrompt": "选择要编辑的设置（b 返回，r 重置）：",
-      "invalidOption": "无效选项。",
-      "editing": "正在编辑",
-      "enterNewValue": "输入新值（按 Enter 保留当前值，输入 'default' 使用系统默认值）：",
-      "validOptions": "有效选项",
-      "updatedSuccessfully": "更新成功！",
-      "noHelp": "此设置无可用帮助",
-      "resetScriptDirectories": "重置为默认值",
-      "resetScriptDirectoriesTitle": "重置脚本目录为默认值",
-      "resetScriptDirectoriesWarning1": "这将把所有脚本目录配置重置为系统默认值。",
-      "resetScriptDirectoriesWarning2": "所有自定义目录路径将被清除。此操作无法撤销。",
-      "resetScriptDirectoriesConfirm": "您确定要将所有脚本目录重置为默认值吗？(y/N): ",
+    "actions": {
+      "editSetting": "编辑 {setting}: ",
+      "settingUpdated": "✅ {setting} 更新成功！",
+      "invalidValue": "❌ 无效的值，请重试。",
+      "pressEnter": "按 Enter 继续...",
+      "backToMenu": "返回主菜单",
+      "saveSuccess": "✅ 设置保存成功！",
+      "saveFailed": "❌ 保存设置失败：{error}",
+      "resetConfirm": "您确定要将所有设置重置为默认值吗？(y/N): ",
+      "resetSuccess": "✅ 设置已成功重置为默认值！",
+      "importSuccess": "✅ 设置导入成功！",
+      "exportSuccess": "✅ 设置导出成功！",
+      "fileNotFound": "❌ 找不到文件：{path}",
+      "invalidFormat": "❌ 设置文件格式无效",
+      "pinProtectionUpdated": "✅ {script} 的 PIN 保护已成功更新！",
+      "pinProtectionReset": "✅ 所有 PIN 保护设置已重置为默认值！",
+      "pinProtectionConfigure": "为单个脚本配置 PIN 保护",
+      "pinProtectionSelectScript": "选择一个脚本以切换 PIN 保护：",
+      "pinProtectionCurrentStatus": "当前状态：{status}",
+      "pinProtectionEnabled": "已启用",
+      "pinProtectionDisabled": "已禁用",
+      "pinProtectionToggle": "切换 PIN 保护",
+      "pinProtectionResetAll": "全部重置为默认值",
+      "pinProtectionBack": "返回安全设置"
+    },
+    "themes": {
+      "light": "浅色",
+      "dark": "深色",
+      "system": "系统"
+    },
+    "languages": {
+      "en": "英语",
+      "de": "德语",
+      "es": "西班牙语",
+      "fr": "法语",
+      "ru": "俄语",
+      "ja": "日语",
+      "zh": "中文"
+    },
+    "viewAll": {
+      "title": "查看所有设置"
+    },
+    "current": "当前",
+    "back": "返回主菜单",
+    "selectSettingPrompt": "选择要编辑的设置（b 返回，r 重置）：",
+    "invalidOption": "无效选项。",
+    "editing": "正在编辑",
+    "enterNewValue": "输入新值（按 Enter 保留当前值，输入 'default' 使用系统默认值）：",
+    "validOptions": "有效选项",
+    "updatedSuccessfully": "更新成功！",
+    "noHelp": "此设置无可用帮助",
+    "resetScriptDirectories": "重置为默认值",
+    "resetScriptDirectoriesTitle": "重置脚本目录为默认值",
+    "resetScriptDirectoriesWarning1": "这将把所有脚本目录配置重置为系统默认值。",
+    "resetScriptDirectoriesWarning2": "所有自定义目录路径将被清除。此操作无法撤销。",
+    "resetScriptDirectoriesConfirm": "您确定要将所有脚本目录重置为默认值吗？(y/N): ",
     "backup": {
       "title": "备份设置",
       "description": "将当前设置备份到文件",
@@ -1827,7 +1853,8 @@
       "confirmHelp": "确认备份操作",
       "confirmYes": "是",
       "confirmNo": "否"
-    }
+    },
+    "startingSettings": "开始设置..."
   },
   "summary": {
     "separator": "============================================================",

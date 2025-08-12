@@ -92,9 +92,16 @@
     "partialKeys": "部分的なキー：",
     "home": "ホーム",
     "settings": "設定",
-    "confirm": "確認"
+    "confirm": "確認",
+    "analyzingTranslationCompleteness": "翻訳の完全性を分析中...",
+    "i18nDirectoryNotFound": "⚠️  i18nディレクトリが見つかりません: {i18nDir}",
+    "translationCompletenessAnalysisFailed": "⚠️  翻訳の完全性分析が失敗しました: {error}",
+    "failedToAnalyzeLanguage": "❌ 言語 {language} の分析に失敗しました: {error}",
+    "errorReadingI18nDirectory": "❌ i18nディレクトリの読み取りに失敗しました: {error}",
+    "languageCompletenessTitle": "📈 翻訳の完全性を言語別に表示",
+    "startingSettings": "🎛️  設定 CLI を開始します..."
   },
-    "errors": {
+  "errors": {
     "readlineClosed": "入力ストリームが閉じられています。非対話モードで実行中です。",
     "noPackageJson": "package.jsonが見つかりません。i18nフレームワークを自動検出できません。",
     "noI18nDir": "プロジェクトルートにi18nディレクトリが見つかりません。",
@@ -103,13 +110,13 @@
   "fixer": {
     "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
     "starting": "🚀 翻訳修正を開始します。言語: {languages}",
-    "sourceDirectory": "📁 ソースディレクトリ: {sourceDir}",  
+    "sourceDirectory": "📁 ソースディレクトリ: {sourceDir}",
     "sourceLanguage": "🔤 ソース言語: {sourceLanguage}",
     "markers": "🏷️  修正するマーカー: {markers}",
     "scanningLanguage": "📊 {language} をスキャン中...",
     "noLanguages": "❌ 修正する言語が指定されていません。",
     "allComplete": "🎉 すべての翻訳が既に完了しています！",
-    "fullReportSaved": "📊 完全なレポートが保存されました: {reportPath}", 
+    "fullReportSaved": "📊 完全なレポートが保存されました: {reportPath}",
     "reviewReport": "翻訳修正レポートを確認してください。",
     "backupCreated": "💾 バックアップが正常に作成されました。",
     "applyingFixes": "🔄 修正を適用中...",
@@ -118,10 +125,10 @@
     "analysisTitle": "🔍 翻訳修正分析",
     "analysisSeparator": "==================================================",
     "totalIssues": "🔍 修正可能な問題の合計: {totalIssues}",
-    "missingTranslations": "❌ 不足している翻訳: {missing}", 
+    "missingTranslations": "❌ 不足している翻訳: {missing}",
     "placeholderTranslations": "⚠️  プレースホルダー翻訳: {placeholder}",
     "noIssues": "✅ 修正可能な問題が見つかりませんでした。すべての翻訳が完了しています。",
-    "detailedIssues": "📋 詳細な問題:",  
+    "detailedIssues": "📋 詳細な問題:",
     "detailedSeparator": "--------------------------------------------------",
     "filePath": "📄 {file} → {path}",
     "missingKey": "❌ 不足している翻訳: {source} → {new}",
@@ -425,7 +432,9 @@
       "keys_have_significant_size_variations": "キーに大きなサイズのばらつきがあります",
       "consider_reviewing_translations": "{lang} の翻訳を見直すことを検討してください - ベースラインより {percentageDifference}% {comparison} です",
       "long_translations_detected": "{lang} では長さが {threshold} 文字を超える翻訳が {longKeys} 件検出されました - 分割を検討してください"
-    }
+    },
+    "starting_analysis": "分析を開始します...",
+    "found_files": "検出されたファイル: {count}"
   },
   "usage": {
     "help_message": "\nI18n 使用解析ツール\n\n使い方: node i18ntk-usage.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./src）\n  --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./src/locales）\n  --output-report        詳細レポートを生成する\n  --output-dir <dir>     レポートの出力ディレクトリ（デフォルト: ./reports）\n  --help                 このヘルプを表示する\n\n例:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
@@ -510,7 +519,17 @@
       "failedToAnalyzeFile": "{filePath} の解析に失敗しました: {error}",
       "failedToAnalyzeLanguage": "{language} の解析に失敗しました: {error}",
       "translationCompletenessAnalysisFailed": "翻訳の完全性分析に失敗しました: {error}",
-      "n": ""
+      "n": "",
+      "no_source_files_found": "⚠️  指定されたディレクトリにソースファイルが見つかりません",
+      "failedToProcessFile": "❌ ファイルの処理に失敗しました: {filePath}",
+      "n_sample_missing_keys": "❌ 不足しているキーのサンプル (最初の 5 件):",
+      "and_missingkeyslength_5_more": "... そしてさらに {count} 件の不足しているキー",
+      "n_generating_detailed_report": "📊 詳細レポートを生成中...",
+      "report_saved_reportpath": "📄 レポートが保存されました: {reportPath}",
+      "add_missing_translation_keys_t": "    ➕ 不足している翻訳キーを追加して一貫性を保つ",
+      "review_dynamic_keys_manually_t": "    🔍 動的キーを手動で確認 (有効な場合があります)",
+      "all_translation_keys_are_prope": "✅ すべての翻訳キーが適切に使用されています！",
+      "2_check_the_detailed_report_fo": "    2. 詳細レポートを確認して特定の問題を特定します"
     },
     "complete": {
       "configLoadedSuccessfully": "設定が正常に読み込まれました",
@@ -549,7 +568,9 @@
     },
     "noTranslationLanguagesFound": "翻訳言語が見つかりませんでした。",
     "failedToAnalyzeLanguage": "{language} の解析に失敗しました: {error}",
-    "translationCompletenessAnalysisFailed": "{language} の翻訳完全性分析に失敗しました: {error}"
+    "translationCompletenessAnalysisFailed": "{language} の翻訳完全性分析に失敗しました: {error}",
+    "errorReadingI18nDirectory": "⚠️  i18nディレクトリの読み取りに失敗しました: {error}",
+    "analysisFailedError": "❌ 分析が失敗しました: {error}"
   },
   "validate": {
     "help_message": "\nI18n 翻訳バリデータ\n\n使い方: node i18ntk-validate.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ (デフォルト: ./locales)\n  --i18n-dir <dir>       I18n ディレクトリ (デフォルト: ./locales)\n  --output-report        詳細レポートを生成\n  --output-dir <dir>     レポートの出力ディレクトリ (デフォルト: ./i18ntk-reports)\n  --help                 ヘルプを表示\n\n例:\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
@@ -1267,15 +1288,15 @@
     "currentDirectory": "現在のプロジェクトディレクトリ",
     "pin": "PIN:",
     "reportBug": {
-        "title": "バグを報告",
-        "description": "発生した問題やバグを報告する",
-        "guidance": "バグを報告するには、以下の手順に従ってください：",
-        "checkLogs": "1. 最近のデバッグログでエラーを確認する",
-        "documentIssue": "2. 再現手順と共に問題を文書化する",
-        "contactSupport": "3. サポートまたは適切な報告チャンネルに連絡する",
-        "completed": "✅ バグ報告プロセスが完了しました",
-        "instructions": "上記の手順に従ってバグを報告してください。"
-      },
+      "title": "バグを報告",
+      "description": "発生した問題やバグを報告する",
+      "guidance": "バグを報告するには、以下の手順に従ってください：",
+      "checkLogs": "1. 最近のデバッグログでエラーを確認する",
+      "documentIssue": "2. 再現手順と共に問題を文書化する",
+      "contactSupport": "3. サポートまたは適切な報告チャンネルに連絡する",
+      "completed": "✅ バグ報告プロセスが完了しました",
+      "instructions": "上記の手順に従ってバグを報告してください。"
+    },
     "mainMenu": {
       "title": "メインメニュー:",
       "uiSettings": "UI設定",
@@ -1832,7 +1853,8 @@
       "confirmHelp": "バックアップ操作の確認",
       "confirmYes": "はい",
       "confirmNo": "いいえ"
-    }
+    },
+    "startingSettings": "設定を開始します..."
   },
   "summary": {
     "separator": "============================================================",
@@ -2187,7 +2209,7 @@
       "warning": "⚠️"
     }
   },
-  "consoleI18nTester": {  
+  "consoleI18nTester": {
     "found_target_file": "ターゲットファイルが見つかりました",
     "scanning_files_for_console_statements": "コンソールステートメントのファイルをスキャン中",
     "found_javascript_files": "JavaScriptファイルが見つかりました",
