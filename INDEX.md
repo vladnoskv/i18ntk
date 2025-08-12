@@ -1,4 +1,4 @@
-# I18N Management Toolkit Documentation Index
+# I18NTK Management Toolkit Documentation Index
 
 **Version:** 1.8.2 | **GitHub:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 

@@ -326,7 +326,7 @@
     "couldNotParseSource": "⚠️  ソース言語の解析中にエラーが発生しました: {error}",
     "reportGenerated": "📄 レポートが生成されました: {reportPath}",
     "generateReportPrompt": "📄 レポートを生成しますか？ (y/n): ",
-    "title": "🌍 I18N 翻訳の補完",
+    "title": "🌍 I18NTK 翻訳補完ツール",
     "separator": "============================================================",
     "sourceDir": "📁 ソースディレクトリ：{sourceDir}",
     "sourceLanguage": "🌐 ソース言語：{sourceLanguage}",
@@ -473,7 +473,7 @@
     "i18nDirectoryNotFound": "⚠️  I18n ディレクトリが見つかりません: {dir}",
     "sourceDirectoryNotFound": "⚠️  ソースディレクトリが見つかりません: {dir}",
     "checkUsage": {
-      "title": "🔍 I18N 使用状況分析",
+      "title": "🔍 I18NTK 使用状況分析",
       "message": "プロジェクト全体の i18n キー使用を分析しています。",
       "help_message": "\nI18n 使用解析ツール\n\n使い方: node i18ntk-usage.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./src）\n  --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./src/locales）\n  --output-report        詳細レポートを生成する\n  --output-dir <dir>     レポートの出力ディレクトリ（デフォルト: ./reports）\n  --help                 このヘルプを表示する\n\n例:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
       "source_directory_thissourcedir": "📁 ソースディレクトリ: {sourceDir}",
@@ -515,7 +515,7 @@
     "complete": {
       "configLoadedSuccessfully": "設定が正常に読み込まれました",
       "configLoadingFailed": "設定の読み込みに失敗しました",
-      "title": "🌍 I18N 翻訳の補完",
+      "title": "🌍 I18NTK 翻訳の補完",
       "separator": "============================================================",
       "sourceDir": "📁 ソースディレクトリ: {sourceDir}",
       "sourceLanguage": "🌐 ソース言語: {sourceLanguage}",
@@ -809,7 +809,7 @@
     "debugLogsDirectoryNotFound": "デバッグログディレクトリが見つかりません。"
   },
   "help": {
-    "title": "📊 I18N 管理ヘルプ\n\n",
+    "title": "📊 I18NTK 管理ヘルプ\n\n",
     "usage": "使用法: node i18ntk-manage.js [options]\n",
     "interactiveMode": "\n💡 直接実行するには: node i18ntk-manage.js --command=<command>\n",
     "showHelp": "\n📖 利用可能なコマンドを見るには: node i18ntk-manage.js --help\n",
@@ -828,7 +828,7 @@
     "debugCommand": "  debug     - 翻訳の問題をデバッグ",
     "menu": {
       "pressEnterToContinue": "Enterキーを押して続行してください…",
-      "title": "\n🌐 I18N 管理メニュー\n",
+      "title": "\n🌐 I18NTK 管理メニュー\n",
       "description": "国際化管理のためのインタラクティブメニュー\n",
       "exit": "\n🚪 終了"
     },
@@ -1012,7 +1012,7 @@
     "translation_preview_complete": "翻訳プレビュー完了。翻訳を適用中…"
   },
   "menu": {
-    "title": "🌐 I18N 管理メニュー",
+    "title": "🌐 I18NTK 管理メニュー",
     "separator": "============================================================",
     "options": {
       "init": "🚀 新しい言語を初期化",
@@ -1842,7 +1842,7 @@
     "excludedFiles": "   除外ファイル: {files}",
     "reportContent": "\n{report}",
     "fatalError": "❌ 致命的エラー: {error}",
-    "helpTitle": "📊 I18N サマリーレポートジェネレーター",
+    "helpTitle": "📊 I18NTK サマリーレポートジェネレーター",
     "helpDescription": "i18nフォルダ構造を分析し、主要統計、ファイル構造解析、検証チェックを含む包括的なサマリーレポートを生成します。",
     "helpUsage": "使用法: node i18ntk-summary.js [options]",
     "helpOptions": "  --source-dir <dir>     分析するソースディレクトリ",
@@ -1869,7 +1869,7 @@
     "keysInFiles": "\n📊 {files} 個のファイルで合計 {keys} 個のキーを検出\n",
     "checkingInconsistentKeys": "\n🔍 言語間のキー不一致をチェック中…",
     "generatingSummaryReport": "\n📝 サマリーレポートを生成中…\n",
-    "reportTitle": "\n📊 I18N サマリーレポート\n",
+    "reportTitle": "\n📊 I18NTK サマリーレポート\n",
     "generated": "\n生成日時: {timestamp}\n",
     "sourceDirectory": "\nソースディレクトリ: {dir}\n",
     "overview": "\n📈 概要",
@@ -1907,7 +1907,7 @@
     "nextStep4": "4. 定期的なモニタリングを推奨",
     "couldNotFindI18nDirectory": "❌ i18n ディレクトリが見つかりません。--source-dir を指定してください。",
     "sourceDirectoryDoesNotExist": "❌ ソースディレクトリが存在しません: {dir}",
-    "i18nSummaryReportGenerator": "📊 I18N サマリーレポートジェネレーター",
+    "i18nSummaryReportGenerator": "📊 I18NTK サマリーレポートジェネレーター",
     "analysisComplete": "\n✅ 分析完了",
     "analyzedLanguages": "\n📊 分析済み言語数: {count}",
     "processedFiles": "\n📁 処理済みファイル数: {count}",
@@ -1915,7 +1915,7 @@
     "foundIssues": "\n❌ 検出された問題数: {count}\n",
     "noIssuesConsole": "\n✅ 問題は見つかりませんでした - すべてのファイルが一貫しています！\n",
     "errorDuringAnalysis": "❌ 分析中のエラー: {error}",
-    "usageReportTitle": "📊 I18N 使用状況レポート",
+    "usageReportTitle": "📊 I18NTK 使用状況レポート",
     "usageReportGenerated": "生成日時: {timestamp}",
     "usageReportSourceDir": "ソースディレクトリ: {sourceDir}",
     "usageReportI18nDir": "I18n ディレクトリ: {i18nDir}",

@@ -1,54 +1,42 @@
-# i18n Management Toolkit - Version 1.8.2 Release Notes
+# i18n Management Toolkit - Version 1.8.3 Release Notes
 
-## [1.8.2] - 2025-08-12 - **Bug Fix Release**
+## [1.8.3] - 2025-08-12 - **Bug Fix Release**
 
-> **🔧 BUG FIX RELEASE**: Version 1.8.2 addresses several bugs accidentally introduced in 1.8.1 while maintaining all existing functionality and introducing improvements to settings management and translation handling.
+> **🔧 BUG FIX RELEASE**: Version 1.8.3 addresses critical bugs and introduces initialization checks for better user experience.
 
-### 🐛 **Bug Fixes**
+### 🐛 **Critical Bug Fixes**
 
-#### **Settings Management Improvements**
-- **Enhanced Settings Schema**: Added new settings schema method to settings-manager for better configuration validation
-- **Improved Path Handling**: Better path resolution and validation in settings CLI
-- **Translation Support**: Enhanced translations for settings-related operations
-- **Configuration Stability**: Fixed issues with settings persistence and validation
+#### **Fixed "undefined match" Error in Usage Analysis**
+- **Issue**: Usage analysis was throwing "undefined match" errors when encountering non-string translation values
+- **Fix**: Added comprehensive null and type checking before string operations in `validatePlaceholderKeys` function
+- **Impact**: Usage analysis now gracefully handles all data types without crashes
 
-#### **Translation Analysis Enhancements**
-- **Placeholder Key Detection**: Enhanced i18n usage analyzer with improved placeholder key detection
-- **Better Error Handling**: Fixed path validation and error handling in report management
-- **Translation Completeness**: Improved detection of missing or incomplete translations
+#### **Enforced Initialization Checks Across All CLI Scripts**
+- **Issue**: CLI scripts could run without proper project initialization, leading to confusing errors
+- **Fix**: Added strict initialization verification in `i18ntk-usage.js`, `i18ntk-analyze.js`, and `i18ntk-sizing.js`
+- **Impact**: Clear error messages guide users to run `i18ntk init` before other operations
 
-#### **Development & Testing**
-- **New Cleanup Script**: Added cleanup-test script for better test directory management
-- **Test Reliability**: Enhanced test stability and directory cleanup procedures
-- **Debug Improvements**: Better error reporting and debugging capabilities
+#### **Simplified Frontend Menu**
+- **Issue**: Debug tools in main menu created confusion for regular users
+- **Fix**: Removed debug menu option (option 12) and renumbered remaining options
+- **Impact**: Cleaner, more focused user interface for production use
 
-#### **Documentation & Assets**
-- **Updated Screenshots**: Replaced outdated screenshots with new v1.8.2 screenshots
-- **Locale Updates**: Updated locale files with latest translations
-- **Documentation Accuracy**: Fixed documentation inconsistencies and improved clarity
-
-### 🔧 **Technical Improvements**
-
-#### **Code Quality**
-- **Error Handling**: Enhanced error handling across all modules
-- **Path Validation**: Improved security through better path validation
-- **Configuration Management**: More robust settings handling and validation
-
-#### **Performance**
-- **Memory Optimization**: Reduced memory usage in translation processing
-- **Faster Operations**: Improved performance in settings and configuration operations
+#### **Enhanced Error Handling**
+- **Improved Error Messages**: Added clear guidance when project initialization is required
+- **Graceful Degradation**: Better handling of edge cases in translation processing
+- **User Experience**: More helpful error messages for common setup issues
 
 ---
 
-# i18n Management Toolkit - Version 1.8.1 Release Notes
+# i18n Management Toolkit - Version 1.8.3 Release Notes
 
-## [1.8.1] - 2025-08-11 - **Major Release: Enhanced Framework Detection, Plugin System & Security Enhancements**
+## [1.8.3] - 2025-08-12 - **Major Release: Enhanced Framework Detection, Plugin System & Security Enhancements**
 
-> **🚀 MAJOR FEATURE RELEASE**: Version 1.8.1 introduces comprehensive framework detection, a powerful plugin system, enhanced security features, and significant performance improvements with 87% faster processing.
+> **🚀 MAJOR FEATURE RELEASE**: Version 1.8.3, 1.8.3 introduces comprehensive framework detection, a powerful plugin system, enhanced security features, and significant performance improvements with 87% faster processing.
 
-With over **2,000 downloads** since release, we thank you for your patience with previously bugged versions. I am proud to release version **1.8.1** with some additional improvements over **1.8.0**, with 1.8.0 marking our first fully stable release. Expect fewer updates as the core toolkit has matured, tested and working. Future efforts may explore optional translation runtime features and a companion web UI for AI-assisted translations while keeping this package dependency-free.
+With over **2,000 downloads** since release, we thank you for your patience with previously bugged versions. I am proud to release version **1.8.3** with some additional improvements over **1.8.3**, with 1.8.3 marking our first fully stable release. Expect fewer updates as the core toolkit has matured, tested and working. Future efforts may explore optional translation runtime features and a companion web UI for AI-assisted translations while keeping this package dependency-free.
 
-### ✨ **New Features** (If you encounter any issues, please report them on GitHub and revert to 1.8.0)
+### ✨ **New Features** (If you encounter any issues, please report them on GitHub)
 
 #### **🎯 Enhanced Framework Detection**
 - **Smart Framework Detection** - Automatically detects i18next, Lingui, and FormatJS frameworks
@@ -130,7 +118,7 @@ With over **2,000 downloads** since release, we thank you for your patience with
 - **New NPM Scripts** - Additional scripts for running specific test suites
 - **Test Environment** - Robust test environment with retry mechanisms
 
-## [1.8.0] - 2025-08-11 - **Major Changes & Improvements**
+## [1.8.3] - 2025-08-11 - **Major Changes & Improvements**
 
 ## 🚀 Major Changes
 
@@ -196,7 +184,7 @@ The automatic fixer has been significantly improved and is now the recommended w
 
 ### File Structure Updates
 ```
-📁 Before (v1.7.0):
+📁 Before (v1.8.3):
 ├── main/
 │   ├── i18ntk-autorun.js    ← REMOVED
 │   └── ...
@@ -205,7 +193,7 @@ The automatic fixer has been significantly improved and is now the recommended w
         "i18ntk-autorun": "./main/i18ntk-autorun.js"  ← REMOVED
     }
 
-📁 After (v1.8.0):
+📁 After (v1.8.3):
 ├── main/                    ← Cleaner, focused on essential scripts
 ├── dev/
 │   └── i18ntk-autorun.js    ← Moved to development tools for local development, requires improvements and fixes.
@@ -268,8 +256,8 @@ The automatic fixer has been significantly improved and is now the recommended w
 
 ## 📈 Version Information
 
-- **Previous Version**: 1.7.0 - 1.7.5
-- **Current Version**: 1.8.0
+- **Previous Version**: 1.8.3, 1.8.3 - 1.8.3, 1.8.3
+- **Current Version**: 1.8.3, 1.8.3
 - **Release Date**: 2025-08-11
 - **Compatibility**: Backward compatible for all existing configurations
 
@@ -289,9 +277,9 @@ The automatic fixer has been significantly improved and is now the recommended w
 
 **Note**: This is a significant architectural change focused on safety and user control. While autorun was convenient, the new approach provides better reliability and prevents common issues that users experienced with automated execution.
 
-## [1.7.6] - 2025-08-11 - **Bug Fixes & User Experience Improvements**
+## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **Bug Fixes & User Experience Improvements**
 
-> **🐛 BUG FIX RELEASE**: Version 1.7.6 resolves interactive prompt issues and improves user experience with translation fixer and package URL corrections.
+> **🐛 BUG FIX RELEASE**: Version 1.8.3, 1.8.3 resolves interactive prompt issues and improves user experience with translation fixer and package URL corrections.
 
 ### 🐛 **Bug Fixes**
 
@@ -310,9 +298,9 @@ The automatic fixer has been significantly improved and is now the recommended w
 
 ---
 
-## [1.7.5] - 2025-08-11 - **CRITICAL SECURITY FIXES - Zero Shell Access**
+## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **CRITICAL SECURITY FIXES - Zero Shell Access**
 
-> **🛡️ SECURITY RELEASE**: Version 1.7.5 eliminates all shell access vulnerabilities and implements direct file system operations for maximum security.
+> **🛡️ SECURITY RELEASE**: Version 1.8.3, 1.8.3 eliminates all shell access vulnerabilities and implements direct file system operations for maximum security.
 
 ### 🔒 **CRITICAL SECURITY FIXES**
 
@@ -331,7 +319,7 @@ The automatic fixer has been significantly improved and is now the recommended w
 
 #### **Testing & Documentation**
 - **test**: Add comprehensive testing guide and cleanup script for security validation
-- **docs**: Update version to 1.7.5 with detailed security fixes documentation
+- **docs**: Update version to 1.8.3, 1.8.3 with detailed security fixes documentation
 - **build**: Update package.json with new test scripts and version
 
 #### **Security Verification**
@@ -341,9 +329,9 @@ The automatic fixer has been significantly improved and is now the recommended w
 
 ---
 
-## [1.7.4] - 2025-08-11 - **INTERACTIVE TRANSLATION FIXER WITH MULTI-MARKER SUPPORT**
+## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **INTERACTIVE TRANSLATION FIXER WITH MULTI-MARKER SUPPORT**
 
-### ✨ **MAJOR FEATURE FOR 1.7.4: Interactive Translation Fixer Tool**
+### ✨ **MAJOR FEATURE FOR 1.8.3, 1.8.3: Interactive Translation Fixer Tool**
 
 #### **Interactive Mode with Multi-Language Support**
 - **🎯 Interactive Translation Fixer**: New `i18ntk fixer` command with step-by-step guided fixing process
@@ -383,7 +371,7 @@ i18ntk fixer --source ./src/locales --auto-fix --report
 i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
 ```
 
-## [1.7.3] - 2025-08-11 - **TRANSLATION FIXER & CONFIG ENHANCEMENTS**
+## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **TRANSLATION FIXER & CONFIG ENHANCEMENTS**
 
 ### ✨ Features
 - Added `i18ntk-fix` script to replace placeholder translations with English text and language code, with automatic backups
@@ -394,16 +382,16 @@ i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
 - Framework detection prompt now only appears when no frameworks are found
 - Added `framework` to security config validation to remove warnings
 
-## [1.7.2] - 2025-08-11 - **FRAMEWORK DETECTION FIX & SETTINGS UPDATE**
+## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **FRAMEWORK DETECTION FIX & SETTINGS UPDATE**
 
 ### 🛠 Fixes
 - **Fixed framework detection prompt issue**: System now correctly skips the "No i18n framework detected" prompt when i18next or other frameworks are already detected
 - Improved i18n framework detection to correctly recognize installed libraries
 - Store toolkit settings within `node_modules/i18ntk/settings` to avoid creating project root folders
 
-## [1.7.1] - 2025-08-10 - **SECURITY LOGGING & CONFIGURATION STABILITY RELEASE**
+## [1.8.3, 1.8.3, 1.8.3] - 2025-08-10 - **SECURITY LOGGING & CONFIGURATION STABILITY RELEASE**
 
-> **🔒 SECURITY & STABILITY PATCH**: Version 1.7.1 delivers **enhanced security logging**, **flexible PIN authentication**, and **configuration stability improvements**.
+> **🔒 SECURITY & STABILITY PATCH**: Version 1.8.3, 1.8.3 delivers **enhanced security logging**, **flexible PIN authentication**, and **configuration stability improvements**.
 
 ### 🔐 **Enhanced Security Logging & Monitoring**
 
@@ -513,9 +501,9 @@ i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
 
 ---
 
-## [1.7.0] - 2025-08-10 - **ULTRA-EXTREME PERFORMANCE & ENTERPRISE SECURITY RELEASE**
+## [1.8.3, 1.8.3, 1.8.3] - 2025-08-10 - **ULTRA-EXTREME PERFORMANCE & ENTERPRISE SECURITY RELEASE**
 
-> **🚀 MAJOR RELEASE**: Version 1.7.0 represents the pinnacle of i18n management with **97% performance improvement** and **enterprise-grade security**.
+> **🚀 MAJOR RELEASE**: Version 1.8.3, 1.8.3 represents the pinnacle of i18n management with **97% performance improvement** and **enterprise-grade security**.
 
 ### 🚀 **ULTRA-EXTREME PERFORMANCE** - 97% Performance Gain Achieved
 
@@ -761,7 +749,7 @@ For any issues encountered with these fixes:
 
 #### **Fresh Installation**:
 ```bash
-npm install -g i18ntk@1.7.0
+npm install -g i18ntk@1.8.3, 1.8.3
 ```
 
 #### **Upgrade from 1.6.x**:

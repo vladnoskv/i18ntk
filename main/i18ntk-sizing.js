@@ -821,7 +821,7 @@ Generated: ${new Date().toISOString()}
     
     if (options.help) {
       console.log(`
-I18N Sizing Analysis Tool
+I18NTK Sizing Analysis Tool
 
 Usage: i18ntk-sizing [options]
 
@@ -834,7 +834,7 @@ Options:
   -d, --detailed              Generate detailed report with more information
   --detailed-keys             Show detailed key-level analysis
   --output-dir <dir>          Output directory for reports (default: ./i18ntk-reports)
-  -h, --help                  Show this help message
+  --help                  Show this help message
 `);
       process.exit(0);
     }

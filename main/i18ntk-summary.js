@@ -195,7 +195,9 @@ class I18nSummaryReporter {
         return this.extractKeysFromObject(data);
       } else if (filePath.endsWith('.js') || filePath.endsWith('.ts')) {
         // Basic extraction for JS/TS files (assumes export default or module.exports)
-        const match = content.match(/(?:export\s+default|module\.exports\s*=)\s*({[\s\S]*})/);;
+        if (!content) return [];
+        const contentStr = String(content);
+        const match = contentStr.match(/(?:export\s+default|module\.exports\s*=)\s*({[\s\S]*})/);;
         if (match) {
           const objStr = match[1];
           // Use safe JSON parsing instead of eval for security
@@ -449,7 +451,7 @@ class I18nSummaryReporter {
   generateDetailedReport() {
     const report = [];
     
-    report.push('I18N DETAILED DUPLICATE KEYS REPORT');
+    report.push('I18NTK DETAILED DUPLICATE KEYS REPORT');
     report.push('='.repeat(40));
     report.push(`Generated: ${new Date().toISOString()}`);
     report.push(`Source directory: ${this.config.sourceDir}`);

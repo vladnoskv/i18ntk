@@ -347,7 +347,7 @@ async function ensureInitialized(cfg) {
       try {
         initStatus = JSON.parse(fs.readFileSync(configPath, 'utf8'));
         // If initialized and version matches current, skip further checks
-        if (initStatus.initialized && initStatus.version === '1.7.2') {
+        if (initStatus.initialized && initStatus.version === '1.8.3') {
           return true;
         }
       } catch (e) {
@@ -368,7 +368,7 @@ async function ensureInitialized(cfg) {
       ensureDirectory(initDir);
       fs.writeFileSync(configPath, JSON.stringify({
         initialized: true,
-        version: '1.7.2',
+        version: '1.8.3',
         timestamp: new Date().toISOString(),
         sourceDir: sourceDir,
         sourceLanguage: sourceLanguage
@@ -387,7 +387,7 @@ async function ensureInitialized(cfg) {
       ensureDirectory(initDir);
       fs.writeFileSync(configPath, JSON.stringify({
         initialized: true,
-        version: '1.7.5',
+        version: '1.8.3',
         timestamp: new Date().toISOString(),
         sourceDir: sourceDir,
         sourceLanguage: sourceLanguage
@@ -407,7 +407,7 @@ async function ensureInitialized(cfg) {
       ensureDirectory(initDir);
       fs.writeFileSync(configPath, JSON.stringify({
         initialized: true,
-        version: '1.7.2',
+        version: '1.8.3',
         timestamp: new Date().toISOString(),
         sourceDir: sourceDir,
         sourceLanguage: sourceLanguage
@@ -472,7 +472,7 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
   const configFile = 'i18ntk-config.json';
   if (!fs.existsSync(configFile)) {
     const defaultConfig = {
-      version: "1.7.2",
+      version: "1.8.3",
       sourceDir: sourceDir,
       outputDir: "./i18ntk-reports",
       defaultLanguage: sourceLang,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * I18N MANAGEMENT TOOLKIT - MAIN MANAGER
+ * I18NTK MANAGEMENT TOOLKIT - MAIN MANAGER
  * 
  * This is the main entry point for all i18n operations.
  * It provides an interactive interface to manage translations.
@@ -76,7 +76,7 @@ async function ensureInitializedOrExit(prompt) {
   if (fs.existsSync(initFilePath)) {
     try {
       const initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
-      isInitialized = initStatus.initialized && initStatus.version === '1.7.2';
+      isInitialized = initStatus.initialized && initStatus.version === '1.8.3, 1.8.3';
     } catch (e) {
       // Invalid init file, proceed with check
     }
@@ -98,7 +98,7 @@ async function ensureInitializedOrExit(prompt) {
     ensureDirectory(initDir);
     fs.writeFileSync(initFilePath, JSON.stringify({
       initialized: true,
-      version: '1.7.2',
+      version: '1.8.3, 1.8.3',
       timestamp: new Date().toISOString(),
       sourceDir: cfg.sourceDir,
       sourceLanguage: cfg.sourceLanguage
@@ -119,7 +119,7 @@ async function ensureInitializedOrExit(prompt) {
   ensureDirectory(initDir);
   fs.writeFileSync(initFilePath, JSON.stringify({
     initialized: true,
-    version: '1.7.2',
+    version: '1.8.3, 1.8.3',
     timestamp: new Date().toISOString(),
     sourceDir: result.sourceDir || cfg.sourceDir,
     sourceLanguage: cfg.sourceLanguage
@@ -779,8 +779,7 @@ class I18nManager {
     console.log(`9. ${t('menu.options.delete')}`);
     console.log(`10. ${t('menu.options.settings')}`);
     console.log(`11. ${t('menu.options.help')}`);
-    console.log(`12. ${t('menu.options.debug')}`);
-    console.log(`13. ${t('menu.options.language')}`);
+    console.log(`12. ${t('menu.options.language')}`);
     console.log(`0. ${t('menu.options.exit')}`);
       console.log('\n' + t('menu.nonInteractiveModeWarning'));
       console.log(t('menu.useDirectExecution'));
@@ -803,8 +802,7 @@ class I18nManager {
     console.log(`9. ${t('menu.options.delete')}`);
     console.log(`10. ${t('menu.options.settings')}`);
     console.log(`11. ${t('menu.options.help')}`);
-    console.log(`12. ${t('menu.options.debug')}`);
-    console.log(`13. ${t('menu.options.language')}`);
+    console.log(`12. ${t('menu.options.language')}`);
     console.log(`0. ${t('menu.options.exit')}`);
     
     const choice = await this.prompt('\n' + t('menu.selectOptionPrompt'));
@@ -900,9 +898,6 @@ class I18nManager {
         await this.showInteractiveMenu();
         break;
       case '12':
-        await this.showDebugMenu();
-        break;
-      case '13':
         await this.showLanguageMenu();
         break;
       case '0':

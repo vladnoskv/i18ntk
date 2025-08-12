@@ -326,7 +326,7 @@
     "couldNotParseSource": "无法解析源语言：{language}",
     "reportGenerated": "报告已生成：{reportPath}",
     "generateReportPrompt": "是否生成报告？(y/n)",
-    "title": "🌍 I18N翻译完成",
+    "title": "🌍 I18NTK 翻译完成",
     "separator": "============================================================",
     "sourceDir": "📁 源目录：{sourceDir}",
     "sourceLanguage": "🌐 源语言：{sourceLanguage}",

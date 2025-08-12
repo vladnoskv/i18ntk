@@ -4,7 +4,7 @@
  * i18ntk Documentation Version Updater
  * Updates all version references across documentation files to the latest version
  * 
- * @version 1.6.3
+ * @version 1.8.3
  * @author i18ntk Team
  */
 
@@ -14,7 +14,7 @@ const { execSync } = require('child_process');
 
 class VersionUpdater {
   constructor() {
-    this.currentVersion = '1.8.1';
+    this.currentVersion = '1.8.3';
     this.targetFiles = [
       'README.md',
       'CHANGELOG.md',
@@ -52,7 +52,7 @@ class VersionUpdater {
     ];
     
     this.deprecatedVersions = [
-      '1.6.0', '1.6.1', '1.6.2'
+      '1.5.x', '1.6.x', '1.7.x'
     ];
     
     this.stats = {

@@ -326,7 +326,7 @@
     "couldNotParseSource": "Impossible de parser la source",
     "reportGenerated": "Rapport généré",
     "generateReportPrompt": "Générer un rapport détaillé ? (y/N): ",
-    "title": "🌍 COMPLÉTION DE TRADUCTION I18N",
+    "title": "🌍 COMPLÉTION DE TRADUCTION I18NTK",
     "separator": "============================================================",
     "sourceDir": "📁 Répertoire source : {sourceDir}",
     "sourceLanguage": "🌐 Langue source : {sourceLanguage}",
@@ -473,7 +473,7 @@
     "i18nDirectoryNotFound": "⚠️  Répertoire i18n non trouvé : {dir}",
     "sourceDirectoryNotFound": "⚠️  Répertoire source non trouvé : {dir}",
     "checkUsage": {
-      "title": "🔍 ANALYSE D'UTILISATION I18N",
+      "title": "🔍 ANALYSE D'UTILISATION I18NTK",
       "message": "Analyse de l'utilisation des clés i18n dans votre projet.",
       "help_message": "\nAnalyseur d'utilisation I18n\n\nUsage : node i18ntk-usage.js [options]\n\nOptions :\n  --source-dir <dir>     Répertoire source à analyser (défaut : ./src)\n  --i18n-dir <dir>       Répertoire I18n (défaut : ./src/locales)\n  --output-report        Générer un rapport détaillé\n  --output-dir <dir>     Répertoire de sortie pour les rapports (défaut : ./reports)\n  --help                 Afficher cette aide\n\nExemples :\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
       "source_directory_thissourcedir": "📁 Répertoire source : {sourceDir}",
@@ -515,7 +515,7 @@
     "complete": {
       "configLoadedSuccessfully": "Configuration chargée avec succès",
       "configLoadingFailed": "Échec du chargement de la configuration",
-      "title": "🌍 COMPLÉTION DE TRADUCTION I18N",
+      "title": "🌍 COMPLÉTION DE TRADUCTION I18NTK",
       "separator": "============================================================",
       "sourceDir": "📁 Répertoire source : {sourceDir}",
       "sourceLanguage": "🌐 Langue source : {sourceLanguage}",
@@ -809,7 +809,7 @@
     "debugLogsDirectoryNotFound": "Répertoire des journaux de débogage introuvable."
   },
   "help": {
-    "title": "📊 AIDE À LA GESTION I18N\n\n",
+    "title": "📊 AIDE À LA GESTION I18NTK\n",
     "usage": "Utilisation : node i18ntk-manage.js [options]\n",
     "interactiveMode": "\n💡 Utilisez : node i18ntk-manage.js --command=<commande> pour exécuter directement\n",
     "showHelp": "\n📖 Utilisez : node i18ntk-manage.js --help pour les commandes disponibles\n",
@@ -828,7 +828,7 @@
     "debugCommand": "  debug     - Déboguer les problèmes de traduction",
     "menu": {
       "pressEnterToContinue": "Appuyez sur Entrée pour continuer...",
-      "title": "\n🌐 MENU DE GESTION I18N\n",
+      "title": "\n🌐 MENU DE GESTION I18NTK\n",
       "description": "Menu interactif pour la gestion de l’internationalisation\n",
       "exit": "\n🚪 Quitter"
     },
@@ -1009,7 +1009,7 @@
     "translation_preview_complete": "Aperçu des traductions terminé. Application en cours…"
   },
   "menu": {
-    "title": "🌐 MENU DE GESTION I18N",
+    "title": "\n🌐 MENU DE GESTION I18NTK\n",
     "separator": "============================================================",
     "options": {
       "init": "🚀 Initialiser de nouvelles langues",
@@ -1830,7 +1830,7 @@
     "excludedFiles": "   Fichiers exclus : {files}",
     "reportContent": "\n{report}",
     "fatalError": "❌ Erreur fatale : {error}",
-    "helpTitle": "📊 GÉNÉRATEUR DE RAPPORT RÉCAPITULATIF I18N",
+    "helpTitle": "📊 GÉNÉRATEUR DE RAPPORT RÉCAPITULATIF I18NTK",
     "helpDescription": "Analyse la structure du dossier i18n et génère un rapport complet incluant statistiques, analyse de l’arborescence et contrôles de validation.",
     "helpUsage": "Utilisation : node i18ntk-summary.js [options]",
     "helpOptions": "  --source-dir <dir>     Répertoire source à analyser",
@@ -1857,7 +1857,7 @@
     "keysInFiles": "\n📊 {keys} clés trouvées dans {files} fichier(s)\n",
     "checkingInconsistentKeys": "\n🔍 Vérification des clés incohérentes entre les langues...\n",
     "generatingSummaryReport": "\n📝 Génération du rapport récapitulatif...\n",
-    "reportTitle": "\n📊 RAPPORT RÉCAPITULATIF I18N\n",
+    "reportTitle": "\n📊 RAPPORT RÉCAPITULATIF I18NTK\n",
     "generated": "\nGénéré le : {timestamp}\n",
     "sourceDirectory": "\nRépertoire source : {dir}\n",
     "overview": "\n📈 VUE D’ENSEMBLE",
@@ -1903,7 +1903,7 @@
     "foundIssues": "\n❌ {count} problème(s) trouvé(s)\n",
     "noIssuesConsole": "\n✅ Aucun problème – tous les fichiers sont cohérents !\n",
     "errorDuringAnalysis": "❌ Erreur lors de l’analyse : {error}",
-    "usageReportTitle": "📊 RAPPORT D’UTILISATION I18N",
+    "usageReportTitle": "📊 RAPPORT D’UTILISATION I18NTK",
     "usageReportGenerated": "Généré le : {timestamp}",
     "usageReportSourceDir": "Répertoire source : {sourceDir}",
     "usageReportI18nDir": "Répertoire i18n : {i18nDir}",
@@ -2242,5 +2242,50 @@
     "signUp": "S'inscrire"
   }
   
+  },
+  "usage": {
+    "title": "🎯 Analyseur d'Utilisation des Traductions",
+    "description": "Analyse l'utilisation des clés de traduction dans votre code source.",
+    "help": "Affiche cette aide",
+    "sourceDir": "Répertoire source à analyser (par défaut: ./src)",
+    "i18nDir": "Répertoire des traductions (par défaut: ./src/i18n/locales)",
+    "outputDir": "Répertoire de sortie pour les rapports",
+    "format": "Format de sortie: json, csv, html",
+    "verbose": "Sortie détaillée",
+    "dryRun": "Exécuter sans effectuer de modifications",
+    "config": "Chemin vers le fichier de configuration",
+    "loadingConfig": "⚙️  Chargement de la configuration...",
+    "analyzingSource": "🔍 Analyse du code source...",
+    "scanningFiles": "📂 Scan des fichiers...",
+    "foundFiles": "✅ Trouvé {count} fichiers à analyser",
+    "processingFile": "📄 Traitement: {filename}",
+    "foundKeys": "🔑 Trouvé {count} clés de traduction utilisées",
+    "availableKeys": "📋 Clés disponibles: {count}",
+    "usedKeys": "✅ Clés utilisées: {count}",
+    "unusedKeys": "⚠️  Clés non utilisées: {count}",
+    "missingKeys": "❌ Clés manquantes: {count}",
+    "coverage": "📊 Couverture: {percentage}%",
+    "generatingReport": "📊 Génération du rapport...",
+    "reportSaved": "✅ Rapport enregistré dans: {path}",
+    "analysisComplete": "🎉 Analyse terminée avec succès",
+    "errorReadingFile": "❌ Erreur de lecture du fichier: {filename}",
+    "invalidTranslationKey": "⚠️  Clé de traduction invalide: {key}",
+    "noTranslationFiles": "❌ Aucun fichier de traduction trouvé",
+    "noSourceFiles": "❌ Aucun fichier source trouvé pour l'analyse",
+    "analysisFailedError": "Erreur: Impossible de terminer l'analyse - {error}",
+    "summaryTitle": "📋 RÉSUMÉ DE L'ANALYSE",
+    "totalFiles": "📄 Fichiers totaux: {count}",
+    "totalKeys": "🔑 Clés totales: {count}",
+    "usedKeysCount": "✅ Clés utilisées: {count}",
+    "unusedKeysCount": "⚠️  Clés non utilisées: {count}",
+    "missingKeysCount": "❌ Clés manquantes: {count}",
+    "coveragePercentage": "📊 Couverture: {percentage}%",
+    "recommendations": "💡 RECOMMANDATIONS",
+    "removeUnused": "   • Supprimer les clés non utilisées",
+    "addMissing": "   • Ajouter les traductions manquantes",
+    "reviewKeys": "   • Examiner les clés avec des noms similaires",
+    "checkDynamic": "   • Vérifier l'utilisation dynamique des clés",
+    "detailedReport": "📊 Rapport détaillé disponible à: {path}",
+    "noIssues": "✅ Aucun problème trouvé! Toutes les clés sont correctement utilisées."
   }
 }

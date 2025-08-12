@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Components Documentation
 
-**Version:** 1.6.3**Last Updated:** 2025-08-08
+**Version:** 1.8.3**Last Updated:** 2025-08-12
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 📋 Overview
@@ -488,4 +488,4 @@ const analyzer = new I18nAnalyzer({
 
 ---
 
-**Note:** This component documentation is maintained for version 1.6.3 (DEPRECATED - use latest version) . For implementation details, refer to the source code and [API Reference](./API_REFERENCE.md).
+**Note:** This component documentation is maintained for version 1.8.3. For implementation details, refer to the source code and [API Reference](./API_REFERENCE.md).

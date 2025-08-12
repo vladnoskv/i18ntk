@@ -61,7 +61,7 @@ class HardcodedConsoleReplacer {
         );
         
         this.replacements.set(
-            /console\.log\('🎛️\s*I18N Management Toolkit'/g,
+            /console\.log\('🎛️\s*I18NTK Management Toolkit'/g,
             "console.log(t('menu.title'))"
         );
         

@@ -326,7 +326,7 @@
     "couldNotParseSource": "Quellsprache konnte nicht analysiert werden",
     "reportGenerated": "Bericht generiert",
     "generateReportPrompt": "Generiere Bericht?",
-    "title": "🌍 I18N-ÜBERSETZUNGSVERVOLLSTÄNDIGUNG",
+    "title": "🌍 I18NTK-ÜBERSETZUNGSVERVOLLSTÄNDIGUNG",
     "separator": "============================================================",
     "sourceDir": "📁 Quelldirectory: {sourceDir}",
     "sourceLanguage": "🌐 Ausgangssprache: {sourceLanguage}",
@@ -473,7 +473,7 @@
     "i18nDirectoryNotFound": "⚠️  I18n-Verzeichnis nicht gefunden: {dir}",
     "sourceDirectoryNotFound": "⚠️  Quellverzeichnis nicht gefunden: {dir}",
     "checkUsage": {
-      "title": "🔍 I18N-NUTZUNGSANALYSE",
+      "title": "🔍 I18NTK-NUTZUNGSANALYSE",
       "message": "Analyse der i18n-Schlüsselverwendung im gesamten Projekt.",
       "help_message": "\nI18n-Nutzungsanalysator\n\nVerwendung: node i18ntk-usage.js [Optionen]\n\nOptionen:\n  --source-dir <dir>     Quellverzeichnis zum Scannen (Standard: ./locales)\n  --i18n-dir <dir>       I18n-Verzeichnis (Standard: ./locales)\n  --output-report        Detaillierten Bericht erstellen\n  --output-dir <dir>     Ausgabeverzeichnis für Berichte (Standard: ./i18ntk-reports)\n  --help                 Diese Hilfe anzeigen\n\nBeispiele:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
       "source_directory_thissourcedir": "📁 Quellverzeichnis: {sourceDir}",
@@ -515,7 +515,7 @@
     "complete": {
       "configLoadedSuccessfully": "Konfiguration erfolgreich geladen",
       "configLoadingFailed": "Konfiguration konnte nicht geladen werden",
-      "title": "🌍 I18NÜBERSetzungsvollständigkeit",
+      "title": "🌍 I18NTK ÜBERSETZUNGSVOLLSTÄNDIGKEIT",
       "separator": "============================================================",
       "sourceDir": "📁 Quellverzeichnis: {sourceDir}",
       "sourceLanguage": "🌐 Quellsprache: {sourceLanguage}",
@@ -809,7 +809,7 @@
     "debugLogsDirectoryNotFound": "Verzeichnis für Debug-Protokolle nicht gefunden."
   },
   "help": {
-    "title": "📊 I18N VERWALTUNGSHILFE\n\n",
+    "title": "📊 I18NTK VERWALTUNGSHILFE\n\n",
     "usage": "Verwendung: node i18ntk-manage.js [Optionen]\n",
     "interactiveMode": "\n💡 Verwenden: node i18ntk-manage.js --command=<command> für direkte Ausführung\n",
     "showHelp": "\n📖 Verwenden: node i18ntk-manage.js --help für verfügbare Befehle\n",
@@ -828,7 +828,7 @@
     "debugCommand": "  debug     - Übersetzungsfehler debuggen",
     "menu": {
       "pressEnterToContinue": "Drücken Sie die Eingabetaste, um fortzufahren...",
-      "title": "\n🌐 I18N VERWALTUNGSMENÜ\n",
+      "title": "\n🌐 I18NTK VERWALTUNGSMENÜ\n",
       "description": "Interaktives Menü zur Verwaltung der Internationalisierung\n",
       "exit": "\n🚪 Beenden"
     },
@@ -1012,7 +1012,7 @@
     "translation_preview_complete": "Übersetzungsvorschau abgeschlossen. Übersetzungen werden angewendet..."
   },
   "menu": {
-    "title": "🌐 I18N VERWALTUNGSMENÜ",
+    "title": "🌐 I18NTK VERWALTUNGSMENÜ",
     "separator": "============================================================",
     "options": {
       "init": "🚀 Neue Sprachen initialisieren",
@@ -1842,7 +1842,7 @@
     "excludedFiles": "   Ausgeschlossene Dateien: {files}",
     "reportContent": "\n{report}",
     "fatalError": "❌ Schwerwiegender Fehler: {error}",
-    "helpTitle": "📊 I18N ZUSAMMENFASSUNGSBERICHT-GENERATOR",
+    "helpTitle": "📊 I18NTK ZUSAMMENFASSUNGSBERICHT-GENERATOR",
     "helpDescription": "Analysiert die i18n-Ordnerstruktur und erstellt einen umfassenden Zusammenfassungsbericht mit wichtigen Statistiken, Dateistrukturanalyse und Validierungsprüfungen.",
     "helpUsage": "Verwendung: node i18ntk-summary.js [Optionen]",
     "helpOptions": "  --source-dir <dir>     Quellverzeichnis zur Analyse",
@@ -1869,7 +1869,7 @@
     "keysInFiles": "\n📊 {keys} Schlüssel in {files} Dateien gefunden\n",
     "checkingInconsistentKeys": "\n🔍 Überprüfe inkonsistente Schlüssel zwischen den Sprachen...",
     "generatingSummaryReport": "\n📝 Generiere Zusammenfassungsbericht...\n",
-    "reportTitle": "\n📊 I18N ZUSAMMENFASSUNGSBERICHT\n",
+    "reportTitle": "\n📊 I18NTK ZUSAMMENFASSUNGSBERICHT\n",
     "generated": "\nErstellt am: {timestamp}\n",
     "sourceDirectory": "\nQuellverzeichnis: {dir}\n",
     "overview": "\n📈 ÜBERSICHT",
@@ -1907,7 +1907,7 @@
     "nextStep4": "4. Regelmäßige Überprüfung empfohlen",
     "couldNotFindI18nDirectory": "❌ Konnte i18n-Verzeichnis nicht finden. Bitte --source-dir angeben.",
     "sourceDirectoryDoesNotExist": "❌ Quellverzeichnis existiert nicht: {dir}",
-    "i18nSummaryReportGenerator": "📊 I18N Zusammenfassungsbericht-Generator",
+    "i18nSummaryReportGenerator": "📊 I18NTK Zusammenfassungsbericht-Generator",
     "analysisComplete": "\n✅ Analyse abgeschlossen",
     "analyzedLanguages": "\n📊 Analysierte Sprachen: {count}",
     "processedFiles": "\n📁 Verarbeitete Dateien: {count}",
@@ -1915,7 +1915,7 @@
     "foundIssues": "\n❌ {count} Probleme gefunden\n",
     "noIssuesConsole": "\n✅ Keine Probleme gefunden – alle Dateien sind konsistent!\n",
     "errorDuringAnalysis": "❌ Fehler während der Analyse: {error}",
-    "usageReportTitle": "📊 I18N NUTZUNGSBERICHT",
+    "usageReportTitle": "📊 I18NTK NUTZUNGSBERICHT",
     "usageReportGenerated": "Erstellt am: {timestamp}",
     "usageReportSourceDir": "Quellverzeichnis: {sourceDir}",
     "usageReportI18nDir": "I18n-Verzeichnis: {i18nDir}",

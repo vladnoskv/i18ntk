@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * I18N INITIALIZATION SCRIPT
+ * I18NTK INITIALIZATION SCRIPT
  * 
  * This script initializes a new i18n project or adds new languages to an existing one.
  * It uses the English (en) locale as the source of truth and generates translation files

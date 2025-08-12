@@ -2,11 +2,11 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.8.2
+**Version:** 1.8.3
 **Last Updated:** 2025-08-12  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
-[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.8.2)](https://socket.dev/npm/package/i18ntk/overview/1.8.2)
+[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.8.3)](https://socket.dev/npm/package/i18ntk/overview/1.8.3)
 
 🚀 **The fastest way to manage translations across any framework or vanilla JavaScript projects**
 
@@ -16,9 +16,9 @@
 
 **What it doesn’t:** It’s not a runtime i18n library (e.g., i18next/Vue i18n); it won’t inject `t()` at runtime. (Maybe in the future...)
 
-**v1.8.2 (Bug-fix):** Tightens settings management and translation handling, resolving regressions from 1.8.1 while preserving all existing functionality. Fixed settings function bug, and sizing script defaulting to /locales instead of the correct config.
+**v1.8.3 (Bug-fix):** Critical fixes for undefined errors and improved user experience with initialization checks and simplified interface.
 
-Big thank you for **2,000+ downloads (12/08/25)** and your patience as the toolkit has matured since 1.0.0. This is my first public package and I hope this toolkit makes your life easier with internationalization. With **1.8.0** as our first fully stable release and **1.8.2** focused on reliability and fixing bugs from the new features introduced in 1.8.1, going forward, we expect fewer changes to core functionality. We’re exploring optional runtime helpers and a companion web UI for AI-assisted translations — while trying to keep the core CLI **dependency-free**.
+Big thank you for **2,000+ downloads (12/08/25)** and your patience as the toolkit has matured. Version **1.8.3** focuses on reliability and fixing critical bugs, with fewer changes expected to core functionality going forward. We're exploring optional runtime helpers and a companion web UI for AI-assisted translations — while keeping the core CLI **dependency-free**.
 
 Please show your support if the package has helped you even 1% by staring my project on GitHub and watch to follow our journey to make internationalization easier than ever. Thank you! [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
 
@@ -33,7 +33,7 @@ npm install -g i18ntk
 npx i18ntk
 
 # Verify installation
-i18ntk --version  # Should show 1.8.2
+i18ntk --version  # Should show 1.8.3
 ```
 
 ### 🎯 **First Command - Instant Results**
@@ -114,7 +114,7 @@ i18ntk analyze --detect-framework --framework react
 - **Interactive CLI** with beautiful menus
 - **CI/CD Ready** with JSON output mode
 
-### 🎯 **NEW in 1.8.2 - Latest Release**
+### 🎯 **NEW in 1.8.3 - Latest Release**
 - **Enhanced Framework Detection** - Auto-detects React, Vue, Angular, i18next
 - **Ultra-Performance Mode** - 97% speed improvement
 - **Advanced Security Features** - PIN protection & encryption
@@ -129,13 +129,13 @@ i18ntk analyze --detect-framework --framework react
 - **Placeholder Validation**: Ensure consistent placeholder usage
 - **Cross-reference Checking**: Verify translation completeness across languages
 
-### 🎯 **Enhanced Framework Detection (NEW in 1.8.2)**
+### 🎯 **Enhanced Framework Detection (NEW in 1.8.3)**
 - **Smart Framework Detection**: Automatically detects i18next, Lingui, and FormatJS
 - **Package.json Analysis**: Quick detection via dependency analysis
 - **Framework-specific Rules**: Tailored validation for each framework
 - **Enhanced Doctor Tool**: Framework-aware analysis and recommendations
 
-### 🔌 **Plugin System (NEW in 1.8.2)**
+### 🔌 **Plugin System (NEW in 1.8.3)**
 - **Plugin Loader Architecture**: Extensible plugin system with PluginLoader and FormatManager
 - **Custom Extractors**: Support for custom translation extractors
 - **Format Managers**: Unified handling of different translation formats
@@ -149,7 +149,7 @@ i18ntk analyze --detect-framework --framework react
 - **Streaming Processing**: Handle large files without memory issues
 - **No Child Processes**: Removed child_process usage for better performance
 
-### 🔒 **Security First (Enhanced in 1.8.2)**
+### 🔒 **Security First (Enhanced in 1.8.3)**
 - **Admin PIN Protection**: Secure sensitive operations with PIN authentication
 - **Command-line PIN**: Support for `--admin-pin` argument in non-interactive mode
 - **Standardized Exit Codes**: Consistent exit codes across all CLI commands
@@ -173,7 +173,7 @@ i18ntk analyze --detect-framework --framework react
 
 ---
 
-## 🛡️ Security in 1.8.2
+## 🛡️ Security in 1.8.3
 
 ### Summary
 
@@ -186,7 +186,7 @@ i18ntk analyze --detect-framework --framework react
 
 ### Before → After
 
-| Area                  | Before (risk)                | After (1.7.5+)                    |
+| Area                  | Before (risk)                | After (1.8.3+)                    |
 | --------------------- | ---------------------------- | --------------------------------- |
 | Shell execution       | Possible via `child_process` | **Removed entirely**              |
 | File ops              | Mixed shell + Node           | **Node fs/path only**             |
@@ -212,7 +212,7 @@ i18ntk analyze --detect-framework --framework react
 |:----------------------:|:--------------------:|
 | ![Language Selection](docs/screenshots/I18NTK-LANGUAGE-UI.PNG) | ![Language Changed](docs/screenshots/I18NTK-LANGUAGE-UI-CHANGED.PNG) |
 
-| **Settings Manager (v1.8.2)** | **Translation Fixer (v1.8.2)** |
+| **Settings Manager (v1.8.3)** | **Translation Fixer (v1.8.3)** |
 |:-----------------------------:|:-------------------------------:|
 | ![Settings Manager](docs/screenshots/I18NTK-SETTINGS.PNG) | ![Translation Fixer](docs/screenshots/I18NTK-FIXER.PNG) |
 
@@ -246,7 +246,7 @@ i18ntk analyze --detect-framework --framework react
 
 ## 📊 **i18ntk vs Others - The Clear Winner**
 
-| Feature | i18ntk 1.8.2 | Traditional Tools | Manual Process |
+| Feature | i18ntk 1.8.3 | Traditional Tools | Manual Process |
 |---------|--------------|-------------------|----------------|
 | **Speed** | 15.38ms (200k keys) | 2-5 minutes | Hours |
 | **Memory** | <2MB | 50-200MB | Variable |
@@ -294,7 +294,7 @@ i18ntk analyze --detect-framework --framework react
 
 ---
 
-## 🔒 Safer Workflow (NEW in v1.8.0)
+## 🔒 Safer Workflow (NEW in v1.8.3)
 
 **Enhanced security through manual script execution:**
 
@@ -318,7 +318,7 @@ Create `settings/i18ntk-config.json` (auto‑generated by `init`):
 
 ```json
 {
-  "version": "1.8.0",
+  "version": "1.8.3",
   "sourceDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "defaultLanguage": "en",
@@ -369,7 +369,7 @@ You can override paths with environment variables:
 
 ---
 
-## 🔧 Enhanced Translation Fixer (v1.8.0)
+## 🔧 Enhanced Translation Fixer (v1.8.3)
 
 Interactive tool with improved automatic detection to locate and repair placeholders such as `{{NOT_TRANSLATED}}`, `__UNTRANSLATED__`, or custom markers.
 
@@ -486,4 +486,4 @@ your-project/
 
 **Made for the global dev community.** ❤️
 **Last Updated:** 2025-08-12**
-**Version:** 1.8.2
+**Version:** 1.8.3

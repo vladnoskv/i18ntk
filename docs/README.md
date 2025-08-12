@@ -1,10 +1,10 @@
 # Documentation Overview
 
-**Version:** 1.8.1
+**Version:** 1.8.3, 1.8.3
 **Last Updated:** 2025-08-11
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
-Version 1.8.1 delivers smart framework detection, a plugin architecture for custom workflows, enhanced security with PIN authentication and AES encryption, and major performance gains. With over 2,000 downloads, this release is considered fully stable.
+Version 1.8.3, 1.8.3 delivers smart framework detection, a plugin architecture for custom workflows, enhanced security with PIN authentication and AES encryption, and major performance gains. With over 2,000 downloads, this release is considered fully stable.
 
 ## Structure
 
@@ -25,14 +25,14 @@ Version 1.8.1 delivers smart framework detection, a plugin architecture for cust
  - [Release Notes](./release-notes/) - Version history and upgrade notes
  - [Reports](./reports/) - Analysis and validation reports
  - [Screenshots](./screenshots/) - Visual examples
- - [Version 1.6.3 Docs](./version-1.6.3/) - Archived documentation for v1.6.3 (deprecated)
+ - [Version 1.8.3, 1.8.3 Docs](./version-1.8.3, 1.8.3/) - Archived documentation for v1.8.3 (deprecated)
  - [TODO & Roadmap](./TODO_ROADMAP.md) - Planned features and upcoming work
  - [License](./LICENSE) - MIT License information
  - [Contributing](./CONTRIBUTING.md) - Guidelines for contributing to i18ntk
  - [Development Scripts and Tools](./dev/) - Scripts and tools for development
 
 
-## Highlights in 1.8.1
+## Highlights in 1.8.3, 1.8.3
 
 - **Smart Framework Detection** automatically configures rules for i18next, Lingui, and FormatJS projects.
 - **Extensible Plugin System** enables custom extractors and format managers.
@@ -41,9 +41,9 @@ Version 1.8.1 delivers smart framework detection, a plugin architecture for cust
 
 ## Migration Guide
 
-### Upgrading to 1.8.1 (Recommended)
+### Upgrading to 1.8.3, 1.8.3 (Recommended)
 
-#### From any version < 1.8.1
+#### From any version < 1.8.3, 1.8.3
 1. **Backup your current configuration**:
    ```bash
    cp -r ./settings ./settings-backup-$(date +%Y%m%d)
@@ -51,18 +51,18 @@ Version 1.8.1 delivers smart framework detection, a plugin architecture for cust
 
 2. **Install the latest secure version**:
     ```bash
-    npm install i18ntk@1.8.1
+    npm install i18ntk@1.8.3
     ```
 
 3. **Run security validation**:
     ```bash
-    npx i18ntk@1.8.1 --security-check
+    npx i18ntk@1.8.3, 1.8.3 --security-check
     ```
 
 4. **Verify installation**:
     ```bash
-    npx i18ntk@1.8.1 --version
-    npx i18ntk@1.8.1 --validate
+    npx i18ntk@1.8.3, 1.8.3 --version
+    npx i18ntk@1.8.3, 1.8.3 --validate
     ```
 
 #### Preserved Features from 1.7.x
@@ -75,7 +75,7 @@ Version 1.8.1 delivers smart framework detection, a plugin architecture for cust
 - ✅ **Zero shell access security**
 
 #### Breaking Changes
-- **None** - 1.8.1 is fully backward compatible with enhanced security
+- **None** - 1.8.3, 1.8.3 is fully backward compatible with enhanced security
 
 ### Migration Support
 If you encounter issues during migration:

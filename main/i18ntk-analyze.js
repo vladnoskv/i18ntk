@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * I18N TRANSLATION ANALYSIS SCRIPT
+ * I18NTK TRANSLATION ANALYSIS SCRIPT
  * 
  * This script analyzes translation files to identify missing translations,
  * inconsistencies, and provides detailed reports for each language.
@@ -41,6 +41,8 @@ class I18nAnalyzer {
         });
         process.exit(0);
       }
+      
+      // Configuration is handled by getUnifiedConfig - no need for .i18ntk directory check
       
       // Initialize i18n with UI language first
       const baseConfig = await getUnifiedConfig('analyze', args);
@@ -173,7 +175,9 @@ class I18nAnalyzer {
 
   // Get value by key path
   getValueByPath(obj, keyPath) {
-    const keys = keyPath.split('.');
+    // Ensure keyPath is a string
+    const keyPathStr = String(keyPath || '');
+    const keys = keyPathStr.split('.');
     let current = obj;
     
     for (const key of keys) {

@@ -1,6 +1,6 @@
 # I18N Management Toolkit - Configuration Guide
 
-**Version:** 1.8.1
+**Version:** 1.8.3
 **Last Updated:** 2025-08-11
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
@@ -19,7 +19,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.8.1",
+  "version": "1.8.3",
   "lastUpdated": "2025-07-27",
   "project": {
     "name": "My Project",
@@ -78,7 +78,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.8.1",
+  "version": "1.8.3, 1.8.3",
   "lastUpdated": "2025-08-11",
   "security": {
     "adminMode": false,
@@ -652,7 +652,7 @@ Common configuration errors and solutions:
 
 ### Version Migration
 
-When upgrading to version 1.6.3 (DEPRECATED - use latest version) , the toolkit automatically:
+When upgrading to version 1.8.3, 1.8.3 (DEPRECATED - use latest version) , the toolkit automatically:
 
 1. **Backs up** existing configuration files
 2. **Migrates** settings to new format
@@ -788,4 +788,4 @@ npm run benchmark:ci
 npm run benchmark:baseline
 ```
 
-**Note:** This configuration guide is maintained for version 1.6.3 (DEPRECATED - use latest version) . For the latest configuration options, refer to the [API Reference](./API_REFERENCE.md) and [Components Documentation](./COMPONENTS.md).
+**Note:** This configuration guide is maintained for version 1.8.3. For the latest configuration options, refer to the [API Reference](./API_REFERENCE.md) and [Components Documentation](./COMPONENTS.md).

@@ -11,7 +11,7 @@ class SettingsManager {
         this.backupDir = path.join(this.configDir, 'backups');
         
         this.defaultConfig = {
-            "version": "1.8.1",
+            "version": "1.8.3, 1.8.3",
             "language": "en",
             "uiLanguage": "en",
             "theme": "dark",
@@ -478,7 +478,7 @@ class SettingsManager {
                 version: {
                     type: 'string',
                     description: 'Configuration version',
-                    default: '1.8.2',
+                    default: '1.8.3',
                     readOnly: true
                 },
                 language: {

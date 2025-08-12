@@ -1,5 +1,21 @@
 #!/usr/bin/env node
 
+/**
+ * I18NTK TRANSLATION VALIDATION TOOLKIT
+ * 
+ * This script validates translation files for completeness, consistency,
+ * and structural integrity across all languages.
+ * 
+ * Usage:
+ *   npm run i18ntk:validate
+ *   npm run i18ntk:validate -- --strict
+ *   npm run i18ntk:validate -- --language=de
+ *   npm run i18ntk:validate -- --source-dir=./src/i18n/locales
+ * 
+ * Alternative direct usage:
+ *   node i18ntk-validate.js
+ */
+
 // Check for uppercase command usage and provide helpful error
 const commandLine = process.argv.join(' ');
 const isUppercase = /NPX I18NTK|NPM I18NTK/i.test(commandLine);
@@ -19,21 +35,6 @@ if (isUppercase) {
   console.error('📖 For more information, run: npx i18ntk --help');
   process.exit(ExitCodes.CONFIG_ERROR);
 }
-/**
- * I18N TRANSLATION VALIDATION TOOLKIT
- * 
- * This script validates translation files for completeness, consistency,
- * and structural integrity across all languages.
- * 
- * Usage:
- *   npm run i18ntk:validate
- *   npm run i18ntk:validate -- --strict
- *   npm run i18ntk:validate -- --language=de
- *   npm run i18ntk:validate -- --source-dir=./src/i18n/locales
- * 
- * Alternative direct usage:
- *   node i18ntk-validate.js
- */
 
 const fs = require('fs');
 const path = require('path');
@@ -234,7 +235,9 @@ class I18nValidator {
 
   // Get value by key path
   getValueByPath(obj, keyPath) {
-    const keys = keyPath.split('.');
+    // Ensure keyPath is a string
+    const keyPathStr = String(keyPath || '');
+    const keys = keyPathStr.split('.');
     let current = obj;
     
     for (const key of keys) {
@@ -309,18 +312,26 @@ class I18nValidator {
 
     extractPlaceholders(value, patterns = []) {
     const placeholders = new Set();
+    if (value === null || value === undefined) return placeholders;
+    const valueStr = String(value);
     patterns.forEach(p => {
-      const reg = new RegExp(p, 'g');
-      let m;
-      while ((m = reg.exec(value)) !== null) {
-        placeholders.add(m[0]);
+      try {
+        const reg = new RegExp(p, 'g');
+        let m;
+        while ((m = reg.exec(valueStr)) !== null) {
+          placeholders.add(m[0]);
+        }
+      } catch (e) {
+        // skip invalid patterns
       }
     });
     return placeholders;
   }
 
   getGenericPlaceholders(value) {
-    return new Set(value.match(/%s|\{\d+\}|\{\{[^}]+\}\}|\{[^}]+\}/g) || []);
+    if (value === null || value === undefined) return new Set();
+    const valueStr = String(value);
+    return new Set(valueStr.match(/%s|\{\d+\}|\{\{[^}]+\}\}|\{[^}]+\}/g) || []);
   }
 
   checkPlaceholders(source, target, language, fileName, prefix = '') {

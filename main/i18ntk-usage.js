@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * I18N USAGE ANALYSIS TOOLKIT - Version 1.8.2
+ * I18NTK USAGE ANALYSIS TOOLKIT - Version 1.8.3
  * 
  * This script analyzes source code to find unused translation keys,
  * missing translations, and provides comprehensive translation completeness analysis.
  * 
- * NEW in v1.8.2:
+ * NEW in v1.8.3:
  * - Enhanced placeholder key detection with validation
  * - Framework-specific pattern recognition
  * - Advanced translation completeness scoring
@@ -13,7 +13,7 @@
  * - Performance-optimized analysis
  * - Detailed framework usage reports
  * 
- * Features from v1.6.3:
+ * Features from v1.8.3:
  * - Modular folder structure support
  * - Recursive translation file discovery
  * - NOT_TRANSLATED analysis
@@ -71,7 +71,7 @@ class I18nUsageAnalyzer {
     this.frameworkUsage = new Map(); // Track framework usage per file
     this.keyComplexity = new Map(); // Track key complexity analysis
     this.startTime = Date.now(); // Track performance metrics
-    this.version = '1.8.2'; // Version tracking
+    this.version = '1.8.3, 1.8.3'; // Version tracking
     
     // Use global translation function
     this.rl = null;
@@ -94,8 +94,11 @@ class I18nUsageAnalyzer {
   // Prompt for user input
   async prompt(question) {
     const rl = getGlobalReadline();
-    return new Promise(resolve => rl.question(question, resolve));
-
+    return new Promise(resolve => {
+      rl.question(question, (answer) => {
+        resolve(answer);
+      });
+    });
   }
 
   async initialize() {
@@ -368,6 +371,11 @@ class I18nUsageAnalyzer {
         this.config = {};
       }
       
+      // Ensure configuration is loaded - no need for .i18ntk directory check
+      if (!this.config) {
+        this.config = {};
+      }
+      
       // Initialize configuration properly when called from menu
       if (fromMenu && !this.sourceDir) {
         const baseConfig = await getUnifiedConfig('usage', args);
@@ -536,14 +544,30 @@ class I18nUsageAnalyzer {
       // NEW: Display framework usage
       if (this.frameworkUsage.size > 0) {
         console.log('\n🛠️  Framework Detection:');
-        for (const [framework, count] of this.frameworkUsage) {
-          console.log(`   ${framework}: ${count} files`);
+        const frameworkCounts = new Map();
+        
+        // Aggregate framework counts
+        for (const [filePath, frameworkInfo] of this.frameworkUsage) {
+          const frameworkName = frameworkInfo.framework || 'generic';
+          frameworkCounts.set(frameworkName, (frameworkCounts.get(frameworkName) || 0) + 1);
         }
+        
+        if (frameworkCounts.size > 0) {
+          for (const [framework, count] of frameworkCounts) {
+            console.log(`   ${framework}: ${count} files`);
+          }
+        } else {
+          console.log('   No Framework: 0 files');
+        }
+      } else {
+        console.log('\n🛠️  Framework Detection:');
+        console.log('   No Framework: 0 files');
       }
       
       // NEW: Display key complexity analysis
-      const avgComplexity = this.keyComplexity.size > 0 ? 
-        Array.from(this.keyComplexity.values()).reduce((a, b) => a + b, 0) / this.keyComplexity.size : 0;
+      const complexityValues = Array.from(this.keyComplexity.values()).map(c => c.segments || 0);
+      const avgComplexity = complexityValues.length > 0 ? 
+        complexityValues.reduce((a, b) => a + b, 0) / complexityValues.length : 0;
       console.log(`\n🔍 Key Complexity: ${avgComplexity.toFixed(2)} avg depth`);
       
       // Sanity check: warn if 0 used keys but available keys exist
@@ -552,16 +576,15 @@ class I18nUsageAnalyzer {
       }
       
       // Display translation completeness by language with enhanced scoring
-      console.log(t('usage.translationCompletenessTitle'));
+      console.log(t('common.languageCompletenessTitle'));
       for (const [language, stats] of this.translationStats) {
         const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
         const score = this.calculateTranslationScore(language, stats);
-        console.log(t('usage.languageCompletenessStats', { 
-          language, 
+        console.log(t('summary.usageReportLanguageCompleteness', { 
+          language: language.toUpperCase(), 
           completeness, 
           translated: stats.translated, 
-          total: stats.total,
-          score: score.quality.toFixed(1)
+          total: stats.total
         }));
       }
       
@@ -580,7 +603,7 @@ class I18nUsageAnalyzer {
     } catch (error) {
       console.error(t('usage.analysisFailedError'), error.message);
       this.closeReadline();
-      await SecurityUtils.logSecurityEvent(t('usage.usageAnalysisFailed'), { 
+      SecurityUtils.logSecurityEvent(t('usage.usageAnalysisFailed'), { 
         component: 'i18ntk-usage', 
         error: error.message 
       });
@@ -591,7 +614,7 @@ class I18nUsageAnalyzer {
   // Show help message
   showHelp() {
     console.log(`
-📊 i18ntk usage - Translation key usage analysis (v1.8.2)
+📊 i18ntk usage - Translation key usage analysis (v1.8.3)
 
 Usage:
   node i18ntk-usage.js [options]
@@ -615,7 +638,7 @@ Examples:
   npm run i18ntk:usage -- --strict --debug --validate-placeholders
   node i18ntk-usage.js --no-prompt --performance-mode --output-dir=./reports
 
-Analysis Features (v1.8.2):
+Analysis Features (v1.8.3):
   • Detects unused translation keys
   • Identifies missing translation keys
   • Shows translation completeness by language
@@ -858,7 +881,7 @@ Analysis Features (v1.8.2):
   // NEW: Analyze translation completeness across all languages
   async analyzeTranslationCompleteness() {
     try {
-      console.log('\n' + t('usage.analyzingTranslationCompleteness'));
+      console.log('\n📊 Analyzing translation completeness...');
       
       const isDebug = process.argv.includes('--debug');
       const isStrict = process.argv.includes('--strict');
@@ -904,7 +927,7 @@ Analysis Features (v1.8.2):
       
       // If no languages found, exit gracefully
       if (languages.size === 0) {
-        console.warn(t('usage.noTranslationLanguagesFound'));
+        console.warn(t('usage.checkUsage.noTranslationLanguagesFound'));
         return;
       }
       
@@ -1337,8 +1360,18 @@ Analysis Features (v1.8.2):
 
   // NEW: Enhanced placeholder key detection with validation
   validatePlaceholderKeys(key, value) {
+    if (typeof value !== 'string') {
+      return {
+        key,
+        hasPlaceholders: false,
+        placeholders: [],
+        isValid: true,
+        errors: []
+      };
+    }
+    
     const placeholderRegex = /\{\{[^}]+\}\}|\{[^}]+\}|\$\{[^}]+\}/g;
-    const placeholders = value.match(placeholderRegex) || [];
+    const placeholders = (typeof value === 'string' ? value : String(value || '')).match(placeholderRegex) || [];
     
     const validation = {
       key,
@@ -1350,17 +1383,20 @@ Analysis Features (v1.8.2):
     
     // Check for common placeholder issues
     placeholders.forEach(placeholder => {
-      if (placeholder.includes('undefined') || placeholder.includes('null')) {
-        validation.isValid = false;
-        validation.errors.push(`Invalid placeholder: ${placeholder}`);
-      }
-      
-      // Check for matching opening/closing brackets
-      const openCount = (placeholder.match(/\{/g) || []).length;
-      const closeCount = (placeholder.match(/\}/g) || []).length;
-      if (openCount !== closeCount) {
-        validation.isValid = false;
-        validation.errors.push(`Mismatched brackets in: ${placeholder}`);
+      if (typeof placeholder === 'string') {
+        if (placeholder.includes('undefined') || placeholder.includes('null')) {
+          validation.isValid = false;
+          validation.errors.push(`Invalid placeholder: ${placeholder}`);
+        }
+        
+        // Check for matching opening/closing brackets
+        const placeholderStr = String(placeholder || '');
+        const openCount = (placeholderStr.match(/\{/g) || []).length;
+        const closeCount = (placeholderStr.match(/\}/g) || []).length;
+        if (openCount !== closeCount) {
+          validation.isValid = false;
+          validation.errors.push(`Mismatched brackets in: ${placeholder}`);
+        }
       }
     });
     
@@ -1399,10 +1435,11 @@ Analysis Features (v1.8.2):
       }
     };
     
+    const contentStr = String(content || '');
     Object.keys(frameworkPatterns).forEach(framework => {
       const config = frameworkPatterns[framework];
       config.patterns.forEach(pattern => {
-        const matches = content.match(pattern);
+        const matches = contentStr.match(pattern);
         if (matches) {
           config.score += matches.length;
         }
@@ -1464,10 +1501,13 @@ Analysis Features (v1.8.2):
 
   // NEW: Key complexity analysis
   analyzeKeyComplexity(key) {
+    // Ensure key is a string
+    const keyStr = String(key || '');
+    
     const complexity = {
       level: 'simple',
-      segments: key.split('.').length,
-      length: key.length,
+      segments: keyStr.split('.').length,
+      length: keyStr.length,
       hasPlaceholders: false,
       patterns: []
     };
@@ -1475,12 +1515,12 @@ Analysis Features (v1.8.2):
     if (complexity.segments > 3) complexity.level = 'complex';
     else if (complexity.segments > 1) complexity.level = 'moderate';
     
-    if (key.includes('{{') || key.includes('${')) {
+    if (keyStr.includes('{{') || keyStr.includes('${')) {
       complexity.hasPlaceholders = true;
       complexity.level = 'complex';
     }
     
-    this.keyComplexity.set(key, complexity);
+    this.keyComplexity.set(keyStr, complexity);
     return complexity;
   }
 
@@ -1573,14 +1613,14 @@ Analysis Features (v1.8.2):
 
       
       // Display translation completeness
-      outputLines.push(t("usage.checkUsage.translation_completeness_title"));
+      outputLines.push(t('common.languageCompletenessTitle'));
       for (const [language, stats] of this.translationStats) {
-        const completeness = ((stats.translated / stats.total) * 100).toFixed(1);
-        outputLines.push(t("usage.checkUsage.language_completeness_stats", {
-          language: language.toUpperCase(),
-          completeness,
-          translated: stats.translated,
-          total: stats.total
+        const completeness = stats.total > 0 ? ((stats.translated / stats.total) * 100).toFixed(1) : '100.0';
+        outputLines.push(t('summary.usageReportLanguageCompleteness', { 
+          language: language.toUpperCase(), 
+          completeness, 
+          translated: stats.translated, 
+          total: stats.total 
         }));
       }
       
@@ -1672,6 +1712,9 @@ Analysis Features (v1.8.2):
       
       // Close readline interface to prevent hanging
       this.closeReadline();
+      
+      // Return instead of force exit to allow proper cleanup
+      return;
       
       return {
         success: true,

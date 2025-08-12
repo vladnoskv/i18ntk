@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * I18N TRANSLATION COMPLETION SCRIPT
+ * I18NTK TRANSLATION COMPLETION SCRIPT
  * 
  * This script automatically adds missing translation keys to achieve 100% coverage.
  * It reads the usage analysis and adds all missing keys with proper markers.
@@ -151,7 +151,8 @@ class I18nCompletionTool {
     }
     
     // Handle dot notation (e.g., "pagination.showing")
-    const parts = keyPath.split('.');
+    const keyPathStr = String(keyPath || '');
+    const parts = keyPathStr.split('.');
     if (parts.length > 1) {
       return {
         file: `${parts[0]}.json`,
@@ -168,7 +169,8 @@ class I18nCompletionTool {
 
   // Check if nested key exists in object
   hasNestedKey(obj, keyPath) {
-    const keys = keyPath.split('.');
+    const keyPathStr = String(keyPath || '');
+    const keys = keyPathStr.split('.');
     let current = obj;
     
     for (const key of keys) {
@@ -183,7 +185,8 @@ class I18nCompletionTool {
 
   // Set nested value in object
   setNestedValue(obj, keyPath, value) {
-    const keys = keyPath.split('.');
+    const keyPathStr = String(keyPath || '');
+    const keys = keyPathStr.split('.');
     let current = obj;
     
     for (let i = 0; i < keys.length - 1; i++) {
@@ -280,7 +283,8 @@ class I18nCompletionTool {
   // Generate a readable value from a key path
   generateValueFromKey(keyPath) {
     // Extract the last part of the key (after dots and colons)
-    const keyName = keyPath.split('.').pop().split(':').pop();
+    const keyPathStr = String(keyPath || '');
+    const keyName = keyPathStr.split('.').pop().split(':').pop();
     
     // Convert camelCase to readable text
     const readable = keyName

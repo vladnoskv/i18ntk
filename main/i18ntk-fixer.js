@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * I18N TRANSLATION FIXER
+ * I18NTK TRANSLATION FIXER
  *
  * Replaces placeholder translations with English source text prefixed by language code
  * and optionally fills missing keys.
@@ -79,7 +79,9 @@ class I18nFixer {
   }
 
   t(key, params = {}) {
-    const keys = key.split('.');
+    // Ensure key is a string
+    const keyStr = String(key || '');
+    const keys = keyStr.split('.');
     let value = this.locale;
     
     for (const k of keys) {
@@ -418,10 +420,12 @@ class I18nFixer {
     };
 
     issues.forEach(issue => {
-      const lang = issue.newValue.match(/\[([A-Z-]+)\]/)?.[1];
-      if (lang) {
-        if (!report.languages[lang]) report.languages[lang] = 0;
-        report.languages[lang]++;
+      if (issue.newValue) {
+        const lang = String(issue.newValue).match(/\[([A-Z-]+)\]/)?.[1];
+        if (lang) {
+          if (!report.languages[lang]) report.languages[lang] = 0;
+          report.languages[lang]++;
+        }
       }
     });
 

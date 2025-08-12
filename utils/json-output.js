@@ -26,7 +26,7 @@ class JsonOutput {
       const packageJson = require('../package.json');
       return packageJson.version;
     } catch (error) {
-      return '1.8.1';
+      return '1.8.3';
     }
   }
 
