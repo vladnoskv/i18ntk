@@ -1,6 +1,107 @@
-# i18n Management Toolkit - Version 1.8.3 Release Notes
+# 🌍 i18ntk - The Ultimate i18n Translation Management Toolkit Changelog
 
-## [1.8.3] - 2025-08-12 - **Major Feature Release: Scanner Framework Detection & Security**
+![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
+
+**Version:** 1.9.0
+**Last Updated:** 2025-08-13  
+**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
+[![npm](https://img.shields.io/npm/v/i18ntk.svg?label=npm%20version)](https://www.npmjs.com/package/i18ntk) [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg?label=npm%20downloads)](https://www.npmjs.com/package/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social&label=github%20stars)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.9.0)](https://socket.dev/npm/package/i18ntk/overview/1.9.0)
+
+## [1.9.0] - 2025-08-13 - Major Release: Config Centralization, Runtime API & Framework Detection
+
+> **Note**: This release includes all features and fixes that were previously planned for version 1.8.3, which was never officially released.
+
+### ✨ Major Features
+
+#### 🏗️ Configuration Centralization
+- **Project-scoped Configuration**: All settings now stored in `settings/i18ntk-config.json`
+- **Legacy Migration**: Automatic migration from `~/.i18ntk` with one-time deprecation warning
+- **Backup Management**: Backups now stored in `settings/backups/`
+- **Environment Variables**: Support for `I18NTK_*` overrides
+
+#### 🚀 Runtime Translation API (Experimental Beta)
+- **Framework-Agnostic**: New `i18ntk/runtime` package with TypeScript support
+- **Lightweight**: Minimal runtime footprint for production use
+- **Flexible Loading**: Supports both single file and folder-based locale structures
+- **Type Safety**: Full TypeScript declarations included
+
+#### 🔍 Enhanced Scanner (1.9.0)
+- **Framework Detection**: Automatic detection of React, Vue, Angular, and more
+- **Comprehensive Testing**: 12+ test cases for framework detection
+- **Pattern Matching**: Support for framework-specific i18n patterns
+- **Documentation**: Added `scanner-guide.md` with usage examples
+
+### 🛠 Improvements
+
+#### Configuration Management
+- **Schema Version**: Updated to 1.9.0
+- **Graceful Bootstrap**: Automatic creation of required directories
+- **Migration Handling**: Clear deprecation messages for legacy config
+- **Security**: Removed all shell access vulnerabilities
+
+#### Performance
+- **Ultra-Extreme Mode**: 97% faster processing (15.38ms for 200k keys)
+- **Memory Optimization**: 1.62MB memory usage
+- **Parallel Processing**: Improved multi-core utilization
+
+### 📚 Documentation
+- **Updated README**: Clear setup instructions and feature overview
+- **Runtime API Docs**: Comprehensive TypeScript documentation
+- **Migration Guide**: Smooth transition from 1.8.x to 1.9.0
+
+### 🐛 Bug Fixes
+- Fixed configuration initialization issues
+- Resolved path resolution in Node.js modules
+- Addressed edge cases in legacy config migration
+- Fixed framework detection reliability
+ - Corrected Manage Menu numbering/mappings so displayed options match executed actions (9 = Delete reports, 13 = Scanner)
+ - Initialization completion summary no longer prompts in non-interactive or no-prompt modes (prevents undefined noPrompt access)
+ - Removed legacy `[NOT_TRANSLATED]` default from initializer configuration; tooling now aligns with country-code marker approach
+
+### 🔄 Migration Notes
+- **Automatic Migration**: Existing configurations will be moved to `settings/`
+- **Backward Compatibility**: All existing CLI commands remain supported
+- **Environment Variables**: Updated to support new configuration structure
+
+### 📦 Installation
+```bash
+# Install globally (recommended)
+npm install -g i18ntk
+
+# Or use npx for one-off commands
+npx i18ntk
+```
+
+### 📞 Support
+For issues and feature requests, please visit our [GitHub repository](https://github.com/vladnoskv/i18ntk).
+
+---
+*Note: This version maintains backward compatibility while introducing significant improvements to configuration management and runtime capabilities.*
+
+## [1.9.0] - 2025-08-13 - Config Centralization & Runtime API
+
+### ✨ Features & Changes
+- Centralized configuration under project `settings/i18ntk-config.json` (single source of truth).
+- Automatic migration from legacy `~/.i18ntk/i18ntk-config.json` with one-time deprecation warning.
+- Graceful bootstrap: creates `settings/` and `settings/backups/` on demand.
+- New framework-agnostic Runtime API exposed via `i18ntk/runtime` with TypeScript declarations.
+- Optimized path resolution to work seamlessly when installed from `node_modules`.
+- Environment overrides preserved: `I18NTK_PROJECT_ROOT`, `I18NTK_SOURCE_DIR`, `I18NTK_I18N_DIR`, `I18NTK_OUTPUT_DIR`, plus `I18NTK_RUNTIME_DIR` for runtime.
+- Schema/version updated to `1.9.0` in settings manager.
+- Added optional `migrationComplete` flag to suppress repeated migration notices.
+
+### 🧹 Cleanups & Deprecations
+- Removed remaining references to legacy `~/.i18ntk` in main package code (docs now describe migration).
+- Delete reports and related flows now use `settings/backups/` only.
+
+### 📚 Docs
+- README updated to reflect new config location and migration behavior.
+- `docs/runtime.md` updated with usage and config resolution order.
+
+---s
+
+## [1.8.3] - 2025-08-13 - **Major Feature Release: Scanner Framework Detection & Security**
 
 > **🚀 MAJOR FEATURE RELEASE**: Version 1.8.3 introduces comprehensive scanner framework detection, enhanced security validation, and new testing infrastructure.
 
@@ -69,13 +170,8 @@
 
 # i18n Management Toolkit - Version 1.8.3 Release Notes
 
-## [1.8.3] - 2025-08-12 - **Major Release: Enhanced Framework Detection, Plugin System & Security Enhancements**
+## [1.8.1] - 2025-08-12 - **Major Release: Enhanced Framework Detection, Plugin System & Security Enhancements**
 
-> **🚀 MAJOR FEATURE RELEASE**: Version 1.8.3, 1.8.3 introduces comprehensive framework detection, a powerful plugin system, enhanced security features, and significant performance improvements with 87% faster processing.
-
-With over **2,000 downloads** since release, we thank you for your patience with previously bugged versions. I am proud to release version **1.8.3** with some additional improvements over **1.8.3**, with 1.8.3 marking our first fully stable release. Expect fewer updates as the core toolkit has matured, tested and working. Future efforts may explore optional translation runtime features and a companion web UI for AI-assisted translations while keeping this package dependency-free.
-
-### ✨ **New Features** (If you encounter any issues, please report them on GitHub)
 
 #### **🎯 Enhanced Framework Detection**
 - **Smart Framework Detection** - Automatically detects i18next, Lingui, and FormatJS frameworks
@@ -163,7 +259,7 @@ With over **2,000 downloads** since release, we thank you for your patience with
 - **New NPM Scripts** - Additional scripts for running specific test suites
 - **Test Environment** - Robust test environment with retry mechanisms
 
-## [1.8.3] - 2025-08-11 - **Major Changes & Improvements**
+## [1.8.0] - 2025-08-11 - **Major Changes & Improvements**
 
 ## 🚀 Major Changes
 
@@ -221,8 +317,8 @@ The automatic fixer has been significantly improved and is now the recommended w
 9. Delete reports and debug logs  ← Renumbered
 10. Settings and configuration  ← Renumbered
 11. Show help and documentation  ← Renumbered
-12. Debug utilities  ← Renumbered
-13. Language settings  ← Renumbered
+12. Language settings  ← Renumbered
+13. Scanner  ← Renumbered
 ```
 
 ## 🔧 Technical Changes
@@ -267,414 +363,6 @@ The automatic fixer has been significantly improved and is now the recommended w
 - **Faster Startup**: Cleaner codebase with fewer dependencies
 - **Focused Operations**: Each script optimized for its specific task
 
-## 🎯 Migration Guide
-
-### For Users Previously Using Autorun
-1. **Manual Workflow**: Use the new menu options in sequence:
-   - Option 1: Initialize project
-   - Option 2: Analyze translations
-   - Option 3: Validate translations
-   - Option 4: Check usage
-   - Option 7: Fix issues automatically
-
-2. **Development Use**: If you need autorun for development, access it directly:
-   ```bash
-   node dev/i18ntk-autorun.js
-   ```
-
-### For New Users
-- **Recommended Path**: Use the interactive menu (`npm run i18ntk`) for all operations
-- **Script-by-Script**: Each script is designed to be run independently
-- **Configuration**: Setup is now more straightforward with clear prompts
-
-## 🐛 Bug Fixes
-
-### Configuration Issues
-- **Fixed**: i18ntk-config.json no longer gets cleared during autorun
-- **Fixed**: Better configuration validation and error handling
-- **Fixed**: Settings persistence across toolkit sessions
-
-### Translation Fixes
-- **Improved**: Automatic detection of placeholder translations
-- **Enhanced**: Better handling of missing translation keys
-- **Fixed**: Formatting issues in generated reports
-
-## 📈 Version Information
-
-- **Previous Version**: 1.8.3, 1.8.3 - 1.8.3, 1.8.3
-- **Current Version**: 1.8.3, 1.8.3
-- **Release Date**: 2025-08-11
-- **Compatibility**: Backward compatible for all existing configurations
-
-## 🔄 Next Steps
-
-### Immediate Actions
-1. **Update**: Run `npm update` to get the latest version
-2. **Test**: Use option 7 to test the new automatic fixer
-3. **Review**: Check your current configuration with option 10
-
-### Long-term Recommendations
-- **Use Interactive Mode**: Embrace the safer, more controlled approach
-- **Regular Maintenance**: Use individual scripts for ongoing maintenance
-- **Development**: Use development tools (dev/ directory) for advanced workflows
-
----
-
-**Note**: This is a significant architectural change focused on safety and user control. While autorun was convenient, the new approach provides better reliability and prevents common issues that users experienced with automated execution.
-
-## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **Bug Fixes & User Experience Improvements**
-
-> **🐛 BUG FIX RELEASE**: Version 1.8.3, 1.8.3 resolves interactive prompt issues and improves user experience with translation fixer and package URL corrections.
-
-### 🐛 **Bug Fixes**
-
-#### **Interactive Translation Fixer**
-- **Fixed double enter issues** - Resolved duplicate input prompts in interactive mode
-- **Fixed readline management** - Proper readline instance cleanup and management
-- **Enhanced user experience** - Smoother interactive workflow without redundant prompts
-
-#### **Package & URL Fixes**
-- **Fixed repository URLs** - Updated all package.json URLs to use correct i18ntk naming
-- **Fixed documentation links** - Updated all documentation references to point to correct repository
-
-#### **General Improvements**
-- **Fixed interactive prompt handling** - Prevents duplicate input issues across all commands
-- **Enhanced error handling** - Better user feedback for edge cases
-
----
-
-## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **CRITICAL SECURITY FIXES - Zero Shell Access**
-
-> **🛡️ SECURITY RELEASE**: Version 1.8.3, 1.8.3 eliminates all shell access vulnerabilities and implements direct file system operations for maximum security.
-
-### 🔒 **CRITICAL SECURITY FIXES**
-
-#### **Zero Shell Access Vulnerabilities**
-- **Eliminated all shell access vulnerabilities** - Removed `child_process.execSync()` and `spawnSync()` from production code
-- **Direct file system operations** - Replaced shell commands with safe `fs` and `path` module usage
-- **Enhanced security validation** - All file operations now use direct Node.js APIs
-- **Production-safe codebase** - Zero shell command execution in main package
-- **Socket.dev compliance** - Addresses security warnings from package scanning
-
-#### **Security Architecture Improvements**
-- **feat(security)**: Replace shell commands with direct file operations across all modules
-- **fix(summary)**: Use safe JSON parsing instead of eval for security - eliminates code injection risks
-- **refactor(autorun)**: Implement module execution instead of spawnSync - removes process spawning
-- **Security Impact**: Zero shell access - all operations use secure file system APIs
-
-#### **Testing & Documentation**
-- **test**: Add comprehensive testing guide and cleanup script for security validation
-- **docs**: Update version to 1.8.3, 1.8.3 with detailed security fixes documentation
-- **build**: Update package.json with new test scripts and version
-
-#### **Security Verification**
-- **Before**: Potential shell injection risks via `child_process` calls
-- **After**: Zero shell access - all operations use secure file system APIs
-- **Verification**: Comprehensive security scanning confirms zero shell access patterns
-
----
-
-## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **INTERACTIVE TRANSLATION FIXER WITH MULTI-MARKER SUPPORT**
-
-### ✨ **MAJOR FEATURE FOR 1.8.3, 1.8.3: Interactive Translation Fixer Tool**
-
-#### **Interactive Mode with Multi-Language Support**
-- **🎯 Interactive Translation Fixer**: New `i18ntk fixer` command with step-by-step guided fixing process
-- **🏷️ Custom Placeholder Markers**: Support for any user-defined placeholder markers (e.g., `{{NOT_TRANSLATED}}`, `__MISSING__`, `[PLACEHOLDER]`)
-- **🌍 Selective Language Fixing**: Choose specific languages or fix all available languages
-- **📁 Selective Directory Targeting**: Target specific directories or files for fixing
-- **⚡ Mass Fix Capability**: Fix thousands of broken translations in a single operation
-- **📊 Comprehensive Reports**: Detailed before/after analysis with fix statistics
-
-#### **Interactive Features (8 Languages Supported)**
-- **Welcome Screen**: Introduction and tool overview in user's preferred language
-- **Marker Configuration**: Interactive setup of custom placeholder markers
-- **Language Selection**: Choose specific languages to process
-- **Directory Selection**: Target specific directories with language files
-- **Real-time Progress**: Live progress tracking and statistics
-- **Fix Confirmation**: Review changes before applying fixes
-- **Report Generation**: Detailed fix reports with complete analysis
-
-#### **Advanced Placeholder Detection**
-- **Standard Markers**: Built-in support for common placeholders
-- **Custom Markers**: Unlimited custom marker configuration
-- **Framework Markers**: Support for framework-specific placeholders
-- **Legacy Support**: Handle old translation system placeholders
-
-#### **Usage Examples**
-```bash
-# Interactive mode with guided prompts
-i18ntk fixer --interactive
-
-# Fix specific languages with custom markers
-i18ntk fixer --languages en,es,fr --markers "{{NOT_TRANSLATED}},__MISSING__"
-
-# Fix specific directory with auto-fix
-i18ntk fixer --source ./src/locales --auto-fix --report
-
-# Custom placeholder detection
-i18ntk fixer --markers "TODO_TRANSLATE,PLACEHOLDER_TEXT,MISSING_TRANSLATION"
-```
-
-## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **TRANSLATION FIXER & CONFIG ENHANCEMENTS**
-
-### ✨ Features
-- Added `i18ntk-fix` script to replace placeholder translations with English text and language code, with automatic backups
-- Integrated fixer into manage menu (option 7) for easy access
-- Support multiple not-translated markers via new `notTranslatedMarkers` configuration
-
-### 🛠 Fixes
-- Framework detection prompt now only appears when no frameworks are found
-- Added `framework` to security config validation to remove warnings
-
-## [1.8.3, 1.8.3, 1.8.3] - 2025-08-11 - **FRAMEWORK DETECTION FIX & SETTINGS UPDATE**
-
-### 🛠 Fixes
-- **Fixed framework detection prompt issue**: System now correctly skips the "No i18n framework detected" prompt when i18next or other frameworks are already detected
-- Improved i18n framework detection to correctly recognize installed libraries
-- Store toolkit settings within `node_modules/i18ntk/settings` to avoid creating project root folders
-
-## [1.8.3, 1.8.3, 1.8.3] - 2025-08-10 - **SECURITY LOGGING & CONFIGURATION STABILITY RELEASE**
-
-> **🔒 SECURITY & STABILITY PATCH**: Version 1.8.3, 1.8.3 delivers **enhanced security logging**, **flexible PIN authentication**, and **configuration stability improvements**.
-
-### 🔐 **Enhanced Security Logging & Monitoring**
-
-#### **Structured Security Event Logging**
-- **Normalized logSecurityEvent**: Now accepts both string and object formats, wrapping strings as `{ message }` objects for consistency
-- **Object-based Details**: All security events now include structured detail objects for better audit trails
-- **Uniform Logging**: Standardized security logging across admin CLI, validator scripts, and authentication modules
-- **Enhanced Debugging**: Improved error tracking with detailed security event context
-
-#### **Admin Authentication Audit**
-- **Comprehensive Audit Trail**: All admin authentication events now logged with full detail objects
-- **Security Event Correlation**: Better correlation between authentication attempts and system events
-- **Incident Response**: Enhanced security incident investigation capabilities
-
-### 🔑 **Flexible Admin PIN Authentication**
-
-#### **Extended PIN Length Support**
-- **4-6 Digit PINs**: Now supports PIN lengths from 4 to 6 digits for enhanced security flexibility
-- **Backward Compatible**: Existing 4-digit PINs continue to work without changes
-- **Security Enhancement**: Enables stronger PIN policies for enterprise environments
-
-#### **PIN Validation Testing**
-- **Comprehensive Test Coverage**: Added focused unit tests validating 4-, 5-, and 6-digit PIN setup and verification
-- **Edge Case Testing**: Thorough testing of PIN boundary conditions and validation logic
-- **Security Validation**: Ensures PIN strength meets enterprise security standards
-
-### 🔇 **Silent Mode Environment Support**
-
-#### **Environment-Driven Silent Mode**
-- **Multi-source Detection**: Silent mode derived from `npm_config_loglevel`, `I18NTK_SILENT`, and `CI` environment variables
-- **Automatic Initialization**: Security checker automatically initializes `isSilent` based on environment context
-- **CI/CD Integration**: Seamless integration with continuous integration environments
-
-#### **Silent Mode Testing**
-- **Validation Tests**: Added focused test confirming log output suppression when `npm_config_loglevel=silent`
-- **Environment Testing**: Comprehensive testing across different environment variable combinations
-- **CI Compatibility**: Ensures clean output in automated build environments
-
-### 🌍 **Enhanced Localization Coverage**
-
-#### **Completion Command Translations**
-- **Missing Entries Added**: Added `changeDetails` and `andMore` entries to completion command translations
-- **Full Localization**: Ensures change details and additional items are properly localized in English and all supported languages
-- **Consistency**: Maintains translation consistency across all 7 supported languages
-
-### 🛠️ **Configuration Stability Improvements**
-
-#### **Settings Directory Management**
-- **Automatic Creation**: Test scripts now automatically create settings directory and i18ntk-config.json
-- **Default Configuration**: Ensures proper configuration initialization in test environments
-- **Zero Configuration**: Eliminates "Consider creating i18ntk-config.json" warnings
-
-#### **Test Environment Robustness**
-- **Configuration Assurance**: All test environments now have proper configuration files
-- **Silent Testing**: Enhanced test reliability in CI/CD environments
-- **Backward Compatibility**: Existing configurations continue to work unchanged
-
-### 🧪 **Testing & Validation**
-
-#### **Security Testing**
-- **PIN Validation Tests**: Comprehensive testing of 4-6 digit PIN authentication
-- **Security Logging Tests**: Validation of structured security event logging
-- **Silent Mode Tests**: Environment-driven silent mode functionality verification
-
-#### **Localization Testing**
-- **Translation Coverage**: Added tests for new completion command translation entries
-- **Language Consistency**: Ensured consistent translation across all supported languages
-- **Edge Case Testing**: Comprehensive testing of translation fallback mechanisms
-
-### 🔄 **Backward Compatibility**
-
-#### **Zero Breaking Changes**
-- **Configuration**: All existing configurations work without modification
-- **Authentication**: Existing 4-digit PINs continue to function
-- **API**: All CLI interfaces maintain backward compatibility
-- **Logging**: Enhanced logging maintains existing log format compatibility
-
-#### **Migration Notes**
-- **Automatic Updates**: All improvements applied transparently on package update
-- **No User Action Required**: Benefits available immediately after update
-- **Safe Rollback**: All changes are backward compatible for safe rollback
-
-### 📊 **Impact Assessment**
-
-#### **Security Impact**
-- **Enhanced Audit Trail**: Comprehensive security event logging for compliance
-- **Flexible Authentication**: Support for stronger PIN policies in enterprise environments
-- **Environment Integration**: Better CI/CD integration with silent mode support
-
-#### **User Experience Impact**
-- **Improved Reliability**: Eliminated configuration-related warnings
-- **Enhanced Security**: Stronger authentication options without breaking changes
-- **Better Debugging**: Detailed security event context for troubleshooting
-
-### 📋 **Files Modified**
-
-| Component | Changes | Impact |
-|-----------|---------|--------|
-| **Security Logging** | Normalized logSecurityEvent | **High** |
-| **Admin CLI** | Object-based security logging | **High** |
-| **Validator Scripts** | Structured security details | **Medium** |
-| **Admin Auth** | Comprehensive audit logging | **High** |
-| **PIN Validation** | 4-6 digit support | **Medium** |
-| **Security Checker** | Environment-driven silent mode | **Medium** |
-| **Localization** | Completion command translations | **Low** |
-| **Test Scripts** | Configuration assurance | **Medium** |
-
----
-
-## [1.8.3, 1.8.3, 1.8.3] - 2025-08-10 - **ULTRA-EXTREME PERFORMANCE & ENTERPRISE SECURITY RELEASE**
-
-> **🚀 MAJOR RELEASE**: Version 1.8.3, 1.8.3 represents the pinnacle of i18n management with **97% performance improvement** and **enterprise-grade security**.
-
-### 🚀 **ULTRA-EXTREME PERFORMANCE** - 97% Performance Gain Achieved
-
-#### **Benchmark Results** (200k keys test):
-- **Ultra-Extreme Mode**: **15.38ms** (97% improvement over baseline)
-- **Memory Usage**: **1.62MB** (67% reduction)
-- **Throughput**: **13.01M keys/second** (1850% improvement)
-- **Scalability**: Linear scaling up to 5M keys
-
-
-### 🎯 **INTERACTIVE LOCALE OPTIMIZER** - up to 86% Package Size Reduction
-- **Package Size**: 830.4KB → 115.3KB (86% reduction for English only)
-- **Smart Management**: Interactive selection with automatic backups
-- **Zero Breaking Changes**: Safe restoration from backups
-
-### 🔒 **Enhanced Security & Sanitization**
-- **Admin PIN Protection**: AES-256-GCM encryption with 30-min sessions
-- **Zero-Trust Architecture**: Comprehensive input validation and sanitization
-- **Edge Case Handling**: Robust error handling for all scenarios
-
-### 🛠️ **Enhanced Configuration Handling**
-- **Unified Config Helper**: Single source of truth for all configuration
-- **Dynamic Reloading**: Configuration changes without restart
-- **Backward Compatibility**: Zero breaking changes from previous versions
-
-### 💾 **Enhanced Backup & Recovery**
-- **Enterprise-Grade**: Automated scheduling, compression, and encryption
-- **Cloud Integration**: Support for cloud storage providers
-- **Recovery Testing**: Automated backup integrity verification
-
-### 🌍 **Enhanced UI & Language Handling**
-- **Improved Language Fallback**: Robust fallback system with graceful degradation
-- **Enhanced Debugging**: Better error messages and debugging tools
-- **Framework Support**: React, Vue, Angular, Next.js, Nuxt, Svelte compatibility
-
-### 📊 **Performance Benchmarking Suite**
-- **Automated Testing**: 100-25,000 key datasets with regression detection
-- **Real-World Scenarios**: Testing actual usage patterns
-- **CI/CD Integration**: Continuous performance monitoring
-
-### 🚨 **Critical Bug Fixes**
-- **Null-Safety**: Zero crashes guaranteed
-- **JSON Scanning**: Proper exclusion of JSON files from source scanning
-- **Memory Management**: Fixed memory leaks and optimized garbage collection
-- **Configuration**: Unified configuration system with validation
-
-### 🔄 **Migration Notes**
-- **Zero Configuration Changes**: All improvements applied automatically
-- **Backward Compatible**: Existing configurations work without modification
-- **Automatic Benefits**: Performance gains and security enhancements applied on installation
-
-### 🔧 **Configuration Management Standardization**
-
-#### **SettingsManager Singleton Pattern**
-Standardized SettingsManager usage pattern across entire codebase:
-- **Import Pattern**: Consistent singleton instance access
-- **Access Pattern**: Safe configuration access with graceful fallbacks
-- **Error Handling**: Enhanced error messages for configuration issues
-
-#### **Enhanced Error Handling**
-- ✅ Added graceful fallbacks for configuration access
-- ✅ Improved error messages for configuration-related failures
-- ✅ Added validation for configuration object structure
-
-### 🧪 **Testing & Validation**
-
-#### **Regression Testing**
-- ✅ Verified all CLI commands now execute successfully
-- ✅ Tested admin PIN authentication flow
-- ✅ Validated settings management interface
-- ✅ Confirmed language switching functionality
-
-#### **Performance Impact**
-- ✅ **Zero performance regression** - All fixes maintain existing performance benchmarks
-- ✅ **Memory usage**: <1MB additional memory for configuration validation
-- ✅ **Startup time**: No measurable impact on initialization speed
-
-### 📋 **CLI Command Verification**
-
-All CLI commands now execute successfully:
-- ✅ `npm run i18ntk` - Main management interface
-- ✅ `i18ntk-sizing` - Translation sizing analysis  
-- ✅ `i18ntk-manage` - Project management
-- ✅ `i18ntk-ui` - UI language management
-- ✅ Admin PIN authentication workflow
-- ✅ Settings management interface
-
-### 🗂️ **Files Modified**
-
-| File | Changes | Lines Modified | Impact |
-|------|---------|----------------|--------|
-| `main/i18ntk-ui.js` | 5 method fixes | 5 | **Critical** |
-| `main/i18ntk-manage.js` | 3 method fixes | 3 | **Critical** |
-| `main/i18ntk-sizing.js` | 1 helper function fix | 1 | **High** |
-| `utils/admin-auth.js` | 4 security method fixes | 4 | **High** |
-| + more files
-
-### 🔄 **Backward Compatibility**
-
-#### **Configuration Migration**
-- ✅ **No breaking changes** to existing configuration formats
-- ✅ **No configuration file migrations** required
-- ✅ **No user action needed** - fixes are transparent
-
-#### **API Compatibility**
-- ✅ All CLI interfaces maintain backward compatibility
-- ✅ All configuration keys and values preserved
-
-### 🎯 **Impact Assessment**
-
-#### **User Impact**
-- ✅ **Zero configuration changes** required from users
-- ✅ **Zero breaking changes** to existing workflows
-- ✅ **Zero data loss** - all settings preserved
-- ✅ **Immediate fix** - commands work upon package update
-
-#### **Development Impact**
-- ✅ **Improved code consistency** across configuration access
-- ✅ **Enhanced error handling** for configuration issues
-- ✅ **Better debugging** with improved error messages
-- ✅ **Future-proof** SettingsManager usage pattern
-
-### 🚀 **Next Steps**
-
-This release focuses entirely on stability and reliability improvements. The configuration manager fixes provide a solid foundation for future feature development while ensuring all existing functionality continues to work seamlessly.
-
 ### 📞 **Support**
 
 For any issues encountered with these fixes:
@@ -682,144 +370,3 @@ For any issues encountered with these fixes:
 2. **Reset configuration if needed**: `i18ntk-manage --reset-config`
 3. **Check logs**: `i18ntk-manage --debug`
 4. **Report issues**: [GitHub Issues](https://github.com/i18n-toolkit/i18ntk/issues)
-
-
-### 🛠️ **New Commands & Features**
-
-#### **i18ntk doctor** - System Diagnostics
-- **Health Checks**: Comprehensive system health verification
-- **Configuration Validation**: Settings integrity verification
-- **Performance Testing**: Built-in performance benchmarking
-- **Security Audit**: Security configuration validation
-- **Dependency Checks**: Node.js and package compatibility
-
-#### **i18ntk sizing** - Optimization Analysis
-- **Package Analysis**: Detailed size breakdown analysis
-- **Optimization Recommendations**: Actionable size reduction tips
-- **Language Selection**: Interactive locale optimizer
-- **Impact Assessment**: Performance impact prediction
-- **Backup Integration**: Safe optimization with automatic backups
-
-
-### 🌍 **Enhanced Language Support**
-
-#### **Fixed Languages**:
-- **Japanese (ja)**: Complete UI localization
-- **Chinese (zh)**: Full UI translation support
-- **Enhanced Coverage**: 8 languages total (en, es, fr, de, ja, ru, zh)
-
-#### **Language Features**:
-- **Smart Fallback**: Intelligent fallback to source language
-- **Context Detection**: Automatic language context detection
-- **Encoding Support**: UTF-8, UTF-16, and ISO-8859 support
-- **Plural Forms**: Advanced plural form handling
-- **Date/Time**: Locale-specific date and time formatting
-
-### 📊 **Advanced Analytics & Reporting**
-
-#### **Performance Metrics**:
-- **Real-time Monitoring**: Live performance tracking
-- **Memory Profiling**: Detailed memory usage analysis
-- **Throughput Analysis**: Operations per second tracking
-- **Bottleneck Detection**: Automatic performance bottleneck identification
-- **Regression Detection**: Performance regression alerts
-
-#### **Usage Analytics**:
-- **Translation Coverage**: Missing translation tracking
-- **Usage Patterns**: Key usage frequency analysis
-- **Performance Trends**: Historical performance tracking
-- **Error Tracking**: Comprehensive error reporting
-- **Optimization Suggestions**: AI-powered optimization recommendations
-
-### 🔧 **Enhanced Configuration System**
-
-#### **Unified Configuration**:
-- **Single Source**: One configuration file for all settings
-- **Validation**: Real-time configuration validation
-- **Migration**: Automatic configuration migration
-- **Environment Support**: Development, staging, production environments
-- **Hot Reloading**: Configuration changes without restart
-
-#### **Advanced Settings**:
-- **Performance Tuning**: Granular performance control
-- **Security Policies**: Configurable security policies
-- **Backup Rules**: Flexible backup configuration
-- **Notification Rules**: Custom notification triggers
-- **Integration Hooks**: External system integration
-
-### 🎯 **Edge Case Handling & Reliability**
-
-#### **Robust Error Handling**:
-- **Corrupt Files**: Automatic detection and recovery
-- **Missing Translations**: Graceful fallback handling
-- **Encoding Issues**: Automatic encoding detection and correction
-- **Permission Errors**: Detailed permission troubleshooting
-- **Network Issues**: Retry mechanisms with exponential backoff
-- **Memory Constraints**: Adaptive memory management
-- **Concurrent Access**: Thread-safe operations
-
-### 📚 **Comprehensive Documentation**
-
-#### **Updated Guides**:
-- **Performance Optimization Guide**: Detailed performance tuning
-- **Security Best Practices**: Enterprise security implementation
-- **Migration Guide**: Zero-downtime migration from 1.6.x
-- **API Reference**: Complete API documentation
-- **Troubleshooting Guide**: Comprehensive issue resolution
-
-#### **Interactive Documentation**:
-- **Command Examples**: Real-world usage examples
-- **Configuration Templates**: Ready-to-use configuration templates
-- **Performance Benchmarks**: Interactive performance comparisons
-- **Security Checklist**: Security implementation checklist
-- **Migration Wizard**: Interactive migration assistant
-
-### 🔄 **Migration & Compatibility**
-
-#### **Zero-Downtime Migration**:
-- **Automatic Migration**: Seamless upgrade from 1.6.x
-- **Backward Compatibility**: Existing configurations work unchanged
-- **Safe Rollback**: Instant rollback capability
-- **Validation**: Pre-migration compatibility checks
-- **Testing**: Comprehensive post-migration verification
-
-#### **Compatibility Matrix**:
-- **Node.js**: 16.x, 18.x, 20.x support
-- **Operating Systems**: Windows, macOS, Linux
-- **Package Managers**: npm, yarn, pnpm
-- **Frameworks**: React, Vue, Angular, Next.js, Nuxt, Svelte
-- **Build Tools**: Webpack, Vite, Rollup, Parcel
-
-### 📦 **Installation & Upgrade**
-
-#### **Fresh Installation**:
-```bash
-npm install -g i18ntk@1.8.3, 1.8.3
-```
-
-#### **Upgrade from 1.6.x**:
-```bash
-npm update -g i18ntk
-```
-
-#### **Verification**:
-```bash
-i18ntk --version
-i18ntk doctor
-```
-
-### 🎯 **Key Performance Benchmarks**
-
-| Mode | Time (200k keys) | Memory | Improvement |
-|------|------------------|--------|-------------|
-| Baseline | 512.3ms | 4.8MB | - |
-| Optimized | 847.9ms | 3.2MB | 45% |
-| Extreme | 38.90ms | 2.1MB | 87% |
-| **Ultra-Extreme** | **15.38ms** | **1.62MB** | **97%** |
-
-
-### Migration Support
-If you encounter issues during migration:
-1. Check the [troubleshooting guide](docs/TROUBLESHOOTING.md)
-2. Open an issue on [GitHub](https://github.com/vladnoskv/i18ntk/issues)
-

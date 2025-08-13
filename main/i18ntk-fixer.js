@@ -10,6 +10,8 @@ const fs = require('fs');
 const path = require('path');
 const { getUnifiedConfig, displayHelp } = require('../utils/config-helper');
 const { loadTranslations } = require('../utils/i18n-helper');
+const SecurityUtils = require('../utils/security');
+const configManager = require('../utils/config-manager');
 loadTranslations(process.env.I18NTK_LANG);
 
 class I18nFixer {
@@ -172,17 +174,101 @@ class I18nFixer {
     const { ask } = require('../utils/cli.js');
 
     const defaultDir = this.config.sourceDir || './locales';
+    const projectRoot = this.config.projectRoot || process.cwd();
+
+    // Build candidate directories (existing + common defaults)
+    const candidates = new Set();
+    const addIf = p => {
+      try {
+        const abs = path.isAbsolute(p) ? p : path.resolve(projectRoot, p);
+        if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) {
+          candidates.add(configManager.toRelative(abs));
+        }
+      } catch (_) { /* ignore */ }
+    };
+    // Common locations
+    ['.','./locales','./src/locales','./i18n','./public/locales','./app/locales'].forEach(addIf);
+    // Scan immediate subdirectories under project root for likely i18n dirs
+    try {
+      fs.readdirSync(projectRoot, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .forEach(d => {
+          const dir = path.join(projectRoot, d.name);
+          // Heuristic: contains *.json or has typical locale filenames
+          const hasJson = fs.readdirSync(dir).some(f => /\.json$/i.test(f));
+          if (hasJson || /locale|locales|i18n/i.test(d.name)) {
+            addIf(dir);
+          }
+        });
+    } catch (_) { /* ignore */ }
+
+    // Ensure default dir shown (even if not existing yet)
+    if (!Array.from(candidates).includes(defaultDir)) {
+      candidates.add(defaultDir);
+    }
+
+    const options = Array.from(candidates);
+
     console.log(`\n${this.t('fixer.directoryPrompt.title')}`);
     console.log(this.t('fixer.directoryPrompt.current', { dir: defaultDir }));
     console.log(this.t('fixer.directoryPrompt.description'));
-    
+    if (options.length > 0) {
+      console.log('\nOptions:');
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      options.forEach((opt, idx) => {
+        const label = letters[idx] || `${idx+1}`;
+        console.log(`  ${label}) ${opt}`);
+      });
+      console.log('  *) Enter a custom path');
+    }
+
     const answer = await ask(this.t('fixer.directoryPrompt.input'));
-    const cleanAnswer = answer.trim();
-    if (cleanAnswer) {
-      return cleanAnswer;
-    } else {
+    let input = answer.trim();
+
+    // Map letter/number selection to option
+    if (input.length === 1) {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const pos = letters.indexOf(input.toUpperCase());
+      if (pos >= 0 && pos < options.length) {
+        input = options[pos];
+      }
+    } else if (/^\d+$/.test(input)) {
+      const num = parseInt(input, 10) - 1;
+      if (num >= 0 && num < options.length) {
+        input = options[num];
+      }
+    }
+
+    const chosen = input || defaultDir;
+    const absChosen = path.isAbsolute(chosen) ? chosen : path.resolve(projectRoot, chosen);
+
+    // Validate chosen path (create if doesn't exist)
+    const safePath = SecurityUtils.validatePath(absChosen, projectRoot);
+    if (!safePath) {
+      console.warn('Invalid or unsafe directory path. Using default.');
       return defaultDir;
     }
+    if (!fs.existsSync(safePath)) {
+      try {
+        fs.mkdirSync(safePath, { recursive: true });
+      } catch (err) {
+        console.warn(`Failed to create directory: ${err.message}`);
+        return defaultDir;
+      }
+    }
+
+    // Persist selection to config
+    try {
+      const rel = configManager.toRelative(safePath);
+      await configManager.updateConfig({ sourceDir: rel, i18nDir: rel });
+      // Refresh in-memory config values
+      this.config.sourceDir = path.resolve(projectRoot, rel);
+      this.config.i18nDir = this.config.sourceDir;
+    } catch (err) {
+      console.warn(`Warning: could not persist directory selection: ${err.message}`);
+    }
+
+    return configManager.toRelative(safePath);
   }
 
   async initialize() {
@@ -204,15 +290,19 @@ class I18nFixer {
       console.log(`\n${this.t('fixer.welcome.title')}`);
       console.log(this.t('fixer.welcome.description'));
       
-      // Prompt for directory
+      // Prompt for directory (with selection + persistence)
       const customDir = await this.promptForDirectory();
-      let sourceDir = customDir;
-      sourceDir = sourceDir.replace(/^["']|["']$/g, '');
-      
-      if (path.isAbsolute(sourceDir)) {
-        this.sourceDir = sourceDir;
+      let sourceDir = customDir || this.config.sourceDir || './locales';
+      if (typeof sourceDir === 'string') {
+        sourceDir = sourceDir.replace(/^['"]|['"]$/g, '');
+      }
+      if (sourceDir && typeof sourceDir === 'string') {
+        this.config.sourceDir = path.isAbsolute(sourceDir) ? sourceDir : path.resolve(process.cwd(), sourceDir);
+        this.config.i18nDir = this.config.sourceDir;
       } else {
-        this.sourceDir = path.resolve(process.cwd(), sourceDir);
+        // Fallback to default
+        this.config.sourceDir = path.resolve(process.cwd(), './locales');
+        this.config.i18nDir = this.config.sourceDir;
       }
       
       // Prompt for markers
@@ -252,7 +342,7 @@ class I18nFixer {
       }
     }
     
-    this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+    this.sourceLanguageDir = path.join(this.sourceDir || path.resolve(process.cwd(), './locales'), this.config.sourceLanguage);
     this.config.outputDir = this.config.outputDir || './i18ntk-reports';
     this.config.noBackup = args['no-backup'] || false;
   }

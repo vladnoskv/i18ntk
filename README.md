@@ -2,29 +2,48 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.8.3
-**Last Updated:** 2025-08-12  
+**Version:** 1.9.0
+**Last Updated:** 2025-08-13  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
-[![npm](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![Downloads](https://img.shields.io/npm/dm/i18ntk.svg)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.8.3)](https://socket.dev/npm/package/i18ntk/overview/1.8.3)
+[![npm](https://img.shields.io/npm/v/i18ntk.svg?label=npm%20version)](https://www.npmjs.com/package/i18ntk) [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg?label=npm%20downloads)](https://www.npmjs.com/package/i18ntk)  [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social&label=github%20stars)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.9.0)](https://socket.dev/npm/package/i18ntk/overview/1.9.0)
 
-🚀 **The fastest way to manage translations across any framework or vanilla JavaScript projects**
+**The fastest way to manage translations across any JavaScript/TypeScript project, with first-class framework support and enterprise-grade tooling.**
 
-**Framework support:** Auto-detects popular libraries — React i18next, Vue i18n, i18next, Nuxt i18n, and Svelte i18n — or runs framework-free.
+**Framework support:** Auto-detects popular libraries — React i18next, Vue i18n, i18next, Nuxt i18n, and Svelte i18n — or runs framework-free on our new vanilla runtime API.
 
-**What it does:** i18ntk discovers, validates, and maintains JSON translation files (usage, analysis, coverage, sizing, fixing).  
+**What it does:** i18ntk provides a comprehensive i18n management experience:
 
-**What it doesn’t:** It’s not a runtime i18n library (e.g., i18next/Vue i18n); it won’t inject `t()` at runtime. (Maybe in the future...)
+- **Discovers** translation files and keys
+- **Validates** JSON files for syntax errors and inconsistencies
+- **Analyzes** key usage, coverage, and sizing
+- **Fixes** issues with missing or unused keys
+- **Maintains** translation files
 
-**v1.8.3 (Bug-fix):** Critical fixes for undefined errors and improved user experience with initialization checks and simplified interface.
 
-Big thank you for **2,000+ downloads (12/08/25)** and your patience as the toolkit has matured. Version **1.8.3** focuses on reliability and fixing critical bugs, with fewer changes expected to core functionality going forward. We're exploring optional runtime helpers and a companion web UI for AI-assisted translations — while keeping the core CLI **dependency-free**.
 
-Please show your support if the package has helped you even 1% by staring my project on GitHub and watch to follow our journey to make internationalization easier than ever. Thank you! [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
+### What's New in 1.9.0
+
+**v1.9.0 (Major Release):** This release combines all features from the unreleased 1.8.3 with additional major features and improvements to the **Runtime API** (optional, dependency-free), **configuration management**, **security**, **framework detection**, and **documentation**.
+
+- **Centralized Configuration**: All settings now in `settings/i18ntk-config.json`
+- **Enhanced Scanner**: Improved framework detection and pattern matching
+- **Security Improvements**: Removed all shell access vulnerabilities
+- **Performance**: Process 200,000+ keys in just 15.38ms
+- **Documentation**: Complete rewrite with better screenshot examples and guides
+
+### 🌐 Runtime API (New in 1.9.0 Experimental Beta)
+- **Framework-Agnostic**: Works with any JavaScript/TypeScript project
+- **TypeScript First**: Full type definitions and IntelliSense support
+- **Lightweight**: Zero dependencies, minimal bundle size
+- [Read the Runtime API Documentation](./docs/runtime.md)
+
+
 
 ## 🚀 Quick Start - Zero to Hero in 30 Seconds
 
-### 📥 **Installation** (Hundreds of developers trust us)
+### 📥 **Installation**
+
 ```bash
 # Install globally (recommended)
 npm install -g i18ntk
@@ -33,7 +52,7 @@ npm install -g i18ntk
 npx i18ntk
 
 # Verify installation
-i18ntk --version  # Should show 1.8.3
+i18ntk --version  # Should show 1.9.0
 ```
 
 ### 🎯 **First Command - Instant Results**
@@ -62,6 +81,132 @@ i18ntk validate --source ./locales --format json --output ./reports
 # Framework-specific analysis
 i18ntk analyze --detect-framework --framework react
 ```
+
+---
+
+## 🚀 Key Features
+
+### 🌐 Runtime API (New in 1.9.0 Experimental Beta)
+
+- **Lightweight**: Zero dependencies, minimal bundle size
+- [Read the Runtime API Documentation](./docs/runtime.md)
+
+### 🔍 Smart Framework Detection
+- **Auto-Discovery**: Automatically detects React, Vue, Angular, and other frameworks
+- **Pattern Recognition**: Identifies framework-specific i18n patterns and syntax
+- **Zero Configuration**: Works out-of-the-box with most project structures
+
+### ⚡ Blazing Fast Performance
+- **Ultra-Extreme Mode**: Processes 200,000+ keys in just 15.38ms
+- **Memory Efficient**: Uses only 1.62MB of memory for large projects
+- **Parallel Processing**: Utilizes all CPU cores for maximum throughput
+
+### 🏗️ Project-Centric Configuration
+- **Single Source of Truth**: All settings in `settings/i18ntk-config.json`
+- **Automatic Migration**: Seamless upgrade from legacy configurations
+- **Environment-Aware**: Supports `.env` files and environment variables
+
+### 🛡️ Enterprise-Grade Security
+- **Dependency-Free**: No external dependencies in production
+- **Security Audited**: Regular security reviews and updates
+- **CI/CD Ready**: Perfect for automated testing and deployment pipelines
+
+### 🌍 Comprehensive i18n Support
+- **30+ Languages**: Built-in support to duplicate your english translations to major and niche world languages
+- **RTL Ready**: Full right-to-left language support
+- **Pluralization**: Advanced plural rules for all supported languages
+
+## 🚀 Getting Started
+
+### Installation
+```bash
+# Install globally (recommended)
+npm install -g i18ntk
+
+# Or use npx for one-off commands
+npx i18ntk
+
+# Verify installation
+i18ntk --version  # Should show 1.9.0
+```
+
+### First Steps
+1. **Initialize** your project:
+   ```bash
+   i18ntk init
+   ```
+2. **Scan** your codebase for i18n keys:
+   ```bash
+   i18ntk scan --source ./src
+   ```
+3. **Translate** your application:
+   ```bash
+   i18ntk translate --locales en,es,fr
+   ```
+4. **Validate** your translations:
+   ```bash
+   i18ntk validate
+   ```
+
+## 🧩 Runtime Translation API
+
+Use i18ntk’s minimal runtime helper in any project (framework or vanilla) to load JSON locales at runtime and translate keys.
+
+Installation is the same (global or local). Import from the subpath export `i18ntk/runtime`:
+
+```ts
+// ESM/TypeScript
+import { initRuntime, t, translate, setLanguage, getAvailableLanguages } from 'i18ntk/runtime';
+
+initRuntime({
+  // All fields optional – single source of truth is i18ntk-config.json (see below)
+  baseDir: './locales',        // Explicit override
+  language: 'en',
+  fallbackLanguage: 'en',
+  keySeparator: '.',
+  preload: true,
+});
+
+console.log(t('common.hello', { name: 'Ada' }));
+setLanguage('de');
+```
+
+```js
+// CommonJS
+const { initRuntime, t, translate, setLanguage } = require('i18ntk/runtime');
+initRuntime({ preload: true });
+console.log(translate('navigation.home'));
+```
+
+Supported locale structures under your base directory:
+- `./locales/en.json` (single file per language)
+- `./locales/en/*.json` (folder per language; files are deep‑merged)
+
+Key resolution uses `language` first, then `fallbackLanguage`. Interpolation supports `{{name}}` and `{name}` placeholders.
+
+Path resolution order for the runtime helper:
+1. Explicit `baseDir` passed to `initRuntime()`
+2. `I18NTK_RUNTIME_DIR` environment variable
+3. `i18ntk-config.json` via internal config manager (`i18nDir` or `sourceDir`, resolved to absolute)
+4. Fallback `./locales` relative to your project root (process.cwd)
+
+See full docs: `docs/runtime.md`.
+
+---
+
+## 🧭 Single Source of Truth: i18ntk-config.json
+
+i18ntk keeps configuration in your project at `settings/i18ntk-config.json` and treats it as the **single source of truth**. All CLI scripts and the runtime helper honor this file (with safe fallbacks and env overrides). On first run, if a legacy `~/.i18ntk/i18ntk-config.json` is found, i18ntk will migrate it into your project `settings/` directory.
+
+Important keys:
+- `i18nDir`: preferred base directory for your locales
+- `sourceDir`: alternative/legacy base directory (used if `i18nDir` not set)
+
+Environment overrides you can use in CI or advanced setups:
+- `I18NTK_PROJECT_ROOT`, `I18NTK_SOURCE_DIR`, `I18NTK_I18N_DIR`, `I18NTK_OUTPUT_DIR`
+- `I18NTK_RUNTIME_DIR` (runtime helper base dir)
+
+Backups are stored under `settings/backups/` and are created on demand by tools that modify files.
 
 ---
 
@@ -132,7 +277,7 @@ i18ntk analyze --detect-framework --framework react
 - **Interactive CLI** with beautiful menus
 - **CI/CD Ready** with JSON output mode
 
-### 🎯 **NEW in 1.8.3 - Latest Release**
+### 🎯 **NEW in 1.9.0 - Latest Release**
 - **Enhanced Framework Detection** - Auto-detects React, Vue, Angular, i18next
 - **Ultra-Performance Mode** - 97% speed improvement
 - **Advanced Security Features** - PIN protection & encryption
@@ -147,20 +292,20 @@ i18ntk analyze --detect-framework --framework react
 - **Placeholder Validation**: Ensure consistent placeholder usage
 - **Cross-reference Checking**: Verify translation completeness across languages
 
-### 🎯 **Enhanced Scanner (NEW in 1.8.3)**
+### 🎯 **Enhanced Scanner (NEW in 1.9.0)**
 - **Framework Detection**: Auto-detect React+i18next, Vue+vue-i18n, Angular+ngx-translate
 - **Pattern Recognition**: Framework-specific translation patterns
 - **Unicode Support**: Full Unicode character detection and handling
 - **Edge Cases**: Empty files, exclusion patterns, length limits
 - **Comprehensive Testing**: 12 test cases covering all major frameworks
 
-### 🎯 **Enhanced Framework Detection (NEW in 1.8.3)**
+### 🎯 **Enhanced Framework Detection (NEW in 1.9.0)**
 - **Smart Framework Detection**: Automatically detects i18next, Lingui, and FormatJS
 - **Package.json Analysis**: Quick detection via dependency analysis
 - **Framework-specific Rules**: Tailored validation for each framework
 - **Enhanced Doctor Tool**: Framework-aware analysis and recommendations
 
-### 🔌 **Plugin System (NEW in 1.8.3)**
+### 🔌 **Plugin System (NEW in 1.9.0)**
 - **Plugin Loader Architecture**: Extensible plugin system with PluginLoader and FormatManager
 - **Custom Extractors**: Support for custom translation extractors
 - **Format Managers**: Unified handling of different translation formats
@@ -174,7 +319,7 @@ i18ntk analyze --detect-framework --framework react
 - **Streaming Processing**: Handle large files without memory issues
 - **No Child Processes**: Removed child_process usage for better performance
 
-### 🔒 **Security First (Enhanced in 1.8.3)**
+### 🔒 **Security First (Enhanced in 1.9.0)**
 - **Admin PIN Protection**: Secure sensitive operations with PIN authentication
 - **Command-line PIN**: Support for `--admin-pin` argument in non-interactive mode
 - **Standardized Exit Codes**: Consistent exit codes across all CLI commands
@@ -198,7 +343,7 @@ i18ntk analyze --detect-framework --framework react
 
 ---
 
-## 🛡️ Security in 1.8.3
+## 🛡️ Security in 1.9.0
 
 ### Summary
 
@@ -211,7 +356,7 @@ i18ntk analyze --detect-framework --framework react
 
 ### Before → After
 
-| Area                  | Before (risk)                | After (1.8.3+)                    |
+| Area                  | Before (risk)                | After (1.9.0+)                    |
 | --------------------- | ---------------------------- | --------------------------------- |
 | Shell execution       | Possible via `child_process` | **Removed entirely**              |
 | File ops              | Mixed shell + Node           | **Node fs/path only**             |
@@ -221,57 +366,9 @@ i18ntk analyze --detect-framework --framework react
 
 
 
----
-
-## 📸 Screenshots
-
-| **Framework Detection** | **Main Menu** |
-|:-----------------------:|:-------------:|
-| ![Framework Detection](docs/screenshots/I18NTK-FRAMEWORK.PNG) | ![Main Menu](docs/screenshots/I18NTK-MENU.PNG) |
-
-| **Initialization** | **Initilization Language Select** |
-|:------------------:|:---------------------------------:|
-| ![Initialization](docs/screenshots/I18NTK-INIT.PNG) | ![Init Summary](docs/screenshots/I18NTK-INIT-LANG-SELECT.PNG) | 
-
-| **Language Selection** | **Language Changed** |
-|:----------------------:|:--------------------:|
-| ![Language Selection](docs/screenshots/I18NTK-LANGUAGE-UI.PNG) | ![Language Changed](docs/screenshots/I18NTK-LANGUAGE-UI-CHANGED.PNG) |
-
-| **Settings Manager (v1.8.3)** | **Translation Fixer (v1.8.3)** |
-|:-----------------------------:|:-------------------------------:|
-| ![Settings Manager](docs/screenshots/I18NTK-SETTINGS.PNG) | ![Translation Fixer](docs/screenshots/I18NTK-FIXER.PNG) |
-
-| **Analyze** | **Complete** | **Usage** |
-|:-----------:|:------------:|:----------:|
-| ![Analyze](docs/screenshots/I18NTK-ANALYZE.PNG) | ![Complete](docs/screenshots/I18NTK-COMPLETE.PNG) | ![Usage](docs/screenshots/I18NTK-USAGE.PNG) |
-
-| **Sizing (Overview)** | **Sizing (List)** |
-|:---------------------:|:-----------------:|
-| ![Sizing](docs/screenshots/I18NTK-SIZING.PNG) | ![Sizing List](docs/screenshots/I18NTK-SIZING-LIST.PNG) |
-
-| **Validate** | **Validate End** |
-|:-----------:|:-----------------:|
-| ![Validate](docs/screenshots/I18NTK-VALIDATE.PNG) | ![Validate End](docs/screenshots/I18NTK-VALIDATE-END.PNG) |
-
-| **Summary** | **Summary Report** | **Summary Completed** |
-|:-----------:|:-----------------:|:-----------------:|
-| ![Summary Start](docs/screenshots/I18NTK-SUMMARY-1.PNG) | ![Summary End](docs/screenshots/I18NTK-SUMMARY-2.PNG) | ![Summary Options](docs/screenshots/I18NTK-SUMMARY-3.PNG) |
-
-
-| **Admin Pin** | **Admin Pin Setup** | **Admin Pin Success** | **Admin Pin Ask** |
-|:-----------:|:-----------------:|:-----------------:|:-----------------:|
-| ![Admin Pin](docs/screenshots/I18NTK-ADMIN-PIN.PNG) | ![Admin Pin Setup](docs/screenshots/I18NTK-ADMIN-PIN-SETUP.PNG) | ![Success](docs/screenshots/I18NTK-ADMIN-PIN-SUCCESS.PNG) | ![Admin Pin Ask](docs/screenshots/I18NTK-ADMIN-PIN-ASK.PNG) |
-
-
-| **Delete Options** | **Delete Full** | **Delete None** |
-|:------------------:|:------------------:|:------------------:|
-| ![Delete Options](docs/screenshots/I18NTK-DELETE-CHOOSE.PNG) | ![Delete Full](docs/screenshots/I18NTK-DELETE-FULL.PNG) | ![Delete None](docs/screenshots/I18NTK-DELETE-NONE.PNG) | 
-
----
-
 ## 📊 **i18ntk vs Others - The Clear Winner**
 
-| Feature | i18ntk 1.8.3 | Traditional Tools | Manual Process |
+| Feature | i18ntk 1.9.0 | Traditional Tools | Manual Process |
 |---------|--------------|-------------------|----------------|
 | **Speed** | 15.38ms (200k keys) | 2-5 minutes | Hours |
 | **Memory** | <2MB | 50-200MB | Variable |
@@ -319,7 +416,7 @@ i18ntk analyze --detect-framework --framework react
 
 ---
 
-## 🔒 Safer Workflow (NEW in v1.8.3)
+## 🔒 Safer Workflow (NEW in v1.9.0)
 
 **Enhanced security through manual script execution:**
 
@@ -343,7 +440,7 @@ Create `settings/i18ntk-config.json` (auto‑generated by `init`):
 
 ```json
 {
-  "version": "1.8.3",
+  "version": "1.9.0",
   "sourceDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "defaultLanguage": "en",
@@ -394,7 +491,7 @@ You can override paths with environment variables:
 
 ---
 
-## 🔧 Enhanced Translation Fixer (v1.8.3)
+## 🔧 Enhanced Translation Fixer (v1.9.0)
 
 Interactive tool with improved automatic detection to locate and repair placeholders such as `{{NOT_TRANSLATED}}`, `__UNTRANSLATED__`, or custom markers.
 
@@ -510,5 +607,5 @@ your-project/
 - **Version:** `i18ntk --version`
 
 **Made for the global dev community.** ❤️
-**Last Updated:** 2025-08-12**
-**Version:** 1.8.3
+**Last Updated:** 2025-08-13**
+**Version:** 1.9.0

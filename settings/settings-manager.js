@@ -6,12 +6,13 @@ const SecurityUtils = require('../utils/security');
 
 class SettingsManager {
     constructor() {
-        this.configDir = path.join(os.homedir(), '.i18ntk');
+        // Use project-scoped settings directory
+        this.configDir = path.resolve(process.cwd(), 'settings');
         this.configFile = path.join(this.configDir, 'i18ntk-config.json');
         this.backupDir = path.join(this.configDir, 'backups');
         
         this.defaultConfig = {
-            "version": "1.8.3, 1.8.3",
+            "version": "1.9.0",
             "language": "en",
             "uiLanguage": "en",
             "theme": "dark",
@@ -19,6 +20,12 @@ class SettingsManager {
             "sourceDir": "./locales",
             "i18nDir": "./i18n",
             "outputDir": "./i18ntk-reports",
+            "framework": {
+                "preference": "auto", // auto | vanilla | react | vue | angular | svelte | i18next | nuxt | next
+                "fallback": "vanilla",
+                "detect": true,
+                "supported": ["react", "vue", "angular", "svelte", "i18next", "nuxt", "next", "vanilla"]
+            },
             "scriptDirectories": {
                 "main": "./main",
                 "utils": "./utils",
@@ -478,7 +485,7 @@ class SettingsManager {
                 version: {
                     type: 'string',
                     description: 'Configuration version',
-                    default: '1.8.3',
+                    default: '1.9.0',
                     readOnly: true
                 },
                 language: {
@@ -518,6 +525,35 @@ class SettingsManager {
                     type: 'string',
                     description: 'Directory for generated reports',
                     default: './i18ntk-reports'
+                },
+                framework: {
+                    type: 'object',
+                    description: 'Framework preference and detection settings',
+                    properties: {
+                        preference: {
+                            type: 'string',
+                            description: 'Preferred framework to use. auto tries to detect.',
+                            enum: ['auto', 'vanilla', 'react', 'vue', 'angular', 'svelte', 'i18next', 'nuxt', 'next'],
+                            default: 'auto'
+                        },
+                        fallback: {
+                            type: 'string',
+                            description: 'Framework to use when detection finds nothing',
+                            enum: ['vanilla', 'react', 'vue', 'angular', 'svelte', 'i18next', 'nuxt', 'next'],
+                            default: 'vanilla'
+                        },
+                        detect: {
+                            type: 'boolean',
+                            description: 'Enable automatic framework detection',
+                            default: true
+                        },
+                        supported: {
+                            type: 'array',
+                            description: 'List of supported frameworks for hints/UI',
+                            items: { type: 'string' },
+                            default: ['react', 'vue', 'angular', 'svelte', 'i18next', 'nuxt', 'next', 'vanilla']
+                        }
+                    }
                 },
                 processing: {
                     type: 'object',

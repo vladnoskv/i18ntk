@@ -57,7 +57,9 @@ class I18nInitializer {
       sourceLanguage: 'en',
       excludeFiles: ['.DS_Store', 'Thumbs.db'],
       supportedExtensions: ['.json'],
-      notTranslatedMarker: '[NOT_TRANSLATED]',
+      // Default structure: modular (folder per language)
+      structure: 'modular', // one of: 'single' | 'modular' | 'existing'
+      perLanguageStructure: {}, // optional map lang -> 'single' | 'modular'
       noPrompt: false,
       ...config
     };
@@ -68,7 +70,10 @@ class I18nInitializer {
       this.config.translationPatterns = this.detectedFramework.patterns;
     }
     this.sourceDir = this.config.sourceDir || './locales';
-    this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+    // Source language directory depends on structure
+    this.sourceLanguageDir = this.config.structure === 'single'
+      ? this.sourceDir
+      : path.join(this.sourceDir, this.config.sourceLanguage);
     
     // Ensure defaultLanguages is properly initialized from config
     this.config.defaultLanguages = this.config.defaultLanguages || ['de', 'es', 'fr', 'ru'];
@@ -335,42 +340,50 @@ class I18nInitializer {
     const usedExisting = await this.detectAndSelectDirectory(skipPrompt);
     
     if (usedExisting) {
-      console.log(t('init.usingExistingStructure', { dir: this.sourceDir }));
+      console.log(t('init.usingExistingDirectory', { dir: this.sourceDir }));
       // When using existing, sourceLanguageDir might already be set to English directory
       return;
     }
     
     // Validate paths
     const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
-    const validatedSourceLanguageDir = SecurityUtils.validatePath(this.sourceLanguageDir, process.cwd());
-    
-    if (!validatedSourceDir || !validatedSourceLanguageDir) {
-      SecurityUtils.logSecurityEvent('Invalid directory paths in setupInitialStructure', 'error', { sourceDir: this.sourceDir, sourceLanguageDir: this.sourceLanguageDir });
-      throw new Error(t('validate.invalidDirectoryPaths') || 'Invalid directory paths detected');
+    if (!validatedSourceDir) {
+      throw new Error(t('validate.invalidSourceDirectory', { sourceDir: this.sourceDir }) || `Invalid source directory: ${this.sourceDir}`);
+    }
+
+    // For modular structure, ensure per-language subdirectory exists
+    let validatedSourceLanguageDir = this.sourceLanguageDir;
+    if (this.config.structure !== 'single') {
+      validatedSourceLanguageDir = SecurityUtils.validatePath(this.sourceLanguageDir, process.cwd());
+      if (!validatedSourceLanguageDir) {
+        throw new Error(t('validate.invalidSourceLanguageDirectory', { sourceDir: this.sourceLanguageDir }) || `Invalid source language directory: ${this.sourceLanguageDir}`);
+      }
     }
     
-    // Create source directory only if it doesn't exist and no existing was detected
+    // Create directories if they do not exist
     if (!fs.existsSync(validatedSourceDir)) {
-      console.log(t('init.creatingSourceDirectory', { dir: validatedSourceDir }));
       fs.mkdirSync(validatedSourceDir, { recursive: true });
-      SecurityUtils.logSecurityEvent('Source directory created', 'info', { dir: validatedSourceDir });
     }
-    
-    // Create source language directory only if it doesn't exist
-    if (!fs.existsSync(validatedSourceLanguageDir)) {
-      console.log(t('init.creatingSourceLanguageDirectory', { dir: validatedSourceLanguageDir }));
+    if (this.config.structure !== 'single' && !fs.existsSync(validatedSourceLanguageDir)) {
       fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });
-      
-      // Create a sample translation file only if no files exist
-      await this.createSampleTranslationFile(validatedSourceLanguageDir);
+    }
+
+    // Create sample translation file if none exist
+    const englishFiles = (this.config.structure === 'single'
+      ? fs.readdirSync(validatedSourceDir)
+      : fs.readdirSync(validatedSourceLanguageDir))
+      .filter(file => file.endsWith(this.format.extension));
+
+    if (englishFiles.length === 0) {
+      await this.createSampleTranslationFile(this.config.structure === 'single' ? validatedSourceDir : validatedSourceLanguageDir);
     } else {
       // Directory exists, check if we need to create a sample file
-      const existingFiles = fs.readdirSync(validatedSourceLanguageDir)
+      const existingFiles = (this.config.structure === 'single' ? fs.readdirSync(validatedSourceDir) : fs.readdirSync(validatedSourceLanguageDir))
         .filter(file => file.endsWith(this.format.extension));
       
       if (existingFiles.length === 0) {
         // No format files exist, create sample file
-        await this.createSampleTranslationFile(validatedSourceLanguageDir);
+        await this.createSampleTranslationFile(this.config.structure === 'single' ? validatedSourceDir : validatedSourceLanguageDir);
       }
     }
 
@@ -443,9 +456,21 @@ class I18nInitializer {
     return true;
   }
 
-  // Get all JSON files from source language directory
+  // Get all JSON files from source language directory (supports single/modular)
   getSourceFiles() {
     try {
+      if (this.config.structure === 'single') {
+        if (!fs.existsSync(this.sourceDir)) {
+          throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
+        }
+        const files = fs.readdirSync(this.sourceDir)
+          .filter(file => file.endsWith(this.format.extension) && !this.config.excludeFiles.includes(file));
+        if (files.length === 0) {
+          throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceDir }) || `No JSON files found in source directory: ${this.sourceDir}`);
+        }
+        return files;
+      }
+
       if (!fs.existsSync(this.sourceLanguageDir)) {
         // Try to find English files in parent directory or subdirectories
         const parentDir = path.dirname(this.sourceLanguageDir);
@@ -476,10 +501,10 @@ class I18nInitializer {
       }
       
       const files = fs.readdirSync(this.sourceLanguageDir)
-        .filter(file => {
-          return file.endsWith(this.format.extension) && 
-                 !this.config.excludeFiles.includes(file);
-        });
+      .filter(file => {
+        return file.endsWith(this.format.extension) && 
+               !this.config.excludeFiles.includes(file);
+      });
       
       if (files.length === 0) {
         throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
@@ -513,55 +538,72 @@ class I18nInitializer {
     return obj;
   }
 
-  // Create or update a language file securely
+  // Create or update a language file securely (supports single/modular)
   async createLanguageFile(sourceFile, targetLanguage, sourceContent) {
-    const targetDir = path.join(this.sourceDir, targetLanguage);
-    const targetFile = path.join(targetDir, sourceFile);
-    
-    // Validate paths
-    const validatedTargetDir = SecurityUtils.validatePath(targetDir, this.sourceDir);
-    const validatedTargetFile = SecurityUtils.validatePath(targetFile, this.sourceDir);
-    
-    if (!validatedTargetDir || !validatedTargetFile) {
-      SecurityUtils.logSecurityEvent('Invalid path detected in createLanguageFile', 'error', { targetDir, targetFile });
-      throw new Error(t('validate.invalidFilePathDetected') || 'Invalid file path detected');
-    }
-    
-    // Create target directory if it doesn't exist
-    if (!fs.existsSync(validatedTargetDir)) {
-      fs.mkdirSync(validatedTargetDir, { recursive: true });
-    }
-    
-    let targetContent;
-    
-    // If target file exists, preserve existing translations
-    if (fs.existsSync(validatedTargetFile)) {
-      try {
-        const existingContent = await SecurityUtils.safeReadFile(validatedTargetFile, this.sourceDir);
-        if (existingContent) {
-          targetContent = this.mergeTranslations(sourceContent, this.format.read(existingContent), targetLanguage);
-        } else {
+    try {
+      const sourceFilePath = path.join(this.sourceLanguageDir, sourceFile);
+      let targetFilePath;
+      if (this.getLanguageStructure(targetLanguage) === 'single') {
+        // Single-file per language, write to <lang>.json in sourceDir
+        const baseName = `${targetLanguage}${this.format.extension}`;
+        targetFilePath = path.join(this.sourceDir, baseName);
+      } else {
+        // Modular: folder per language mirroring source file
+        const targetDir = path.join(this.sourceDir, targetLanguage);
+        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+        targetFilePath = path.join(targetDir, sourceFile);
+      }
+
+      const validatedSourcePath = SecurityUtils.validatePath(sourceFilePath, process.cwd());
+      const validatedTargetPath = SecurityUtils.validatePath(targetFilePath, process.cwd());
+      
+      if (!validatedTargetDir || !validatedTargetFile) {
+        SecurityUtils.logSecurityEvent('Invalid path detected in createLanguageFile', 'error', { targetDir, targetFile });
+        throw new Error(t('validate.invalidFilePathDetected') || 'Invalid file path detected');
+      }
+      
+      // Create target directory if it doesn't exist
+      if (!fs.existsSync(validatedTargetPath)) {
+        const targetDir = path.dirname(validatedTargetPath);
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+      }
+      
+      let targetContent;
+      
+      // If target file exists, preserve existing translations
+      if (fs.existsSync(validatedTargetPath)) {
+        try {
+          const existingContent = await SecurityUtils.safeReadFile(validatedTargetPath, process.cwd());
+          if (existingContent) {
+            targetContent = this.mergeTranslations(sourceContent, this.format.read(existingContent), targetLanguage);
+          } else {
+            targetContent = this.markWithCountryCode(sourceContent, targetLanguage);
+          }
+        } catch (error) {
+          console.warn(`⚠️  Warning: Could not parse existing file ${validatedTargetPath}, creating new one`);
+          SecurityUtils.logSecurityEvent('File parse error', 'warn', { file: validatedTargetPath, error: error.message });
           targetContent = this.markWithCountryCode(sourceContent, targetLanguage);
         }
-      } catch (error) {
-        console.warn(`⚠️  Warning: Could not parse existing file ${validatedTargetFile}, creating new one`);
-        SecurityUtils.logSecurityEvent('File parse error', 'warn', { file: validatedTargetFile, error: error.message });
+      } else {
         targetContent = this.markWithCountryCode(sourceContent, targetLanguage);
       }
-    } else {
-      targetContent = this.markWithCountryCode(sourceContent, targetLanguage);
+      
+      // Write the file securely
+      const success = await SecurityUtils.safeWriteFile(validatedTargetPath, this.format.serialize(targetContent), process.cwd());
+      
+      if (!success) {
+        SecurityUtils.logSecurityEvent('Failed to write language file', 'error', { file: validatedTargetPath });
+        throw new Error(t('validate.failedToWriteFile', { filePath: validatedTargetPath }) || `Failed to write file: ${validatedTargetPath}`);
+      }
+      
+      SecurityUtils.logSecurityEvent('Language file created/updated', 'info', { file: validatedTargetPath, language: targetLanguage });
+      return validatedTargetPath;
+    } catch (error) {
+      console.error(t('init.errors.initializationFailed', { error: error.message }));
+      return false;
     }
-    
-    // Write the file securely
-    const success = await SecurityUtils.safeWriteFile(validatedTargetFile, this.format.serialize(targetContent), this.sourceDir);
-    
-    if (!success) {
-      SecurityUtils.logSecurityEvent('Failed to write language file', 'error', { file: validatedTargetFile });
-      throw new Error(t('validate.failedToWriteFile', { filePath: validatedTargetFile }) || `Failed to write file: ${validatedTargetFile}`);
-    }
-    
-    SecurityUtils.logSecurityEvent('Language file created/updated', 'info', { file: validatedTargetFile, language: targetLanguage });
-    return validatedTargetFile;
   }
 
   // Merge existing translations with new structure using country code markers
@@ -693,7 +735,7 @@ class I18nInitializer {
 
     console.log('\n' + t('init.languageSelectionTitle'));
     console.log(t('common.separator'));
-    console.log(t('language.available'));
+    console.log(t('init.available'));
 
     Object.entries(LANGUAGE_CONFIG).forEach(([code, config], index) => {
       console.log(`  ${(index + 1).toString().padStart(2)}. ${code} - ${config.name} (${config.nativeName})`);
@@ -718,78 +760,46 @@ class I18nInitializer {
     return validLanguages.length > 0 ? validLanguages : this.config.defaultLanguages;
   }
 
-  // Main initialization process
-  async init() {
-    try {
-      console.log(t('init.initializationTitle'));
-      console.log(t('common.separator'));
-      
-      // Parse command line arguments
-      const args = this.parseArgs();
-      if (args.sourceDir) this.config.sourceDir = args.sourceDir;
-      if (args.sourceLanguage) this.config.sourceLanguage = args.sourceLanguage;
-      
-      // Update paths
-      this.sourceDir = path.resolve(this.config.sourceDir);
-      this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
-      
-      console.log(t('init.sourceDirectoryLabel', { dir: this.sourceDir }));
-      console.log(t('init.sourceLanguageLabel', { language: this.config.sourceLanguage }));
-      
-      // Check i18n dependencies first and exit if user chooses not to continue
-      const hasI18n = await this.checkI18nDependencies(args.noPrompt);
-      
-      if (!hasI18n) {
-        console.log(this.t('init.errors.noFramework'));
-        console.log(this.t('init.suggestions.installFramework'));
-        process.exit(0);
-      }
-      
-      // Call the enhanced initialize method with args
-      await this.initialize(hasI18n, args);
-      
-      // Offer interactive locale optimization after successful initialization
-      if (!args.noPrompt) {
-        await this.offerLocaleOptimization();
-      }
-      
-    } catch (error) {
-      console.error(t('init.errors.initializationFailed', { error: error.message }));
-      throw error;
-    } finally {
-      // No explicit readline cleanup needed; CLI helpers manage a shared interface
-    }
-  }
-
-  // Interactive setup configuration
+  // Interactive setup configuration (internationalized)
   async promptSetupConfiguration(skipPrompt = false) {
     if (skipPrompt || !process.stdin.isTTY) {
-      return { structure: 'folder', duplicateStructure: true };
+      return { structure: 'modular', duplicateStructure: true };
     }
 
     const { ask } = require('../utils/cli');
 
-    console.log('\n🎯 **SETUP CONFIGURATION**');
+    console.log('\n' + t('init.setup.title'));
     console.log(t('common.separator'));
-    console.log('📁 How would you like to organize your translation files?');
-    console.log('   1. Single file per language (e.g., en.json, fr.json)');
-    console.log('   2. Modular structure (folder per language with multiple files)');
-    console.log('   3. Keep existing structure (if detected)');
+    // Determine recommended option
+    const recommended = ' (recommended)';
+    console.log(t('init.setup.question'));
+    console.log('   1. ' + t('init.setup.opt_single') + (this.config.structure === 'single' ? recommended : ''));
+    console.log('   2. ' + t('init.setup.opt_modular') + (this.config.structure !== 'single' ? recommended : ''));
+    console.log('   3. ' + t('init.setup.opt_existing'));
 
-    const structureChoice = await ask('\n🤖 Enter your choice (1/2/3): ');
+    const structureChoice = await ask('\n' + t('init.setup.choice_prompt'));
     
-    let structure = 'folder';
+    let structure = 'modular';
     if (structureChoice === '1') structure = 'single';
     else if (structureChoice === '2') structure = 'modular';
     else structure = 'existing';
 
     let duplicateStructure = true;
+    let perLanguage = [];
     if (structure !== 'existing') {
-      const duplicateChoice = await ask('\n🤖 Apply the same structure to all languages? (y/n): ');
+      const duplicateChoice = await ask('\n' + t('init.setup.apply_all_prompt'));
       duplicateStructure = duplicateChoice.toLowerCase() === 'y' || duplicateChoice.toLowerCase() === 'yes';
+      if (!duplicateStructure) {
+        // Prompt for languages to include/exclude
+        console.log(t('init.setup.per_language_intro'));
+        const available = Object.keys(LANGUAGE_CONFIG).join(', ');
+        console.log(t('init.setup.available_languages', { languages: available }));
+        const includeAns = await ask(t('init.setup.include_prompt'));
+        perLanguage = includeAns.split(',').map(l => l.trim().toLowerCase()).filter(Boolean);
+      }
     }
 
-    return { structure, duplicateStructure };
+    return { structure, duplicateStructure, perLanguage };
   }
 
   // Enhanced initialization with dependency checking
@@ -924,58 +934,58 @@ class I18nInitializer {
   // Generate completion summary with proper error handling
   async generateCompletionSummary(results, targetLanguages) {
     try {
-      console.log('\n' + '=' .repeat(50));
+      console.log('\n' + '='.repeat(50));
       console.log(t('init.initializationSummaryTitle'));
       console.log(t('common.separator'));
-      
+
       let totalChanges = 0;
       let languagesProcessed = 0;
       let missingKeysAdded = 0;
 
-      Object.entries(results).forEach(([lang, data]) => {
+      Object.entries(results || {}).forEach(([lang, data]) => {
         if (!data || typeof data !== 'object') return;
-        
+
         const langName = LANGUAGE_CONFIG[lang]?.name || 'Unknown';
         const stats = data.totalStats || { total: 0, translated: 0, percentage: 0, missing: 0 };
-        
+
         const statusIcon = stats.percentage === 100 ? '✅' : stats.percentage >= 80 ? '🟡' : '🔴';
-        
-        console.log(t('init.languageSummary', { 
-          icon: statusIcon, 
-          name: langName, 
-          code: lang, 
-          percentage: stats.percentage || 0 
-        }));
-        
+
+        console.log(
+          t('init.languageSummary', {
+            icon: statusIcon,
+            name: langName,
+            code: lang,
+            percentage: stats.percentage || 0,
+          })
+        );
+
         if (data.files && Array.isArray(data.files)) {
           console.log(t('init.languageFiles', { count: data.files.length }));
         }
-        
-        console.log(t('init.languageKeys', { 
-          translated: stats.translated || 0, 
-          total: stats.total || 0 
-        }));
-        
+
+        console.log(
+          t('init.languageKeys', {
+            translated: stats.translated || 0,
+            total: stats.total || 0,
+          })
+        );
+
         console.log(t('init.languageMissing', { count: stats.missing || 0 }));
-        
-        // Calculate totals
+
         totalChanges += (stats.translated || 0) + (stats.missing || 0);
-        languagesProcessed++;
+        languagesProcessed += 1;
         missingKeysAdded += stats.missing || 0;
       });
 
-      // Display completion summary
       console.log('\n📊 COMPLETION SUMMARY');
       console.log(t('common.separator'));
       console.log(`📝 Total changes: ${totalChanges}`);
       console.log(`🌍 Languages processed: ${languagesProcessed}`);
       console.log(`➕ Missing keys added: ${missingKeysAdded}`);
 
-      // Offer to generate report
-      if (process.stdin.isTTY && !this.args.noPrompt) {
+      if (process.stdin.isTTY && !this.config?.noPrompt) {
         const { ask } = require('../utils/cli');
         const generateReport = await ask('\n🤖 Would you like a report generated? (Y/N): ');
-        
         if (generateReport.toLowerCase() === 'y' || generateReport.toLowerCase() === 'yes') {
           await this.generateDetailedReport(results, targetLanguages);
         }

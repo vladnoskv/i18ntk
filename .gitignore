@@ -5,7 +5,7 @@
 /src
 /test-i18ntk*
 .trae
-test-*
+
 
 # Security and configuration files
 settings/.i18n-admin-config.json

@@ -1,8 +1,10 @@
-# Security Guide
+![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.8.3
-**Last Updated:** 2025-08-12  
+**Version:** 1.9.0
+**Last Updated:** 2025-08-13  
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+
+[![npm](https://img.shields.io/npm/v/i18ntk.svg?label=npm%20version)](https://www.npmjs.com/package/i18ntk) [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg?label=npm%20downloads)](https://www.npmjs.com/package/i18ntk) [![Node.js Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social&label=github%20stars)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.9.0)](https://socket.dev/npm/package/i18ntk/overview/1.9.0)
 
 This document outlines the security measures and best practices implemented in the i18n Management Toolkit.
 
@@ -46,7 +48,7 @@ This document outlines the security measures and best practices implemented in t
 - **Key Rotation**: Automatic rotation during PIN changes
 - **Key Destruction**: Secure deletion when PIN is reset
 
-## 🛡️ **Security Enhancements in 1.8.3**
+## 🛡️ **Security Enhancements in 1.9.0**
 
 ### **Zero Shell Access Vulnerabilities - Production Code**
 
@@ -58,7 +60,7 @@ This document outlines the security measures and best practices implemented in t
 - **Production-safe codebase** - Verified by comprehensive security scanning
 
 #### **Before vs After Security Analysis**
-| Security Aspect | Before 1.8.3, 1.8.3 | After 1.8.3, 1.8.3 |
+| Security Aspect | Before 1.9.0, 1.9.0 | After 1.9.0, 1.9.0 |
 |------------------|---------------|-------------|
 | **Shell Access** | `child_process.execSync()` usage | Zero shell access |
 | **Process Spawning** | `spawnSync()` calls | Direct module execution |
@@ -155,5 +157,5 @@ When deploying as a web application, implement:
 ---
 
 **Last Updated**: 2025-08-12
-**Version**: 1.8.3, 1.8.3
+**Version**: 1.9.0, 1.8.3
 **Maintainer**: Vladimir Noskov

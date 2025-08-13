@@ -76,7 +76,7 @@ async function ensureInitializedOrExit(prompt) {
   if (fs.existsSync(initFilePath)) {
     try {
       const initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
-      isInitialized = initStatus.initialized && initStatus.version === '1.8.3, 1.8.3';
+      isInitialized = initStatus.initialized && initStatus.version === '1.9.0';
     } catch (e) {
       // Invalid init file, proceed with check
     }
@@ -98,7 +98,7 @@ async function ensureInitializedOrExit(prompt) {
     ensureDirectory(initDir);
     fs.writeFileSync(initFilePath, JSON.stringify({
       initialized: true,
-      version: '1.8.3, 1.8.3',
+      version: '1.9.0',
       timestamp: new Date().toISOString(),
       sourceDir: cfg.sourceDir,
       sourceLanguage: cfg.sourceLanguage
@@ -119,7 +119,7 @@ async function ensureInitializedOrExit(prompt) {
   ensureDirectory(initDir);
   fs.writeFileSync(initFilePath, JSON.stringify({
     initialized: true,
-    version: '1.8.3, 1.8.3',
+    version: '1.9.0',
     timestamp: new Date().toISOString(),
     sourceDir: result.sourceDir || cfg.sourceDir,
     sourceLanguage: cfg.sourceLanguage
@@ -481,7 +481,7 @@ class I18nManager {
 
       // Define valid direct commands
       const directCommands = [
-        'init', 'analyze', 'validate', 'usage', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow'
+        'init', 'analyze', 'validate', 'usage', 'scanner', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow'
       ];
 
       // Handle help immediately without dependency checks
@@ -521,10 +521,10 @@ class I18nManager {
 
       // Framework detection is now handled by maybePromptFramework above
       // Skip the redundant checkI18nDependencies prompt
-      
+
       // Interactive mode - showInteractiveMenu will handle the title
       await this.showInteractiveMenu();
-      
+
     } catch (error) {
       if (this.ui && this.ui.t) {
         console.error(t('common.genericError', { error: error.message }));
@@ -559,11 +559,12 @@ class I18nManager {
         'help.sizingCommand': '  --command=sizing  Analyze translation sizing',
         'help.completeCommand': '  --command=complete Run complete analysis',
         'help.summaryCommand': '  --command=summary Generate summary report',
-        'help.debugCommand': '  --command=debug   Run debug utilities'
+        'help.debugCommand': '  --command=debug   Run debug utilities',
+        'help.scannerCommand': '  --command=scanner Scan for translation keys'
       };
       return helpTexts[key] || key;
     };
-    
+
     console.log(t('help.usage'));
     console.log(t('help.interactiveMode'));
     console.log(t('help.initProject'));
@@ -580,6 +581,7 @@ class I18nManager {
     console.log(t('help.completeCommand'));
     console.log(t('help.summaryCommand'));
     console.log(t('help.debugCommand'));
+    console.log(t('help.scannerCommand'));
 
     // Ensure proper exit for direct command execution
     if (process.argv.includes('--help') || process.argv.includes('-h')) {
@@ -628,7 +630,7 @@ class I18nManager {
     }
     
     // Check admin authentication for all commands when PIN protection is enabled
-    const authRequiredCommands = ['init', 'analyze', 'validate', 'usage', 'complete', 'fix', 'sizing', 'workflow', 'status', 'delete', 'settings', 'debug'];
+    const authRequiredCommands = ['init', 'analyze', 'validate', 'usage', 'scanner', 'complete', 'fix', 'sizing', 'workflow', 'status', 'delete', 'settings', 'debug'];
     if (authRequiredCommands.includes(command)) {
       const authPassed = await this.checkAdminAuth();
       if (!authPassed) {
@@ -672,6 +674,13 @@ class I18nManager {
                 await fixerTool.run({fromMenu: isManagerExecution});
                 break;
 
+            case 'scanner':
+                const Scanner = require('./i18ntk-scanner');
+                const scanner = new Scanner();
+                await scanner.initialize();
+                await scanner.run();
+                break;
+
             case 'debug':
                 const debuggerTool = new I18nDebugger();
                 await debuggerTool.run();
@@ -679,7 +688,7 @@ class I18nManager {
             case 'help':
                 this.showHelp();
                 if (isManagerExecution && !this.isNonInteractiveMode()) {
-                  await this.prompt(t('usage.pressEnterToReturnToMenu'));
+                  await this.prompt(t('menu.pressEnterToContinue'));
                   await this.showInteractiveMenu();
                 } else {
                   console.log(t('workflow.exitingCompleted'));
@@ -764,23 +773,26 @@ class I18nManager {
   }
 
   async showInteractiveMenu() {
+
     // Check if we're in non-interactive mode (like echo 0 | node script)
     if (this.isNonInteractiveMode()) {
       console.log(`\n${t('menu.title')}`);
       console.log(t('menu.separator'));
       console.log(`1. ${t('menu.options.init')}`);
-    console.log(`2. ${t('menu.options.analyze')}`);
-    console.log(`3. ${t('menu.options.validate')}`);
-    console.log(`4. ${t('menu.options.usage')}`);
-    console.log(`5. ${t('menu.options.complete')}`);
-    console.log(`6. ${t('menu.options.sizing')}`);
-    console.log(`7. ${t('menu.options.fix')}`);
-    console.log(`8. ${t('menu.options.status')}`);
-    console.log(`9. ${t('menu.options.delete')}`);
-    console.log(`10. ${t('menu.options.settings')}`);
-    console.log(`11. ${t('menu.options.help')}`);
-    console.log(`12. ${t('menu.options.language')}`);
-    console.log(`0. ${t('menu.options.exit')}`);
+      console.log(`2. ${t('menu.options.analyze')}`);
+      console.log(`3. ${t('menu.options.validate')}`);
+      console.log(`4. ${t('menu.options.usage')}`);
+      console.log(`5. ${t('menu.options.complete')}`);
+      console.log(`6. ${t('menu.options.sizing')}`);
+      console.log(`7. ${t('menu.options.fix')}`);
+      console.log(`8. ${t('menu.options.status')}`);
+      console.log(`9. ${t('menu.options.delete')}`);
+      console.log(`10. ${t('menu.options.settings')}`);
+      console.log(`11. ${t('menu.options.help')}`);
+      console.log(`12. ${t('menu.options.language')}`);
+      console.log(`13. ${t('menu.options.scanner')}`);
+      console.log(`0. ${t('menu.options.exit')}`);
+
       console.log('\n' + t('menu.nonInteractiveModeWarning'));
       console.log(t('menu.useDirectExecution'));
       console.log(t('menu.useHelpForCommands'));
@@ -803,6 +815,7 @@ class I18nManager {
     console.log(`10. ${t('menu.options.settings')}`);
     console.log(`11. ${t('menu.options.help')}`);
     console.log(`12. ${t('menu.options.language')}`);
+    console.log(`13. ${t('menu.options.scanner')}`);
     console.log(`0. ${t('menu.options.exit')}`);
     
     const choice = await this.prompt('\n' + t('menu.selectOptionPrompt'));
@@ -899,6 +912,9 @@ class I18nManager {
         break;
       case '12':
         await this.showLanguageMenu();
+        break;
+      case '13':
+        await this.executeCommand('scanner', {fromMenu: true});
         break;
       case '0':
         console.log(t('menu.goodbye'));
@@ -1092,7 +1108,7 @@ class I18nManager {
       { path: path.join(process.cwd(), 'reports', 'backups'), name: 'Reports Backups', type: 'backups' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
-      { path: path.join(require('os').homedir(), '.i18ntk', 'backups'), name: 'Settings Backups', type: 'backups' },
+      { path: path.join(process.cwd(), 'settings', 'backups'), name: 'Settings Backups', type: 'backups' },
       { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' }
     ].filter(dir => dir.path && typeof dir.path === 'string');
     

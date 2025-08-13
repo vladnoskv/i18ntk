@@ -4,8 +4,21 @@ const os = require('os');
 
 // Project root is where commands are executed
 const projectRoot = process.cwd();
-const CONFIG_DIR = path.join(os.homedir(), '.i18ntk');
-const CONFIG_PATH = path.join(CONFIG_DIR, 'i18ntk-config.json');
+// Prefer project-scoped settings directory over legacy home config
+const PROJECT_SETTINGS_DIR = path.resolve(projectRoot, 'settings');
+const PROJECT_CONFIG_PATH = path.join(PROJECT_SETTINGS_DIR, 'i18ntk-config.json');
+
+// Legacy home directory config (for migration only)
+const LEGACY_CONFIG_DIR = path.join(os.homedir(), '.i18ntk');
+const LEGACY_CONFIG_PATH = path.join(LEGACY_CONFIG_DIR, 'i18ntk-config.json');
+
+// Package defaults fallback (read-only)
+const PACKAGE_SETTINGS_DIR = path.resolve(projectRoot, 'node_modules', 'i18ntk', 'settings');
+const PACKAGE_CONFIG_PATH = path.join(PACKAGE_SETTINGS_DIR, 'i18ntk-config.json');
+
+// Back-compat: expose CONFIG_DIR/CONFIG_PATH but point to project settings
+const CONFIG_DIR = PROJECT_SETTINGS_DIR;
+const CONFIG_PATH = PROJECT_CONFIG_PATH;
 
 // Default configuration values - comprehensive configuration
 const DEFAULT_CONFIG = {
@@ -16,6 +29,12 @@ const DEFAULT_CONFIG = {
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
+  "framework": {
+    "preference": "auto", // one of: auto | vanilla | react | vue | angular | svelte | i18next | nuxt | next
+    "fallback": "vanilla", // when auto detects nothing, use this value
+    "detect": true,
+    "supported": ["react", "vue", "angular", "svelte", "i18next", "nuxt", "next", "vanilla"]
+  },
   "scriptDirectories": {
     "init": null,
     "analyze": null,
@@ -212,6 +231,9 @@ const ENV_VAR_MAP = {
   I18NTK_SOURCE_DIR: 'sourceDir',
   I18NTK_I18N_DIR: 'i18nDir',
   I18NTK_OUTPUT_DIR: 'outputDir',
+  I18NTK_FRAMEWORK_PREFERENCE: 'framework.preference',
+  I18NTK_FRAMEWORK_FALLBACK: 'framework.fallback',
+  I18NTK_FRAMEWORK_DETECT: 'framework.detect',
 };
 
 let currentConfig = null;
@@ -220,9 +242,9 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function ensureConfigDir() {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true });
+function ensureProjectSettingsDir() {
+  if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+    fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
   }
 }
 
@@ -236,11 +258,15 @@ function normalizePathValue(keyPath, value) {
   return value;
 }
 
+// Deep merge that also normalizes path-like leaves based on their key path
 function deepMerge(target, source, basePath = '') {
+  if (!target || typeof target !== 'object') target = {};
   for (const [key, val] of Object.entries(source || {})) {
     const pathKey = basePath ? `${basePath}.${key}` : key;
     if (val && typeof val === 'object' && !Array.isArray(val)) {
-      if (!target[key] || typeof target[key] !== 'object') target[key] = {};
+      if (!target[key] || typeof target[key] !== 'object' || Array.isArray(target[key])) {
+        target[key] = {};
+      }
       deepMerge(target[key], val, pathKey);
     } else {
       target[key] = normalizePathValue(pathKey, val);
@@ -250,29 +276,109 @@ function deepMerge(target, source, basePath = '') {
 }
 
 function applyEnvOverrides(cfg) {
-  const overrides = {};
-  for (const [envVar, key] of Object.entries(ENV_VAR_MAP)) {
-    if (process.env[envVar]) {
-      overrides[key] = process.env[envVar];
+  for (const [envVar, keyPath] of Object.entries(ENV_VAR_MAP)) {
+    const value = process.env[envVar];
+    if (value === undefined) continue;
+    const keys = keyPath.split('.');
+    let current = cfg;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i];
+      if (!current[k] || typeof current[k] !== 'object') current[k] = {};
+      current = current[k];
+    }
+    const leaf = keys[keys.length - 1];
+    if (keyPath === 'framework.detect') {
+      current[leaf] = String(value).toLowerCase() !== 'false';
+    } else {
+      current[leaf] = normalizePathValue(keyPath, value);
     }
   }
-  if (Object.keys(overrides).length > 0) {
-    deepMerge(cfg, overrides);
-  }
   return cfg;
+}
+
+function tryReadJson(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return null;
+    }
+    
+    const data = fs.readFileSync(filePath, 'utf8');
+    if (!data || data.trim() === '') {
+      console.warn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
+      return null;
+    }
+    
+    try {
+      return JSON.parse(data);
+    } catch (parseError) {
+      console.error(`[i18ntk] Error parsing JSON from ${filePath}: ${parseError.message}`);
+      // Create a backup of the corrupted file
+      const backupPath = `${filePath}.corrupted-${Date.now()}.bak`;
+      try {
+        fs.writeFileSync(backupPath, data, 'utf8');
+        console.warn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
+      } catch (backupError) {
+        console.error(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
+      }
+      return null;
+    }
+  } catch (error) {
+    console.error(`[i18ntk] Error reading config file at ${filePath}: ${error.message}`);
+    return null;
+  }
+}
+
+async function migrateLegacyIfNeeded(baseCfg) {
+  // If project config does not exist but legacy exists, migrate once
+  if (!fs.existsSync(PROJECT_CONFIG_PATH) && fs.existsSync(LEGACY_CONFIG_PATH)) {
+    const legacy = tryReadJson(LEGACY_CONFIG_PATH);
+    if (legacy && typeof legacy === 'object') {
+      const merged = deepMerge(clone(baseCfg), legacy);
+      // Mark migration completion in the merged config (QoL telemetry)
+      try { merged.migrationComplete = true; } catch (_) {}
+      ensureProjectSettingsDir();
+      try {
+        await fs.promises.writeFile(PROJECT_CONFIG_PATH, JSON.stringify(merged, null, 2), 'utf8');
+        // Best-effort removal of legacy file to prevent future use
+        try { fs.unlinkSync(LEGACY_CONFIG_PATH); } catch (_) {}
+        // Deprecation notice
+        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to settings/i18ntk-config.json. Please commit the settings/ directory to your project.');
+        return merged;
+      } catch (_) {
+        // If write fails, fall back to in-memory config without deleting legacy
+        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Using migrated settings in memory; failed to persist to settings/. Ensure the project has write permissions.');
+        return merged;
+      }
+    }
+  }
+  return null;
 }
 
 function loadConfig() {
   if (currentConfig) return currentConfig;
   let cfg = clone(DEFAULT_CONFIG);
-  try {
-    if (fs.existsSync(CONFIG_PATH)) {
-      const data = fs.readFileSync(CONFIG_PATH, 'utf8');
-      const parsed = JSON.parse(data);
-      cfg = deepMerge(clone(DEFAULT_CONFIG), parsed);
+  // 1) Project config (primary)
+  const projectCfg = tryReadJson(PROJECT_CONFIG_PATH);
+  if (projectCfg) {
+    cfg = deepMerge(clone(DEFAULT_CONFIG), projectCfg);
+  } else {
+    // 2) Package default (read-only)
+    const pkgCfg = tryReadJson(PACKAGE_CONFIG_PATH);
+    if (pkgCfg) {
+      cfg = deepMerge(clone(DEFAULT_CONFIG), pkgCfg);
     }
-  } catch (_) {
-    // ignore and use defaults
+    // 3) Legacy migration (read-only source)
+    if (!projectCfg) {
+      const fromLegacy = tryReadJson(LEGACY_CONFIG_PATH);
+      if (fromLegacy) {
+        cfg = deepMerge(clone(DEFAULT_CONFIG), fromLegacy);
+        // Attempt to migrate to project settings
+        // Ignore migration errors; we still return merged cfg in memory
+        // eslint-disable-next-line no-unused-vars
+        console.warn('[i18ntk] Detected legacy config at ~/.i18ntk. Migrating to project settings directory...');
+        const _ = (async () => { await migrateLegacyIfNeeded(DEFAULT_CONFIG); })();
+      }
+    }
   }
   applyEnvOverrides(cfg);
   currentConfig = cfg;
@@ -281,14 +387,14 @@ function loadConfig() {
 
 async function saveConfig(cfg = currentConfig) {
   if (!cfg) return;
-  ensureConfigDir();
+  ensureProjectSettingsDir();
   const data = JSON.stringify(cfg, null, 2);
   try {
-    await fs.promises.writeFile(CONFIG_PATH, data, 'utf8');
+    await fs.promises.writeFile(PROJECT_CONFIG_PATH, data, 'utf8');
   } catch (err) {
     console.warn(`Warning: Async config save failed: ${err.message}`);
     try {
-      fs.writeFileSync(CONFIG_PATH, data, 'utf8');
+      fs.writeFileSync(PROJECT_CONFIG_PATH, data, 'utf8');
     } catch (syncErr) {
       console.error(`Fallback sync save failed: ${syncErr.message}`);
     }
@@ -353,4 +459,5 @@ module.exports = {
   resolvePaths,
   toRelative,
   normalizePathValue,
-};
+}
+

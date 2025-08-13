@@ -469,8 +469,25 @@ class I18nTextScanner {
     this.config = { ...baseConfig, ...(this.config || {}) };
     
     this.sourceDir = this.config.sourceDir || './src';
-    this.framework = this.config.framework || this.detectFramework(process.cwd());
-    
+
+    // Resolve framework with precedence: CLI arg > config.framework.preference|string > auto-detect > fallback
+    const cliFramework = args.framework;
+    const cfgFramework = this.config.framework;
+    const fwPref = typeof cfgFramework === 'string' ? cfgFramework : (cfgFramework?.preference || 'auto');
+    const fwDetectEnabled = typeof cfgFramework === 'object' ? (cfgFramework.detect !== false) : true;
+    const fwFallback = typeof cfgFramework === 'object' ? (cfgFramework.fallback || 'vanilla') : 'vanilla';
+
+    if (cliFramework && typeof cliFramework === 'string') {
+      this.framework = cliFramework;
+    } else if (fwPref && fwPref !== 'auto') {
+      this.framework = fwPref;
+    } else if (fwDetectEnabled) {
+      const detected = this.detectFramework(process.cwd());
+      this.framework = detected || fwFallback;
+    } else {
+      this.framework = fwFallback;
+    }
+
     // Validate source directory
     if (!fs.existsSync(this.sourceDir)) {
       console.error(`❌ Source directory does not exist: ${this.sourceDir}`);

@@ -1,6 +1,6 @@
 # Installation Guide
 
-**Version:** 1.8.3, 1.8.3
+**Version:** 1.9.0
 **Last Updated:** 2025-08-12
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
@@ -8,26 +8,26 @@
 
 ```bash
 # Install locally (recommended)
-npm install i18ntk@1.8.3, 1.8.3 --save-dev
+npm install i18ntk@1.9.0 --save-dev
 
 # Initialize project
-npx i18ntk@1.8.3, 1.8.3 init
+npx i18ntk@1.9.0 init
 
 # Run analysis
-npx i18ntk@1.8.3, 1.8.3 analyze
+npx i18ntk@1.9.0 analyze
 ```
 
 ### Watch Helper & Lite Package
 
 ```bash
 # Watch for changes and re-run analysis automatically
-npx i18ntk@1.8.3, 1.8.3 analyze --watch
+npx i18ntk@1.9.0 analyze --watch
 
 # Build a lite English-only UI locale bundle
 npm run build:lite
 
 # Use the new interactive translation fixer
-npx i18ntk@1.8.3, 1.8.3 fixer --interactive
+npx i18ntk@1.9.0 fixer --interactive
 ```
 
 ## System Requirements
@@ -40,17 +40,17 @@ npx i18ntk@1.8.3, 1.8.3 fixer --interactive
 
 ### Local Installation (Recommended)
 ```bash
-npm install i18ntk@1.8.3, 1.8.3 --save-dev
+npm install i18ntk@1.9.0 --save-dev
 ```
 
 ### Global Installation
 ```bash
-npm install -g i18ntk@1.8.3, 1.8.3
+npm install -g i18ntk@1.9.0
 ```
 
 ### Using npx (No Installation)
 ```bash
-npx i18ntk@1.8.3, 1.8.3 <command>
+npx i18ntk@1.9.0 <command>
 ```
 
 ## Framework Setup
@@ -117,7 +117,7 @@ Create `i18ntk-config.json` in your project root:
 
 ### Upgrading from Deprecated Versions
 
-#### From any version < 1.8.3, 1.8.3 (DEPRECATED - use latest version)
+#### From any version < 1.9.0 (DEPRECATED - use latest version)
 1. **Backup your current configuration**:
    ```bash
    cp -r ./settings ./settings-backup-$(date +%Y%m%d)
@@ -147,14 +147,14 @@ Create `i18ntk-config.json` in your project root:
 - ✅ Memory optimization
 - ✅ Advanced configuration management
 
-#### Security Updates in 1.8.3, 1.8.3
+#### Security Updates in 1.9.0
 - **Zero Shell Access** - All shell command vulnerabilities eliminated
 - **Enhanced Security** - Direct file system operations replacing shell commands
 - **Socket.dev Compliance** - Addresses all security scanning warnings
 - **Production Safety** - Zero shell access in production codebase
 
 #### Breaking Changes
-- **None** - 1.8.3, 1.8.3 is fully backward compatible with enhanced security
+- **None** - 1.9.0 is fully backward compatible with enhanced security
 
 ### Migration Support
 If you encounter issues during migration:

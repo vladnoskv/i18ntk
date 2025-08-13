@@ -127,7 +127,7 @@ class TestRunner {
 
         // Generate detailed report
         const report = {
-            version: '1.8.3, 1.8.3',
+            version: '1.9.0',
             timestamp: endTime.toISOString(),
             totalTests: this.testSuites.length,
             passed,

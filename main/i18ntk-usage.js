@@ -71,7 +71,7 @@ class I18nUsageAnalyzer {
     this.frameworkUsage = new Map(); // Track framework usage per file
     this.keyComplexity = new Map(); // Track key complexity analysis
     this.startTime = Date.now(); // Track performance metrics
-    this.version = '1.8.3, 1.8.3'; // Version tracking
+    this.version = '1.9.0'; // Version tracking
     
     // Use global translation function
     this.rl = null;
