@@ -1043,6 +1043,7 @@
       "complete": "🎯 Completar traducciones (100% cobertura)",
       "sizing": "📏 Analizar dimensionamiento",
       "fix": "🛠️  Corregir traducciones provisionales",
+      "scanner": "🔍 Buscar problemas de i18n",
       "workflow": "🔄 Ejecutar flujo completo",
       "status": "📋 Mostrar estado del proyecto",
       "delete": "🗑️  Eliminar todos los informes",
@@ -1054,7 +1055,7 @@
     },
     "update": "📦 Actualizar paquete",
     "goodbye": "👋 ¡Adiós!",
-    "invalidChoice": "❌ Opción inválida. Por favor seleccione 0-14.",
+    "invalidChoice": "❌ Opción inválida. Por favor seleccione 0-15.",
     "returning": "🔄 Volviendo al menú principal...",
     "invalidOption": "❌ Opción inválida. Por favor intente de nuevo.",
     "nonInteractiveModeWarning": "⚠️ Modo no interactivo detectado. Menú mostrado solo como referencia.",
@@ -1982,6 +1983,7 @@
       "analyzeTranslations": "🔍 Analizar traducciones",
       "validateTranslations": "✅ Validar traducciones",
       "checkUsage": "📊 Verificar uso de claves",
+      "scannerCommand": "🔍 Escanear problemas i18n",
       "showHelp": "📖 Usar: node i18ntk-manage.js --help para ver comandos disponibles",
       "availableCommands": "📖 Comandos Disponibles:",
       "initCommand": "  init      - Inicializar nuevos idiomas",
@@ -1991,6 +1993,7 @@
       "sizingCommand": "  sizing    - Analizar dimensionamiento",
       "completeCommand": "  complete  - Completar traducciones (100% cobertura)",
       "summaryCommand": "  summary   - Mostrar estado del proyecto",
+      "scannerCommand": "  scanner   - Escanear problemas i18n",
       "debugCommand": "  debug     - Depurar problemas de traducción"
     },
     "test_complete_system": {
@@ -2088,6 +2091,45 @@
       "coverage_percentage": "    Cobertura: {coverage}%\n",
       "error_general": "❌ Error:",
       "use_help": "Use --help para ver información de uso"
+    }
+  },
+  "scanner": {
+    "help_message": "\nEscáner de Texto i18n\n\nUso: node i18ntk-scanner.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente para escanear (por defecto: ./src)\n  --output <file>        Archivo de salida para resultados (por defecto: ./i18ntk-scanner-report.json)\n  --framework <nombre>   Framework a analizar (react, vue, angular, vanilla)\n  --patterns <patrones>  Patrones regex personalizados (separados por comas)\n  --include-tests        Incluir archivos de prueba en el escaneo\n  --exclude-dirs <dirs>  Directorios a excluir (separados por comas)\n  --help                 Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./resultados-escaneo.json\n",
+    "starting": "🔍 Iniciando escáner de texto para framework: {framework}",
+    "sourceDirectory": "📁 Escaneando directorio: {sourceDir}",
+    "frameworkDetected": "🎯 Framework detectado: {framework}",
+    "scanningFiles": "📊 Escaneando {fileCount} archivos...",
+    "foundTexts": "📝 Encontrados {textCount} textos que requieren traducción",
+    "generatingReport": "📊 Generando informe detallado...",
+    "reportSaved": "💾 Informe de escaneo guardado en: {reportPath}",
+    "noTextsFound": "✅ No se encontraron textos en inglés hardcodeados",
+    "scanComplete": "🎉 ¡Escaneo completado exitosamente!",
+    "analysisTitle": "🔍 ANÁLISIS DE ESCÁNER DE TRADUCCIÓN",
+    "fileSummary": "📄 {file}: {count} textos encontrados",
+    "textLocation": "📍 Línea {line}: {text}",
+    "context": "📝 Contexto: {context}",
+    "severity": "⚠️  Severidad: {severity}",
+    "recommendation": "💡 Recomendación: {recommendation}",
+    "welcome": {
+      "title": "🎯 ¡Bienvenido al Escáner de Texto!",
+      "description": "Esta herramienta escanea tu código fuente en busca de textos en inglés hardcodeados que puedan necesitar traducción."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Seleccionar Framework",
+      "available": "Frameworks disponibles: react, vue, angular, vanilla",
+      "description": "Ingrese el tipo de framework (o presione Enter para detección automática):",
+      "input": "Framework: "
+    },
+    "directoryPrompt": {
+      "title": "📁 Seleccionar Directorio Fuente",
+      "current": "Directorio actual: {dir}",
+      "description": "Ingrese el directorio a escanear (o presione Enter para el actual):",
+      "input": "Directorio: "
+    },
+    "options": {
+      "includeTests": "¿Incluir archivos de prueba?",
+      "excludeDirs": "Directorios a excluir (separados por comas):",
+      "customPatterns": "Patrones personalizados a escanear (regex):"
     }
   },
   "ui": {

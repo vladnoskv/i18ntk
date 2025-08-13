@@ -67,7 +67,8 @@
     "i18ntk-sizing": "main/i18ntk-sizing.js",
     "i18ntk-summary": "main/i18ntk-summary.js",
     "i18ntk-doctor": "main/i18ntk-doctor.js",
-    "i18ntk-fixer": "main/i18ntk-fixer.js"
+    "i18ntk-fixer": "main/i18ntk-fixer.js",
+    "i18ntk-scanner": "main/i18ntk-scanner.js"
   },
   "directories": {
     "doc": "docs",
@@ -128,6 +129,7 @@
     "test:framework-detection": "node dev/tests/framework-detection.test.js",
     "test:security-features": "node dev/tests/security-features.test.js",
     "test:all-new": "npm run test:new-features && npm run test:framework-detection && npm run test:security-features",
+    "test:scanner": "node dev/tests/scanner-comprehensive.test.js",
     "test:enhanced-features": "node scripts/test-enhanced-features.js",
     "test:placeholder-validation": "node tests/unit/placeholder-validation.test.js",
     "test:performance-metrics": "node tests/unit/performance-metrics.test.js",

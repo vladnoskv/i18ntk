@@ -1050,11 +1050,12 @@
       "settings": "⚙️  設定",
       "help": "❓ ヘルプ",
       "debug": "🔧 デバッグツール",
+      "scanner": "🔍 i18n問題をスキャン",
       "exit": "🚪 終了"
     },
     "update": "📦 パッケージを更新",
     "goodbye": "👋 さようなら！",
-    "invalidChoice": "❌ 無効な選択です。0〜14 を選択してください。",
+    "invalidChoice": "❌ 無効な選択です。0〜15 を選択してください。",
     "returning": "🔄 メインメニューに戻ります…",
     "invalidOption": "❌ 無効なオプションです。もう一度お試しください。",
     "nonInteractiveModeWarning": "⚠️ 非対話モードが検出されました。メニューは参照用です。",
@@ -1989,7 +1990,8 @@
       "sizingCommand": "  sizing    - サイズを分析",
       "completeCommand": "  complete  - 翻訳を完了 (100% カバレッジ)",
       "summaryCommand": "  summary   - プロジェクトステータスを表示",
-      "debugCommand": "  debug     - 翻訳の問題をデバッグ"
+      "debugCommand": "  debug     - 翻訳の問題をデバッグ",
+      "scannerCommand": "  scanner   - 🔍 i18nの問題をスキャン"
     },
     "test_complete_system": {
       "starting_test": "🧪 完全システムテストを開始します\n",
@@ -2274,5 +2276,55 @@
     "signIn": "サインイン",
     "forgotPassword": "パスワードを忘れた",
     "signUp": "サインアップ"
+  },
+  "scanner": {
+    "title": "🕵️ i18n テキストスキャナー",
+    "description": "ソースファイル内のハードコードされた英語テキストをスキャンします",
+    "usage": "使用方法: i18ntk-scanner [オプション]",
+    "options": {
+      "sourceDir": "スキャンするディレクトリ",
+      "outputDir": "レポート出力ディレクトリ",
+      "patterns": "カスタム正規表現パターン",
+      "framework": "フレームワーク (react, vue, angular, vanilla)",
+      "extensions": "スキャンするファイル拡張子",
+      "exclude": "除外するパターン",
+      "minLength": "スキャンするテキストの最小長",
+      "maxLength": "スキャンするテキストの最大長"
+    },
+    "status": {
+      "scanning": "🔍 ファイルをスキャン中...",
+      "analyzing": "📊 検出されたテキストを分析中...",
+      "generating": "📄 レポートを生成中...",
+      "complete": "✅ スキャンが完了しました",
+      "found": "🎯 {count} 個の翻訳が必要な項目を検出しました"
+    },
+    "results": {
+      "title": "📊 スキャン結果",
+      "summary": "サマリー",
+      "filesScanned": "スキャンしたファイル数",
+      "textItemsFound": "検出したテキスト項目数",
+      "uniqueTexts": "一意のテキスト",
+      "filesWithText": "テキストを含むファイル数",
+      "exportLocation": "エクスポート先"
+    },
+    "prompts": {
+      "selectFramework": "フレームワークを選択してください:",
+      "enterSourceDir": "ソースディレクトリを入力してください",
+      "enterOutputDir": "出力ディレクトリを入力してください",
+      "confirmScan": "スキャンを開始しますか？",
+      "saveReport": "レポートを保存しますか？"
+    },
+    "errors": {
+      "invalidDirectory": "無効なディレクトリです",
+      "noFilesFound": "スキャンするファイルが見つかりませんでした",
+      "scanFailed": "スキャンに失敗しました",
+      "exportFailed": "レポートのエクスポートに失敗しました"
+    },
+    "help": {
+      "examples": "使用例:",
+      "example1": "i18ntk-scanner --source-dir ./src --framework react",
+      "example2": "i18ntk-scanner --patterns 'console\\.log\\s*\\([^)]*'",
+      "example3": "i18ntk-scanner --extensions js,ts,tsx --min-length 3"
+    }
   }
 }

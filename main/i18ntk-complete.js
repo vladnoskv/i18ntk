@@ -496,14 +496,14 @@ class I18nCompletionTool {
           // Show sample of changes
           const sampleChanges = changes.slice(0, 3);
           sampleChanges.forEach(change => {
-            console.log(t("complete.changeDetails", { file: change.file, key: change.key }));
+            console.log(t("usage.complete.changeDetails", { file: change.file, key: change.key }));
           });
           
           if (changes.length > 3) {
-            console.log(t("complete.andMore", { count: changes.length - 3 }));
+            console.log(t("usage.complete.andMore", { count: changes.length - 3 }));
           }
         } else {
-          console.log(t("complete.noChangesNeeded", { language }));
+          console.log(t("usage.complete.noChangesNeeded", { language }));
         }
       }
       

@@ -1,8 +1,16 @@
 # i18n Management Toolkit - Version 1.8.3 Release Notes
 
-## [1.8.3] - 2025-08-12 - **Bug Fix Release**
+## [1.8.3] - 2025-08-12 - **Major Feature Release: Scanner Framework Detection & Security**
 
-> **🔧 BUG FIX RELEASE**: Version 1.8.3 addresses critical bugs and introduces initialization checks for better user experience.
+> **🚀 MAJOR FEATURE RELEASE**: Version 1.8.3 introduces comprehensive scanner framework detection, enhanced security validation, and new testing infrastructure.
+
+### ✨ **New Features**
+
+#### **NEW: Comprehensive Scanner Tests** - Added `scanner-comprehensive.test.js` with 12 test cases covering framework detection, edge cases, and i18n patterns
+#### **NEW: i18n Framework Detection** - Automatic detection of React+i18next, Vue+vue-i18n, Angular+ngx-translate patterns
+#### **NEW: Scanner Framework Support** - Dedicated test suite for vanilla JavaScript, React, Vue, and Angular patterns
+#### **NEW: Framework-Specific Patterns** - Intelligent pattern matching based on detected framework
+#### **NEW: Unicode & Edge Case Support** - Full support for Unicode characters, empty files, and length limits
 
 ### 🐛 **Critical Bug Fixes**
 
@@ -11,10 +19,20 @@
 - **Fix**: Added comprehensive null and type checking before string operations in `validatePlaceholderKeys` function
 - **Impact**: Usage analysis now gracefully handles all data types without crashes
 
+#### **Fixed "Cannot read properties of undefined" Error in Initialization**
+- **Issue**: `i18ntk-init.js` was throwing "Cannot read properties of undefined" errors during completion summary generation
+- **Fix**: Updated `getTranslationStats` method to correctly handle new country code marker format (`[COUNTRY CODE] English`)
+- **Impact**: Initialization process now completes successfully with accurate statistics
+
 #### **Enforced Initialization Checks Across All CLI Scripts**
 - **Issue**: CLI scripts could run without proper project initialization, leading to confusing errors
 - **Fix**: Added strict initialization verification in `i18ntk-usage.js`, `i18ntk-analyze.js`, and `i18ntk-sizing.js`
 - **Impact**: Clear error messages guide users to run `i18ntk init` before other operations
+
+#### **Scanner Security Fixes**
+- **Issue**: Security validation failures in scanner operations
+- **Fix**: Strengthened file system operations with strict permission checks and path validation
+- **Impact**: Zero shell access vulnerabilities in scanner operations
 
 #### **Simplified Frontend Menu**
 - **Issue**: Debug tools in main menu created confusion for regular users
@@ -25,6 +43,27 @@
 - **Improved Error Messages**: Added clear guidance when project initialization is required
 - **Graceful Degradation**: Better handling of edge cases in translation processing
 - **User Experience**: More helpful error messages for common setup issues
+
+### 🔒 **Security Enhancements**
+
+#### **Enhanced Security Validation**
+- **Comprehensive Security**: Added security validation for all file operations
+- **Path Traversal Protection**: Improved path handling with normalized path validation
+- **Input Sanitization**: Enhanced input validation and sanitization across all scanner operations
+
+### 📚 **Documentation & Testing**
+
+#### **NEW: Scanner Guide** - Added comprehensive `scanner-guide.md` with framework-specific instructions
+#### **Framework Reliability Notice** - Documented scanner reliability dependencies on framework packages
+#### **CLI Documentation** - Updated README with new scanner commands and options
+#### **Best Practices** - Added troubleshooting and configuration guidelines
+
+#### **Testing Infrastructure**
+- **Test Coverage**: Added comprehensive scanner test suite with 12 test cases
+- **Framework Detection**: Tests for React, Vue, Angular, and vanilla JavaScript patterns
+- **Edge Cases**: Unicode support, empty files, exclusion patterns, and length limits
+- **Report Generation**: Automated testing of JSON and Markdown report formats
+- **Integration**: Added `npm run test:scanner` command to test suite
 
 ---
 
@@ -88,6 +127,12 @@ With over **2,000 downloads** since release, we thank you for your patience with
 - **Better error reporting** - Clearer error messages when invalid arguments are provided
 
 ### 🏗️ **Architecture Improvements**
+
+#### **Enhanced Initialization Process**
+- **New Translation Marker System** - Replaced `NOT_TRANSLATED` with country code format (`[COUNTRY CODE] English`)
+- **Interactive Setup Configuration** - Added prompt for selecting file organization (single file, modular, or existing structure)
+- **Robust Completion Summary** - Enhanced completion statistics with detailed reporting and JSON export option
+- **Improved Error Handling** - Better error handling and reporting throughout initialization process
 
 #### **Directory Structure**
 - **Organized Source Structure** - Changed to `./src/i18n/locales` for better organization

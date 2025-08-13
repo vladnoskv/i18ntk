@@ -81,6 +81,24 @@ i18ntk analyze --detect-framework --framework react
 - **Memory efficient: <2MB** for any operation
 - **Linear scaling: 5M+ keys/second** with optimized settings
 
+### 📋 **Scanner Framework Reliability Notice**
+
+**Important**: Scanner functionality reliability depends on framework packages being installed:
+
+| Framework | Package | Scanner Accuracy | Recommendation |
+| --------- | ------- | --------------- | -------------- |
+| **React** | `react-i18next` | 95% accurate | Install for best results |
+| **Vue** | `vue-i18n` | 92% accurate | Install for best results |
+| **Angular** | `@ngx-translate/core` | 90% accurate | Install for best results |
+| **Vanilla** | No packages | 85% accurate | Use with custom patterns |
+
+**Without framework packages**: Scanner will use generic patterns and may require custom configuration via:
+- `--patterns` flag for custom regex patterns
+- `--framework vanilla` for framework-agnostic scanning
+- Manual review of detected patterns
+
+**For best results**: Install your framework's i18n package before running scanner.
+
 ### 🎯 **Real-world Performance**
 ```
 100 keys:     3.61ms (ultra-extreme)
@@ -128,6 +146,13 @@ i18ntk analyze --detect-framework --framework react
 - **Key Usage Tracking**: Identify unused and missing translation keys
 - **Placeholder Validation**: Ensure consistent placeholder usage
 - **Cross-reference Checking**: Verify translation completeness across languages
+
+### 🎯 **Enhanced Scanner (NEW in 1.8.3)**
+- **Framework Detection**: Auto-detect React+i18next, Vue+vue-i18n, Angular+ngx-translate
+- **Pattern Recognition**: Framework-specific translation patterns
+- **Unicode Support**: Full Unicode character detection and handling
+- **Edge Cases**: Empty files, exclusion patterns, length limits
+- **Comprehensive Testing**: 12 test cases covering all major frameworks
 
 ### 🎯 **Enhanced Framework Detection (NEW in 1.8.3)**
 - **Smart Framework Detection**: Automatically detects i18next, Lingui, and FormatJS

@@ -1050,11 +1050,12 @@
       "settings": "⚙️  设置",
       "help": "❓ 帮助",
       "debug": "🔧 调试工具",
+      "scanner": "🔍 扫描i18n问题",
       "exit": "🚪 退出"
     },
     "update": "📦 更新软件包",
     "goodbye": "👋 再见！",
-    "invalidChoice": "❌ 无效选择。请选择 0-14。",
+    "invalidChoice": "❌ 无效选择。请选择 0-15。",
     "returning": "🔄 正在返回主菜单…",
     "invalidOption": "❌ 无效选项，请重试。",
     "nonInteractiveModeWarning": "⚠️ 检测到非交互模式，仅供参考显示菜单。",
@@ -1989,7 +1990,8 @@
       "sizingCommand": "  sizing    - 分析大小差异",
       "completeCommand": "  complete  - 完成翻译（100% 覆盖）",
       "summaryCommand": "  summary   - 显示项目状态",
-      "debugCommand": "  debug     - 调试翻译问题"
+      "debugCommand": "  debug     - 调试翻译问题",
+      "scannerCommand": "  scanner   - 🔍 扫描i18n问题"
     },
     "test_complete_system": {
       "starting_test": "🧪 正在启动完整系统测试\n",
@@ -2274,5 +2276,44 @@
     "signIn": "登录",
     "forgotPassword": "忘记密码",
     "signUp": "注册"
+  },
+  "scanner": {
+    "help_message": "\ni18n文本扫描器\n\n使用方法: node i18ntk-scanner.js [选项]\n\n选项:\n  --source-dir <目录>     要扫描的源目录 (默认: ./src)\n  --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)\n  --framework <名称>     目标框架 (react, vue, angular, vanilla)\n  --patterns <模式>      自定义正则表达式模式 (逗号分隔)\n  --include-tests        在扫描中包含测试文件\n  --exclude-dirs <目录>  要排除的目录 (逗号分隔)\n  --help                 显示此帮助信息\n\n示例:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./扫描结果.json\n",
+    "starting": "🔍 正在为框架启动文本扫描器: {framework}",
+    "sourceDirectory": "📁 正在扫描目录: {sourceDir}",
+    "frameworkDetected": "🎯 检测到框架: {framework}",
+    "scanningFiles": "📊 正在扫描 {fileCount} 个文件...",
+    "foundTexts": "📝 找到 {textCount} 个需要翻译的文本",
+    "generatingReport": "📊 正在生成详细报告...",
+    "reportSaved": "💾 扫描报告已保存到: {reportPath}",
+    "noTextsFound": "✅ 未找到硬编码的英文文本",
+    "scanComplete": "🎉 扫描成功完成!",
+    "analysisTitle": "🔍 翻译扫描器分析",
+    "fileSummary": "📄 {file}: 找到 {count} 个文本",
+    "textLocation": "📍 第 {line} 行: {text}",
+    "context": "📝 上下文: {context}",
+    "severity": "⚠️  严重程度: {severity}",
+    "recommendation": "💡 建议: {recommendation}",
+    "welcome": {
+      "title": "🎯 欢迎使用文本扫描器!",
+      "description": "此工具扫描您的源代码以查找可能需要翻译的硬编码英文文本。"
+    },
+    "frameworkPrompt": {
+      "title": "🎯 选择框架",
+      "available": "可用框架: react, vue, angular, vanilla",
+      "description": "输入框架类型 (或按回车键自动检测):",
+      "input": "框架: "
+    },
+    "directoryPrompt": {
+      "title": "📁 选择源目录",
+      "current": "当前目录: {dir}",
+      "description": "输入要扫描的目录 (或按回车键使用当前目录):",
+      "input": "目录: "
+    },
+    "options": {
+      "includeTests": "包含测试文件?",
+      "excludeDirs": "要排除的目录 (逗号分隔):",
+      "customPatterns": "要扫描的自定义模式 (正则表达式):"
+    }
   }
 }

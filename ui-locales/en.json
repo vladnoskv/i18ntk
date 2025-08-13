@@ -108,6 +108,45 @@
     "noI18nDir": "No i18n directory found in the project root.",
     "noI18nConfig": "No i18n configuration file found in the project root."
   },
+  "scanner": {
+    "help_message": "\nI18n Text Scanner\n\nUsage: node i18ntk-scanner.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)\n  --framework <name>     Framework to target (react, vue, angular, vanilla)\n  --patterns <patterns>  Custom regex patterns (comma-separated)\n  --include-tests        Include test files in scan\n  --exclude-dirs <dirs>  Directories to exclude (comma-separated)\n  --help                Show this help\n\nExamples:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./scan-results.json\n",
+    "starting": "🔍 Starting text scanner for framework: {framework}",
+    "sourceDirectory": "📁 Scanning directory: {sourceDir}",
+    "frameworkDetected": "🎯 Detected framework: {framework}",
+    "scanningFiles": "📊 Scanning {fileCount} files...",
+    "foundTexts": "📝 Found {textCount} texts requiring translation",
+    "generatingReport": "📊 Generating detailed report...",
+    "reportSaved": "💾 Scan report saved to: {reportPath}",
+    "noTextsFound": "✅ No hardcoded English texts found",
+    "scanComplete": "🎉 Scan completed successfully!",
+    "analysisTitle": "🔍 TRANSLATION SCAN ANALYSIS",
+    "fileSummary": "📄 {file}: {count} texts found",
+    "textLocation": "📍 Line {line}: {text}",
+    "context": "📝 Context: {context}",
+    "severity": "⚠️  Severity: {severity}",
+    "recommendation": "💡 Recommendation: {recommendation}",
+    "welcome": {
+      "title": "🎯 Welcome to the Text Scanner!",
+      "description": "This tool scans your source code for hardcoded English text that may need translation."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Select Framework",
+      "available": "Available frameworks: react, vue, angular, vanilla",
+      "description": "Enter the framework type (or press Enter for auto-detection):",
+      "input": "Framework: "
+    },
+    "directoryPrompt": {
+      "title": "📁 Select Source Directory",
+      "current": "Current directory: {dir}",
+      "description": "Enter the directory to scan (or press Enter for current):",
+      "input": "Directory: "
+    },
+    "options": {
+      "includeTests": "Include test files?",
+      "excludeDirs": "Directories to exclude (comma-separated):",
+      "customPatterns": "Custom patterns to scan for (regex):"
+    }
+  },
   "fixer": {
     "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
     "starting": "🚀 Starting translation fixing for languages: {languages}",
@@ -1044,6 +1083,7 @@
       "complete": "🎯 Complete translations (100% coverage)",
       "sizing": "📏 Analyze sizing",
       "fix": "🛠️  Fix placeholder translations",
+      "scanner": "🔍 Scan for i18n issues",
       "workflow": "🔄 Run full workflow",
       "status": "📋 Show project status",
       "delete": "🗑️  Delete all reports",
@@ -1055,7 +1095,7 @@
     },
     "update": "📦 Update Package",
     "goodbye": "👋 Goodbye!",
-    "invalidChoice": "❌ Invalid choice. Please select 0-14.",
+    "invalidChoice": "❌ Invalid choice. Please select 0-15.",
     "returning": "🔄 Returning to main menu...",
     "invalidOption": "❌ Invalid option. Please try again.",
     "nonInteractiveModeWarning": "⚠️ Non-interactive mode detected. Menu displayed for reference only.",
@@ -1981,6 +2021,7 @@
       "analyzeTranslations": "🔍 Analyze translations",
       "validateTranslations": "✅ Validate translations",
       "checkUsage": "📊 Check key usage",
+      "scannerCommand": "🔍 Scan for i18n issues",
       "showHelp": "📖 Use: node i18ntk-manage.js --help for available commands",
       "availableCommands": "📖 Available Commands:",
       "initCommand": "  init      - Initialize new languages",
@@ -1990,6 +2031,7 @@
       "sizingCommand": "  sizing    - Analyze sizing",
       "completeCommand": "  complete  - Complete translations (100% coverage)",
       "summaryCommand": "  summary   - Show project status",
+      "scannerCommand": "  scanner   - Scan for i18n issues",
       "debugCommand": "  debug     - Debug translation issues"
     },
     "test_complete_system": {

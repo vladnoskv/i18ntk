@@ -599,11 +599,15 @@ class I18nInitializer {
   getTranslationStats(obj) {
     let total = 0;
     let translated = 0;
+    let missing = 0;
     
     const count = (item) => {
       if (typeof item === 'string') {
         total++;
-        if (item !== this.config.notTranslatedMarker && item.trim() !== '') {
+        const isCountryCodeMarker = /^\[([A-Z]{2})\]/.test(item);
+        if (isCountryCodeMarker) {
+          missing++;
+        } else if (item.trim() !== '') {
           translated++;
         }
       } else if (Array.isArray(item)) {
@@ -619,7 +623,7 @@ class I18nInitializer {
       total,
       translated,
       percentage: total > 0 ? Math.round((translated / total) * 100) : 0,
-      missing: total - translated
+      missing
     };
   }
 
@@ -757,6 +761,37 @@ class I18nInitializer {
     }
   }
 
+  // Interactive setup configuration
+  async promptSetupConfiguration(skipPrompt = false) {
+    if (skipPrompt || !process.stdin.isTTY) {
+      return { structure: 'folder', duplicateStructure: true };
+    }
+
+    const { ask } = require('../utils/cli');
+
+    console.log('\n🎯 **SETUP CONFIGURATION**');
+    console.log(t('common.separator'));
+    console.log('📁 How would you like to organize your translation files?');
+    console.log('   1. Single file per language (e.g., en.json, fr.json)');
+    console.log('   2. Modular structure (folder per language with multiple files)');
+    console.log('   3. Keep existing structure (if detected)');
+
+    const structureChoice = await ask('\n🤖 Enter your choice (1/2/3): ');
+    
+    let structure = 'folder';
+    if (structureChoice === '1') structure = 'single';
+    else if (structureChoice === '2') structure = 'modular';
+    else structure = 'existing';
+
+    let duplicateStructure = true;
+    if (structure !== 'existing') {
+      const duplicateChoice = await ask('\n🤖 Apply the same structure to all languages? (y/n): ');
+      duplicateStructure = duplicateChoice.toLowerCase() === 'y' || duplicateChoice.toLowerCase() === 'yes';
+    }
+
+    return { structure, duplicateStructure };
+  }
+
   // Enhanced initialization with dependency checking
   async initialize(hasI18n = true, args = {}) {
     console.log(t('init.initializingProject'));
@@ -766,7 +801,10 @@ class I18nInitializer {
       console.log(t('init.translationFilesCreatedWarning'));
     }
     
-      // Handle directory selection and structure setup
+    // Get setup configuration
+    const setupConfig = await this.promptSetupConfiguration(args.noPrompt);
+    
+    // Handle directory selection and structure setup
     const selectedDir = await this.detectAndSelectDirectory(args.noPrompt);
     if (selectedDir) {
       this.config.sourceDir = selectedDir;
@@ -873,26 +911,104 @@ class I18nInitializer {
       console.log(t('init.overallProgress', { translated: languageResults.totalStats.translated, total: languageResults.totalStats.total, percentage: languageResults.totalStats.percentage }));
     }
     
-    // Summary report
-    console.log('\n' + '=' .repeat(50));
-    console.log(t('init.initializationSummaryTitle'));
-    console.log(t('common.separator'));
-    
-    Object.entries(results).forEach(([lang, data]) => {
-      const langName = LANGUAGE_CONFIG[lang]?.name || 'Unknown';
-      const statusIcon = data.totalStats.percentage === 100 ? '✅' : data.totalStats.percentage >= 80 ? '🟡' : '🔴';
-      
-      console.log(t('init.languageSummary', { icon: statusIcon, name: langName, code: lang, percentage: data.totalStats.percentage }));
-      console.log(t('init.languageFiles', { count: data.files.length }));
-      console.log(t('init.languageKeys', { translated: data.totalStats.translated, total: data.totalStats.total }));
-      console.log(t('init.languageMissing', { count: data.totalStats.missing }));
-    });
+    // Generate and display completion summary
+    await this.generateCompletionSummary(results, targetLanguages);
     
     console.log('\n' + t('init.initializationCompletedSuccessfully'));
     console.log('\n' + t('init.nextStepsTitle'));
     console.log(t('init.nextStep1'));
     console.log(t('init.nextStep2'));
     console.log(t('init.nextStep3'));
+  }
+
+  // Generate completion summary with proper error handling
+  async generateCompletionSummary(results, targetLanguages) {
+    try {
+      console.log('\n' + '=' .repeat(50));
+      console.log(t('init.initializationSummaryTitle'));
+      console.log(t('common.separator'));
+      
+      let totalChanges = 0;
+      let languagesProcessed = 0;
+      let missingKeysAdded = 0;
+
+      Object.entries(results).forEach(([lang, data]) => {
+        if (!data || typeof data !== 'object') return;
+        
+        const langName = LANGUAGE_CONFIG[lang]?.name || 'Unknown';
+        const stats = data.totalStats || { total: 0, translated: 0, percentage: 0, missing: 0 };
+        
+        const statusIcon = stats.percentage === 100 ? '✅' : stats.percentage >= 80 ? '🟡' : '🔴';
+        
+        console.log(t('init.languageSummary', { 
+          icon: statusIcon, 
+          name: langName, 
+          code: lang, 
+          percentage: stats.percentage || 0 
+        }));
+        
+        if (data.files && Array.isArray(data.files)) {
+          console.log(t('init.languageFiles', { count: data.files.length }));
+        }
+        
+        console.log(t('init.languageKeys', { 
+          translated: stats.translated || 0, 
+          total: stats.total || 0 
+        }));
+        
+        console.log(t('init.languageMissing', { count: stats.missing || 0 }));
+        
+        // Calculate totals
+        totalChanges += (stats.translated || 0) + (stats.missing || 0);
+        languagesProcessed++;
+        missingKeysAdded += stats.missing || 0;
+      });
+
+      // Display completion summary
+      console.log('\n📊 COMPLETION SUMMARY');
+      console.log(t('common.separator'));
+      console.log(`📝 Total changes: ${totalChanges}`);
+      console.log(`🌍 Languages processed: ${languagesProcessed}`);
+      console.log(`➕ Missing keys added: ${missingKeysAdded}`);
+
+      // Offer to generate report
+      if (process.stdin.isTTY && !this.args.noPrompt) {
+        const { ask } = require('../utils/cli');
+        const generateReport = await ask('\n🤖 Would you like a report generated? (Y/N): ');
+        
+        if (generateReport.toLowerCase() === 'y' || generateReport.toLowerCase() === 'yes') {
+          await this.generateDetailedReport(results, targetLanguages);
+        }
+      }
+    } catch (error) {
+      console.error('\n❌ Error during completion:', error.message);
+      console.log('📊 COMPLETION SUMMARY (Basic)');
+      console.log(t('common.separator'));
+      console.log(`🌍 Languages processed: ${Object.keys(results || {}).length}`);
+    }
+  }
+
+  // Generate detailed report
+  async generateDetailedReport(results, targetLanguages) {
+    try {
+      const reportPath = path.join(this.config.outputDir, 'init-report.json');
+      const report = {
+        timestamp: new Date().toISOString(),
+        languages: targetLanguages,
+        results: results,
+        summary: {
+          languagesProcessed: targetLanguages.length,
+          totalFiles: Object.values(results).reduce((sum, data) => sum + (data.files?.length || 0), 0),
+          totalKeys: Object.values(results).reduce((sum, data) => sum + (data.totalStats?.total || 0), 0),
+          totalMissing: Object.values(results).reduce((sum, data) => sum + (data.totalStats?.missing || 0), 0)
+        }
+      };
+
+      await fs.promises.writeFile(reportPath, JSON.stringify(report, null, 2));
+      console.log(`✅ Report generated: ${reportPath}`);
+    } catch (error) {
+      console.error('❌ Failed to generate report:', error.message);
+    }
   }
 
   // Offer interactive locale optimization after initialization

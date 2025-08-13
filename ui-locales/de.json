@@ -1050,11 +1050,12 @@
       "settings": "⚙️  Einstellungen",
       "help": "❓ Hilfe",
       "debug": "🔧 Debug-Werkzeuge",
+      "scanner": "🔍 i18n-Probleme scannen",
       "exit": "🚪 Beenden"
     },
     "update": "📦 Paket aktualisieren",
     "goodbye": "👋 Auf Wiedersehen!",
-    "invalidChoice": "❌ Ungültige Auswahl. Bitte wähle 0–14.",
+    "invalidChoice": "❌ Ungültige Auswahl. Bitte wähle 0–15.",
     "returning": "🔄 Zurück zum Hauptmenü...",
     "invalidOption": "❌ Ungültige Option. Bitte erneut versuchen.",
     "nonInteractiveModeWarning": "⚠️ Nicht-interaktiver Modus erkannt. Menü dient nur zur Referenz.",
@@ -1980,6 +1981,7 @@
       "analyzeTranslations": "🔍 Übersetzungen analysieren",
       "validateTranslations": "✅ Übersetzungen validieren",
       "checkUsage": "📊 Schlüsselverwendung prüfen",
+      "scannerCommand": "🔍 i18n-Probleme scannen",
       "showHelp": "📖 Hilfe anzeigen mit: node i18ntk-manage.js --help",
       "availableCommands": "📖 Verfügbare Befehle:",
       "initCommand": "  init      - Neue Sprachen initialisieren",
@@ -1989,6 +1991,7 @@
       "sizingCommand": "  sizing    - Größenanalyse durchführen",
       "completeCommand": "  complete  - Übersetzungen vervollständigen (100% Abdeckung)",
       "summaryCommand": "  summary   - Projektstatus anzeigen",
+      "scannerCommand": "  scanner   - i18n-Probleme scannen",
       "debugCommand": "  debug     - Übersetzungsprobleme debuggen"
     },
     "test_complete_system": {
@@ -2274,5 +2277,44 @@
     "signIn": "Anmelden",
     "forgotPassword": "Passwort vergessen",
     "signUp": "Registrieren"
+  },
+  "scanner": {
+    "help_message": "\nI18n Text-Scanner\n\nVerwendung: node i18ntk-scanner.js [optionen]\n\nOptionen:\n  --source-dir <dir>     Quellverzeichnis zu scannen (Standard: ./src)\n  --output <file>        Ausgabedatei für Ergebnisse (Standard: ./i18ntk-scanner-report.json)\n  --framework <name>     Ziel-Framework (react, vue, angular, vanilla)\n  --patterns <patterns>  Benutzerdefinierte Regex-Muster (durch Kommas getrennt)\n  --include-tests        Testdateien in den Scan einbeziehen\n  --exclude-dirs <dirs>  Auszuschließende Verzeichnisse (durch Kommas getrennt)\n  --help                 Diese Hilfe anzeigen\n\nBeispiele:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./scan-ergebnisse.json\n",
+    "starting": "🔍 Starte Text-Scanner für Framework: {framework}",
+    "sourceDirectory": "📁 Scanne Verzeichnis: {sourceDir}",
+    "frameworkDetected": "🎯 Framework erkannt: {framework}",
+    "scanningFiles": "📊 Scanne {fileCount} Dateien...",
+    "foundTexts": "📝 {textCount} zu übersetzende Texte gefunden",
+    "generatingReport": "📊 Generiere detaillierten Bericht...",
+    "reportSaved": "💾 Scan-Bericht gespeichert in: {reportPath}",
+    "noTextsFound": "✅ Keine hartcodierten englischen Texte gefunden",
+    "scanComplete": "🎉 Scan erfolgreich abgeschlossen!",
+    "analysisTitle": "🔍 ÜBERSETZUNGSSCANNER-ANALYSE",
+    "fileSummary": "📄 {file}: {count} Texte gefunden",
+    "textLocation": "📍 Zeile {line}: {text}",
+    "context": "📝 Kontext: {context}",
+    "severity": "⚠️  Schweregrad: {severity}",
+    "recommendation": "💡 Empfehlung: {recommendation}",
+    "welcome": {
+      "title": "🎯 Willkommen beim Text-Scanner!",
+      "description": "Dieses Tool scannt Ihren Quellcode nach hartcodierten englischen Texten, die möglicherweise übersetzt werden müssen."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Framework auswählen",
+      "available": "Verfügbare Frameworks: react, vue, angular, vanilla",
+      "description": "Framework-Typ eingeben (oder Enter für automatische Erkennung):",
+      "input": "Framework: "
+    },
+    "directoryPrompt": {
+      "title": "📁 Quellverzeichnis auswählen",
+      "current": "Aktuelles Verzeichnis: {dir}",
+      "description": "Verzeichnis zum Scannen eingeben (oder Enter für aktuelles Verzeichnis):",
+      "input": "Verzeichnis: "
+    },
+    "options": {
+      "includeTests": "Testdateien einbeziehen?",
+      "excludeDirs": "Auszuschließende Verzeichnisse (durch Kommas getrennt):",
+      "customPatterns": "Benutzerdefinierte Muster zu scannen (Regex):"
+    }
   }
 }
