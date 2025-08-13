@@ -20,8 +20,6 @@
 - **Fixes** issues with missing or unused keys
 - **Maintains** translation files
 
-
-
 ### What's New in 1.9.0
 
 **v1.9.0 (Major Release):** This release combines all features from the unreleased 1.8.3 with additional major features and improvements to the **Runtime API** (optional, dependency-free), **configuration management**, **security**, **framework detection**, and **documentation**.

@@ -55,6 +55,7 @@
       "errors": "Errors:",
       "genericError": "❌ Error: {error}",
       "initializationFailed": "❌ Initialization failed: {error}",
+      "initializationCancelled": "❌ Initialization cancelled by user.",
       "translationKeyNotFound": "Translation key not found: {key}",
       "sourceDirectoryNotFound": "Source directory not found: {directory}",
       "configLoadingFailed": "Configuration loading failed",
@@ -103,6 +104,7 @@
   "confirm": "Confirm"
   },
     "errors": {
+    "invalidOption": "❌ Invalid option: {option}. Please try again.",
     "readlineClosed": "Input stream is closed; running in non-interactive mode.",
     "noPackageJson": "No package.json found. Cannot auto-detect i18n framework.",
     "noI18nDir": "No i18n directory found in the project root.",
@@ -954,6 +956,7 @@
   },
   "init": {
     "initializationTitle": "🚀 i18n Management Toolkit - Project Initialization",
+    "initializationCancelled": "🚫 Initialization cancelled by user.",
     "sourceDirectoryLabel": "📁 Source Directory: {dir}",
     "requiredTitle": "Initialization Required",
     "requiredBody": "This project must be initialized before running this command.",
@@ -1008,6 +1011,20 @@
     "nextStep2": "2. Add translations for each target language",
     "nextStep3": "3. Run 'npm run i18ntk' again to validate translations",
     "detectedFrameworks": "✅ Detected i18n framework(s): {frameworks}",
+    "setup": {
+      "title": "Setup",
+      "question": "Setup question",
+      "opt_single": "Single file",
+      "opt_modular": "Modular",
+      "opt_existing": "Existing",
+      "choice_prompt": "Choose an option:",
+      "opt_confirm": "Confirm",
+      "opt_cancel": "Cancel",
+      "apply_all_prompt": "Apply this structure to all languages? (y/N): ",
+      "per_language_intro": "You've chosen to configure languages individually. Here are the available languages:",
+      "available_languages": "Available languages: {languages}",
+      "include_prompt": "Enter comma-separated language codes to include (e.g., 'de,fr,es'): "
+    },
     "warnings": {
       "noPackageJson": "No package.json found. Cannot auto-detect i18n framework."
     },

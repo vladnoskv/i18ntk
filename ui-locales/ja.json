@@ -967,6 +967,20 @@
     "nextStep2": "2. 各対象言語の翻訳を追加する",
     "nextStep3": "3. 'npm run i18ntk' を再実行して翻訳を検証する",
     "detectedFrameworks": "✅ 検出されたi18nフレームワーク: {frameworks}",
+    "setup": {
+      "title": "設定",
+      "question": "設定質問",
+      "opt_single": "単一ファイル",
+      "opt_modular": "モジュール",
+      "opt_existing": "既存",
+      "choice_prompt": "選択肢を入力してください:",
+      "opt_confirm": "確認",
+      "opt_cancel": "キャンセル",
+      "apply_all_prompt": "この構造をすべての言語に適用しますか？(y/N): ",
+      "per_language_intro": "言語ごとに個別に設定することを選択しました。利用可能な言語は以下の通りです：",
+      "available_languages": "利用可能な言語: {languages}",
+      "include_prompt": "含める言語コードをカンマ区切りで入力してください（例: 'de,fr,es'）: "
+    },
     "warnings": {
       "noPackageJson": "package.json が見つかりません。i18nフレームワークを自動検出できません。"
     },

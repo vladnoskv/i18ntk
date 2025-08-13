@@ -53,6 +53,7 @@
     "errors": {
       "errors": "Errores:",
       "genericError": "❌ Error: {error}",
+      "initializationCancelled": "🚫 Inicialización cancelada por el usuario.",
       "initializationFailed": "❌ Inicialización fallida: {error}",
       "translationKeyNotFound": "Traducción no encontrada: {key}",
       "sourceDirectoryNotFound": "Directorio fuente no encontrado: {directory}",
@@ -103,6 +104,8 @@
   },
   "errors": {
     "readlineClosed": "Flujo de entrada cerrado; ejecutando en modo no interactivo.",
+    "initializationCancelled": "🚫 Inicialización cancelada por el usuario.",
+    "invalidOption": "❌ Opción inválida: {option}. Por favor, inténtelo de nuevo.",
     "noPackageJson": "No se encontró package.json. No se puede autodetectar el framework i18n.",
     "noI18nDir": "No se encontró directorio i18n en la raíz del proyecto.",
     "noI18nConfig": "No se encontró archivo de configuración i18n en la raíz del proyecto."
@@ -967,6 +970,20 @@
     "nextStep2": "2. Agrega traducciones para cada idioma objetivo",
     "nextStep3": "3. Ejecuta 'npm run i18ntk' nuevamente para validar traducciones",
     "detectedFrameworks": "✅ Framework(s) i18n detectado(s): {frameworks}",
+    "setup": {
+      "título": "Configuración",
+      "pregunta": "Pregunta de configuración",
+      "opt_single": "Archivo único",
+      "opt_modular": "Modular",
+      "opt_existing": "Existente",
+      "choice_prompt": "Elige una opción:",
+      "opt_confirm": "Confirmar",
+      "opt_cancel": "Cancelar",
+      "apply_all_prompt": "¿Aplicar esta estructura a todos los idiomas? (s/N): ",
+      "per_language_intro": "Has elegido configurar los idiomas individualmente. Estos son los idiomas disponibles:",
+      "available_languages": "Idiomas disponibles: {languages}",
+      "include_prompt": "Ingresa los códigos de idioma separados por comas (ej. 'de,fr,es'): "
+    },
     "warnings": {
       "noPackageJson": "No se encontró package.json. No se puede auto-detectar el framework i18n."
     },

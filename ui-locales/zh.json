@@ -98,10 +98,12 @@
     "translationCompletenessAnalysisFailed": "⚠️  翻译完整性分析失败: {error}",
     "failedToAnalyzeLanguage": "❌  分析语言 {language} 失败: {error}",
     "errorReadingI18nDirectory": "❌  读取 i18n 目录时出错: {error}",
+    "initializationCancelled": "🚫 初始化被用户取消。",
     "languageCompletenessTitle": "📈 翻译完整性按语言",
     "startingSettings": "🎛️  开始设置 CLI..."
   },
   "errors": {
+    "invalidOption": "❌ 无效的选项：{option}。请重试。",
     "readlineClosed": "输入流已关闭；正在以非交互模式运行。",
     "noPackageJson": "未找到 package.json 文件。无法自动检测 i18n 框架。",
     "noI18nDir": "未在项目根目录找到 i18n 目录。",
@@ -913,6 +915,7 @@
   },
   "init": {
     "initializationTitle": "🚀 i18n 管理工具 - 项目初始化",
+    "initializationCancelled": "🚫 初始化已被用户取消。",
     "sourceDirectoryLabel": "📁 源目录：{dir}",
     "requiredTitle": "需要初始化",
     "requiredBody": "在运行此命令之前，必须先初始化项目。",
@@ -967,6 +970,20 @@
     "nextStep2": "2. 为每个目标语言添加翻译",
     "nextStep3": "3. 再次运行 'npm run i18ntk' 验证翻译",
     "detectedFrameworks": "✅ 检测到的 i18n 框架：{frameworks}",
+    "setup": {
+      "title": "设置",
+      "question": "设置问题",
+      "opt_single": "单个文件",
+      "opt_modular": "模块化",
+      "opt_existing": "现有",
+      "choice_prompt": "请选择选项：",
+      "opt_confirm": "确认",
+      "opt_cancel": "取消",
+      "apply_all_prompt": "是否将此结构应用于所有语言？(y/N): ",
+      "per_language_intro": "您选择了为每种语言单独配置。以下是可用语言：",
+      "available_languages": "可用语言：{languages}",
+      "include_prompt": "请输入要包含的语言代码，用逗号分隔（例如 'de,fr,es'）："
+    },
     "warnings": {
       "noPackageJson": "未找到 package.json 文件。无法自动检测 i18n 框架。"
     },

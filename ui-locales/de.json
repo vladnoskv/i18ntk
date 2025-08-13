@@ -53,6 +53,7 @@
     "errors": {
       "errors": "Fehler:",
       "genericError": "❌ Fehler: {error}",
+      "initializationCancelled": "🚫 Initialisierung wurde vom Benutzer abgebrochen.",
       "initializationFailed": "❌ Initialisierung fehlgeschlagen: {error}",
       "translationKeyNotFound": "Übersetzungsschlüssel nicht gefunden: {key}",
       "sourceDirectoryNotFound": "Quellverzeichnis nicht gefunden: {directory}",
@@ -967,6 +968,20 @@
     "nextStep2": "2. Fügen Sie Übersetzungen für jede Zielsprache hinzu",
     "nextStep3": "3. Führen Sie 'npm run i18ntk' erneut aus, um Übersetzungen zu validieren",
     "detectedFrameworks": "✅ Erkanntes i18n-Framework: {frameworks}",
+    "setup": {
+      "title": "Einrichten",
+      "question": "Einrichtungsfrage",
+      "opt_single": "Einzelne Datei",
+      "opt_modular": "Modular",
+      "opt_existing": "Vorhanden",
+      "choice_prompt": "Wählen Sie eine Option:",
+      "opt_confirm": "Bestätigen",
+      "opt_cancel": "Abbrechen",
+      "apply_all_prompt": "Diese Struktur auf alle Sprachen anwenden? (j/N): ",
+      "per_language_intro": "Sie haben sich für die individuelle Konfiguration der Sprachen entschieden. Hier sind die verfügbaren Sprachen:",
+      "available_languages": "Verfügbare Sprachen: {languages}",
+      "include_prompt": "Geben Sie die Sprachcodes durch Kommas getrennt ein (z. B. 'de,fr,es'): "
+    },
     "warnings": {
       "noPackageJson": "Keine package.json gefunden. i18n-Framework kann nicht automatisch erkannt werden."
     },

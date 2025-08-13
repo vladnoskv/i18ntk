@@ -269,14 +269,38 @@ class I18nInitializer {
       console.log('\n' + t('init.existingDirectoriesFound'));
       console.log(t('common.separator'));
 
+      // List existing locations
       existingLocations.forEach((location, index) => {
         console.log(`  ${index + 1}. ${location}`);
       });
 
+      // Add options for new directory and exit
       console.log(`  ${existingLocations.length + 1}. Create new directory`);
+      console.log(`  0. Exit`);
 
-      const answer = await this.prompt('\n' + t('init.selectDirectoryPrompt') + ' (Enter number):');
-      const selectedIndex = parseInt(answer) - 1;
+      let answer;
+      let selectedIndex;
+      
+      // Keep asking until we get a valid number
+      while (true) {
+        answer = await this.prompt('\n' + t('init.selectDirectoryPrompt') + ' (0-' + (existingLocations.length + 1) + '):');
+        
+        // Check for exit (0)
+        if (answer === '0') {
+          console.log(t('init.initializationCancelled'));
+          process.exit(0);
+        }
+        
+        // Parse the selection
+        selectedIndex = parseInt(answer) - 1;
+        
+        // Validate the selection
+        if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex <= existingLocations.length) {
+          break;
+        }
+        
+        console.log(t('errors.invalidOption', { option: answer }));
+      }
 
       if (selectedIndex >= 0 && selectedIndex < existingLocations.length) {
         const selectedDir = existingLocations[selectedIndex];
@@ -538,6 +562,16 @@ class I18nInitializer {
     return obj;
   }
 
+  // Get the structure type for a specific language
+  getLanguageStructure(language) {
+    // Check for per-language structure first
+    if (this.config.perLanguageStructure && this.config.perLanguageStructure[language]) {
+      return this.config.perLanguageStructure[language];
+    }
+    // Fall back to the global structure
+    return this.config.structure || 'modular';
+  }
+
   // Create or update a language file securely (supports single/modular)
   async createLanguageFile(sourceFile, targetLanguage, sourceContent) {
     try {
@@ -554,20 +588,22 @@ class I18nInitializer {
         targetFilePath = path.join(targetDir, sourceFile);
       }
 
+      // Validate source and target paths
       const validatedSourcePath = SecurityUtils.validatePath(sourceFilePath, process.cwd());
       const validatedTargetPath = SecurityUtils.validatePath(targetFilePath, process.cwd());
+      const targetDir = path.dirname(validatedTargetPath);
       
-      if (!validatedTargetDir || !validatedTargetFile) {
-        SecurityUtils.logSecurityEvent('Invalid path detected in createLanguageFile', 'error', { targetDir, targetFile });
+      if (!validatedSourcePath || !validatedTargetPath) {
+        SecurityUtils.logSecurityEvent('Invalid path detected in createLanguageFile', 'error', { 
+          sourcePath: sourceFilePath,
+          targetPath: targetFilePath 
+        });
         throw new Error(t('validate.invalidFilePathDetected') || 'Invalid file path detected');
       }
       
       // Create target directory if it doesn't exist
-      if (!fs.existsSync(validatedTargetPath)) {
-        const targetDir = path.dirname(validatedTargetPath);
-        if (!fs.existsSync(targetDir)) {
-          fs.mkdirSync(targetDir, { recursive: true });
-        }
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
       }
       
       let targetContent;

@@ -6,6 +6,21 @@
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
+  "framework": {
+    "preference": "auto",
+    "fallback": "vanilla",
+    "detect": true,
+    "supported": [
+      "react",
+      "vue",
+      "angular",
+      "svelte",
+      "i18next",
+      "nuxt",
+      "next",
+      "vanilla"
+    ]
+  },
   "scriptDirectories": {
     "init": null,
     "analyze": null,

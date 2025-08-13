@@ -967,6 +967,20 @@
     "nextStep2": "2. Ajoutez les traductions pour chaque langue cible",
     "nextStep3": "3. Exécutez à nouveau « npm run i18ntk » pour valider les traductions",
     "detectedFrameworks": "Frameworks i18n détectés : {frameworks}",
+    "setup": {
+      "title": "Configuration",
+      "question": "Question de configuration",
+      "opt_single": "Fichier unique",
+      "opt_modular": "Modulaire",
+      "opt_existing": "Existant",
+      "choice_prompt": "Choisissez une option :",
+      "opt_confirm": "Confirmer",
+      "opt_cancel": "Annuler",
+      "apply_all_prompt": "Appliquer cette structure à toutes les langues ? (o/N) : ",
+      "per_language_intro": "Vous avez choisi de configurer les langues individuellement. Voici les langues disponibles :",
+      "available_languages": "Langues disponibles : {languages}",
+      "include_prompt": "Entrez les codes de langue séparés par des virgules (par exemple 'de,fr,es') : "
+    },
     "warnings": {
       "noPackageJson": "Aucun package.json trouvé. Impossible de détecter le framework i18n."
     },
