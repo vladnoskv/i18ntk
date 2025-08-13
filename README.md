@@ -146,6 +146,55 @@ i18ntk --version  # Should show 1.9.0
    i18ntk validate
    ```
 
+---
+
+## 📸 Screenshots
+
+| **Framework Detection** | **Main Menu** |
+|:-----------------------:|:-------------:|
+| ![Framework Detection](docs/screenshots/I18NTK-FRAMEWORK.PNG) | ![Main Menu](docs/screenshots/I18NTK-MENU.PNG) |
+
+| **Initialization** | **Initilization Language Select** |
+|:------------------:|:---------------------------------:|
+| ![Initialization](docs/screenshots/I18NTK-INIT.PNG) | ![Init Summary](docs/screenshots/I18NTK-INIT-LANG-SELECT.PNG) | 
+
+| **Language Selection** | **Language Changed** |
+|:----------------------:|:--------------------:|
+| ![Language Selection](docs/screenshots/I18NTK-LANGUAGE-UI.PNG) | ![Language Changed](docs/screenshots/I18NTK-LANGUAGE-UI-CHANGED.PNG) |
+
+| **Settings Manager (v1.8.3)** | **Translation Fixer (v1.8.3)** |
+|:-----------------------------:|:-------------------------------:|
+| ![Settings Manager](docs/screenshots/I18NTK-SETTINGS.PNG) | ![Translation Fixer](docs/screenshots/I18NTK-FIXER.PNG) |
+
+| **Analyze** | **Complete** | **Usage** |
+|:-----------:|:------------:|:----------:|
+| ![Analyze](docs/screenshots/I18NTK-ANALYZE.PNG) | ![Complete](docs/screenshots/I18NTK-COMPLETE.PNG) | ![Usage](docs/screenshots/I18NTK-USAGE.PNG) |
+
+| **Sizing (Overview)** | **Sizing (List)** |
+|:---------------------:|:-----------------:|
+| ![Sizing](docs/screenshots/I18NTK-SIZING.PNG) | ![Sizing List](docs/screenshots/I18NTK-SIZING-LIST.PNG) |
+
+| **Validate** | **Validate End** |
+|:-----------:|:-----------------:|
+| ![Validate](docs/screenshots/I18NTK-VALIDATE.PNG) | ![Validate End](docs/screenshots/I18NTK-VALIDATE-END.PNG) |
+
+| **Summary** | **Summary Report** | **Summary Completed** |
+|:-----------:|:-----------------:|:-----------------:|
+| ![Summary Start](docs/screenshots/I18NTK-SUMMARY-1.PNG) | ![Summary End](docs/screenshots/I18NTK-SUMMARY-2.PNG) | ![Summary Options](docs/screenshots/I18NTK-SUMMARY-3.PNG) |
+
+
+| **Admin Pin** | **Admin Pin Setup** | **Admin Pin Success** | **Admin Pin Ask** |
+|:-----------:|:-----------------:|:-----------------:|:-----------------:|
+| ![Admin Pin](docs/screenshots/I18NTK-ADMIN-PIN.PNG) | ![Admin Pin Setup](docs/screenshots/I18NTK-ADMIN-PIN-SETUP.PNG) | ![Success](docs/screenshots/I18NTK-ADMIN-PIN-SUCCESS.PNG) | ![Admin Pin Ask](docs/screenshots/I18NTK-ADMIN-PIN-ASK.PNG) |
+
+
+| **Delete Options** | **Delete Full** | **Delete None** |
+|:------------------:|:------------------:|:------------------:|
+| ![Delete Options](docs/screenshots/I18NTK-DELETE-CHOOSE.PNG) | ![Delete Full](docs/screenshots/I18NTK-DELETE-FULL.PNG) | ![Delete None](docs/screenshots/I18NTK-DELETE-NONE.PNG) | 
+
+---
+
+
 ## 🧩 Runtime Translation API
 
 Use i18ntk’s minimal runtime helper in any project (framework or vanilla) to load JSON locales at runtime and translate keys.
