@@ -32,6 +32,8 @@ function normalizePath(dirPath) {
  */
 async function getUnifiedConfig(scriptName, cliArgs = {}) {
   try {
+    // Setup is now handled automatically by config-manager, no need to check here
+
     let cfg;
     let projectRoot;
     let settingsDir;

@@ -12,6 +12,11 @@ const { getUnifiedConfig, displayHelp } = require('../utils/config-helper');
 const { loadTranslations } = require('../utils/i18n-helper');
 const SecurityUtils = require('../utils/security');
 const configManager = require('../utils/config-manager');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
+
 loadTranslations(process.env.I18NTK_LANG);
 
 class I18nFixer {
@@ -35,7 +40,12 @@ class I18nFixer {
       // Fallback to basic English strings if locale file not found
       return {
         fixer: {
-          help_message: "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
+          help_options: {
+            source_dir: "Source directory to scan (default: ./locales)",
+            languages: "Comma separated list of languages to fix",
+            markers: "Comma separated markers to treat as untranslated",
+            no_backup: "Skip automatic backup creation"
+          },
           starting: "🚀 Starting translation fixing for languages: {languages}",
           sourceDirectory: "📁 Source directory: {sourceDir}",
           sourceLanguage: "🔤 Source language: {sourceLanguage}",

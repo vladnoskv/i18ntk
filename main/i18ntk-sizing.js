@@ -35,11 +35,16 @@ const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG);
 const configManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig } = require('../utils/config-helper');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
+
+loadTranslations(process.env.I18NTK_LANG);
 
 // Get configuration from settings manager
 function getConfig() {

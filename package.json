@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "i18ntk (i18n Toolkit) - Ultra-extreme performance enterprise-grade internationalization management toolkit with 97% performance improvement (15.38ms for 200k keys), NEW interactive translation fixer with custom placeholder markers, selective language/file fixing, mass fix capabilities, advanced security with PIN protection, comprehensive backup & recovery, **zero shell access security fixes**, and edge case handling for JavaScript/TypeScript projects",
   "keywords": [
     "i18n",
@@ -47,12 +47,18 @@
   "author": "Vladimir Noskov (https://github.com/vladnoskv)",
   "type": "commonjs",
   "main": "main/i18ntk-manage.js",
+  "types": "runtime/i18ntk.d.ts",
   "exports": {
     ".": "./main/i18ntk-manage.js",
     "./runtime": {
-      "types": "./runtime/index.d.ts",
+      "types": "./runtime/i18ntk.d.ts",
       "require": "./runtime/index.js",
       "default": "./runtime/index.js"
+    },
+    "./runtime/enhanced": {
+      "types": "./runtime/enhanced.d.ts",
+      "require": "./runtime/enhanced.js",
+      "default": "./runtime/enhanced.js"
     },
     "./runtime/*": "./runtime/*",
     "./main/*": "./main/*",
@@ -64,6 +70,7 @@
   },
   "bin": {
     "i18ntk": "main/i18ntk-manage.js",
+    "i18ntk-setup": "main/i18ntk-setup.js",
     "i18ntk-manage": "main/i18ntk-manage.js",
     "i18ntk-init": "main/i18ntk-init.js",
     "i18ntk-analyze": "main/i18ntk-analyze.js",
@@ -135,13 +142,18 @@
     "test:new-features": "node dev/tests/run-new-features-tests.js",
     "test:framework-detection": "node dev/tests/framework-detection.test.js",
     "test:security-features": "node dev/tests/security-features.test.js",
+    "test:packsecurity": "node run-security-tests.js",
     "test:all-new": "npm run test:new-features && npm run test:framework-detection && npm run test:security-features",
+    "test:comprehensive-security": "npm run test:security && npm run test:security-full",
     "test:scanner": "node dev/tests/scanner-comprehensive.test.js",
     "test:enhanced-features": "node scripts/test-enhanced-features.js",
     "test:placeholder-validation": "node tests/unit/placeholder-validation.test.js",
     "test:runtime": "node scripts/runtime.test.js",
     "test:performance-metrics": "node tests/unit/performance-metrics.test.js",
     "test:integration-enhanced": "node tests/integration/enhanced-features.test.js",
+    "test:security-integration": "node tests/integration/security-integration.test.js",
+    "test:security-vulnerabilities": "node tests/security/command-injection.test.js",
+    "test:security-full": "npm run test:security-vulnerabilities && npm run test:security-integration",
     "test:local-package": "node dev/test-local-package.js",
     "security:audit": "npm audit --audit-level=moderate",
     "security:fix": "npm audit fix",
@@ -176,16 +188,15 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-      "version": "1.9.0",
-      "releaseDate": "13/08/2025",
-      "lastUpdated": "13/08/2025",
+    "version": "1.9.1",
+    "releaseDate": "13/08/2025",
+    "lastUpdated": "13/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "SECURITY: Enhanced workflow protection with mandatory configuration validation",
-      "SECURITY: Strengthened file system operations with strict permission checks",
+      "SECURITY: Complete removal of child_process dependencies - zero shell access",
       "PERFORMANCE: Optimized translation processing - 97% improvement (15ms for 200k keys)",
       "FEATURE: Advanced Translation Assistant with AI-powered suggestions",
       "FEATURE: Bulk translation management supporting 500k+ entries simultaneously",
@@ -222,9 +233,8 @@
       "1.8.1",
       "1.8.2",
       "1.8.3"
-
     ],
-      "nextVersion": "1.9.0",
+    "nextVersion": "1.9.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -242,5 +252,13 @@
       "i18next": ">=21.0.0"
     }
   },
-  "dependencies": {}
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-react": "^7.27.1",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/vue": "^8.1.0",
+    "jest": "^30.0.5"
+  }
 }

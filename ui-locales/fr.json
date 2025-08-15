@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.6.0",
-    "updated": "2025-08-08"
+    "version": "1.9.1",
+    "updated": "2025-12-19"
   },
   "common": {
     "welcome": "Bienvenue",
@@ -1108,7 +1108,7 @@
       "translation_replacement_complete": "\n✅ Remplacement des traductions terminé !",
       "total_replacements": "📊 Remplacements totaux : {count}",
       "dry_run_mode": "\n⚠️ MODE DRY RUN – Aucun fichier n’a été modifié",
-      "tool_title": "🌍 Remplaceur de traductions natives v1.6.0",
+      "tool_title": "🌍 Remplaceur de traductions natives v1.9.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Exécution en mode DRY RUN – aucun fichier ne sera modifié\n",
       "error_during_replacement": "❌ Erreur lors du remplacement des traductions :"
@@ -2107,13 +2107,24 @@
   },
   "scanner": {
     "help_message": "\nScanneur de Texte i18n\n\nUsage: node i18ntk-scanner.js [options]\n\nOptions:\n  --source-dir <dir>     Répertoire source à scanner (par défaut: ./src)\n  --output <file>        Fichier de sortie pour les résultats (par défaut: ./i18ntk-scanner-report.json)\n  --framework <nom>      Framework cible (react, vue, angular, vanilla)\n  --patterns <patterns>  Motifs regex personnalisés (séparés par des virgules)\n  --include-tests        Inclure les fichiers de test dans le scan\n  --exclude-dirs <dirs>  Répertoires à exclure (séparés par des virgules)\n  --help                 Afficher cette aide\n\nExemples:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./resultats-scan.json\n",
+    "help_options": {
+      "source_dir": "Répertoire source à scanner",
+      "output_dir": "Fichier de sortie pour les résultats",
+      "framework": "Framework cible (react, vue, angular, vanilla)",
+      "patterns": "Motifs regex personnalisés (séparés par des virgules)",
+      "exclude": "Répertoires à exclure (séparés par des virgules)",
+      "output_report": "Fichier de sortie pour le rapport",
+      "min_length": "Longueur minimale du texte à inclure",
+      "max_length": "Longueur maximale du texte à inclure",
+      "include_tests": "Inclure les fichiers de test dans le scan"
+    },
     "starting": "🔍 Démarrage du scanneur de texte pour le framework: {framework}",
     "sourceDirectory": "📁 Scan du répertoire: {sourceDir}",
     "frameworkDetected": "🎯 Framework détecté: {framework}",
     "scanningFiles": "📊 Scan de {fileCount} fichiers...",
     "foundTexts": "📝 {textCount} textes nécessitant une traduction trouvés",
     "generatingReport": "📊 Génération du rapport détaillé...",
-    "foundText": "Encontrado texto: {text}",
+    "foundText": "Trouvé {count} instances potentielles de texte codé en dur",
     "reportSaved": "💾 Rapport de scan sauvegardé dans: {reportPath}",
     "noTextsFound": "✅ Aucun texte anglais hardcodé trouvé",
     "scanComplete": "🎉 Scan terminé avec succès!",

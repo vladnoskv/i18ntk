@@ -11,12 +11,17 @@ const fs = require('fs');
 const path = require('path');
 const cliHelper = require('../utils/cli-helper');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG);
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const watchLocales = require('../utils/watch-locales');
 const JsonOutput = require('../utils/json-output');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
+
+loadTranslations( 'en', path.resolve(__dirname, '..', 'ui-locales'));
 
 const PROJECT_ROOT = process.cwd();
 

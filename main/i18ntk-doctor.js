@@ -2,6 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
 
 const ExitCodes = require('../utils/exit-codes');
 

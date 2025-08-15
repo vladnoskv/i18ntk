@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.8.0",
-    "updated": "2025-08-12"
+    "version": "1.9.1",
+    "updated": "2025-12-19"
   },
   "common": {
     "welcome": "Bienvenido",
@@ -1111,7 +1111,7 @@
       "translation_replacement_complete": "\n✅ ¡Reemplazo de traducciones completado!",
       "total_replacements": "📊 Total de reemplazos: {count}",
       "dry_run_mode": "\n⚠️ MODO PRUEBA - No se modificaron archivos",
-      "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.6.0",
+      "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.9.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Ejecutando en modo PRUEBA - no se modificarán archivos\n",
       "error_during_replacement": "❌ Error durante el reemplazo de traducción:"
@@ -2112,13 +2112,24 @@
   },
   "scanner": {
     "help_message": "\nEscáner de Texto i18n\n\nUso: node i18ntk-scanner.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente para escanear (por defecto: ./src)\n  --output <file>        Archivo de salida para resultados (por defecto: ./i18ntk-scanner-report.json)\n  --framework <nombre>   Framework a analizar (react, vue, angular, vanilla)\n  --patterns <patrones>  Patrones regex personalizados (separados por comas)\n  --include-tests        Incluir archivos de prueba en el escaneo\n  --exclude-dirs <dirs>  Directorios a excluir (separados por comas)\n  --help                 Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./resultados-escaneo.json\n",
+    "help_options": {
+      "source_dir": "Directorio fuente para escanear",
+      "output_dir": "Archivo de salida para resultados",
+      "framework": "Framework a analizar (react, vue, angular, vanilla)",
+      "patterns": "Patrones regex personalizados (separados por comas)",
+      "exclude": "Directorios a excluir (separados por comas)",
+      "output_report": "Archivo de salida para el informe",
+      "min_length": "Longitud mínima del texto para incluir",
+      "max_length": "Longitud máxima del texto para incluir",
+      "include_tests": "Incluir archivos de prueba en el escaneo"
+    },
     "starting": "🔍 Iniciando escáner de texto para framework: {framework}",
     "sourceDirectory": "📁 Escaneando directorio: {sourceDir}",
     "frameworkDetected": "🎯 Framework detectado: {framework}",
     "scanningFiles": "📊 Escaneando {fileCount} archivos...",
     "foundTexts": "📝 Encontrados {textCount} textos que requieren traducción",
     "generatingReport": "📊 Generando informe detallado...",
-    "foundText": "Encontrado texto: {text}",
+    "foundText": "Encontrado {count} instancias de texto potencialmente codificado",
     "reportSaved": "💾 Informe de escaneo guardado en: {reportPath}",
     "noTextsFound": "✅ No se encontraron textos en inglés hardcodeados",
     "scanComplete": "🎉 ¡Escaneo completado exitosamente!",

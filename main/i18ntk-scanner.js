@@ -20,6 +20,10 @@ const path = require('path');
 const { getUnifiedConfig, displayHelp } = require('../utils/config-helper');
 const { loadTranslations } = require('../utils/i18n-helper');
 const SecurityUtils = require('../utils/security');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
 
 loadTranslations(process.env.I18NTK_LANG);
 
@@ -44,7 +48,17 @@ class I18nTextScanner {
     } catch (error) {
       return {
         scanner: {
-          help_message: "\nI18n Text Scanner\n\nUsage: node i18ntk-scanner.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --framework <type>     Framework type: react, vue, angular, vanilla (auto-detected)\n  --patterns <patterns>  Custom patterns to match (comma-separated)\n  --exclude <patterns>   Exclude patterns (comma-separated)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Report output directory (default: ./reports)\n  --min-length <number>  Minimum text length to consider (default: 3)\n  --max-length <number>  Maximum text length to consider (default: 100)\n  --include-tests        Include test files in scan\n  --help                Show this help\n\nExamples:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --output-report --min-length=5\n  node i18ntk-scanner.js --patterns=\"Button,Submit\" --exclude=\"*.test.js\"\n",
+          help_options: {
+            source_dir: "Source directory to scan (default: ./src)",
+            framework: "Framework type: react, vue, angular, vanilla (auto-detected)",
+            patterns: "Custom patterns to match (comma-separated)",
+            exclude: "Exclude patterns (comma-separated)",
+            output_report: "Generate detailed report",
+            output_dir: "Report output directory (default: ./reports)",
+            min_length: "Minimum text length to consider (default: 3)",
+            max_length: "Maximum text length to consider (default: 100)",
+            include_tests: "Include test files in scan"
+          },
           starting: "🔍 Starting text analysis for {framework} project...",
           sourceDirectory: "📁 Source directory: {sourceDir}",
           framework: "🏗️ Framework: {framework}",
@@ -134,8 +148,37 @@ class I18nTextScanner {
   detectFramework(projectRoot) {
     const packagePath = path.join(projectRoot, 'package.json');
     
-    if (!fs.existsSync(packagePath)) {
-      return 'vanilla';
+    // Check for Python frameworks
+    const requirementsPath = path.join(projectRoot, 'requirements.txt');
+    const setupPath = path.join(projectRoot, 'setup.py');
+    const pyprojectPath = path.join(projectRoot, 'pyproject.toml');
+    
+    try {
+      // Check Python frameworks first
+      if (fs.existsSync(requirementsPath)) {
+        const requirements = fs.readFileSync(requirementsPath, 'utf8');
+        if (requirements.includes('Django')) return 'django';
+        if (requirements.includes('Flask') || requirements.includes('flask-babel')) return 'flask';
+      }
+      
+      if (fs.existsSync(setupPath)) {
+        const setup = fs.readFileSync(setupPath, 'utf8');
+        if (setup.includes('Django')) return 'django';
+        if (setup.includes('Flask')) return 'flask';
+      }
+      
+      if (fs.existsSync(pyprojectPath)) {
+        const pyproject = fs.readFileSync(pyprojectPath, 'utf8');
+        if (pyproject.includes('Django')) return 'django';
+        if (pyproject.includes('Flask')) return 'flask';
+      }
+      
+      // Check for Python files
+      const hasPythonFiles = fs.readdirSync(projectRoot, { recursive: true })
+        .some(file => file.endsWith && file.endsWith('.py'));
+      if (hasPythonFiles) return 'python';
+    } catch (error) {
+      // Continue to JS frameworks
     }
     
     try {
@@ -203,6 +246,26 @@ class I18nTextScanner {
         /<button[^>]*>([^<]{2,99})<\/button>/g,
         // Span text
         /<span[^>]*>([^<]{2,99})<\/span>/g
+      ],
+      django: [
+        // Django template patterns
+        /\{\%\s*trans\s+["']([^"']{2,99})["']\s*%\}/g,
+        /\{\%\s*blocktrans\s*%\}([^%]{2,99})\{\%\s*endblocktrans\s*%\}/g,
+        /{{\s*_["']([^"']{2,99})["']\s*}}/g,
+        /{{\s*gettext\(["']([^"']{2,99})["']\)\s*}}/g
+      ],
+      flask: [
+        // Flask/Jinja2 template patterns
+        /\{\{\s*_["']([^"']{2,99})["']\s*}}/g,
+        /\{\{\s*gettext\(["']([^"']{2,99})["']\)\s*}}/g,
+        /\{\{\s*lazy_gettext\(["']([^"']{2,99})["']\)\s*}}/g
+      ],
+      python: [
+        // Python source patterns
+        /gettext\(["']([^"']{2,99})["']\)/g,
+        /_\(["']([^"']{2,99})["']\)/g,
+        /gettext_lazy\(["']([^"']{2,99})["']\)/g,
+        /lazy_gettext\(["']([^"']{2,99})["']\)/g
       ]
     };
 
@@ -310,6 +373,21 @@ class I18nTextScanner {
       angular: {
         pipe: `{{ '${text}' | translate }}`,
         service: `this.translateService.instant('ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}')`
+      },
+      django: {
+        template: `{% trans '${text}' %}`,
+        python: `from django.utils.translation import gettext as _\n_('${text}')`,
+        model: `from django.utils.translation import gettext_lazy as _\n_('${text}')`
+      },
+      flask: {
+        template: `{{ _('${text}') }}`,
+        python: `from flask_babel import gettext as _\n_('${text}')`,
+        lazy: `from flask_babel import lazy_gettext as _\n_('${text}')`
+      },
+      python: {
+        gettext: `import gettext\ngettext.gettext('${text}')`,
+        underscore: `from gettext import gettext as _\n_('${text}')`,
+        lazy: `from gettext import gettext_lazy as _\n_('${text}')`
       }
     };
 
@@ -330,7 +408,7 @@ class I18nTextScanner {
     }
 
     const allResults = [];
-    const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.html', '.svelte'];
+    const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.html', '.svelte', '.py', '.pyx', '.pyi'];
     
     const scanRecursive = (currentDir) => {
       const items = fs.readdirSync(currentDir);

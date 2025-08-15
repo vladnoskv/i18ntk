@@ -39,17 +39,21 @@ if (isUppercase) {
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG);
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const watchLocales = require('../utils/watch-locales');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
-
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
 const JsonOutput = require('../utils/json-output');
 const ExitCodes = require('../utils/exit-codes');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
+
+loadTranslations( 'en', path.resolve(__dirname, '..', 'ui-locales'));
 
 class I18nValidator {
   constructor(config = {}) {

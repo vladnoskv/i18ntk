@@ -167,6 +167,8 @@ class I18nInitializer {
     return this.promptInstance.question(question);
   }
 
+
+
   // Parse command line arguments
   parseArgs() {
     const args = process.argv.slice(2);
@@ -1037,7 +1039,12 @@ class I18nInitializer {
   // Generate detailed report
   async generateDetailedReport(results, targetLanguages) {
     try {
-      const reportPath = path.join(this.config.outputDir, 'init-report.json');
+      const outputDir = this.config.outputDir || path.join(process.cwd(), 'i18ntk-reports');
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+      
+      const reportPath = path.join(outputDir, 'init-report.json');
       const report = {
         timestamp: new Date().toISOString(),
         languages: targetLanguages,
@@ -1123,6 +1130,8 @@ class I18nInitializer {
       const { loadTranslations } = require('../utils/i18n-helper');
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       }
+      
+      // Setup is now handled centrally by config manager
 
       // Override config with command line arguments
       if (args.languages) {

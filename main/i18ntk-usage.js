@@ -35,16 +35,20 @@ const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getGlobalReadline, closeGlobalReadline, askHidden } = require('../utils/cli');
 const { detectFramework } = require('../utils/framework-detector');
 const { getExtractor } = require('../utils/extractor-manager');
-loadTranslations(process.env.I18NTK_LANG);
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const SettingsManager = require('../settings/settings-manager');
 const settingsManager = new SettingsManager();
-
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
 const JsonOutput = require('../utils/json-output');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
+
+loadTranslations( 'en', path.resolve(__dirname, '..', 'ui-locales'));
 
 async function getConfig() {
   return await getUnifiedConfig('usage');
@@ -71,7 +75,7 @@ class I18nUsageAnalyzer {
     this.frameworkUsage = new Map(); // Track framework usage per file
     this.keyComplexity = new Map(); // Track key complexity analysis
     this.startTime = Date.now(); // Track performance metrics
-    this.version = '1.9.0'; // Version tracking
+    this.version = '1.9.1'; // Version tracking
     
     // Use global translation function
     this.rl = null;
@@ -115,7 +119,7 @@ class I18nUsageAnalyzer {
       if (detected) {
         this.config.translationPatterns = detected.patterns;
         if (!this.config.includeExtensions) {
-          this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx'];
+          this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi'];
         }
         if (!this.config.excludeDirs) {
           this.config.excludeDirs = [];
@@ -155,7 +159,7 @@ class I18nUsageAnalyzer {
         this.config.excludeDirs = ['node_modules', '.git'];
       }
       if (!Array.isArray(this.config.includeExtensions) && !Array.isArray(this.config.supportedExtensions)) {
-        this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx'];
+        this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi'];
       }
       
       await SecurityUtils.logSecurityEvent(t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
@@ -278,7 +282,7 @@ class I18nUsageAnalyzer {
   }
 
   // Get all files recursively from a directory with enhanced filtering
-  async getAllFiles(dir, extensions = (this.config && (this.config.includeExtensions || this.config.supportedExtensions)) || ['.js', '.jsx', '.ts', '.tsx']) {
+  async getAllFiles(dir, extensions = (this.config && (this.config.includeExtensions || this.config.supportedExtensions)) || ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi']) {
     const files = [];
     
     // Enhanced list of toolkit files to exclude from analysis
@@ -294,7 +298,7 @@ class I18nUsageAnalyzer {
     ];
     
     // Null-safe extensions handling
-        const safeExtensions = Array.isArray(extensions) ? extensions : ['.js', '.jsx', '.ts', '.tsx'];
+        const safeExtensions = Array.isArray(extensions) ? extensions : ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi'];
     const skipRoot = path.resolve(this.i18nDir || '');
     const traverse = async (currentDir) => {
       try {
@@ -398,7 +402,7 @@ class I18nUsageAnalyzer {
           this.config.excludeDirs = ['node_modules', '.git'];
         }
         if (!Array.isArray(this.config.includeExtensions) && !Array.isArray(this.config.supportedExtensions)) {
-          this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx'];
+          this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi'];
         }
 
         this.sourceDir = this.config.sourceDir;

@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.6.0",
-    "updated": "2025-08-08"
+    "version": "1.9.1",
+    "updated": "2025-12-19"
   },
   
   "common": {
@@ -112,6 +112,17 @@
   },
   "scanner": {
     "help_message": "\nI18n Text Scanner\n\nUsage: node i18ntk-scanner.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)\n  --framework <name>     Framework to target (react, vue, angular, vanilla)\n  --patterns <patterns>  Custom regex patterns (comma-separated)\n  --include-tests        Include test files in scan\n  --exclude-dirs <dirs>  Directories to exclude (comma-separated)\n  --help                Show this help\n\nExamples:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./scan-results.json\n",
+    "help_options": {
+      "source_dir": "Source directory to scan for i18n issues",
+      "output_dir": "Directory for scan reports and results",
+      "framework": "Target framework (react, vue, angular, vanilla)",
+      "patterns": "Custom regex patterns for text detection",
+      "exclude": "File patterns to exclude from scanning",
+      "output_report": "Generate detailed scan report",
+      "min_length": "Minimum text length to consider for translation",
+      "max_length": "Maximum text length to consider for translation",
+      "include_tests": "Include test files in the scanning process"
+    },
     "starting": "🔍 Starting text scanner for framework: {framework}",
     "sourceDirectory": "📁 Scanning directory: {sourceDir}",
     "frameworkDetected": "🎯 Detected framework: {framework}",
@@ -124,7 +135,7 @@
     "analysisTitle": "🔍 TRANSLATION SCAN ANALYSIS",
     "fileSummary": "📄 {file}: {count} texts found",
     "textLocation": "📍 Line {line}: {text}",
-    "foundText": "Found text: {text}",
+    "foundText": "Found {count} potential hardcoded text instances",
     "context": "📝 Context: {context}",
     "severity": "⚠️  Severity: {severity}",
     "recommendation": "💡 Recommendation: {recommendation}",
@@ -1152,7 +1163,7 @@
       "translation_replacement_complete": "\n✅ Translation replacement complete!",
       "total_replacements": "📊 Total replacements: {count}",
       "dry_run_mode": "\n⚠️ DRY RUN MODE - No files were modified",
-      "tool_title": "🌍 Native Translation Replacer v1.6.0",
+      "tool_title": "🌍 Native Translation Replacer v1.9.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Running in DRY RUN mode - no files will be modified\n",
       "error_during_replacement": "❌ Error during translation replacement:"

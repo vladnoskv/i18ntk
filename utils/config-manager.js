@@ -2,19 +2,29 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Project root is where commands are executed
-const projectRoot = process.cwd();
-// Prefer project-scoped settings directory over legacy home config
-const PROJECT_SETTINGS_DIR = path.resolve(projectRoot, 'settings');
+
+// Determine package directory and user project root
+const packageDir = path.resolve(__dirname, '..');
+const userProjectRoot = process.cwd();
+
+// Always use package's internal settings directory to avoid polluting user projects
+// The settings directory should be within the package, not in user space
+const PROJECT_SETTINGS_DIR = path.join(packageDir, 'settings');
 const PROJECT_CONFIG_PATH = path.join(PROJECT_SETTINGS_DIR, 'i18ntk-config.json');
+
+// Setup tracking file
+const SETUP_COMPLETED_FILE = path.join(PROJECT_SETTINGS_DIR, 'setup.json');
 
 // Legacy home directory config (for migration only)
 const LEGACY_CONFIG_DIR = path.join(os.homedir(), '.i18ntk');
 const LEGACY_CONFIG_PATH = path.join(LEGACY_CONFIG_DIR, 'i18ntk-config.json');
 
-// Package defaults fallback (read-only)
-const PACKAGE_SETTINGS_DIR = path.resolve(projectRoot, 'node_modules', 'i18ntk', 'settings');
+// Package defaults fallback (read-only) - always points to package internals
+const PACKAGE_SETTINGS_DIR = path.join(packageDir, 'settings');
 const PACKAGE_CONFIG_PATH = path.join(PACKAGE_SETTINGS_DIR, 'i18ntk-config.json');
+
+// Keep projectRoot for path resolution functions
+const projectRoot = userProjectRoot;
 
 // Back-compat: expose CONFIG_DIR/CONFIG_PATH but point to project settings
 const CONFIG_DIR = PROJECT_SETTINGS_DIR;
@@ -243,16 +253,18 @@ function clone(obj) {
 }
 
 function ensureProjectSettingsDir() {
-  if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
-    fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
-  }
+  // Only create settings directory within the package, not in user projects
+  // Since PROJECT_SETTINGS_DIR is now set to package internals, no action needed
+  // if directory doesn't exist, we'll use package defaults
 }
 
 function normalizePathValue(keyPath, value) {
   if (typeof value !== 'string') return value;
   const last = keyPath.split('.').pop();
   if (/dir|directory|root|path$/i.test(last)) {
-    const abs = path.resolve(projectRoot, value);
+    // Always resolve paths relative to user's project root, not package directory
+    const userProjectRoot = process.cwd();
+    const abs = path.resolve(userProjectRoot, value);
     return toRelative(abs);
   }
   return value;
@@ -387,40 +399,74 @@ function loadConfig() {
 
 async function saveConfig(cfg = currentConfig) {
   if (!cfg) return;
-  ensureProjectSettingsDir();
-  const data = JSON.stringify(cfg, null, 2);
-  try {
-    await fs.promises.writeFile(PROJECT_CONFIG_PATH, data, 'utf8');
-  } catch (err) {
-    console.warn(`Warning: Async config save failed: ${err.message}`);
-    try {
-      fs.writeFileSync(PROJECT_CONFIG_PATH, data, 'utf8');
-    } catch (syncErr) {
-      console.error(`Fallback sync save failed: ${syncErr.message}`);
-    }
-  }
+  // Prevent saving to user's project space - use package defaults only
+  // User configuration should be managed through environment variables or CLI args
+  console.warn('[i18ntk] Configuration changes are not persisted - using package defaults');
 }
 
 function getConfig() {
-  return loadConfig();
+  try {
+    // Ensure settings directory exists
+    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+    }
+
+    // Setup is now handled automatically by the unified config system
+    // No need to check here - handled by getUnifiedConfig
+
+    // Check if config file exists
+    if (fs.existsSync(PROJECT_CONFIG_PATH)) {
+      const config = JSON.parse(fs.readFileSync(PROJECT_CONFIG_PATH, 'utf8'));
+      return resolvePaths(config);
+    }
+
+    // Check for legacy config for migration
+    if (fs.existsSync(LEGACY_CONFIG_PATH)) {
+      console.log('📦 Migrating legacy configuration...');
+      const legacyConfig = JSON.parse(fs.readFileSync(LEGACY_CONFIG_PATH, 'utf8'));
+      const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
+      saveConfig(migratedConfig);
+      
+      // Clean up legacy config
+      try {
+        fs.unlinkSync(LEGACY_CONFIG_PATH);
+        if (fs.readdirSync(LEGACY_CONFIG_DIR).length === 0) {
+          fs.rmdirSync(LEGACY_CONFIG_DIR);
+        }
+      } catch (cleanupError) {
+        // Ignore cleanup errors
+      }
+      
+      return resolvePaths(migratedConfig);
+    }
+
+    // Use package defaults for new installation
+    console.log('📦 Initializing with default configuration...');
+    saveConfig(DEFAULT_CONFIG);
+    return resolvePaths(DEFAULT_CONFIG);
+
+  } catch (error) {
+    console.warn('⚠️  Error loading configuration, using defaults:', error.message);
+    return resolvePaths(DEFAULT_CONFIG);
+  }
 }
 
 async function setConfig(cfg) {
   currentConfig = deepMerge(clone(DEFAULT_CONFIG), cfg || {});
-  await saveConfig();
+  // Don't save to disk - use in-memory config only
   return currentConfig;
 }
 
 async function updateConfig(patch) {
   const cfg = loadConfig();
   deepMerge(cfg, patch);
-  await saveConfig();
+  // Don't save to disk - use in-memory config only
   return cfg;
 }
 
 async function resetToDefaults() {
   currentConfig = clone(DEFAULT_CONFIG);
-  await saveConfig();
+  // Don't save to disk - use in-memory config only
   return currentConfig;
 }
 
@@ -446,6 +492,8 @@ function toRelative(absPath) {
   const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
   return normalized;
 }
+
+
 
 module.exports = {
   CONFIG_PATH,

@@ -5,6 +5,7 @@
 /src
 /test-i18ntk*
 .trae
+/fpts/
 
 
 # Security and configuration files

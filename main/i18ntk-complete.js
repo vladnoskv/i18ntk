@@ -16,8 +16,13 @@ const path = require('path');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG);
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
+
+loadTranslations(process.env.I18NTK_LANG);
 
 
 
@@ -365,7 +370,8 @@ class I18nCompletionTool {
 
   // Generate completion report
   async generateReport(changes, languages) {
-    const reportsDir = path.join(this.config.projectRoot || '.', 'i18ntk-reports');
+    const projectRoot = this.config.projectRoot || process.cwd();
+    const reportsDir = path.join(projectRoot, 'i18ntk-reports');
     if (!fs.existsSync(reportsDir)) {
       fs.mkdirSync(reportsDir, { recursive: true });
     }
@@ -379,7 +385,7 @@ class I18nCompletionTool {
       sourceDir: this.sourceDir,
       languagesProcessed: languages.length,
       totalChanges: changes.reduce((sum, lang) => sum + lang.changes.length, 0),
-      languages: languages.map(lang => ({
+      languages: changes.map(lang => ({
         language: lang.language,
         changes: lang.changes.length,
         files: lang.changes.reduce((acc, change) => {

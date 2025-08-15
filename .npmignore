@@ -12,6 +12,7 @@
 /archive/
 .trae
 /utils/ultra-performance-optimizer.js
+test
 test-*
 
 # Debug directory and files
@@ -49,6 +50,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.log
+
+# Exclude fpts directory
+/fpts/
 
 # Configuration files
 config.json

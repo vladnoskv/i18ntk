@@ -3,11 +3,16 @@
 const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG);
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
+
+loadTranslations( 'en', path.resolve(__dirname, '..', 'ui-locales'));
 
 
 class I18nSummaryReporter {
@@ -193,7 +198,7 @@ class I18nSummaryReporter {
       if (filePath.endsWith('.json')) {
         const data = JSON.parse(content);
         return this.extractKeysFromObject(data);
-      } else if (filePath.endsWith('.js') || filePath.endsWith('.ts')) {
+      } else if (filePath.endsWith('.js') || filePath.endsWith('.ts') || filePath.endsWith('.py')) {
         // Basic extraction for JS/TS files (assumes export default or module.exports)
         if (!content) return [];
         const contentStr = String(content);

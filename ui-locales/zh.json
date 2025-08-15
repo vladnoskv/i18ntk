@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.6.0",
-    "updated": "2025-08-08"
+    "version": "1.9.1",
+    "updated": "2025-12-19"
   },
   "common": {
     "welcome": "欢迎",
@@ -1111,7 +1111,7 @@
       "translation_replacement_complete": "\n✅ 翻译替换完成！",
       "total_replacements": "📊 替换总数：{count}",
       "dry_run_mode": "\n⚠️ 试运行模式 - 未修改任何文件",
-      "tool_title": "🌍 本地化自动翻译工具 v1.6.0",
+      "tool_title": "🌍 本地化自动翻译工具 v1.9.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ 正在试运行模式 - 不会修改文件\n",
       "error_during_replacement": "❌ 翻译替换过程中出错："
@@ -2296,12 +2296,24 @@
     "signUp": "注册"
   },
   "scanner": {
-    "help_message": "\ni18n文本扫描器\n\n使用方法: node i18ntk-scanner.js [选项]\n\n选项:\n  --source-dir <目录>     要扫描的源目录 (默认: ./src)\n  --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)\n  --framework <名称>     目标框架 (react, vue, angular, vanilla)\n  --patterns <模式>      自定义正则表达式模式 (逗号分隔)\n  --include-tests        在扫描中包含测试文件\n  --exclude-dirs <目录>  要排除的目录 (逗号分隔)\n  --help                 显示此帮助信息\n\n示例:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./扫描结果.json\n",
+      "help_message": "\ni18n文本扫描器\n\n使用方法: node i18ntk-scanner.js [选项]\n\n选项:\n  --source-dir <目录>     要扫描的源目录 (默认: ./src)\n  --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)\n  --framework <名称>     目标框架 (react, vue, angular, vanilla)\n  --patterns <模式>      自定义正则表达式模式 (逗号分隔)\n  --include-tests        在扫描中包含测试文件\n  --exclude-dirs <目录>  要排除的目录 (逗号分隔)\n  --help                 显示此帮助信息\n\n示例:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./扫描结果.json\n",
+      "help_options": {
+        "source_dir": "要扫描的源目录",
+        "output_dir": "结果输出文件",
+        "framework": "目标框架 (react, vue, angular, vanilla)",
+        "patterns": "自定义正则表达式模式 (逗号分隔)",
+        "exclude": "要排除的目录 (逗号分隔)",
+        "output_report": "报告输出文件",
+        "min_length": "包含文本的最小长度",
+        "max_length": "包含文本的最大长度",
+        "include_tests": "在扫描中包含测试文件"
+      },
     "starting": "🔍 正在为框架启动文本扫描器: {framework}",
     "sourceDirectory": "📁 正在扫描目录: {sourceDir}",
     "frameworkDetected": "🎯 检测到框架: {framework}",
     "scanningFiles": "📊 正在扫描 {fileCount} 个文件...",
-    "foundTexts": "📝 找到 {textCount} 个需要翻译的文本",
+    "foundTexts": "📝 找到 {count} 个需要翻译的文本",
+    "foundText": "找到 {count} 个潜在的硬编码文本实例",
     "generatingReport": "📊 正在生成详细报告...",
     "reportSaved": "💾 扫描报告已保存到: {reportPath}",
     "noTextsFound": "✅ 未找到硬编码的英文文本",

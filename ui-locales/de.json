@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.6.0",
-    "updated": "2025-08-08"
+    "version": "1.9.1",
+    "updated": "2025-12-19"
   },
   "common": {
     "welcome": "Willkommen",
@@ -1109,7 +1109,7 @@
       "translation_replacement_complete": "\n✅ Ersetzung der Übersetzungen abgeschlossen!",
       "total_replacements": "📊 Gesamt ersetzte Einträge: {count}",
       "dry_run_mode": "\n⚠️ DRY-RUN-MODUS – Keine Dateien wurden verändert",
-      "tool_title": "🌍 Native Translation Replacer v1.6.0",
+      "tool_title": "🌍 Native Translation Replacer v1.9.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ DRY-RUN aktiv – Es werden keine Dateien verändert\n",
       "error_during_replacement": "❌ Fehler während der Ersetzung der Übersetzungen:"
@@ -2295,6 +2295,17 @@
   },
   "scanner": {
     "help_message": "\nI18n Text-Scanner\n\nVerwendung: node i18ntk-scanner.js [optionen]\n\nOptionen:\n  --source-dir <dir>     Quellverzeichnis zu scannen (Standard: ./src)\n  --output <file>        Ausgabedatei für Ergebnisse (Standard: ./i18ntk-scanner-report.json)\n  --framework <name>     Ziel-Framework (react, vue, angular, vanilla)\n  --patterns <patterns>  Benutzerdefinierte Regex-Muster (durch Kommas getrennt)\n  --include-tests        Testdateien in den Scan einbeziehen\n  --exclude-dirs <dirs>  Auszuschließende Verzeichnisse (durch Kommas getrennt)\n  --help                 Diese Hilfe anzeigen\n\nBeispiele:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./scan-ergebnisse.json\n",
+    "help_options": {
+      "source_dir": "Quellverzeichnis zu scannen",
+      "output_dir": "Ausgabedatei für Ergebnisse",
+      "framework": "Ziel-Framework (react, vue, angular, vanilla)",
+      "patterns": "Benutzerdefinierte Regex-Muster (durch Kommas getrennt)",
+      "exclude": "Auszuschließende Verzeichnisse (durch Kommas getrennt)",
+      "output_report": "Ausgabedatei für den Bericht",
+      "min_length": "Mindestlänge des einzubeziehenden Textes",
+      "max_length": "Maximallänge des einzubeziehenden Textes",
+      "include_tests": "Testdateien in den Scan einbeziehen"
+    },
     "starting": "🔍 Starte Text-Scanner für Framework: {framework}",
     "sourceDirectory": "📁 Scanne Verzeichnis: {sourceDir}",
     "frameworkDetected": "🎯 Framework erkannt: {framework}",

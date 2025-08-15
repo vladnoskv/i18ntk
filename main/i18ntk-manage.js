@@ -35,11 +35,14 @@ const I18nFixer = require('./i18ntk-fixer');
 const SettingsCLI = require('../settings/settings-cli');
 const I18nDebugger = require('../scripts/debug/debugger');
 const { createPrompt, isInteractive } = require('../utils/prompt-helper');
-
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
 const cliHelper = require('../utils/cli-helper');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../utils/config');
 const pkg = require('../package.json');
+const SetupEnforcer = require('../utils/setup-enforcer');
+
+// Ensure setup is complete before running
+SetupEnforcer.checkSetupComplete();
 
 async function runInitFlow() {
   const initializer = new I18nInitializer();
@@ -51,6 +54,8 @@ async function runInitFlow() {
 function askYesNo(prompt, question) {
   return prompt.question(question).then(a => /^y(es)?$/i.test(a.trim()));
 }
+
+
 
 async function ensureInitializedOrExit(prompt) {
   const path = require('path');
@@ -73,10 +78,11 @@ async function ensureInitializedOrExit(prompt) {
   const initFilePath = path.join(settingsManager.configDir, 'initialization.json');
   
   let isInitialized = false;
+  let initStatus = {};
   if (fs.existsSync(initFilePath)) {
     try {
-      const initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
-      isInitialized = initStatus.initialized && initStatus.version === '1.9.0';
+      initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
+      isInitialized = initStatus.initialized && initStatus.version === '1.9.1';
     } catch (e) {
       // Invalid init file, proceed with check
     }
@@ -85,6 +91,8 @@ async function ensureInitializedOrExit(prompt) {
   if (isInitialized) {
     return cfg;
   }
+
+  // Setup is now handled automatically by the unified config system
 
   // Check if source language files exist
   const langDir = path.join(cfg.sourceDir, cfg.sourceLanguage);
@@ -98,10 +106,12 @@ async function ensureInitializedOrExit(prompt) {
     ensureDirectory(initDir);
     fs.writeFileSync(initFilePath, JSON.stringify({
       initialized: true,
-      version: '1.9.0',
+      version: '1.9.1',
       timestamp: new Date().toISOString(),
       sourceDir: cfg.sourceDir,
-      sourceLanguage: cfg.sourceLanguage
+      sourceLanguage: cfg.sourceLanguage,
+      detectedLanguage: cfg.detectedLanguage,
+      detectedFramework: cfg.detectedFramework
     }, null, 2));
     return cfg;
   }
@@ -119,10 +129,12 @@ async function ensureInitializedOrExit(prompt) {
   ensureDirectory(initDir);
   fs.writeFileSync(initFilePath, JSON.stringify({
     initialized: true,
-    version: '1.9.0',
+    version: '1.9.1',
     timestamp: new Date().toISOString(),
     sourceDir: result.sourceDir || cfg.sourceDir,
-    sourceLanguage: cfg.sourceLanguage
+    sourceLanguage: cfg.sourceLanguage,
+    detectedLanguage: cfg.detectedLanguage,
+    detectedFramework: cfg.detectedFramework
   }, null, 2));
   
   return {
@@ -130,6 +142,115 @@ async function ensureInitializedOrExit(prompt) {
     sourceDir: result.sourceDir || cfg.sourceDir,
     i18nDir: result.i18nDir || cfg.i18nDir
   };
+}
+
+async function detectEnvironmentAndFramework() {
+  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const pyprojectPath = path.join(process.cwd(), 'pyproject.toml');
+  const requirementsPath = path.join(process.cwd(), 'requirements.txt');
+  const goModPath = path.join(process.cwd(), 'go.mod');
+  const pomPath = path.join(process.cwd(), 'pom.xml');
+  const composerPath = path.join(process.cwd(), 'composer.json');
+
+  let detectedLanguage = 'generic';
+  let detectedFramework = 'generic';
+
+  if (fs.existsSync(packageJsonPath)) {
+    detectedLanguage = 'javascript';
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+
+      if (deps.react || deps['react-dom']) detectedFramework = 'react';
+      else if (deps.vue || deps['vue-router']) detectedFramework = 'vue';
+      else if (deps['@angular/core']) detectedFramework = 'angular';
+      else if (deps.next) detectedFramework = 'nextjs';
+      else if (deps.nuxt) detectedFramework = 'nuxt';
+      else if (deps.svelte) detectedFramework = 'svelte';
+      else detectedFramework = 'generic';
+    } catch (error) {
+      detectedFramework = 'generic';
+    }
+  } else if (fs.existsSync(pyprojectPath) || fs.existsSync(requirementsPath)) {
+    detectedLanguage = 'python';
+    try {
+      if (fs.existsSync(requirementsPath)) {
+        const requirements = fs.readFileSync(requirementsPath, 'utf8');
+        if (requirements.includes('django')) detectedFramework = 'django';
+        else if (requirements.includes('flask')) detectedFramework = 'flask';
+        else if (requirements.includes('fastapi')) detectedFramework = 'fastapi';
+        else detectedFramework = 'generic';
+      }
+    } catch (error) {
+      detectedFramework = 'generic';
+    }
+  } else if (fs.existsSync(goModPath)) {
+    detectedLanguage = 'go';
+    detectedFramework = 'generic';
+  } else if (fs.existsSync(pomPath)) {
+    detectedLanguage = 'java';
+    try {
+      const pomContent = fs.readFileSync(pomPath, 'utf8');
+      if (pomContent.includes('spring-boot')) detectedFramework = 'spring-boot';
+      else if (pomContent.includes('spring')) detectedFramework = 'spring';
+      else if (pomContent.includes('quarkus')) detectedFramework = 'quarkus';
+      else detectedFramework = 'generic';
+    } catch (error) {
+      detectedFramework = 'generic';
+    }
+  } else if (fs.existsSync(composerPath)) {
+    detectedLanguage = 'php';
+    try {
+      const composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
+      const deps = composer.require || {};
+      
+      if (deps['laravel/framework']) detectedFramework = 'laravel';
+      else if (deps['symfony/framework-bundle']) detectedFramework = 'symfony';
+      else if (deps['wordpress']) detectedFramework = 'wordpress';
+      else detectedFramework = 'generic';
+    } catch (error) {
+      detectedFramework = 'generic';
+    }
+  }
+
+  return { detectedLanguage, detectedFramework };
+}
+
+function getFrameworkSuggestions(language) {
+  const suggestions = {
+    javascript: [
+      { name: 'i18next', description: 'Feature-rich i18n framework for JavaScript' },
+      { name: 'react-i18next', description: 'React integration for i18next' },
+      { name: 'vue-i18n', description: 'Vue.js i18n plugin' },
+      { name: 'Angular i18n', description: 'Built-in Angular i18n' }
+    ],
+    typescript: [
+      { name: 'i18next', description: 'TypeScript-first i18n framework' },
+      { name: 'react-i18next', description: 'React + TypeScript integration' },
+      { name: 'vue-i18n', description: 'Vue.js i18n with TypeScript support' }
+    ],
+    python: [
+      { name: 'Django i18n', description: 'Built-in Django internationalization' },
+      { name: 'Flask-Babel', description: 'Babel integration for Flask' },
+      { name: 'FastAPI i18n', description: 'i18n middleware for FastAPI' }
+    ],
+    java: [
+      { name: 'Spring i18n', description: 'Spring Framework internationalization' },
+      { name: 'Spring Boot i18n', description: 'Spring Boot auto-configuration' },
+      { name: 'Quarkus i18n', description: 'Quarkus internationalization support' }
+    ],
+    go: [
+      { name: 'go-i18n', description: 'Go i18n library with pluralization' },
+      { name: 'nicksnyder/go-i18n', description: 'Feature-rich Go i18n' }
+    ],
+    php: [
+      { name: 'Laravel i18n', description: 'Built-in Laravel localization' },
+      { name: 'Symfony Translation', description: 'Symfony translation component' },
+      { name: 'WordPress i18n', description: 'WordPress localization functions' }
+    ]
+  };
+
+  return suggestions[language] || suggestions.javascript;
 }
 
 async function maybePromptFramework(prompt, cfg, currentVersion) {
@@ -167,37 +288,7 @@ async function maybePromptFramework(prompt, cfg, currentVersion) {
     settings.framework.prompt = 'always';
   }
 
-  if (settings.framework.prompt === 'always') {
-    const ans = await prompt.question([
-        t('init.suggestions.noFramework'),
-        t('init.frameworks.react'),
-        t('init.frameworks.vue'),
-        t('init.frameworks.i18next'),
-        t('init.frameworks.nuxt'),
-        t('init.frameworks.svelte'),
-        '',
-        t('init.continueWithoutI18nPrompt') + ' (y/N/dnr = do not remind until next update): '
-      ].join('\n')).then(a => a.trim().toLowerCase());
-
-    if (ans === 'y' || ans === 'yes') {
-      settings.framework.preference = 'none';
-      settings.framework.prompt = 'always'; // Keep asking until explicitly suppressed
-    } else if (ans === 'dnr') {
-      settings.framework.preference = 'none';
-      settings.framework.prompt = 'suppress';
-      settings.framework.lastPromptedVersion = currentVersion;
-    } else {
-      console.log('Operation cancelled.');
-      process.exit(0);
-    }
-    
-    // Save configuration using settings manager
-    if (configManager.saveSettings) {
-      configManager.saveSettings(settings);
-    } else if (configManager.saveConfig) {
-      configManager.saveConfig(settings);
-    }
-  }
+  // This function is now handled by ensureInitializedOrExit for better flow control
 
   return cfg;
 }
