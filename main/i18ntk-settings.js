@@ -2,7 +2,14 @@
 const SetupEnforcer = require('../utils/setup-enforcer');
 const SettingsCLI = require('../settings/settings-cli');
 
-SetupEnforcer.checkSetupComplete();
+(async () => {
+  try {
+    await SetupEnforcer.checkSetupCompleteAsync();
+  } catch (error) {
+    console.error('Setup check failed:', error.message);
+    process.exit(1);
+  }
+})();
 
 async function run() {
   const cli = new SettingsCLI();

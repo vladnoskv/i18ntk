@@ -101,6 +101,8 @@ i18ntk usage
 
 ## 🏗️ Supported Frameworks (BETA v2)
 
+**Note**: Our framework feature now beta v2 includes enhanced framework detection and should now support Python. The package also has a more advanced runtime framework that can be run on multiple frameworks, this is an experimental feature and has been tested in simulated environments, but I will require your feedback if things don't work and I will get it fixed!
+
 ### JavaScript/TypeScript
 - React (react-i18next) - 95% accurate with package installed
 - Vue.js (vue-i18n) - 92% accurate with package installed

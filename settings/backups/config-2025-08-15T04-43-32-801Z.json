@@ -1,7 +1,7 @@
 {
     "version": "1.9.1",
-    "language": "en",
-    "uiLanguage": "en",
+    "language": "de",
+    "uiLanguage": "de",
     "theme": "dark",
     "projectRoot": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0",
     "sourceDir": "./locales",

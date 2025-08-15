@@ -33,7 +33,7 @@ const I18nUsageAnalyzer = require('./i18ntk-usage');
 const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const I18nFixer = require('./i18ntk-fixer');
 const SettingsCLI = require('../settings/settings-cli');
-const I18nDebugger = require('../scripts/debug/debugger');
+// const I18nDebugger = require('../scripts/debug/debugger');
 const { createPrompt, isInteractive } = require('../utils/prompt-helper');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
 const cliHelper = require('../utils/cli-helper');
@@ -41,8 +41,7 @@ const { loadConfig, saveConfig, ensureConfigDefaults } = require('../utils/confi
 const pkg = require('../package.json');
 const SetupEnforcer = require('../utils/setup-enforcer');
 
-// Ensure setup is complete before running
-SetupEnforcer.checkSetupComplete();
+// Setup check will be handled in the I18nManager.run() method
 
 async function runInitFlow() {
   const initializer = new I18nInitializer();
@@ -535,6 +534,9 @@ class I18nManager {
   async run() {
     let prompt;
     try {
+      // Ensure setup is complete before running any operations
+      await SetupEnforcer.checkSetupCompleteAsync();
+      
       const args = this.parseArgs();
       prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
       const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
@@ -773,8 +775,7 @@ class I18nManager {
                 break;
 
             case 'debug':
-                const debuggerTool = new I18nDebugger();
-                await debuggerTool.run();
+                console.log('Debug functionality is not available in this version.');
                 break;
             case 'help':
                 this.showHelp();

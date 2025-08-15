@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "1.9.1",
-    "updated": "2025-12-19"
+    "updated": "2025-08-15"
   },
   "common": {
     "welcome": "Willkommen",
@@ -169,7 +169,7 @@
     "directoryPrompt": {
       "title": "📁 Verzeichnis auswählen",
       "current": "Aktuelles Verzeichnis: {dir}",
-      "description": "Geben Sie das Verzeichnis mit Ihren Sprachdateien ein (oder Enter für aktuelles Verzeichnis):",
+      "description": "Geben Sie das Verzeichnis mit Ihren Sprachdateien ein (oder Enter für aktuelles Verzeichnis, 0 zum Abbrechen):",
       "input": "Verzeichnis: "
     }
   },

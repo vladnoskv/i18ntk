@@ -1,17 +1,18 @@
-# Changelog
+# CHANGELOG
 
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.9.1] - 2025-08-13
+## [1.9.1] - 2025-08-15
 
 ### Added
 - **Python Support**: Full support for Python frameworks including Django, Flask, FastAPI, and generic Python projects
 - **Enhanced Framework Detection**: Improved accuracy for all supported frameworks with new Python detection algorithms
 - **Common Locale File**: Added `locales/common.json` for shared translation keys across frameworks
 - **Zero Shell Security**: Complete removal of `child_process` dependencies for maximum security
+- **Exit/Cancel Option**: Added option to exit/cancel (press 0) during directory selection in fixer command
 
 ### Changed
 - **Security Overhaul**: Replaced all `child_process` imports with native Node.js APIs
@@ -38,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory Usage**: Maintained <2MB memory usage for all operations
 - **Validation**: Enhanced validation with no performance impact
 
-## [1.9.0] - 2025-08-12
+## [1.9.0]
 
 ### Added
 - Enhanced setup with one-time configuration behavior
@@ -55,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added enhanced workflow protection
 - Strengthened file system operations with strict permission checks
 
-## [1.8.0] - 2025-07-28
+## [1.8.0]
 
 ### Added
 - 87% performance improvement across all operations
@@ -68,7 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated memory management strategies
 - Enhanced garbage collection optimization
 
-## [1.7.0] - 2025-07-15
+## [1.7.0]
 
 ### Added
 - Admin PIN protection system
@@ -81,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added strict permission checks for file operations
 - Enhanced protection against common attack vectors
 
-## [1.6.0] - 2025-06-30
+## [1.6.0] -
 
 ### Added
 - Multi-language support expansion
@@ -94,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced translation key validation
 - Improved error reporting and debugging
 
-## [1.5.0] - 2025-06-15
+## [1.5.0]
 
 ### Added
 - Initial framework detection capabilities
@@ -107,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced configuration management
 - Improved user experience
 
-## [1.4.0] - 2025-06-01
+## [1.4.0]
 
 ### Added
 - Initial security features
@@ -115,7 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced error handling
 - Improved logging capabilities
 
-## [1.3.0] - 2025-05-15
+## [1.3.0]
 
 ### Added
 - Core internationalization functionality
@@ -123,7 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Simple CLI interface
 - Initial documentation
 
-## [1.2.0] - 2025-05-01
+## [1.2.0]
 
 ### Added
 - Initial project structure
@@ -131,7 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Simple configuration system
 - Initial testing framework
 
-## [1.1.0] - 2025-04-15
+## [1.1.0] 
 
 ### Added
 - Initial release preparation
@@ -139,7 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial documentation setup
 - Package configuration
 
-## [1.0.0] - 2025-04-01
+## [1.0.0] - 2025-07-27
 
 ### Added
 - Initial release of i18n Toolkit

@@ -15,7 +15,14 @@ const configManager = require('../utils/config-manager');
 const SetupEnforcer = require('../utils/setup-enforcer');
 
 // Ensure setup is complete before running
-SetupEnforcer.checkSetupComplete();
+(async () => {
+  try {
+    await SetupEnforcer.checkSetupCompleteAsync();
+  } catch (error) {
+    console.error('Setup check failed:', error.message);
+    process.exit(1);
+  }
+})();
 
 loadTranslations(process.env.I18NTK_LANG);
 
@@ -230,10 +237,21 @@ class I18nFixer {
         console.log(`  ${label}) ${opt}`);
       });
       console.log('  *) Enter a custom path');
+      console.log('  0) Exit/Cancel');
+    } else {
+      console.log('\nOptions:');
+      console.log('  *) Enter a custom path');
+      console.log('  0) Exit/Cancel');
     }
 
     const answer = await ask(this.t('fixer.directoryPrompt.input'));
     let input = answer.trim();
+
+    // Check for exit
+    if (input === '0') {
+      console.log('Operation cancelled by user.');
+      process.exit(0);
+    }
 
     // Map letter/number selection to option
     if (input.length === 1) {

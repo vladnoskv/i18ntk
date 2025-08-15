@@ -19,7 +19,14 @@ const JsonOutput = require('../utils/json-output');
 const SetupEnforcer = require('../utils/setup-enforcer');
 
 // Ensure setup is complete before running
-SetupEnforcer.checkSetupComplete();
+(async () => {
+  try {
+    await SetupEnforcer.checkSetupCompleteAsync();
+  } catch (error) {
+    console.error('Setup check failed:', error.message);
+    process.exit(1);
+  }
+})();
 
 loadTranslations( 'en', path.resolve(__dirname, '..', 'ui-locales'));
 

@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": "1.9.1",
-    "updated": "2025-12-19"
+    "updated": "2025-08-15"
   },
   "common": {
     "welcome": "Bienvenue",
@@ -168,7 +168,7 @@
     "directoryPrompt": {
       "title": "📁 Sélectionner le Répertoire",
       "current": "Répertoire actuel : {dir}",
-      "description": "Entrez le répertoire contenant vos fichiers de langue (ou appuyez sur Entrée pour le répertoire actuel) :",
+      "description": "Entrez le répertoire contenant vos fichiers de langue (ou appuyez sur Entrée pour le répertoire actuel, 0 pour annuler) :",
       "input": "Répertoire : "
     }
   },

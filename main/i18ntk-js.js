@@ -15,7 +15,14 @@ const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper.js'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
 const { program } = require('commander');
 
-SetupEnforcer.checkSetupComplete();
+(async () => {
+  try {
+    await SetupEnforcer.checkSetupCompleteAsync();
+  } catch (error) {
+    console.error('Setup check failed:', error.message);
+    process.exit(1);
+  }
+})();
 
 class I18ntkJavaScriptCommand {
   constructor() {

@@ -94,6 +94,7 @@ npx i18ntk fixer --interactive
 - Selective language and directory targeting
 - Real-time progress tracking
 - Comprehensive fix reports
+- **Exit/Cancel option** (press 0) during directory selection
 
 **Advanced Options:**
 - `--interactive` - Enable interactive mode with guided prompts

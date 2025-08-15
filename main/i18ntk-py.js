@@ -17,7 +17,14 @@ const I18ntkCore = require(path.join(__dirname, '../framework/i18ntk-core.js'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
 const { program } = require('commander');
 
-SetupEnforcer.checkSetupComplete();
+(async () => {
+  try {
+    await SetupEnforcer.checkSetupCompleteAsync();
+  } catch (error) {
+    console.error('Setup check failed:', error.message);
+    process.exit(1);
+  }
+})();
 
 class I18ntkPythonCommand {
   constructor() {
