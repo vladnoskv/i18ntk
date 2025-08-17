@@ -20,6 +20,7 @@ const AdminAuth = require('../utils/admin-auth');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const { detectFramework } = require('../utils/framework-detector');
 const { getFormatAdapter } = require('../utils/format-manager');
+const { pathConfig } = require('../utils/path-config');
 // Ensure UIi18n is available for this initializer class
 const UIi18n = require('./i18ntk-ui');
 loadTranslations(process.env.I18NTK_LANG);
@@ -72,8 +73,8 @@ class I18nInitializer {
     this.sourceDir = this.config.sourceDir || './locales';
     // Source language directory depends on structure
     this.sourceLanguageDir = this.config.structure === 'single'
-      ? this.sourceDir
-      : path.join(this.sourceDir, this.config.sourceLanguage);
+      ? pathConfig.resolveConfigPath(this.sourceDir, './locales')
+      : path.join(pathConfig.resolveConfigPath(this.sourceDir, './locales'), this.config.sourceLanguage);
     
     // Ensure defaultLanguages is properly initialized from config
     this.config.defaultLanguages = this.config.defaultLanguages || ['de', 'es', 'fr', 'ru'];
@@ -87,7 +88,7 @@ class I18nInitializer {
 
   // Updated checkI18nDependencies method that uses configuration
   async checkI18nDependencies(noPrompt = false) {
-    const packageJsonPath = path.resolve('./package.json');
+    const packageJsonPath = pathConfig.resolveProject('package.json');
     
     if (!fs.existsSync(packageJsonPath)) {
       console.log(t('errors.noPackageJson'));
@@ -221,16 +222,17 @@ class I18nInitializer {
     
     // Check for existing translation directories
     for (const location of possibleLocations) {
-      if (fs.existsSync(location)) {
+      const validatedLocation = SecurityUtils.validatePath(location, process.cwd());
+      if (validatedLocation && fs.existsSync(validatedLocation)) {
         try {
-          const items = fs.readdirSync(location);
+          const items = SecurityUtils.safeReaddirSync(validatedLocation, process.cwd());
           const englishFormats = ['en', 'en-US', 'en-GB', 'english'];
           
           // Check for English directories first
           for (const format of englishFormats) {
-            const englishPath = path.join(location, format);
-            if (fs.existsSync(englishPath) && fs.statSync(englishPath).isDirectory()) {
-              const englishFiles = fs.readdirSync(englishPath).filter(file => file.endsWith(this.format.extension));
+            const englishPath = SecurityUtils.validatePath(path.join(validatedLocation, format), validatedLocation);
+            if (englishPath && fs.existsSync(englishPath) && fs.statSync(englishPath).isDirectory()) {
+              const englishFiles = SecurityUtils.safeReaddirSync(englishPath, validatedLocation).filter(file => file.endsWith(this.format.extension));
               if (englishFiles.length > 0) {
                 // Found English files, prioritize this
                 existingLocations.unshift(location);
@@ -241,8 +243,8 @@ class I18nInitializer {
           
           // Also check for any language directories or format files
           const hasLanguageDirs = items.some(item => {
-            const itemPath = path.join(location, item);
-            if (fs.statSync(itemPath).isDirectory()) {
+            const itemPath = SecurityUtils.validatePath(path.join(validatedLocation, item), validatedLocation);
+            if (itemPath && fs.statSync(itemPath).isDirectory()) {
               return ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh', 'en-US', 'en-GB'].includes(item);
             }
             return item.endsWith(this.format.extension);
@@ -325,7 +327,7 @@ class I18nInitializer {
           const newDirPath = path.resolve(newDirName.trim());
 
           if (!fs.existsSync(newDirPath)) {
-            fs.mkdirSync(newDirPath, { recursive: true });
+            SecurityUtils.safeMkdirSync(newDirPath, process.cwd());
             console.log(t('init.createdNewDirectory', { dir: newDirPath }));
           } else {
             console.log(t('init.directoryAlreadyExists', { dir: newDirPath }));
@@ -333,7 +335,7 @@ class I18nInitializer {
 
           const sourceLangDir = path.join(newDirPath, this.config.sourceLanguage);
           if (!fs.existsSync(sourceLangDir)) {
-            fs.mkdirSync(sourceLangDir, { recursive: true });
+            SecurityUtils.safeMkdirSync(sourceLangDir, process.cwd());
             console.log(t('init.createdSourceLanguageDirectory', { dir: sourceLangDir }));
             await this.createSampleTranslationFile(sourceLangDir);
           }
@@ -387,24 +389,24 @@ class I18nInitializer {
     }
     
     // Create directories if they do not exist
-    if (!fs.existsSync(validatedSourceDir)) {
-      fs.mkdirSync(validatedSourceDir, { recursive: true });
-    }
-    if (this.config.structure !== 'single' && !fs.existsSync(validatedSourceLanguageDir)) {
-      fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });
-    }
+      if (!fs.existsSync(validatedSourceDir)) {
+        SecurityUtils.safeMkdirSync(validatedSourceDir, process.cwd());
+      }
+      if (this.config.structure !== 'single' && validatedSourceLanguageDir && !fs.existsSync(validatedSourceLanguageDir)) {
+        SecurityUtils.safeMkdirSync(validatedSourceLanguageDir, process.cwd());
+      }
 
     // Create sample translation file if none exist
     const englishFiles = (this.config.structure === 'single'
-      ? fs.readdirSync(validatedSourceDir)
-      : fs.readdirSync(validatedSourceLanguageDir))
+      ? SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd())
+      : SecurityUtils.safeReaddirSync(validatedSourceLanguageDir, process.cwd()))
       .filter(file => file.endsWith(this.format.extension));
 
     if (englishFiles.length === 0) {
       await this.createSampleTranslationFile(this.config.structure === 'single' ? validatedSourceDir : validatedSourceLanguageDir);
     } else {
       // Directory exists, check if we need to create a sample file
-      const existingFiles = (this.config.structure === 'single' ? fs.readdirSync(validatedSourceDir) : fs.readdirSync(validatedSourceLanguageDir))
+      const existingFiles = (this.config.structure === 'single' ? SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd()) : SecurityUtils.safeReaddirSync(validatedSourceLanguageDir, process.cwd()))
         .filter(file => file.endsWith(this.format.extension));
       
       if (existingFiles.length === 0) {
@@ -445,7 +447,8 @@ class I18nInitializer {
     const i18ntkCommonFilePath = path.join(validatedSourceLanguageDir, `i18ntk-common${this.format.extension}`);
     
     let sampleFilePath;
-    if (!fs.existsSync(commonFilePath)) {
+    const validatedCommonPath = SecurityUtils.validatePath(commonFilePath, process.cwd());
+    if (validatedCommonPath && !fs.existsSync(validatedCommonPath)) {
       sampleFilePath = commonFilePath;
     } else {
       sampleFilePath = i18ntkCommonFilePath;
@@ -471,11 +474,13 @@ class I18nInitializer {
   
   // Check if source directory and language exist
   validateSource() {
-    if (!fs.existsSync(this.sourceDir)) {
+    const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
+    if (!validatedSourceDir || !fs.existsSync(validatedSourceDir)) {
       throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
     }
     
-    if (!fs.existsSync(this.sourceLanguageDir)) {
+    const validatedSourceLanguageDir = SecurityUtils.validatePath(this.sourceLanguageDir, process.cwd());
+    if (!validatedSourceLanguageDir || !fs.existsSync(validatedSourceLanguageDir)) {
       throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || `Source language directory not found: ${this.sourceLanguageDir}`);
     }
     
@@ -485,11 +490,16 @@ class I18nInitializer {
   // Get all JSON files from source language directory (supports single/modular)
   getSourceFiles() {
     try {
+      const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
+      if (!validatedSourceDir) {
+        throw new Error(t('validate.invalidSourceDirectory', { sourceDir: this.sourceDir }) || `Invalid source directory: ${this.sourceDir}`);
+      }
+
       if (this.config.structure === 'single') {
-        if (!fs.existsSync(this.sourceDir)) {
+        if (!fs.existsSync(validatedSourceDir)) {
           throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
         }
-        const files = fs.readdirSync(this.sourceDir)
+        const files = SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd())
           .filter(file => file.endsWith(this.format.extension) && !this.config.excludeFiles.includes(file));
         if (files.length === 0) {
           throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceDir }) || `No JSON files found in source directory: ${this.sourceDir}`);
@@ -497,36 +507,47 @@ class I18nInitializer {
         return files;
       }
 
-      if (!fs.existsSync(this.sourceLanguageDir)) {
+      const validatedSourceLanguageDir = SecurityUtils.validatePath(this.sourceLanguageDir, process.cwd());
+      if (!validatedSourceLanguageDir) {
+        throw new Error(t('validate.invalidSourceLanguageDirectory', { sourceDir: this.sourceLanguageDir }) || `Invalid source language directory: ${this.sourceLanguageDir}`);
+      }
+
+      if (!fs.existsSync(validatedSourceLanguageDir)) {
         // Try to find English files in parent directory or subdirectories
-        const parentDir = path.dirname(this.sourceLanguageDir);
-        if (fs.existsSync(parentDir)) {
-          const subdirs = fs.readdirSync(parentDir).filter(item => {
-            const fullPath = path.join(parentDir, item);
-            return fs.statSync(fullPath).isDirectory();
-          });
-          
-          // Look for English files in any subdirectory
-          for (const subdir of subdirs) {
-            const englishDir = path.join(parentDir, subdir);
-            if (fs.existsSync(englishDir)) {
-              const files = fs.readdirSync(englishDir);
-              const formatFiles = files.filter(file =>
-                file.endsWith(this.format.extension) &&
-                !this.config.excludeFiles.includes(file)
-              );
-              if (formatFiles.length > 0) {
-                // Found English files, use this directory
-                this.sourceLanguageDir = englishDir;
-                return formatFiles;
-              }
+        const parentDir = SecurityUtils.validatePath(path.dirname(validatedSourceLanguageDir), process.cwd());
+        if (!parentDir || !fs.existsSync(parentDir)) {
+          throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
+        }
+        
+        const validatedParentDir = SecurityUtils.validatePath(parentDir, process.cwd());
+        if (!validatedParentDir) {
+          return [];
+        }
+        const subdirs = SecurityUtils.safeReaddirSync(validatedParentDir, process.cwd()).filter(item => {
+          const fullPath = SecurityUtils.validatePath(path.join(validatedParentDir, item), validatedParentDir);
+          return fullPath && fs.statSync(fullPath).isDirectory();
+        });
+        
+        // Look for English files in any subdirectory
+        for (const subdir of subdirs) {
+          const englishDir = SecurityUtils.validatePath(path.join(parentDir, subdir), parentDir);
+          if (englishDir && fs.existsSync(englishDir)) {
+            const files = SecurityUtils.safeReaddirSync(englishDir, process.cwd());
+            const formatFiles = files.filter(file =>
+              file.endsWith(this.format.extension) &&
+              !this.config.excludeFiles.includes(file)
+            );
+            if (formatFiles.length > 0) {
+              // Found English files, use this directory
+              this.sourceLanguageDir = englishDir;
+              return formatFiles;
             }
           }
         }
         throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
       }
       
-      const files = fs.readdirSync(this.sourceLanguageDir)
+      const files = SecurityUtils.safeReaddirSync(validatedSourceLanguageDir, process.cwd())
       .filter(file => {
         return file.endsWith(this.format.extension) && 
                !this.config.excludeFiles.includes(file);
@@ -586,7 +607,7 @@ class I18nInitializer {
       } else {
         // Modular: folder per language mirroring source file
         const targetDir = path.join(this.sourceDir, targetLanguage);
-        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+        if (!fs.existsSync(targetDir)) SecurityUtils.safeMkdirSync(targetDir, process.cwd());
         targetFilePath = path.join(targetDir, sourceFile);
       }
 
@@ -604,8 +625,9 @@ class I18nInitializer {
       }
       
       // Create target directory if it doesn't exist
-      if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true });
+      const validatedTargetDir = SecurityUtils.validatePath(targetDir, process.cwd());
+      if (validatedTargetDir && !fs.existsSync(validatedTargetDir)) {
+        SecurityUtils.safeMkdirSync(validatedTargetDir, process.cwd());
       }
       
       let targetContent;
@@ -1041,7 +1063,7 @@ class I18nInitializer {
     try {
       const outputDir = this.config.outputDir || path.join(process.cwd(), 'i18ntk-reports');
       if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
+        SecurityUtils.safeMkdirSync(outputDir, process.cwd(), { recursive: true });
       }
       
       const reportPath = path.join(outputDir, 'init-report.json');
@@ -1057,7 +1079,7 @@ class I18nInitializer {
         }
       };
 
-      await fs.promises.writeFile(reportPath, JSON.stringify(report, null, 2));
+      SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd());
       console.log(`✅ Report generated: ${reportPath}`);
     } catch (error) {
       console.error('❌ Failed to generate report:', error.message);

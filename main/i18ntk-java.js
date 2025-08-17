@@ -19,7 +19,7 @@ const SecurityUtils = require(path.join(__dirname, '../utils/security'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { parseArgs } = require('util');
 
 (async () => {
   try {
@@ -254,7 +254,7 @@ items.count={0} items
     };
     
     const reportPath = path.join(outputDir, 'i18ntk-java-report.json');
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd());
     
     return reportPath;
   }
@@ -283,88 +283,158 @@ items.count={0} items
 }
 
 // CLI Implementation
-program
-  .name('i18ntk-java')
-  .description('Java language i18n management tool')
-  .version('1.9.1');
-
-program
-  .command('init')
-  .description('Initialize Java i18n structure')
-  .option('-s, --source-dir <dir>', 'Source directory', './')
-  .option('-o, --output-dir <dir>', 'Output directory', './i18ntk-reports')
-  .option('-l, --languages <langs>', 'Languages (comma-separated)', 'en')
-  .option('-f, --framework <framework>', 'Framework (spring-boot|android|standard)', 'standard-java')
-  .action(async (options) => {
-    try {
-      const manager = new JavaI18nManager();
-      const languages = options.languages.split(',');
-      
-      const localesDir = await manager.createLocaleStructure(options.outputDir, languages, options.framework);
-      
-      console.log(`✅ Java i18n structure initialized in: ${localesDir}`);
-      console.log(`📊 Languages: ${languages.join(', ')}`);
-      console.log(`🎯 Framework: ${options.framework}`);
-      
-    } catch (error) {
-      console.error('❌ Error initializing Java i18n:', error.message);
-      process.exit(1);
+function parseArguments() {
+  const { parseArgs } = require('util');
+  
+  const options = {
+    sourceDir: {
+      type: 'string',
+      short: 's',
+      default: './'
+    },
+    outputDir: {
+      type: 'string',
+      short: 'o',
+      default: './i18ntk-reports'
+    },
+    languages: {
+      type: 'string',
+      short: 'l',
+      default: 'en'
+    },
+    framework: {
+      type: 'string',
+      short: 'f',
+      default: 'standard-java'
+    },
+    'dry-run': {
+      type: 'boolean'
+    },
+    debug: {
+      type: 'boolean'
+    },
+    help: {
+      type: 'boolean',
+      short: 'h'
+    },
+    version: {
+      type: 'boolean',
+      short: 'v'
     }
-  });
+  };
 
-program
-  .command('analyze')
-  .description('Analyze Java i18n usage')
-  .option('-s, --source-dir <dir>', 'Source directory', './')
-  .option('-o, --output-dir <dir>', 'Output directory', './i18ntk-reports')
-  .option('--dry-run', 'Preview without making changes')
-  .action(async (options) => {
-    try {
-      SecurityUtils.validatePath(options.sourceDir);
-      
-      const manager = new JavaI18nManager();
-      const results = await manager.extractTranslations(options.sourceDir);
-      
-      console.log(`🔍 Framework detected: ${results.framework}`);
-      console.log(`📊 Files processed: ${results.files}`);
-      console.log(`📝 Translations found: ${results.translations.length}`);
-      
-      if (!options.dryRun) {
-        const reportPath = await manager.generateReport(results, options.outputDir);
-        console.log(`📄 Report saved: ${reportPath}`);
-      }
-      
-    } catch (error) {
-      console.error('❌ Error analyzing Java i18n:', error.message);
-      process.exit(1);
-    }
-  });
+  try {
+    const { values, positionals } = parseArgs({
+      args: process.argv.slice(2),
+      options,
+      allowPositionals: true
+    });
 
-program
-  .command('extract')
-  .description('Extract Java translations')
-  .option('-s, --source-dir <dir>', 'Source directory', './')
-  .option('-o, --output-dir <dir>', 'Output directory', './locales')
-  .option('-l, --languages <langs>', 'Languages (comma-separated)', 'en')
-  .option('-f, --framework <framework>', 'Framework (spring-boot|android|standard)', 'standard-java')
-  .action(async (options) => {
-    try {
-      SecurityUtils.validatePath(options.sourceDir);
-      
-      const manager = new JavaI18nManager();
-      const results = await manager.extractTranslations(options.sourceDir);
-      
-      await manager.createLocaleStructure(options.outputDir, options.languages.split(','), options.framework);
-      
-      console.log(`✅ Extracted ${results.translations.length} translations`);
-      console.log(`📁 Locale structure created in: ${options.outputDir}`);
-      console.log(`🎯 Framework: ${options.framework}`);
-      
-    } catch (error) {
-      console.error('❌ Error extracting Java translations:', error.message);
-      process.exit(1);
+    return { values, positionals };
+  } catch (error) {
+    console.error('❌ Error parsing arguments:', error.message);
+    process.exit(1);
+  }
+}
+
+function showHelp() {
+  console.log(`
+Java language i18n management tool
+
+Usage: node i18ntk-java.js <command> [options]
+
+Commands:
+  init                    Initialize Java i18n structure
+  analyze                 Analyze Java i18n usage
+  extract                 Extract Java translations
+
+Options:
+  -s, --source-dir <dir>     Source directory (default: ./)
+  -o, --output-dir <dir>     Output directory (default: ./i18ntk-reports for init/analyze, ./locales for extract)
+  -l, --languages <langs>    Languages (comma-separated, default: en)
+  -f, --framework <framework> Framework (spring-boot|android|standard, default: standard-java)
+      --dry-run              Preview without making changes
+      --debug                Enable debug output
+  -h, --help                 Show this help message
+  -v, --version              Show version information
+
+Examples:
+  node i18ntk-java.js init -l en,es,fr
+  node i18ntk-java.js analyze --dry-run
+  node i18ntk-java.js extract -s ./src -o ./locales
+  node i18ntk-java.js init -f spring-boot -l de,ja
+`);
+}
+
+async function main() {
+  const { values, positionals } = parseArguments();
+  
+  const command = positionals[0];
+  
+  if (values.help || !command) {
+    showHelp();
+    return;
+  }
+  
+  if (values.version) {
+    console.log('i18ntk-java 1.10.0');
+    return;
+  }
+
+  try {
+    switch (command) {
+      case 'init':
+        const managerInit = new JavaI18nManager();
+        const languages = values.languages.split(',');
+        const outputDir = values.outputDir || './i18ntk-reports';
+        
+        const localesDir = await managerInit.createLocaleStructure(outputDir, languages, values.framework);
+        
+        console.log(`✅ Java i18n structure initialized in: ${localesDir}`);
+        console.log(`📊 Languages: ${languages.join(', ')}`);
+        console.log(`🎯 Framework: ${values.framework}`);
+        break;
+        
+      case 'analyze':
+        SecurityUtils.validatePath(values.sourceDir);
+        
+        const managerAnalyze = new JavaI18nManager();
+        const results = await managerAnalyze.extractTranslations(values.sourceDir);
+        
+        console.log(`🔍 Framework detected: ${results.framework}`);
+        console.log(`📊 Files processed: ${results.files}`);
+        console.log(`📝 Translations found: ${results.translations.length}`);
+        
+        if (!values['dry-run']) {
+          const reportPath = await managerAnalyze.generateReport(results, values.outputDir);
+          console.log(`📄 Report saved: ${reportPath}`);
+        }
+        break;
+        
+      case 'extract':
+        SecurityUtils.validatePath(values.sourceDir);
+        
+        const managerExtract = new JavaI18nManager();
+        const extractResults = await managerExtract.extractTranslations(values.sourceDir);
+        const extractOutputDir = values.outputDir || './locales';
+        
+        await managerExtract.createLocaleStructure(extractOutputDir, values.languages.split(','), values.framework);
+        
+        console.log(`✅ Extracted ${extractResults.translations.length} translations`);
+        console.log(`📁 Locale structure created in: ${extractOutputDir}`);
+        console.log(`🎯 Framework: ${values.framework}`);
+        break;
+        
+      default:
+        console.error(`❌ Unknown command: ${command}`);
+        showHelp();
+        process.exit(1);
     }
-  });
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    process.exit(1);
+  }
+}
 
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
@@ -381,5 +451,5 @@ process.on('unhandledRejection', (reason) => {
 module.exports = { JavaI18nManager };
 
 if (require.main === module) {
-  program.parse();
+  main();
 }

@@ -19,7 +19,7 @@ const SecurityUtils = require(path.join(__dirname, '../utils/security'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { parseArgs } = require('util');
 
 (async () => {
   try {
@@ -331,7 +331,7 @@ return [
     };
     
     const reportPath = path.join(outputDir, 'i18ntk-php-report.json');
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd());
     
     return reportPath;
   }
@@ -360,46 +360,103 @@ return [
 }
 
 // CLI Implementation
-program
-  .name('i18ntk-php')
-  .description('PHP language i18n management tool')
-  .version('1.9.1');
+function parseArguments(args) {
+  const options = {
+    'init': { type: 'boolean', default: false },
+    'analyze': { type: 'boolean', default: false },
+    'extract': { type: 'boolean', default: false },
+    'source-dir': { type: 'string', default: './' },
+    'output-dir': { type: 'string', default: './i18ntk-reports' },
+    'languages': { type: 'string', default: 'en' },
+    'framework': { type: 'string', default: 'standard-php' },
+    'dry-run': { type: 'boolean', default: false },
+    'help': { type: 'boolean', default: false },
+    'version': { type: 'boolean', default: false }
+  };
 
-program
-  .command('init')
-  .description('Initialize PHP i18n structure')
-  .option('-s, --source-dir <dir>', 'Source directory', './')
-  .option('-o, --output-dir <dir>', 'Output directory', './i18ntk-reports')
-  .option('-l, --languages <langs>', 'Languages (comma-separated)', 'en')
-  .option('-f, --framework <framework>', 'Framework (laravel|symfony|wordpress|standard)', 'standard-php')
-  .action(async (options) => {
-    try {
-      const manager = new PhpI18nManager();
+  try {
+    const { values } = parseArgs({ args, options, allowPositionals: true });
+    return values;
+  } catch (error) {
+    console.error('Error parsing arguments:', error.message);
+    showHelp();
+    process.exit(1);
+  }
+}
+
+function showHelp() {
+  console.log(`
+🔧 i18ntk-php - PHP Language I18n Management Tool
+===============================================
+
+Usage: node i18ntk-php.js [command] [options]
+
+Commands:
+  init                       Initialize PHP i18n structure
+  analyze                    Analyze PHP i18n usage
+  extract                    Extract PHP translations
+
+Options:
+  -s, --source-dir <dir>     Source directory (default: ./)
+  -o, --output-dir <dir>     Output directory (default: ./i18ntk-reports)
+  -l, --languages <langs>    Languages (comma-separated, default: en)
+  -f, --framework <type>     Framework (laravel|symfony|wordpress|standard, default: standard-php)
+  --dry-run                  Preview without making changes
+  --help                     Show this help message
+  --version                  Show version information
+
+Examples:
+  node i18ntk-php.js init --languages en,es,fr --framework laravel
+  node i18ntk-php.js analyze --source-dir ./src --dry-run
+`);
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const options = parseArguments(args);
+
+  if (options.help) {
+    showHelp();
+    return;
+  }
+
+  if (options.version) {
+    console.log('i18ntk-php v1.10.0');
+    return;
+  }
+
+  // Determine command
+  let command = null;
+  if (options.init) {
+    command = 'init';
+  } else if (options.analyze) {
+    command = 'analyze';
+  } else if (options.extract) {
+    command = 'extract';
+  } else if (args[0] === 'init') {
+    command = 'init';
+  } else if (args[0] === 'analyze') {
+    command = 'analyze';
+  } else if (args[0] === 'extract') {
+    command = 'extract';
+  } else {
+    showHelp();
+    return;
+  }
+
+  const manager = new PhpI18nManager();
+
+  try {
+    if (command === 'init') {
       const languages = options.languages.split(',');
-      
       const localesDir = await manager.createLocaleStructure(options.outputDir, languages, options.framework);
       
       console.log(`✅ PHP i18n structure initialized in: ${localesDir}`);
       console.log(`📊 Languages: ${languages.join(', ')}`);
       console.log(`🎯 Framework: ${options.framework}`);
-      
-    } catch (error) {
-      console.error('❌ Error initializing PHP i18n:', error.message);
-      process.exit(1);
-    }
-  });
-
-program
-  .command('analyze')
-  .description('Analyze PHP i18n usage')
-  .option('-s, --source-dir <dir>', 'Source directory', './')
-  .option('-o, --output-dir <dir>', 'Output directory', './i18ntk-reports')
-  .option('--dry-run', 'Preview without making changes')
-  .action(async (options) => {
-    try {
+    } else if (command === 'analyze') {
       SecurityUtils.validatePath(options.sourceDir);
       
-      const manager = new PhpI18nManager();
       const results = await manager.extractTranslations(options.sourceDir);
       
       console.log(`🔍 Framework detected: ${results.framework}`);
@@ -410,25 +467,9 @@ program
         const reportPath = await manager.generateReport(results, options.outputDir);
         console.log(`📄 Report saved: ${reportPath}`);
       }
-      
-    } catch (error) {
-      console.error('❌ Error analyzing PHP i18n:', error.message);
-      process.exit(1);
-    }
-  });
-
-program
-  .command('extract')
-  .description('Extract PHP translations')
-  .option('-s, --source-dir <dir>', 'Source directory', './')
-  .option('-o, --output-dir <dir>', 'Output directory', './locales')
-  .option('-l, --languages <langs>', 'Languages (comma-separated)', 'en')
-  .option('-f, --framework <framework>', 'Framework (laravel|symfony|wordpress|standard)', 'standard-php')
-  .action(async (options) => {
-    try {
+    } else if (command === 'extract') {
       SecurityUtils.validatePath(options.sourceDir);
       
-      const manager = new PhpI18nManager();
       const results = await manager.extractTranslations(options.sourceDir);
       
       await manager.createLocaleStructure(options.outputDir, options.languages.split(','), options.framework);
@@ -436,12 +477,12 @@ program
       console.log(`✅ Extracted ${results.translations.length} translations`);
       console.log(`📁 Locale structure created in: ${options.outputDir}`);
       console.log(`🎯 Framework: ${options.framework}`);
-      
-    } catch (error) {
-      console.error('❌ Error extracting PHP translations:', error.message);
-      process.exit(1);
     }
-  });
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    process.exit(1);
+  }
+}
 
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
@@ -458,5 +499,5 @@ process.on('unhandledRejection', (reason) => {
 module.exports = { PhpI18nManager };
 
 if (require.main === module) {
-  program.parse();
+  main();
 }

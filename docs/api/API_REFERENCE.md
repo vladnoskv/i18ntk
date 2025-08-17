@@ -1,7 +1,7 @@
 # i18ntk API Reference
 
-**Version:** 1.8.3
-**Last Updated:** 2025-08-12
+**Version:** 1.10.0
+**Last Updated:** 2025-08-16
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## Overview
@@ -178,7 +178,180 @@ Manage configuration
 npx i18ntk settings --reset --export settings.json
 ```
 
-## Enhanced Features (v1.8.3)
+## Backup Commands (NEW in v1.10.0)
+
+### `i18ntk-backup`
+Secure backup and restore utility for i18n translation files with security-first design.
+
+#### `i18ntk-backup create [directory]`
+Create a new backup of translation files with security validation.
+
+**Usage:**
+```bash
+# Create backup from default directory
+i18ntk-backup create
+
+# Create backup from specific directory
+i18ntk-backup create ui-locales
+
+# Create backup with custom output directory
+i18ntk-backup create --output ./custom-backups
+```
+
+**Security Features:**
+- Path traversal protection
+- Safe file operations with SecurityUtils
+- Input validation and sanitization
+- Directory validation against traversal attacks
+
+#### `i18ntk-backup list`
+List all available backups with interactive directory creation.
+
+**Usage:**
+```bash
+i18ntk-backup list
+```
+
+**Interactive Features:**
+- Automatic directory creation prompts
+- Configuration persistence
+- Custom backup directory setup
+- User-friendly error messages
+
+#### `i18ntk-backup restore <backup-file>`
+Restore translation files from a backup with integrity validation.
+
+**Usage:**
+```bash
+# Restore to default directory
+i18ntk-backup restore backup-20241215-143022.json
+
+# Restore to specific directory
+i18ntk-backup restore backup-20241215-143022.json --output ./restored-locales
+```
+
+#### `i18ntk-backup verify <backup-file>`
+Verify backup file integrity and structure.
+
+**Usage:**
+```bash
+i18ntk-backup verify backup-20241215-143022.json
+```
+
+#### `i18ntk-backup cleanup`
+Remove old backups based on retention policy.
+
+**Usage:**
+```bash
+# Cleanup with default retention (10 backups)
+i18ntk-backup cleanup
+
+# Cleanup keeping specific number of backups
+i18ntk-backup cleanup --keep 5
+```
+
+### Backup Configuration
+
+Configuration is automatically managed and persisted to `.i18ntk/settings.json`:
+
+```json
+{
+  "backup": {
+    "directory": "./i18ntk-backup",
+    "maxBackups": 10
+  }
+}
+```
+
+### Environment Variables
+
+Override configuration with environment variables:
+- `I18N_BACKUP_DIR`: Custom backup directory
+- `I18N_MAX_BACKUPS`: Maximum backups to retain
+
+## Enhanced Features (v1.10.0)
+
+### Enhanced Runtime API
+Improved framework-agnostic translation runtime with better TypeScript support:
+
+```bash
+# Enhanced runtime with TypeScript support
+i18ntk runtime --generate-types
+
+# Framework-specific runtime generation
+i18ntk runtime --framework nextjs --typescript
+```
+
+### Enhanced Framework Detection
+Enhanced support for Next.js, Nuxt.js, and SvelteKit with improved accuracy:
+
+```bash
+# Enhanced framework detection with language info
+i18ntk analyze --framework-detection --verbose
+
+# Framework-specific best practices
+i18ntk analyze --framework nextjs --recommendations
+```
+
+### Security Enhancements (v1.10.0)
+- **Path Traversal Protection**: All file operations validated against directory traversal
+- **Safe File Operations**: SecurityUtils integration for all read/write operations
+- **Input Sanitization**: Comprehensive input validation and sanitization
+- **Backup Security**: Secure backup creation with integrity verification
+
+### Framework Validation & Testing (v1.10.0)
+Comprehensive testing environment with validated framework configurations:
+
+#### Supported Framework Validation
+```bash
+# React project validation
+i18ntk validate --framework react-i18next --source ./src --i18n ./locales
+
+# Vue.js project validation
+i18ntk validate --framework vue-i18n --source ./src --i18n ./locales
+
+# Node.js project validation
+i18ntk validate --framework i18n-node --source ./src --i18n ./locales
+
+# Python project validation
+i18ntk validate --framework flask-babel --source ./src --i18n ./locales
+```
+
+#### Test Environment Features
+```bash
+# Run comprehensive framework tests
+i18ntk test --framework all --verbose
+
+# Generate test report
+i18ntk test --report --format json
+
+# Validate specific framework
+i18ntk test --framework react --detailed
+```
+
+#### Admin PIN Security
+```bash
+# Setup admin PIN
+i18ntk admin setup-pin
+
+# Validate admin access
+i18ntk admin validate --pin <your-pin>
+
+# Reset admin configuration
+i18ntk admin reset --force
+```
+
+#### Cross-Platform Testing
+```bash
+# Test on Windows
+i18ntk test --platform windows
+
+# Test on macOS
+i18ntk test --platform macos
+
+# Test on Linux
+i18ntk test --platform linux
+```
 
 ### Placeholder Validation
 Enhanced placeholder validation ensures consistency across all translations:

@@ -116,12 +116,12 @@ class I18nSizingAnalyzer {
       throw new Error(t("sizing.invalidSourceDirectoryError", { sourceDir: this.sourceDir }));
     }
 
-    if (!fs.existsSync(validatedSourceDir)) {
+    if (!SecurityUtils.safeExistsSync(validatedSourceDir, process.cwd())) {
       throw new Error(t("sizing.sourceDirectoryNotFoundError", { sourceDir: validatedSourceDir }));
     }
 
     const files = [];
-    const items = fs.readdirSync(validatedSourceDir);
+    const items = SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd());
     
     // Check for nested language directories
     for (const item of items) {
@@ -132,7 +132,7 @@ class I18nSizingAnalyzer {
       
       if (stat.isDirectory()) {
         // This is a language directory, combine all JSON files
-        const langFiles = fs.readdirSync(itemPath)
+        const langFiles = SecurityUtils.safeReaddirSync(itemPath, process.cwd())
           .filter(file => file.endsWith('.json'))
           .map(file => SecurityUtils.validatePath(path.join(itemPath, file), process.cwd()))
           .filter(file => file !== null);
@@ -499,9 +499,9 @@ class I18nSizingAnalyzer {
     }
 
     // Ensure output directory exists
-    if (!fs.existsSync(validatedOutputDir)) {
-      fs.mkdirSync(validatedOutputDir, { recursive: true });
-    }
+        if (!SecurityUtils.safeExistsSync(validatedOutputDir, process.cwd())) {
+          SecurityUtils.safeMkdirSync(validatedOutputDir, { recursive: true }, process.cwd());
+        }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     

@@ -6,11 +6,11 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 class SecurityConfig {
     constructor() {
-        const projectRoot = process.cwd();
-        this.configDir = path.join(projectRoot, 'settings');
+        this.configDir = path.resolve(__dirname, '..');
         this.configPath = path.join(this.configDir, 'security-config.json');
         this.securityDefaults = {
             pin: {
@@ -125,9 +125,7 @@ class SecurityConfig {
 
         // Ensure config directory exists
         const configDir = path.dirname(this.configPath);
-        if (!fs.existsSync(configDir)) {
-            fs.mkdirSync(configDir, { recursive: true });
-        }
+        SecurityUtils.safeMkdirSync(configDir, process.cwd());
 
         // Remove actual secrets from config file (use env vars)
         const safeConfig = {
@@ -139,7 +137,7 @@ class SecurityConfig {
             }
         };
 
-        fs.writeFileSync(this.configPath, JSON.stringify(safeConfig, null, 2));
+        SecurityUtils.safeWriteFileSync(this.configPath, JSON.stringify(safeConfig, null, 2), process.cwd());
         
         return {
             configPath: this.configPath,
@@ -151,12 +149,17 @@ class SecurityConfig {
      * Load and validate existing configuration
      */
     loadSecurityConfig() {
-        if (!fs.existsSync(this.configPath)) {
+        const exists = SecurityUtils.safeExistsSync(this.configPath, process.cwd());
+        if (!exists) {
             return this.createSecureConfig();
         }
 
         try {
-            const config = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
+            const content = SecurityUtils.safeReadFileSync(this.configPath, process.cwd(), 'utf8');
+            if (content === null) {
+                throw new Error(`Failed to read security configuration file: ${this.configPath}`);
+            }
+            const config = JSON.parse(content);
             const validation = this.validateSecurityConfig(config);
             
             return {
@@ -179,8 +182,12 @@ class SecurityConfig {
         const timestamp = new Date().toISOString();
         
         // Create backup of old config
-        if (fs.existsSync(this.configPath)) {
-            fs.copyFileSync(this.configPath, `${this.configPath}.backup.${timestamp}`);
+        const exists = SecurityUtils.safeExistsSync(this.configPath, process.cwd());
+        if (exists) {
+            const content = SecurityUtils.safeReadFileSync(this.configPath, process.cwd(), 'utf8');
+            if (content !== null) {
+                SecurityUtils.safeWriteFileSync(`${this.configPath}.backup.${timestamp}`, content, process.cwd());
+            }
         }
 
         // Update configuration with new keys

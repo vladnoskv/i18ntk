@@ -39,7 +39,6 @@ class PrepublishCleaner {
             'main/i18ntk-sizing.js',
             'main/i18ntk-complete.js',
             'main/i18ntk-ui.js',
-            'main/i18ntk-autorun.js',
             'utils/i18n-helper.js',
             'utils/security.js',
             'settings/settings-manager.js',
@@ -84,6 +83,9 @@ class PrepublishCleaner {
         for (const file of this.files) {
             await this.cleanFile(file);
         }
+        
+        // Minify UI locale files to reduce package size
+        await this.minifyUILocales();
         
         // Reset security settings
         await this.resetSecuritySettings();
@@ -244,8 +246,7 @@ class PrepublishCleaner {
             // Validate bin entries
             const requiredBinEntries = [
                 'i18ntk', 'i18ntk-init', 'i18ntk-analyze', 'i18ntk-validate',
-                'i18ntk-usage', 'i18ntk-summary', 'i18ntk-sizing', 'i18ntk-complete',
-                'i18ntk-ui', 'i18ntk-autorun'
+                'i18ntk-usage', 'i18ntk-summary', 'i18ntk-sizing', 'i18ntk-complete'
             ];
             
             for (const bin of requiredBinEntries) {
@@ -268,6 +269,39 @@ class PrepublishCleaner {
         }
     }
     
+    async minifyUILocales() {
+        this.log('Minifying UI locale files to reduce package size...');
+        
+        let totalSizeBefore = 0;
+        let totalSizeAfter = 0;
+        
+        for (const localeFile of this.essentialLocales) {
+            const filePath = path.join(this.projectRoot, localeFile);
+            if (!fs.existsSync(filePath)) continue;
+            
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                totalSizeBefore += content.length;
+                
+                // Parse and re-stringify with minimal formatting
+                const parsed = JSON.parse(content);
+                const minified = JSON.stringify(parsed);
+                
+                SecurityUtils.safeWriteFileSync(filePath, minified, this.projectRoot);
+                totalSizeAfter += minified.length;
+                
+                this.log(`Minified ${localeFile}: ${content.length} → ${minified.length} bytes`);
+            } catch (error) {
+                this.log(`Warning: Could not minify ${localeFile}: ${error.message}`);
+            }
+        }
+        
+        const saved = totalSizeBefore - totalSizeAfter;
+        const percent = ((saved / totalSizeBefore) * 100).toFixed(1);
+        
+        this.log(`✅ UI locales minified: ${totalSizeBefore} → ${totalSizeAfter} bytes (${saved} bytes saved, ${percent}% reduction)`);
+    }
+
     async finalValidation() {
         this.log('Running final validation checks...');
         
@@ -296,9 +330,7 @@ class PrepublishCleaner {
             'main/i18ntk-usage.js',
             'main/i18ntk-summary.js',
             'main/i18ntk-sizing.js',
-            'main/i18ntk-complete.js',
-            'main/i18ntk-ui.js',
-            'main/i18ntk-autorun.js'
+            'main/i18ntk-complete.js'
         ];
         
         for (const script of scripts) {
@@ -314,8 +346,8 @@ class PrepublishCleaner {
         
         this.log('✅ Final validation complete');
     }
-    
-    async resetSecuritySettings() {
+      
+      async resetSecuritySettings() {
         const configPath = path.join(require('../settings/settings-manager').configDir, '.i18n-admin-config.json');
         
         if (fs.existsSync(configPath)) {
@@ -330,7 +362,7 @@ class PrepublishCleaner {
                 lockedUntil: null
             };
             
-            fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+            SecurityUtils.safeWriteFileSync(configPath, JSON.stringify(defaultConfig, null, 2), require('../settings/settings-manager').configDir);
             this.log('Reset security settings to defaults');
         }
     }

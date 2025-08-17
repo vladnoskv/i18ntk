@@ -52,10 +52,12 @@ function deepMerge(target, source) {
 function resolveBaseDir(explicitBaseDir) {
   // 1) Highest priority: explicit option
   if (explicitBaseDir) return path.resolve(explicitBaseDir);
+  
   // 2) Environment override for CI/explicit control
   if (process.env.I18NTK_RUNTIME_DIR) {
     return path.resolve(process.env.I18NTK_RUNTIME_DIR);
   }
+  
   // 2b) Respect config-style env overrides, even without config-manager
   if (process.env.I18NTK_I18N_DIR) {
     return path.resolve(process.env.I18NTK_I18N_DIR);
@@ -63,19 +65,29 @@ function resolveBaseDir(explicitBaseDir) {
   if (process.env.I18NTK_SOURCE_DIR) {
     return path.resolve(process.env.I18NTK_SOURCE_DIR);
   }
+  
   // 3) Use config-manager if available (single source of truth: i18ntk-config.json)
   try {
     const cfgRaw = configManager?.getConfig?.() || {};
     const cfg = configManager?.resolvePaths ? configManager.resolvePaths(cfgRaw) : cfgRaw;
     const base = cfg.i18nDir || cfg.sourceDir || './locales';
+    
     // If config-manager resolved absolute paths, use as-is; otherwise resolve from project cwd
     const isAbs = typeof base === 'string' && path.isAbsolute(base);
     if (isAbs) return base;
-    const root = process.env.I18NTK_PROJECT_ROOT ? path.resolve(process.env.I18NTK_PROJECT_ROOT) : process.cwd();
+    
+    // Use dynamic project root resolution
+    const root = process.env.I18NTK_PROJECT_ROOT ? 
+      path.resolve(process.env.I18NTK_PROJECT_ROOT) : 
+      process.cwd();
+    
+    // Ensure the path is resolved relative to the actual project root
     return path.resolve(root, base);
   } catch (_) {
     // 4) Fallback to conventional './locales' from project CWD
-    const root = process.env.I18NTK_PROJECT_ROOT ? path.resolve(process.env.I18NTK_PROJECT_ROOT) : process.cwd();
+    const root = process.env.I18NTK_PROJECT_ROOT ? 
+      path.resolve(process.env.I18NTK_PROJECT_ROOT) : 
+      process.cwd();
     return path.resolve(root, './locales');
   }
 }

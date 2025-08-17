@@ -1636,7 +1636,15 @@ class SettingsCLI {
         
         if (confirm.toLowerCase() === 'y') {
             try {
+                // Disable admin authentication and clear PIN
                 await this.adminAuth.disableAuth();
+                
+                // Delete the PIN configuration file to completely reset
+                const pinConfigPath = path.join(this.configDir, '.i18n-admin-config.json');
+                if (fs.existsSync(pinConfigPath)) {
+                    fs.unlinkSync(pinConfigPath);
+                }
+                
                 await configManager.resetToDefaults();
                 this.settings = configManager.getConfig();
                 this.modified = false;
@@ -1892,7 +1900,11 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
         }
         const lowerKey = key.toLowerCase();
         if (typeof value === 'string' && (lowerKey.includes('dir') || lowerKey.includes('path') || lowerKey.includes('root'))) {
-            return configManager.toRelative(path.resolve(value));
+            try {
+                return configManager.toRelative(path.resolve(value));
+            } catch (error) {
+                return `${colors.red}(invalid path: ${value})${colors.reset}`;
+            }
         }
         if (typeof value === 'boolean') {
             return value ? `${colors.green}enabled${colors.reset}` : `${colors.red}disabled${colors.reset}`;

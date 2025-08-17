@@ -30,41 +30,76 @@ class SecurityUtils {
    * @param {string} basePath - The base path that the input should be within (optional)
    * @returns {string|null} - Sanitized path or null if invalid
    */
-  static validatePath(filePath, basePath = process.cwd()) {
+  static sanitizePath(inputPath, basePath = process.cwd(), options = {}) {
     try {
-      if (!filePath || typeof filePath !== 'string') {
-        const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationFailed'), 'error', { inputPath: filePath, reason: i18n.t('security.invalidInputType') });
+      if (!inputPath || typeof inputPath !== 'string') {
+        console.error('SecurityUtils.sanitizePath: inputPath is not a string:', inputPath);
         return null;
       }
 
-      // Resolve base and target paths
-      const base = fs.realpathSync(basePath);
-      const resolvedPath = path.resolve(base, filePath);
+      const { 
+        allowTraversal = false, 
+        createIfNotExists = false,
+        normalize = true 
+      } = options;
 
-      // Resolve symlinks if the path exists
-      let finalPath = resolvedPath;
-      try {
-        finalPath = fs.realpathSync(resolvedPath);
-      } catch {
-        // If the path doesn't exist yet, fall back to the resolved path
-      }
-
-      // Ensure the target path is within the base directory
-      const relativePath = path.relative(base, finalPath);
-      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
-        const i18n = getI18n();
-        SecurityUtils.logSecurityEvent(i18n.t('security.pathTraversalAttempt'), 'warning', { inputPath: filePath, resolvedPath: finalPath, basePath: base });
-        return null;
+      // Resolve and normalize base path
+      const absoluteBase = path.resolve(basePath);
+      
+      // Helper to normalize path case for comparison
+      const normalizeCase = (p) => 
+        process.platform === 'win32' ? p.toLowerCase() : p;
+      
+      // Resolve the input path relative to base
+      const resolvedPath = path.resolve(absoluteBase, inputPath);
+      
+      // Normalize the path if requested
+      const normalizedPath = normalize ? path.normalize(resolvedPath) : resolvedPath;
+      
+      // For Windows, normalize the path separators
+      const normalizedForOs = process.platform === 'win32' 
+        ? normalizedPath.replace(/\\/g, '/') 
+        : normalizedPath;
+      
+      const normalizedBase = process.platform === 'win32'
+        ? absoluteBase.replace(/\\/g, '/')
+        : absoluteBase;
+      
+      // Check for path traversal attempts
+      if (!allowTraversal) {
+        // Check if the resolved path is within the base directory
+        if (!normalizeCase(normalizedForOs).startsWith(normalizeCase(normalizedBase + '/'))) {
+          console.error('SecurityUtils.sanitizePath: Path traversal attempt detected:', {
+            inputPath,
+            basePath: absoluteBase,
+            resolvedPath: normalizedForOs
+          });
+          return null;
+        }
+        
+        // Additional check for relative paths that might escape
+        const relativePath = path.relative(absoluteBase, normalizedPath);
+        if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+          console.error('SecurityUtils.sanitizePath: Relative path traversal detected:', relativePath);
+          return null;
+        }
       }
       
-      const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidated'), 'info', { inputPath: filePath, resolvedPath: finalPath });
+      // Ensure directory exists if requested
+      if (createIfNotExists) {
+        const dir = path.dirname(normalizedPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+      }
       
-      return finalPath;
+      return normalizedPath;
     } catch (error) {
       const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationError'), 'error', { inputPath: filePath, error: error.message });
+      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationError'), 'error', { 
+        inputPath: inputPath || 'unknown', 
+        error: error.message 
+      });
       return null;
     }
   }
@@ -77,7 +112,7 @@ class SecurityUtils {
    * @returns {Promise<string|null>} - File content or null if error
    */
   static async safeReadFile(filePath, basePath, encoding = 'utf8') {
-    const validatedPath = this.validatePath(filePath, basePath);
+    const validatedPath = this.sanitizePath(filePath, basePath);
     if (!validatedPath) {
       return null;
     }
@@ -110,7 +145,7 @@ class SecurityUtils {
    * @returns {string|null} - File content or null if error
    */
   static safeReadFileSync(filePath, basePath, encoding = 'utf8') {
-    const validatedPath = this.validatePath(filePath, basePath);
+    const validatedPath = this.sanitizePath(filePath, basePath);
     if (!validatedPath) {
       return null;
     }
@@ -142,7 +177,7 @@ class SecurityUtils {
    * @returns {Promise<boolean>} - Success status
    */
   static async safeWriteFile(filePath, content, basePath, encoding = 'utf8') {
-    const validatedPath = this.validatePath(filePath, basePath);
+    const validatedPath = this.sanitizePath(filePath, basePath);
     if (!validatedPath) {
       return false;
     }
@@ -192,6 +227,116 @@ class SecurityUtils {
       const i18n = getI18n();
       console.warn(i18n.t('security.json_parse_error', { errorMessage: error.message }));
       return null;
+    }
+  }
+
+  /**
+   * Secure directory listing with path traversal protection
+   * @param {string} dirPath - Directory path to list
+   * @param {string} basePath - Base directory for validation (required)
+   * @param {Object} options - Additional security options
+   * @returns {string[]} Array of file/directory names
+   */
+  static safeReaddirSync(dirPath, basePath, options = {}) {
+    const {
+      allowSymlinks = false,
+      allowlist = null,
+      maxDepth = 1
+    } = options;
+
+    // Validate required parameters
+    if (!dirPath || typeof dirPath !== 'string') {
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.invalidDirectoryPath'), 'error', { inputPath: dirPath });
+      throw new SecurityError('Invalid directory path provided');
+    }
+
+    if (!basePath || typeof basePath !== 'string') {
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.invalidBasePath'), 'error', { basePath });
+      throw new SecurityError('Invalid base path provided');
+    }
+
+    try {
+      // Validate the directory path
+      const validatedPath = this.sanitizePath(dirPath, basePath);
+      if (!validatedPath) {
+        const i18n = getI18n();
+        throw new SecurityError(i18n.t('security.pathValidationFailed'));
+      }
+
+      // Check allowlist if provided
+      if (allowlist && Array.isArray(allowlist)) {
+        const isAllowed = allowlist.some(allowed => {
+          try {
+            const allowedPath = path.resolve(basePath, allowed);
+            return validatedPath.startsWith(allowedPath);
+          } catch {
+            return false;
+          }
+        });
+        
+        if (!isAllowed) {
+          const i18n = getI18n();
+          SecurityUtils.logSecurityEvent(i18n.t('security.pathNotInAllowlist'), 'warning', { path: validatedPath });
+          throw new SecurityError('Directory path not in allowlist');
+        }
+      }
+
+      // Check symlink protection
+      if (!allowSymlinks) {
+        try {
+          const realPath = fs.realpathSync(validatedPath);
+          const baseRealPath = fs.realpathSync(basePath);
+          
+          if (!realPath.startsWith(baseRealPath)) {
+            const i18n = getI18n();
+            SecurityUtils.logSecurityEvent(i18n.t('security.symlinkTraversalDetected'), 'warning', { 
+              path: validatedPath, 
+              realPath 
+            });
+            throw new SecurityError('Symlink traversal detected');
+          }
+        } catch (error) {
+          if (error instanceof SecurityError) {
+            throw error;
+          }
+          // Continue if realpath fails (path doesn't exist)
+        }
+      }
+
+      // Validate it's actually a directory
+      const stats = fs.statSync(validatedPath);
+      if (!stats.isDirectory()) {
+        const i18n = getI18n();
+        SecurityUtils.logSecurityEvent(i18n.t('security.pathNotDirectory'), 'error', { path: validatedPath });
+        throw new SecurityError('Path is not a directory');
+      }
+
+      // Perform the directory listing
+      const files = fs.readdirSync(validatedPath);
+      
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.directoryListed'), 'info', { 
+        path: validatedPath, 
+        fileCount: files.length 
+      });
+      
+      return files;
+      
+    } catch (error) {
+      // Re-throw SecurityError instances
+      if (error instanceof SecurityError) {
+        throw error;
+      }
+      
+      // Log and re-wrap other errors
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.directoryAccessError'), 'error', { 
+        path: dirPath, 
+        error: error.message 
+      });
+      throw new SecurityError(`Access denied to directory: ${dirPath}`);
     }
   }
 
@@ -400,6 +545,220 @@ class SecurityUtils {
   }
 
   /**
+   * Centralized path sanitization utility for preventing path traversal
+      }
+      continue;
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+      }
+
+      return resolvedPath;
+    } catch (error) {
+      console.error('SecurityUtils.sanitizePath error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Secure directory creation with path validation
+   * @param {string} dirPath - Directory path to create
+   * @param {string} basePath - Base path for validation
+   * @param {Object} options - Creation options
+   * @returns {string|null} - Created directory path or null if failed
+   */
+  static safeMkdirSync(dirPath, basePath, options = {}) {
+    const sanitizedPath = this.sanitizePath(dirPath, basePath, { 
+      createIfNotExists: true,
+      ...options 
+    });
+    
+    if (!sanitizedPath) {
+      return null;
+    }
+
+    try {
+      if (!fs.existsSync(sanitizedPath)) {
+        fs.mkdirSync(sanitizedPath, { recursive: true, mode: 0o755 });
+      }
+      
+      // Verify it's a directory
+      const stats = fs.statSync(sanitizedPath);
+      if (!stats.isDirectory()) {
+        const i18n = getI18n();
+        SecurityUtils.logSecurityEvent(i18n.t('security.pathNotDirectory'), 'error', { path: sanitizedPath });
+        return null;
+      }
+
+      return sanitizedPath;
+    } catch (error) {
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.directoryCreationError'), 'error', { 
+        path: sanitizedPath, 
+        error: error.message 
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Secure file write with path validation and atomic operations
+   * @param {string} filePath - File path to write
+   * @param {string|Buffer} content - Content to write
+   * @param {string} basePath - Base path for validation
+   * @param {Object} options - Write options
+   * @returns {boolean} - Success status
+   */
+  static safeWriteFileSync(filePath, content, basePath, options = {}) {
+    const sanitizedPath = this.sanitizePath(filePath, basePath, { 
+      createIfNotExists: true,
+      ...options 
+    });
+    
+    if (!sanitizedPath) {
+      return false;
+    }
+
+    try {
+      const { 
+        atomic = true, 
+        mode = 0o644,
+        encoding = 'utf8' 
+      } = options;
+
+      // Validate content size
+      const contentSize = typeof content === 'string' ? Buffer.byteLength(content, encoding) : content.length;
+      if (contentSize > 10 * 1024 * 1024) { // 10MB limit
+        const i18n = getI18n();
+        SecurityUtils.logSecurityEvent(i18n.t('security.contentTooLarge'), 'error', { 
+          filePath: sanitizedPath, 
+          size: contentSize 
+        });
+        return false;
+      }
+
+      if (atomic) {
+        // Atomic write: write to temp file, then rename
+        const tempPath = `${sanitizedPath}.tmp.${Date.now()}`;
+        fs.writeFileSync(tempPath, content, { encoding, mode });
+        fs.renameSync(tempPath, sanitizedPath);
+      } else {
+        fs.writeFileSync(sanitizedPath, content, { encoding, mode });
+      }
+
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.fileWritten'), 'info', { 
+        filePath: sanitizedPath,  
+        size: contentSize 
+      });
+
+      return true;
+    } catch (error) {
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.fileWriteError'), 'error', { 
+        filePath: sanitizedPath, 
+        error: error.message 
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Secure file existence check with path validation
+   * @param {string} filePath - File path to check
+   * @param {string} basePath - Base path for validation
+   * @returns {boolean} - Whether file exists and is accessible
+   */
+  static safeExistsSync(filePath, basePath) {
+    const sanitizedPath = this.sanitizePath(filePath, basePath);
+    if (!sanitizedPath) {
+      return false;
+    }
+
+    try {
+      fs.accessSync(sanitizedPath, fs.constants.F_OK);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Secure file stat with path validation
+   * @param {string} filePath - File path to stat
+   * @param {string} basePath - Base path for validation
+   * @returns {fs.Stats|null} - File stats or null if error
+   */
+  static safeStatSync(filePath, basePath) {
+    const sanitizedPath = this.sanitizePath(filePath, basePath);
+    if (!sanitizedPath) {
+      return null;
+    }
+
+    try {
+      return fs.statSync(sanitizedPath);
+    } catch (error) {
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.fileStatError'), 'error', { 
+        filePath: sanitizedPath, 
+        error: error.message
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Secure file/directory deletion with path validation
+   * @param {string} filePath - File or directory path to delete
+   * @param {string} basePath - Base path for validation
+   * @param {Object} options - Deletion options
+   * @returns {boolean} - Success status
+   */
+  static safeDeleteSync(filePath, basePath, options = {}) {
+    const sanitizedPath = this.sanitizePath(filePath, basePath);
+    if (!sanitizedPath) {
+      return false;
+    }
+
+    try {
+      const { recursive = false } = options;
+      
+      // Check if path exists before attempting deletion
+      if (!fs.existsSync(sanitizedPath)) {
+        return true; // Already deleted, consider success
+      }
+
+      const stats = fs.statSync(sanitizedPath);
+      
+      if (stats.isDirectory()) {
+        if (recursive) {
+          fs.rmSync(sanitizedPath, { recursive: true, force: true });
+        } else {
+          fs.rmdirSync(sanitizedPath);
+        }
+      } else {
+        fs.unlinkSync(sanitizedPath);
+      }
+
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.fileDeleted'), 'info', { 
+        filePath: sanitizedPath,
+        isDirectory: stats.isDirectory(),
+        recursive: recursive
+      });
+
+      return true;
+    } catch (error) {
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.fileDeleteError'), 'error', { 
+        filePath: sanitizedPath, 
+        error: error.message
+      });
+      return false;
+    }
+  }
+
+  /**
    * Logs security events for monitoring
    * @param {string} event - Security event description
    * @param {string} level - Log level (info, warn, error)
@@ -420,19 +779,38 @@ class SecurityUtils {
 
     // Only show security logs if debug mode is enabled and showSecurityLogs is true
     try {
-      const cfg = configManager.getConfig();
-      if (cfg.debug?.enabled && cfg.debug?.showSecurityLogs) {
+      // Avoid circular dependency by checking if configManager is available
+      const cfg = configManager?.getConfig?.();
+      if (cfg?.debug?.enabled && cfg?.debug?.showSecurityLogs) {
         console.log(`[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`, details);
       }
     } catch (error) {
       // Fallback: if settings can't be loaded, don't show security logs to maintain clean UI
       // Only log critical security events in this case
       if (event.includes('CRITICAL') || event.includes('BREACH') || event.includes('ATTACK')) {
-        const i18n = getI18n();
-        console.log(i18n.t('security.security_alert', { timestamp, event }), details);
+        try {
+          const i18n = getI18n();
+          console.log(i18n.t('security.security_alert', { timestamp, event }), details);
+        } catch (i18nError) {
+          // Final fallback if i18n also fails
+          console.log(`[SECURITY ALERT] ${timestamp}: ${event}`, details);
+        }
       }
     }
   }
 }
 
+/**
+ * Custom Security Error class for security-related exceptions
+ */
+class SecurityError extends Error {
+  constructor(message, code = 'SECURITY_ERROR') {
+    super(message);
+    this.name = 'SecurityError';
+    this.code = code;
+    this.timestamp = new Date().toISOString();
+  }
+}
+
 module.exports = SecurityUtils;
+module.exports.SecurityError = SecurityError;

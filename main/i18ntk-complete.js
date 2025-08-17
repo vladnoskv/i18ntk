@@ -121,13 +121,13 @@ class I18nCompletionTool {
     }
     
     // Check for monolith JSON files (en.json, es.json, etc.)
-    const files = fs.readdirSync(this.sourceDir);
+    const files = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd());
     const languages = files
       .filter(file => file.endsWith('.json'))
       .map(file => path.basename(file, '.json'));
     
     // Also check for directory-based structure for backward compatibility
-    const directories = fs.readdirSync(this.sourceDir)
+    const directories = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd())
       .filter(item => {
         const itemPath = path.join(this.sourceDir, item);
         return fs.statSync(itemPath).isDirectory();
@@ -144,7 +144,7 @@ class I18nCompletionTool {
       return [];
     }
     
-    return fs.readdirSync(languageDir)
+    return SecurityUtils.safeReaddirSync(languageDir, this.sourceDir)
       .filter(file => {
         return file.endsWith('.json') && 
                !this.config.excludeFiles.includes(file);
@@ -234,19 +234,20 @@ class I18nCompletionTool {
       let fileContent = {};
       
       // Load existing file or create new
-      if (fs.existsSync(filePath)) {
+      const fileExists = SecurityUtils.safeExistsSync(filePath, process.cwd());
+      if (fileExists) {
         try {
-          fileContent = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          const content = SecurityUtils.safeReadFileSync(filePath, process.cwd(), 'utf8');
+          fileContent = content ? JSON.parse(content) : {};
         } catch (error) {
-          console.warn(t("completeTranslations.warning_could_not_parse_filepa", { filePath })); ;
+          console.warn(t("completeTranslations.warning_could_not_parse_filepa", { filePath }));;
           fileContent = {};
         }
       } else {
         // Create directory if it doesn't exist
-        if (!fs.existsSync(languageDir)) {
-          if (!dryRun) {
-            fs.mkdirSync(languageDir, { recursive: true });
-          }
+        const dirExists = SecurityUtils.safeExistsSync(languageDir, process.cwd());
+        if (!dirExists && !dryRun) {
+          SecurityUtils.safeMkdirSync(languageDir, process.cwd());
         }
       }
       
@@ -271,7 +272,7 @@ class I18nCompletionTool {
       
       // Save file
       if (fileChanged && !dryRun) {
-        fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+        SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(fileContent, null, 2), process.cwd(), 'utf8');
       }
     }
     
@@ -327,40 +328,87 @@ class I18nCompletionTool {
 
   // Get missing keys by comparing source language with target languages
   getMissingKeysFromComparison() {
-    const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
+    const sourceLang = this.config.sourceLanguage;
+    const sourceFilePath = path.join(this.sourceDir, `${sourceLang}.json`);
     const missingKeys = [];
-    
-    if (!fs.existsSync(this.sourceLanguageDir)) {
-      console.log(t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
-      return [];
-    }
-    
-    // Process each file in source language
-    for (const fileName of sourceFiles) {
-      const sourceFilePath = path.join(this.sourceLanguageDir, fileName);
+
+    const sourceFileExists = SecurityUtils.safeExistsSync(sourceFilePath, process.cwd());
+    if (!sourceFileExists) {
+      // Fallback to directory based lookup
+      const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
+      const sourceDirExists = SecurityUtils.safeExistsSync(this.sourceLanguageDir, process.cwd());
+      if (!sourceDirExists) {
+        console.log(t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
+        return [];
+      }
       
-      try {
-        const sourceContent = JSON.parse(fs.readFileSync(sourceFilePath, 'utf8'));
-        const sourceKeys = this.getAllKeys(sourceContent);
+      // Process each file in source language
+      for (const fileName of sourceFiles) {
+        const sourceFilePathInDir = path.join(this.sourceLanguageDir, fileName);
         
-        // Check all other languages
+        try {
+          const sourceContentRaw = SecurityUtils.safeReadFileSync(sourceFilePathInDir, process.cwd(), 'utf8');
+          if (sourceContentRaw === null) continue;
+          const sourceContent = JSON.parse(sourceContentRaw);
+          const sourceKeys = this.getAllKeys(sourceContent);
+          
+          // Check all other languages
+          const languages = this.getAvailableLanguages();
+          for (const language of languages) {
+            if (language === this.config.sourceLanguage) continue;
+            
+            const targetFilePath = path.join(this.sourceDir, language, fileName);
+            let targetKeys = [];
+            
+            const targetExists = SecurityUtils.safeExistsSync(targetFilePath, process.cwd());
+            if (targetExists) {
+              try {
+                const targetContentRaw = SecurityUtils.safeReadFileSync(targetFilePath, process.cwd(), 'utf8');
+                if (targetContentRaw !== null) {
+                  const targetContent = JSON.parse(targetContentRaw);
+                  targetKeys = this.getAllKeys(targetContent);
+                }
+              } catch (error) {
+                console.warn(t("complete.couldNotParseTarget", { file: targetFilePath }));
+              }
+            }
+            
+            // Find keys missing in target language
+            const missingInTarget = sourceKeys.filter(key => !targetKeys.includes(key));
+            missingKeys.push(...missingInTarget);
+          }
+        } catch (error) {
+          console.warn(t("complete.couldNotParseSource", { file: sourceFilePathInDir }));
+        }
+      }
+    } else {
+      // Monolith file logic
+      try {
+        const sourceContentRaw = SecurityUtils.safeReadFileSync(sourceFilePath, process.cwd(), 'utf8');
+        if (sourceContentRaw === null) return [];
+        const sourceContent = JSON.parse(sourceContentRaw);
+        const sourceKeys = this.getAllKeys(sourceContent);
+
         const languages = this.getAvailableLanguages();
         for (const language of languages) {
-          if (language === this.config.sourceLanguage) continue;
-          
-          const targetFilePath = path.join(this.sourceDir, language, fileName);
+          if (language === sourceLang) continue;
+
+          const targetFilePath = path.join(this.sourceDir, `${language}.json`);
           let targetKeys = [];
-          
-          if (fs.existsSync(targetFilePath)) {
+
+          const targetExists = SecurityUtils.safeExistsSync(targetFilePath, process.cwd());
+          if (targetExists) {
             try {
-              const targetContent = JSON.parse(fs.readFileSync(targetFilePath, 'utf8'));
-              targetKeys = this.getAllKeys(targetContent);
+              const targetContentRaw = SecurityUtils.safeReadFileSync(targetFilePath, process.cwd(), 'utf8');
+              if (targetContentRaw !== null) {
+                const targetContent = JSON.parse(targetContentRaw);
+                targetKeys = this.getAllKeys(targetContent);
+              }
             } catch (error) {
               console.warn(t("complete.couldNotParseTarget", { file: targetFilePath }));
             }
           }
           
-          // Find keys missing in target language
           const missingInTarget = sourceKeys.filter(key => !targetKeys.includes(key));
           missingKeys.push(...missingInTarget);
         }
@@ -379,8 +427,9 @@ class I18nCompletionTool {
   async generateReport(changes, languages) {
     const projectRoot = this.config.projectRoot || process.cwd();
     const reportsDir = path.join(projectRoot, 'i18ntk-reports');
-    if (!fs.existsSync(reportsDir)) {
-      fs.mkdirSync(reportsDir, { recursive: true });
+    const reportsDirExists = SecurityUtils.safeExistsSync(reportsDir, process.cwd());
+    if (!reportsDirExists) {
+      SecurityUtils.safeMkdirSync(reportsDir, process.cwd());
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -407,7 +456,7 @@ class I18nCompletionTool {
       }))
     };
     
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
+    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd(), 'utf8');
     console.log(t("complete.reportGenerated", { path: reportPath }));
     return reportPath;
   }

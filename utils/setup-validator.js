@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const configManager = require('./config-manager');
 
 
 class SetupValidator {
@@ -61,33 +62,22 @@ class SetupValidator {
     }
 
     async loadConfiguration() {
-        const configPath = path.join(process.cwd(), 'i18ntk-config.json');
-        
-        if (fs.existsSync(configPath)) {
-            try {
-                this.config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-                this.results.checks.push({
-                    category: 'configuration',
-                    message: 'Configuration file found and valid',
-                    status: 'passed',
-                    details: { path: configPath }
-                });
-            } catch (error) {
-                this.results.errors.push({
-                    category: 'configuration',
-                    message: 'Invalid configuration file',
-                    severity: 'high',
-                    fix: 'Run setup script to regenerate configuration',
-                    details: { error: error.message }
-                });
-            }
-        } else {
+        try {
+            this.config = configManager.getConfig();
+            this.results.checks.push({
+                category: 'configuration',
+                message: 'Configuration loaded successfully',
+                status: 'passed',
+                details: { source: 'config-manager' }
+            });
+        } catch (error) {
             this.results.errors.push({
                 category: 'configuration',
-                message: 'Configuration file not found',
+                message: 'Configuration error',
                 severity: 'critical',
-                fix: 'Run i18ntk-setup.js to create configuration',
-                action: 'node main/i18ntk-setup.js'
+                fix: 'Run setup script to create configuration',
+                action: 'node main/i18ntk-setup.js',
+                details: { error: error.message }
             });
         }
     }

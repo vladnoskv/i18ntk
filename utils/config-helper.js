@@ -42,13 +42,17 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
 
     const configDirArg = toStr(cliArgs.configDir);
     if (configDirArg) {
-      const safeConfigDir = SecurityUtils.validatePath(configDirArg, process.cwd());
+      const safeConfigDir = SecurityUtils.sanitizePath(configDirArg, process.cwd());
       if (!safeConfigDir) {
         throw new Error('Invalid config directory');
       }
       settingsDir = safeConfigDir;
       const configFile = path.join(settingsDir, 'i18ntk-config.json');
-      cfg = fs.existsSync(configFile) ? JSON.parse(fs.readFileSync(configFile, 'utf8')) : {};
+      const validatedConfigFile = SecurityUtils.sanitizePath(configFile, safeConfigDir);
+      if (!validatedConfigFile) {
+        throw new Error('Invalid config file path');
+      }
+      cfg = SecurityUtils.safeExistsSync(validatedConfigFile, safeConfigDir) ? JSON.parse(SecurityUtils.safeReadFileSync(validatedConfigFile, 'utf8', safeConfigDir)) : {};
       projectRoot = settingsDir;
       cfg.projectRoot = projectRoot;
       cfg.sourceDir = path.resolve(projectRoot, toStr(cfg.sourceDir) || './locales');
@@ -61,7 +65,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       const updates = {};
       const sourceDirArg = toStr(cliArgs.sourceDir);
       if (sourceDirArg) {
-        const safe = SecurityUtils.validatePath(sourceDirArg, projectRoot);
+        const safe = SecurityUtils.sanitizePath(sourceDirArg, projectRoot);
         if (!safe) {
           throw new Error('Invalid source directory');
         }
@@ -70,7 +74,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
       const i18nDirArg = toStr(cliArgs.i18nDir);
       if (i18nDirArg) {
-        const safe = SecurityUtils.validatePath(i18nDirArg, projectRoot);
+        const safe = SecurityUtils.sanitizePath(i18nDirArg, projectRoot);
         if (!safe) {
           throw new Error('Invalid i18n directory');
         }
@@ -79,7 +83,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
       const outputDirArg = toStr(cliArgs.outputDir);
       if (outputDirArg) {
-        const safe = SecurityUtils.validatePath(outputDirArg, projectRoot);
+        const safe = SecurityUtils.sanitizePath(outputDirArg, projectRoot);
         if (!safe) {
           throw new Error('Invalid output directory');
         }
@@ -100,7 +104,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
 
       // Auto-fix i18nDir if missing but sourceDir exists
-      if (!fs.existsSync(cfg.i18nDir) && fs.existsSync(cfg.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(cfg.i18nDir, cfg.projectRoot) && SecurityUtils.safeExistsSync(cfg.sourceDir, cfg.projectRoot)) {
         await configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
         cfg.i18nDir = cfg.sourceDir;
       }
@@ -341,22 +345,6 @@ function displayPaths(cfg = {}) {
 // Ensure project has been initialized with source language files
 async function ensureInitialized(cfg) {
   try {
-    // Check if initialization has been marked as complete
-    const configPath = path.join(settingsManager.configDir, 'initialization.json');
-    let initStatus = { initialized: false, version: null, timestamp: null };
-    
-    if (fs.existsSync(configPath)) {
-      try {
-        initStatus = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        // If initialized and version matches current, skip further checks
-        if (initStatus.initialized && initStatus.version === '1.8.3') {
-          return true;
-        }
-      } catch (e) {
-        // Invalid initialization file, proceed with normal check
-      }
-    }
-
     const sourceDir = cfg.sourceDir;
     const sourceLanguage = cfg.sourceLanguage || 'en';
     const langDir = path.join(sourceDir, sourceLanguage);
@@ -364,17 +352,7 @@ async function ensureInitialized(cfg) {
     const hasLanguageFiles = fs.existsSync(langDir) &&
       fs.readdirSync(langDir).some(f => f.endsWith('.json'));
     
-    // If language files exist and we're upgrading, mark as initialized
     if (hasLanguageFiles) {
-      const initDir = path.dirname(configPath);
-      ensureDirectory(initDir);
-      fs.writeFileSync(configPath, JSON.stringify({
-        initialized: true,
-        version: '1.8.3',
-        timestamp: new Date().toISOString(),
-        sourceDir: sourceDir,
-        sourceLanguage: sourceLanguage
-      }, null, 2));
       return true;
     }
 
@@ -383,17 +361,6 @@ async function ensureInitialized(cfg) {
     if (nonInteractive) {
       console.warn(`Missing source language files in ${langDir}. Running initialization...`);
       await initializeSourceFiles(sourceDir, sourceLanguage);
-      
-      // Mark initialization as complete
-      const initDir = path.dirname(configPath);
-      ensureDirectory(initDir);
-      fs.writeFileSync(configPath, JSON.stringify({
-        initialized: true,
-        version: '1.8.3',
-        timestamp: new Date().toISOString(),
-        sourceDir: sourceDir,
-        sourceLanguage: sourceLanguage
-      }, null, 2));
       return true;
     }
 
@@ -403,17 +370,6 @@ async function ensureInitialized(cfg) {
 
     if (answer.trim().toLowerCase().startsWith('y')) {
       await initializeSourceFiles(sourceDir, sourceLanguage);
-      
-      // Mark initialization as complete
-      const initDir = path.dirname(configPath);
-      ensureDirectory(initDir);
-      fs.writeFileSync(configPath, JSON.stringify({
-        initialized: true,
-        version: '1.8.3',
-        timestamp: new Date().toISOString(),
-        sourceDir: sourceDir,
-        sourceLanguage: sourceLanguage
-      }, null, 2));
       return true;
     }
     return false;
@@ -470,28 +426,9 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
     }
   });
   
-  // Create i18ntk-config.json if it doesn't exist
-  const configFile = 'i18ntk-config.json';
-  if (!fs.existsSync(configFile)) {
-    const defaultConfig = {
-      version: "1.8.3",
-      sourceDir: sourceDir,
-      outputDir: "./i18ntk-reports",
-      defaultLanguage: sourceLang,
-      supportedLanguages: [sourceLang, 'es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'],
-      security: {
-        adminPinEnabled: true,
-        sessionTimeout: 1800000,
-        maxFailedAttempts: 3
-      },
-      performance: {
-        mode: "extreme",
-        cacheEnabled: true,
-        batchSize: 1000
-      }
-    };
-    fs.writeFileSync(configFile, JSON.stringify(defaultConfig, null, 2));
-  }
+  // The unified configuration system in settings/i18ntk-config.json
+  // will be used as the single source of truth
+  // No need to create additional config files
 }
 
 

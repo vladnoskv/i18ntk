@@ -1,0 +1,9 @@
+{
+  "name": "react-test-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-i18next": "^11.0.0",
+    "i18next": "^20.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "vue-test-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "vue": "^3.5.1",
+    "vue-i18n": "^11.0.0"
+  }
+}

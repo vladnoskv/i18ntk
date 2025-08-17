@@ -1,15 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { resolvePackagePath, resolveProjectPath, ensureDirectory } = require('./path-utils');
+const SecurityUtils = require('./security');
 
-
-// Determine package directory and user project root
-const packageDir = path.resolve(__dirname, '..');
+// Use dynamic path resolution for package and project directories
+const packageDir = resolvePackagePath('.');
 const userProjectRoot = process.cwd();
 
 // Always use package's internal settings directory to avoid polluting user projects
 // The settings directory should be within the package, not in user space
-const PROJECT_SETTINGS_DIR = path.join(packageDir, 'settings');
+const PROJECT_SETTINGS_DIR = resolvePackagePath('settings');
 const PROJECT_CONFIG_PATH = path.join(PROJECT_SETTINGS_DIR, 'i18ntk-config.json');
 
 // Setup tracking file
@@ -20,7 +21,7 @@ const LEGACY_CONFIG_DIR = path.join(os.homedir(), '.i18ntk');
 const LEGACY_CONFIG_PATH = path.join(LEGACY_CONFIG_DIR, 'i18ntk-config.json');
 
 // Package defaults fallback (read-only) - always points to package internals
-const PACKAGE_SETTINGS_DIR = path.join(packageDir, 'settings');
+const PACKAGE_SETTINGS_DIR = resolvePackagePath('settings');
 const PACKAGE_CONFIG_PATH = path.join(PACKAGE_SETTINGS_DIR, 'i18ntk-config.json');
 
 // Keep projectRoot for path resolution functions
@@ -270,10 +271,36 @@ function normalizePathValue(keyPath, value) {
   return value;
 }
 
+// Sanitize object keys to prevent prototype pollution
+function sanitizeKeys(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return obj;
+  }
+  
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    // Skip dangerous keys that could lead to prototype pollution
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue;
+    }
+    
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      sanitized[key] = sanitizeKeys(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
 // Deep merge that also normalizes path-like leaves based on their key path
 function deepMerge(target, source, basePath = '') {
   if (!target || typeof target !== 'object') target = {};
-  for (const [key, val] of Object.entries(source || {})) {
+  
+  // Sanitize source to prevent prototype pollution
+  const sanitizedSource = sanitizeKeys(source);
+  
+  for (const [key, val] of Object.entries(sanitizedSource || {})) {
     const pathKey = basePath ? `${basePath}.${key}` : key;
     if (val && typeof val === 'object' && !Array.isArray(val)) {
       if (!target[key] || typeof target[key] !== 'object' || Array.isArray(target[key])) {
@@ -310,11 +337,11 @@ function applyEnvOverrides(cfg) {
 
 function tryReadJson(filePath) {
   try {
-    if (!fs.existsSync(filePath)) {
+    if (!SecurityUtils.safeExistsSync(filePath, process.cwd())) {
       return null;
     }
     
-    const data = fs.readFileSync(filePath, 'utf8');
+    const data = SecurityUtils.safeReadFileSync(filePath, 'utf8', process.cwd());
     if (!data || data.trim() === '') {
       console.warn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
       return null;
@@ -327,7 +354,7 @@ function tryReadJson(filePath) {
       // Create a backup of the corrupted file
       const backupPath = `${filePath}.corrupted-${Date.now()}.bak`;
       try {
-        fs.writeFileSync(backupPath, data, 'utf8');
+        SecurityUtils.safeWriteFileSync(backupPath, data, process.cwd());
         console.warn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
       } catch (backupError) {
         console.error(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
@@ -342,7 +369,7 @@ function tryReadJson(filePath) {
 
 async function migrateLegacyIfNeeded(baseCfg) {
   // If project config does not exist but legacy exists, migrate once
-  if (!fs.existsSync(PROJECT_CONFIG_PATH) && fs.existsSync(LEGACY_CONFIG_PATH)) {
+  if (!SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH, process.cwd()) && SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH, process.cwd())) {
     const legacy = tryReadJson(LEGACY_CONFIG_PATH);
     if (legacy && typeof legacy === 'object') {
       const merged = deepMerge(clone(baseCfg), legacy);
@@ -350,9 +377,9 @@ async function migrateLegacyIfNeeded(baseCfg) {
       try { merged.migrationComplete = true; } catch (_) {}
       ensureProjectSettingsDir();
       try {
-        await fs.promises.writeFile(PROJECT_CONFIG_PATH, JSON.stringify(merged, null, 2), 'utf8');
+        SecurityUtils.safeWriteFileSync(PROJECT_CONFIG_PATH, JSON.stringify(merged, null, 2), process.cwd());
         // Best-effort removal of legacy file to prevent future use
-        try { fs.unlinkSync(LEGACY_CONFIG_PATH); } catch (_) {}
+        try { SecurityUtils.safeDeleteSync(LEGACY_CONFIG_PATH, process.cwd()); } catch (_) {}
         // Deprecation notice
         console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to settings/i18ntk-config.json. Please commit the settings/ directory to your project.');
         return merged;
@@ -399,9 +426,37 @@ function loadConfig() {
 
 async function saveConfig(cfg = currentConfig) {
   if (!cfg) return;
-  // Prevent saving to user's project space - use package defaults only
-  // User configuration should be managed through environment variables or CLI args
-  console.warn('[i18ntk] Configuration changes are not persisted - using package defaults');
+  
+  try {
+    // Ensure settings directory exists
+    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+    }
+    
+    // Validate PROJECT_CONFIG_PATH is valid
+    if (!PROJECT_CONFIG_PATH || typeof PROJECT_CONFIG_PATH !== 'string') {
+      throw new Error(`Invalid config path: ${PROJECT_CONFIG_PATH}`);
+    }
+    
+    // Save configuration to project settings using SecurityUtils
+    const configToSave = clone(cfg);
+    const success = SecurityUtils.safeWriteFileSync(
+      PROJECT_CONFIG_PATH, 
+      JSON.stringify(configToSave, null, 2), 
+      PROJECT_SETTINGS_DIR
+    );
+    
+    if (!success) {
+      throw new Error('Failed to write configuration file');
+    }
+    
+    // Update in-memory config
+    currentConfig = configToSave;
+    
+  } catch (error) {
+    console.warn('[i18ntk] Failed to save configuration:', error.message);
+    throw error;
+  }
 }
 
 function getConfig() {
@@ -411,13 +466,21 @@ function getConfig() {
       fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
     }
 
+    // Validate paths are valid strings
+    if (!PROJECT_CONFIG_PATH || typeof PROJECT_CONFIG_PATH !== 'string') {
+      console.warn('⚠️  Invalid PROJECT_CONFIG_PATH:', PROJECT_CONFIG_PATH);
+      const result = resolvePaths(DEFAULT_CONFIG);
+      return result || DEFAULT_CONFIG;
+    }
+
     // Setup is now handled automatically by the unified config system
     // No need to check here - handled by getUnifiedConfig
 
     // Check if config file exists
     if (fs.existsSync(PROJECT_CONFIG_PATH)) {
       const config = JSON.parse(fs.readFileSync(PROJECT_CONFIG_PATH, 'utf8'));
-      return resolvePaths(config);
+      const resolved = resolvePaths(config);
+      return resolved || config; // Fallback to unresolved config if resolvePaths fails
     }
 
     // Check for legacy config for migration
@@ -437,17 +500,20 @@ function getConfig() {
         // Ignore cleanup errors
       }
       
-      return resolvePaths(migratedConfig);
+      const resolved = resolvePaths(migratedConfig);
+      return resolved || migratedConfig;
     }
 
     // Use package defaults for new installation
     console.log('📦 Initializing with default configuration...');
     saveConfig(DEFAULT_CONFIG);
-    return resolvePaths(DEFAULT_CONFIG);
+    const resolved = resolvePaths(DEFAULT_CONFIG);
+    return resolved || DEFAULT_CONFIG;
 
   } catch (error) {
     console.warn('⚠️  Error loading configuration, using defaults:', error.message);
-    return resolvePaths(DEFAULT_CONFIG);
+    const resolved = resolvePaths(DEFAULT_CONFIG);
+    return resolved || DEFAULT_CONFIG;
   }
 }
 
@@ -465,32 +531,56 @@ async function updateConfig(patch) {
 }
 
 async function resetToDefaults() {
+  console.error('DEBUG: Starting resetToDefaults');
+  console.error('DEBUG: PROJECT_CONFIG_PATH:', PROJECT_CONFIG_PATH);
+  console.error('DEBUG: PROJECT_SETTINGS_DIR:', PROJECT_SETTINGS_DIR);
+  console.error('DEBUG: typeof PROJECT_CONFIG_PATH:', typeof PROJECT_CONFIG_PATH);
+  console.error('DEBUG: typeof PROJECT_SETTINGS_DIR:', typeof PROJECT_SETTINGS_DIR);
+  
   currentConfig = clone(DEFAULT_CONFIG);
-  // Don't save to disk - use in-memory config only
+  // Save reset configuration to disk
+  await saveConfig(currentConfig);
+  console.error('DEBUG: Reset completed successfully');
   return currentConfig;
 }
 
-function resolvePaths(cfg = getConfig()) {
+function resolvePaths(cfg) {
+  if (!cfg) {
+    return null; // Return null or throw an error if cfg is not provided
+  }
+  
   const root = path.resolve(projectRoot, cfg.projectRoot || '.');
   const resolved = clone(cfg);
   resolved.projectRoot = root;
+  
   ['sourceDir', 'i18nDir', 'outputDir'].forEach(key => {
-    if (resolved[key]) resolved[key] = path.resolve(root, resolved[key]);
+    if (resolved[key] && typeof resolved[key] === 'string') {
+      resolved[key] = path.resolve(root, resolved[key]);
+    }
   });
+  
   if (resolved.scriptDirectories) {
     resolved.scriptDirectories = { ...resolved.scriptDirectories };
     for (const [k, v] of Object.entries(resolved.scriptDirectories)) {
-      if (v) resolved.scriptDirectories[k] = path.resolve(root, v);
+      if (v && typeof v === 'string') {
+        resolved.scriptDirectories[k] = path.resolve(root, v);
+      }
     }
   }
+  
   return resolved;
 }
 
 function toRelative(absPath) {
-  if (!absPath) return absPath;
-  const rel = path.relative(projectRoot, absPath);
-  const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
-  return normalized;
+  if (!absPath || typeof absPath !== 'string') return absPath;
+  try {
+    const rel = path.relative(projectRoot, absPath);
+    const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
+    return normalized;
+  } catch (error) {
+    console.warn(`Warning: Failed to resolve relative path for: ${absPath}`, error.message);
+    return absPath;
+  }
 }
 
 

@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 function isWindows(p) {
   return /^[a-zA-Z]:\\/.test(p);
@@ -30,4 +31,98 @@ function resolvePaths(base, paths) {
   return paths.map(p => resolver(base, p));
 }
 
-module.exports = { toRelative, resolvePaths };
+/**
+ * Get the package root directory dynamically for npm packages
+ * @returns {string} Package root directory
+ */
+function getPackageRoot() {
+  // Start from current file and traverse up to find package.json
+  let currentDir = __dirname;
+  while (currentDir !== path.parse(currentDir).root) {
+    const packageJsonPath = path.join(currentDir, 'package.json');
+    if (fs.existsSync(packageJsonPath)) {
+      return currentDir;
+    }
+    currentDir = path.dirname(currentDir);
+  }
+  // Fallback to current directory
+  return __dirname;
+}
+
+/**
+ * Resolve a path relative to the project root or package root
+ * @param {string} relativePath - Relative path to resolve
+ * @param {string} [baseDir] - Optional base directory (defaults to process.cwd())
+ * @returns {string} Absolute path
+ */
+function resolveProjectPath(relativePath, baseDir = null) {
+  const base = baseDir || process.cwd();
+  return path.resolve(base, relativePath);
+}
+
+/**
+ * Resolve a path relative to the package installation directory
+ * @param {string} relativePath - Relative path within the package
+ * @returns {string} Absolute path within the package
+ */
+function resolvePackagePath(relativePath) {
+  const packageRoot = getPackageRoot();
+  return path.resolve(packageRoot, relativePath);
+}
+
+/**
+ * Ensure a directory exists, creating it if necessary
+ * @param {string} dirPath - Directory path to ensure
+ * @returns {boolean} True if directory exists or was created
+ */
+function ensureDirectory(dirPath) {
+  try {
+    if (!fs.existsSync(dirPath)) {
+      SecurityUtils.safeMkdirSync(dirPath, process.cwd(), { recursive: true });
+    }
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Get the appropriate path separator for the current platform
+ * @returns {string} Path separator
+ */
+function getPathSeparator() {
+  return path.sep;
+}
+
+/**
+ * Normalize a path to use forward slashes consistently
+ * @param {string} filePath - Path to normalize
+ * @returns {string} Normalized path with forward slashes
+ */
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
+/**
+ * Check if a path is within the project directory
+ * @param {string} targetPath - Path to check
+ * @param {string} [projectPath] - Project root path (defaults to process.cwd())
+ * @returns {boolean} True if path is within project
+ */
+function isWithinProject(targetPath, projectPath = null) {
+  const project = projectPath || process.cwd();
+  const relative = path.relative(project, targetPath);
+  return !relative.startsWith('..') && !path.isAbsolute(relative);
+}
+
+module.exports = {
+  toRelative,
+  resolvePaths,
+  getPackageRoot,
+  resolveProjectPath,
+  resolvePackagePath,
+  ensureDirectory,
+  getPathSeparator,
+  normalizePath,
+  isWithinProject
+};

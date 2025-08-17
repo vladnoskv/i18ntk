@@ -1,6 +1,7 @@
 // utils/i18n-helper.js
 const path = require('path');
 const fs = require('fs');
+const SecurityUtils = require('./security');
 
 // Helper functions for OS-agnostic path handling
 function toPosix(p) { return String(p).replace(/\\/g, '/'); }
@@ -21,7 +22,10 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  const raw = fs.readFileSync(file, 'utf8');
+  const raw = SecurityUtils.safeReadFileSync(file, process.cwd(), 'utf8');
+  if (raw === null) {
+    throw new Error(`Failed to read file: ${file}`);
+  }
   return JSON.parse(stripBOMAndComments(raw));
 }
 
@@ -43,7 +47,8 @@ function resolveLocalesDirs() {
       try {
         const normalized = path.normalize(path.resolve(dir.trim()));
 
-        if (fs.existsSync(normalized) && fs.statSync(normalized).isDirectory()) {
+        const stat = SecurityUtils.safeStatSync(normalized, process.cwd());
+        if (stat && stat.isDirectory()) {
           dirs.push(normalized);
         }
       } catch {
@@ -89,18 +94,14 @@ function findLocaleFilesAllDirs(lang) {
   for (const dir of dirs) {
     for (const candidate of candidatesForLang(dir, lang)) {
       try {
-        if (fs.existsSync(candidate)) {
-          const stats = fs.statSync(candidate);
-          if (stats.isFile() && stats.size > 0) {
-            // Validate file is readable and parseable
-            fs.accessSync(candidate, fs.constants.R_OK);
-            // Quick JSON validation
-            const content = fs.readFileSync(candidate, 'utf8');
-            if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
-              files.push(candidate);
-            } else {
-              errors.push({ file: candidate, error: 'Invalid JSON format' });
-            }
+        const stat = SecurityUtils.safeStatSync(candidate, process.cwd());
+        if (stat && stat.isFile() && stat.size > 0) {
+          // Validate file is readable and parseable
+          const content = SecurityUtils.safeReadFileSync(candidate, process.cwd(), 'utf8');
+          if (content !== null && (content.trim().startsWith('{') || content.trim().startsWith('['))) {
+            files.push(candidate);
+          } else {
+            errors.push({ file: candidate, error: 'Invalid JSON format' });
           }
         }
       } catch (error) {

@@ -112,21 +112,22 @@ class I18nSummaryReporter {
 
   // Get all available languages
   getAvailableLanguages() {
-    if (!fs.existsSync(this.config.sourceDir)) {
+    if (!SecurityUtils.safeExistsSync(this.config.sourceDir, process.cwd())) {
       return [];
     }
 
     // Check for monolith JSON files (en.json, es.json, etc.)
-    const files = fs.readdirSync(this.config.sourceDir);
+    const files = SecurityUtils.safeReaddirSync(this.config.sourceDir, process.cwd()) || [];
     const languages = files
       .filter(file => file.endsWith('.json'))
       .map(file => path.basename(file, '.json'));
     
     // Also check for directory-based structure for backward compatibility
-    const directories = fs.readdirSync(this.config.sourceDir)
+    const directories = (SecurityUtils.safeReaddirSync(this.config.sourceDir, process.cwd()) || [])
       .filter(item => {
         const itemPath = path.join(this.config.sourceDir, item);
-        return fs.statSync(itemPath).isDirectory() && 
+        const stat = SecurityUtils.safeStatSync(itemPath, process.cwd());
+        return stat && stat.isDirectory() && 
                !item.startsWith('.') &&
                item !== 'node_modules';
       });
@@ -138,11 +139,11 @@ class I18nSummaryReporter {
   getLanguageFiles(language) {
     const languageDir = path.join(this.config.sourceDir, language);
     
-    if (!fs.existsSync(languageDir)) {
+    if (!SecurityUtils.safeExistsSync(languageDir, process.cwd())) {
       return [];
     }
 
-    return fs.readdirSync(languageDir)
+    return (SecurityUtils.safeReaddirSync(languageDir, process.cwd()) || [])
       .filter(file => {
         return this.config.supportedExtensions.some(ext => file.endsWith(ext)) &&
                !this.config.excludeFiles.includes(file);
@@ -153,7 +154,8 @@ class I18nSummaryReporter {
   // Get file size information
   getFileSize(filePath) {
     try {
-      const stats = fs.statSync(filePath);
+      const stats = SecurityUtils.safeStatSync(filePath, process.cwd());
+      if (!stats) return { size: 0, sizeFormatted: '0 B', lastModified: null };
       return {
         size: stats.size,
         sizeFormatted: this.formatFileSize(stats.size),
@@ -177,13 +179,18 @@ class I18nSummaryReporter {
   calculateFolderSize(folderPath) {
     let totalSize = 0;
     try {
-      const items = fs.readdirSync(folderPath);
+      const validatedFolderPath = SecurityUtils.validatePath(folderPath, process.cwd());
+      if (!validatedFolderPath) {
+        return 0;
+      }
+      const items = SecurityUtils.safeReaddirSync(validatedFolderPath, process.cwd()) || [];
       for (const item of items) {
-        const itemPath = path.join(folderPath, item);
-        const stats = fs.statSync(itemPath);
-        if (stats.isDirectory()) {
+        const itemPath = SecurityUtils.validatePath(path.join(validatedFolderPath, item), validatedFolderPath);
+        if (!itemPath) continue;
+        const stats = SecurityUtils.safeStatSync(itemPath, process.cwd());
+        if (stats && stats.isDirectory()) {
           totalSize += this.calculateFolderSize(itemPath);
-        } else {
+        } else if (stats) {
           totalSize += stats.size;
         }
       }
@@ -898,8 +905,8 @@ class I18nSummaryReporter {
         
         // Create output directory if it doesn't exist
         const outputDir = path.resolve(process.cwd(), 'i18ntk-reports');
-        if (!fs.existsSync(outputDir)) {
-          fs.mkdirSync(outputDir, { recursive: true });
+        if (!SecurityUtils.safeExistsSync(outputDir, process.cwd())) {
+          SecurityUtils.safeMkdirSync(outputDir, process.cwd());
         }
         
         const detailedReportName = totalDuplicateKeys > 100 
@@ -923,8 +930,8 @@ class I18nSummaryReporter {
       if (args.outputFile) {
         // Always save summary reports to i18ntk-reports
         const reportsDir = path.resolve(process.cwd(), 'i18ntk-reports');
-        if (!fs.existsSync(reportsDir)) {
-          fs.mkdirSync(reportsDir, { recursive: true });
+        if (!SecurityUtils.safeExistsSync(reportsDir, process.cwd())) {
+          SecurityUtils.safeMkdirSync(reportsDir, process.cwd());
         }
         const outputFileName = args.outputFile ? path.basename(args.outputFile) : `summary-report-${new Date().toISOString().slice(0,10)}.txt`;
         const outputPath = path.join(reportsDir, outputFileName);
@@ -943,8 +950,8 @@ class I18nSummaryReporter {
         console.log(t('summary.cleaningUpReportFiles'));
         try {
           const reportsDir = path.join(this.config.sourceDir, 'scripts', 'i18n', 'reports');
-          if (fs.existsSync(reportsDir)) {
-            const files = fs.readdirSync(reportsDir);
+          if (SecurityUtils.safeExistsSync(reportsDir, process.cwd())) {
+            const files = SecurityUtils.safeReaddirSync(reportsDir, process.cwd()) || [];
             const reportFiles = files.filter(file => 
               (file.endsWith('.txt') || file.endsWith('.json') || file.endsWith('.log')) &&
               file !== path.basename(args.outputFile || '')
@@ -953,7 +960,7 @@ class I18nSummaryReporter {
             let deletedCount = 0;
             for (const file of reportFiles) {
               try {
-                fs.unlinkSync(path.join(reportsDir, file));
+                SecurityUtils.safeDeleteSync(path.join(reportsDir, file), process.cwd());
                 deletedCount++;
               } catch (error) {
                 console.log(t('summary.couldNotDelete', { file, error: error.message }));

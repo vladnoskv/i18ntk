@@ -1,83 +1,94 @@
-# Development files and directories
-/dev/
-/benchmarks/
-/settings/backups/
-/.github/
-/docs/
-/reports/
-/backups/
-/EXPORT/
-/test-temp/
-/src/
-/archive/
-.trae
-/utils/ultra-performance-optimizer.js
-test
-test-*
-
-# Debug directory and files
-/scripts/debug/
-scripts/debug/
-
-# Test files
+# Development and test files
+/test/
+.localtest
+/test-*
 *.test.js
 *.spec.js
 **/*.test.js
 **/*.spec.js
-/test-usage-fix.html
+/coverage/
+.nyc_output/
 
-# Development scripts
-scripts/test-runner.js
-scripts/verify-package.js
-scripts/path-utils.test.js
-scripts/reset-defaults.test.js
-scripts/prepublish.js
-
-# Backup files
-/settings/backups
-
-# Editor and OS files
-.DS_Store
-.vscode
-.idea
-Thumbs.db
+# Debug and development
+/.vscode/
+/.idea/
+*.log
 *.swp
 *.swo
 *~
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
-
-# Exclude fpts directory
-/fpts/
-
-# Configuration files
-config.json
-settings.json
+# Environment and configuration
 .env
-.env.local
+.env.*
+!.env.example
+/config/*
+!/config/default.json
 
-# NPM files
-npm
+# Sensitive files
+/settings/
+/backups/
+/security-scan-*.json
+*.encrypted
+*.vault
 
-# Documentation and changelogs (GitHub-only)
+# Documentation (handled by package.json files)
+/docs/
+CHANGELOG.md
 SECURITY.md
 CONTRIBUTING.md
-CHANGELOG.md
-/docs/development
-/docs/debug
-/docs/screenshots
+README.md.bak
+*.md.backup
 
-# Development configuration files
-.commitlintrc.json
-.releaserc.json
+# Build and distribution
+/dist/
+/build/
+*.tsbuildinfo
+
+# Editor directories and files
+.DS_Store
+Thumbs.db
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Sensitive files that should never be published
+utils/missing-key-validator.js
+settings/.i18n-admin-config.json
+settings/admin-config.json
+settings/i18ntk-config.json
+settings/language-config.json
+
+# Redundant utility files (replaced by newer versions)
+utils/colors.js
+utils/prompt.js
+utils/prompt-new.js
+
+# Development tooling
 .husky/
 .nyc_output/
-coverage/
 .cache/
-*.tmp
-*.temp
- 
+.tmp/
+.temp/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Performance and benchmark data
+/benchmarks/
+*.benchmark.js
+
+# Local development
+/.github/
+/reports/
+/EXPORT/
+/test-temp/
+/archive/
+.trae

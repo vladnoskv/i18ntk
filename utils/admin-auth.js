@@ -10,9 +10,8 @@ const configManager = require('./config-manager');
  */
 class AdminAuth {
   constructor() {
-    const SettingsManager = require('../settings/settings-manager');
-    const settingsManager = new SettingsManager();
-    this.configPath = path.join(settingsManager.configDir, '.i18n-admin-config.json');
+    const packageRoot = path.resolve(__dirname, '..');
+    this.configPath = path.join(packageRoot, '.i18n-admin-config.json');
 
     // Get settings from config manager
     const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});

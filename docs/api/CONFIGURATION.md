@@ -78,7 +78,7 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.9.0",
+  "version": "1.10.0",
   "lastUpdated": "2025-08-11",
   "security": {
     "adminMode": false,
@@ -652,7 +652,7 @@ Common configuration errors and solutions:
 
 ### Version Migration
 
-When upgrading to version 1.9.0 (DEPRECATED - use latest version) , the toolkit automatically:
+When upgrading to version 1.10.0, the toolkit automatically:
 
 1. **Backs up** existing configuration files
 2. **Migrates** settings to new format

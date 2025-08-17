@@ -181,8 +181,17 @@ class I18nTextScanner {
       }
       
       // Check for Python files
-      const hasPythonFiles = fs.readdirSync(projectRoot, { recursive: true })
-        .some(file => file.endsWith && file.endsWith('.py'));
+      const validatedProjectRoot = SecurityUtils.validatePath(projectRoot, process.cwd());
+      let hasPythonFiles = false;
+      if (validatedProjectRoot) {
+        try {
+          const files = fs.readdirSync(validatedProjectRoot, { recursive: true });
+          hasPythonFiles = files.some(file => file.endsWith && file.endsWith('.py'));
+        } catch (error) {
+          // Handle directory access issues
+          hasPythonFiles = false;
+        }
+      }
       if (hasPythonFiles) return 'python';
     } catch (error) {
       // Continue to JS frameworks
@@ -418,7 +427,7 @@ class I18nTextScanner {
     const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.html', '.svelte', '.py', '.pyx', '.pyi'];
     
     const scanRecursive = (currentDir) => {
-      const items = fs.readdirSync(currentDir);
+      const items = SecurityUtils.safeReaddirSync(currentDir, process.cwd());
       
       for (const item of items) {
         const fullPath = path.join(currentDir, item);
@@ -453,7 +462,7 @@ class I18nTextScanner {
 
   async generateReport(results, outputDir) {
     if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(outputDir, process.cwd());
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -470,11 +479,11 @@ class I18nTextScanner {
     };
 
     // JSON report
-    fs.writeFileSync(reportFile, JSON.stringify(summary, null, 2));
+    SecurityUtils.safeWriteFileSync(reportFile, JSON.stringify(summary, null, 2), process.cwd());
 
     // Markdown summary
     const mdContent = this.generateMarkdownReport(summary);
-    fs.writeFileSync(summaryFile, mdContent);
+    SecurityUtils.safeWriteFileSync(summaryFile, mdContent, process.cwd());
 
     return { reportFile, summaryFile, summary };
   }

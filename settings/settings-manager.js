@@ -6,8 +6,8 @@ const SecurityUtils = require('../utils/security');
 
 class SettingsManager {
     constructor() {
-        // Use project-scoped settings directory
-        this.configDir = path.resolve(process.cwd(), 'settings');
+        // Use package settings directory
+        this.configDir = path.resolve(__dirname, '..');
         this.configFile = path.join(this.configDir, 'i18ntk-config.json');
         this.backupDir = path.join(this.configDir, 'backups');
         
@@ -377,12 +377,18 @@ class SettingsManager {
         }
         
         try {
-            if (!fs.existsSync(this.configDir)) {
-                fs.mkdirSync(this.configDir, { recursive: true });
+            console.log('DEBUG: configDir =', this.configDir);
+            console.log('DEBUG: configFile =', this.configFile);
+            console.log('DEBUG: backupDir =', this.backupDir);
+            console.log('DEBUG: process.cwd() =', process.cwd());
+            
+            if (!SecurityUtils.safeExistsSync(this.configDir, process.cwd())) {
+                SecurityUtils.safeMkdirSync(this.configDir, { recursive: true }, process.cwd());
             }
             
             const content = JSON.stringify(this.settings, null, 4);
-            fs.writeFileSync(this.configFile, content, 'utf8');
+            console.log('DEBUG: About to write to:', this.configFile);
+            SecurityUtils.safeWriteFileSync(this.configFile, content, process.cwd());
             
             // Create backup if enabled
             if (this.settings.backup?.enabled) {
@@ -392,6 +398,7 @@ class SettingsManager {
             console.log('Settings saved successfully');
         } catch (error) {
             console.error('Error saving settings:', error.message);
+            console.error('Error stack:', error.stack);
         }
     }
 
@@ -400,14 +407,17 @@ class SettingsManager {
      */
     createBackup() {
         try {
-            if (!fs.existsSync(this.backupDir)) {
-                fs.mkdirSync(this.backupDir, { recursive: true });
+            if (!SecurityUtils.safeExistsSync(this.backupDir, process.cwd())) {
+                SecurityUtils.safeMkdirSync(this.backupDir, { recursive: true }, process.cwd());
             }
             
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupFile = path.join(this.backupDir, `config-${timestamp}.json`);
             
-            fs.copyFileSync(this.configFile, backupFile);
+            const configContent = SecurityUtils.safeReadFileSync(this.configFile, process.cwd());
+            if (configContent) {
+                SecurityUtils.safeWriteFileSync(backupFile, configContent, process.cwd());
+            }
             
             // Clean old backups
             this.cleanupOldBackups();
@@ -421,19 +431,24 @@ class SettingsManager {
      */
     cleanupOldBackups() {
         try {
-            const files = fs.readdirSync(this.backupDir)
+            const files = SecurityUtils.safeReaddirSync(this.backupDir, process.cwd())
                 .filter(file => file.startsWith('config-') && file.endsWith('.json'))
-                .map(file => ({
-                    name: file,
-                    path: path.join(this.backupDir, file),
-                    mtime: fs.statSync(path.join(this.backupDir, file)).mtime
-                }))
+                .map(file => {
+                    const filePath = path.join(this.backupDir, file);
+                    const stat = SecurityUtils.safeStatSync(filePath, process.cwd());
+                    return {
+                        name: file,
+                        path: filePath,
+                        mtime: stat ? stat.mtime : new Date(0)
+                    };
+                })
+                .filter(file => file.mtime.getTime() > 0)
                 .sort((a, b) => b.mtime - a.mtime);
             
             const maxBackups = this.settings.backup?.maxBackups || 10;
             if (files.length > maxBackups) {
                 files.slice(maxBackups).forEach(file => {
-                    fs.unlinkSync(file.path);
+                    SecurityUtils.safeDeleteSync(file.path, process.cwd());
                 });
             }
         } catch (error) {

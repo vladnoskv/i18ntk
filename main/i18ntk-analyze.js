@@ -135,31 +135,76 @@ class I18nAnalyzer {
 
   // Get all available languages
   getAvailableLanguages() {
-    if (!fs.existsSync(this.sourceDir)) {
+    if (!this.sourceDir) {
+      throw new Error('Source directory not configured');
+    }
+    
+    const validatedSourceDir = SecurityUtils.sanitizePath(this.sourceDir);
+    if (!validatedSourceDir || !fs.existsSync(validatedSourceDir)) {
       throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
-    return fs.readdirSync(this.sourceDir)
+    return SecurityUtils.safeReaddirSync(validatedSourceDir, this.sourceDir)
       .filter(item => {
-        const itemPath = path.join(this.sourceDir, item);
-        return fs.statSync(itemPath).isDirectory() && item !== this.config.sourceLanguage;
+        const itemPath = path.join(validatedSourceDir, item);
+        const validatedItemPath = SecurityUtils.sanitizePath(itemPath, validatedSourceDir);
+        if (!validatedItemPath) return false;
+        
+        try {
+          return fs.statSync(validatedItemPath).isDirectory() && item !== this.config.sourceLanguage;
+        } catch (error) {
+          console.warn(`Skipping inaccessible directory: ${item}`);
+          return false;
+        }
       });
   }
 
   // Get all JSON files from a language directory
   getLanguageFiles(language) {
-    const languageDir = path.join(this.sourceDir, language);
-    
-    const validatedPath = SecurityUtils.validatePath(languageDir, this.sourceDir);
-    if (!validatedPath || !fs.existsSync(validatedPath)) {
+    if (!this.sourceDir) {
+      console.warn('Source directory not set');
       return [];
     }
     
-    return fs.readdirSync(validatedPath)
-      .filter(file => {
-        return file.endsWith('.json') && 
-               !this.config.excludeFiles.includes(file);
-      });
+    const languageDir = path.resolve(this.sourceDir, language);
+    
+    try {
+      // Ensure the path is within the source directory for security
+      const validatedPath = SecurityUtils.sanitizePath(languageDir, this.sourceDir);
+      if (!validatedPath || !fs.existsSync(validatedPath)) {
+        console.warn(`Language directory not found or invalid: ${languageDir}`);
+        return [];
+      }
+      
+      // Safely read directory contents using SecurityUtils
+      const files = SecurityUtils.safeReaddirSync(validatedPath, this.sourceDir).filter(file => {
+        const filePath = path.join(validatedPath, file);
+        return SecurityUtils.sanitizePath(filePath, this.sourceDir) !== null;
+      })
+        .filter(file => {
+          // Skip hidden files and non-JSON files
+          if (file.startsWith('.') || !file.endsWith('.json')) {
+            return false;
+          }
+          
+          // Check against exclude patterns
+          return !(this.config.excludeFiles || []).some(pattern => {
+            if (typeof pattern === 'string') {
+              return file === pattern || file.endsWith(path.sep + pattern);
+            }
+            if (pattern instanceof RegExp) {
+              return pattern.test(file);
+            }
+            return false;
+          });
+        });
+      
+      return files;
+      
+    } catch (error) {
+      console.error(`Error reading language directory ${languageDir}:`, error.message);
+      return [];
+    }
   }
 
   // Get all keys recursively from an object
@@ -334,14 +379,38 @@ class I18nAnalyzer {
       const sourceFullPath = path.join(this.sourceDir, sourceFilePath);
       const targetFullPath = path.join(this.sourceDir, targetFilePath);
       
-      if (!fs.existsSync(sourceFullPath)) {
+      // Validate source file path
+      const validatedSourcePath = SecurityUtils.sanitizePath(sourceFullPath, this.sourceDir);
+      if (!validatedSourcePath) {
+        analysis.files[fileName] = {
+          error: `Invalid source file path: ${sourceFullPath}`
+        };
+        continue;
+      }
+      
+      // Validate target file path
+      const validatedTargetPath = SecurityUtils.sanitizePath(targetFullPath, this.sourceDir);
+      if (!validatedTargetPath) {
+        analysis.files[fileName] = {
+          error: `Invalid target file path: ${targetFullPath}`
+        };
+        continue;
+      }
+      
+      if (!fs.existsSync(validatedSourcePath)) {
         continue;
       }
       
       let sourceContent, targetContent;
       
       try {
-        const sourceFileContent = fs.readFileSync(sourceFullPath, 'utf8');
+        const sourceFileContent = SecurityUtils.safeReadFileSync(validatedSourcePath, this.sourceDir, 'utf8');
+        if (!sourceFileContent) {
+          analysis.files[fileName] = {
+            error: `Failed to read source file: ${validatedSourcePath}`
+          };
+          continue;
+        }
         sourceContent = JSON.parse(sourceFileContent);
       } catch (error) {
         analysis.files[fileName] = {
@@ -350,7 +419,7 @@ class I18nAnalyzer {
         continue;
       }
       
-      if (!fs.existsSync(targetFullPath)) {
+      if (!fs.existsSync(validatedTargetPath)) {
         analysis.files[fileName] = {
           status: 'missing',
           sourceKeys: this.getAllKeys(sourceContent).size
@@ -359,7 +428,13 @@ class I18nAnalyzer {
       }
       
 try {
-    const targetFileContent = fs.readFileSync(targetFullPath, 'utf8');
+    const targetFileContent = SecurityUtils.safeReadFileSync(validatedTargetPath, this.sourceDir, 'utf8');
+    if (!targetFileContent) {
+      analysis.files[fileName] = {
+        error: `Failed to read target file: ${validatedTargetPath}`
+      };
+      continue;
+    }
     const parsed = JSON.parse(targetFileContent);
 
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
@@ -500,21 +575,89 @@ try {
     return report;
   }
 
-  // Save report to file
+  // Save analysis report to a file
   async saveReport(language, report) {
-    const reportPath = path.join(this.outputDir, `analysis-${language}.txt`);
-    const validatedPath = SecurityUtils.validatePath(reportPath, this.outputDir);
-    
-    if (!validatedPath) {
-      throw new Error(t('analyze.invalidReportFilePath') || 'Invalid report file path');
+    try {
+      // Ensure we have a valid output directory
+      if (!this.outputDir) {
+        this.outputDir = path.join(process.cwd(), 'i18n-reports');
+        console.warn(`No output directory specified, using default: ${this.outputDir}`);
+      }
+      
+      // Ensure the output directory exists
+      const safeOutputDir = SecurityUtils.safeMkdirSync(this.outputDir, process.cwd());
+      if (!safeOutputDir) {
+        console.error(`Invalid output directory: ${this.outputDir} - path traversal detected`);
+        return null;
+      }
+      
+      // Validate the output directory is within the project
+      const validatedOutputDir = SecurityUtils.sanitizePath(this.outputDir, process.cwd());
+      if (!validatedOutputDir) {
+        console.error(`Invalid output directory: ${this.outputDir} is outside project root`);
+        return null;
+      }
+      
+      // Create a safe filename
+      const safeLanguage = language.replace(/[^\w-]/g, '_');
+      const reportPath = path.resolve(validatedOutputDir, `translation-report-${safeLanguage}.json`);
+      
+      // Ensure the final path is still within the output directory
+      if (!reportPath.startsWith(validatedOutputDir)) {
+        console.error('Invalid report path detected, potential directory traversal attack');
+        return null;
+      }
+      
+      // Always use safeWriteFile if available, otherwise use safe path validation
+        if (SecurityUtils.safeWriteFile) {
+          const success = await SecurityUtils.safeWriteFile(reportPath, report, this.outputDir);
+          if (!success) {
+            throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
+          }
+        } else {
+          // Use secure file write
+          const success = SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), this.outputDir);
+          if (!success) {
+            throw new Error('Failed to write report file securely');
+          }
+        }
+      
+      console.log(`Report saved to: ${reportPath}`);
+      return reportPath;
+      
+    } catch (error) {
+      console.error(`Failed to save report for ${language}:`, error.message);
+      return null;
     }
-    
-    const success = await SecurityUtils.safeWriteFile(validatedPath, report, this.outputDir);
-    if (!success) {
-      throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
+  }
+
+  // Sanitize and validate path to prevent directory traversal
+  sanitizePath(inputPath, baseDir) {
+    try {
+      // Resolve to absolute path
+      const absolutePath = path.resolve(baseDir, inputPath);
+      
+      // Normalize to remove redundant segments
+      const normalizedPath = path.normalize(absolutePath);
+      
+      // Ensure the path is within the base directory
+      const relativePath = path.relative(baseDir, normalizedPath);
+      
+      // Check for path traversal attempts
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+        return null;
+      }
+      
+      // Final validation: ensure path starts with base directory
+      if (!normalizedPath.startsWith(path.resolve(baseDir))) {
+        return null;
+      }
+      
+      return normalizedPath;
+    } catch (error) {
+      console.error('Path sanitization error:', error.message);
+      return null;
     }
-    
-    return validatedPath;
   }
 
   // Show help message
@@ -537,8 +680,9 @@ try {
       }
       
       // Ensure output directory exists
-      if (!fs.existsSync(this.outputDir)) {
-        fs.mkdirSync(this.outputDir, { recursive: true });
+      const safeOutputDir = SecurityUtils.safeMkdirSync(this.outputDir, process.cwd());
+      if (!safeOutputDir) {
+        throw new Error(`Invalid output directory: ${this.outputDir} - path traversal detected`);
       }
       
       const languages = this.getAvailableLanguages();
@@ -691,8 +835,8 @@ try {
         if (isRequired) {
           console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'analyze translations' }));
           const cliHelper = require('../utils/cli-helper');
-        const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
-        const isValid = await this.adminAuth.verifyPin(pin);
+          const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
+          const isValid = await adminAuth.verifyPin(pin);
           
           if (!isValid) {
             console.log(t('adminCli.invalidPin'));
@@ -784,7 +928,11 @@ async function analyzeTranslations(datasetPath) {
   analyzer.outputDir = './reports';
   
   // Load and analyze the dataset
-  const dataset = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
+  const content = SecurityUtils.safeReadFileSync(datasetPath, process.cwd());
+  if (!content) {
+    throw new Error(`Failed to read dataset file: ${datasetPath}`);
+  }
+  const dataset = JSON.parse(content);
   
   // Simulate analysis processing
   const languages = Object.keys(dataset).filter(lang => lang !== 'en');

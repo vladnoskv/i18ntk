@@ -9,22 +9,16 @@
 
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
+const { blue, yellow, gray, cyan, green, red } = require('./colors-new');
+const configManager = require('./config-manager');
 
 class SetupEnforcer {
     static _setupCheckInProgress = false;
     static _setupCheckPromise = null;
 
     static checkSetupComplete() {
-        const configPath = path.join(process.cwd(), 'settings', 'i18ntk-config.json');
-        
-        if (!fs.existsSync(configPath)) {
-            this.handleMissingSetup();
-            return;
-        }
-
         try {
-            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const config = configManager.getConfig();
             
             // Check if config has required fields
             if (!config.version || !config.sourceDir || !config.detectedFramework) {
@@ -34,15 +28,15 @@ class SetupEnforcer {
 
             return true;
         } catch (error) {
-            this.handleInvalidConfig();
+            this.handleMissingSetup();
             return;
         }
     }
 
-    static handleMissingSetup() {
-        console.log(chalk.blue('🔧 Setup Required'));
-        console.log(chalk.yellow('Welcome to i18n Toolkit! This appears to be your first time running the toolkit.'));
-        console.log(chalk.gray('Setup is required to configure your project for internationalization management.'));
+    static async handleMissingSetup() {
+        console.log(blue('🔧 Setup Required'));
+        console.log(yellow('Welcome to i18n Toolkit! This appears to be your first time running the toolkit.'));
+        console.log(gray('Setup is required to configure your project for internationalization management.'));
         console.log('');
         
         // Use readline for interactive prompt
@@ -53,55 +47,33 @@ class SetupEnforcer {
         });
         
         return new Promise((resolve, reject) => {
-            rl.question(chalk.cyan('Would you like to run setup now? (Y/n): '), async (answer) => {
+            rl.question(cyan('Would you like to run setup now? (Y/n): '), async (answer) => {
                 rl.close();
                 
                 if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
-                    console.log(chalk.gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
+                    console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                     process.exit(0);
                 }
                 
-                console.log(chalk.green('🚀 Running setup...'));
+                console.log(green('🚀 Running setup...'));
                 
                 try {
-                    // Import and run setup dynamically
-                    const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (fs.existsSync(setupPath)) {
-                        const { spawn } = require('child_process');
-                        const setupProcess = spawn('node', [setupPath], {
-                            stdio: 'inherit',
-                            cwd: process.cwd()
-                        });
-                        
-                        setupProcess.on('close', (code) => {
-                            if (code === 0) {
-                                console.log(chalk.green('✅ Setup completed successfully!'));
-                                console.log(chalk.gray('You can now run your original command.'));
-                                resolve(true);
-                            } else {
-                                console.error(chalk.red('❌ Setup failed. Please try running setup manually:'));
-                                console.error(chalk.cyan('   npm run i18ntk-setup'));
-                                process.exit(1);
-                            }
-                        });
-                    } else {
-                        console.error(chalk.red('❌ Setup script not found. Please run:'));
-                        console.error(chalk.cyan('   npm run i18ntk-setup'));
-                        process.exit(1);
-                    }
+                    await this.runSetup();
+                    resolve(true);
                 } catch (error) {
-                    console.error(chalk.red('❌ Error running setup:'), error.message);
-                    console.error(chalk.cyan('   npm run i18ntk-setup'));
+                    console.error(red('❌ Setup failed:'), error.message);
+                    console.error(cyan('   Please try running setup manually:'));
+                    console.error(cyan('   npm run i18ntk-setup'));
                     process.exit(1);
                 }
             });
         });
     }
 
-    static handleIncompleteSetup() {
-        console.log(chalk.blue('🔧 Incomplete Setup'));
-        console.log(chalk.yellow('Your setup appears to be incomplete or outdated.'));
-        console.log(chalk.gray('This might happen after updating to a new version.'));
+    static async handleIncompleteSetup() {
+        console.log(blue('🔧 Incomplete Setup'));
+        console.log(yellow('Your setup appears to be incomplete or outdated.'));
+        console.log(gray('This might happen after updating to a new version.'));
         console.log('');
         
         const readline = require('readline');
@@ -111,52 +83,33 @@ class SetupEnforcer {
         });
         
         return new Promise((resolve, reject) => {
-            rl.question(chalk.cyan('Would you like to re-run setup? (Y/n): '), async (answer) => {
+            rl.question(cyan('Would you like to re-run setup? (Y/n): '), async (answer) => {
                 rl.close();
                 
                 if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
-                    console.log(chalk.gray('Operation cancelled.'));
+                    console.log(gray('Operation cancelled.'));
                     process.exit(0);
                 }
                 
-                console.log(chalk.green('🚀 Running setup...'));
+                console.log(green('🚀 Running setup...'));
                 
                 try {
-                    const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (fs.existsSync(setupPath)) {
-                        const { spawn } = require('child_process');
-                        const setupProcess = spawn('node', [setupPath], {
-                            stdio: 'inherit',
-                            cwd: process.cwd()
-                        });
-                        
-                        setupProcess.on('close', (code) => {
-                            if (code === 0) {
-                                console.log(chalk.green('✅ Setup completed successfully!'));
-                                resolve(true);
-                            } else {
-                                console.error(chalk.red('❌ Setup failed. Please try running setup manually:'));
-                                console.error(chalk.cyan('   npm run i18ntk-setup'));
-                                process.exit(1);
-                            }
-                        });
-                    } else {
-                        console.error(chalk.red('❌ Setup script not found. Please run:'));
-                        console.error(chalk.cyan('   npm run i18ntk-setup'));
-                        process.exit(1);
-                    }
+                    await this.runSetup();
+                    resolve(true);
                 } catch (error) {
-                    console.error(chalk.red('❌ Error running setup:'), error.message);
+                    console.error(red('❌ Setup failed:'), error.message);
+                    console.error(cyan('   Please try running setup manually:'));
+                    console.error(cyan('   npm run i18ntk-setup'));
                     process.exit(1);
                 }
             });
         });
     }
 
-    static handleInvalidConfig() {
-        console.log(chalk.blue('🔧 Invalid Configuration'));
-        console.log(chalk.yellow('Your configuration file appears to be corrupted or invalid.'));
-        console.log(chalk.gray('This might happen due to file corruption or manual editing.'));
+    static async handleInvalidConfig() {
+        console.log(blue('🔧 Invalid Configuration'));
+        console.log(yellow('Your configuration file appears to be corrupted or invalid.'));
+        console.log(gray('This might happen due to file corruption or manual editing.'));
         console.log('');
         
         const readline = require('readline');
@@ -166,49 +119,54 @@ class SetupEnforcer {
         });
         
         return new Promise((resolve, reject) => {
-            rl.question(chalk.cyan('Would you like to re-run setup to fix this? (Y/n): '), async (answer) => {
+            rl.question(cyan('Would you like to re-run setup to fix this? (Y/n): '), async (answer) => {
                 rl.close();
                 
                 if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
-                    console.log(chalk.gray('Operation cancelled.'));
+                    console.log(gray('Operation cancelled.'));
                     process.exit(0);
                 }
                 
-                console.log(chalk.green('🚀 Running setup...'));
+                console.log(green('🚀 Running setup...'));
                 
                 try {
-                    const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (fs.existsSync(setupPath)) {
-                        const { spawn } = require('child_process');
-                        const setupProcess = spawn('node', [setupPath], {
-                            stdio: 'inherit',
-                            cwd: process.cwd()
-                        });
-                        
-                        setupProcess.on('close', (code) => {
-                            if (code === 0) {
-                                console.log(chalk.green('✅ Setup completed successfully!'));
-                                resolve(true);
-                            } else {
-                                console.error(chalk.red('❌ Setup failed. Please try running setup manually:'));
-                                console.error(chalk.cyan('   npm run i18ntk-setup'));
-                                process.exit(1);
-                            }
-                        });
-                    } else {
-                        console.error(chalk.red('❌ Setup script not found. Please run:'));
-                        console.error(chalk.cyan('   npm run i18ntk-setup'));
-                        process.exit(1);
-                    }
+                    await this.runSetup();
+                    resolve(true);
                 } catch (error) {
-                    console.error(chalk.red('❌ Error running setup:'), error.message);
+                    console.error(red('❌ Setup failed:'), error.message);
                     process.exit(1);
                 }
             });
         });
     }
 
-    static checkSetupCompleteAsync() {
+    static async runSetup() {
+        const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
+        if (!fs.existsSync(setupPath)) {
+            throw new Error('Setup script not found');
+        }
+
+        const setup = require(setupPath);
+        
+        // Handle different export patterns
+        if (typeof setup === 'function' && setup.name === 'I18nSetupManager') {
+            const setupManager = new setup();
+            await setupManager.setup();
+        } else if (typeof setup === 'function') {
+            await setup();
+        } else if (setup && typeof setup.run === 'function') {
+            await setup.run();
+        } else if (setup && typeof setup.prototype.setup === 'function') {
+            const setupManager = new setup();
+            await setupManager.setup();
+        } else {
+            throw new Error('Invalid setup export pattern');
+        }
+        
+        console.log(green('✅ Setup completed successfully!'));
+    }
+
+    static async checkSetupCompleteAsync() {
         // Return existing promise if already in progress
         if (SetupEnforcer._setupCheckInProgress && SetupEnforcer._setupCheckPromise) {
             return SetupEnforcer._setupCheckPromise;
@@ -218,27 +176,14 @@ class SetupEnforcer {
         SetupEnforcer._setupCheckInProgress = true;
         SetupEnforcer._setupCheckPromise = new Promise(async (resolve, reject) => {
             try {
-                const configPath = path.join(process.cwd(), 'settings', 'i18ntk-config.json');
-                
-                if (!fs.existsSync(configPath)) {
-                    await this.handleMissingSetup();
-                    // After setup is done, re-check the config
-                    if (fs.existsSync(configPath)) {
-                        resolve(true);
-                    } else {
-                        process.exit(0);
-                    }
-                    return;
-                }
-
                 try {
-                    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                    const config = configManager.getConfig();
                     
                     // Check if config has required fields
                     if (!config.version || !config.sourceDir || !config.detectedFramework) {
-                        await this.handleIncompleteSetup();
+                        await SetupEnforcer.handleIncompleteSetup();
                         // After setup is done, re-check the config
-                        const newConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                        const newConfig = configManager.getConfig();
                         if (newConfig.version && newConfig.sourceDir && newConfig.detectedFramework) {
                             resolve(true);
                         } else {
@@ -249,10 +194,10 @@ class SetupEnforcer {
 
                     resolve(true);
                 } catch (error) {
-                    await this.handleInvalidConfig();
+                    await SetupEnforcer.handleMissingSetup();
                     // After setup is done, re-check the config
                     try {
-                        const newConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                        const newConfig = configManager.getConfig();
                         if (newConfig.version && newConfig.sourceDir && newConfig.detectedFramework) {
                             resolve(true);
                         } else {
@@ -266,6 +211,7 @@ class SetupEnforcer {
                 reject(error);
             } finally {
                 SetupEnforcer._setupCheckInProgress = false;
+                SetupEnforcer._setupCheckPromise = null;
             }
         });
 

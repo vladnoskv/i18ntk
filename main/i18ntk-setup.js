@@ -12,6 +12,8 @@ const fs = require('fs');
 const path = require('path');
 
 const SettingsManager = require('../settings/settings-manager');
+const { pathConfig } = require('../utils/path-config');
+const SecurityUtils = require('../utils/security');
 
 class I18nSetupManager {
     constructor() {
@@ -61,12 +63,12 @@ class I18nSetupManager {
     async detectEnvironment() {
         console.log('📍 Detecting environment...');
         
-        const packageJsonPath = path.join(process.cwd(), 'package.json');
-        const pyprojectPath = path.join(process.cwd(), 'pyproject.toml');
-        const requirementsPath = path.join(process.cwd(), 'requirements.txt');
-        const goModPath = path.join(process.cwd(), 'go.mod');
-        const pomPath = path.join(process.cwd(), 'pom.xml');
-        const composerPath = path.join(process.cwd(), 'composer.json');
+        const packageJsonPath = pathConfig.resolveProject('package.json');
+        const pyprojectPath = pathConfig.resolveProject('pyproject.toml');
+        const requirementsPath = pathConfig.resolveProject('requirements.txt');
+        const goModPath = pathConfig.resolveProject('go.mod');
+        const pomPath = pathConfig.resolveProject('pom.xml');
+        const composerPath = pathConfig.resolveProject('composer.json');
 
         if (fs.existsSync(packageJsonPath)) {
             this.config.detectedLanguage = 'javascript';
@@ -94,15 +96,21 @@ class I18nSetupManager {
 
     async detectNodeFramework(packageJsonPath) {
         try {
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8', process.cwd());
+            if (!packageJsonContent) {
+                this.config.detectedFramework = 'generic';
+                return;
+            }
+            
+            const packageJson = JSON.parse(packageJsonContent);
             const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
-            if (deps.react || deps['react-dom']) this.config.detectedFramework = 'react';
-            else if (deps.vue || deps['vue-router']) this.config.detectedFramework = 'vue';
-            else if (deps['@angular/core']) this.config.detectedFramework = 'angular';
-            else if (deps.next) this.config.detectedFramework = 'nextjs';
-            else if (deps.nuxt) this.config.detectedFramework = 'nuxt';
-            else if (deps.svelte) this.config.detectedFramework = 'svelte';
+            if (deps && deps.react || deps && deps['react-dom']) this.config.detectedFramework = 'react';
+            else if (deps && deps.vue || deps && deps['vue-router']) this.config.detectedFramework = 'vue';
+            else if (deps && deps['@angular/core']) this.config.detectedFramework = 'angular';
+            else if (deps && deps.next) this.config.detectedFramework = 'nextjs';
+            else if (deps && deps.nuxt) this.config.detectedFramework = 'nuxt';
+            else if (deps && deps.svelte) this.config.detectedFramework = 'svelte';
             else this.config.detectedFramework = 'generic';
         } catch (error) {
             this.config.detectedFramework = 'generic';
@@ -111,9 +119,9 @@ class I18nSetupManager {
 
     async detectPythonFramework() {
         try {
-            const requirementsPath = path.join(process.cwd(), 'requirements.txt');
-            if (fs.existsSync(requirementsPath)) {
-                const requirements = fs.readFileSync(requirementsPath, 'utf8');
+            const requirementsPath = pathConfig.resolveProject('requirements.txt');
+            if (SecurityUtils.safeExistsSync(requirementsPath, process.cwd())) {
+                const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8', process.cwd());
                 if (requirements.includes('django')) this.config.detectedFramework = 'django';
                 else if (requirements.includes('flask')) this.config.detectedFramework = 'flask';
                 else if (requirements.includes('fastapi')) this.config.detectedFramework = 'fastapi';
@@ -128,7 +136,7 @@ class I18nSetupManager {
 
     async detectJavaFramework(pomPath) {
         try {
-            const pomContent = fs.readFileSync(pomPath, 'utf8');
+            const pomContent = SecurityUtils.safeReadFileSync(pomPath, 'utf8', process.cwd());
             if (pomContent.includes('spring-boot')) this.config.detectedFramework = 'spring-boot';
             else if (pomContent.includes('spring')) this.config.detectedFramework = 'spring';
             else if (pomContent.includes('quarkus')) this.config.detectedFramework = 'quarkus';
@@ -140,12 +148,18 @@ class I18nSetupManager {
 
     async detectPhpFramework(composerPath) {
         try {
-            const composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
-            const deps = composer.require || {};
+            const composerContent = SecurityUtils.safeReadFileSync(composerPath, 'utf8', process.cwd());
+            if (!composerContent) {
+                this.config.detectedFramework = 'generic';
+                return;
+            }
             
-            if (deps['laravel/framework']) this.config.detectedFramework = 'laravel';
-            else if (deps['symfony/framework-bundle']) this.config.detectedFramework = 'symfony';
-            else if (deps['wordpress']) this.config.detectedFramework = 'wordpress';
+            const composer = JSON.parse(composerContent);
+            const deps = composer && composer.require || {};
+            
+            if (deps && deps['laravel/framework']) this.config.detectedFramework = 'laravel';
+            else if (deps && deps['symfony/framework-bundle']) this.config.detectedFramework = 'symfony';
+            else if (deps && deps['wordpress']) this.config.detectedFramework = 'wordpress';
             else this.config.detectedFramework = 'generic';
         } catch (error) {
             this.config.detectedFramework = 'generic';
@@ -216,7 +230,7 @@ class I18nSetupManager {
         ];
 
         for (const dirPath of possiblePaths) {
-            if (fs.existsSync(dirPath)) {
+            if (SecurityUtils.safeExistsSync(dirPath, process.cwd())) {
                 this.config.sourceDir = dirPath;
                 break;
             }
@@ -231,8 +245,8 @@ class I18nSetupManager {
         this.config.prerequisites = {
             nodeVersion: process.version,
             nodeVersionValid: parseInt(process.version.slice(1).split('.')[0]) >= 16,
-            hasPackageJson: fs.existsSync('package.json'),
-            hasLocales: fs.existsSync(this.config.sourceDir),
+            hasPackageJson: SecurityUtils.safeExistsSync('package.json', process.cwd()),
+            hasLocales: SecurityUtils.safeExistsSync(this.config.sourceDir, process.cwd()),
             hasGit: this.checkCommand('git'),
             hasNpm: this.checkCommand('npm'),
             hasPython: this.checkCommand('python3') || this.checkCommand('python'),
@@ -244,13 +258,22 @@ class I18nSetupManager {
         // Check for i18n libraries
         if (this.config.detectedLanguage === 'javascript') {
             const packageJsonPath = path.join(process.cwd(), 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-                const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-                const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
-                
-                this.config.prerequisites.hasI18nLibrary = Object.keys(deps).some(dep => 
-                    this.config.frameworkConfig.i18nLibraries.some(lib => dep.includes(lib))
-                );
+            if (SecurityUtils.safeExistsSync(packageJsonPath, process.cwd())) {
+                const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8', process.cwd());
+                if (packageJsonContent) {
+                    try {
+                        const packageJson = JSON.parse(packageJsonContent);
+                        const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+                        
+                        this.config.prerequisites.hasI18nLibrary = Object.keys(deps || {}).some(dep => 
+                            this.config.frameworkConfig.i18nLibraries.some(lib => dep.includes(lib))
+                        );
+                    } catch (e) {
+                        this.config.prerequisites.hasI18nLibrary = false;
+                    }
+                } else {
+                    this.config.prerequisites.hasI18nLibrary = false;
+                }
             }
         }
 
@@ -273,8 +296,11 @@ class I18nSetupManager {
             for (const ext of extensions) {
                 const fullPath = path.join(dir, command + ext);
                 try {
-                    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
-                        return true;
+                    if (SecurityUtils.safeExistsSync(fullPath, process.cwd())) {
+                        const stats = SecurityUtils.safeStatSync(fullPath, process.cwd());
+                        if (stats && stats.isFile()) {
+                            return true;
+                        }
                     }
                 } catch {
                     // Ignore errors accessing files
@@ -374,7 +400,7 @@ class I18nSetupManager {
         
         // Also save a local copy for user reference
         const reportPath = path.join(process.cwd(), 'i18ntk-setup-report.json');
-        fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+        SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd());
         console.log(`   Setup report saved: ${reportPath}`);
     }
 
@@ -415,4 +441,9 @@ if (require.main === module) {
     setupManager.setup().catch(console.error);
 }
 
+// Export both the class and a run function for direct usage
 module.exports = I18nSetupManager;
+module.exports.run = async function() {
+    const setupManager = new I18nSetupManager();
+    return await setupManager.setup();
+};

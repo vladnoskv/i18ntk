@@ -1,6 +1,7 @@
 {
+  "$schema": "http://json.schemastore.org/package",
   "name": "i18ntk",
-  "version": "1.9.1",
+  "version": "1.10.0",
   "description": "i18ntk (i18n Toolkit) - An ultra-extreme performance i18n internationalization management toolkit with 97% performance improvement, intelligent framework detection, security-first design with PIN protection, and comprehensive translation management capabilities.",
   "keywords": [
     "i18n",
@@ -107,8 +108,9 @@
     "i18ntk-sizing": "main/i18ntk-sizing.js",
     "i18ntk-summary": "main/i18ntk-summary.js",
     "i18ntk-doctor": "main/i18ntk-doctor.js",
-    "i18ntk-fixer": "main/i18ntk-fixer.js",
-    "i18ntk-scanner": "main/i18ntk-scanner.js"
+    "i18ntk-fixer": "./main/i18ntk-fixer.js",
+    "i18ntk-scanner": "./main/i18ntk-scanner.js",
+    "i18ntk-backup": "./main/i18ntk-backup.js"
   },
   "directories": {
     "doc": "docs",
@@ -140,6 +142,7 @@
     "i18ntk-doctor": "node main/i18ntk-doctor.js",
     "i18ntk-fixer": "node main/i18ntk-fixer.js",
     "i18ntk-scanner": "node main/i18ntk-scanner.js",
+    "i18ntk-backup": "node main/i18ntk-backup.js",
     "i18ntk-py": "node main/i18ntk-py.js",
     "i18ntk-js": "node main/i18ntk-js.js",
     "i18ntk-java": "node main/i18ntk-java.js",
@@ -149,25 +152,26 @@
     "full-coverage": "npm run i18ntk-complete && npm run i18ntk-analyze",
     "smoke:pack": "node scripts/smoke-pack.js",
     "prepublishOnly": "npm run smoke:pack",
-    "security:audit": "npm audit --audit-level=moderate",
+    "security:audit": "node utils/security-audit.js --full",
     "security:fix": "npm audit fix",
     "security:check": "node utils/security-check.js",
+    "backup:create": "node main/i18ntk-backup.js create",
+    "backup:restore": "node main/i18ntk-backup.js restore",
+    "backup:list": "node main/i18ntk-backup.js list",
+    "backup:verify": "node main/i18ntk-backup.js verify",
+    "backup:cleanup": "node main/i18ntk-backup.js cleanup",
     "languages:select": "node settings/settings-cli.js",
     "languages:list": "node settings/settings-cli.js --list-languages",
     "languages:status": "node settings/settings-cli.js --language-status"
-  },
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.9.1",
-    "releaseDate": "15/08/2025",
-    "lastUpdated": "15/08/2025",
+    "version": "1.10.0",
+    "releaseDate": "16/08/2025",
+    "lastUpdated": "16/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
@@ -209,7 +213,7 @@
       "1.8.2",
       "1.8.3"
     ],
-    "nextVersion": "1.9.3",
+    "nextVersion": "1.11.0",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -232,6 +236,8 @@
       "laravel": ">=8.0.0"
     }
   },
-  "devDependencies": {
+  "_comment": "This package is zero-dependency and uses only native Node.js modules",
+  "dependencies": {
+    "i18ntk": "file:finaltest/i18ntk-1.10.0.tgz"
   }
 }

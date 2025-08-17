@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 class SecurityCheck {
   constructor() {
@@ -52,7 +53,7 @@ class SecurityCheck {
   async checkDirectory(dir) {
     const dirPath = path.join(process.cwd(), dir);
     
-    if (!fs.existsSync(dirPath)) {
+    if (!SecurityUtils.safeExistsSync(dirPath, process.cwd())) {
       return;
     }
 
@@ -65,7 +66,9 @@ class SecurityCheck {
 
   getAllFiles(dirPath) {
     const files = [];
-    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    const entries = SecurityUtils.safeReaddirSync(dirPath, { withFileTypes: true }, process.cwd());
+    
+    if (!entries) return files;
     
     for (const entry of entries) {
       const fullPath = path.join(dirPath, entry.name);
@@ -81,7 +84,9 @@ class SecurityCheck {
   }
 
   async checkFile(filePath) {
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = SecurityUtils.safeReadFileSync(filePath, 'utf8', process.cwd());
+    if (!content) return;
+    
     const lines = content.split('\n');
     
     for (let i = 0; i < lines.length; i++) {

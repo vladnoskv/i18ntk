@@ -13,7 +13,7 @@ const SecurityUtils = require(path.join(__dirname, '../utils/security.js'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper.js'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper.js'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { parseArgs } = require('util');
 
 (async () => {
   try {
@@ -83,25 +83,42 @@ class I18ntkJavaScriptCommand {
   async init() {
     console.log('🔧 Initializing i18ntk JavaScript/TypeScript command...');
     
-    program
-      .name('i18ntk-js')
-      .description('i18ntk specialized for JavaScript and TypeScript applications')
-      .version('1.9.1')
-      .option('-s, --source-dir <dir>', 'Source directory to scan', './src')
-      .option('-l, --locales-dir <dir>', 'Locales directory', './locales')
-      .option('--framework <type>', 'JavaScript framework type', 'auto')
-      .option('--typescript', 'Include TypeScript files')
-      .option('--react', 'Force React mode')
-      .option('--vue', 'Force Vue mode')
-      .option('--angular', 'Force Angular mode')
-      .option('--node', 'Force Node.js mode')
-      .option('--dry-run', 'Show what would be done without making changes')
-      .option('--debug', 'Enable debug output')
-      .option('--extract-only', 'Only extract translations, don\'t analyze')
-      .option('--include-tests', 'Include test files in analysis')
-      .parse();
+    const args = process.argv.slice(2);
+    const options = {
+      'source-dir': { type: 'string', default: './src' },
+      'locales-dir': { type: 'string', default: './locales' },
+      'framework': { type: 'string', default: 'auto' },
+      'typescript': { type: 'boolean', default: false },
+      'react': { type: 'boolean', default: false },
+      'vue': { type: 'boolean', default: false },
+      'angular': { type: 'boolean', default: false },
+      'node': { type: 'boolean', default: false },
+      'dry-run': { type: 'boolean', default: false },
+      'debug': { type: 'boolean', default: false },
+      'extract-only': { type: 'boolean', default: false },
+      'include-tests': { type: 'boolean', default: false },
+      'help': { type: 'boolean', default: false },
+      'version': { type: 'boolean', default: false }
+    };
 
-    this.options = program.opts();
+    try {
+      const { values } = parseArgs({ args, options, allowPositionals: true });
+      this.options = values;
+    } catch (error) {
+      console.error('Error parsing arguments:', error.message);
+      this.showHelp();
+      process.exit(1);
+    }
+
+    if (this.options.help) {
+      this.showHelp();
+      process.exit(0);
+    }
+
+    if (this.options.version) {
+      console.log('i18ntk-js v1.10.0');
+      process.exit(0);
+    }
     this.sourceDir = path.resolve(this.options.sourceDir);
     this.localesDir = path.resolve(this.options.localesDir);
     
@@ -178,6 +195,36 @@ class I18ntkJavaScriptCommand {
 
     console.log(`✅ Detected framework: ${framework}`);
     return framework;
+  }
+
+  showHelp() {
+    console.log(`
+🔧 i18ntk JavaScript/TypeScript Command
+=====================================
+
+Usage: node i18ntk-js.js [options]
+
+Options:
+  -s, --source-dir <dir>     Source directory to scan (default: ./src)
+  -l, --locales-dir <dir>    Locales directory (default: ./locales)
+  --framework <type>         JavaScript framework type (default: auto)
+  --typescript               Include TypeScript files
+  --react                    Force React mode
+  --vue                      Force Vue mode
+  --angular                  Force Angular mode
+  --node                     Force Node.js mode
+  --dry-run                  Show what would be done without making changes
+  --debug                    Enable debug output
+  --extract-only             Only extract translations, don't analyze
+  --include-tests            Include test files in analysis
+  --help                     Show this help message
+  --version                  Show version information
+
+Examples:
+  node i18ntk-js.js --source-dir ./src --locales-dir ./locales
+  node i18ntk-js.js --react --debug
+  node i18ntk-js.js --vue --dry-run
+`);
   }
 
   findFiles(pattern, extensions = []) {
@@ -460,7 +507,7 @@ class I18ntkJavaScriptCommand {
       console.log(`📊 Would create report: ${reportPath}`);
       console.log('📋 Report contents:', JSON.stringify(report, null, 2));
     } else {
-      fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+      SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), this.sourceDir);
       console.log(`📊 Report saved: ${reportPath}`);
     }
 

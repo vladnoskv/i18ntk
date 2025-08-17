@@ -13,9 +13,9 @@ const path = require('path');
 const SecurityUtils = require(path.join(__dirname, '../utils/security'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper'));
-const I18ntkCore = require(path.join(__dirname, '../framework/i18ntk-core.js'));
+
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { parseArgs } = require('util');
 
 (async () => {
   try {
@@ -43,22 +43,39 @@ class I18ntkPythonCommand {
   async init() {
     console.log('🔧 Initializing i18ntk Python command...');
     
-    program
-      .name('i18ntk-py')
-      .description('i18ntk specialized for Python applications')
-      .version('1.9.1')
-      .option('-s, --source-dir <dir>', 'Source directory to scan', './')
-      .option('-l, --locales-dir <dir>', 'Locales directory', './locales')
-      .option('--framework <type>', 'Python framework type', 'auto')
-      .option('--dry-run', 'Show what would be done without making changes')
-      .option('--debug', 'Enable debug output')
-      .option('--extract-only', 'Only extract translations, don\'t analyze')
-      .option('--django', 'Force Django mode')
-      .option('--flask', 'Force Flask mode')
-      .option('--generic', 'Force generic Python mode')
-      .parse();
+    const options = {
+      'source-dir': { type: 'string', default: './' },
+      'locales-dir': { type: 'string', default: './locales' },
+      'framework': { type: 'string', default: 'auto' },
+      'dry-run': { type: 'boolean', default: false },
+      'debug': { type: 'boolean', default: false },
+      'extract-only': { type: 'boolean', default: false },
+      'django': { type: 'boolean', default: false },
+      'flask': { type: 'boolean', default: false },
+      'generic': { type: 'boolean', default: false },
+      'help': { type: 'boolean', default: false },
+      'version': { type: 'boolean', default: false }
+    };
 
-    this.options = program.opts();
+    try {
+      const { values } = parseArgs({ args: process.argv.slice(2), options, allowPositionals: true });
+      this.options = values;
+    } catch (error) {
+      console.error('Error parsing arguments:', error.message);
+      this.showHelp();
+      process.exit(1);
+    }
+
+    if (this.options.help) {
+      this.showHelp();
+      process.exit(0);
+    }
+
+    if (this.options.version) {
+      console.log('i18ntk-py v1.10.0');
+      process.exit(0);
+    }
+
     this.sourceDir = path.resolve(this.options.sourceDir);
     this.localesDir = path.resolve(this.options.localesDir);
     
@@ -202,6 +219,32 @@ class I18ntkPythonCommand {
 
     console.log(`📊 Found ${translations.size} unique translation keys`);
     return Array.from(translations);
+  }
+
+  showHelp() {
+    console.log(`
+🔧 i18ntk-py - Python I18n Management Tool
+=========================================
+
+Usage: node i18ntk-py.js [options]
+
+Options:
+  -s, --source-dir <dir>     Source directory to scan (default: ./)
+  -l, --locales-dir <dir>    Locales directory (default: ./locales)
+  --framework <type>         Python framework type (auto|django|flask|generic, default: auto)
+  --dry-run                  Show what would be done without making changes
+  --debug                    Enable debug output
+  --extract-only             Only extract translations, don't analyze
+  --django                   Force Django mode
+  --flask                    Force Flask mode
+  --generic                  Force generic Python mode
+  --help                     Show this help message
+  --version                  Show version information
+
+Examples:
+  node i18ntk-py.js --source-dir ./src --locales-dir ./i18n --framework django
+  node i18ntk-py.js --dry-run --debug
+`);
   }
 
   async createLocaleStructure() {

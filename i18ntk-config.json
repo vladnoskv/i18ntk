@@ -1,9 +1,9 @@
 {
     "version": "1.9.1",
-    "language": "de",
-    "uiLanguage": "de",
+    "language": "en",
+    "uiLanguage": "en",
     "theme": "dark",
-    "projectRoot": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0",
+    "projectRoot": "E:\\i18n-management-toolkit-main\\i18ntk-1.10.0",
     "sourceDir": "./locales",
     "i18nDir": "./i18n",
     "outputDir": "./i18ntk-reports",
@@ -288,8 +288,8 @@
         "nodeVersionValid": true,
         "hasPackageJson": true,
         "hasLocales": true,
-        "hasGit": true,
-        "hasNpm": true,
+        "hasGit": false,
+        "hasNpm": false,
         "hasPython": false,
         "hasJava": false,
         "hasGo": false,
@@ -297,13 +297,13 @@
         "hasI18nLibrary": false
     },
     "setupReport": {
-        "timestamp": "2025-08-15T04:40:57.529Z",
+        "timestamp": "2025-08-17T15:21:27.638Z",
         "setup": {
             "language": "javascript",
             "framework": "generic",
             "sourceDirectory": "./locales",
             "optimizationMode": "extreme",
-            "prerequisitesMet": 5,
+            "prerequisitesMet": 3,
             "totalPrerequisites": 10
         },
         "recommendations": [
