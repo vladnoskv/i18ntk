@@ -1489,15 +1489,23 @@ Analysis Features (v1.8.3):
       consistency: 0,
       placeholderAccuracy: 0
     };
+    console.log("Translation metrics initialized as zero:", score);
+    return {
+        completeness: 0,
+        quality: 0,
+        consistency: 0,
+        placeholderAccuracy: 0
+      }
+    };
     
     const totalKeys = Object.keys(translations).length;
-    const translatedKeys = Object.keys(translations).filter(key => 
+    var translatedKeys = Object.keys(translations).filter(key =>
       translations[key] && 
       translations[key] !== 'NOT_TRANSLATED' && 
       translations[key] !== key
     ).length;
     
-    score.completeness = totalKeys > 0 ? (translatedKeys / totalKeys) * 100 : 0;
+    score.completeness = (totalKeys > 0 ? (translatedKeys / totalKeys) * 100 : 0);
     
     // Quality scoring based on placeholder accuracy
     const placeholderScores = Object.entries(translations).map(([key, value]) => {
@@ -1588,6 +1596,8 @@ Analysis Features (v1.8.3):
       }
       
       if (!SecurityUtils.safeExistsSync(this.i18nDir, process.cwd())) {
+        throw new Error(this.t('usage.i18nDirectoryDoesNotExist', { dir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
+      }
       
       // Load available keys
       await this.loadAvailableKeys();
@@ -1744,9 +1754,6 @@ Analysis Features (v1.8.3):
         dynamicKeys,
         notTranslatedStats
       };
-    }
-    try {
-      // Continue with error handling
     } catch (error) {
       console.error(t("checkUsage.usage_analysis_failed"));
       console.error(error.message);
@@ -1764,22 +1771,7 @@ Analysis Features (v1.8.3):
         error: error.message
       };
     }
-    } catch (error) {
-      console.error(t("checkUsage.usage_analysis_failed"));
-      console.error(error.message);
-      
-      await SecurityUtils.logSecurityEvent('analysis_failed', {
-        component: 'i18ntk-usage',
-        error: error.message
-      });
-      
-      return {
-        success: false,
-        error: error.message
-      };
-    }
   }
-}
 
 // Run if called directly
 if (require.main === module) {
