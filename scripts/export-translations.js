@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 
 // Load translations
@@ -14,13 +15,13 @@ const TARGET_LANGUAGES = ['de', 'fr', 'es', 'ru', 'ja', 'zh'];
 function createLanguageTemplate(lang) {
   const langDir = path.join(SOURCE_DIR, lang);
   
-  if (!fs.existsSync(langDir)) {
-    fs.mkdirSync(langDir, { recursive: true });
+  if (!SecurityUtils.safeExistsSync(langDir)) {
+    SecurityUtils.safeMkdirSync(langDir, { recursive: true });
     console.log(t('exportTranslations.createdDirectory', { dir: langDir }));
   }
   
   const enDir = path.join(SOURCE_DIR, 'en');
-  const enFiles = fs.readdirSync(enDir).filter(file => file.endsWith('.json'));
+  const enFiles = SecurityUtils.safeReaddirSync(enDir).filter(file => file.endsWith('.json'));
   
   console.log(t('exportTranslations.foundFiles', { count: enFiles.length }));
   enFiles.forEach(file => {
@@ -31,12 +32,11 @@ function createLanguageTemplate(lang) {
     const sourceFile = path.join(enDir, file);
     const targetFile = path.join(langDir, file);
     
-    if (!fs.existsSync(targetFile)) {
-      const sourceContent = JSON.parse(fs.readFileSync(sourceFile, 'utf8'));
+    if (!SecurityUtils.safeExistsSync(targetFile)) {
+      const sourceContent = JSON.parse(SecurityUtils.safeReadFileSync(sourceFile, 'utf8'));
       const templateContent = createTemplateFromEnglish(sourceContent);
-      fs.writeFileSync(targetFile, JSON.stringify(templateContent, null, 2));
-      console.log(t('exportTranslations.createdTemplate', { lang, file }));
-    } else {
+      SecurityUtils.safeWriteFileSync(targetFile, JSON.stringify(templateContent, null, 2), 'utf8');
+      console.log(t('exportTranslations.createdTemplate', { lang, file }));    } else {
       console.log(t('exportTranslations.skippedExisting', { lang, file }));
     }
   });
@@ -64,7 +64,7 @@ function main() {
     createLanguageTemplate(lang);
   });
   
-  const enFiles = fs.readdirSync(path.join(SOURCE_DIR, 'en')).filter(file => file.endsWith('.json'));
+  const enFiles = SecurityUtils.safeReaddirSync(path.join(SOURCE_DIR, 'en')).filter(file => file.endsWith('.json'));
   
   console.log(`\n${t('exportTranslations.summary')}`);
   console.log(t('exportTranslations.summaryLanguages', { count: TARGET_LANGUAGES.length }));

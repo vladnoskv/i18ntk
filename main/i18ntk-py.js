@@ -84,12 +84,12 @@ class I18ntkPythonCommand {
   }
 
   async validateSourceDir() {
-    if (!fs.existsSync(this.sourceDir)) {
+    if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
       console.error(`❌ Source directory not found: ${this.sourceDir}`);
       process.exit(1);
     }
 
-    const stats = fs.statSync(this.sourceDir);
+    const stats = SecurityUtils.safeStatSync(this.sourceDir);
     if (!stats.isDirectory()) {
       console.error(`❌ Source path is not a directory: ${this.sourceDir}`);
       process.exit(1);
@@ -133,8 +133,8 @@ class I18ntkPythonCommand {
     try {
       // Check requirements.txt
       const requirementsPath = path.join(this.sourceDir, 'requirements.txt');
-      if (fs.existsSync(requirementsPath)) {
-        const requirements = fs.readFileSync(requirementsPath, 'utf8');
+      if (SecurityUtils.safeExistsSync(requirementsPath)) {
+        const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
         if (requirements.includes('Django')) framework = 'django';
         else if (requirements.includes('Flask')) framework = 'flask';
       }
@@ -169,12 +169,12 @@ class I18ntkPythonCommand {
     const results = [];
     
     function scanDir(dir) {
-      if (!fs.existsSync(dir)) return;
+      if (!SecurityUtils.safeExistsSync(dir)) return;
       
-      const items = fs.readdirSync(dir);
+      const items = SecurityUtils.safeReaddirSync(dir);
       for (const item of items) {
         const fullPath = path.join(dir, item);
-        const stat = fs.statSync(fullPath);
+        const stat = SecurityUtils.safeStatSync(fullPath);
         
         if (stat.isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
           scanDir(fullPath);
@@ -196,7 +196,7 @@ class I18ntkPythonCommand {
     
     for (const file of pythonFiles) {
       try {
-        const content = fs.readFileSync(file, 'utf8');
+        const content = SecurityUtils.safeReadFileSync(file, 'utf8');
         
         for (const pattern of this.pythonPatterns) {
           let match;
@@ -248,13 +248,13 @@ Examples:
   }
 
   async createLocaleStructure() {
-    if (!fs.existsSync(this.localesDir)) {
+    if (!SecurityUtils.safeExistsSync(this.localesDir)) {
       if (this.options.dryRun) {
         console.log(`📁 Would create directory: ${this.localesDir}`);
         return;
       }
       
-      fs.mkdirSync(this.localesDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(this.localesDir, { recursive: true });
       console.log(`📁 Created locales directory: ${this.localesDir}`);
     }
 
@@ -262,13 +262,13 @@ Examples:
     
     for (const lang of languages) {
       const langDir = path.join(this.localesDir, lang);
-      if (!fs.existsSync(langDir)) {
+      if (!SecurityUtils.safeExistsSync(langDir)) {
         if (this.options.dryRun) {
           console.log(`📁 Would create directory: ${langDir}`);
           continue;
         }
         
-        fs.mkdirSync(langDir, { recursive: true });
+        SecurityUtils.safeMkdirSync(langDir, { recursive: true });
         
         // Create basic translation files
         const commonFile = path.join(langDir, 'common.json');
@@ -280,7 +280,7 @@ Examples:
           }
         };
         
-        fs.writeFileSync(commonFile, JSON.stringify(initialContent, null, 2));
+        SecurityUtils.safeWriteFileSync(commonFile, JSON.stringify(initialContent, null, 2));
       }
     }
   }
@@ -323,7 +323,7 @@ Examples:
     // Analyze patterns
     for (const file of pythonFiles) {
       try {
-        const content = fs.readFileSync(file, 'utf8');
+        const content = SecurityUtils.safeReadFileSync(file, 'utf8');
         
         if (content.includes('gettext(')) analysis.patterns.gettext++;
         if (content.includes('gettext_lazy(')) analysis.patterns.gettext_lazy++;
@@ -373,7 +373,7 @@ Examples:
       console.log(`📊 Would create report: ${reportPath}`);
       console.log('📋 Report contents:', JSON.stringify(report, null, 2));
     } else {
-      fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+      SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
       console.log(`📊 Report saved: ${reportPath}`);
     }
 

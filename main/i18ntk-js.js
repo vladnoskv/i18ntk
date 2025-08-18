@@ -127,12 +127,12 @@ class I18ntkJavaScriptCommand {
   }
 
   async validateSourceDir() {
-    if (!fs.existsSync(this.sourceDir)) {
+    if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
       console.error(`❌ Source directory not found: ${this.sourceDir}`);
       process.exit(1);
     }
 
-    const stats = fs.statSync(this.sourceDir);
+    const stats = SecurityUtils.safeStatSync(this.sourceDir);
     if (!stats.isDirectory()) {
       console.error(`❌ Source path is not a directory: ${this.sourceDir}`);
       process.exit(1);
@@ -161,8 +161,8 @@ class I18ntkJavaScriptCommand {
 
     try {
       const packageJsonPath = path.join(this.sourceDir, 'package.json');
-      if (fs.existsSync(packageJsonPath)) {
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+        const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
         
         const dependencies = {
           ...packageJson.dependencies || {},
@@ -232,12 +232,12 @@ Examples:
     const validExtensions = extensions.length > 0 ? extensions : ['.js', '.jsx', '.ts', '.tsx'];
     
     function scanDir(dir) {
-      if (!fs.existsSync(dir)) return;
+      if (!SecurityUtils.safeExistsSync(dir)) return;
       
-      const items = fs.readdirSync(dir);
+      const items = SecurityUtils.safeReaddirSync(dir);
       for (const item of items) {
         const fullPath = path.join(dir, item);
-        const stat = fs.statSync(fullPath);
+        const stat = SecurityUtils.safeStatSync(fullPath);
         
         if (stat.isDirectory()) {
           // Skip node_modules and hidden directories
@@ -282,7 +282,7 @@ Examples:
     
     for (const file of jsFiles) {
       try {
-        const content = fs.readFileSync(file, 'utf8');
+        const content = SecurityUtils.safeReadFileSync(file, 'utf8');
         
         for (const pattern of this.jsPatterns) {
           let match;
@@ -308,13 +308,13 @@ Examples:
   }
 
   async createLocaleStructure() {
-    if (!fs.existsSync(this.localesDir)) {
+    if (!SecurityUtils.safeExistsSync(this.localesDir)) {
       if (this.options.dryRun) {
         console.log(`📁 Would create directory: ${this.localesDir}`);
         return;
       }
       
-      fs.mkdirSync(this.localesDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(this.localesDir);
       console.log(`📁 Created locales directory: ${this.localesDir}`);
     }
 
@@ -322,13 +322,13 @@ Examples:
     
     for (const lang of languages) {
       const langDir = path.join(this.localesDir, lang);
-      if (!fs.existsSync(langDir)) {
+      if (!SecurityUtils.safeExistsSync(langDir)) {
         if (this.options.dryRun) {
           console.log(`📁 Would create directory: ${langDir}`);
           continue;
         }
         
-        fs.mkdirSync(langDir, { recursive: true });
+        SecurityUtils.safeMkdirSync(langDir);
         
         // Create framework-specific translation files
         const commonFile = path.join(langDir, 'common.json');
@@ -354,7 +354,7 @@ Examples:
           }
         };
         
-        fs.writeFileSync(commonFile, JSON.stringify(initialContent, null, 2));
+        SecurityUtils.safeWriteFileSync(commonFile, JSON.stringify(initialContent, null, 2));
       }
     }
   }
@@ -457,8 +457,8 @@ Examples:
     // Check package.json for dependencies
     try {
       const packageJsonPath = path.join(this.sourceDir, 'package.json');
-      if (fs.existsSync(packageJsonPath)) {
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+        const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
         const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
         
         for (const [pkg, version] of Object.entries(deps)) {

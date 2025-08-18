@@ -1205,6 +1205,7 @@
   },
   "security": {
     "pathValidationFailed": "validación_de_ruta_fallida",
+    "directoryListed": "Seguridad: Directorio listado exitosamente: {path} ({fileCount} archivos)",
     "invalidInputType": "tipo_de_entrada_inválido",
     "pathTraversalAttempt": "intento_de_atravesamiento_de_ruta",
     "pathValidated": "✅ Ruta validada exitosamente",

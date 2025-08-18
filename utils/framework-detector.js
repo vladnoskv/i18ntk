@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 const { gte } = require('./version-utils');
 
 // Framework compatibility information
@@ -296,13 +297,13 @@ async function detectFramework(projectRoot) {
   const detectedFrameworks = [];
   
   // Only proceed if package.json exists
-  if (!fs.existsSync(packageJsonPath)) {
-    return null;
-  }
+    if (!SecurityUtils.safeExistsSync(packageJsonPath)) {
+      return null;
+    }
 
-  try {
-    // Read and parse package.json
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    try {
+      // Read and parse package.json
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8') || '{}');
     const deps = { 
       ...(packageJson.dependencies || {}), 
       ...(packageJson.devDependencies || {}),

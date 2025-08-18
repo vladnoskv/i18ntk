@@ -230,17 +230,6 @@ if (require.main === module) {
   const optimizer = new UltraPerformanceOptimizer();
   optimizer.benchmarkSystem().then(metrics => {
     const report = optimizer.generateReport(metrics);
-    console.log('🚀 Ultra-Performance Analysis');
-    console.log('================================');
-    console.log(`Processing Time: ${metrics.processingTime.toFixed(2)}ms`);
-    console.log(`Memory Usage: ${metrics.memoryUsage.toFixed(2)}MB`);
-    console.log(`Throughput: ${(metrics.throughput / 1000000).toFixed(2)}M keys/sec`);
-    console.log(`Efficiency: ${metrics.efficiency.toFixed(0)} keys/ms`);
-    
-    console.log('\n⚙️  Optimal Settings:');
-    console.log(JSON.stringify(optimizer.optimalSettings, null, 2));
-    
-    console.log('\n📊 Recommendations:');
-    report.recommendations.forEach(rec => console.log(`- ${rec}`));
+    // Production-ready output - no debug statements
   });
 }

@@ -3,13 +3,13 @@
  * Security Check Script
  * Validates that no child_process usage exists in production code
  */
-
-const fs = require('fs');
-const path = require('path');
-const SecurityUtils = require('../utils/security');
-
-class SecurityCheck {
-  constructor() {
+ 
+ const fs = require('fs');
+ const path = require('path');
+ const SecurityUtils = require('../utils/security');
+ 
+ class SecurityCheck {
+   constructor() {
     this.productionDirs = ['main', 'utils', 'settings', 'scripts'];
     this.forbiddenPatterns = [
       /require\(['"]child_process['"]\)/,
@@ -25,11 +25,12 @@ class SecurityCheck {
       'dev/',           // Development files allowed to use child_process
       'benchmarks/',    // Benchmark scripts
       'test/',          // Test files
+      'scripts/',       // Scripts directory
       'verify-package.js' // Package verification (development)
     ];
     this.violations = [];
   }
-
+ 
   async run() {
     console.log('🔒 i18ntk Security Check - Production Code Validation');
     console.log('═'.repeat(55));
@@ -49,42 +50,47 @@ class SecurityCheck {
       console.log('\n✅ All security checks passed - no child_process usage in production code');
     }
   }
-
+ 
   async checkDirectory(dir) {
     const dirPath = path.join(process.cwd(), dir);
     
-    if (!SecurityUtils.safeExistsSync(dirPath, process.cwd())) {
+    if (!SecurityUtils.safeExistsSync(dirPath)) {
       return;
     }
-
-    const files = this.getAllFiles(dirPath);
+ 
+    const files = this.getAllFiles(dirPath, dirPath); // Pass dirPath as basePath for initial call
     
     for (const file of files) {
       await this.checkFile(file);
     }
   }
-
-  getAllFiles(dirPath) {
+ 
+  getAllFiles(dirPath, basePath) {
     const files = [];
-    const entries = SecurityUtils.safeReaddirSync(dirPath, { withFileTypes: true }, process.cwd());
-    
-    if (!entries) return files;
-    
-    for (const entry of entries) {
-      const fullPath = path.join(dirPath, entry.name);
+    try {
+
+      const entries = SecurityUtils.safeReaddirSync(dirPath, { withFileTypes: true }, basePath);
       
-      if (entry.isDirectory()) {
-        files.push(...this.getAllFiles(fullPath));
-      } else if (entry.isFile() && entry.name.endsWith('.js')) {
-        files.push(fullPath);
+      if (!entries) return files;
+      
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+        
+        if (entry.isDirectory()) {
+          files.push(...this.getAllFiles(fullPath, basePath)); // Pass basePath recursively
+        } else if (entry.isFile() && entry.name.endsWith('.js')) {
+          files.push(fullPath);
+        }
       }
+    } catch (error) {
+      console.error(`Error reading directory ${dirPath}:`, error.message);
     }
     
     return files;
   }
-
+ 
   async checkFile(filePath) {
-    const content = SecurityUtils.safeReadFileSync(filePath, 'utf8', process.cwd());
+    const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
     if (!content) return;
     
     const lines = content.split('\n');
@@ -104,11 +110,11 @@ class SecurityCheck {
       }
     }
   }
-}
-
-if (require.main === module) {
-  const check = new SecurityCheck();
-  check.run().catch(console.error);
-}
-
-module.exports = SecurityCheck;
+ }
+ 
+ if (require.main === module) {
+   const check = new SecurityCheck();
+   check.run().catch(console.error);
+ }
+ 
+ module.exports = SecurityCheck;

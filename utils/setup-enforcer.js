@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const { blue, yellow, gray, cyan, green, red } = require('./colors-new');
 const configManager = require('./config-manager');
+const SecurityUtils = require('./security');
 
 class SetupEnforcer {
     static _setupCheckInProgress = false;
@@ -142,7 +143,7 @@ class SetupEnforcer {
 
     static async runSetup() {
         const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-        if (!fs.existsSync(setupPath)) {
+        if (!SecurityUtils.safeExistsSync(setupPath)) {
             throw new Error('Setup script not found');
         }
 
@@ -180,7 +181,7 @@ class SetupEnforcer {
                     const config = configManager.getConfig();
                     
                     // Check if config has required fields
-                    if (!config.version || !config.sourceDir || !config.detectedFramework) {
+                    if (!config.version || !config.sourceDir) {
                         await SetupEnforcer.handleIncompleteSetup();
                         // After setup is done, re-check the config
                         const newConfig = configManager.getConfig();

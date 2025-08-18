@@ -1209,6 +1209,7 @@
     "pathTraversalAttempt": "路径遍历尝试",
     "pathValidated": "✅ 路径验证成功",
     "pathValidationError": "路径验证错误",
+    "directoryListed": "安全：目录已成功列出：{directory}（{fileCount} 个文件）",
     "fileTooLarge": "安全：文件过大：{filePath}",
     "fileReadError": "安全：读取文件出错：{errorMessage}",
     "contentTooLargeForFile": "安全：内容过大，无法写入文件：{filePath}",

@@ -75,7 +75,7 @@ class CoreCommandsTester {
     await this.runCommand('node main/i18ntk-validate.js --help', 'Validate command help');
 
     // Test setup command with test project
-    if (fs.existsSync(this.testDir)) {
+    if (SecurityUtils.safeExistsSync(this.testDir)) {
       await this.runCommand(
         `node main/i18ntk-setup.js --source-dir ${this.testDir} --dry-run`,
         'Setup command with Vue project (dry run)'
@@ -83,7 +83,7 @@ class CoreCommandsTester {
     }
 
     // Test analyze command with test project
-    if (fs.existsSync(this.testDir)) {
+    if (SecurityUtils.safeExistsSync(this.testDir)) {
       await this.runCommand(
         `node main/i18ntk-analyze.js --source-dir ${this.testDir} --dry-run`,
         'Analyze command with Vue project (dry run)'

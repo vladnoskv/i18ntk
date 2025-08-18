@@ -52,7 +52,7 @@ class JavaI18nManager {
   async detectFramework(sourceDir) {
     // Check for Android
     const androidManifest = path.join(sourceDir, 'AndroidManifest.xml');
-    if (fs.existsSync(androidManifest)) {
+    if (SecurityUtils.safeExistsSync(androidManifest)) {
       return 'android';
     }
     
@@ -60,15 +60,15 @@ class JavaI18nManager {
     const pomXml = path.join(sourceDir, 'pom.xml');
     const gradleFile = path.join(sourceDir, 'build.gradle');
     
-    if (fs.existsSync(pomXml)) {
-      const content = fs.readFileSync(pomXml, 'utf8');
+    if (SecurityUtils.safeExistsSync(pomXml)) {
+      const content = SecurityUtils.safeReadFileSync(pomXml, 'utf8');
       if (content.includes('spring-boot')) {
         return 'spring-boot';
       }
     }
     
-    if (fs.existsSync(gradleFile)) {
-      const content = fs.readFileSync(gradleFile, 'utf8');
+    if (SecurityUtils.safeExistsSync(gradleFile)) {
+      const content = SecurityUtils.safeReadFileSync(gradleFile, 'utf8');
       if (content.includes('spring-boot')) {
         return 'spring-boot';
       }
@@ -97,7 +97,7 @@ class JavaI18nManager {
     const javaFiles = [...this.findFiles(sourceDir, '.java'), ...this.findFiles(sourceDir, '.kt')];
     
     for (const file of javaFiles) {
-      const content = fs.readFileSync(file, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(file, 'utf8');
       
       // Extract Android string references
       const androidPatterns = [
@@ -131,7 +131,7 @@ class JavaI18nManager {
     const xmlFiles = this.findFiles(sourceDir, '.xml');
     for (const file of xmlFiles) {
       if (file.includes('strings.xml')) {
-        const content = fs.readFileSync(file, 'utf8');
+        const content = SecurityUtils.safeReadFileSync(file, 'utf8');
         const stringPatterns = [
           /<string name="([^"]+)"/g,
           /<string-array name="([^"]+)"/g,
@@ -151,7 +151,7 @@ class JavaI18nManager {
     const propertiesFiles = this.findFiles(sourceDir, '.properties');
     for (const file of propertiesFiles) {
       if (file.includes('messages') || file.includes('i18n')) {
-        const content = fs.readFileSync(file, 'utf8');
+        const content = SecurityUtils.safeReadFileSync(file, 'utf8');
         const lines = content.split('\n');
         
         for (const line of lines) {
@@ -177,11 +177,11 @@ class JavaI18nManager {
     
     for (const lang of languages) {
       const langDir = path.join(localesDir, lang);
-      fs.mkdirSync(langDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(langDir, null, { recursive: true });
       
       if (framework === 'android') {
         // Android string resources
-        fs.writeFileSync(path.join(langDir, 'strings.xml'), `<?xml version="1.0" encoding="utf-8"?>
+        SecurityUtils.safeWriteFileSync(path.join(langDir, 'strings.xml'), `<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">My App</string>
     <string name="hello">Hello, World!</string>
@@ -195,14 +195,14 @@ class JavaI18nManager {
 `);
       } else {
         // Java properties format
-        fs.writeFileSync(path.join(langDir, 'messages.properties'), `# Java i18n properties for ${lang}
+        SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.properties'), `# Java i18n properties for ${lang}
 app.name=My Application
 hello.message=Hello, World!
 items.count={0} items
 `);
         
         // JSON format
-        fs.writeFileSync(path.join(langDir, 'messages.json'), JSON.stringify({
+        SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.json'), JSON.stringify({
           app: { name: "My Application" },
           hello: { message: "Hello, World!" },
           items: { count: "{0} items" }
@@ -217,14 +217,14 @@ items.count={0} items
     const files = [];
     
     function traverse(currentDir) {
-      if (!fs.existsSync(currentDir)) return;
+      if (!SecurityUtils.safeExistsSync(currentDir)) return;
       
-      const items = fs.readdirSync(currentDir);
+      const items = SecurityUtils.safeReaddirSync(currentDir);
       
       for (const item of items) {
         const fullPath = path.join(currentDir, item);
         try {
-          const stat = fs.statSync(fullPath);
+          const stat = SecurityUtils.safeStatSync(fullPath);
           
           if (stat.isDirectory() && !item.startsWith('.') && 
               !['node_modules', 'build', 'target'].includes(item)) {

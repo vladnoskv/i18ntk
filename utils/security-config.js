@@ -125,7 +125,7 @@ class SecurityConfig {
 
         // Ensure config directory exists
         const configDir = path.dirname(this.configPath);
-        SecurityUtils.safeMkdirSync(configDir, process.cwd());
+        SecurityUtils.safeMkdirSync(configDir);
 
         // Remove actual secrets from config file (use env vars)
         const safeConfig = {
@@ -137,7 +137,7 @@ class SecurityConfig {
             }
         };
 
-        SecurityUtils.safeWriteFileSync(this.configPath, JSON.stringify(safeConfig, null, 2), process.cwd());
+        SecurityUtils.safeWriteFileSync(this.configPath, JSON.stringify(safeConfig, null, 2));
         
         return {
             configPath: this.configPath,
@@ -149,13 +149,13 @@ class SecurityConfig {
      * Load and validate existing configuration
      */
     loadSecurityConfig() {
-        const exists = SecurityUtils.safeExistsSync(this.configPath, process.cwd());
+        const exists = SecurityUtils.safeExistsSync(this.configPath);
         if (!exists) {
             return this.createSecureConfig();
         }
 
         try {
-            const content = SecurityUtils.safeReadFileSync(this.configPath, process.cwd(), 'utf8');
+            const content = SecurityUtils.safeReadFileSync(this.configPath, 'utf8');
             if (content === null) {
                 throw new Error(`Failed to read security configuration file: ${this.configPath}`);
             }
@@ -182,11 +182,11 @@ class SecurityConfig {
         const timestamp = new Date().toISOString();
         
         // Create backup of old config
-        const exists = SecurityUtils.safeExistsSync(this.configPath, process.cwd());
+        const exists = SecurityUtils.safeExistsSync(this.configPath);
         if (exists) {
-            const content = SecurityUtils.safeReadFileSync(this.configPath, process.cwd(), 'utf8');
+            const content = SecurityUtils.safeReadFileSync(this.configPath, 'utf8');
             if (content !== null) {
-                SecurityUtils.safeWriteFileSync(`${this.configPath}.backup.${timestamp}`, content, process.cwd());
+                SecurityUtils.safeWriteFileSync(`${this.configPath}.backup.${timestamp}`, content);
             }
         }
 

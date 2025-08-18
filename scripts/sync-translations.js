@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 // Configuration
 const UI_LOCALES_DIR = path.join(__dirname, '..', 'ui-locales');
@@ -23,7 +24,7 @@ const TARGET_LANGUAGES = ['de', 'es', 'fr', 'ru', 'ja']; // Exclude Chinese (zh)
  */
 function getEnglishFiles() {
   try {
-    const files = fs.readdirSync(ENGLISH_DIR);
+    const files = SecurityUtils.safeReaddirSync(ENGLISH_DIR);
     return files.filter(file => file.endsWith('.json'));
   } catch (error) {
     console.error('Error reading English directory:', error.message);
@@ -36,8 +37,8 @@ function getEnglishFiles() {
  */
 function readJsonFile(filePath) {
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(content);
+    const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
+    return JSON.parse(content || '{}');
   } catch (error) {
     console.error(`Error reading JSON file ${filePath}:`, error.message);
     return {};
@@ -50,7 +51,7 @@ function readJsonFile(filePath) {
 function writeJsonFile(filePath, data) {
   try {
     const jsonString = JSON.stringify(data, null, 2);
-    fs.writeFileSync(filePath, jsonString + '\n');
+    SecurityUtils.safeWriteFileSync(filePath, jsonString + '\n');
     return true;
   } catch (error) {
     console.error(`Error writing JSON file ${filePath}:`, error.message);
@@ -74,9 +75,9 @@ function syncLanguage(language) {
   const languageDir = path.join(UI_LOCALES_DIR, language);
   
   // Ensure language directory exists
-  if (!fs.existsSync(languageDir)) {
-    fs.mkdirSync(languageDir, { recursive: true });
-  }
+    if (!SecurityUtils.safeExistsSync(languageDir)) {
+      SecurityUtils.safeMkdirSync(languageDir, { recursive: true });
+    }
   
   const englishFiles = getEnglishFiles();
   let syncedFiles = 0;

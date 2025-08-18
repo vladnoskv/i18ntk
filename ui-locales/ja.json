@@ -1202,6 +1202,7 @@
   },
   "security": {
     "pathValidationFailed": "パス検証に失敗しました",
+    "directoryListed": "セキュリティ: ディレクトリが正常に一覧表示されました: {path} ({fileCount} ファイル)",
     "invalidInputType": "無効な入力タイプです",
     "pathTraversalAttempt": "パストラバーサルの試行が検出されました",
     "pathValidated": "✅ パスが正常に検証されました",

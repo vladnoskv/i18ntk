@@ -337,7 +337,7 @@ function applyEnvOverrides(cfg) {
 
 function tryReadJson(filePath) {
   try {
-    if (!SecurityUtils.safeExistsSync(filePath, process.cwd())) {
+    if (!SecurityUtils.safeExistsSync(filePath)) {
       return null;
     }
     
@@ -369,7 +369,7 @@ function tryReadJson(filePath) {
 
 async function migrateLegacyIfNeeded(baseCfg) {
   // If project config does not exist but legacy exists, migrate once
-  if (!SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH, process.cwd()) && SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH, process.cwd())) {
+  if (!SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH) && SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
     const legacy = tryReadJson(LEGACY_CONFIG_PATH);
     if (legacy && typeof legacy === 'object') {
       const merged = deepMerge(clone(baseCfg), legacy);
@@ -377,9 +377,9 @@ async function migrateLegacyIfNeeded(baseCfg) {
       try { merged.migrationComplete = true; } catch (_) {}
       ensureProjectSettingsDir();
       try {
-        SecurityUtils.safeWriteFileSync(PROJECT_CONFIG_PATH, JSON.stringify(merged, null, 2), process.cwd());
+        SecurityUtils.safeWriteFileSync(PROJECT_CONFIG_PATH, JSON.stringify(merged, null, 2));
         // Best-effort removal of legacy file to prevent future use
-        try { SecurityUtils.safeDeleteSync(LEGACY_CONFIG_PATH, process.cwd()); } catch (_) {}
+        try { SecurityUtils.safeDeleteSync(LEGACY_CONFIG_PATH); } catch (_) {}
         // Deprecation notice
         console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to settings/i18ntk-config.json. Please commit the settings/ directory to your project.');
         return merged;
@@ -429,8 +429,8 @@ async function saveConfig(cfg = currentConfig) {
   
   try {
     // Ensure settings directory exists
-    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
-      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
+      SecurityUtils.safeMkdirSync(PROJECT_SETTINGS_DIR, null, { recursive: true });
     }
     
     // Validate PROJECT_CONFIG_PATH is valid
@@ -462,8 +462,8 @@ async function saveConfig(cfg = currentConfig) {
 function getConfig() {
   try {
     // Ensure settings directory exists
-    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
-      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
+      SecurityUtils.safeMkdirSync(PROJECT_SETTINGS_DIR, null, { recursive: true });
     }
 
     // Validate paths are valid strings
@@ -477,24 +477,24 @@ function getConfig() {
     // No need to check here - handled by getUnifiedConfig
 
     // Check if config file exists
-    if (fs.existsSync(PROJECT_CONFIG_PATH)) {
-      const config = JSON.parse(fs.readFileSync(PROJECT_CONFIG_PATH, 'utf8'));
+    if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
+      const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, 'utf8'));
       const resolved = resolvePaths(config);
       return resolved || config; // Fallback to unresolved config if resolvePaths fails
     }
 
     // Check for legacy config for migration
-    if (fs.existsSync(LEGACY_CONFIG_PATH)) {
+    if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
       console.log('📦 Migrating legacy configuration...');
-      const legacyConfig = JSON.parse(fs.readFileSync(LEGACY_CONFIG_PATH, 'utf8'));
+      const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, 'utf8'));
       const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
       saveConfig(migratedConfig);
       
       // Clean up legacy config
       try {
-        fs.unlinkSync(LEGACY_CONFIG_PATH);
-        if (fs.readdirSync(LEGACY_CONFIG_DIR).length === 0) {
-          fs.rmdirSync(LEGACY_CONFIG_DIR);
+        SecurityUtils.safeUnlinkSync(LEGACY_CONFIG_PATH);
+        if (SecurityUtils.safeReaddirSync(LEGACY_CONFIG_DIR).length === 0) {
+          SecurityUtils.safeRmdirSync(LEGACY_CONFIG_DIR);
         }
       } catch (cleanupError) {
         // Ignore cleanup errors
@@ -531,16 +531,12 @@ async function updateConfig(patch) {
 }
 
 async function resetToDefaults() {
-  console.error('DEBUG: Starting resetToDefaults');
-  console.error('DEBUG: PROJECT_CONFIG_PATH:', PROJECT_CONFIG_PATH);
-  console.error('DEBUG: PROJECT_SETTINGS_DIR:', PROJECT_SETTINGS_DIR);
-  console.error('DEBUG: typeof PROJECT_CONFIG_PATH:', typeof PROJECT_CONFIG_PATH);
-  console.error('DEBUG: typeof PROJECT_SETTINGS_DIR:', typeof PROJECT_SETTINGS_DIR);
-  
   currentConfig = clone(DEFAULT_CONFIG);
   // Save reset configuration to disk
   await saveConfig(currentConfig);
-  console.error('DEBUG: Reset completed successfully');
+  if (process.env.I18N_DEBUG === 'true') {
+    console.log('Settings reset to defaults');
+  }
   return currentConfig;
 }
 

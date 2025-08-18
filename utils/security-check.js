@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 class SecurityChecker {
     constructor() {
@@ -67,8 +68,8 @@ class SecurityChecker {
         const gitignorePath = '.gitignore';
         let gitignoreContent = '';
         
-        if (fs.existsSync(gitignorePath)) {
-            gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+        if (SecurityUtils.safeExistsSync(gitignorePath)) {
+            gitignoreContent = SecurityUtils.safeReadFileSync(gitignorePath, 'utf8') || '';
         }
 
         const issues = [];
@@ -94,7 +95,7 @@ class SecurityChecker {
      */
     checkConfigurationFiles() {
         const configFiles = ['i18ntk-config.json', 'config.json'];
-        const hasConfigFile = configFiles.some(file => fs.existsSync(file));
+        const hasConfigFile = configFiles.some(file => SecurityUtils.safeExistsSync(file));
 
         this.checks.push({
             name: 'Configuration Files',
@@ -105,9 +106,9 @@ class SecurityChecker {
         // Check for default PINs in config
         const defaultPinFiles = ['i18ntk-config.json', 'config.json'];
         defaultPinFiles.forEach(file => {
-            if (fs.existsSync(file)) {
+            if (SecurityUtils.safeExistsSync(file)) {
                 try {
-                    const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+                    const config = JSON.parse(SecurityUtils.safeReadFileSync(file, 'utf8') || '{}');
                     if (config.adminPin && ['1234', '0000', 'admin', 'password'].includes(config.adminPin)) {
                         this.checks.push({
                             name: 'Default PIN Check',
@@ -136,10 +137,10 @@ class SecurityChecker {
             let highCount = 0;
             let moderateCount = 0;
             
-            if (fs.existsSync(packageLockPath)) {
+            if (SecurityUtils.safeExistsSync(packageLockPath)) {
                 try {
-                    const packageLock = JSON.parse(fs.readFileSync(packageLockPath, 'utf8'));
-                    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+                    const packageLock = JSON.parse(SecurityUtils.safeReadFileSync(packageLockPath, 'utf8') || '{}');
+                    const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packagePath, 'utf8') || '{}');
                     
                     // Check for outdated dependencies by comparing versions
                     const dependencies = { ...packageJson.dependencies, ...packageJson.devDependencies };
@@ -189,9 +190,9 @@ class SecurityChecker {
     checkEncryptionConfig() {
         const adminPinPath = 'admin-pin.json';
         
-        if (fs.existsSync(adminPinPath)) {
+        if (SecurityUtils.safeExistsSync(adminPinPath)) {
             try {
-                const pinData = JSON.parse(fs.readFileSync(adminPinPath, 'utf8'));
+                const pinData = JSON.parse(SecurityUtils.safeReadFileSync(adminPinPath, 'utf8') || '{}');
                 
                 // Check for old encryption methods
                 if (pinData.hash && pinData.hash.length === 64) {
@@ -235,9 +236,9 @@ class SecurityChecker {
         const sensitiveFiles = ['admin-pin.json', 'config.json', 'i18ntk-config.json'];
         
         sensitiveFiles.forEach(file => {
-            if (fs.existsSync(file)) {
+            if (SecurityUtils.safeExistsSync(file)) {
                 try {
-                    const stats = fs.statSync(file);
+                    const stats = SecurityUtils.safeStatSync(file);
                     const mode = stats.mode & parseInt('777', 8);
                     
                     if (mode > parseInt('600', 8)) {
@@ -278,7 +279,7 @@ class SecurityChecker {
         const results = [];
         
         try {
-            const items = fs.readdirSync(dir, { withFileTypes: true });
+            const items = SecurityUtils.safeReaddirSync(dir, { withFileTypes: true });
             
             items.forEach(item => {
                 const fullPath = path.join(dir, item.name);

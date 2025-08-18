@@ -18,8 +18,8 @@ async function checkInitialized(options = {}) {
   
   // Check if source language files exist
   const langDir = path.resolve(sourceDir, sourceLanguage);
-  const hasLanguageFiles = fs.existsSync(langDir) &&
-    fs.readdirSync(langDir).some(f => f.endsWith('.json'));
+  const hasLanguageFiles = SecurityUtils.safeExistsSync(langDir) &&
+    SecurityUtils.safeReaddirSync(langDir).some(f => f.endsWith('.json'));
   
   // Return initialization status based on file existence
   return {

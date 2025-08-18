@@ -1,6 +1,6 @@
-const fs = require('fs');
 const path = require('path');
-
+const fs = require('fs');
+const SecurityUtils = require('./security');
 const settingsManager = require('../settings/settings-manager');
 const CONFIG_FILE = 'i18ntk-config.json';
 
@@ -12,11 +12,41 @@ const CONFIG_FILE = 'i18ntk-config.json';
  * @throws {Error} If path traversal is detected
  */
 function validatePath(filePath, allowedDir) {
-  const resolvedPath = path.resolve(filePath);
-  const resolvedAllowed = path.resolve(allowedDir);
+  let resolvedPath;
+  let resolvedAllowed;
   
-  // Check if the resolved path is within the allowed directory
-  if (!resolvedPath.startsWith(resolvedAllowed)) {
+  try {
+    // Use fs.realpathSync.native for proper canonicalization on Windows
+    resolvedPath = fs.realpathSync.native(path.resolve(filePath));
+    resolvedAllowed = fs.realpathSync.native(path.resolve(allowedDir));
+  } catch (error) {
+    // Always try to canonicalize allowedDir even if filePath resolution failed
+    try {
+      resolvedAllowed = fs.realpathSync.native(path.resolve(allowedDir));
+    } catch {
+      resolvedAllowed = path.resolve(allowedDir);
+    }
+
+    if (error && error.code === 'ENOENT') {
+      // File may not exist yet: canonicalize its parent dir to resolve any symlinks
+      let parent = path.dirname(path.resolve(filePath));
+      try {
+        parent = fs.realpathSync.native(parent);
+      } catch {
+        parent = path.resolve(parent);
+      }
+      resolvedPath = path.join(parent, path.basename(filePath));
+    } else {
+      // Unexpected error: fall back to lexical resolution for the path only
+      resolvedPath = path.resolve(filePath);
+    }
+  }
+  
+  // Use path.relative for accurate comparison, handling separators and casing
+  const relativePath = path.relative(resolvedAllowed, resolvedPath);
+  
+  // Check if the path tries to escape the allowed directory
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
     throw new Error(`Path traversal attempt detected: ${filePath}`);
   }
   
@@ -46,12 +76,12 @@ function loadConfig(cwd = settingsManager.configDir) {
     const configPath = getConfigPath(cwd);
     
     // Check if file exists and is accessible
-    if (!fs.existsSync(configPath)) {
+    if (!SecurityUtils.safeExistsSync(configPath)) {
       return null;
     }
     
     // Read file with explicit encoding
-    const raw = fs.readFileSync(configPath, { encoding: 'utf8', flag: 'r' });
+    const raw = SecurityUtils.safeReadFileSync(configPath, { encoding: 'utf8', flag: 'r' });
     
     // Basic validation of file content
     if (!raw || typeof raw !== 'string') {
@@ -83,12 +113,12 @@ function saveConfig(config, cwd = settingsManager.configDir) {
     const dir = path.dirname(configPath);
     
     // Ensure directory exists
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    if (!SecurityUtils.safeExistsSync(dir)) {
+      SecurityUtils.safeMkdirSync(dir, { recursive: true, mode: 0o700 });
     }
     
     // Write file with secure permissions (read/write for owner only)
-    fs.writeFileSync(
+    SecurityUtils.safeWriteFileSync(
       configPath,
       JSON.stringify(config, null, 2),
       { mode: 0o600, encoding: 'utf8' }

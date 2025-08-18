@@ -144,10 +144,10 @@ function showFrameworkWarningOnce(ui) {
       // Last resort: use locale files directly
       try {
         const path = require('path');
-        const fs = require('fs');
+const SecurityUtils = require('./security');
         const localePath = path.join(__dirname, '..', 'ui-locales', 'en.json');
-        if (fs.existsSync(localePath)) {
-          const translations = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+        if (SecurityUtils.safeExistsSync(localePath)) {
+          const translations = JSON.parse(SecurityUtils.safeReadFileSync(localePath, 'utf8') || '{}');
           t = (key) => {
             const keys = key.split('.');
             let result = translations;
@@ -163,7 +163,6 @@ function showFrameworkWarningOnce(ui) {
         // Final fallback: load from current UI locale or English
         try {
           const path = require('path');
-          const fs = require('fs');
           
           // Try to determine current language from settings
           const settingsManager = require('../settings/settings-manager');
@@ -171,8 +170,8 @@ function showFrameworkWarningOnce(ui) {
           const currentLang = settings.uiLanguage || 'en';
           
           const localePath = path.join(__dirname, '..', 'ui-locales', `${currentLang}.json`);
-          if (fs.existsSync(localePath)) {
-            const translations = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+          if (SecurityUtils.safeExistsSync(localePath)) {
+            const translations = JSON.parse(SecurityUtils.safeReadFileSync(localePath, 'utf8') || '{}');
             t = (key) => {
               const keys = key.split('.');
               let result = translations;
@@ -184,8 +183,8 @@ function showFrameworkWarningOnce(ui) {
           } else {
             // Fallback to English
             const enLocalePath = path.join(__dirname, '..', 'ui-locales', 'en.json');
-            if (fs.existsSync(enLocalePath)) {
-              const translations = JSON.parse(fs.readFileSync(enLocalePath, 'utf8'));
+            if (SecurityUtils.safeExistsSync(enLocalePath)) {
+              const translations = JSON.parse(SecurityUtils.safeReadFileSync(enLocalePath, 'utf8') || '{}');
               t = (key) => {
                 const keys = key.split('.');
                 let result = translations;

@@ -1,12 +1,31 @@
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 // Load all language files
 const localesPath = path.join(__dirname, '../ui-locales');
-const files = fs.readdirSync(localesPath).filter(file => file.endsWith('.json') && file !== 'en.json');
+const files = (SecurityUtils.safeReaddirSync(localesPath) || []).filter(
+  file => file.endsWith('.json') && file !== 'en.json'
+);
 
 // Load English as the base for comparison
-const enContent = JSON.parse(fs.readFileSync(path.join(localesPath, 'en.json'), 'utf8'));
+const enPath = path.join(localesPath, 'en.json');
+const enRaw = SecurityUtils.safeReadFileSync(enPath, 'utf8');
+if (!enRaw) {
+  console.error(`Base translations not found or unreadable: ${enPath}`);
+  process.exit(1);
+}
+let enContent;
+try {
+  enContent = JSON.parse(enRaw);
+} catch (e) {
+  console.error(`Invalid JSON in ${enPath}: ${e.message}`);
+  process.exit(1);
+}
+if (!enContent || typeof enContent !== 'object' || Array.isArray(enContent)) {
+  console.error(`Expected an object at the top level of ${enPath}`);
+  process.exit(1);
+}
 
 // Function to get all keys from an object
 function getAllKeys(obj, prefix = '') {
@@ -26,9 +45,23 @@ const enKeys = new Set(getAllKeys(enContent));
 console.log('\n🔍 Verifying translation keys across all language files...\n');
 
 files.forEach(file => {
-  const langCode = path.basename(file, '.json');
+  const raw = SecurityUtils.safeReadFileSync(filePath, 'utf8');
+  let content = {};
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      content = (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+      if (Object.keys(content).length === 0) {
+        // optional: log only when top-level is not an object
+        // console.warn(`Top-level of ${filePath} is not an object; treating as empty.`);
+      }
+    } catch (e) {
+      console.error(`Invalid JSON in ${filePath}: ${e.message}`);
+      // keep content as {}
+    }
+  }
   const filePath = path.join(localesPath, file);
-  const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  content = JSON.parse(SecurityUtils.safeReadFileSync(filePath, 'utf8') || '{}');
   const langKeys = new Set(getAllKeys(content));
   
   // Find missing keys

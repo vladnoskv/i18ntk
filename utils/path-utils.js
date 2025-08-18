@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const SecurityUtils = require('./security');
 
 function isWindows(p) {
   return /^[a-zA-Z]:\\/.test(p);
@@ -40,7 +41,7 @@ function getPackageRoot() {
   let currentDir = __dirname;
   while (currentDir !== path.parse(currentDir).root) {
     const packageJsonPath = path.join(currentDir, 'package.json');
-    if (fs.existsSync(packageJsonPath)) {
+    if (SecurityUtils.safeExistsSync(packageJsonPath)) {
       return currentDir;
     }
     currentDir = path.dirname(currentDir);
@@ -77,8 +78,8 @@ function resolvePackagePath(relativePath) {
  */
 function ensureDirectory(dirPath) {
   try {
-    if (!fs.existsSync(dirPath)) {
-      SecurityUtils.safeMkdirSync(dirPath, process.cwd(), { recursive: true });
+    if (!SecurityUtils.safeExistsSync(dirPath)) {
+      SecurityUtils.safeMkdirSync(dirPath, { recursive: true });
     }
     return true;
   } catch (error) {

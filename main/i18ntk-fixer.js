@@ -41,7 +41,7 @@ class I18nFixer {
     const localeFile = path.join(uiLocalesDir, 'en.json');
     
     try {
-      const localeContent = SecurityUtils.safeReadFileSync(localeFile, process.cwd()) || '';
+      const localeContent = SecurityUtils.safeReadFileSync(localeFile) || '';
       return JSON.parse(localeContent);
     } catch (error) {
       // Fallback to basic English strings if locale file not found
@@ -198,7 +198,7 @@ class I18nFixer {
     const addIf = p => {
       try {
         const abs = path.isAbsolute(p) ? p : path.resolve(projectRoot, p);
-        const stat = SecurityUtils.safeStatSync(abs, process.cwd());
+        const stat = SecurityUtils.safeStatSync(abs);
         if (stat && stat.isDirectory()) {
           candidates.add(configManager.toRelative(abs));
         }
@@ -210,7 +210,7 @@ class I18nFixer {
     try {
       const validatedProjectRoot = SecurityUtils.sanitizePath(projectRoot, process.cwd());
       if (validatedProjectRoot) {
-        SecurityUtils.safeReaddirSync(validatedProjectRoot, process.cwd(), { withFileTypes: true })
+        SecurityUtils.safeReaddirSync(validatedProjectRoot, { withFileTypes: true })
           .filter(d => d.isDirectory())
           .forEach(d => {
             const dir = SecurityUtils.sanitizePath(path.join(validatedProjectRoot, d.name), validatedProjectRoot);
@@ -279,15 +279,15 @@ class I18nFixer {
     const absChosen = path.isAbsolute(chosen) ? chosen : path.resolve(projectRoot, chosen);
 
     // Validate chosen path (create if doesn't exist)
-    const safePath = SecurityUtils.sanitizePath(absChosen, projectRoot);
+    const safePath = SecurityUtils.safeSanitizePath(absChosen, projectRoot);
     if (!safePath) {
       console.warn('Invalid or unsafe directory path. Using default.');
       return defaultDir;
     }
-    if (!SecurityUtils.safeExistsSync(safePath, process.cwd())) {
-            SecurityUtils.safeMkdirSync(safePath, { recursive: true }, process.cwd());
+    if (!SecurityUtils.safeExistsSync(safePath)) {
+            SecurityUtils.safeMkdirSync(safePath, { recursive: true });
       try {
-        SecurityUtils.safeMkdirSync(safePath, { recursive: true }, process.cwd());
+        SecurityUtils.safeMkdirSync(safePath, { recursive: true });
       } catch (err) {
         console.warn(`Failed to create directory: ${err.message}`);
         return defaultDir;
@@ -401,12 +401,12 @@ class I18nFixer {
   }
 
   getAvailableLanguages() {
-    if (!SecurityUtils.safeExistsSync(this.sourceDir, process.cwd())) return [];
-    const entries = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd());
+    if (!SecurityUtils.safeExistsSync(this.sourceDir)) return [];
+    const entries = SecurityUtils.safeReaddirSync(this.sourceDir);
     const langs = new Set();
     entries.forEach(item => {
       const full = path.join(this.sourceDir, item);
-      const stat = SecurityUtils.safeStatSync(full, process.cwd());
+      const stat = SecurityUtils.safeStatSync(full);
         if (stat && stat.isDirectory()) {
         langs.add(item);
       } else if (item.endsWith('.json')) {
@@ -430,7 +430,7 @@ class I18nFixer {
   getAllFiles(dir) {
     const results = [];
     const validatedDir = SecurityUtils.sanitizePath(dir, this.sourceDir);
-    if (!validatedDir || !SecurityUtils.safeExistsSync(validatedDir, process.cwd())) return results;
+    if (!validatedDir || !SecurityUtils.safeExistsSync(validatedDir)) return results;
     
     try {
       SecurityUtils.safeReaddirSync(validatedDir, this.sourceDir).forEach(item => {
@@ -438,7 +438,7 @@ class I18nFixer {
         const validatedFull = SecurityUtils.sanitizePath(full, this.sourceDir);
         if (!validatedFull) return;
         
-        const stat = SecurityUtils.safeStatSync(validatedFull, process.cwd());
+        const stat = SecurityUtils.safeStatSync(validatedFull);
         if (stat.isDirectory()) {
           results.push(...this.getAllFiles(validatedFull));
         } else if (stat.isFile() && item.endsWith('.json')) {
@@ -505,7 +505,7 @@ class I18nFixer {
       }
       
       let tgtData = {};
-      if (SecurityUtils.safeExistsSync(validatedTargetFile, process.cwd())) {
+      if (SecurityUtils.safeExistsSync(validatedTargetFile)) {
         try {
           const content = SecurityUtils.safeReadFileSync(validatedTargetFile, this.sourceDir);
           tgtData = content ? JSON.parse(content) : {};
@@ -559,7 +559,7 @@ class I18nFixer {
       }
       
       let tgtData = {};
-      if (SecurityUtils.safeExistsSync(validatedTargetFile, process.cwd())) {
+      if (SecurityUtils.safeExistsSync(validatedTargetFile)) {
         try {
           const content = SecurityUtils.safeReadFileSync(validatedTargetFile, this.sourceDir);
           tgtData = content ? JSON.parse(content) : {};
@@ -706,18 +706,18 @@ class I18nFixer {
     const reportDir = path.join(this.config.outputDir || './i18ntk-reports', 'fixer-reports');
     
     // Validate report directory path
-    const validatedReportDir = SecurityUtils.sanitizePath(reportDir, process.cwd());
+    const validatedReportDir = SecurityUtils.safeSanitizePath(reportDir);
     if (!validatedReportDir) {
       throw new Error('Invalid report directory path');
     }
     
     // Ensure report directory exists
-    if (!SecurityUtils.safeExistsSync(validatedReportDir, process.cwd())) {
-      SecurityUtils.safeMkdirSync(validatedReportDir, process.cwd());
+    if (!SecurityUtils.safeExistsSync(validatedReportDir)) {
+      SecurityUtils.safeMkdirSync(validatedReportDir);
     }
 
     const reportFile = path.join(validatedReportDir, `fixer-report-${timestamp}.json`);
-    const validatedReportFile = SecurityUtils.sanitizePath(reportFile, validatedReportDir);
+    const validatedReportFile = SecurityUtils.safeSanitizePath(reportFile, validatedReportDir);
     if (!validatedReportFile) {
       throw new Error('Invalid report file path');
     }
@@ -813,7 +813,7 @@ class I18nFixer {
       const allIssues = [];
       for (const lang of this.languages) {
         console.log(this.t('fixer.scanningLanguage', { language: lang }));
-        const issues = this.scanForIssues(lang);
+        const issues = this.safeScanForIssues(lang);
         allIssues.push(...issues);
       }
 
@@ -833,7 +833,7 @@ class I18nFixer {
       // Non-interactive mode (for tests)
       if (this.config.noBackup) {
         console.log(`\n${this.t('fixer.nonInteractiveMode')}`);
-        this.languages.forEach(lang => this.processLanguage(lang));
+        this.languages.forEach(lang => this.safeProcessLanguage(lang));
         console.log(this.t('fixer.fixingComplete'));
         return;
       }
@@ -849,7 +849,7 @@ class I18nFixer {
         console.log(this.t('fixer.backupCreated'));
         
         console.log(`\n${this.t('fixer.applyingFixes')}`);
-        this.languages.forEach(lang => this.processLanguage(lang));
+        this.languages.forEach(lang => this.safeProcessLanguage(lang));
         console.log(this.t('fixer.fixingComplete'));
       } else {
         console.log(this.t('fixer.operationCancelled'));

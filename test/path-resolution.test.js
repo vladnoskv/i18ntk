@@ -16,8 +16,8 @@ describe('Path Resolution Tests', () => {
   
   beforeAll(() => {
     // Ensure test project directory exists
-    if (!fs.existsSync(testProjectRoot)) {
-      fs.mkdirSync(testProjectRoot, { recursive: true });
+    if (!SecurityUtils.safeExistsSync(testProjectRoot)) {
+      SecurityUtils.safeMkdirSync(testProjectRoot, null, { recursive: true });
     }
     
     // Change to test project directory
@@ -106,7 +106,7 @@ describe('Path Resolution Tests', () => {
     
     // Should be able to resolve package.json
     const packageJsonPath = path.join(packageRoot, 'package.json');
-    expect(fs.existsSync(packageJsonPath)).toBe(true);
+    expect(SecurityUtils.safeExistsSync(packageJsonPath)).toBe(true);
     
     // Should be able to resolve node_modules relative to package
     const nodeModulesPath = path.join(packageRoot, 'node_modules');
@@ -138,11 +138,11 @@ describe('Path Resolution Tests', () => {
     }).not.toThrow();
     
     // Should exist after creation
-    expect(fs.existsSync(testDir)).toBe(true);
+    expect(SecurityUtils.safeExistsSync(testDir)).toBe(true);
     
     // Clean up
-    if (fs.existsSync(testDir)) {
-      fs.rmdirSync(testDir, { recursive: true });
+    if (SecurityUtils.safeExistsSync(testDir)) {
+      SecurityUtils.safeRmdirSync(testDir, { recursive: true });
     }
   });
 

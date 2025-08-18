@@ -11,6 +11,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 class LiteBuild {
   constructor() {
@@ -54,10 +55,10 @@ class LiteBuild {
   }
 
   async cleanBuildDir() {
-    if (fs.existsSync(this.buildDir)) {
-      fs.rmSync(this.buildDir, { recursive: true, force: true });
+    if (SecurityUtils.safeExistsSync(this.buildDir)) {
+      SecurityUtils.safeRmdirSync(this.buildDir, { recursive: true, force: true });
     }
-    SecurityUtils.safeMkdirSync(this.buildDir, process.cwd(), { recursive: true });
+    SecurityUtils.safeMkdirSync(this.buildDir, { recursive: true });
   }
 
   async createBuildStructure() {
@@ -70,7 +71,7 @@ class LiteBuild {
     ];
 
     dirs.forEach(dir => {
-      SecurityUtils.safeMkdirSync(path.join(this.buildDir, dir), this.buildDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(path.join(this.buildDir, dir), { recursive: true });
     });
   }
 
@@ -106,8 +107,8 @@ class LiteBuild {
       const srcPath = path.join(this.projectRoot, src);
       const destPath = path.join(this.buildDir, dest);
       
-      if (fs.existsSync(srcPath)) {
-        fs.copyFileSync(srcPath, destPath);
+      if (SecurityUtils.safeExistsSync(srcPath)) {
+        SecurityUtils.safeCopyFileSync(srcPath, destPath);
       }
     });
   }
@@ -116,11 +117,11 @@ class LiteBuild {
     const enLocaleDir = path.join(this.projectRoot, 'ui-locales', 'en');
     const destDir = path.join(this.buildDir, 'ui-locales', 'en');
     
-    if (fs.existsSync(enLocaleDir)) {
-      const files = fs.readdirSync(enLocaleDir);
+    if (SecurityUtils.safeExistsSync(enLocaleDir)) {
+      const files = SecurityUtils.safeReaddirSync(enLocaleDir);
       files.forEach(file => {
         if (file.endsWith('.json')) {
-          fs.copyFileSync(
+          SecurityUtils.safeCopyFileSync(
             path.join(enLocaleDir, file),
             path.join(destDir, file)
           );
@@ -150,11 +151,10 @@ class LiteBuild {
       homepage: this.packageJson.homepage
     };
 
-    fs.writeFileSync(
+    SecurityUtils.safeWriteFileSync(
       path.join(this.buildDir, 'package.json'),
       JSON.stringify(litePackageJson, null, 2)
-    );
-  }
+    );  }
 
   async createNpmIgnore() {
     const npmIgnoreContent = `
@@ -205,10 +205,10 @@ Thumbs.db
 .DS_Store
 `;
 
-    fs.writeFileSync(
+    SecurityUtils.safeWriteFileSync(
       path.join(this.buildDir, '.npmignore'),
       npmIgnoreContent.trim()
-    );
+    )
   }
 
   async generateBuildReport() {
@@ -242,10 +242,10 @@ Thumbs.db
     let totalSize = 0;
     
     const countFiles = (dir) => {
-      const files = fs.readdirSync(dir);
+      const files = SecurityUtils.safeReaddirSync(dir);
       files.forEach(file => {
         const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
+        const stat = SecurityUtils.safeStatSync(filePath);
         
         if (stat.isDirectory()) {
           countFiles(filePath);

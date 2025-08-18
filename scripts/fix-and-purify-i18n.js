@@ -46,18 +46,19 @@ const COUNTRY_CODES = { de: 'DE', es: 'ES', fr: 'FR', ru: 'RU', ja: 'JA', zh: 'Z
 
 // ---------------- HELPERS ----------------
 function readUTF8(p) {
-  try { return SecurityUtils.safeReadFileSync(p, 'utf8', process.cwd()); } catch { return null; }
+  try { return SecurityUtils.safeReadFile(p, 'utf8'); } catch { return null; }
 }
 function writeJSON(p, obj) {
-  SecurityUtils.safeMkdirSync(path.dirname(p), process.cwd());
-  SecurityUtils.safeWriteFileSync(p, JSON.stringify(obj, null, 2) + '\n', process.cwd());
+  SecurityUtils.safeMkdirSync(path.dirname(p), { recursive: true });
+  SecurityUtils.safeWriteFile(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+
 }
 function isDir(p) { 
-  const stats = SecurityUtils.safeStatSync(p, process.cwd());
+  const stats = SecurityUtils.safeStatSync(p);
   return stats ? stats.isDirectory() : false;
 }
 function isFile(p) { 
-  const stats = SecurityUtils.safeStatSync(p, process.cwd());
+  const stats = SecurityUtils.safeStatSync(p);
   return stats ? stats.isFile() : false;
 }
 
@@ -65,10 +66,10 @@ function listFilesRecursive(dir, exts = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '
   const out = [];
   (function walk(d) {
     try {
-      for (const name of SecurityUtils.safeReaddirSync(d, process.cwd())) {
+      for (const name of SecurityUtils.safeReaddirSync(d)) {
         const full = path.join(d, name);
         if (EXCLUDE_DIRS.has(name)) continue;
-        const st = SecurityUtils.safeStatSync(full, process.cwd());
+        const st = SecurityUtils.safeStatSync(full);
         if (st) {
           if (st.isDirectory()) walk(full);
           else if (st.isFile() && exts.includes(path.extname(name))) out.push(full);
@@ -136,7 +137,7 @@ function loadLanguage(lang) {
   const dir = path.join(I18N_DIR, lang);
   if (isDir(dir)) {
     const data = {};
-    for (const f of SecurityUtils.safeReaddirSync(dir, process.cwd()).filter(f => f.endsWith('.json'))) {
+    for (const f of SecurityUtils.safeReaddir(dir).filter(f => f.endsWith('.json'))) {
       const p = path.join(dir, f);
       const name = path.basename(f, '.json');
       try { data[name] = JSON.parse(readUTF8(p) || '{}'); } catch { data[name] = {}; }

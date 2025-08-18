@@ -116,21 +116,22 @@ class I18nCompletionTool {
 
   // Get all available languages
   getAvailableLanguages() {
-    if (!fs.existsSync(this.sourceDir)) {
+    if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
       throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
     // Check for monolith JSON files (en.json, es.json, etc.)
-    const files = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd());
+    const files = SecurityUtils.safeReaddir(this.sourceDir);
     const languages = files
       .filter(file => file.endsWith('.json'))
       .map(file => path.basename(file, '.json'));
     
     // Also check for directory-based structure for backward compatibility
-    const directories = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd())
+    const directories = SecurityUtils.safeReaddir(this.sourceDir)
       .filter(item => {
         const itemPath = path.join(this.sourceDir, item);
-        return fs.statSync(itemPath).isDirectory();
+        const stats = SecurityUtils.safeStatSync(itemPath);
+        return stats ? stats.isDirectory() : false;
       });
     
     return [...new Set([...languages, ...directories])];
@@ -140,11 +141,11 @@ class I18nCompletionTool {
   getLanguageFiles(language) {
     const languageDir = path.join(this.sourceDir, language);
     
-    if (!fs.existsSync(languageDir)) {
+    if (!SecurityUtils.safeExistsSync(languageDir)) {
       return [];
     }
     
-    return SecurityUtils.safeReaddirSync(languageDir, this.sourceDir)
+    return SecurityUtils.safeReaddir(languageDir)
       .filter(file => {
         return file.endsWith('.json') && 
                !this.config.excludeFiles.includes(file);
@@ -234,10 +235,10 @@ class I18nCompletionTool {
       let fileContent = {};
       
       // Load existing file or create new
-      const fileExists = SecurityUtils.safeExistsSync(filePath, process.cwd());
+      const fileExists = SecurityUtils.safeExistsSync(filePath);
       if (fileExists) {
         try {
-          const content = SecurityUtils.safeReadFileSync(filePath, process.cwd(), 'utf8');
+          const content = SecurityUtils.safeReadFile(filePath, 'utf8');
           fileContent = content ? JSON.parse(content) : {};
         } catch (error) {
           console.warn(t("completeTranslations.warning_could_not_parse_filepa", { filePath }));;
@@ -245,9 +246,9 @@ class I18nCompletionTool {
         }
       } else {
         // Create directory if it doesn't exist
-        const dirExists = SecurityUtils.safeExistsSync(languageDir, process.cwd());
+        const dirExists = SecurityUtils.safeExistsSync(languageDir);
         if (!dirExists && !dryRun) {
-          SecurityUtils.safeMkdirSync(languageDir, process.cwd());
+          SecurityUtils.safeMkdirSync(languageDir);
         }
       }
       
@@ -272,7 +273,7 @@ class I18nCompletionTool {
       
       // Save file
       if (fileChanged && !dryRun) {
-        SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(fileContent, null, 2), process.cwd(), 'utf8');
+        SecurityUtils.safeWriteFile(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
       }
     }
     
@@ -332,11 +333,11 @@ class I18nCompletionTool {
     const sourceFilePath = path.join(this.sourceDir, `${sourceLang}.json`);
     const missingKeys = [];
 
-    const sourceFileExists = SecurityUtils.safeExistsSync(sourceFilePath, process.cwd());
+    const sourceFileExists = SecurityUtils.safeExistsSync(sourceFilePath);
     if (!sourceFileExists) {
       // Fallback to directory based lookup
       const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
-      const sourceDirExists = SecurityUtils.safeExistsSync(this.sourceLanguageDir, process.cwd());
+      const sourceDirExists = SecurityUtils.safeExistsSync(this.sourceLanguageDir);
       if (!sourceDirExists) {
         console.log(t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
         return [];
@@ -347,7 +348,7 @@ class I18nCompletionTool {
         const sourceFilePathInDir = path.join(this.sourceLanguageDir, fileName);
         
         try {
-          const sourceContentRaw = SecurityUtils.safeReadFileSync(sourceFilePathInDir, process.cwd(), 'utf8');
+          const sourceContentRaw = SecurityUtils.safeReadFile(sourceFilePathInDir, 'utf8');
           if (sourceContentRaw === null) continue;
           const sourceContent = JSON.parse(sourceContentRaw);
           const sourceKeys = this.getAllKeys(sourceContent);
@@ -360,10 +361,10 @@ class I18nCompletionTool {
             const targetFilePath = path.join(this.sourceDir, language, fileName);
             let targetKeys = [];
             
-            const targetExists = SecurityUtils.safeExistsSync(targetFilePath, process.cwd());
+            const targetExists = SecurityUtils.safeExistsSync(targetFilePath);
             if (targetExists) {
               try {
-                const targetContentRaw = SecurityUtils.safeReadFileSync(targetFilePath, process.cwd(), 'utf8');
+                const targetContentRaw = SecurityUtils.safeReadFile(targetFilePath, 'utf8');
                 if (targetContentRaw !== null) {
                   const targetContent = JSON.parse(targetContentRaw);
                   targetKeys = this.getAllKeys(targetContent);
@@ -384,7 +385,7 @@ class I18nCompletionTool {
     } else {
       // Monolith file logic
       try {
-        const sourceContentRaw = SecurityUtils.safeReadFileSync(sourceFilePath, process.cwd(), 'utf8');
+        const sourceContentRaw = SecurityUtils.safeReadFile(sourceFilePath, 'utf8');
         if (sourceContentRaw === null) return [];
         const sourceContent = JSON.parse(sourceContentRaw);
         const sourceKeys = this.getAllKeys(sourceContent);
@@ -396,10 +397,10 @@ class I18nCompletionTool {
           const targetFilePath = path.join(this.sourceDir, `${language}.json`);
           let targetKeys = [];
 
-          const targetExists = SecurityUtils.safeExistsSync(targetFilePath, process.cwd());
+          const targetExists = SecurityUtils.safeExistsSync(targetFilePath);
           if (targetExists) {
             try {
-              const targetContentRaw = SecurityUtils.safeReadFileSync(targetFilePath, process.cwd(), 'utf8');
+              const targetContentRaw = SecurityUtils.safeReadFile(targetFilePath, 'utf8');
               if (targetContentRaw !== null) {
                 const targetContent = JSON.parse(targetContentRaw);
                 targetKeys = this.getAllKeys(targetContent);
@@ -427,9 +428,9 @@ class I18nCompletionTool {
   async generateReport(changes, languages) {
     const projectRoot = this.config.projectRoot || process.cwd();
     const reportsDir = path.join(projectRoot, 'i18ntk-reports');
-    const reportsDirExists = SecurityUtils.safeExistsSync(reportsDir, process.cwd());
+    const reportsDirExists = SecurityUtils.safeExistsSync(reportsDir);
     if (!reportsDirExists) {
-      SecurityUtils.safeMkdirSync(reportsDir, process.cwd());
+      SecurityUtils.safeMkdirSync(reportsDir);
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -456,7 +457,7 @@ class I18nCompletionTool {
       }))
     };
     
-    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd(), 'utf8');
+    SecurityUtils.safeWriteFile(reportPath, JSON.stringify(report, null, 2), 'utf8');
     console.log(t("complete.reportGenerated", { path: reportPath }));
     return reportPath;
   }

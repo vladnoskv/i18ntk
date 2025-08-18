@@ -84,9 +84,9 @@ function secureErrorHandler(options = {}) {
   const operationQueue = [];
   
   // Ensure log directory exists
-  if (config.logFilePath && !fs.existsSync(path.dirname(config.logFilePath))) {
+  if (config.logFilePath && !SecurityUtils.safeExistsSync(path.dirname(config.logFilePath))) {
     try {
-      fs.mkdirSync(path.dirname(config.logFilePath), { recursive: true });
+      SecurityUtils.safeMkdirSync(path.dirname(config.logFilePath), { recursive: true });
     } catch (e) {
       console.error('Failed to create log directory:', e);
     }
@@ -111,113 +111,171 @@ function secureErrorHandler(options = {}) {
     return recentErrors.length > config.maxErrorsPerMinute;
   }
 
-  return async function(error, req, res, next) {
-    const clientId = req?.ip || 'unknown';
+const rateLimitCache = new Map();
+const fileOperationLimiter = {
+  activeOperations: new Map(),
+  maxConcurrent: 5,
+  queue: [],
+  
+  async throttleOperation(operation) {
+    const key = Date.now().toString();
     
-    // Rate limiting check
-    if (isRateLimited(clientId)) {
-      res.status(429).json({
-        error: 'TooManyRequests',
-        message: 'Too many error requests',
-        code: 'RATE_LIMITED'
-      });
-      return;
+    if (this.activeOperations.size >= this.maxConcurrent) {
+      await new Promise(resolve => this.queue.push(resolve));
     }
     
-    // Add rate limiting for error handling
-    const now = Date.now();
-    if (!this.lastErrorHandled || (now - this.lastErrorHandled) >= 100) { // Minimum 100ms between error handling
-      this.lastErrorHandled = now;
-      let statusCode = 500;
-      let response = {};
+    this.activeOperations.set(key, true);
+    
+    try {
+      const result = await operation();
+      return result;
+    } finally {
+      this.activeOperations.delete(key);
+      if (this.queue.length > 0) {
+        const resolve = this.queue.shift();
+        resolve();
+      }
+    }
+  }
+};
 
-      if (error instanceof ValidationError) {
+// Resource limiter for file operations
+const resourceLimiter = {
+  lastFileOperation: 0,
+  minInterval: 10, // 10ms minimum between file operations
+  
+  async limitFileOperation(operation) {
+    const now = Date.now();
+    const timeSinceLast = now - this.lastFileOperation;
+    
+    if (timeSinceLast < this.minInterval) {
+      await new Promise(resolve => setTimeout(resolve, this.minInterval - timeSinceLast));
+    }
+    
+    try {
+      const result = await operation();
+      return result;
+    } finally {
+      this.lastFileOperation = Date.now();
+    }
+  }
+};
+
+async function handleSecureError(error, req, res, _next) {
+    const clientId = req?.ip || 'unknown';
+    const errorId = crypto.randomBytes(8).toString('hex');
+    const now = Date.now();
+
+    // Rate limiting check
+    const lastErrorTime = rateLimitCache.get(clientId);
+    if (lastErrorTime && (now - lastErrorTime) < 100) { // Minimum 100ms between error handling
+        res.status(429).json({
+            error: 'TooManyRequests',
+            errorId,
+            message: 'Too many error requests',
+            code: 'RATE_LIMITED'
+        });
+        return;
+    }
+
+    // Update rate limit cache
+    rateLimitCache.set(clientId, now);
+    setTimeout(() => rateLimitCache.delete(clientId), 100); // Remove entry after 100ms
+
+    let statusCode = 500;
+    let response = {};
+
+    if (error instanceof ValidationError) {
         statusCode = 400;
         response = error.toJSON();
-      } else if (error instanceof SecurityError) {
+    } else if (error instanceof SecurityError) {
         statusCode = 403;
         response = error.toJSON();
-      } else if (error instanceof EncryptionError) {
+    } else if (error instanceof EncryptionError) {
         statusCode = 400;
         response = error.toJSON();
-      } else {
+    } else {
         response = SecureError.sanitizeError(error);
-      }
+    }
 
-      // Log the error if enabled
-      if (config.logErrors) {
+    // Log the error if enabled
+    if (config.logErrors) {
         const logEntry = {
-          timestamp: new Date().toISOString(),
-          error: {
-            name: error.name,
-            message: error.message,
-            stack: config.sanitizeStack 
-              ? error.stack.split('\n').slice(0, 3).join('\n') + '\n    ...'
-              : error.stack,
-            ...(error.details && { details: error.details }),
-            errorId: response.errorId
-          },
-          request: req ? {
-            method: req.method,
-            url: req.originalUrl,
-            ip: req.ip,
-            userAgent: req.get('user-agent')
-          } : undefined
+            timestamp: new Date().toISOString(),
+            error: {
+                name: error.name,
+                message: error.message,
+                stack: config.sanitizeStack 
+                    ? error.stack.split('\n').slice(0, 3).join('\n') + '\n    ...'
+                    : error.stack,
+                ...(error.details && { details: error.details }),
+                errorId: response.errorId
+            },
+            request: req ? {
+                method: req.method,
+                url: req.originalUrl,
+                ip: req.ip,
+                userAgent: req.get('user-agent')
+            } : undefined
         };
 
         // Log to console
         if (typeof config.logFunction === 'function') {
-          config.logFunction(JSON.stringify(logEntry, null, 2));
+            config.logFunction(JSON.stringify(logEntry, null, 2));
         }
 
-        // Log to file if configured
+        // Log to file if configured - with resource limiting
         if (config.logFilePath) {
-          try {
-            const logString = JSON.stringify(logEntry) + '\n';
-            const maxLogSize = 1024 * 1024; // 1MB limit per log entry
-            
-            // Only proceed if log entry size is within limits
-            if (logString.length <= maxLogSize) {
-              // Use a rolling file size limit
-              let stats;
-              try {
-                stats = fs.statSync(config.logFilePath);
-              } catch (err) {
-                // File doesn't exist yet
-                stats = { size: 0 };
-              }
+            try {
+                const logString = JSON.stringify(logEntry) + '\n';
+                const maxLogSize = 1024 * 1024; // 1MB limit per log entry
+                
+                // Only proceed if log entry size is within limits
+                if (logString.length <= maxLogSize) {
+                    await resourceLimiter.limitFileOperation(async () => {
+                        return await fileOperationLimiter.throttleOperation(async () => {
+                            // Use a rolling file size limit
+                            let stats;
+                            try {
+                                stats = await fs.promises.stat(config.logFilePath);
+                            } catch (err) {
+                                // File doesn't exist yet
+                                stats = { size: 0 };
+                            }
 
-              const maxFileSize = 10 * 1024 * 1024; // 10MB total file size limit
-              
-              if (stats.size + logString.length <= maxFileSize) {
-                // Use async file write with proper error handling
-                await fs.promises.appendFile(
-                  config.logFilePath,
-                  logString,
-                  { encoding: 'utf8' }
-                );
-              } else {
-                // Rotate log file if size limit reached
-                try {
-                  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                  const backupPath = `${config.logFilePath}.${timestamp}`;
-                  await fs.promises.rename(config.logFilePath, backupPath);
-                  await fs.promises.appendFile(config.logFilePath, logString, { encoding: 'utf8' });
-                } catch (rotateError) {
-                  console.error('Failed to rotate log file:', rotateError);
+                            const maxFileSize = 10 * 1024 * 1024; // 10MB total file size limit
+                            
+                            if (stats.size + logString.length <= maxFileSize) {
+                                // Use async file write with proper error handling
+                                await fs.promises.appendFile(
+                                    config.logFilePath,
+                                    logString,
+                                    { encoding: 'utf8' }
+                                );
+                            } else {
+                                // Rotate log file if size limit reached
+                                try {
+                                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                                    const backupPath = `${config.logFilePath}.${timestamp}`;
+                                    await fs.promises.rename(config.logFilePath, backupPath);
+                                    await fs.promises.appendFile(config.logFilePath, logString, { encoding: 'utf8' });
+                                } catch (rotateError) {
+                                    console.error('Failed to rotate log file:', rotateError);
+                                }
+                            }
+                        });
+                    });
                 }
-              }
+            } catch (writeError) {
+                console.error('Failed to write error log:', writeError);
             }
-          } catch (writeError) {
-            console.error('Failed to write error log:', writeError);
-          }
         }
-      }
-
-      // Send response
-      res.status(statusCode).json(response);
     }
-  },
+
+    // Send response
+    res.status(statusCode).json(response);
+}
+}
 
 module.exports = {
   SecureError,
@@ -226,4 +284,4 @@ module.exports = {
   EncryptionError,
   secureErrorHandler,
   createError: (message, code, details) => new SecureError(message, code, details)
-}}
+}

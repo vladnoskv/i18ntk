@@ -60,8 +60,8 @@ class PhpI18nManager {
   async detectFramework(sourceDir) {
     // Check for Laravel
     const composerJson = path.join(sourceDir, 'composer.json');
-    if (fs.existsSync(composerJson)) {
-      const content = fs.readFileSync(composerJson, 'utf8');
+    if (SecurityUtils.safeExistsSync(composerJson)) {
+      const content = SecurityUtils.safeReadFileSync(composerJson, 'utf8');
       const composer = JSON.parse(content);
       
       if (composer.require && composer.require['laravel/framework']) {
@@ -83,7 +83,7 @@ class PhpI18nManager {
     
     // Check for WordPress
     const wpConfig = path.join(sourceDir, 'wp-config.php');
-    if (fs.existsSync(wpConfig)) {
+    if (SecurityUtils.safeExistsSync(wpConfig)) {
       return 'wordpress';
     }
     
@@ -109,7 +109,7 @@ class PhpI18nManager {
     ];
     
     for (const file of phpFiles) {
-      const content = fs.readFileSync(file, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(file, 'utf8');
       
       // Extract PHP i18n patterns
       const patterns = [
@@ -162,35 +162,62 @@ class PhpI18nManager {
     for (const file of translationFiles) {
       if (file.includes('lang') || file.includes('translations') || file.includes('i18n')) {
         try {
-          const content = fs.readFileSync(file, 'utf8');
+          const content = SecurityUtils.safeReadFileSync(file, 'utf8');
           
           if (file.endsWith('.php')) {
             // PHP array translations
-            const arrayPattern = /'([^']+)'\s*=>/g;
+            const arrayPattern = /['"]([^'"]+)['"]\s*=>/g;
             let match;
             while ((match = arrayPattern.exec(content)) !== null) {
               translations.add(match[1]);
             }
           } else if (file.endsWith('.json')) {
             // JSON translations
-            const data = JSON.parse(content);
-            const keys = this.extractKeysFromObject(data);
-            keys.forEach(key => translations.add(key));
+            try {
+              const data = JSON.parse(content);
+              const keys = this.extractKeysFromObject(data);
+              keys.forEach(key => translations.add(key));
+            } catch (parseError) {
+              console.warn(`Skipping invalid JSON file: ${file}`);
+            }
           } else if (file.endsWith('.yml') || file.endsWith('.yaml')) {
-            // YAML translations (basic parsing)
-            const lines = content.split('\n');
-            for (const line of lines) {
-              const trimmed = line.trim();
-              if (trimmed && !trimmed.startsWith('#') && trimmed.includes(':')) {
-                const key = trimmed.split(':')[0].trim();
-                if (!key.startsWith(' ')) {
-                  translations.add(key);
+            // YAML translations (improved parsing)
+            try {
+              const lines = content.split('\n');
+              let currentIndent = 0;
+              let keyStack = [];
+              
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('#')) continue;
+                
+                const indent = line.search(/\S/);
+                const colonIndex = trimmed.indexOf(':');
+                
+                if (colonIndex > -1) {
+                  let key = trimmed.substring(0, colonIndex).trim();
+                  
+                  // Handle nested keys
+                  if (indent < currentIndent) {
+                    keyStack = keyStack.slice(0, Math.floor(indent / 2));
+                  }
+                  
+                  const fullKey = [...keyStack, key].join('.');
+                  translations.add(fullKey);
+                  
+                  if (indent > currentIndent || (indent === currentIndent && keyStack.length > 0)) {
+                    keyStack.push(key);
+                  }
+                  
+                  currentIndent = indent;
                 }
               }
+            } catch (parseError) {
+              console.warn(`Skipping invalid YAML file: ${file}`);
             }
           }
         } catch (error) {
-          // Skip files that can't be parsed
+          console.warn(`Error processing file ${file}:`, error.message);
         }
       }
     }
@@ -221,13 +248,17 @@ class PhpI18nManager {
   async createLocaleStructure(outputDir, languages = ['en'], framework = 'standard-php') {
     const localesDir = path.join(outputDir, 'locales');
     
-    for (const lang of languages) {
-      const langDir = path.join(localesDir, lang);
-      fs.mkdirSync(langDir, { recursive: true });
+    try {
+      // Ensure locales directory exists
+      await fs.promises.mkdir(localesDir, { recursive: true });
       
-      if (framework === 'laravel') {
-        // Laravel structure
-        fs.writeFileSync(path.join(langDir, 'messages.php'), `<?php
+      for (const lang of languages) {
+        const langDir = path.join(localesDir, lang);
+        await fs.promises.mkdir(langDir, { recursive: true });
+        
+        if (framework === 'laravel') {
+          // Laravel structure
+          const messagesContent = `<?php
 // Laravel i18n for ${lang}
 return [
     'hello' => 'Hello, World!',
@@ -237,71 +268,92 @@ return [
     ],
     'welcome' => 'Welcome to our application'
 ];
-`);
-        
-        fs.writeFileSync(path.join(langDir, 'validation.php'), `<?php
+`;
+          const validationContent = `<?php
 // Laravel validation messages for ${lang}
 return [
     'required' => 'The :attribute field is required.',
     'email' => 'The :attribute must be a valid email address.',
     'unique' => 'The :attribute has already been taken.'
 ];
-`);
-      } else if (framework === 'symfony') {
-        // Symfony structure
-        fs.writeFileSync(path.join(langDir, 'messages.yml'), `# Symfony i18n for ${lang}
-hello: "Hello, World!"
-items:
-  one: "%count% item"
-  other: "%count% items"
-welcome: "Welcome to our application"
-`);
-        
-        fs.writeFileSync(path.join(langDir, 'validators.yml'), `# Symfony validation for ${lang}
-required: "The {{ field }} field is required."
-email: "The {{ field }} must be a valid email address."
-unique: "The {{ field }} has already been taken."
-`);
-      } else {
-        // Standard PHP
-        fs.writeFileSync(path.join(langDir, 'messages.php'), `<?php
-// PHP i18n for ${lang}
+`;
+          
+          SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.php'), messagesContent, process.cwd());
+          SecurityUtils.safeWriteFileSync(path.join(langDir, 'validation.php'), validationContent, process.cwd());
+          const validatorsContent = `<?php
+// Laravel validation messages for ${lang}
 return [
-    'hello' => 'Hello, World!',
-    'items' => [
-        'one' => '{0} item',
-        'other' => '{0} items'
-    ],
-    'welcome' => 'Welcome to our application'
+    'required' => 'The :attribute field is required.',
+    'email' => 'The :attribute must be a valid email address.',
+    'unique' => 'The :attribute has already been taken.'
 ];
-`);
-        
-        fs.writeFileSync(path.join(langDir, 'messages.json'), JSON.stringify({
-          hello: "Hello, World!",
-          items: {
-            one: "{0} item",
-            other: "{0} items"
-          },
-          welcome: "Welcome to our application"
-        }, null, 2));
+`;
+          SecurityUtils.safeWriteFileSync(path.join(langDir, 'validators.php'), validatorsContent, process.cwd());
+
+        } else if (framework === 'symfony') {
+          // Symfony structure
+          const messagesContent = `# Symfony i18n for ${lang}
+    hello: "Hello, World!"
+    items:
+      one: "%count% item"
+      other: "%count% items"
+    welcome: "Welcome to our application"
+    `;
+          const validatorsContent = `# Symfony validation for ${lang}
+    required: "The {{ field }} field is required."
+    email: "The {{ field }} must be a valid email address."
+    unique: "The {{ field }} has already been taken."
+    `;
+          
+          SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.yml'), messagesContent, process.cwd());
+          SecurityUtils.safeWriteFileSync(path.join(langDir, 'validators.yml'), validatorsContent, process.cwd());
+          
+        } else {
+          // Standard PHP
+          const messagesContent = `<?php
+    // PHP i18n for ${lang}
+    return [
+        'hello' => 'Hello, World!',
+        'items' => [
+            'one' => '{0} item',
+            'other' => '{0} items'
+        ],
+        'welcome' => 'Welcome to our application'
+    ];
+    `;
+          
+          const messagesJson = JSON.stringify({
+            hello: "Hello, World!",
+            items: {
+              one: "{0} item",
+              other: "{0} items"
+            },
+            welcome: "Welcome to our application"
+          }, null, 2);
+          
+          SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.php'), messagesContent, process.cwd());
+          SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.json'), messagesJson, process.cwd());
+        }
       }
+      
+      return localesDir;
+    } catch (error) {
+      throw new Error(`Failed to create locale structure: ${error.message}`);
     }
-    
-    return localesDir;
   }
 
   findFiles(dir, extension) {
     const files = [];
     
     function traverse(currentDir) {
-      if (!fs.existsSync(currentDir)) return;
+      if (!SecurityUtils.safeExistsSync(currentDir)) return;
       
-      const items = fs.readdirSync(currentDir);
+      const items = SecurityUtils.safeReaddirSync(currentDir);
       
       for (const item of items) {
         const fullPath = path.join(currentDir, item);
         try {
-          const stat = fs.statSync(fullPath);
+          const stat = SecurityUtils.safeStatSync(fullPath);
           
           if (stat.isDirectory() && !item.startsWith('.') && 
               !['node_modules', 'vendor', 'cache', 'storage'].includes(item)) {

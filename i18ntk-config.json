@@ -1,5 +1,5 @@
 {
-    "version": "1.9.1",
+    "version": "1.10.0",
     "language": "en",
     "uiLanguage": "en",
     "theme": "dark",
@@ -297,7 +297,7 @@
         "hasI18nLibrary": false
     },
     "setupReport": {
-        "timestamp": "2025-08-17T15:21:27.638Z",
+        "timestamp": "2025-08-18T20:50:28.888Z",
         "setup": {
             "language": "javascript",
             "framework": "generic",

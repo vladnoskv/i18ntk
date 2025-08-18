@@ -8,6 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 class PrepublishCleaner {
     constructor() {
@@ -97,27 +98,27 @@ class PrepublishCleaner {
     }
 
     async cleanDirectory(dirPath) {
-        if (!fs.existsSync(dirPath)) {
+        if (!SecurityUtils.safeExistsSync(dirPath)) {
             return;
         }
 
         try {
-            const files = fs.readdirSync(dirPath);
+            const files = SecurityUtils.safeReaddirSync(dirPath);
             let deletedCount = 0;
 
             for (const file of files) {
                 const filePath = path.join(dirPath, file);
-                const stat = fs.statSync(filePath);
+                const stat = SecurityUtils.safeStatSync(filePath);
 
                 if (stat.isFile()) {
-                    fs.unlinkSync(filePath);
+                    SecurityUtils.safeDeleteSync(filePath);
                     deletedCount++;
                 } else if (stat.isDirectory()) {
                     // Recursively clean subdirectories
                     await this.cleanDirectory(filePath);
                     // Remove empty directories
                     try {
-                        fs.rmdirSync(filePath);
+                        SecurityUtils.safeRmdirSync(filePath);
                     } catch (e) {
                         // Directory not empty, skip
                     }
@@ -140,22 +141,22 @@ class PrepublishCleaner {
             const dir = path.dirname(searchPath);
             const filenamePattern = path.basename(searchPath);
             
-            if (fs.existsSync(dir)) {
-                const files = fs.readdirSync(dir);
+            if (SecurityUtils.safeExistsSync(dir)) {
+                const files = SecurityUtils.safeReaddirSync(dir);
                 const regex = new RegExp(filenamePattern.replace('*', '.*'));
                 
                 for (const file of files) {
                     if (regex.test(file)) {
                         const filePath = path.join(dir, file);
-                        fs.unlinkSync(filePath);
+                        SecurityUtils.safeDeleteSync(filePath);
                         this.log(`Deleted ${path.relative(this.projectRoot, filePath)}`);
                     }
                 }
             }
         } else {
             // Handle exact files
-            if (fs.existsSync(searchPath)) {
-                fs.unlinkSync(searchPath);
+            if (SecurityUtils.safeExistsSync(searchPath)) {
+                SecurityUtils.safeDeleteSync(searchPath);
                 this.log(`Deleted ${path.relative(this.projectRoot, searchPath)}`);
             }
         }
@@ -167,9 +168,9 @@ class PrepublishCleaner {
         let missingFiles = [];
         for (const file of this.essentialFiles) {
             const filePath = path.join(this.projectRoot, file);
-            if (!fs.existsSync(filePath)) {
+            if (!SecurityUtils.safeExistsSync(filePath)) {
                 missingFiles.push(file);
-            } else if (!fs.statSync(filePath).isFile()) {
+            } else if (!SecurityUtils.safeStatSync(filePath).isFile()) {
                 this.log(`❌ ${file} is not a file`);
                 process.exit(1);
             }
@@ -189,13 +190,13 @@ class PrepublishCleaner {
         let invalidFiles = [];
         for (const localeFile of this.essentialLocales) {
             const filePath = path.join(this.projectRoot, localeFile);
-            if (!fs.existsSync(filePath)) {
+            if (!SecurityUtils.safeExistsSync(filePath)) {
                 invalidFiles.push(localeFile);
                 continue;
             }
             
             try {
-                const content = fs.readFileSync(filePath, 'utf8');
+                const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
                 const parsed = JSON.parse(content);
                 
                 // Validate structure
@@ -226,7 +227,7 @@ class PrepublishCleaner {
         
         const packagePath = path.join(this.projectRoot, 'package.json');
         try {
-            const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            const pkg = JSON.parse(SecurityUtils.safeReadFileSync(packagePath, 'utf8'));
             
             // Validate required fields
             const requiredFields = ['name', 'version', 'description', 'main', 'bin', 'files'];
@@ -256,10 +257,10 @@ class PrepublishCleaner {
                 }
                 
                 const binPath = path.join(this.projectRoot, pkg.bin[bin]);
-                if (!fs.existsSync(binPath)) {
-                    this.log(`❌ Missing bin script: ${pkg.bin[bin]}`);
-                    process.exit(1);
-                }
+            if (!SecurityUtils.safeExistsSync(binPath)) {
+                this.log(`❌ Missing bin script: ${pkg.bin[bin]}`);
+                process.exit(1);
+            }
             }
             
             this.log('✅ package.json validated');
@@ -277,10 +278,10 @@ class PrepublishCleaner {
         
         for (const localeFile of this.essentialLocales) {
             const filePath = path.join(this.projectRoot, localeFile);
-            if (!fs.existsSync(filePath)) continue;
+            if (!SecurityUtils.safeExistsSync(filePath)) continue;
             
             try {
-                const content = fs.readFileSync(filePath, 'utf8');
+                const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
                 totalSizeBefore += content.length;
                 
                 // Parse and re-stringify with minimal formatting
@@ -316,7 +317,7 @@ class PrepublishCleaner {
         
         for (const artifact of devArtifacts) {
             const artifactPath = path.join(this.projectRoot, artifact);
-            if (fs.existsSync(artifactPath)) {
+            if (SecurityUtils.safeExistsSync(artifactPath)) {
                 this.log(`⚠️ Development artifact found: ${artifact}`);
             }
         }
@@ -335,9 +336,9 @@ class PrepublishCleaner {
         
         for (const script of scripts) {
             const scriptPath = path.join(this.projectRoot, script);
-            if (fs.existsSync(scriptPath)) {
+            if (SecurityUtils.safeExistsSync(scriptPath)) {
                 try {
-                    fs.accessSync(scriptPath, fs.constants.X_OK);
+                    SecurityUtils.safeAccessSync(scriptPath, fs.constants.X_OK);
                 } catch (e) {
                     this.log(`⚠️ Script not executable: ${script}`);
                 }
@@ -350,7 +351,7 @@ class PrepublishCleaner {
       async resetSecuritySettings() {
         const configPath = path.join(require('../settings/settings-manager').configDir, '.i18n-admin-config.json');
         
-        if (fs.existsSync(configPath)) {
+        if (SecurityUtils.safeExistsSync(configPath)) {
             const defaultConfig = {
                 enabled: false,
                 pinHash: null,
@@ -364,6 +365,39 @@ class PrepublishCleaner {
             
             SecurityUtils.safeWriteFileSync(configPath, JSON.stringify(defaultConfig, null, 2), require('../settings/settings-manager').configDir);
             this.log('Reset security settings to defaults');
+        }
+    }
+
+    async checkDirectory(dirPath, requiredFiles = []) {
+        if (!SecurityUtils.safeExistsSync(dirPath)) {
+            this.log(`❌ Directory ${path.relative(this.projectRoot, dirPath)} does not exist`);
+            process.exit(1);
+        }
+
+        if (!SecurityUtils.safeStatSync(dirPath).isDirectory()) {
+            this.log(`❌ ${path.relative(this.projectRoot, dirPath)} is not a directory`);
+            process.exit(1);
+        }
+
+        for (const file of requiredFiles) {
+            const filePath = path.join(dirPath, file);
+            if (!SecurityUtils.safeExistsSync(filePath)) {
+                this.log(`❌ Required file ${path.relative(this.projectRoot, filePath)} missing`);
+                process.exit(1);
+            }
+        }
+    }
+
+    async checkFileSize(filePath, maxSizeKB = 500) {
+        if (!SecurityUtils.safeExistsSync(filePath)) {
+            return;
+        }
+        
+        const stats = SecurityUtils.safeStatSync(filePath);
+        const sizeKB = stats.size / 1024;
+        
+        if (sizeKB > maxSizeKB) {
+            this.log(`⚠️  ${path.relative(this.projectRoot, filePath)} is ${sizeKB.toFixed(1)}KB (max: ${maxSizeKB}KB)`);
         }
     }
 }

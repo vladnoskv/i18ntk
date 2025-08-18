@@ -85,7 +85,9 @@ This guide provides comprehensive information about configuring the I18N Managem
     "encryptionEnabled": true,
     "securityLevel": "standard",
     "sessionTimeout": 3600,
-    "maxLoginAttempts": 3
+    "maxLoginAttempts": 3,
+    "pathTraversalProtection": true,
+    "strictPathValidation": true
   },
   "backup": {
     "enabled": true,

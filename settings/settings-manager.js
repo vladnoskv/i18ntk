@@ -1,14 +1,30 @@
 const fs = require('fs');
+const SecurityUtils = require('../utils/security');
 const path = require('path');
 const os = require('os');
 const { I18nError } = require('../utils/i18n-helper');
-const SecurityUtils = require('../utils/security');
 
 class SettingsManager {
     constructor() {
         // Use package settings directory
         this.configDir = path.resolve(__dirname, '..');
-        this.configFile = path.join(this.configDir, 'i18ntk-config.json');
+        
+        // Prefer project config in CWD; fallback to package example if present
+        const projectConfigPath = path.join(process.cwd(), 'i18ntk-config.json');
+        const packageConfigPath = path.join(__dirname, 'i18ntk-config.json');
+
+        // Use project config if found; else use package example; else create project config
+        if (SecurityUtils.safeExistsSync(projectConfigPath)) {
+            this.configFile = projectConfigPath;
+        } else if (SecurityUtils.safeExistsSync(packageConfigPath)) {
+            this.configFile = packageConfigPath;
+        } else {
+            this.configFile = projectConfigPath;
+        }
+
+        // Keep config-related dirs aligned with the chosen config file
+        this.configDir = path.dirname(this.configFile);
+        
         this.backupDir = path.join(this.configDir, 'backups');
         
         this.defaultConfig = {
@@ -304,8 +320,8 @@ class SettingsManager {
      */
     loadSettings() {
         try {
-            if (fs.existsSync(this.configFile)) {
-                const content = fs.readFileSync(this.configFile, 'utf8');
+            if (SecurityUtils.safeExistsSync(this.configFile)) {
+            const content = SecurityUtils.safeReadFileSync(this.configFile, 'utf8');
                 const loadedSettings = JSON.parse(content);
                 // Merge with defaults to ensure all properties exist
                 this.settings = this.mergeWithDefaults(loadedSettings);
@@ -377,17 +393,11 @@ class SettingsManager {
         }
         
         try {
-            console.log('DEBUG: configDir =', this.configDir);
-            console.log('DEBUG: configFile =', this.configFile);
-            console.log('DEBUG: backupDir =', this.backupDir);
-            console.log('DEBUG: process.cwd() =', process.cwd());
-            
-            if (!SecurityUtils.safeExistsSync(this.configDir, process.cwd())) {
-                SecurityUtils.safeMkdirSync(this.configDir, { recursive: true }, process.cwd());
+            if (!SecurityUtils.safeExistsSync(this.configDir)) {
+                SecurityUtils.safeMkdirSync(this.configDir, process.cwd(), { recursive: true });
             }
             
             const content = JSON.stringify(this.settings, null, 4);
-            console.log('DEBUG: About to write to:', this.configFile);
             SecurityUtils.safeWriteFileSync(this.configFile, content, process.cwd());
             
             // Create backup if enabled
@@ -395,7 +405,9 @@ class SettingsManager {
                 this.createBackup();
             }
             
-            console.log('Settings saved successfully');
+            if (process.env.I18N_DEBUG === 'true') {
+                console.log('Settings saved successfully');
+            }
         } catch (error) {
             console.error('Error saving settings:', error.message);
             console.error('Error stack:', error.stack);
@@ -407,14 +419,14 @@ class SettingsManager {
      */
     createBackup() {
         try {
-            if (!SecurityUtils.safeExistsSync(this.backupDir, process.cwd())) {
-                SecurityUtils.safeMkdirSync(this.backupDir, { recursive: true }, process.cwd());
+            if (!SecurityUtils.safeExistsSync(this.backupDir)) {
+                SecurityUtils.safeMkdirSync(this.backupDir, process.cwd(), { recursive: true });
             }
             
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupFile = path.join(this.backupDir, `config-${timestamp}.json`);
             
-            const configContent = SecurityUtils.safeReadFileSync(this.configFile, process.cwd());
+            const configContent = SecurityUtils.safeReadFileSync(this.configFile);
             if (configContent) {
                 SecurityUtils.safeWriteFileSync(backupFile, configContent, process.cwd());
             }
@@ -431,11 +443,11 @@ class SettingsManager {
      */
     cleanupOldBackups() {
         try {
-            const files = SecurityUtils.safeReaddirSync(this.backupDir, process.cwd())
+            const files = SecurityUtils.safeReaddirSync(this.backupDir)
                 .filter(file => file.startsWith('config-') && file.endsWith('.json'))
                 .map(file => {
                     const filePath = path.join(this.backupDir, file);
-                    const stat = SecurityUtils.safeStatSync(filePath, process.cwd());
+                    const stat = SecurityUtils.safeStatSync(filePath);
                     return {
                         name: file,
                         path: filePath,
@@ -448,7 +460,7 @@ class SettingsManager {
             const maxBackups = this.settings.backup?.maxBackups || 10;
             if (files.length > maxBackups) {
                 files.slice(maxBackups).forEach(file => {
-                    SecurityUtils.safeDeleteSync(file.path, process.cwd());
+                    SecurityUtils.safeDeleteSync(file.path);
                 });
             }
         } catch (error) {

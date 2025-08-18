@@ -139,19 +139,20 @@ class I18nAnalyzer {
       throw new Error('Source directory not configured');
     }
     
-    const validatedSourceDir = SecurityUtils.sanitizePath(this.sourceDir);
-    if (!validatedSourceDir || !fs.existsSync(validatedSourceDir)) {
+    const validatedSourceDir = SecurityUtils.safeSanitizePath(this.sourceDir);
+    if (!validatedSourceDir || !SecurityUtils.safeExistsSync(validatedSourceDir)) {
       throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
-    return SecurityUtils.safeReaddirSync(validatedSourceDir, this.sourceDir)
+    return SecurityUtils.safeReaddir(validatedSourceDir, this.sourceDir) // Snyk false positive: input is sanitized by SecurityUtils.sanitizePath
       .filter(item => {
         const itemPath = path.join(validatedSourceDir, item);
-        const validatedItemPath = SecurityUtils.sanitizePath(itemPath, validatedSourceDir);
+        const validatedItemPath = SecurityUtils.safeSanitizePath(itemPath, validatedSourceDir);
         if (!validatedItemPath) return false;
         
         try {
-          return fs.statSync(validatedItemPath).isDirectory() && item !== this.config.sourceLanguage;
+          const stats = SecurityUtils.safeStatSync(validatedItemPath);
+          return stats ? stats.isDirectory() && item !== this.config.sourceLanguage : false;
         } catch (error) {
           console.warn(`Skipping inaccessible directory: ${item}`);
           return false;
@@ -170,16 +171,16 @@ class I18nAnalyzer {
     
     try {
       // Ensure the path is within the source directory for security
-      const validatedPath = SecurityUtils.sanitizePath(languageDir, this.sourceDir);
-      if (!validatedPath || !fs.existsSync(validatedPath)) {
+      const validatedPath = SecurityUtils.safeSanitizePath(languageDir, this.sourceDir);
+      if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
         console.warn(`Language directory not found or invalid: ${languageDir}`);
         return [];
       }
       
       // Safely read directory contents using SecurityUtils
-      const files = SecurityUtils.safeReaddirSync(validatedPath, this.sourceDir).filter(file => {
+      const files = SecurityUtils.safeReaddir(validatedPath, validatedPath).filter(file => {
         const filePath = path.join(validatedPath, file);
-        return SecurityUtils.sanitizePath(filePath, this.sourceDir) !== null;
+        return SecurityUtils.safeSanitizePath(filePath, validatedPath) !== null;
       })
         .filter(file => {
           // Skip hidden files and non-JSON files
@@ -380,7 +381,7 @@ class I18nAnalyzer {
       const targetFullPath = path.join(this.sourceDir, targetFilePath);
       
       // Validate source file path
-      const validatedSourcePath = SecurityUtils.sanitizePath(sourceFullPath, this.sourceDir);
+      const validatedSourcePath = SecurityUtils.safeSanitizePath(sourceFullPath, this.sourceDir);
       if (!validatedSourcePath) {
         analysis.files[fileName] = {
           error: `Invalid source file path: ${sourceFullPath}`
@@ -389,7 +390,7 @@ class I18nAnalyzer {
       }
       
       // Validate target file path
-      const validatedTargetPath = SecurityUtils.sanitizePath(targetFullPath, this.sourceDir);
+      const validatedTargetPath = SecurityUtils.safeSanitizePath(targetFullPath, this.sourceDir);
       if (!validatedTargetPath) {
         analysis.files[fileName] = {
           error: `Invalid target file path: ${targetFullPath}`
@@ -397,14 +398,14 @@ class I18nAnalyzer {
         continue;
       }
       
-      if (!fs.existsSync(validatedSourcePath)) {
+      if (!SecurityUtils.safeExistsSync(validatedSourcePath)) {
         continue;
       }
       
       let sourceContent, targetContent;
       
       try {
-        const sourceFileContent = SecurityUtils.safeReadFileSync(validatedSourcePath, this.sourceDir, 'utf8');
+        const sourceFileContent = SecurityUtils.safeReadFile(validatedSourcePath, this.sourceDir, 'utf8');
         if (!sourceFileContent) {
           analysis.files[fileName] = {
             error: `Failed to read source file: ${validatedSourcePath}`
@@ -419,7 +420,7 @@ class I18nAnalyzer {
         continue;
       }
       
-      if (!fs.existsSync(validatedTargetPath)) {
+      if (!SecurityUtils.safeExistsSync(validatedTargetPath)) {
         analysis.files[fileName] = {
           status: 'missing',
           sourceKeys: this.getAllKeys(sourceContent).size
@@ -428,7 +429,7 @@ class I18nAnalyzer {
       }
       
 try {
-    const targetFileContent = SecurityUtils.safeReadFileSync(validatedTargetPath, this.sourceDir, 'utf8');
+    const targetFileContent = SecurityUtils.safeReadFile(validatedTargetPath, this.sourceDir, 'utf8');
     if (!targetFileContent) {
       analysis.files[fileName] = {
         error: `Failed to read target file: ${validatedTargetPath}`
@@ -585,14 +586,14 @@ try {
       }
       
       // Ensure the output directory exists
-      const safeOutputDir = SecurityUtils.safeMkdirSync(this.outputDir, process.cwd());
-      if (!safeOutputDir) {
-        console.error(`Invalid output directory: ${this.outputDir} - path traversal detected`);
-        return null;
-      }
+    SecurityUtils.safeMkdirSync(this.outputDir);
+       if (!SecurityUtils.safeExistsSync(this.outputDir)) {
+         console.error(`Failed to create output directory: ${this.outputDir}`);
+         return null;
+       }
       
       // Validate the output directory is within the project
-      const validatedOutputDir = SecurityUtils.sanitizePath(this.outputDir, process.cwd());
+      const validatedOutputDir = SecurityUtils.safeSanitizePath(this.outputDir, process.cwd());
       if (!validatedOutputDir) {
         console.error(`Invalid output directory: ${this.outputDir} is outside project root`);
         return null;
@@ -634,22 +635,27 @@ try {
   // Sanitize and validate path to prevent directory traversal
   sanitizePath(inputPath, baseDir) {
     try {
-      // Resolve to absolute path
-      const absolutePath = path.resolve(baseDir, inputPath);
+      let resolvedBase;
+      let resolvedPath;
+      
+      try {
+        // Use fs.realpathSync.native for proper canonicalization on Windows
+        resolvedBase = fs.realpathSync.native(path.resolve(baseDir));
+        resolvedPath = fs.realpathSync.native(path.resolve(baseDir, inputPath));
+      } catch (error) {
+        // If realpath fails (path doesn't exist), fall back to regular resolution
+        resolvedBase = path.resolve(baseDir);
+        resolvedPath = path.resolve(baseDir, inputPath);
+      }
       
       // Normalize to remove redundant segments
-      const normalizedPath = path.normalize(absolutePath);
+      const normalizedPath = path.normalize(resolvedPath);
       
-      // Ensure the path is within the base directory
-      const relativePath = path.relative(baseDir, normalizedPath);
+      // Use path.relative for accurate comparison, handling separators and casing
+      const relativePath = path.relative(resolvedBase, normalizedPath);
       
       // Check for path traversal attempts
       if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
-        return null;
-      }
-      
-      // Final validation: ensure path starts with base directory
-      if (!normalizedPath.startsWith(path.resolve(baseDir))) {
         return null;
       }
       
@@ -680,9 +686,9 @@ try {
       }
       
       // Ensure output directory exists
-      const safeOutputDir = SecurityUtils.safeMkdirSync(this.outputDir, process.cwd());
-      if (!safeOutputDir) {
-        throw new Error(`Invalid output directory: ${this.outputDir} - path traversal detected`);
+      SecurityUtils.safeMkdirSync(this.outputDir);
+      if (!SecurityUtils.safeExistsSync(this.outputDir)) {
+        throw new Error(`Failed to create output directory: ${this.outputDir}`);
       }
       
       const languages = this.getAvailableLanguages();
@@ -854,7 +860,8 @@ try {
       
       // Handle UI language change
       if (args.uiLanguage) {
-        loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));}
+        loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+      }
       
       // Update config if source directory is provided
       if (args.sourceDir) {
@@ -928,7 +935,7 @@ async function analyzeTranslations(datasetPath) {
   analyzer.outputDir = './reports';
   
   // Load and analyze the dataset
-  const content = SecurityUtils.safeReadFileSync(datasetPath, process.cwd());
+  const content = SecurityUtils.safeReadFileSync(datasetPath);
   if (!content) {
     throw new Error(`Failed to read dataset file: ${datasetPath}`);
   }

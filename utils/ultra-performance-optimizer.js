@@ -7,6 +7,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { performance } = require('perf_hooks');
+const SecurityUtils = require('./security');
 
 class UltraPerformanceOptimizer {
   constructor(options = {}) {
@@ -258,7 +259,7 @@ class UltraPerformanceOptimizer {
    * Generate cache key
    */
   getCacheKey(filePath) {
-    return `${filePath}:${fs.statSync(filePath).mtime.getTime()}`;
+    return `${filePath}:${SecurityUtils.safeStatSync(filePath).mtime.getTime()}`;
   }
 
   /**
@@ -287,20 +288,11 @@ class UltraPerformanceOptimizer {
    * Run ultra-extreme benchmark
    */
   async runUltraBenchmark(filePaths) {
-    console.log('🚀 Starting Ultra-Extreme Performance Benchmark...');
-    
     const start = performance.now();
     const results = await this.processFiles(filePaths);
     const end = performance.now();
     
     const stats = this.getStats();
-    
-    console.log('\n📊 Ultra-Extreme Results:');
-    console.log(`Processing Time: ${stats.processingTime}ms`);
-    console.log(`Memory Used: ${stats.memoryUsed}MB`);
-    console.log(`Throughput: ${(stats.throughput / 1000000).toFixed(2)}M keys/sec`);
-    console.log(`Cache Hit Rate: ${stats.cacheHitRate}%`);
-    console.log(`Total Operations: ${stats.operations}`);
     
     return {
       ...stats,
@@ -331,7 +323,7 @@ class UltraPerformanceOptimizer {
 // Export for use
 module.exports = UltraPerformanceOptimizer;
 
-// CLI usage
+// CLI usage - production ready (no debug output)
 if (require.main === module) {
   const optimizer = new UltraPerformanceOptimizer();
   
@@ -341,10 +333,8 @@ if (require.main === module) {
   );
   
   optimizer.runUltraBenchmark(mockFiles).then(results => {
-    console.log('\n✅ Ultra-Extreme benchmark completed!');
     process.exit(0);
   }).catch(error => {
-    console.error('❌ Benchmark failed:', error);
     process.exit(1);
   });
 }

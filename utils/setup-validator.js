@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const configManager = require('./config-manager');
+const SecurityUtils = require('./security-utils');
 
 
 class SetupValidator {
@@ -141,10 +142,10 @@ class SetupValidator {
         const outputDir = this.config.outputDir;
 
         // Check source directory
-        if (fs.existsSync(sourceDir)) {
-            const stats = fs.statSync(sourceDir);
+        if (SecurityUtils.safeExistsSync(sourceDir)) {
+            const stats = SecurityUtils.safeStatSync(sourceDir);
             if (stats.isDirectory()) {
-                const files = fs.readdirSync(sourceDir);
+                const files = SecurityUtils.safeReaddirSync(sourceDir);
                 const localeFiles = files.filter(f => f.endsWith('.json') || f.endsWith('.yml') || f.endsWith('.yaml'));
                 
                 this.results.checks.push({
@@ -183,8 +184,8 @@ class SetupValidator {
         }
 
         // Check output directory
-        if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });
+        if (!SecurityUtils.safeExistsSync(outputDir)) {
+            SecurityUtils.safeMkdirSync(outputDir, { recursive: true });
             this.results.checks.push({
                 category: 'directories',
                 message: 'Output directory created',
@@ -248,9 +249,9 @@ class SetupValidator {
         switch (language) {
             case 'javascript':
             case 'typescript':
-                if (fs.existsSync(packageJsonPath)) {
+                if (SecurityUtils.safeExistsSync(packageJsonPath)) {
                     try {
-                        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+                        const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
                         const allDeps = { ...packageJson.dependencies, ...packageJson.devDependencies };
                         
                         const recommended = dependencies[language].recommended;
@@ -287,8 +288,8 @@ class SetupValidator {
                 break;
 
             case 'python':
-                if (fs.existsSync(requirementsPath)) {
-                    const requirements = fs.readFileSync(requirementsPath, 'utf8');
+                if (SecurityUtils.safeExistsSync(requirementsPath)) {
+                    const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => requirements.includes(dep));
                     
@@ -314,8 +315,8 @@ class SetupValidator {
                 break;
 
             case 'go':
-                if (fs.existsSync(goModPath)) {
-                    const goMod = fs.readFileSync(goModPath, 'utf8');
+                if (SecurityUtils.safeExistsSync(goModPath)) {
+                    const goMod = SecurityUtils.safeReadFileSync(goModPath, 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => goMod.includes(dep));
                     
@@ -341,8 +342,8 @@ class SetupValidator {
                 break;
 
             case 'java':
-                if (fs.existsSync(pomPath)) {
-                    const pom = fs.readFileSync(pomPath, 'utf8');
+                if (SecurityUtils.safeExistsSync(pomPath)) {
+                    const pom = SecurityUtils.safeReadFileSync(pomPath, 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => pom.includes(dep));
                     
@@ -367,9 +368,9 @@ class SetupValidator {
                 break;
 
             case 'php':
-                if (fs.existsSync(composerPath)) {
+                if (SecurityUtils.safeExistsSync(composerPath)) {
                     try {
-                        const composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
+                        const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
                         const allDeps = { ...composer.require, ...composer['require-dev'] };
                         
                         const recommended = dependencies[language].recommended;
@@ -527,7 +528,7 @@ class SetupValidator {
 
         // Check for sensitive data in locale files
         const sourceDir = this.config?.sourceDir;
-        if (sourceDir && fs.existsSync(sourceDir)) {
+        if (sourceDir && SecurityUtils.safeExistsSync(sourceDir)) {
             const sensitivePatterns = [
                 /password/i,
                 /secret/i,
@@ -536,13 +537,13 @@ class SetupValidator {
                 /private[_-]?key/i
             ];
 
-            const files = fs.readdirSync(sourceDir);
+            const files = SecurityUtils.safeReaddirSync(sourceDir);
             let sensitiveFound = false;
 
             for (const file of files) {
                 const filePath = path.join(sourceDir, file);
-                if (fs.statSync(filePath).isFile()) {
-                    const content = fs.readFileSync(filePath, 'utf8');
+                if (SecurityUtils.safeStatSync(filePath).isFile()) {
+                    const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
                     
                     for (const pattern of sensitivePatterns) {
                         if (pattern.test(content)) {
@@ -642,7 +643,7 @@ class SetupValidator {
             }
         };
 
-        fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+        SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
         console.log(`\n📋 Validation report saved: ${reportPath}`);
 
         // Print summary

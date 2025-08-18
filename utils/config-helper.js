@@ -321,8 +321,8 @@ function displayHelp(scriptName, additionalOptions = {}) {
  * @param {string} dirPath - Directory path
  */
 function ensureDirectory(dirPath) {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+  if (!SecurityUtils.safeExistsSync(dirPath)) {
+    SecurityUtils.safeMkdirSync(dirPath, null, { recursive: true });
   }
 }
 
@@ -349,8 +349,8 @@ async function ensureInitialized(cfg) {
     const sourceLanguage = cfg.sourceLanguage || 'en';
     const langDir = path.join(sourceDir, sourceLanguage);
 
-    const hasLanguageFiles = fs.existsSync(langDir) &&
-      fs.readdirSync(langDir).some(f => f.endsWith('.json'));
+    const hasLanguageFiles = SecurityUtils.safeExistsSync(langDir) &&
+      SecurityUtils.safeReaddirSync(langDir).some(f => f.endsWith('.json'));
     
     if (hasLanguageFiles) {
       return true;
@@ -408,21 +408,21 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
   ensureDirectory(sourceDir);
   
   // Write the default source language file
-  fs.writeFileSync(sourceFile, JSON.stringify(defaultContent, null, 2));
+  SecurityUtils.safeWriteFileSync(sourceFile, JSON.stringify(defaultContent, null, 2));
   
   // Create directories for supported languages
   const supportedLanguages = ['es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'];
   
   supportedLanguages.forEach(lang => {
     const langFile = path.join(sourceDir, `${lang}.json`);
-    if (!fs.existsSync(langFile)) {
+    if (!SecurityUtils.safeExistsSync(langFile)) {
       // Create empty object structure for each language
       const emptyStructure = {
         app: {},
         common: {},
         navigation: {}
       };
-      fs.writeFileSync(langFile, JSON.stringify(emptyStructure, null, 2));
+      SecurityUtils.safeWriteFileSync(langFile, JSON.stringify(emptyStructure, null, 2));
     }
   });
   

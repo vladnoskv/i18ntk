@@ -177,7 +177,7 @@ async function handleCreate(args) {
     throw new Error(`Source directory must be within the current working directory: ${sourceDir}`);
   }
   
-  const files = (await fs.readdir(validatedSourceDir, { withFileTypes: true }))
+  const files = (await SecurityUtils.safeReaddir(validatedSourceDir, { withFileTypes: true }))
     .filter(dirent => dirent.isFile() && dirent.name.endsWith('.json'))
     .map(dirent => dirent.name);
     
@@ -243,7 +243,7 @@ async function handleRestore(args) {
   }
   
   // Validate backup file
-  if (!fs.existsSync(backupPath)) {
+  if (!SecurityUtils.safeExistsSync(backupPath)) {
     throw new Error(`Backup file not found: ${backupPath}`);
   }
   
@@ -251,7 +251,7 @@ async function handleRestore(args) {
   
   try {
     // Read the backup file with security validation
-    const backupData = await SecurityUtils.safeReadFile(backupPath, process.cwd(), 'utf8');
+    const backupData = SecurityUtils.safeReadFileSync(backupPath, 'utf8');
     const translations = JSON.parse(backupData);
     
     // Create output directory if it doesn't exist
@@ -420,14 +420,14 @@ async function handleVerify(args) {
   }
   
   // Validate backup file
-  if (!fs.existsSync(validatedBackupPath)) {
+  if (!SecurityUtils.safeExistsSync(validatedBackupPath)) {
     throw new Error(`Backup file not found: ${validatedBackupPath}`);
   }
   
   logger.info('\nVerifying backup...');
   
   try {
-    const data = await SecurityUtils.safeReadFile(validatedBackupPath, process.cwd(), 'utf8');
+    const data = SecurityUtils.safeReadFileSync(validatedBackupPath, 'utf8');
     const content = JSON.parse(data);
     
     if (typeof content === 'object' && content !== null) {
@@ -468,7 +468,7 @@ async function handleCleanup(args) {
         return {
           name: file,
           path: validatedFilePath,
-          time: fs.statSync(validatedFilePath).mtime.getTime()
+          time: SecurityUtils.safeStatSync(validatedFilePath)?.mtime.getTime()
         };
       })
       .filter(file => file !== null)
@@ -525,7 +525,7 @@ async function cleanupOldBackups(outputDir) {
         return {
           name: file,
           path: validatedFilePath,
-          time: fs.statSync(validatedFilePath).mtime.getTime()
+          time: SecurityUtils.safeStatSync(validatedFilePath)?.mtime.getTime()
         };
       })
       .filter(file => file !== null)

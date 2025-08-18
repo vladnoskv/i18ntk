@@ -78,6 +78,7 @@ config.json
 .idea/
 *.swp
 *.swo
+*.roo
 
 # OS
 .DS_Store

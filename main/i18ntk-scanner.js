@@ -50,7 +50,7 @@ class I18nTextScanner {
     const localeFile = path.join(uiLocalesDir, 'en.json');
     
     try {
-      const localeContent = fs.readFileSync(localeFile, 'utf8');
+      const localeContent = SecurityUtils.safeReadFileSync(localeFile, 'utf8');
       return JSON.parse(localeContent);
     } catch (error) {
       return {
@@ -162,20 +162,20 @@ class I18nTextScanner {
     
     try {
       // Check Python frameworks first
-      if (fs.existsSync(requirementsPath)) {
-        const requirements = fs.readFileSync(requirementsPath, 'utf8');
+      if (SecurityUtils.safeExistsSync(requirementsPath)) {
+        const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
         if (requirements.includes('Django')) return 'django';
         if (requirements.includes('Flask') || requirements.includes('flask-babel')) return 'flask';
       }
       
-      if (fs.existsSync(setupPath)) {
-        const setup = fs.readFileSync(setupPath, 'utf8');
+      if (SecurityUtils.safeExistsSync(setupPath)) {
+        const setup = SecurityUtils.safeReadFileSync(setupPath, 'utf8');
         if (setup.includes('Django')) return 'django';
         if (setup.includes('Flask')) return 'flask';
       }
       
-      if (fs.existsSync(pyprojectPath)) {
-        const pyproject = fs.readFileSync(pyprojectPath, 'utf8');
+      if (SecurityUtils.safeExistsSync(pyprojectPath)) {
+        const pyproject = SecurityUtils.safeReadFileSync(pyprojectPath, 'utf8');
         if (pyproject.includes('Django')) return 'django';
         if (pyproject.includes('Flask')) return 'flask';
       }
@@ -185,7 +185,7 @@ class I18nTextScanner {
       let hasPythonFiles = false;
       if (validatedProjectRoot) {
         try {
-          const files = fs.readdirSync(validatedProjectRoot, { recursive: true });
+          const files = SecurityUtils.safeReaddirSync(validatedProjectRoot, { recursive: true });
           hasPythonFiles = files.some(file => file.endsWith && file.endsWith('.py'));
         } catch (error) {
           // Handle directory access issues
@@ -198,7 +198,7 @@ class I18nTextScanner {
     }
     
     try {
-      const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packagePath, 'utf8'));
       const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
       
       if (deps.react || deps['react-dom']) return 'react';
@@ -320,7 +320,7 @@ class I18nTextScanner {
 
   scanFile(filePath, patterns, minLength, maxLength) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
       const lines = content.split('\n');
       const results = [];
 
@@ -419,7 +419,7 @@ class I18nTextScanner {
       includeTests = false 
     } = options;
 
-    if (!fs.existsSync(dir)) {
+    if (!SecurityUtils.safeExistsSync(dir)) {
       throw new Error(`Directory does not exist: ${dir}`);
     }
 
@@ -427,11 +427,11 @@ class I18nTextScanner {
     const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.html', '.svelte', '.py', '.pyx', '.pyi'];
     
     const scanRecursive = (currentDir) => {
-      const items = SecurityUtils.safeReaddirSync(currentDir, process.cwd());
+      const items = SecurityUtils.safeReaddirSync(currentDir);
       
       for (const item of items) {
         const fullPath = path.join(currentDir, item);
-        const stat = fs.statSync(fullPath);
+        const stat = SecurityUtils.safeStatSync(fullPath);
         
         if (stat.isDirectory()) {
           if (!item.startsWith('.') && !this.shouldExcludeFile(fullPath, exclusions)) {
@@ -461,8 +461,8 @@ class I18nTextScanner {
   }
 
   async generateReport(results, outputDir) {
-    if (!fs.existsSync(outputDir)) {
-      SecurityUtils.safeMkdirSync(outputDir, process.cwd());
+    if (!SecurityUtils.safeExistsSync(outputDir)) {
+      SecurityUtils.safeMkdirSync(outputDir);
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -583,7 +583,7 @@ class I18nTextScanner {
     }
 
     // Validate source directory
-    if (!fs.existsSync(this.sourceDir)) {
+    if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
       console.error(`❌ Source directory does not exist: ${this.sourceDir}`);
       process.exit(1);
     }

@@ -90,13 +90,13 @@ class I18nInitializer {
   async checkI18nDependencies(noPrompt = false) {
     const packageJsonPath = pathConfig.resolveProject('package.json');
     
-    if (!fs.existsSync(packageJsonPath)) {
+    if (!SecurityUtils.safeExistsSync(packageJsonPath)) {
       console.log(t('errors.noPackageJson'));
       return true; // Allow to continue without framework
     }
     
     try {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
       // Include peerDependencies in the check
       const dependencies = { 
         ...packageJson.dependencies, 
@@ -223,15 +223,15 @@ class I18nInitializer {
     // Check for existing translation directories
     for (const location of possibleLocations) {
       const validatedLocation = SecurityUtils.validatePath(location, process.cwd());
-      if (validatedLocation && fs.existsSync(validatedLocation)) {
+      if (validatedLocation && SecurityUtils.safeExistsSync(validatedLocation)) {
         try {
-          const items = SecurityUtils.safeReaddirSync(validatedLocation, process.cwd());
+          const items = SecurityUtils.safeReaddirSync(validatedLocation);
           const englishFormats = ['en', 'en-US', 'en-GB', 'english'];
           
           // Check for English directories first
           for (const format of englishFormats) {
             const englishPath = SecurityUtils.validatePath(path.join(validatedLocation, format), validatedLocation);
-            if (englishPath && fs.existsSync(englishPath) && fs.statSync(englishPath).isDirectory()) {
+            if (englishPath && SecurityUtils.safeExistsSync(englishPath) && SecurityUtils.safeStatSync(englishPath).isDirectory()) {
               const englishFiles = SecurityUtils.safeReaddirSync(englishPath, validatedLocation).filter(file => file.endsWith(this.format.extension));
               if (englishFiles.length > 0) {
                 // Found English files, prioritize this
@@ -244,7 +244,7 @@ class I18nInitializer {
           // Also check for any language directories or format files
           const hasLanguageDirs = items.some(item => {
             const itemPath = SecurityUtils.validatePath(path.join(validatedLocation, item), validatedLocation);
-            if (itemPath && fs.statSync(itemPath).isDirectory()) {
+            if (itemPath && SecurityUtils.safeStatSync(itemPath).isDirectory()) {
               return ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh', 'en-US', 'en-GB'].includes(item);
             }
             return item.endsWith(this.format.extension);
@@ -326,16 +326,16 @@ class I18nInitializer {
         if (newDirName && newDirName.trim()) {
           const newDirPath = path.resolve(newDirName.trim());
 
-          if (!fs.existsSync(newDirPath)) {
-            SecurityUtils.safeMkdirSync(newDirPath, process.cwd());
+          if (!SecurityUtils.safeExistsSync(newDirPath)) {
+            SecurityUtils.safeMkdirSync(newDirPath);
             console.log(t('init.createdNewDirectory', { dir: newDirPath }));
           } else {
             console.log(t('init.directoryAlreadyExists', { dir: newDirPath }));
           }
 
           const sourceLangDir = path.join(newDirPath, this.config.sourceLanguage);
-          if (!fs.existsSync(sourceLangDir)) {
-            SecurityUtils.safeMkdirSync(sourceLangDir, process.cwd());
+          if (!SecurityUtils.safeExistsSync(sourceLangDir)) {
+            SecurityUtils.safeMkdirSync(sourceLangDir);
             console.log(t('init.createdSourceLanguageDirectory', { dir: sourceLangDir }));
             await this.createSampleTranslationFile(sourceLangDir);
           }
@@ -389,24 +389,24 @@ class I18nInitializer {
     }
     
     // Create directories if they do not exist
-      if (!fs.existsSync(validatedSourceDir)) {
-        SecurityUtils.safeMkdirSync(validatedSourceDir, process.cwd());
+      if (!SecurityUtils.safeExistsSync(validatedSourceDir)) {
+        SecurityUtils.safeMkdirSync(validatedSourceDir);
       }
-      if (this.config.structure !== 'single' && validatedSourceLanguageDir && !fs.existsSync(validatedSourceLanguageDir)) {
-        SecurityUtils.safeMkdirSync(validatedSourceLanguageDir, process.cwd());
+      if (this.config.structure !== 'single' && validatedSourceLanguageDir && !SecurityUtils.safeExistsSync(validatedSourceLanguageDir)) {
+        SecurityUtils.safeMkdirSync(validatedSourceLanguageDir);
       }
 
     // Create sample translation file if none exist
     const englishFiles = (this.config.structure === 'single'
-      ? SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd())
-      : SecurityUtils.safeReaddirSync(validatedSourceLanguageDir, process.cwd()))
+      ? SecurityUtils.safeReaddir(validatedSourceDir)
+      : SecurityUtils.safeReaddir(validatedSourceLanguageDir))
       .filter(file => file.endsWith(this.format.extension));
 
     if (englishFiles.length === 0) {
       await this.createSampleTranslationFile(this.config.structure === 'single' ? validatedSourceDir : validatedSourceLanguageDir);
     } else {
       // Directory exists, check if we need to create a sample file
-      const existingFiles = (this.config.structure === 'single' ? SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd()) : SecurityUtils.safeReaddirSync(validatedSourceLanguageDir, process.cwd()))
+      const existingFiles = (this.config.structure === 'single' ? SecurityUtils.safeReaddir(validatedSourceDir) : SecurityUtils.safeReaddir(validatedSourceLanguageDir))
         .filter(file => file.endsWith(this.format.extension));
       
       if (existingFiles.length === 0) {
@@ -448,7 +448,7 @@ class I18nInitializer {
     
     let sampleFilePath;
     const validatedCommonPath = SecurityUtils.validatePath(commonFilePath, process.cwd());
-    if (validatedCommonPath && !fs.existsSync(validatedCommonPath)) {
+    if (validatedCommonPath && !SecurityUtils.safeExistsSync(validatedCommonPath)) {
       sampleFilePath = commonFilePath;
     } else {
       sampleFilePath = i18ntkCommonFilePath;
@@ -475,12 +475,12 @@ class I18nInitializer {
   // Check if source directory and language exist
   validateSource() {
     const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
-    if (!validatedSourceDir || !fs.existsSync(validatedSourceDir)) {
+    if (!validatedSourceDir || !SecurityUtils.safeExistsSync(validatedSourceDir)) {
       throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
     }
     
     const validatedSourceLanguageDir = SecurityUtils.validatePath(this.sourceLanguageDir, process.cwd());
-    if (!validatedSourceLanguageDir || !fs.existsSync(validatedSourceLanguageDir)) {
+    if (!validatedSourceLanguageDir || !SecurityUtils.safeExistsSync(validatedSourceLanguageDir)) {
       throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || `Source language directory not found: ${this.sourceLanguageDir}`);
     }
     
@@ -496,10 +496,10 @@ class I18nInitializer {
       }
 
       if (this.config.structure === 'single') {
-        if (!fs.existsSync(validatedSourceDir)) {
+        if (!SecurityUtils.safeExistsSync(validatedSourceDir)) {
           throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
         }
-        const files = SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd())
+        const files = SecurityUtils.safeReaddir(validatedSourceDir)
           .filter(file => file.endsWith(this.format.extension) && !this.config.excludeFiles.includes(file));
         if (files.length === 0) {
           throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceDir }) || `No JSON files found in source directory: ${this.sourceDir}`);
@@ -512,10 +512,10 @@ class I18nInitializer {
         throw new Error(t('validate.invalidSourceLanguageDirectory', { sourceDir: this.sourceLanguageDir }) || `Invalid source language directory: ${this.sourceLanguageDir}`);
       }
 
-      if (!fs.existsSync(validatedSourceLanguageDir)) {
+      if (!SecurityUtils.safeExistsSync(validatedSourceLanguageDir)) {
         // Try to find English files in parent directory or subdirectories
         const parentDir = SecurityUtils.validatePath(path.dirname(validatedSourceLanguageDir), process.cwd());
-        if (!parentDir || !fs.existsSync(parentDir)) {
+        if (!parentDir || !SecurityUtils.safeExistsSync(parentDir)) {
           throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
         }
         
@@ -523,16 +523,16 @@ class I18nInitializer {
         if (!validatedParentDir) {
           return [];
         }
-        const subdirs = SecurityUtils.safeReaddirSync(validatedParentDir, process.cwd()).filter(item => {
+        const subdirs = SecurityUtils.safeReaddir(validatedParentDir).filter(item => {
           const fullPath = SecurityUtils.validatePath(path.join(validatedParentDir, item), validatedParentDir);
-          return fullPath && fs.statSync(fullPath).isDirectory();
+          return fullPath && SecurityUtils.safeStatSync(fullPath).isDirectory();
         });
         
         // Look for English files in any subdirectory
         for (const subdir of subdirs) {
           const englishDir = SecurityUtils.validatePath(path.join(parentDir, subdir), parentDir);
-          if (englishDir && fs.existsSync(englishDir)) {
-            const files = SecurityUtils.safeReaddirSync(englishDir, process.cwd());
+          if (englishDir && SecurityUtils.safeExistsSync(englishDir)) {
+            const files = SecurityUtils.safeReaddir(englishDir);
             const formatFiles = files.filter(file =>
               file.endsWith(this.format.extension) &&
               !this.config.excludeFiles.includes(file)
@@ -547,7 +547,7 @@ class I18nInitializer {
         throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
       }
       
-      const files = SecurityUtils.safeReaddirSync(validatedSourceLanguageDir, process.cwd())
+      const files = SecurityUtils.safeReaddir(validatedSourceLanguageDir)
       .filter(file => {
         return file.endsWith(this.format.extension) && 
                !this.config.excludeFiles.includes(file);
@@ -607,7 +607,7 @@ class I18nInitializer {
       } else {
         // Modular: folder per language mirroring source file
         const targetDir = path.join(this.sourceDir, targetLanguage);
-        if (!fs.existsSync(targetDir)) SecurityUtils.safeMkdirSync(targetDir, process.cwd());
+        if (!SecurityUtils.safeExistsSync(targetDir)) SecurityUtils.safeMkdirSync(targetDir);
         targetFilePath = path.join(targetDir, sourceFile);
       }
 
@@ -626,20 +626,20 @@ class I18nInitializer {
       
       // Create target directory if it doesn't exist
       const validatedTargetDir = SecurityUtils.validatePath(targetDir, process.cwd());
-      if (validatedTargetDir && !fs.existsSync(validatedTargetDir)) {
-        SecurityUtils.safeMkdirSync(validatedTargetDir, process.cwd());
+      if (validatedTargetDir && !SecurityUtils.safeExistsSync(validatedTargetDir)) {
+        SecurityUtils.safeMkdirSync(validatedTargetDir);
       }
       
       let targetContent;
       
       // If target file exists, preserve existing translations
-      if (fs.existsSync(validatedTargetPath)) {
+      if (SecurityUtils.safeExistsSync(validatedTargetPath)) {
         try {
-          const existingContent = await SecurityUtils.safeReadFile(validatedTargetPath, process.cwd());
+          const existingContent = await SecurityUtils.safeReadFile(validatedTargetPath);
           if (existingContent) {
             targetContent = this.mergeTranslations(sourceContent, this.format.read(existingContent), targetLanguage);
           } else {
-            targetContent = this.markWithCountryCode(sourceContent, targetLanguage);
+            targetContent = this. markWithCountryCode(sourceContent, targetLanguage);
           }
         } catch (error) {
           console.warn(`⚠️  Warning: Could not parse existing file ${validatedTargetPath}, creating new one`);
@@ -937,7 +937,7 @@ class I18nInitializer {
           continue;
         }
         
-        const sourceContentRaw = await SecurityUtils.safeReadFile(validatedSourceFilePath, process.cwd());
+        const sourceContentRaw = await SecurityUtils.safeReadFile(validatedSourceFilePath);
         if (!sourceContentRaw) {
           SecurityUtils.logSecurityEvent('Failed to read source file', 'error', { file: validatedSourceFilePath });
           continue;
@@ -948,7 +948,7 @@ class I18nInitializer {
         const targetFilePath = await this.createLanguageFile(sourceFile, targetLanguage, sourceContent);
         
         // Get stats for this file
-        const targetContentRaw = await SecurityUtils.safeReadFile(targetFilePath, process.cwd());
+        const targetContentRaw = await SecurityUtils.safeReadFile(targetFilePath);
         if (!targetContentRaw) {
           SecurityUtils.logSecurityEvent('Failed to read target file for stats', 'error', { file: targetFilePath });
           continue;
@@ -1062,8 +1062,8 @@ class I18nInitializer {
   async generateDetailedReport(results, targetLanguages) {
     try {
       const outputDir = this.config.outputDir || path.join(process.cwd(), 'i18ntk-reports');
-      if (!fs.existsSync(outputDir)) {
-        SecurityUtils.safeMkdirSync(outputDir, process.cwd(), { recursive: true });
+      if (!SecurityUtils.safeExistsSync(outputDir)) {
+        SecurityUtils.safeMkdirSync(outputDir, { recursive: true });
       }
       
       const reportPath = path.join(outputDir, 'init-report.json');
@@ -1079,7 +1079,7 @@ class I18nInitializer {
         }
       };
 
-      SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), process.cwd());
+      SecurityUtils.safeWriteFile(reportPath, JSON.stringify(report, null, 2));
       console.log(`✅ Report generated: ${reportPath}`);
     } catch (error) {
       console.error('❌ Failed to generate report:', error.message);
@@ -1133,7 +1133,7 @@ class I18nInitializer {
       const args = this.parseArgs();
 
       // On first run, prompt user for preferred UI language
-      if (!fs.existsSync(configManager.CONFIG_PATH)) {
+      if (!SecurityUtils.safeExistsSync(configManager.CONFIG_PATH)) {
         const { getGlobalReadline } = require('../utils/cli');
         getGlobalReadline();
         const selectedLang = await this.ui.selectLanguage();

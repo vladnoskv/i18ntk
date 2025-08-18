@@ -17,6 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const cliHelper = require('../utils/cli-helper');
 const JsonOutput = require('../utils/json-output');
+const SecurityUtils = require('../utils/security');
 
 class LocaleOptimizer {
   constructor() {
@@ -41,9 +42,9 @@ class LocaleOptimizer {
       
       const locales = available.map(locale => {
         const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-        const stats = fs.statSync(filePath);
-        const sizeKB = parseFloat((stats.size / 1024).toFixed(1));
-        totalSize += stats.size;
+      const stats = SecurityUtils.safeStatSync(filePath);
+      const sizeKB = parseFloat(((stats ? stats.size : 0) / 1024).toFixed(1));
+      totalSize += stats ? stats.size : 0;
         
         return {
           locale,
@@ -92,9 +93,9 @@ class LocaleOptimizer {
     
     available.forEach(locale => {
       const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-      const stats = fs.statSync(filePath);
-      const sizeKB = (stats.size / 1024).toFixed(1);
-      totalSize += stats.size;
+      const stats = SecurityUtils.safeStatSync(filePath);
+      const sizeKB = ((stats ? stats.size : 0) / 1024).toFixed(1);
+      totalSize += stats ? stats.size : 0;
       
       const displayName = this.getDisplayName(locale);
       const status = locale === 'en' ? 'Required' : 'Optional';
@@ -138,8 +139,8 @@ class LocaleOptimizer {
     console.log(`   Keeping: ${keepList.join(', ').toUpperCase()}`);
     
     // Create backup directory
-    if (!fs.existsSync(this.backupDir)) {
-      fs.mkdirSync(this.backupDir, { recursive: true });
+    if (!SecurityUtils.safeExistsSync(this.backupDir)) {
+      SecurityUtils.safeMkdirSync(this.backupDir, process.cwd(), { recursive: true });
     }
     
     let removedCount = 0;
@@ -150,16 +151,16 @@ class LocaleOptimizer {
       const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
       const backupPath = path.join(this.backupDir, `${locale}.json`);
       
-      if (!keepList.includes(locale) && fs.existsSync(filePath)) {
+      if (!keepList.includes(locale) && SecurityUtils.safeExistsSync(filePath)) {
         // Backup the file
-        fs.copyFileSync(filePath, backupPath);
+        SecurityUtils.safeCopyFileSync(filePath, backupPath);
         
         // Remove from ui-locales
-        const stats = fs.statSync(filePath);
-        savedSpace += stats.size;
-        fs.unlinkSync(filePath);
-        removedCount++;
-        removedLocales.push(locale);
+        const stats = SecurityUtils.safeStatSync(filePath);
+        const bytes = stats ? stats.size : 0;
+        savedSpace += bytes;
+        SecurityUtils.safeUnlinkSync(filePath);
+        removedCount++;        removedLocales.push(locale);
         
         console.log(`   ✅ Removed ${locale.toUpperCase()} (backed up)`);
       }
@@ -172,7 +173,7 @@ class LocaleOptimizer {
       
       // Create warning file
       const warningPath = path.join(this.backupDir, 'REMOVED_LOCALES.txt');
-      fs.writeFileSync(warningPath, `Removed locales: ${removedLocales.join(',')}\nRestore with: node scripts/locale-optimizer.js --restore`);
+      SecurityUtils.safeWriteFileSync(warningPath, `Removed locales: ${removedLocales.join(',')}\nRestore with: node scripts/locale-optimizer.js --restore`);
     }
     
     const savedKB = (savedSpace / 1024).toFixed(1);
@@ -188,12 +189,12 @@ class LocaleOptimizer {
   restoreLocales() {
     console.log('🔄 Restoring locales from backup...');
     
-    if (!fs.existsSync(this.backupDir)) {
+    if (!SecurityUtils.safeExistsSync(this.backupDir)) {
       console.log('   ❌ No backup directory found');
       return;
     }
     
-    const backupFiles = fs.readdirSync(this.backupDir).filter(f => f.endsWith('.json'));
+    const backupFiles = SecurityUtils.safeReaddirSync(this.backupDir).filter(f => f.endsWith('.json'));
     
     if (backupFiles.length === 0) {
       console.log('   ❌ No backup files found');
@@ -206,7 +207,7 @@ class LocaleOptimizer {
       const backupPath = path.join(this.backupDir, file);
       const restorePath = path.join(this.uiLocalesDir, file);
       
-      fs.copyFileSync(backupPath, restorePath);
+      SecurityUtils.safeCopyFileSync(backupPath, restorePath);
       restoredCount++;
       console.log(`   ✅ Restored ${file.replace('.json', '').toUpperCase()}`);
     });
@@ -351,7 +352,7 @@ class LocaleOptimizer {
   getAvailableLocales() {
     return this.allLocales.filter(locale => {
       const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-      return fs.existsSync(filePath);
+      return SecurityUtils.safeExistsSync(filePath);
     });
   }
 
@@ -360,8 +361,9 @@ class LocaleOptimizer {
    */
   getLocaleSize(locale) {
     const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-    if (fs.existsSync(filePath)) {
-      return fs.statSync(filePath).size / 1024;
+    if (SecurityUtils.safeExistsSync(filePath)) {
+      const stats = SecurityUtils.safeStatSync(filePath);
+      return stats ? stats.size / 1024 : 0;
     }
     return 0;
   }
@@ -383,9 +385,9 @@ class LocaleOptimizer {
     
     this.allLocales.forEach(locale => {
       const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-      if (fs.existsSync(filePath)) {
-        activeLocales.push(locale);
-      }
+    if (SecurityUtils.safeExistsSync(filePath)) {
+      activeLocales.push(locale);
+    }
     });
     
     return activeLocales;

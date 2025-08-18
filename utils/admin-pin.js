@@ -215,11 +215,11 @@ class AdminPinManager {
             
             // Ensure settings directory exists
             const settingsDir = path.dirname(this.pinFile);
-            if (!fs.existsSync(settingsDir)) {
-                fs.mkdirSync(settingsDir, { recursive: true });
+            if (!SecurityUtils.safeExistsSync(settingsDir)) {
+                SecurityUtils.safeMkdirSync(settingsDir, null, { recursive: true });
             }
             
-            fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
+            SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
             
             const i18n = getI18n();
                 console.log(i18n.t('adminPin.setup_success'));
@@ -254,7 +254,7 @@ class AdminPinManager {
      * Check if PIN is set
      */
     isPinSet() {
-        return fs.existsSync(this.pinFile);
+        return SecurityUtils.safeExistsSync(this.pinFile);
     }
 
     /**
@@ -373,7 +373,7 @@ class AdminPinManager {
         const shouldCloseRL = !externalRl && !hadGlobal;
 
         try {
-            const pinData = JSON.parse(fs.readFileSync(this.pinFile, 'utf8'));
+            const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, 'utf8'));
             
             if (pinData.locked) {
                 const i18n = getI18n();
@@ -405,7 +405,7 @@ class AdminPinManager {
             if (this.constantTimeCompare(computedHashHex, pinData.hash)) {
                 // Reset attempts on successful login
                 pinData.attempts = 0;
-                fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
+                SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
                 const i18n = getI18n();
                 console.log(i18n.t('adminPin.access_granted'));
@@ -416,14 +416,18 @@ class AdminPinManager {
                 
                 if (pinData.attempts >= 3) {
                     pinData.locked = true;
+
                     setTimeout(() => {
-                        pinData.locked = false;
+                        pinData.locked = true;
+                        pinData.lockUntil = Date.now() + 5 * 60 * 1000;
+                        SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                         pinData.attempts = 0;
-                        fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
+                        delete pinData.lockUntil;
+                        SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                     }, 5 * 60 * 1000); // 5 minutes
                 }
                 
-                fs.writeFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
+                SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
                 
                 const i18n = getI18n();
                 console.log(i18n.t('adminPin.incorrect_pin', { attempts: 3 - pinData.attempts }));
@@ -492,7 +496,7 @@ class AdminPinManager {
         }
         
         try {
-            const pinData = JSON.parse(fs.readFileSync(this.pinFile, 'utf8'));
+            const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, 'utf8'));
             const key = Buffer.from(pinData.key, 'hex');
             const decryptedPin = this.decryptPin(pinData.encrypted, key);
             
@@ -510,8 +514,8 @@ class AdminPinManager {
      * Reset PIN
      */
     async resetPin() {
-        if (fs.existsSync(this.pinFile)) {
-            fs.unlinkSync(this.pinFile);
+        if (SecurityUtils.safeExistsSync(this.pinFile)) {
+            SecurityUtils.safeDeleteSync(this.pinFile);
         }
         return await this.setupPin();
     }

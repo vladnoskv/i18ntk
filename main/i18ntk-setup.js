@@ -42,21 +42,170 @@ class I18nSetupManager {
     }
 
     async setup() {
-        console.log('🔧 i18n Toolkit - Foundational Setup');
-        console.log('=====================================');
+        const isQuiet = process.argv.includes('--quiet') || process.env.I18N_QUIET === 'true';
+        
+        if (!isQuiet) {
+            console.log('🔧 i18n Toolkit - Foundational Setup');
+            console.log('=====================================');
+        }
         
         try {
-            await this.detectEnvironment();
-            await this.configureFramework();
+            // Check if user wants manual configuration
+            const useManual = process.argv.includes('--manual') || 
+                            (process.argv.includes('--language') && process.argv.includes('--framework'));
+            
+            if (useManual) {
+                if (!isQuiet) console.log('🛠️  Using manual configuration...');
+                await this.manualConfiguration();
+            } else {
+                await this.detectEnvironment();
+                await this.configureFramework();
+            }
+            
             await this.validatePrerequisites();
             await this.optimizeForLanguage();
-            await this.generateSetupReport();
             
-            console.log('✅ Setup completed successfully!');
+            if (!isQuiet) {
+                await this.generateSetupReport();
+                console.log('✅ Setup completed successfully!');
+            }
+            
             return this.config;
         } catch (error) {
             console.error('❌ Setup failed:', error.message);
             process.exit(1);
+        }
+    }
+
+    async promptForManualSetup() {
+        const readline = require('readline');
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        
+        return new Promise((resolve) => {
+            rl.question('Would you like to manually configure your language and framework? (y/N): ', (answer) => {
+                rl.close();
+                resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
+            });
+        });
+    }
+
+    async manualConfiguration() {
+        const isQuiet = process.argv.includes('--quiet') || process.env.I18N_QUIET === 'true';
+        
+        if (!isQuiet) {
+            console.log('🛠️  Manual Configuration Mode');
+            console.log('=============================');
+        }
+
+        // Parse CLI arguments first
+        const languageArg = process.argv.find(arg => arg.startsWith('--language='));
+        const frameworkArg = process.argv.find(arg => arg.startsWith('--framework='));
+        const sourceDirArg = process.argv.find(arg => arg.startsWith('--source-dir='));
+        const outputDirArg = process.argv.find(arg => arg.startsWith('--output-dir='));
+
+        if (languageArg) {
+            this.config.language = languageArg.split('=')[1];
+        }
+        if (frameworkArg) {
+            this.config.framework = frameworkArg.split('=')[1];
+        }
+        if (sourceDirArg) {
+            this.config.sourceDir = sourceDirArg.split('=')[1];
+        }
+        if (outputDirArg) {
+            this.config.outputDir = outputDirArg.split('=')[1];
+        }
+
+        // If CLI arguments provided, skip interactive prompts
+        if (languageArg && frameworkArg) {
+            if (!isQuiet) {
+                console.log(`✅ CLI configuration complete:`);
+                console.log(`   Language: ${this.config.language}`);
+                console.log(`   Framework: ${this.config.framework}`);
+                console.log(`   Source directory: ${this.config.sourceDir || './locales'}`);
+                console.log(`   Output directory: ${this.config.outputDir || './i18ntk-reports'}`);
+            }
+            return;
+        }
+
+        // Interactive mode
+        const readline = require('readline');
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        const prompt = (question) => new Promise((resolve) => {
+            rl.question(question, (answer) => resolve(answer.trim()));
+        });
+
+        try {
+            // Language selection
+            if (!this.config.detectedLanguage) {
+                console.log('\nAvailable languages:');
+                console.log('1. javascript');
+                console.log('2. typescript');
+                console.log('3. python');
+                console.log('4. java');
+                console.log('5. go');
+                console.log('6. php');
+                
+                let languageChoice = await prompt('Select language (1-6): ');
+                const languageMap = {
+                    '1': 'javascript',
+                    '2': 'typescript',
+                    '3': 'python',
+                    '4': 'java',
+                    '5': 'go',
+                    '6': 'php'
+                };
+                this.config.detectedLanguage = languageMap[languageChoice] || 'javascript';
+            }
+
+            // Framework selection based on language
+            if (!this.config.detectedFramework) {
+                const frameworks = {
+                    javascript: ['generic', 'react', 'vue', 'angular', 'nextjs', 'nuxt', 'svelte'],
+                    typescript: ['generic', 'react', 'vue', 'angular', 'nextjs', 'nuxt'],
+                    python: ['generic', 'django', 'flask', 'fastapi'],
+                    java: ['generic', 'spring', 'spring-boot', 'quarkus'],
+                    go: ['generic', 'gin', 'echo', 'fiber'],
+                    php: ['generic', 'laravel', 'symfony', 'wordpress']
+                };
+
+                console.log(`\nAvailable frameworks for ${this.config.detectedLanguage}:`);
+                frameworks[this.config.detectedLanguage].forEach((fw, idx) => {
+                    console.log(`${idx + 1}. ${fw}`);
+                });
+                
+                let frameworkChoice = await prompt('Select framework (1-n): ');
+                this.config.detectedFramework = frameworks[this.config.detectedLanguage][parseInt(frameworkChoice) - 1] || 'generic';
+            }
+
+            // Directory configuration
+            if (!this.config.sourceDir) {
+                this.config.sourceDir = await prompt(`Source directory (default: ./locales): `) || './locales';
+            }
+            if (!this.config.outputDir) {
+                this.config.outputDir = await prompt(`Output directory (default: ./i18ntk-reports): `) || './i18ntk-reports';
+            }
+
+            rl.close();
+            
+            if (!isQuiet) {
+                console.log(`\n✅ Manual configuration complete:`);
+                console.log(`   Language: ${this.config.detectedLanguage}`);
+                console.log(`   Framework: ${this.config.detectedFramework}`);
+                console.log(`   Source directory: ${this.config.sourceDir}`);
+                console.log(`   Output directory: ${this.config.outputDir}`);
+            }
+            
+        } catch (error) {
+            rl.close();
+            throw error;
         }
     }
 
@@ -70,19 +219,19 @@ class I18nSetupManager {
         const pomPath = pathConfig.resolveProject('pom.xml');
         const composerPath = pathConfig.resolveProject('composer.json');
 
-        if (fs.existsSync(packageJsonPath)) {
+        if (SecurityUtils.safeExistsSync(packageJsonPath)) {
             this.config.detectedLanguage = 'javascript';
             await this.detectNodeFramework(packageJsonPath);
-        } else if (fs.existsSync(pyprojectPath) || fs.existsSync(requirementsPath)) {
+        } else if (SecurityUtils.safeExistsSync(pyprojectPath) || SecurityUtils.safeExistsSync(requirementsPath)) {
             this.config.detectedLanguage = 'python';
             await this.detectPythonFramework();
-        } else if (fs.existsSync(goModPath)) {
+        } else if (SecurityUtils.safeExistsSync(goModPath)) {
             this.config.detectedLanguage = 'go';
             this.config.detectedFramework = 'generic';
-        } else if (fs.existsSync(pomPath)) {
+        } else if (SecurityUtils.safeExistsSync(pomPath)) {
             this.config.detectedLanguage = 'java';
             await this.detectJavaFramework(pomPath);
-        } else if (fs.existsSync(composerPath)) {
+        } else if (SecurityUtils.safeExistsSync(composerPath)) {
             this.config.detectedLanguage = 'php';
             await this.detectPhpFramework(composerPath);
         } else {
@@ -120,7 +269,7 @@ class I18nSetupManager {
     async detectPythonFramework() {
         try {
             const requirementsPath = pathConfig.resolveProject('requirements.txt');
-            if (SecurityUtils.safeExistsSync(requirementsPath, process.cwd())) {
+            if (SecurityUtils.safeExistsSync(requirementsPath)) {
                 const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8', process.cwd());
                 if (requirements.includes('django')) this.config.detectedFramework = 'django';
                 else if (requirements.includes('flask')) this.config.detectedFramework = 'flask';
@@ -230,7 +379,7 @@ class I18nSetupManager {
         ];
 
         for (const dirPath of possiblePaths) {
-            if (SecurityUtils.safeExistsSync(dirPath, process.cwd())) {
+            if (SecurityUtils.safeExistsSync(dirPath)) {
                 this.config.sourceDir = dirPath;
                 break;
             }
@@ -245,8 +394,8 @@ class I18nSetupManager {
         this.config.prerequisites = {
             nodeVersion: process.version,
             nodeVersionValid: parseInt(process.version.slice(1).split('.')[0]) >= 16,
-            hasPackageJson: SecurityUtils.safeExistsSync('package.json', process.cwd()),
-            hasLocales: SecurityUtils.safeExistsSync(this.config.sourceDir, process.cwd()),
+            hasPackageJson: SecurityUtils.safeExistsSync('package.json'),
+            hasLocales: SecurityUtils.safeExistsSync(this.config.sourceDir),
             hasGit: this.checkCommand('git'),
             hasNpm: this.checkCommand('npm'),
             hasPython: this.checkCommand('python3') || this.checkCommand('python'),
@@ -258,7 +407,7 @@ class I18nSetupManager {
         // Check for i18n libraries
         if (this.config.detectedLanguage === 'javascript') {
             const packageJsonPath = path.join(process.cwd(), 'package.json');
-            if (SecurityUtils.safeExistsSync(packageJsonPath, process.cwd())) {
+            if (SecurityUtils.safeExistsSync(packageJsonPath)) {
                 const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8', process.cwd());
                 if (packageJsonContent) {
                     try {
@@ -287,17 +436,30 @@ class I18nSetupManager {
     }
 
     checkCommand(command) {
-        // Secure command checking without child_process
+        // Restrict command checking to project scope only
+        // This prevents access to system directories like C:/WINDOWS/system32
         const extensions = process.platform === 'win32' ? ['.exe', '.cmd', '.bat'] : [''];
-        const pathEnv = process.env.PATH || process.env.Path || '';
-        const pathDirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
+        const projectRoot = process.cwd();
         
-        for (const dir of pathDirs) {
+        // Only check within project directories, not system PATH
+        const projectDirs = [
+            path.join(projectRoot, 'node_modules', '.bin'),
+            path.join(projectRoot, 'bin'),
+            path.join(projectRoot, '.bin')
+        ].filter(dir => {
+            try {
+                return SecurityUtils.safeExistsSync(dir);
+            } catch {
+                return false;
+            }
+        });
+        
+        for (const dir of projectDirs) {
             for (const ext of extensions) {
                 const fullPath = path.join(dir, command + ext);
                 try {
-                    if (SecurityUtils.safeExistsSync(fullPath, process.cwd())) {
-                        const stats = SecurityUtils.safeStatSync(fullPath, process.cwd());
+                    if (SecurityUtils.safeExistsSync(fullPath)) {
+                        const stats = SecurityUtils.safeStatSync(fullPath);
                         if (stats && stats.isFile()) {
                             return true;
                         }
@@ -356,19 +518,41 @@ class I18nSetupManager {
             ...optimizationStrategies[this.config.detectedLanguage]
         };
 
-        // Update configuration using SettingsManager
+        // Update configuration using SettingsManager - batch all updates to prevent multiple backups
         const SettingsManager = require('../settings/settings-manager');
         const settingsManager = new SettingsManager();
         
-        settingsManager.updateSetting('sourceDir', this.config.sourceDir);
-        settingsManager.updateSetting('outputDir', this.config.outputDir);
-        settingsManager.updateSetting('detectedLanguage', this.config.detectedLanguage);
-        settingsManager.updateSetting('detectedFramework', this.config.detectedFramework);
-        settingsManager.updateSetting('optimization', this.config.optimization);
-        settingsManager.updateSetting('prerequisites', this.config.prerequisites);
-        settingsManager.updateSetting('security.adminPinEnabled', false);
-        settingsManager.updateSetting('security.sessionTimeout', 1800000);
-        settingsManager.updateSetting('security.maxFailedAttempts', 3);
+        // Get current package version
+        const packageJsonPath = path.join(__dirname, '..', 'package.json');
+        let version = '1.10.0'; // fallback
+        try {
+            const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8');
+            const packageJson = JSON.parse(packageJsonContent);
+            version = packageJson.version || version;
+        } catch (error) {
+            // Use fallback version
+        }
+        
+        // Batch all updates into a single save operation
+        const currentSettings = settingsManager.getSettings();
+        const updatedSettings = {
+            ...currentSettings,
+            version: version,
+            sourceDir: this.config.sourceDir,
+            outputDir: this.config.outputDir,
+            detectedLanguage: this.config.detectedLanguage,
+            detectedFramework: this.config.detectedFramework,
+            optimization: this.config.optimization,
+            prerequisites: this.config.prerequisites,
+            security: {
+                ...currentSettings.security,
+                adminPinEnabled: false,
+                sessionTimeout: 1800000,
+                maxFailedAttempts: 3
+            }
+        };
+        
+        settingsManager.saveSettings(updatedSettings);
         
         console.log(`   Configuration updated in settings/i18ntk-config.json`);
     }

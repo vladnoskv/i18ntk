@@ -39,7 +39,7 @@ class AdminAuth {
      */
     async initialize() {
         try {
-            if (!fs.existsSync(this.configPath)) {
+            if (!SecurityUtils.safeExistsSync(this.configPath)) {
                 // Create default config if it doesn't exist
                 const defaultConfig = {
                     enabled: false,
@@ -82,7 +82,7 @@ class AdminAuth {
    */
   async loadConfig() {
     try {
-      if (!fs.existsSync(this.configPath)) {
+      if (!SecurityUtils.safeExistsSync(this.configPath)) {
         return null;
       }
       

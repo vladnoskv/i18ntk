@@ -30,15 +30,15 @@ class LanguageDetectionTester {
       const pomPath = path.join(projectRoot, 'pom.xml');
       const composerPath = path.join(projectRoot, 'composer.json');
 
-      if (fs.existsSync(packageJsonPath)) {
+      if (SecurityUtils.safeExistsSync(packageJsonPath)) {
         return 'javascript';
-      } else if (fs.existsSync(pyprojectPath) || fs.existsSync(requirementsPath)) {
+      } else if (SecurityUtils.safeExistsSync(pyprojectPath) || SecurityUtils.safeExistsSync(requirementsPath)) {
         return 'python';
-      } else if (fs.existsSync(goModPath)) {
+      } else if (SecurityUtils.safeExistsSync(goModPath)) {
         return 'go';
-      } else if (fs.existsSync(pomPath)) {
+      } else if (SecurityUtils.safeExistsSync(pomPath)) {
         return 'java';
-      } else if (fs.existsSync(composerPath)) {
+      } else if (SecurityUtils.safeExistsSync(composerPath)) {
         return 'php';
       } else {
         return 'generic';
@@ -59,7 +59,7 @@ class LanguageDetectionTester {
     for (const projectPath of this.testProjects) {
       const fullPath = path.resolve(projectPath);
       
-      if (!fs.existsSync(fullPath)) {
+      if (!SecurityUtils.safeExistsSync(fullPath)) {
         console.log(`❌ Project not found: ${projectPath}`);
         continue;
       }

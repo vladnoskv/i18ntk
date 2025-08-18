@@ -3,6 +3,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const SecurityUtils = require('../utils/security');
 
 function run(cmd, opts = {}) { return execSync(cmd, { stdio: 'inherit', ...opts }); }
 
@@ -38,11 +39,11 @@ const requiredFiles = [
 
 requiredDirs.forEach(dir => {
   const p = path.join(installed, dir);
-  if (!fs.existsSync(p)) {
+  if (!SecurityUtils.safeExistsSync(p)) {
     console.error('❌ Missing packaged directory:', dir);
     process.exit(2);
   }
-  if (!fs.statSync(p).isDirectory()) {
+  if (!SecurityUtils.safeStatSync(p).isDirectory()) {
     console.error('❌ Not a directory:', dir);
     process.exit(2);
   }
@@ -50,14 +51,14 @@ requiredDirs.forEach(dir => {
 
 requiredFiles.forEach(file => {
   const p = path.join(installed, file);
-  if (!fs.existsSync(p)) {
+  if (!SecurityUtils.safeExistsSync(p)) {
     console.error('❌ Missing required locale file:', file);
     process.exit(2);
   }
   
   // Validate file content
   try {
-    const content = fs.readFileSync(p, 'utf8');
+    const content = SecurityUtils.safeReadFileSync(p, 'utf8');
     JSON.parse(content);
     console.log(`✅ ${file} validated (${Math.round(content.length/1024)}KB)`);
   } catch (e) {
@@ -80,7 +81,7 @@ requiredFiles.forEach(file => {
 
 unwantedDirs.forEach(dir => {
   const p = path.join(installed, dir);
-  if (fs.existsSync(p) && fs.statSync(p).isDirectory()) {
+  if (SecurityUtils.safeExistsSync(p) && SecurityUtils.safeStatSync(p).isDirectory()) {
     console.error('❌ Unexpected directory in package:', dir);
     process.exit(2);
   }
@@ -98,7 +99,7 @@ const essentialFiles = [
 
 essentialFiles.forEach(file => {
   const p = path.join(installed, file);
-  if (!fs.existsSync(p)) {
+  if (!SecurityUtils.safeExistsSync(p)) {
     console.error('❌ Missing essential file:', file);
     process.exit(2);
   }
@@ -145,8 +146,7 @@ const testScripts = [
   "const fs=require('fs'); const path=require('path'); const langs=['en','es','fr','de','ja','ru','zh']; langs.forEach(l=>{const content=fs.readFileSync(path.join(__dirname,'node_modules/i18ntk/ui-locales',l+'.json'),'utf8'); const tr=JSON.parse(content); if(!tr||!tr.settings||!tr.settings.title){console.error('❌ Failed to load language:',l);process.exit(5)}}); console.log('✅ All languages loaded successfully');",
   
   // Test 3: Test locale files exist and are valid
-  "const fs=require('fs'); const path=require('path'); const langs=['en','es','fr','de','ja','ru','zh']; langs.forEach(l=>{const filePath=path.join(__dirname,'node_modules/i18ntk/ui-locales',l+'.json'); if(!fs.existsSync(filePath)){console.error('❌ Missing locale file:',l);process.exit(6)} try{JSON.parse(fs.readFileSync(filePath,'utf8'))}catch(e){console.error('❌ Invalid JSON in:',l,e.message);process.exit(6)}}); console.log('✅ All locale files are valid');"
-];
+  "const fs=require('fs'); const path=require('path'); const langs=['en','es','fr','de','ja','ru','zh']; langs.forEach(l=>{const filePath=path.join(__dirname,'node_modules/i18ntk/ui-locales',l+'.json'); if(!fs.existsSync(filePath)){console.error('❌ Missing locale file:',l);process.exit(6)} try{JSON.parse(fs.readFileSync(filePath,'utf8'))}catch(e){console.error('❌ Invalid JSON in:',l,e.message);process.exit(6)}}); console.log('✅ All locale files are valid');"];
 
 testScripts.forEach((script, index) => {
   try {
@@ -170,7 +170,7 @@ function checkFileSize(dir) {
     if (file.isDirectory()) {
       checkFileSize(fullPath);
     } else {
-      const stats = fs.statSync(fullPath);
+      const stats = SecurityUtils.safeStatSync(fullPath);
       const sizeKB = stats.size / 1024;
       totalSize += stats.size;
       
@@ -195,8 +195,8 @@ console.log('\n🧹 Cleaning up test files...');
 testScenarios.forEach(scenario => {
   const targetPath = path.join(tmp, scenario.dir, `${scenario.name}.json`);
   try {
-    if (fs.existsSync(targetPath)) {
-      fs.rmSync(targetPath, { recursive: true, force: true });
+    if (SecurityUtils.safeExistsSync(targetPath)) {
+      SecurityUtils.safeRmSync(targetPath, { recursive: true, force: true });
     }
   } catch (e) {
     // Ignore cleanup errors

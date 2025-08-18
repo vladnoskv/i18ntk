@@ -238,6 +238,5 @@
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules",
   "dependencies": {
-    "i18ntk": "file:finaltest/i18ntk-1.10.0.tgz"
   }
 }

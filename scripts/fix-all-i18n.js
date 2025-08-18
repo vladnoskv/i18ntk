@@ -10,6 +10,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 const argv = Object.fromEntries(
   process.argv.slice(2).map(a => {
@@ -36,19 +37,22 @@ const KEY_PATTERNS = [
 
 const EXCLUDE_DIRS = new Set(['node_modules', '.git', path.basename(I18N_DIR)]);
 
-function readUTF8(p) { try { return fs.readFileSync(p, 'utf8'); } catch { return null; } }
-function writeJSON(p, obj) { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8'); }
-function isDir(p) { try { return fs.statSync(p).isDirectory(); } catch { return false; } }
-function isFile(p) { try { return fs.statSync(p).isFile(); } catch { return false; } }
+function readUTF8(p) { try { return SecurityUtils.safeReadFileSync(p, 'utf8'); } catch { return null; } }
+function writeJSON(p, obj) {
+  SecurityUtils.safeMkdirSync(path.dirname(p));
+  SecurityUtils.safeWriteFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+function isDir(p) { try { return SecurityUtils.safeStatSync(p).isDirectory(); } catch { return false; } }
+function isFile(p) { try { return SecurityUtils.safeStatSync(p).isFile(); } catch { return false; } }
 
 function listFilesRecursive(dir, exts = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']) {
   const out = [];
   (function walk(d) {
-    for (const name of fs.readdirSync(d)) {
+    for (const name of SecurityUtils.safeReaddirSync(d)) {
       const full = path.join(d, name);
       if (EXCLUDE_DIRS.has(name)) continue;
       try {
-        const st = fs.statSync(full);
+        const st = SecurityUtils.safeStatSync(full);
         if (st.isDirectory()) walk(full);
         else if (st.isFile() && exts.includes(path.extname(name))) out.push(full);
       } catch {}
@@ -112,7 +116,7 @@ function loadLanguage(lang) {
   const dir = path.join(I18N_DIR, lang);
   if (isDir(dir)) {
     const data = {};
-    for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.json'))) {
+    for (const f of SecurityUtils.safeReaddirSync(dir).filter(f => f.endsWith('.json'))) {
       const p = path.join(dir, f);
       const name = path.basename(f, '.json');
       const txt = readUTF8(p);

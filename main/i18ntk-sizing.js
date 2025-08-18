@@ -111,30 +111,30 @@ class I18nSizingAnalyzer {
 
   // Get available language files
   getLanguageFiles() {
-    const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir, process.cwd());
+    const validatedSourceDir = SecurityUtils.validatePath(this.sourceDir);
     if (!validatedSourceDir) {
       throw new Error(t("sizing.invalidSourceDirectoryError", { sourceDir: this.sourceDir }));
     }
 
-    if (!SecurityUtils.safeExistsSync(validatedSourceDir, process.cwd())) {
+    if (!SecurityUtils.safeExistsSync(validatedSourceDir)) {
       throw new Error(t("sizing.sourceDirectoryNotFoundError", { sourceDir: validatedSourceDir }));
     }
 
     const files = [];
-    const items = SecurityUtils.safeReaddirSync(validatedSourceDir, process.cwd());
+    const items = SecurityUtils.safeReaddirSync(validatedSourceDir);
     
     // Check for nested language directories
     for (const item of items) {
       const itemPath = SecurityUtils.validatePath(path.join(validatedSourceDir, item), process.cwd());
       if (!itemPath) continue;
       
-      const stat = fs.statSync(itemPath);
+      const stat = SecurityUtils.safeStatSync(itemPath);
       
       if (stat.isDirectory()) {
         // This is a language directory, combine all JSON files
-        const langFiles = SecurityUtils.safeReaddirSync(itemPath, process.cwd())
+        const langFiles = SecurityUtils.safeReaddirSync(itemPath)
           .filter(file => file.endsWith('.json'))
-          .map(file => SecurityUtils.validatePath(path.join(itemPath, file), process.cwd()))
+          .map(file => SecurityUtils.validatePath(path.join(itemPath, file)))
           .filter(file => file !== null);
         
         if (langFiles.length > 0) {
@@ -176,8 +176,9 @@ class I18nSizingAnalyzer {
         let lastModified = new Date(0);
         
         langFiles.forEach(langFile => {
-          const stats = fs.statSync(langFile);
-          let content = SecurityUtils.safeReadFileSync(langFile, process.cwd());
+          const stats = SecurityUtils.safeStatSync(langFile);
+          let content = SecurityUtils.safeReadFile(langFile, 'utf8');
+
           if (typeof content !== "string") content = "";
           totalSize += stats.size;
           totalLines += content.split('\n').length;
@@ -198,8 +199,9 @@ class I18nSizingAnalyzer {
         };
       } else {
         // Handle single file structure
-        const stats = fs.statSync(filePath);
-        let content = SecurityUtils.safeReadFileSync(filePath, process.cwd());
+        const stats = SecurityUtils.safeStatSync(filePath);
+        let content = SecurityUtils.safeReadFile(filePath, 'utf8');
+
         if (typeof content !== "string") content = "";
         this.stats.files[language] = {
           file,
@@ -225,7 +227,8 @@ class I18nSizingAnalyzer {
         if (langFiles) {
           // Handle nested directory structure - combine all JSON files
           langFiles.forEach(langFile => {
-            const rawContent = SecurityUtils.safeReadFileSync(langFile, process.cwd());
+            const rawContent = SecurityUtils.safeReadFile(langFile, 'utf8');
+
             const fileContent = SecurityUtils.safeParseJSON(rawContent);
             if (fileContent) {
               const fileName = path.basename(langFile, '.json');
@@ -234,7 +237,8 @@ class I18nSizingAnalyzer {
           });
         } else {
           // Handle single file structure
-          const rawContent = SecurityUtils.safeReadFileSync(filePath, process.cwd());
+          const rawContent = SecurityUtils.safeReadFile(filePath, 'utf8');
+
           combinedContent = SecurityUtils.safeParseJSON(rawContent) || {};
         }
         
@@ -493,20 +497,20 @@ class I18nSizingAnalyzer {
     
     console.log(t("sizing.generating_detailed_report"));
     
-    const validatedOutputDir = SecurityUtils.validatePath(this.outputDir, process.cwd());
+    const validatedOutputDir = SecurityUtils.validatePath(this.outputDir);
     if (!validatedOutputDir) {
       throw new Error(t("sizing.invalidOutputDirectoryError", { outputDir: this.outputDir }));
     }
 
     // Ensure output directory exists
-        if (!SecurityUtils.safeExistsSync(validatedOutputDir, process.cwd())) {
-          SecurityUtils.safeMkdirSync(validatedOutputDir, { recursive: true }, process.cwd());
+        if (!SecurityUtils.safeExistsSync(validatedOutputDir)) {
+          SecurityUtils.safeMkdirSync(validatedOutputDir, { recursive: true });
         }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     
     // Generate human-readable text report
-    const textReportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.txt`), process.cwd());
+    const textReportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.txt`));
     if (!textReportPath) {
       throw new Error(t("sizing.invalidReportFileError"));
     }
@@ -518,7 +522,7 @@ class I18nSizingAnalyzer {
     }
     
     // Generate JSON for programmatic access
-    const jsonReportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.json`), process.cwd());
+    const jsonReportPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.json`));
     if (!jsonReportPath) {
       throw new Error(t("sizing.invalidReportFileError"));
     }
@@ -644,7 +648,7 @@ Generated: ${new Date().toISOString()}
       throw new Error(t("sizing.invalidOutputDirectoryError", { outputDir: this.outputDir }));
     }
 
-    const csvPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.csv`), process.cwd());
+    const csvPath = SecurityUtils.validatePath(path.join(validatedOutputDir, `sizing-analysis-${timestamp}.csv`));
     if (!csvPath) {
       throw new Error(t("sizing.invalidCsvFileError"));
     }

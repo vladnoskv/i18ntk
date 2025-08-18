@@ -11,6 +11,7 @@ const SettingsManager = require('./settings-manager');
 const settingsManager = new SettingsManager();
 const UIi18n = require('../main/i18ntk-ui');
 const configManager = require('../utils/config-manager');
+const SecurityUtils = require('../utils/security');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations(process.env.I18NTK_LANG, path.resolve(__dirname, '..', 'ui-locales'));
 
@@ -1219,8 +1220,8 @@ class SettingsCLI {
         }
 
         try {
-            fs.writeFileSync(exportFile, exportData);
-            const stats = fs.statSync(exportFile);
+            SecurityUtils.safeWriteFileSync(exportFile, exportData);
+        const stats = SecurityUtils.safeStatSync(exportFile);
             this.success(`Settings exported to ${exportFile}`);
             console.log(`  Size: ${Math.round(stats.size / 1024)}KB`);
             console.log(`  Format: ${formatChoice === '2' ? 'Minified JSON' : formatChoice === '3' ? 'JSON with metadata' : 'Formatted JSON'}`);
@@ -1252,13 +1253,13 @@ class SettingsCLI {
         }
         
         try {
-            if (!fs.existsSync(filename)) {
+            if (!SecurityUtils.safeExistsSync(filename)) {
                 this.error('File not found.');
                 await this.pause();
                 return;
             }
 
-            const fileContent = fs.readFileSync(filename, 'utf8');
+            const fileContent = SecurityUtils.safeReadFileSync(filename, 'utf8');
             let importedSettings;
             
             try {
@@ -1332,18 +1333,18 @@ class SettingsCLI {
         try {
             const source = configManager.CONFIG_PATH;
             const backupDir = path.join(path.dirname(source), 'backups');
-            if (!fs.existsSync(backupDir)) {
-                fs.mkdirSync(backupDir, { recursive: true });
+            if (!SecurityUtils.safeExistsSync(backupDir)) {
+                SecurityUtils.safeMkdirSync(backupDir, { recursive: true });
             }
             const backupFile = path.join(backupDir, `config-backup-${Date.now()}.json`);
-            fs.copyFileSync(source, backupFile);
+            SecurityUtils.safeCopyFileSync(source, backupFile);
             this.success(`Backup created: ${backupFile}`);
 
-            const backupFiles = fs.readdirSync(backupDir)
+            const backupFiles = SecurityUtils.safeReaddirSync(backupDir)
                 .filter(file => file.endsWith('.json') && file.includes('-backup-'));
             const totalSize = backupFiles.reduce((total, file) => {
                 const filePath = path.join(backupDir, file);
-                return total + fs.statSync(filePath).size;
+                return total + SecurityUtils.safeStatSync(filePath).size;
             }, 0);
             console.log(`  Total backups: ${backupFiles.length}`);
             console.log(`  Total size: ${Math.round(totalSize / 1024)}KB`);
@@ -1371,18 +1372,18 @@ class SettingsCLI {
         try {
             const backupDir = path.join(path.dirname(configManager.CONFIG_PATH), 'backups');
             
-            if (!fs.existsSync(backupDir)) {
+            if (!SecurityUtils.safeExistsSync(backupDir)) {
                 this.error('No backup directory found.');
                 await this.pause();
                 return;
             }
 
-            const backupFiles = fs.readdirSync(backupDir)
+            const backupFiles = SecurityUtils.safeReaddirSync(backupDir)
                 .filter(file => file.endsWith('.json') && file.includes('-backup-'))
                 .map(file => ({
                     name: file,
                     path: path.join(backupDir, file),
-                    created: fs.statSync(path.join(backupDir, file)).mtime
+                    created: SecurityUtils.safeStatSync(path.join(backupDir, file)).mtime
                 }))
                 .sort((a, b) => b.created - a.created);
 
@@ -1413,7 +1414,7 @@ class SettingsCLI {
             
             const confirm = await this.prompt(`Restore from ${selectedBackup.name}? This will overwrite current settings. (y/n): `);
             if (confirm.toLowerCase() === 'y') {
-                const importedSettings = JSON.parse(fs.readFileSync(selectedBackup.path, 'utf8'));
+                const importedSettings = JSON.parse(SecurityUtils.safeReadFileSync(selectedBackup.path, 'utf8'));
                 
                 // Validate imported settings
                 if (!settingsManager.validateSettings(importedSettings)) {
@@ -1457,7 +1458,7 @@ class SettingsCLI {
         try {
             const backupDir = path.join(path.dirname(configManager.CONFIG_PATH), 'backups');
             
-            if (!fs.existsSync(backupDir)) {
+            if (!SecurityUtils.safeExistsSync(backupDir)) {
                 this.error('No backup directory found.');
                 await this.pause();
                 return;
@@ -1468,11 +1469,11 @@ class SettingsCLI {
                 this.showHeader();
                 console.log(`${colors.bright}Manage Backup Files${colors.reset}\n`);
 
-                const backupFiles = fs.readdirSync(backupDir)
+                const backupFiles = SecurityUtils.safeReaddirSync(backupDir)
                     .filter(file => file.endsWith('.json') && file.includes('-backup-'))
                     .map(file => {
                         const filePath = path.join(backupDir, file);
-                        const stats = fs.statSync(filePath);
+                        const stats = SecurityUtils.safeStatSync(filePath);
                         return {
                             name: file,
                             path: filePath,
@@ -1547,7 +1548,7 @@ class SettingsCLI {
         
         if (confirm.toLowerCase() === 'y') {
             try {
-                fs.unlinkSync(selectedBackup.path);
+                SecurityUtils.safeDeleteSync(selectedBackup.path);
                 this.success(`Deleted ${selectedBackup.name}`);
             } catch (error) {
                 this.error(`Failed to delete backup: ${error.message}`);
@@ -1579,7 +1580,7 @@ class SettingsCLI {
             let deletedCount = 0;
             filesToDelete.forEach(file => {
                 try {
-                    fs.unlinkSync(file.path);
+                    SecurityUtils.safeDeleteSync(file.path);
                     deletedCount++;
                 } catch (error) {
                     this.error(`Failed to delete ${file.name}: ${error.message}`);
@@ -1601,7 +1602,7 @@ class SettingsCLI {
             let deletedCount = 0;
             backupFiles.forEach(file => {
                 try {
-                    fs.unlinkSync(file.path);
+                    SecurityUtils.safeDeleteSync(file.path);
                     deletedCount++;
                 } catch (error) {
                     this.error(`Failed to delete ${file.name}: ${error.message}`);
@@ -1640,11 +1641,11 @@ class SettingsCLI {
                 await this.adminAuth.disableAuth();
                 
                 // Delete the PIN configuration file to completely reset
-                const pinConfigPath = path.join(this.configDir, '.i18n-admin-config.json');
-                if (fs.existsSync(pinConfigPath)) {
-                    fs.unlinkSync(pinConfigPath);
-                }
-                
+                const configDir = path.dirname(configManager.CONFIG_PATH);
+                const pinConfigPath = path.join(configDir, '.i18n-admin-config.json');
+                if (SecurityUtils.safeExistsSync(pinConfigPath)) {
+                    SecurityUtils.safeDeleteSync(pinConfigPath);
+                }                
                 await configManager.resetToDefaults();
                 this.settings = configManager.getConfig();
                 this.modified = false;
@@ -1974,7 +1975,7 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
             const fileName = `i18ntk-enhanced-schema-${Date.now()}.json`;
             const filePath = path.join(process.cwd(), fileName);
             
-            fs.writeFileSync(filePath, JSON.stringify(enhancedSchema, null, 2), 'utf8');
+            SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(enhancedSchema, null, 2), 'utf8');
             this.success(`Enhanced schema exported to: ${filePath}`);
             
             await this.pause();

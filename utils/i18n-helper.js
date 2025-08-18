@@ -22,7 +22,7 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  const raw = SecurityUtils.safeReadFileSync(file, process.cwd(), 'utf8');
+  const raw = SecurityUtils.safeReadFileSync(file, 'utf8');
   if (raw === null) {
     throw new Error(`Failed to read file: ${file}`);
   }
@@ -47,7 +47,7 @@ function resolveLocalesDirs() {
       try {
         const normalized = path.normalize(path.resolve(dir.trim()));
 
-        const stat = SecurityUtils.safeStatSync(normalized, process.cwd());
+        const stat = SecurityUtils.safeStatSync(normalized);
         if (stat && stat.isDirectory()) {
           dirs.push(normalized);
         }
@@ -94,10 +94,10 @@ function findLocaleFilesAllDirs(lang) {
   for (const dir of dirs) {
     for (const candidate of candidatesForLang(dir, lang)) {
       try {
-        const stat = SecurityUtils.safeStatSync(candidate, process.cwd());
+        const stat = SecurityUtils.safeStatSync(candidate);
         if (stat && stat.isFile() && stat.size > 0) {
           // Validate file is readable and parseable
-          const content = SecurityUtils.safeReadFileSync(candidate, process.cwd(), 'utf8');
+          const content = SecurityUtils.safeReadFileSync(candidate, 'utf8');
           if (content !== null && (content.trim().startsWith('{') || content.trim().startsWith('['))) {
             files.push(candidate);
           } else {
@@ -201,9 +201,7 @@ function loadTranslations(language) {
   currentLanguage = 'en';
   isInitialized = true;
   
-  if (loadErrors.length > 0) {
-    console.warn(`⚠️ No valid UI locale files found. Using built-in English strings.`);
-  }
+  // Fallback warning is handled by the translation system
   
   return translations;
 }
@@ -310,12 +308,12 @@ function getAvailableLanguages() {
   const langs = new Set();
   for (const d of dirs) {
     try {
-      if (!fs.existsSync(d)) continue;
-      for (const f of fs.readdirSync(d)) {
+      if (!SecurityUtils.safeExistsSync(d)) continue;
+      for (const f of SecurityUtils.safeReaddirSync(d)) {
         if (f.endsWith('.json')) langs.add(path.basename(f, '.json'));
       }
-      for (const f of fs.readdirSync(d, { withFileTypes: true })) {
-        if (f.isDirectory() && fs.existsSync(path.join(d, f.name, `${f.name}.json`))) {
+      for (const f of SecurityUtils.safeReaddirSync(d, { withFileTypes: true })) {
+        if (f.isDirectory() && SecurityUtils.safeExistsSync(path.join(d, f.name, `${f.name}.json`))) {
           langs.add(f.name);
         }
       }
