@@ -127,7 +127,7 @@ class I18ntkJavaScriptCommand {
   }
 
   async validateSourceDir() {
-    if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
+    if (!SecurityUtils.safeExists(this.sourceDir)) {
       console.error(`❌ Source directory not found: ${this.sourceDir}`);
       process.exit(1);
     }
@@ -161,7 +161,7 @@ class I18ntkJavaScriptCommand {
 
     try {
       const packageJsonPath = path.join(this.sourceDir, 'package.json');
-      if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+      if (SecurityUtils.safeExists(packageJsonPath)) {
         const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
         
         const dependencies = {
@@ -232,7 +232,7 @@ Examples:
     const validExtensions = extensions.length > 0 ? extensions : ['.js', '.jsx', '.ts', '.tsx'];
     
     function scanDir(dir) {
-      if (!SecurityUtils.safeExistsSync(dir)) return;
+      if (!SecurityUtils.safeExists(dir)) return;
       
       const items = SecurityUtils.safeReaddirSync(dir);
       for (const item of items) {
@@ -308,7 +308,7 @@ Examples:
   }
 
   async createLocaleStructure() {
-    if (!SecurityUtils.safeExistsSync(this.localesDir)) {
+    if (!SecurityUtils.safeExists(this.localesDir)) {
       if (this.options.dryRun) {
         console.log(`📁 Would create directory: ${this.localesDir}`);
         return;
@@ -322,7 +322,7 @@ Examples:
     
     for (const lang of languages) {
       const langDir = path.join(this.localesDir, lang);
-      if (!SecurityUtils.safeExistsSync(langDir)) {
+      if (!SecurityUtils.safeExists(langDir)) {
         if (this.options.dryRun) {
           console.log(`📁 Would create directory: ${langDir}`);
           continue;
@@ -457,7 +457,7 @@ Examples:
     // Check package.json for dependencies
     try {
       const packageJsonPath = path.join(this.sourceDir, 'package.json');
-      if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+      if (SecurityUtils.safeExists(packageJsonPath)) {
         const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
         const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
         

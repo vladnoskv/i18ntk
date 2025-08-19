@@ -284,7 +284,7 @@ class I18nFixer {
       console.warn('Invalid or unsafe directory path. Using default.');
       return defaultDir;
     }
-    if (!SecurityUtils.safeExistsSync(safePath)) {
+    if (!SecurityUtils.safeExists(safePath)) {
             SecurityUtils.safeMkdirSync(safePath, { recursive: true });
       try {
         SecurityUtils.safeMkdirSync(safePath, { recursive: true });
@@ -401,7 +401,7 @@ class I18nFixer {
   }
 
   getAvailableLanguages() {
-    if (!SecurityUtils.safeExistsSync(this.sourceDir)) return [];
+    if (!SecurityUtils.safeExists(this.sourceDir)) return [];
     const entries = SecurityUtils.safeReaddirSync(this.sourceDir);
     const langs = new Set();
     entries.forEach(item => {
@@ -429,8 +429,8 @@ class I18nFixer {
 
   getAllFiles(dir) {
     const results = [];
-    const validatedDir = SecurityUtils.sanitizePath(dir, this.sourceDir);
-    if (!validatedDir || !SecurityUtils.safeExistsSync(validatedDir)) return results;
+    const validatedDir = SecurityUtils.safeSanitizePath(dir, this.sourceDir);
+    if (!validatedDir || !SecurityUtils.safeExists(validatedDir)) return results;
     
     try {
       SecurityUtils.safeReaddirSync(validatedDir, this.sourceDir).forEach(item => {
@@ -505,7 +505,7 @@ class I18nFixer {
       }
       
       let tgtData = {};
-      if (SecurityUtils.safeExistsSync(validatedTargetFile)) {
+      if (SecurityUtils.safeExists(validatedTargetFile)) {
         try {
           const content = SecurityUtils.safeReadFileSync(validatedTargetFile, this.sourceDir);
           tgtData = content ? JSON.parse(content) : {};
@@ -559,7 +559,7 @@ class I18nFixer {
       }
       
       let tgtData = {};
-      if (SecurityUtils.safeExistsSync(validatedTargetFile)) {
+      if (SecurityUtils.safeExists(validatedTargetFile)) {
         try {
           const content = SecurityUtils.safeReadFileSync(validatedTargetFile, this.sourceDir);
           tgtData = content ? JSON.parse(content) : {};
@@ -712,7 +712,7 @@ class I18nFixer {
     }
     
     // Ensure report directory exists
-    if (!SecurityUtils.safeExistsSync(validatedReportDir)) {
+    if (!SecurityUtils.safeExists(validatedReportDir)) {
       SecurityUtils.safeMkdirSync(validatedReportDir);
     }
 

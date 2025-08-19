@@ -394,8 +394,8 @@ class I18nSetupManager {
         this.config.prerequisites = {
             nodeVersion: process.version,
             nodeVersionValid: parseInt(process.version.slice(1).split('.')[0]) >= 16,
-            hasPackageJson: SecurityUtils.safeExistsSync('package.json'),
-            hasLocales: SecurityUtils.safeExistsSync(this.config.sourceDir),
+            hasPackageJson: SecurityUtils.safeExists('package.json'),
+            hasLocales: SecurityUtils.safeExists(this.config.sourceDir),
             hasGit: this.checkCommand('git'),
             hasNpm: this.checkCommand('npm'),
             hasPython: this.checkCommand('python3') || this.checkCommand('python'),

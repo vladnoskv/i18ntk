@@ -76,7 +76,7 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
       exitCode = Math.max(exitCode, ExitCodes.SECURITY_VIOLATION);
       continue;
     }
-    const exists = SecurityUtils.safeExistsSync(dir);
+    const exists = SecurityUtils.safeExists(dir);
     console.log(`${name}: ${dir} ${exists ? '✅' : '❌'}`);
     if (!exists) {
       if (name !== 'outputDir') {
@@ -102,11 +102,11 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
   const sourceLang = config.sourceLanguage || 'en';
   const languages = config.defaultLanguages || [];
   const srcDir = path.join(config.i18nDir, sourceLang);
-  const srcFiles = SecurityUtils.safeExistsSync(srcDir) ? SecurityUtils.safeReaddirSync(srcDir).filter(f => f.endsWith('.json')) : [];
+  const srcFiles = SecurityUtils.safeExists(srcDir) ? SecurityUtils.safeReaddirSync(srcDir).filter(f => f.endsWith('.json')) : [];
 
   for (const lang of languages) {
     const langDir = path.join(config.i18nDir, lang);
-    if (!SecurityUtils.safeExistsSync(langDir)) {
+    if (!SecurityUtils.safeExists(langDir)) {
       issues.push(`Missing locale directory: ${lang}`);
       exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
       continue;
@@ -119,7 +119,7 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
       }
       const srcPath = path.join(srcDir, file);
       const tgtPath = path.join(langDir, file);
-      if (!SecurityUtils.safeExistsSync(srcPath) || !SecurityUtils.safeExistsSync(tgtPath)) continue;
+      if (!SecurityUtils.safeExists(srcPath) || !SecurityUtils.safeExists(tgtPath)) continue;
       const srcContent = SecurityUtils.safeReadFileSync(srcPath, 'utf8');
       const tgtContent = SecurityUtils.safeReadFileSync(tgtPath, 'utf8');
       if (hasBOM(srcContent) || hasBOM(tgtContent)) {

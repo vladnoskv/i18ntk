@@ -176,7 +176,7 @@ class I18nSizingAnalyzer {
         let lastModified = new Date(0);
         
         langFiles.forEach(langFile => {
-          const stats = SecurityUtils.safeStatSync(langFile);
+          const stats = SecurityUtils.safeStat(langFile);
           let content = SecurityUtils.safeReadFile(langFile, 'utf8');
 
           if (typeof content !== "string") content = "";
@@ -199,7 +199,7 @@ class I18nSizingAnalyzer {
         };
       } else {
         // Handle single file structure
-        const stats = SecurityUtils.safeStatSync(filePath);
+        const stats = SecurityUtils.safeStat(filePath);
         let content = SecurityUtils.safeReadFile(filePath, 'utf8');
 
         if (typeof content !== "string") content = "";

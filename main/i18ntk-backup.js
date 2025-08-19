@@ -243,7 +243,7 @@ async function handleRestore(args) {
   }
   
   // Validate backup file
-  if (!SecurityUtils.safeExistsSync(backupPath)) {
+  if (!SecurityUtils.safeExists(backupPath)) {
     throw new Error(`Backup file not found: ${backupPath}`);
   }
   
@@ -251,7 +251,7 @@ async function handleRestore(args) {
   
   try {
     // Read the backup file with security validation
-    const backupData = SecurityUtils.safeReadFileSync(backupPath, 'utf8');
+    const backupData = await SecurityUtils.safeReadFile(backupPath, 'utf8');
     const translations = JSON.parse(backupData);
     
     // Create output directory if it doesn't exist
@@ -420,14 +420,14 @@ async function handleVerify(args) {
   }
   
   // Validate backup file
-  if (!SecurityUtils.safeExistsSync(validatedBackupPath)) {
+  if (!SecurityUtils.safeExists(validatedBackupPath)) {
     throw new Error(`Backup file not found: ${validatedBackupPath}`);
   }
   
   logger.info('\nVerifying backup...');
   
   try {
-    const data = SecurityUtils.safeReadFileSync(validatedBackupPath, 'utf8');
+    const data = SecurityUtils.safeReadFile(validatedBackupPath, 'utf8');
     const content = JSON.parse(data);
     
     if (typeof content === 'object' && content !== null) {

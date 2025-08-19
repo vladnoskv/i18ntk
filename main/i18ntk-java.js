@@ -52,7 +52,7 @@ class JavaI18nManager {
   async detectFramework(sourceDir) {
     // Check for Android
     const androidManifest = path.join(sourceDir, 'AndroidManifest.xml');
-    if (SecurityUtils.safeExistsSync(androidManifest)) {
+    if (SecurityUtils.safeExists(androidManifest)) {
       return 'android';
     }
     
@@ -60,14 +60,14 @@ class JavaI18nManager {
     const pomXml = path.join(sourceDir, 'pom.xml');
     const gradleFile = path.join(sourceDir, 'build.gradle');
     
-    if (SecurityUtils.safeExistsSync(pomXml)) {
+    if (SecurityUtils.safeExists(pomXml)) {
       const content = SecurityUtils.safeReadFileSync(pomXml, 'utf8');
       if (content.includes('spring-boot')) {
         return 'spring-boot';
       }
     }
     
-    if (SecurityUtils.safeExistsSync(gradleFile)) {
+    if (SecurityUtils.safeExists(gradleFile)) {
       const content = SecurityUtils.safeReadFileSync(gradleFile, 'utf8');
       if (content.includes('spring-boot')) {
         return 'spring-boot';
@@ -217,7 +217,7 @@ items.count={0} items
     const files = [];
     
     function traverse(currentDir) {
-      if (!SecurityUtils.safeExistsSync(currentDir)) return;
+      if (!SecurityUtils.safeExists(currentDir)) return;
       
       const items = SecurityUtils.safeReaddirSync(currentDir);
       

@@ -37,13 +37,13 @@ const KEY_PATTERNS = [
 
 const EXCLUDE_DIRS = new Set(['node_modules', '.git', path.basename(I18N_DIR)]);
 
-function readUTF8(p) { try { return SecurityUtils.safeReadFileSync(p, 'utf8'); } catch { return null; } }
+function readUTF8(p) { try { return SecurityUtils.safeReadFile(p, 'utf8'); } catch { return null; } }
 function writeJSON(p, obj) {
   SecurityUtils.safeMkdirSync(path.dirname(p));
-  SecurityUtils.safeWriteFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  SecurityUtils.safeWriteFile(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
-function isDir(p) { try { return SecurityUtils.safeStatSync(p).isDirectory(); } catch { return false; } }
-function isFile(p) { try { return SecurityUtils.safeStatSync(p).isFile(); } catch { return false; } }
+function isDir(p) { try { return SecurityUtils.safeStat(p).isDirectory(); } catch { return false; } }
+function isFile(p) { try { return SecurityUtils.safeStat(p).isFile(); } catch { return false; } }
 
 function listFilesRecursive(dir, exts = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']) {
   const out = [];
@@ -116,7 +116,7 @@ function loadLanguage(lang) {
   const dir = path.join(I18N_DIR, lang);
   if (isDir(dir)) {
     const data = {};
-    for (const f of SecurityUtils.safeReaddirSync(dir).filter(f => f.endsWith('.json'))) {
+    for (const f of SecurityUtils.safeReaddir(dir).filter(f => f.endsWith('.json'))) {
       const p = path.join(dir, f);
       const name = path.basename(f, '.json');
       const txt = readUTF8(p);

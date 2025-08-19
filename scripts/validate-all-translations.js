@@ -51,7 +51,7 @@ function flatten(obj, prefix = '') {
 
 function listLocaleFile(lang) {
   const file = path.join(I18N_DIR, `${lang}.json`);
-  if (SecurityUtils.safeExistsSync(file)) return file;
+  if (SecurityUtils.safeExists(file)) return file;
   throw new Error(`Locale file not found: ${file}`);
 }
 

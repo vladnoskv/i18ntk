@@ -44,7 +44,7 @@ class GoI18nManager {
 
   async detectFramework(sourceDir) {
     const goModPath = path.join(sourceDir, 'go.mod');
-    if (SecurityUtils.safeExistsSync(goModPath)) {
+    if (SecurityUtils.safeExists(goModPath)) {
       const content = SecurityUtils.safeReadFileSync(goModPath, 'utf8');
       
       if (content.includes('go-i18n')) return 'go-i18n';

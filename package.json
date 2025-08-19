@@ -171,7 +171,7 @@
   "versionInfo": {
     "version": "1.10.0",
     "releaseDate": "16/08/2025",
-    "lastUpdated": "16/08/2025",
+    "lastUpdated": "18/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
@@ -207,11 +207,7 @@
       "1.7.2",
       "1.7.3",
       "1.7.4",
-      "1.7.5",
-      "1.7.6",
-      "1.8.1",
-      "1.8.2",
-      "1.8.3"
+      "1.7.5"
     ],
     "nextVersion": "1.11.0",
     "supportedNodeVersions": ">=16.0.0",

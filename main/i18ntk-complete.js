@@ -116,7 +116,7 @@ class I18nCompletionTool {
 
   // Get all available languages
   getAvailableLanguages() {
-    if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
+    if (!SecurityUtils.safeExists(this.sourceDir)) {
       throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
@@ -130,7 +130,7 @@ class I18nCompletionTool {
     const directories = SecurityUtils.safeReaddir(this.sourceDir)
       .filter(item => {
         const itemPath = path.join(this.sourceDir, item);
-        const stats = SecurityUtils.safeStatSync(itemPath);
+        const stats = SecurityUtils.safeStat(itemPath);
         return stats ? stats.isDirectory() : false;
       });
     
@@ -141,7 +141,7 @@ class I18nCompletionTool {
   getLanguageFiles(language) {
     const languageDir = path.join(this.sourceDir, language);
     
-    if (!SecurityUtils.safeExistsSync(languageDir)) {
+    if (!SecurityUtils.safeExists(languageDir)) {
       return [];
     }
     
@@ -235,7 +235,7 @@ class I18nCompletionTool {
       let fileContent = {};
       
       // Load existing file or create new
-      const fileExists = SecurityUtils.safeExistsSync(filePath);
+      const fileExists = SecurityUtils.safeExists(filePath);
       if (fileExists) {
         try {
           const content = SecurityUtils.safeReadFile(filePath, 'utf8');
@@ -246,7 +246,7 @@ class I18nCompletionTool {
         }
       } else {
         // Create directory if it doesn't exist
-        const dirExists = SecurityUtils.safeExistsSync(languageDir);
+        const dirExists = SecurityUtils.safeExists(languageDir);
         if (!dirExists && !dryRun) {
           SecurityUtils.safeMkdirSync(languageDir);
         }
@@ -333,11 +333,11 @@ class I18nCompletionTool {
     const sourceFilePath = path.join(this.sourceDir, `${sourceLang}.json`);
     const missingKeys = [];
 
-    const sourceFileExists = SecurityUtils.safeExistsSync(sourceFilePath);
+    const sourceFileExists = SecurityUtils.safeExists(sourceFilePath);
     if (!sourceFileExists) {
       // Fallback to directory based lookup
       const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
-      const sourceDirExists = SecurityUtils.safeExistsSync(this.sourceLanguageDir);
+      const sourceDirExists = SecurityUtils.safeExists(this.sourceLanguageDir);
       if (!sourceDirExists) {
         console.log(t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
         return [];
@@ -361,7 +361,7 @@ class I18nCompletionTool {
             const targetFilePath = path.join(this.sourceDir, language, fileName);
             let targetKeys = [];
             
-            const targetExists = SecurityUtils.safeExistsSync(targetFilePath);
+            const targetExists = SecurityUtils.safeExists(targetFilePath);
             if (targetExists) {
               try {
                 const targetContentRaw = SecurityUtils.safeReadFile(targetFilePath, 'utf8');
@@ -397,7 +397,7 @@ class I18nCompletionTool {
           const targetFilePath = path.join(this.sourceDir, `${language}.json`);
           let targetKeys = [];
 
-          const targetExists = SecurityUtils.safeExistsSync(targetFilePath);
+          const targetExists = SecurityUtils.safeExists(targetFilePath);
           if (targetExists) {
             try {
               const targetContentRaw = SecurityUtils.safeReadFile(targetFilePath, 'utf8');
@@ -428,7 +428,7 @@ class I18nCompletionTool {
   async generateReport(changes, languages) {
     const projectRoot = this.config.projectRoot || process.cwd();
     const reportsDir = path.join(projectRoot, 'i18ntk-reports');
-    const reportsDirExists = SecurityUtils.safeExistsSync(reportsDir);
+    const reportsDirExists = SecurityUtils.safeExists(reportsDir);
     if (!reportsDirExists) {
       SecurityUtils.safeMkdirSync(reportsDir);
     }

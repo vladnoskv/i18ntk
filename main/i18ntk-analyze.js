@@ -140,7 +140,7 @@ class I18nAnalyzer {
     }
     
     const validatedSourceDir = SecurityUtils.safeSanitizePath(this.sourceDir);
-    if (!validatedSourceDir || !SecurityUtils.safeExistsSync(validatedSourceDir)) {
+    if (!validatedSourceDir || !SecurityUtils.safeExists(validatedSourceDir)) {
       throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
@@ -151,7 +151,7 @@ class I18nAnalyzer {
         if (!validatedItemPath) return false;
         
         try {
-          const stats = SecurityUtils.safeStatSync(validatedItemPath);
+          const stats = SecurityUtils.safeStat(validatedItemPath);
           return stats ? stats.isDirectory() && item !== this.config.sourceLanguage : false;
         } catch (error) {
           console.warn(`Skipping inaccessible directory: ${item}`);
@@ -172,7 +172,7 @@ class I18nAnalyzer {
     try {
       // Ensure the path is within the source directory for security
       const validatedPath = SecurityUtils.safeSanitizePath(languageDir, this.sourceDir);
-      if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
+      if (!validatedPath || !SecurityUtils.safeExists(validatedPath)) {
         console.warn(`Language directory not found or invalid: ${languageDir}`);
         return [];
       }
@@ -398,7 +398,7 @@ class I18nAnalyzer {
         continue;
       }
       
-      if (!SecurityUtils.safeExistsSync(validatedSourcePath)) {
+      if (!SecurityUtils.safeExists(validatedSourcePath)) {
         continue;
       }
       
@@ -420,7 +420,7 @@ class I18nAnalyzer {
         continue;
       }
       
-      if (!SecurityUtils.safeExistsSync(validatedTargetPath)) {
+      if (!SecurityUtils.safeExists(validatedTargetPath)) {
         analysis.files[fileName] = {
           status: 'missing',
           sourceKeys: this.getAllKeys(sourceContent).size
@@ -587,7 +587,7 @@ try {
       
       // Ensure the output directory exists
     SecurityUtils.safeMkdirSync(this.outputDir);
-       if (!SecurityUtils.safeExistsSync(this.outputDir)) {
+       if (!SecurityUtils.safeExists(this.outputDir)) {
          console.error(`Failed to create output directory: ${this.outputDir}`);
          return null;
        }
@@ -687,7 +687,7 @@ try {
       
       // Ensure output directory exists
       SecurityUtils.safeMkdirSync(this.outputDir);
-      if (!SecurityUtils.safeExistsSync(this.outputDir)) {
+      if (!SecurityUtils.safeExists(this.outputDir)) {
         throw new Error(`Failed to create output directory: ${this.outputDir}`);
       }
       
@@ -860,7 +860,7 @@ try {
       
       // Handle UI language change
       if (args.uiLanguage) {
-        loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+        SecurityUtils.safeLoadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       }
       
       // Update config if source directory is provided
@@ -881,7 +881,7 @@ try {
       if (args.watch) {
         await execute();
         let running = false;
-        watchLocales(this.sourceDir, async () => {
+        SecurityUtils.safeWatchLocales(this.sourceDir, async () => {
           if (running) return;
           running = true;
           try {

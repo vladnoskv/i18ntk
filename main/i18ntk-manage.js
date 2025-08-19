@@ -179,7 +179,7 @@ async function detectEnvironmentAndFramework() {
   let detectedLanguage = 'generic';
   let detectedFramework = 'generic';
 
-  if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+  if (SecurityUtils.safeExists(packageJsonPath)) {
     detectedLanguage = 'javascript';
     try {
       const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));

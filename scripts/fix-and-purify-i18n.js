@@ -54,11 +54,11 @@ function writeJSON(p, obj) {
 
 }
 function isDir(p) { 
-  const stats = SecurityUtils.safeStatSync(p);
+  const stats = SecurityUtils.safeStat(p);
   return stats ? stats.isDirectory() : false;
 }
 function isFile(p) { 
-  const stats = SecurityUtils.safeStatSync(p);
+  const stats = SecurityUtils.safeStat(p);
   return stats ? stats.isFile() : false;
 }
 
