@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.10.0",
+    "version": "1.10.1",
     "updated": "2025-08-16"
   },
   "common": {
@@ -60,7 +60,8 @@
       "invalidSourceDirectory": "无效源目录: {directory}",
       "securityViolation": "安全违规检测到",
       "authenticationFailed": "身份验证失败",
-      "sourceEqualsI18nWarn": "⚠️ 源目录等于国际化目录 ({sourceDir})。回退到 {fallback} 进行源扫描。"
+      "sourceEqualsI18nWarn": "⚠️ 源目录等于国际化目录 ({sourceDir})。回退到 {fallback} 进行源扫描。",
+      "initializationCancelled": "[common.errors.initializationCancelled]"
     },
     "errorGeneratingStatusSummary": "生成状态摘要时出错: {error}",
     "errorRunningDebugTool": "运行调试工具'{displayName}'时出错: {error}",
@@ -1234,7 +1235,23 @@
     "content_too_large_for_file": "内容过大，无法写入文件",
     "file_write_error": "文件写入错误",
     "json_string_too_large": "JSON 字符串过大",
-    "security_alert": "安全警报"
+    "security_alert": "安全警报",
+    "statError": "[security.statError]",
+    "pathTraversalError": "[security.pathTraversalError]",
+    "accessDenied": "[security.accessDenied]",
+    "directoryCreationError": "[security.directoryCreationError]",
+    "invalidDirectoryPath": "[security.invalidDirectoryPath]",
+    "invalidBasePath": "[security.invalidBasePath]",
+    "pathNotInAllowlist": "[security.pathNotInAllowlist]",
+    "symlinkTraversalDetected": "[security.symlinkTraversalDetected]",
+    "pathNotDirectory": "[security.pathNotDirectory]",
+    "directoryAccessError": "[security.directoryAccessError]",
+    "fileDeleteError": "[security.fileDeleteError]",
+    "translationFileParseError": "[security.translationFileParseError]",
+    "languageValidationError": "[security.languageValidationError]",
+    "invalidPath": "[security.invalidPath]",
+    "safeOperationFailed": "[security.safeOperationFailed]",
+    "file_delete_error": "[security.file_delete_error]"
   },
   "settings-cli": {
     "settings": {
@@ -2298,18 +2315,18 @@
     "signUp": "注册"
   },
   "scanner": {
-      "help_message": "\ni18n文本扫描器\n\n使用方法: node i18ntk-scanner.js [选项]\n\n选项:\n  --source-dir <目录>     要扫描的源目录 (默认: ./src)\n  --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)\n  --framework <名称>     目标框架 (react, vue, angular, vanilla)\n  --patterns <模式>      自定义正则表达式模式 (逗号分隔)\n  --include-tests        在扫描中包含测试文件\n  --exclude-dirs <目录>  要排除的目录 (逗号分隔)\n  --help                 显示此帮助信息\n\n示例:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./扫描结果.json\n",
-      "help_options": {
-        "source_dir": "要扫描的源目录",
-        "output_dir": "结果输出文件",
-        "framework": "目标框架 (react, vue, angular, vanilla)",
-        "patterns": "自定义正则表达式模式 (逗号分隔)",
-        "exclude": "要排除的目录 (逗号分隔)",
-        "output_report": "报告输出文件",
-        "min_length": "包含文本的最小长度",
-        "max_length": "包含文本的最大长度",
-        "include_tests": "在扫描中包含测试文件"
-      },
+    "help_message": "\ni18n文本扫描器\n\n使用方法: node i18ntk-scanner.js [选项]\n\n选项:\n  --source-dir <目录>     要扫描的源目录 (默认: ./src)\n  --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)\n  --framework <名称>     目标框架 (react, vue, angular, vanilla)\n  --patterns <模式>      自定义正则表达式模式 (逗号分隔)\n  --include-tests        在扫描中包含测试文件\n  --exclude-dirs <目录>  要排除的目录 (逗号分隔)\n  --help                 显示此帮助信息\n\n示例:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./扫描结果.json\n",
+    "help_options": {
+      "source_dir": "要扫描的源目录",
+      "output_dir": "结果输出文件",
+      "framework": "目标框架 (react, vue, angular, vanilla)",
+      "patterns": "自定义正则表达式模式 (逗号分隔)",
+      "exclude": "要排除的目录 (逗号分隔)",
+      "output_report": "报告输出文件",
+      "min_length": "包含文本的最小长度",
+      "max_length": "包含文本的最大长度",
+      "include_tests": "在扫描中包含测试文件"
+    },
     "starting": "🔍 正在为框架启动文本扫描器: {framework}",
     "sourceDirectory": "📁 正在扫描目录: {sourceDir}",
     "frameworkDetected": "🎯 检测到框架: {framework}",
@@ -2347,5 +2364,8 @@
       "excludeDirs": "要排除的目录 (逗号分隔):",
       "customPatterns": "要扫描的自定义模式 (正则表达式):"
     }
+  },
+  "console": {
+    "log(": "console.log("
   }
 }

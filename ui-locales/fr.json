@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.10.0",
+    "version": "1.10.1",
     "updated": "2025-08-16"
   },
   "common": {
@@ -60,7 +60,8 @@
       "invalidSourceDirectory": "Répertoire source invalide : {directory}",
       "securityViolation": "Violation de sécurité détectée",
       "authenticationFailed": "Authentification échouée",
-      "sourceEqualsI18nWarn": "⚠️ sourceDir equals i18nDir ({sourceDir}). Falling back to {fallback} for source scanning."
+       "sourceEqualsI18nWarn": "⚠️ Le répertoire source est identique à i18nDir ({sourceDir}). Retour à {fallback} pour l'analyse des sources.",
+       "initializationCancelled": "Initialisation annulée."
     },
     "errorGeneratingStatusSummary": "Erreur lors de la génération du résumé d'état : {error}",
     "errorRunningDebugTool": "Erreur lors de l'exécution de l'outil de débogage '{displayName}' : {error}",
@@ -105,7 +106,8 @@
     "readlineClosed": "Flux d'entrée fermé; exécution en mode non interactif.",
     "noPackageJson": "Aucun fichier package.json trouvé. Impossible de détecter automatiquement le framework i18n.",
     "noI18nDir": "Aucun répertoire i18n trouvé dans la racine du projet.",
-    "noI18nConfig": "Aucun fichier de configuration i18n trouvé dans la racine du projet."
+    "noI18nConfig": "Aucun fichier de configuration i18n trouvé dans la racine du projet.",
+    "invalidOption": "Option invalide."
   },
   "fixer": {
     "help_message": "\nCorrecteur de Traduction I18n\n\nUtilisation: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Répertoire source à analyser (par défaut: ./locales)\n  --languages <langs>    Liste séparée par virgules des langues à corriger\n  --markers <markers>    Liste séparée par virgules des marqueurs à traiter comme non traduits\n  --no-backup           Sauter la création de sauvegarde automatique\n  --help                Afficher cette aide\n\nExemples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -1016,7 +1018,8 @@
     "fileAlreadyExistsMerging": "Le fichier {file} existe déjà. Fusion des nouvelles clés.",
     "createdNewFile": "Nouveau fichier créé : {file}",
     "updatedFile": "Fichier mis à jour : {file}",
-    "skippingExcludedFile": "Ignorer {file} pour {language} car il est exclu."
+    "skippingExcludedFile": "Ignorer {file} pour {language} car il est exclu.",
+    "initializationCancelled": "Initialisation annulée."
   },
   "language": {
     "title": "🌍 Changer la langue",
@@ -1230,7 +1233,24 @@
     "content_too_large_for_file": "Sécurité : Contenu trop volumineux pour le fichier : {filePath}",
     "file_write_error": "Sécurité : Erreur d’écriture du fichier : {errorMessage}",
     "json_string_too_large": "Sécurité : Chaîne JSON trop volumineuse",
-    "security_alert": "Sécurité : Alerte"
+    "security_alert": "Sécurité : Alerte",
+    "directoryListed": "[security.directoryListed]",
+    "statError": "[security.statError]",
+    "pathTraversalError": "[security.pathTraversalError]",
+    "accessDenied": "[security.accessDenied]",
+    "directoryCreationError": "[security.directoryCreationError]",
+    "invalidDirectoryPath": "[security.invalidDirectoryPath]",
+    "invalidBasePath": "[security.invalidBasePath]",
+    "pathNotInAllowlist": "[security.pathNotInAllowlist]",
+    "symlinkTraversalDetected": "[security.symlinkTraversalDetected]",
+    "pathNotDirectory": "[security.pathNotDirectory]",
+    "directoryAccessError": "[security.directoryAccessError]",
+    "fileDeleteError": "[security.fileDeleteError]",
+    "translationFileParseError": "[security.translationFileParseError]",
+    "languageValidationError": "[security.languageValidationError]",
+    "invalidPath": "[security.invalidPath]",
+    "safeOperationFailed": "[security.safeOperationFailed]",
+    "file_delete_error": "[security.file_delete_error]"
   },
   "settings-cli": {
     "settings": {
@@ -1991,7 +2011,7 @@
       "completed": "✅ Terminé"
     },
     "help": {
-      "usage": "Usage: node i18ntk-manage.js [options]", 
+      "usage": "Usage: node i18ntk-manage.js [options]",
       "interactiveMode": "💡 Utilisez : node i18ntk-manage.js --command=<command> pour exécution directe",
       "initProject": "🚀 Initialiser de nouvelles langues",
       "analyzeTranslations": "🔍 Analyser les traductions",
@@ -2339,7 +2359,7 @@
   "auth": {
     "title": "Authentification",
     "email": "Email",
-    "password": "Mot de passe", 
+    "password": "Mot de passe",
     "signIn": "Se connecter",
     "forgotPassword": "Mot de passe oublié",
     "signUp": "S'inscrire"

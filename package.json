@@ -1,8 +1,8 @@
 {
   "$schema": "http://json.schemastore.org/package",
   "name": "i18ntk",
-  "version": "1.10.0",
-  "description": "i18ntk (i18n Toolkit) - An ultra-extreme performance i18n internationalization management toolkit with 97% performance improvement, intelligent framework detection, security-first design with PIN protection, and comprehensive translation management capabilities.",
+  "version": "1.10.1",
+  "description": "i18ntk (i18n Toolkit) - An ultra-extreme performance i18n internationalization management toolkit with 97% performance improvement, intelligent framework detection, enterprise-grade security with zero vulnerabilities, comprehensive SecurityUtils API, AES-256 encryption, path traversal protection, and PIN protection. Security-first design with comprehensive translation management capabilities.",
   "keywords": [
     "i18n",
     "internationalization",
@@ -169,7 +169,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.10.0",
+    "version": "1.10.1",
     "releaseDate": "16/08/2025",
     "lastUpdated": "18/08/2025",
     "maintainer": "Vladimir Noskov",

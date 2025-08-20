@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.10.0",
+    "version": "1.10.1",
     "updated": "2025-08-16"
   },
   "common": {
@@ -178,7 +178,7 @@
   "autorun": {
     "stepAnalyzeTranslations": "Analizar traducciones",
     "stepCompletedWithIcon": "✅ Completado: {stepName}",
-    "stepValidateTranslations": "Validar traducciones", 
+    "stepValidateTranslations": "Validar traducciones",
     "stepRunning": "▶️  Paso {stepNumber}/{totalSteps}: {stepName}",
     "separator": "==================================================",
     "stepFailed": "❌ Fallido: {stepName}",
@@ -370,11 +370,11 @@
     "configurationValidationFailed": "Falló la validación de configuración: faltan campos requeridos"
   },
   "sizing": {
-    "separator": "================================================================================", 
+    "separator": "================================================================================",
     "lineSeparator": " --------------------------------------------------------------------------------",
     "analysisStats": "{stats}",
     "sourceDirectoryLabel": "📁 Directorio fuente: {sourceDir}",
-    "sourceLanguageLabel": "🌍 Idioma fuente: {sourceLanguage}", 
+    "sourceLanguageLabel": "🌍 Idioma fuente: {sourceLanguage}",
     "strictModeLabel": "⚙️ Modo estricto: {mode}",
     "invalidSourceDirectoryError": "Ruta de directorio fuente inválida: {sourceDir}",
     "sourceDirectoryNotFoundError": "Directorio fuente no encontrado: {sourceDir}",
@@ -413,7 +413,7 @@
     "keysHaveSignificantSizeVariations": "las claves tienen variaciones significativas de tamaño",
     "longTranslationsDetected": "${lang} tiene ${data.longKeys} traducciones más largas que 100 caracteres - considere dividirlas",
     "longer": "más largo",
-    "shorter": "más corto", 
+    "shorter": "más corto",
     "review_translations": "Considere revisar las traducciones de {lang} - son {percentageDifference}% {comparison} que la línea base",
     "report_saved_to": "Informe guardado en: {reportPath}",
     "considerReviewingTranslations": "Considere revisar las traducciones de ${lang} - son ${data.percentageDifference}% más largas que la línea base",
@@ -542,7 +542,7 @@
       "title": "🌍 COMPLETADO DE TRADUCCIÓN I18NTK",
       "separator": "============================================================",
       "sourceDir": "📁 Directorio fuente: {sourceDir}",
-      "sourceLanguage": "🌐 Idioma fuente: {sourceLanguage}", 
+      "sourceLanguage": "🌐 Idioma fuente: {sourceLanguage}",
       "dryRunMode": "🧪 Modo de prueba - no se realizarán cambios",
       "languages": "🌍 Idiomas disponibles: {languages}",
       "addingMissingKeys": "➕ Agregando claves faltantes a archivos de traducción...",
@@ -983,7 +983,9 @@
       "apply_all_prompt": "¿Aplicar esta estructura a todos los idiomas? (s/N): ",
       "per_language_intro": "Has elegido configurar los idiomas individualmente. Estos son los idiomas disponibles:",
       "available_languages": "Idiomas disponibles: {languages}",
-      "include_prompt": "Ingresa los códigos de idioma separados por comas (ej. 'de,fr,es'): "
+      "include_prompt": "Ingresa los códigos de idioma separados por comas (ej. 'de,fr,es'): ",
+      "title": "[init.setup.title]",
+      "question": "[init.setup.question]"
     },
     "warnings": {
       "noPackageJson": "No se encontró package.json. No se puede auto-detectar el framework i18n."
@@ -996,7 +998,7 @@
     },
     "frameworks": {
       "react": "- React i18next (react-i18next)",
-      "vue": "- Vue i18n (vue-i18n)", 
+      "vue": "- Vue i18n (vue-i18n)",
       "i18next": "- i18next (i18next)",
       "nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
       "svelte": "- Svelte i18n (svelte-i18n)"
@@ -1019,7 +1021,8 @@
     "fileAlreadyExistsMerging": "El archivo {file} ya existe. Fusionando nuevas claves.",
     "createdNewFile": "Archivo nuevo creado: {file}",
     "updatedFile": "Archivo actualizado: {file}",
-    "skippingExcludedFile": "Omitiendo {file} para {language} ya que está excluido."
+    "skippingExcludedFile": "Omitiendo {file} para {language} ya que está excluido.",
+    "initializationCancelled": "Inicialización cancelada."
   },
   "language": {
     "title": "🌍 Cambiar Idioma",
@@ -1234,7 +1237,23 @@
     "content_too_large_for_file": "Contenido demasiado grande para archivo",
     "file_write_error": "Error de escritura de archivo",
     "json_string_too_large": "Cadena JSON demasiado grande",
-    "security_alert": "Alerta de seguridad"
+    "security_alert": "Alerta de seguridad",
+    "statError": "Error al obtener el estado del archivo",
+    "pathTraversalError": "Se detectó intento de traversal de ruta",
+    "accessDenied": "Acceso denegado",
+    "directoryCreationError": "Error al crear el directorio",
+    "invalidDirectoryPath": "Ruta de directorio inválida",
+    "invalidBasePath": "Ruta base inválida",
+    "pathNotInAllowlist": "La ruta no está en la lista permitida",
+    "symlinkTraversalDetected": "Se detectó traversal mediante enlace simbólico",
+    "pathNotDirectory": "La ruta no es un directorio",
+    "directoryAccessError": "Error al acceder al directorio",
+    "fileDeleteError": "Error al eliminar el archivo",
+    "translationFileParseError": "Error al analizar el archivo de traducción",
+    "languageValidationError": "Error al validar el idioma",
+    "invalidPath": "Ruta inválida",
+    "safeOperationFailed": "La operación segura falló",
+    "file_delete_error": "Error al eliminar archivo"
   },
   "settings-cli": {
     "settings": {
@@ -1798,6 +1817,9 @@
       },
       "pinProtection_${helperKey}": {
         "help": "  Ayuda"
+      },
+      "dynamicHelper": {
+        "help": "Ayuda"
       }
     },
     "actions": {
@@ -2349,5 +2371,8 @@
     "signIn": "Iniciar sesión",
     "forgotPassword": "Olvidé mi contraseña",
     "signUp": "Registrarse"
+  },
+  "console": {
+    "log(": "Registro("
   }
 }

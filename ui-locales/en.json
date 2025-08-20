@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.10.0",
+    "version": "1.10.1",
     "updated": "2025-08-18"
   },
   
@@ -1255,7 +1255,6 @@
     }
   },
   "security": {
-    "pathValidationFailed": "path_validation_failed",
     "invalidInputType": "invalid_input_type",
     "pathTraversalAttempt": "path_traversal_attempt",
     "pathValidated": "✅ Path validated successfully",
@@ -1264,6 +1263,18 @@
     "statError": "Security: Failed to access file or directory",
     "pathTraversalError": "Security: Path traversal attempt detected",
     "accessDenied": "Security: Access denied",
+    "directoryCreationError": "Failed to create directory",
+    "invalidDirectoryPath": "Invalid directory path provided",
+    "invalidBasePath": "Invalid base path provided",
+    "pathValidationFailed": "Path validation failed",
+    "pathNotInAllowlist": "Directory path not in allowlist",
+    "symlinkTraversalDetected": "Symlink traversal detected",
+    "pathNotDirectory": "Path is not a directory",
+    "directoryAccessError": "Access denied to directory",
+    "fileDeleteError": "Failed to delete file",
+    "file_too_large": "File too large: {filePath}",
+    "translationFileParseError": "Translation file parse error: {error}",
+    "languageValidationError": "Language validation error: {error}",
     "invalidPath": "Security: Invalid file path",
     "safeOperationFailed": "Security: Safe file operation failed",
     "fileTooLarge": "Security: File too large: {filePath}",
@@ -1285,7 +1296,6 @@
     "alertMessage": "[SECURITY ALERT] {timestamp}: {event}",
     "securityWarning": "[SECURITY WARNING] {timestamp}: {event}",
     "json_parse_error": "Security: JSON parse error: {errorMessage}",
-    "file_too_large": "File too large",
     "file_read_error": "File read error",
     "content_too_large_for_file": "Content too large for file",
     "file_write_error": "File write error",

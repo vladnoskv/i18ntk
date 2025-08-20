@@ -88,6 +88,75 @@ Interactive translation fixer with custom placeholder markers and mass fix capab
 npx i18ntk fixer --interactive
 ```
 
+#### `i18ntk verify-translations` (NEW in v1.10.1)
+Comprehensive translation verification script for validating and fixing missing translation keys across all locale files
+```bash
+node scripts/verify-translations.js
+```
+
+#### `i18ntk --security-check`
+Run comprehensive security validation to verify all security enhancements are properly implemented
+```bash
+npx i18ntk --security-check
+```
+
+**Security Validation Includes:**
+- ✅ Path traversal vulnerability checks
+- ✅ Input sanitization validation
+- ✅ Secure file operation verification
+- ✅ Configuration encryption status
+- ✅ Permission validation for sensitive files
+- ✅ Cross-platform security compatibility
+- ✅ Zero shell access verification
+- ✅ Encrypted settings integrity check
+
+**verify-translations — Features:**
+- **Comprehensive Key Scanning**: Uses English (en.json) as base for comparison across all languages
+- **Language-Specific Prefixing**: Adds missing translations with language code prefixes (e.g., `[FR]`, `[DE]`, `[ES]`)
+- **Interactive Directory Selection**: Choose target directories with validation and confirmation
+- **Real-time Progress**: Live progress tracking during verification and fixing processes
+- **Automatic Backup**: Creates timestamped backups before applying any changes
+- **Detailed Reporting**: Comprehensive reports showing missing keys by language
+- **Graceful Cancellation**: Safe cancellation options with proper cleanup**Usage Examples:**
+```bash
+# Run interactive verification
+node scripts/verify-translations.js
+
+# Select specific directory during interactive mode
+# Option 1: Current directory
+# Option 2: ui-locales folder (default)
+# Option 3: Custom path
+
+# The script will:
+# 1. Scan all locale files (de.json, es.json, fr.json, ja.json, ru.json, zh.json)
+# 2. Compare against en.json for completeness
+# 3. Report missing keys with language-specific counts
+# 4. Offer to fix missing keys with English translations prefixed by language code
+# 5. Create automatic backup before applying changes
+```
+
+**Output Example:**
+```
+📊 Translation Verification Report
+=====================================
+✅ Scanning 7 locale files...
+📁 Found: de.json, en.json, es.json, fr.json, ja.json, ru.json, zh.json
+🔍 Checking for missing translation keys...
+
+📋 Missing Keys Summary:
+- de.json: 45 missing keys
+- es.json: 32 missing keys
+- fr.json: 38 missing keys
+- ja.json: 41 missing keys
+- ru.json: 35 missing keys
+- zh.json: 29 missing keys
+
+🛠️ Fix Options:
+✔ Create backup: ./backups/translation-backup-1234567890/
+✔ Add missing keys with language prefixes
+✔ Preserve exact key structure and formatting
+```
+
 **Interactive Mode:**
 - Step-by-step guided fixing process
 - Custom placeholder marker configuration
@@ -525,6 +594,120 @@ Generated in `i18ntk-reports/`:
 - `usage-report.html` - Key utilization
 - `sizing-report.html` - Performance metrics
 - `summary-report.html` - Project overview
+
+## Security API
+
+## Security API
+
+### SecurityUtils
+
+Security utilities for safe file operations and path validation. Methods perform strict path normalization and containment checks; read/write helpers can optionally encrypt/decrypt content using AES-256-GCM when enabled (e.g., for backups or protected configs).
+
+#### `SecurityUtils.safeSanitizePath(path, options)`**Parameters:**
+- `path` (string): The file path to sanitize
+- `options` (object): Validation options
+  - `baseDir` (string): Base directory for validation (required)
+  - `allowAbsolute` (boolean): Allow absolute paths (default: false)
+  - `allowTraversal` (boolean): Allow directory traversal (default: false)
+  - `allowedExtensions` (array): Whitelist of allowed file extensions
+
+**Returns:**
+- `string`: Sanitized absolute path
+
+**Security Features:**
+- ✅ Prevents directory traversal (`../`, `..\`)
+- ✅ Blocks absolute path access unless explicitly allowed
+- ✅ Validates against symlink attacks
+- ✅ Whitelist-based file extension validation
+- ✅ Cross-platform path normalization (Windows, macOS, Linux)
+
+**Example:**
+```javascript
+const { SecurityUtils } = require('i18ntk/utils/security');
+const safePath = SecurityUtils.safeSanitizePath('../config.json', {
+  baseDir: '/app/translations',
+  allowTraversal: false,
+  allowedExtensions: ['.json', '.js', '.ts']
+});
+```
+
+#### `SecurityUtils.safeReadFile(path, options)`
+Securely read files with comprehensive path validation and error handling.
+
+**Parameters:**
+- `path` (string): File path to read
+- `options` (object): Security options (same as safeSanitizePath)
+
+**Returns:**
+- `Promise<string>`: File contents
+
+**Example:**
+```javascript
+const content = await SecurityUtils.safeReadFile('translations/en.json', {
+  baseDir: '/app/translations',
+  allowedExtensions: ['.json']
+});
+```
+
+#### `SecurityUtils.safeReadFileSync(path, options)`
+Synchronous version of safeReadFile.
+
+**Returns:**
+- `string`: File contents
+
+#### `SecurityUtils.safeWriteFile(path, content, options)`
+Securely write files with path validation and permission checking.
+
+**Parameters:**
+- `path` (string): File path to write
+- `content` (string): Content to write
+- `options` (object): Security options
+
+**Returns:**
+- `Promise<void>`
+
+#### `SecurityUtils.safeWriteFileSync(path, content, options)`
+Synchronous version of safeWriteFile.
+
+#### `SecurityUtils.safeReaddir(path, options)`
+Securely read directory contents with validation.
+
+**Parameters:**
+- `path` (string): Directory path
+- `options` (object): Security options
+
+**Returns:**
+- `Promise<string[]>`: Array of file/directory names
+
+#### `SecurityUtils.safeStat(path, options)`
+Secure file status checking with path validation.
+
+**Parameters:**
+- `path` (string): File path to check
+- `options` (object): Security options
+
+**Returns:**
+- `Promise<fs.Stats>`: File statistics
+
+#### `SecurityUtils.safeExists(path, options)`
+Secure file existence checking.
+
+**Parameters:**
+- `path` (string): File path to check
+- `options` (object): Security options
+
+**Returns:**
+- `Promise<boolean>`: True if file exists
+
+#### `SecurityUtils.safeMkdir(path, options)`
+Secure directory creation with validation.
+
+**Parameters:**
+- `path` (string): Directory path to create
+- `options` (object): Security options plus standard mkdir options
+
+**Returns:**
+- `Promise<string>`: Created directory path
 
 ## Security Features
 

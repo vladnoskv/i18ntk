@@ -2,8 +2,8 @@
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.10.0
-**Last Updated:** 2025-08-16  
+**Version:** 1.10.1
+**Last Updated:** 2025-08-20
 **GitHub Repository:** [vladnoskv/i18n-management-toolkit](https://github.com/vladnoskv/i18n-management-toolkit)
 
 [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Performance](https://img.shields.io/badge/Performance-97%25%20faster-blue.svg)](https://github.com/vladnoskv/i18ntk#performance) 
@@ -52,6 +52,9 @@ i18ntk-scanner --source-dir=./src --framework=react
 
 # Translation fixer for broken translations
 i18ntk-fixer --languages de,fr --markers NOT_TRANSLATED
+
+# Translation verification (NEW in v1.10.1)
+node scripts/verify-translations.js  # Comprehensive translation validation
 
 # Backup & Restore
 i18ntk-backup create           # Create a new backup
@@ -168,6 +171,15 @@ i18ntk usage
   - Placeholder validation
   - Plural form verification
   - HTML/XML tag matching
+
+- **Translation Verification** (NEW in v1.10.1)
+  - Comprehensive key scanning across all locale files
+  - Language-specific prefixing for missing translations (`[FR]`, `[DE]`, `[ES]`)
+  - Interactive directory selection with validation
+  - Real-time progress tracking and detailed reporting
+  - Automatic backup creation before applying changes
+  - Uses English (en.json) as base for comparison across all languages
+  - **[📖 Full Guide](docs/translation-verification.md)** - Complete documentation and usage examples
 
 - **Optimization**
   - Remove unused translations
@@ -331,23 +343,51 @@ The toolkit supports all CLDR languages with built-in pluralization rules and RT
 
 ## 🔒 Security
 
-### Key Security Features
+### Key Security Features (v1.10.0+)
 - **Local-Only**: No network access or external dependencies
 - **Minimal Permissions**: Only accesses explicitly specified directories
 - **Zero Dependencies**: Reduces attack surface and potential vulnerabilities
 - **Memory Protection**: Secure handling of sensitive data in memory
 - **Secure Defaults**: All security features enabled by default
+- **SecurityUtils API**: Comprehensive security utilities for safe file operations
+- **Encrypted Configuration**: AES-256-GCM encryption for absolute file paths
+- **Symlink Attack Prevention**: Validation against symlink-based attacks
+- **No Known Vulnerabilities**: Successfully passed comprehensive security audits
 
 ### Security Architecture
 
 #### 🛡️ Security Hardening in v1.10.0
-- **Zero Vulnerabilities**: Successfully passed comprehensive security audit
 - **Path Traversal Fix**: Complete resolution of directory traversal vulnerabilities
 - **SecurityUtils Integration**: All file operations use secure wrapper functions
 - **Input Sanitization**: Comprehensive validation and sanitization of all user inputs
 - **Symlink Protection**: Validation of symlink targets to prevent attacks
 - **Secure File Operations**: Replaced all direct `fs` calls with secure wrappers
 - **Enhanced Encryption**: Verified AES-256-GCM with PBKDF2 key derivation
+
+### SecurityUtils API (NEW in v1.10.0)
+Comprehensive security utilities for safe file operations:
+
+```javascript
+const { SecurityUtils } = require('i18ntk/utils/security');
+
+// Safe file operations with path validation
+const content = await SecurityUtils.safeReadFile('translations/en.json', {
+  baseDir: '/app/translations',
+  allowedExtensions: ['.json']
+});
+
+// Path sanitization against traversal attacks
+const safePath = SecurityUtils.safeSanitizePath('../config.json', {
+  baseDir: '/app/translations',
+  allowTraversal: false
+});
+
+// Secure file writing
+await SecurityUtils.safeWriteFile('translations/new.json', content, {
+  baseDir: '/app/translations',
+  allowedExtensions: ['.json']
+});
+```
 
 #### Data Protection
 - **Encryption**: AES-256-GCM with PBKDF2 key derivation
@@ -743,6 +783,45 @@ i18ntk fixer --languages all
 - Secure backup creation
 - Real-time progress tracking
 
+## 🛠️ Troubleshooting
+
+### Common Issues & Solutions
+
+#### Setup Completion Issues
+If you see "Incomplete Setup" messages repeatedly:
+```bash
+# Force re-run setup (v1.10.1+)
+i18ntk setup --force
+
+# Check setup status
+i18ntk doctor
+```
+
+#### Command Hanging
+If commands hang or freeze:
+```bash
+# Clear cache and restart
+i18ntk --clear-cache
+
+# Use debug mode for detailed logging
+DEBUG=i18ntk i18ntk [command]
+```
+
+#### Security Validation Issues
+If you encounter path validation errors:
+```bash
+# Verify security settings
+i18ntk security-check
+
+# Reset security configuration
+i18ntk settings --reset-security
+```
+
+#### Cross-Platform Issues
+- **Windows**: Ensure paths use forward slashes or escaped backslashes
+- **macOS/Linux**: Check file permissions with `ls -la`
+- **All platforms**: Run `i18ntk doctor` for environment diagnostics
+
 ## 📚 Documentation
 
 All documentation is built into the toolkit. Use:
@@ -761,9 +840,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔄 Changelog
 
-## 🆕 What's New in 1.10.0 - Production Ready Release
+## 🆕 What's New in 1.10.1 - Setup & Stability Release
 
-### 🔒 Security Features
+### 🔧 Setup & Initialization Fixes
+- **✅ Setup Completion Detection** - Fixed persistent "Incomplete Setup" messages when setup was already completed
+- **🔄 Initialization Loop Resolution** - Eliminated infinite initialization requests on every command execution
+- **⚡ Command Reliability** - Fixed hanging issues with `npm run i18ntk` and other CLI commands
+- **🛡️ Enhanced Security Validation** - Optimized path traversal rules to prevent excessive blocking while maintaining security
+- **🔧 Cross-Platform Path Resolution** - Improved path handling across Windows, macOS, and Linux environments
+
+### 🔒 Security Features (v1.10.0)
 - **🔒 Zero Vulnerabilities** - All security issues resolved, npm audit clean
 - **🛡️ Secure File Permissions** - Fixed i18ntk-config.json permissions (600/700)
 - **🚫 Zero Shell Access** - Complete removal of all shell command dependencies
@@ -906,5 +992,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Version:** `i18ntk --version`
 
 **Made for the global dev community.** ❤️
-**Last Updated:** 2025-08-16
-**Version:** 1.10.0
+**Last Updated:** 2025-01-19
+**Version:** 1.10.1

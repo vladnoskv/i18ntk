@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.10.0",
+    "version": "1.10.1",
     "updated": "2025-08-16"
   },
   "common": {
@@ -60,7 +60,8 @@
       "invalidSourceDirectory": "無効なソースディレクトリ: {directory}",
       "securityViolation": "セキュリティ違反が検出されました",
       "authenticationFailed": "認証が失敗しました",
-      "sourceEqualsI18nWarn": "⚠️ ソースディレクトリと I18n ディレクトリが等しいため、ソーススキャンを {fallback} にフォールバックします。"
+      "sourceEqualsI18nWarn": "⚠️ ソースディレクトリと I18n ディレクトリが等しいため、ソーススキャンを {fallback} にフォールバックします。",
+      "initializationCancelled": "初期化がキャンセルされました"
     },
     "errorGeneratingStatusSummary": "ステータスサマリーの生成エラー：{error}",
     "errorRunningDebugTool": "デバッグツール'{displayName}'の実行エラー：{error}",
@@ -105,7 +106,8 @@
     "readlineClosed": "入力ストリームが閉じられています。非対話モードで実行中です。",
     "noPackageJson": "package.jsonが見つかりません。i18nフレームワークを自動検出できません。",
     "noI18nDir": "プロジェクトルートにi18nディレクトリが見つかりません。",
-    "noI18nConfig": "プロジェクトルートにi18n設定ファイルが見つかりません。"
+    "noI18nConfig": "プロジェクトルートにi18n設定ファイルが見つかりません。",
+    "invalidOption": "無効なオプション"
   },
   "fixer": {
     "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -1016,7 +1018,8 @@
     "fileAlreadyExistsMerging": "{file} は既に存在します。新しいキーをマージ中。",
     "createdNewFile": "新しいファイルを作成しました: {file}",
     "updatedFile": "ファイルを更新しました: {file}",
-    "skippingExcludedFile": "{language} の {file} は除外リストにあるためスキップされました。"
+    "skippingExcludedFile": "{language} の {file} は除外リストにあるためスキップされました。",
+    "initializationCancelled": "初期化がキャンセルされました"
   },
   "language": {
     "title": "🌍 言語を変更",
@@ -1231,7 +1234,23 @@
     "content_too_large_for_file": "セキュリティ: ファイルに対してコンテンツが大きすぎます",
     "file_write_error": "セキュリティ: ファイル書き込みエラー",
     "json_string_too_large": "セキュリティ: JSON文字列が大きすぎます",
-    "security_alert": "セキュリティ: アラート"
+    "security_alert": "セキュリティ: アラート",
+    "statError": "ファイルステータスの取得に失敗しました",
+    "pathTraversalError": "パストラバーサル攻撃が検出されました",
+    "accessDenied": "アクセスが拒否されました",
+    "directoryCreationError": "ディレクトリの作成に失敗しました",
+    "invalidDirectoryPath": "無効なディレクトリパスです",
+    "invalidBasePath": "無効なベースパスです",
+    "pathNotInAllowlist": "パスが許可リストにありません",
+    "symlinkTraversalDetected": "シンボリックリンクの不正な使用が検出されました",
+    "pathNotDirectory": "指定されたパスはディレクトリではありません",
+    "directoryAccessError": "ディレクトリアクセスエラー",
+    "fileDeleteError": "ファイル削除エラー",
+    "translationFileParseError": "翻訳ファイルの解析エラー",
+    "languageValidationError": "言語の検証エラー",
+    "invalidPath": "無効なパス",
+    "safeOperationFailed": "セキュア操作に失敗しました",
+    "file_delete_error": "ファイル削除エラー"
   },
   "settings-cli": {
     "settings": {
@@ -2299,7 +2318,6 @@
     "description": "ソースファイル内のハードコードされた英語テキストをスキャンします",
     "usage": "使用方法: i18ntk-scanner [オプション]",
     "foundText": "{count} 件のハードコードされた英語テキストが見つかりました",
-    
     "options": {
       "sourceDir": "スキャンするディレクトリ",
       "outputDir": "レポート出力ディレクトリ",
@@ -2308,7 +2326,10 @@
       "extensions": "スキャンするファイル拡張子",
       "exclude": "除外するパターン",
       "minLength": "スキャンするテキストの最小長",
-      "maxLength": "スキャンするテキストの最大長"
+      "maxLength": "スキャンするテキストの最大長",
+      "includeTests": "テストファイルを含める",
+      "excludeDirs": "除外するディレクトリ",
+      "customPatterns": "カスタムパターン"
     },
     "status": {
       "scanning": "🔍 ファイルをスキャン中...",
@@ -2355,6 +2376,41 @@
       "min_length": "含めるテキストの最小長",
       "max_length": "含めるテキストの最大長",
       "include_tests": "テストファイルをスキャンに含める"
+    },
+    "help_message": "\ni18n テキストスキャナー\n\n使用方法: node i18ntk-scanner.js [オプション]\n\nオプション:\n  --source-dir <dir>     スキャンするソースディレクトリ (デフォルト: ./src)\n  --framework <type>     フレームワークタイプ (react, vue, angular, vanilla)\n  --output-dir <dir>     レポート出力ディレクトリ (デフォルト: ./i18ntk-reports)\n  --include-tests        テストファイルを含める\n  --exclude-dirs <dirs>  除外するディレクトリ (カンマ区切り)\n  --custom-patterns <p>  カスタム検索パターン (カンマ区切り)\n  --help                 ヘルプを表示\n\n例:\n  node i18ntk-scanner.js --source-dir ./app --framework react\n  node i18ntk-scanner.js --exclude-dirs node_modules,dist --include-tests\n",
+    "starting": "🔍 i18nテキストスキャンを開始しています...",
+    "sourceDirectory": "📁 ソースディレクトリ: {sourceDir}",
+    "frameworkDetected": "🔧 検出されたフレームワーク: {framework}",
+    "scanningFiles": "📄 {count} 件のファイルをスキャン中...",
+    "foundTexts": "🎯 {count} 件のハードコードされたテキストが見つかりました",
+    "generatingReport": "📊 レポートを生成中...",
+    "reportSaved": "💾 レポートが保存されました: {path}",
+    "noTextsFound": "✅ ハードコードされたテキストは見つかりませんでした",
+    "scanComplete": "✅ スキャンが完了しました",
+    "analysisTitle": "🔍 i18nテキスト分析結果",
+    "fileSummary": "📋 ファイルサマリー",
+    "textLocation": "📍 テキストの場所",
+    "context": "🔍 コンテキスト",
+    "severity": "⚠️ 重要度",
+    "recommendation": "💡 推奨事項",
+    "welcome": {
+      "title": "🕵️ i18nテキストスキャナーへようこそ",
+      "description": "このツールはソースファイル内のハードコードされた英語テキストを検出し、翻訳が必要な箇所を特定します。"
+    },
+    "frameworkPrompt": {
+      "title": "🔧 フレームワークの選択",
+      "available": "利用可能なフレームワーク: {frameworks}",
+      "description": "使用しているフレームワークを選択してください:",
+      "input": "フレームワーク: "
+    },
+    "directoryPrompt": {
+      "title": "📁 ディレクトリの選択",
+      "current": "現在のディレクトリ: {dir}",
+      "description": "スキャンするソースディレクトリを入力してください:",
+      "input": "ディレクトリ: "
     }
+  },
+  "console": {
+    "log(": "ログ出力("
   }
 }

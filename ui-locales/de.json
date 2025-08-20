@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.10.0",
+    "version": "1.10.1",
     "updated": "2025-08-16"
   },
   "common": {
@@ -106,7 +106,8 @@
     "readlineClosed": "Eingabestrom ist geschlossen; läuft im nicht-interaktiven Modus.",
     "noPackageJson": "Keine package.json gefunden. Kann i18n-Framework nicht automatisch erkennen.",
     "noI18nDir": "Kein i18n-Verzeichnis im Projekt-Root gefunden.",
-    "noI18nConfig": "Keine i18n-Konfigurationsdatei im Projekt-Root gefunden."
+    "noI18nConfig": "Keine i18n-Konfigurationsdatei im Projekt-Root gefunden.",
+    "invalidOption": "Ungültige Option: {option}"
   },
   "fixer": {
     "help_message": "\nI18n Übersetzungs-Fixer\n\nVerwendung: node i18ntk-fixer.js [optionen]\n\nOptionen:\n  --source-dir <dir>     Quellverzeichnis zu analysieren (Standard: ./locales)\n  --languages <langs>    Komma-getrennte Liste der zu korrigierenden Sprachen\n  --markers <markers>    Komma-getrennte Liste der als nicht übersetzt zu behandelnden Markierungen\n  --no-backup           Automatische Backup-Erstellung überspringen\n  --help                Diese Hilfe anzeigen\n\nBeispiele:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -1017,7 +1018,8 @@
     "fileAlreadyExistsMerging": "Datei {file} existiert bereits. Neue Schlüssel werden zusammengeführt.",
     "createdNewFile": "Neue Datei erstellt: {file}",
     "updatedFile": "Datei aktualisiert: {file}",
-    "skippingExcludedFile": "Überspringe {file} für {language}, da ausgeschlossen."
+    "skippingExcludedFile": "Überspringe {file} für {language}, da ausgeschlossen.",
+    "initializationCancelled": "🚫 Initialisierung wurde vom Benutzer abgebrochen."
   },
   "language": {
     "title": "🌍 Sprache ändern",
@@ -1231,7 +1233,24 @@
     "content_too_large_for_file": "Sicherheit: Inhalt zu groß für Datei: {validatedPath}",
     "file_write_error": "Sicherheit: Fehler beim Schreiben der Datei: {errorMessage}",
     "json_string_too_large": "Sicherheit: JSON-String zu groß",
-    "security_alert": "Sicherheit: Alarm"
+    "security_alert": "Sicherheit: Alarm",
+    "directoryListed": "[security.directoryListed]",
+    "statError": "[security.statError]",
+    "pathTraversalError": "[security.pathTraversalError]",
+    "accessDenied": "[security.accessDenied]",
+    "directoryCreationError": "[security.directoryCreationError]",
+    "invalidDirectoryPath": "[security.invalidDirectoryPath]",
+    "invalidBasePath": "[security.invalidBasePath]",
+    "pathNotInAllowlist": "[security.pathNotInAllowlist]",
+    "symlinkTraversalDetected": "[security.symlinkTraversalDetected]",
+    "pathNotDirectory": "[security.pathNotDirectory]",
+    "directoryAccessError": "[security.directoryAccessError]",
+    "fileDeleteError": "[security.fileDeleteError]",
+    "translationFileParseError": "[security.translationFileParseError]",
+    "languageValidationError": "[security.languageValidationError]",
+    "invalidPath": "[security.invalidPath]",
+    "safeOperationFailed": "[security.safeOperationFailed]",
+    "file_delete_error": "[security.file_delete_error]"
   },
   "settings-cli": {
     "settings": {
@@ -2342,6 +2361,10 @@
       "includeTests": "Testdateien einbeziehen?",
       "excludeDirs": "Auszuschließende Verzeichnisse (durch Kommas getrennt):",
       "customPatterns": "Benutzerdefinierte Muster zu scannen (Regex):"
-    }
+    },
+    "foundText": "{count} potenzielle hartcodierte Textinstanzen gefunden"
+  },
+  "console": {
+    "log(": "[console.log(]"
   }
 }
