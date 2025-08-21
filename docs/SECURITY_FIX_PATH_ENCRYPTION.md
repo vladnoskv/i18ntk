@@ -22,7 +22,7 @@ The `settings/initialization.json` file contained absolute file paths in plain t
 **Example of vulnerable data:**
 ```json
 {
-  "sourceDir": "E:\\i18n-management-toolkit-main\\i18ntk-1.10.0\\locales"
+  "sourceDir": "E:\\i18ntk-management-toolkit-main\\i18ntk-1.10.0\\locales"
 }
 ```
 

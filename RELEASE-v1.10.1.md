@@ -83,7 +83,7 @@ i18ntk security-check
 - **Cross-Platform Security** - Consistent security implementation across all platforms
 
 ### Security Validation
-- **Zero Vulnerabilities** - Maintained zero-vulnerability status
+- **No Known Vulnerabilities** - Maintained zero-vulnerability status
 - **Enhanced Auditing** - Improved security audit capabilities
 - **Faster Security Checks** - Reduced security validation overhead
 

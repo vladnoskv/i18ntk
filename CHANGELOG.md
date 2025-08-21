@@ -166,7 +166,7 @@ i18ntk v2.0.0 represents a major milestone that consolidates all security enhanc
 - **Test Environment**: Successfully validated 16/17 tests across all supported frameworks
 - **Framework Support**: Verified React, Vue.js, Node.js, and Python project compatibility
 - **Performance Testing**: Confirmed 97% performance improvement maintained across frameworks
-- **Security Testing**: Zero vulnerabilities confirmed through comprehensive security audit
+- **Security Testing**: No Known Vulnerabilities confirmed through comprehensive security audit
 - **Cross-Platform Validation**: Tested on Windows, macOS, and Linux environments
 
 ## [1.9.2] - 2025-08-15
@@ -226,7 +226,7 @@ i18ntk v2.0.0 represents a major milestone that consolidates all security enhanc
 - **Legacy Files**: Removed outdated configuration and development files
 
 ### Security
-- **Zero Vulnerabilities**: Successfully passed security audit with 0 vulnerabilities
+- **No Known Vulnerabilities**: Successfully passed security audit with 0 vulnerabilities
 - **Memory Safety**: Enhanced memory-safe operations throughout the codebase
 - **Input Validation**: Improved validation for all user inputs and file operations
 - **Dependency Cleanup**: Removed all shell-related dependencies

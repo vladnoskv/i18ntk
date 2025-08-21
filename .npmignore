@@ -59,7 +59,7 @@ Thumbs.db
 
 # Sensitive files that should never be published
 utils/missing-key-validator.js
-settings/.i18n-admin-config.json
+settings/.i18ntk-admin-config.json
 settings/admin-config.json
 settings/i18ntk-config.json
 settings/language-config.json

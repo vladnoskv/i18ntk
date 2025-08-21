@@ -1,7 +1,8 @@
-# I18N Management Toolkit - Configuration Guide
+# I18NTK - Management Toolkit - Configuration Guide
 
-**Version:** 1.8.3
-**Last Updated:** 2025-08-11
+
+**Version:** 2.0.0
+**Last Updated:** 2025-08-20
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## 📋 Overview
@@ -19,54 +20,33 @@ This guide provides comprehensive information about configuring the I18N Managem
 
 ```json
 {
-  "version": "1.8.3",
-  "lastUpdated": "2025-07-27",
   "project": {
-    "name": "My Project",
-    "type": "react",
-    "framework": "framework-agnostic"
+    "name": "MyApp",
+    "version": "1.0.0"
   },
-  "directories": {
-    "source": "./locales",
-    "locales": "./locales",
-    "reports": "./i18ntk-reports",
-    "backups": "./backups"
-  },
-  "languages": {
+  "locales": {
+    "directory": "./locales",
     "default": "en",
-    "supported": ["en", "es", "fr", "de", "ru", "ja", "zh"],
-    "fallback": "en"
+    "languages": ["en", "es", "fr", "de"]
   },
-  "features": {
-    "autoTranslate": false,
-    "autoValidate": true,
-    "autoBackup": true,
-    "strictMode": false
+  "framework": {
+    "type": "react",
+    "autoDetect": true
   },
-  "translation": {
-    "provider": "google",
-    "apiKey": "",
-    "batchSize": 50,
-    "rateLimit": 100
+  "scanner": {
+    "sourceDir": "./src",
+    "filePatterns": ["**/*.{js,jsx,ts,tsx,vue}"],
+    "ignorePatterns": ["**/*.test.*", "**/node_modules/**"]
   },
   "validation": {
-    "strict": true,
-    "autoFix": false,
-    "checkSyntax": true,
-    "checkConsistency": true,
-    "checkCompleteness": true
+    "strictMode": false,
+    "checkPlaceholders": true,
+    "autoFix": false
   },
-  "reporting": {
-    "format": "html",
-    "includeCharts": true,
-    "includeStatistics": true,
-    "autoOpen": false
-  },
-  "ui": {
-    "language": "en",
-    "theme": "default",
-    "showProgress": true,
-    "verboseOutput": false
+  "backup": {
+    "enabled": true,
+    "directory": "./.i18ntk-backups",
+    "maxBackups": 10
   }
 }
 ```

@@ -2,7 +2,7 @@
 
 ## Overview
 
-i18ntk-backup is a secure, standalone backup utility for i18n translation files. It provides comprehensive backup and restore functionality with security-first design, interactive prompts, and automatic cleanup.
+i18ntk-backup is a secure, standalone backup utility for i18ntk translation files. It provides comprehensive backup and restore functionality with security-first design, interactive prompts, and automatic cleanup.
 
 ## Security Features
 

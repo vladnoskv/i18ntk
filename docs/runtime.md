@@ -1,94 +1,21 @@
-# i18ntk Runtime Translation API (v1.10.0+)
+# i18ntk Runtime API (v2.0.0)
 
-A lightweight, framework-agnostic TypeScript-first runtime for internationalization that works with any JavaScript project. Part of the i18ntk toolkit, designed for maximum flexibility and performance.
+Zero-dependency runtime internationalization for JavaScript/TypeScript.
 
-> **Updated in v1.10.0**: Enhanced security and performance with framework-agnostic design and improved TypeScript support.
-
-## ✨ Key Features
-
-- **Zero Dependencies**: Ultra-lightweight with no external dependencies
-- **TypeScript First**: Full type definitions and IntelliSense support
-- **Framework Agnostic**: Works with React, Vue, Angular, Svelte, or vanilla JS
-- **Language-Specific Optimizations**:
-  - **Python**: Native `.po`/`.mo` file support
-  - **Java**: ResourceBundle and properties files
-  - **PHP**: Native array and Laravel JSON format
-  - **Go**: TOML/JSON/YAML support with go-i18n compatibility
-  - **JavaScript/TypeScript**: Full type safety and dynamic imports
-- **Tree-shakeable**: Only include what you use in your final bundle
-- **Modular**: Load only the languages you need
-- **Pluralization**: Built-in support for all CLDR plural rules
+- **Zero Dependencies**: No external runtime dependencies
+- **Framework Agnostic**: Works with any JavaScript framework
+- **TypeScript First**: Full type safety and IntelliSense
+- **Tree-shakeable**: Import only what you need
+- **Built-in Pluralization**: CLDR rules via `Intl.PluralRules`
 - **Interpolation**: Named and positional placeholders
-- **Nested Keys**: Dot notation for nested translations
-- **Fallback Chains**: Graceful fallback between languages
+- **Fallback Languages**: Configurable fallback chains
 
-## 🌐 Language-Specific Setup
 
-### Python
-```python
-# Install with pip
-pip install i18ntk
-
-# Initialize in your app
-import i18ntk
-i18ntk.init(translations_path='locales')
-```
-
-### Java
-```java
-// Add to build.gradle
-implementation 'com.i18ntk:i18ntk-runtime:1.10.0'
-
-// Initialize in your app
-I18n i18n = I18n.builder()
-    .withDefaultLocale(Locale.US)
-    .withTranslationDirectory("src/main/resources/i18n")
-    .build();
-```
-
-### PHP (Laravel)
-```php
-// Install with Composer
-composer require i18ntk/i18ntk-php
-
-// Add to config/app.php
-'providers' => [
-    // ...
-    I18ntk\I18ntkServiceProvider::class,
-];
-```
-
-### Go
-```go
-import "github.com/i18ntk/go-i18ntk"
-
-func main() {
-    i18n := i18ntk.New()
-    i18n.LoadTranslationFile("locales/en.json")
-    // Use with your HTTP framework
-}
-```
 
 ## 📦 Installation
 
 ```bash
-# Install as a dependency
 npm install i18ntk
-```
-
-## 🔧 Basic Usage
-
-### Installation
-
-```bash
-# Using npm
-npm install i18ntk
-
-# Using yarn
-yarn add i18ntk
-
-# Using pnpm
-pnpm add i18ntk
 ```
 
 ### Importing the API
@@ -103,7 +30,7 @@ import {
   getLanguages,    // Get available languages
   onLanguageChange, // Subscribe to language changes
   format,          // Low-level formatting
-  i18n             // Core i18n instance
+  i18ntk             // Core i18ntk instance
 } from 'i18ntk/runtime';
 
 // CommonJS
@@ -220,7 +147,7 @@ t('price', {
 ### React Example
 
 ```typescript
-// i18n.ts
+// i18ntk.ts
 import { initRuntime, t } from 'i18ntk/runtime';
 
 initRuntime({
@@ -231,7 +158,7 @@ initRuntime({
 export { t };
 
 // Component.tsx
-import { t } from './i18n';
+import { t } from './i18ntk';
 
 function Greeting() {
   return <h1>{t('common.hello')}</h1>;
@@ -348,4 +275,4 @@ Useful env overrides:
 ## Notes
 
 - The runtime helper is intentionally minimal and not a full framework.
-- It complements i18ntk’s CLI by enabling simple runtime reads of the same JSON sources you manage with the toolkit. We recommend using established packages for more comprehensive support. We may develop the runtime helper further in the future. 
+- It complements i18ntk’s CLI by enabling simple runtime reads of the same JSON sources you manage with the toolkit. We recommend using established packages for more comprehensive support. We may develop the runtime helper further in the future.

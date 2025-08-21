@@ -1634,6 +1634,5 @@ if (require.main === module) {
   const manager = new I18nManager();
   manager.run();
 }
-}
-}
+}}
 module.exports = I18nManager;

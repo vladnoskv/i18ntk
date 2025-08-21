@@ -27,6 +27,7 @@ function safeRequireConfig() {
   } finally {
     g.__i18nHelperLoading = wasLoading;
   }
+}
 
 function stripBOMAndComments(s) {
   if (s.charCodeAt(0) === 0xFEFF) s = s.slice(1);
@@ -396,6 +397,7 @@ function refreshLanguageFromSettings() {
  */
 function refreshTranslations() {
   refreshLanguageFromSettings();
+}
 
 module.exports = {
   loadTranslations,
@@ -406,5 +408,3 @@ module.exports = {
   refreshTranslations,
   refreshLanguageFromSettings
 };
-}
-}

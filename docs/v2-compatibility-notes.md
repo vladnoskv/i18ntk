@@ -173,7 +173,7 @@ i18ntk test --framework your-framework
 ### What's New in v2.0.0
 | Feature Category | 1.10.x | v2.0.0 Enhancement |
 |------------------|--------|-------------------|
-| **Security** | Zero vulnerabilities | **Zero-vulnerability certification** |
+| **Security** | No Known Vulnerabilities | **Zero-vulnerability certification** |
 | **Performance** | 97% improvement | **Ultra-performance platform** |
 | **Framework** | 4 languages | **7 languages + enhanced** |
 | **Reliability** | Setup fixes | **Zero false positives** |

@@ -167,7 +167,7 @@
             "\\\\[\\\\[\\\\w+\\\\]\\\\]",
             "\\\\{\\\\{t\\\\s+['\"][^'\"]*['\"]\\\\}\\\\}",
             "t\\\\(['\"][^'\"]*['\"]",
-            "i18n\\\\.t\\\\(['\"][^'\"]*['\"]"
+            "i18ntk\\\\.t\\\\(['\"][^'\"]*['\"]"
         ],
         "de": [
             "%\\\\{[^}]+\\\\}",
@@ -250,7 +250,7 @@
                 "\\\\{\\\\{[^}]+\\\\}\\\\}",
                 "\\\\$\\\\{[^}]+\\\\}",
                 "t\\\\(['\"][^'\"]*['\"]",
-                "i18n\\\\.t\\\\(['\"][^'\"]*['\"]",
+                "i18ntk\\\\.t\\\\(['\"][^'\"]*['\"]",
                 "useTranslation\\\\s*\\\\([^)]*\\\\)",
                 "<Trans[^>]*>.*?</Trans>"
             ],
@@ -309,7 +309,7 @@
         "recommendations": [
             {
                 "type": "info",
-                "message": "Consider installing an i18n library for better integration",
+                "message": "Consider installing an i18ntk library for better integration",
                 "action": "npm install i18next"
             }
         ],

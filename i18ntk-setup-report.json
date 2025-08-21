@@ -11,7 +11,7 @@
   "recommendations": [
     {
       "type": "info",
-      "message": "Consider installing an i18n library for better integration",
+      "message": "Consider installing an i18ntk library for better integration",
       "action": "npm install i18next"
     }
   ],

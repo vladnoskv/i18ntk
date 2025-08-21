@@ -1,68 +1,50 @@
-# 🎯 i18ntk Scanner Guide - Framework Detection & Custom Patterns
+# i18ntk Scanner Guide
 
-## Overview
+**Version:** 2.0.0 | **Updated:** 2025-08-20
 
-The i18ntk scanner is a powerful tool for detecting hardcoded text in your codebase that should be internationalized. This guide covers framework-specific detection, reliability considerations, and custom configuration options.
+Detect and extract hardcoded text from your codebase.
 
-## 🚀 Quick Start
+## Quick Start
 
-### Basic Scanner Usage
 ```bash
-# Scan with automatic framework detection
-i18ntk scanner --source ./src --detect-framework
-
-# Scan specific framework
+# Scan project
 i18ntk scanner --source ./src --framework react
 
-# Generate detailed reports
-i18ntk scanner --source ./src --output-report --min-length=3
+# Auto-detect framework
+i18ntk scanner --source ./src
 ```
 
-## 📋 Framework Detection & Reliability
+## Framework Support
 
-### Framework Package Dependencies
+| Framework | Accuracy | Detection Method |
+|-----------|----------|------------------|
+| React     | 95%      | JSX, React components |
+| Vue       | 93%      | Templates, SFC |
+| Angular   | 91%      | Templates, bindings |
+| Vanilla   | 87%      | DOM manipulation |
 
-| Framework | Required Package | Scanner Accuracy | Installation |
-| --------- | ---------------- | ---------------- | ------------ |
-| **React** | `react-i18next` | 95% | `npm install react-i18next` |
-| **Vue** | `vue-i18n` | 92% | `npm install vue-i18n` |
-| **Angular** | `@ngx-translate/core` | 90% | `npm install @ngx-translate/core` |
-| **Vanilla** | None required | 85% | N/A |
+## Framework Patterns
 
-### Framework-Specific Patterns
-
-#### React + i18next Patterns
-```javascript
-// Detected patterns:
-const { t } = useTranslation();
-<span>{t('user.welcome')}</span>
-<button>{t('buttons.save')}</button>
-
-// Hardcoded text that will be detected:
-<span>Welcome User</span>  // ✅ Detected
-<button>Save Changes</button>  // ✅ Detected
+### React
+```jsx
+// Detected: "Hello World"
+<div>Hello World</div>
+<Component title="Settings" />
 ```
 
-#### Vue + vue-i18n Patterns
-```javascript
-// Detected patterns:
-{{ $t('user.welcome') }}
-<span v-t="'buttons.save'"></span>
-
-// Hardcoded text that will be detected:
-<span>Welcome User</span>  // ✅ Detected
-<button>Save Changes</button>  // ✅ Detected
+### Vue
+```vue
+<!-- Detected: "Welcome" -->
+<template>
+  <div>Welcome</div>
+</template>
 ```
 
-#### Angular + ngx-translate Patterns
-```javascript
-// Detected patterns:
-{{ 'user.welcome' | translate }}
-<span [translate]="'buttons.save'"></span>
-
-// Hardcoded text that will be detected:
-<span>Welcome User</span>  // ✅ Detected
-<button>Save Changes</button>  // ✅ Detected
+### Angular
+```html
+<!-- Detected: "Welcome" -->
+<div>Welcome</div>
+<div [title]="'Settings'"></div>
 ```
 
 ## 🔧 Custom Configuration
@@ -284,7 +266,7 @@ i18ntk scanner --source ./test.js --framework vanilla
         "{t\\('([^']*?)'\\)}",           // t() function calls
         "{t\\(\"([^\"]*?)\"\\)}",         // t() with double quotes
         "useTranslation\\(\)\\.t\\('([^']*?)'\\)", // useTranslation hook
-        "i18n\\.t\\('([^']*?)'\\)"          // i18n instance
+        "i18ntk\\.t\\('([^']*?)'\\)"          // i18ntk instance
       ]
     }
   }

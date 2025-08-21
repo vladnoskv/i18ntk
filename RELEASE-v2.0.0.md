@@ -214,7 +214,7 @@ i18ntk backup create --enterprise --auto-version
 
 ### Security Certification
 ```
-✅ Zero Vulnerabilities: CERTIFIED
+✅ No Known Vulnerabilities: CERTIFIED
 ✅ Cross-Platform Security: VALIDATED
 ✅ Enterprise Encryption: AES-256-GCM
 ✅ Path Traversal Protection: COMPLETE

@@ -1,12 +1,8 @@
-# i18ntk API Reference - v2.0.0 Enterprise Security Platform
+# I18NTK - CLI API Reference
 
-**Version:** 2.0.0
-**Last Updated:** 2025-08-20
-**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+**Version:** 2.0.0 | **Updated:** 2025-08-20
 
-## Overview
-
-Complete API documentation for i18ntk - the comprehensive internationalization toolkit for JavaScript/TypeScript projects.
+Complete API documentation for I18NTK - the comprehensive internationalization toolkit for JavaScript/TypeScript projects.
 
 ## CLI Commands
 
@@ -19,7 +15,7 @@ npx i18ntk
 ```
 
 #### `i18ntk init`
-Initialize i18n structure
+Initialize I18NTK structure
 ```bash
 npx i18ntk init --source-dir ./src --locales-dir ./locales --languages en,es,fr
 ```
@@ -50,25 +46,25 @@ npx i18ntk validate --strict --fix
 ```
 
 **Options:**
-- `--strict` - Enable strict validation
-- `--fix` - Auto-fix common issues
-- `--format <type>` - Validation format (json, yaml)
-- `--no-prompt` - Skip interactive prompts (CI/CD mode)
+- `--strict` - Strict validation
+- `--fix` - Auto-fix issues
+- `--format <type>` - Validation format
+- `--no-prompt` - Skip prompts
 
 #### `i18ntk usage`
-Check translation key usage with enhanced analysis capabilities
+Check translation key usage
 ```bash
-npx i18ntk usage --unused --missing --validate-placeholders --framework-detect --performance-mode
+npx i18ntk usage --unused --missing
 ```
 
 **Options:**
-- `--unused` - Show only unused keys
-- `--missing` - Show only missing keys
-- `--source-dir <path>` - Source directory to scan
-- `--validate-placeholders` - Enable placeholder validation across translations
-- `--framework-detect` - Enable automatic framework detection
-- `--performance-mode` - Enable performance metrics tracking
-- `--no-prompt` - Skip interactive prompts (CI/CD mode)
+- `--unused` - Show unused keys
+- `--missing` - Show missing keys
+- `--source-dir <path>` - Source directory
+- `--validate-placeholders` - Placeholder validation
+- `--framework-detect` - Framework detection
+- `--performance-mode` - Performance tracking
+- `--no-prompt` - Skip prompts
 
 #### `i18ntk complete`
 Complete missing translations
@@ -77,10 +73,10 @@ npx i18ntk complete --auto --language es --provider google
 ```
 
 **Options:**
-- `--auto` - Use automatic translation
-- `--language <code>` - Target specific language
-- `--provider <name>` - Translation provider (google, deepl, openai)
-- `--no-prompt` - Skip interactive prompts (CI/CD mode)
+- `--auto` - Auto-translate
+- `--language <code>` - Target language
+- `--provider <name>` - Provider (google, deepl, openai)
+- `--no-prompt` - Skip prompts
 
 #### `i18ntk fixer` (NEW in v1.8.3)
 Interactive translation fixer with custom placeholder markers and mass fix capabilities
