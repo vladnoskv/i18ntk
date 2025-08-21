@@ -38,8 +38,16 @@ const { getExtractor } = require('../utils/extractor-manager');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
-const SettingsManager = require('../settings/settings-manager');
-const settingsManager = new SettingsManager();
+const { SettingsManager } = require('../settings/settings-manager');
+
+// Lazy initialization for settingsManager
+let _settingsManager = null;
+const getSettingsManager = () => {
+  if (!_settingsManager) {
+    _settingsManager = new SettingsManager();
+  }
+  return _settingsManager;
+};
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
 const JsonOutput = require('../utils/json-output');
@@ -76,7 +84,7 @@ class I18nUsageAnalyzer {
     this.translationStats = new Map(); // Track translation completeness
     this.extractor = getExtractor(config.extractor);
     this.placeholderKeys = new Set();
-    this.placeholderStyles = settingsManager.getDefaultSettings().placeholderStyles || {};
+    this.placeholderStyles = getSettingsManager().getDefaultSettings().placeholderStyles || {};
     
     // NEW: Enhanced analysis properties
     this.frameworkUsage = new Map(); // Track framework usage per file
@@ -136,7 +144,7 @@ class I18nUsageAnalyzer {
       this.i18nDir = this.config.i18nDir;
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
 
-      if (!SecurityUtils.safeExistsSync(this.i18nDir)) {
+      if (!SecurityUtils.safeExistsSync(this.i18nDir, process.cwd())) {
         console.warn(t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         this.i18nDir = this.sourceDir;
         this.config.i18nDir = this.i18nDir;
@@ -222,7 +230,7 @@ class I18nUsageAnalyzer {
         const absoluteDir = path.resolve(currentDir);
         const validatedPath = SecurityUtils.validatePath(absoluteDir, process.cwd());
         
-        if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
+        if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath, process.cwd())) {
           return;
         }
         
@@ -313,7 +321,7 @@ class I18nUsageAnalyzer {
         const absoluteDir = path.resolve(currentDir);
         const validatedPath = SecurityUtils.validatePath(absoluteDir, process.cwd());
         
-                if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
+                if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath, process.cwd())) {
           return;
         }
         
@@ -331,8 +339,9 @@ class I18nUsageAnalyzer {
               if (!excludes.includes(item)) {
                 // hard-skip the locales root to avoid reading JSON
                 if (skipRoot) {
-                  const realItemPath = fs.realpathSync.native(path.resolve(itemPath));
-                  const realSkipRoot = fs.realpathSync.native(skipRoot);
+                  const realItemPath = SecurityUtils.safeRealpathSync(path.resolve(itemPath), currentDir) || path.resolve(itemPath);
+                  const realSkipRoot = SecurityUtils.safeRealpathSync(skipRoot, currentDir) || skipRoot;
+                  if (!realItemPath || !realSkipRoot) continue;
                   const relative = path.relative(realSkipRoot, realItemPath);
                   if (!relative || relative.startsWith('..')) continue;
                 }
@@ -492,7 +501,7 @@ class I18nUsageAnalyzer {
         
         for (const dir of possibleSourceDirs) {
           const testPath = path.resolve(projectRoot, dir);
-            if (SecurityUtils.safeExistsSync(testPath)) {
+            if (SecurityUtils.safeExistsSync(testPath, process.cwd())) {
             this.config.sourceDir = testPath;
             this.sourceDir = testPath;
             break;
@@ -511,7 +520,7 @@ class I18nUsageAnalyzer {
         const fallback = path.resolve(this.config.projectRoot || '.', 'src');
         console.warn(t('usage.sourceEqualsI18nWarn') ||
           `⚠️ sourceDir equals i18nDir (${this.sourceDir}). Falling back to ${fallback} for source scanning.`);
-        if (SecurityUtils.safeExistsSync(fallback)) {
+        if (SecurityUtils.safeExistsSync(fallback, process.cwd())) {
           this.sourceDir = fallback;
         } else {
           console.warn(`⚠️ Fallback directory ${fallback} does not exist. Using project root for source scanning.`);
@@ -692,7 +701,7 @@ Analysis Features (v1.8.3):
           await SecurityUtils.validatePath(fileInfo.filePath);
           
           // Check if file exists and is readable
-           if (!SecurityUtils.safeExistsSync(fileInfo.filePath)) {
+           if (!SecurityUtils.safeExistsSync(fileInfo.filePath, process.cwd())) {
             if (isDebug || isStrict) {
               console.warn(`⚠️  File not found: ${path.basename(fileInfo.filePath)}`);
             }
@@ -835,7 +844,7 @@ Analysis Features (v1.8.3):
       console.log(t('usage.checkUsage.analyzing_source_files'));
       
       // Check if source directory exists
-      if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(this.sourceDir, process.cwd())) {
         throw new Error(this.t('usage.sourceDirectoryDoesNotExist', { dir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
@@ -906,7 +915,7 @@ Analysis Features (v1.8.3):
       const isStrict = process.argv.includes('--strict');
       
       // Check if i18n directory exists
-      if (!SecurityUtils.safeExistsSync(this.i18nDir)) {
+      if (!SecurityUtils.safeExistsSync(this.i18nDir, process.cwd())) {
         console.warn(t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         return;
       }
@@ -960,7 +969,7 @@ Analysis Features (v1.8.3):
           
           for (const fileInfo of translationFiles) {
             try {
-            if (!SecurityUtils.safeExistsSync(fileInfo.filePath)) {
+            if (!SecurityUtils.safeExistsSync(fileInfo.filePath, process.cwd())) {
                 if (isDebug || isStrict) {
                   console.warn(`⚠️  File not found: ${path.basename(fileInfo.filePath)}`);
                 }
@@ -1362,7 +1371,7 @@ Analysis Features (v1.8.3):
   async saveReport(report, outputDir = './i18ntk-reports/usage') {
     try {
       // Ensure output directory exists
-        if (!SecurityUtils.safeExistsSync(outputDir)) {
+        if (!SecurityUtils.safeExistsSync(outputDir, process.cwd())) {
           SecurityUtils.safeMkdirSync(outputDir, { recursive: true });
         }
       
@@ -1588,12 +1597,12 @@ Analysis Features (v1.8.3):
       await SecurityUtils.validatePath(this.sourceDir);
       await SecurityUtils.validatePath(this.i18nDir);
       
-      if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(this.sourceDir, process.cwd())) {
         throw new Error(this.t('usage.sourceDirectoryDoesNotExist', { dir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
 
       }
       
-      if (!SecurityUtils.safeExistsSync(this.i18nDir)) {
+      if (!SecurityUtils.safeExistsSync(this.i18nDir, process.cwd())) {
         throw new Error(this.t('usage.i18nDirectoryDoesNotExist', { dir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
       }
       

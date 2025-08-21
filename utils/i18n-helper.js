@@ -4,15 +4,29 @@ const fs = require('fs');
 const SecurityUtils = require('./security');
 
 // Helper functions for OS-agnostic path handling
-function toPosix(p) { return String(p).replace(/\\/g, '/'); }
-function isBundledPath(p) { 
-  const s = toPosix(p); 
-  return s.includes('/node_modules/i18ntk/') || s.includes('/i18ntk/ui-locales/'); 
+function toPosix(p) {
+  return String(p).replace(/\\/g, '/');
 }
 
-function safeRequireConfig() {
-  try { return require('./config-manager'); } catch { return null; }
+function isBundledPath(p) {
+  const s = toPosix(p);
+  return s.includes('/node_modules/i18ntk/') || s.includes('/i18ntk/ui-locales/');
 }
+function safeRequireConfig() {
+  const g = globalThis;
+  const wasLoading = Boolean(g.__i18nHelperLoading);
+  if (wasLoading) return null;
+  g.__i18nHelperLoading = true;
+  try {
+    return require('./config-manager');
+  } catch (error) {
+    if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+      console.warn('⚠️ safeRequireConfig failed:', error.message);
+    }
+    return null;
+  } finally {
+    g.__i18nHelperLoading = wasLoading;
+  }
 
 function stripBOMAndComments(s) {
   if (s.charCodeAt(0) === 0xFEFF) s = s.slice(1);
@@ -123,8 +137,18 @@ let isInitialized = false;
 const missingWarned = new Set();
 
 function loadTranslations(language) {
-  const cfg = safeRequireConfig();
-  const settings = cfg?.getConfig?.() || {};
+  let settings = {};
+  try {
+    const cfg = safeRequireConfig();
+    if (cfg && typeof cfg.getConfig === 'function') {
+      settings = cfg.getConfig() || {};
+    }
+  } catch (error) {
+    // Silently handle config loading errors to prevent crashes
+    if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+      console.warn('⚠️ Could not load configuration, using defaults:', error.message);
+    }
+  }
   const configuredLanguage = settings.uiLanguage || settings.language || 'en';
 
   // Prioritize settings file language over environment variable
@@ -347,8 +371,18 @@ function deepMerge(target, source) {
  * This ensures translations stay in sync with settings changes
  */
 function refreshLanguageFromSettings() {
-  const cfg = safeRequireConfig();
-  const settings = cfg?.getConfig?.() || {};
+  let settings = {};
+  try {
+    const cfg = safeRequireConfig();
+    if (cfg && typeof cfg.getConfig === 'function') {
+      settings = cfg.getConfig() || {};
+    }
+  } catch (error) {
+    // Silently handle config loading errors to prevent crashes
+    if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+      console.warn('⚠️ Could not refresh language from settings:', error.message);
+    }
+  }
   const configuredLanguage = settings.language || settings.uiLanguage || 'en';
   
   if (configuredLanguage !== currentLanguage) {
@@ -362,7 +396,6 @@ function refreshLanguageFromSettings() {
  */
 function refreshTranslations() {
   refreshLanguageFromSettings();
-}
 
 module.exports = {
   loadTranslations,
@@ -373,3 +406,5 @@ module.exports = {
   refreshTranslations,
   refreshLanguageFromSettings
 };
+}
+}

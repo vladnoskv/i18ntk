@@ -6,9 +6,17 @@
 const fs = require('fs');
 const path = require('path');
 const SecurityUtils = require('../utils/security');
-const SettingsManager = require('../settings/settings-manager');
+const { SettingsManager } = require('../settings/settings-manager');
 const legacyConfigManager = require('../utils/config-manager');
-const configManager = new SettingsManager();
+
+// Lazy initialization for configManager
+let _configManager = null;
+const getConfigManager = () => {
+  if (!_configManager) {
+    _configManager = new SettingsManager();
+  }
+  return _configManager;
+};
 
 class UIi18n {
     constructor() {
@@ -16,9 +24,9 @@ class UIi18n {
 this.translations = {};
         this.uiLocalesDir = path.resolve(__dirname, '..', 'ui-locales');
         this.availableLanguages = [];
-        this.configFile = path.resolve(configManager.configFile);
-        
-
+        const configManager = getConfigManager();
+        const cfgFile = configManager?.configFile;
+        this.configFile = cfgFile ? path.resolve(cfgFile) : null;
         // Initialize with safe defaults
         this.initialize();
     }
@@ -26,7 +34,8 @@ this.translations = {};
 
     initialize() {
         try {
-            const config = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
+            const configManager = getConfigManager();
+            const config = configManager.getConfig();
             
             // Use safe defaults if config is not available
             this.uiLocalesDir = path.resolve(__dirname, '..', 'ui-locales');
@@ -82,10 +91,8 @@ this.translations = {};
 
         this.translations = {}; // Reset translations for the new language
 
-        const settings = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
-        const debugEnabled = settings.debug?.enabled || false;
-        
-        if (debugEnabled) {
+        const settings = getConfigManager().getConfig?.() || {};
+        const debugEnabled = Boolean(settings?.debug?.enabled);        if (debugEnabled) {
             console.log(`UI: Attempting to load translations from monolith file for: ${language}`);
         }
         
@@ -200,31 +207,20 @@ this.translations = {};
      * @returns {string} Current language code
      */
     getCurrentLanguageFromSettings() {
-        const settings = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
-        return settings.language || settings.uiLanguage || 'en';
+       const settings = getConfigManager().getConfig?.() || {};
+       return settings.language || settings.uiLanguage || 'en';
     }
-
     /**
      * Save language preference to settings manager
      * @param {string} language - Language code to save
      */
     async saveLanguagePreference(language) {
         try {
-            // Use setSetting method which properly persists individual settings
-            if (configManager.setSetting) {
-                await configManager.setSetting('language', language);
-                await configManager.setSetting('uiLanguage', language);
-            } else {
-                // Fallback to manual update for backward compatibility
-                const settings = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
-                settings.language = language;
-                settings.uiLanguage = language;
-                if (configManager.saveSettings) {
-                    await configManager.saveSettings(settings);
-                } else if (configManager.updateConfig) {
-                    await configManager.updateConfig(settings);
-                }
-            }
+            const configManager = getConfigManager();
+            const settings = configManager.getConfig();
+            settings.language = language;
+            settings.uiLanguage = language;
+            await configManager.saveConfig(settings);
 
             // Keep legacy config-manager in sync for modules using it directly
             if (legacyConfigManager && legacyConfigManager.updateConfig) {
@@ -451,7 +447,7 @@ this.translations = {};
      * Call this after settings changes to update UI language
      */
     refreshLanguageFromSettings() {
-        const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        const settings = configManager.getConfig();
         const configuredLanguage = settings.language || settings.uiLanguage || 'en';
         
         if (configuredLanguage && this.availableLanguages.includes(configuredLanguage)) {

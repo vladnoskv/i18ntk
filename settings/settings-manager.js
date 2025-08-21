@@ -6,26 +6,13 @@ const { I18nError } = require('../utils/i18n-helper');
 
 class SettingsManager {
     constructor() {
-        // Use package settings directory
-        this.configDir = path.resolve(__dirname, '..');
-        
-        // Prefer project config in CWD; fallback to package example if present
-        const projectConfigPath = path.join(process.cwd(), 'i18ntk-config.json');
-        const packageConfigPath = path.join(__dirname, 'i18ntk-config.json');
-
-        // Use project config if found; else use package example; else create project config
-        if (SecurityUtils.safeExistsSync(projectConfigPath)) {
-            this.configFile = projectConfigPath;
-        } else if (SecurityUtils.safeExistsSync(packageConfigPath)) {
-            this.configFile = packageConfigPath;
-        } else {
-            this.configFile = projectConfigPath;
-        }
-
-        // Keep config-related dirs aligned with the chosen config file
-        this.configDir = path.dirname(this.configFile);
-        
+        // Always use project config as the single source of truth
+        this.configDir = process.cwd();
+        this.configFile = path.join(this.configDir, 'i18ntk-config.json');
         this.backupDir = path.join(this.configDir, 'backups');
+        
+        // Package config template for reference
+        this.packageConfigFile = path.join(__dirname, 'i18ntk-config.json');
         
         this.defaultConfig = {
             "version": "1.9.1",
@@ -183,6 +170,7 @@ class SettingsManager {
                 "includeMemoryUsage": false,
                 "performanceMetrics": false
             },
+            "setupDone": false,
             "sizeLimit": null,
             "placeholderStyles": {
                 "en": [
@@ -311,7 +299,9 @@ class SettingsManager {
             }
         };
         
-        this.settings = this.loadSettings();
+        // Defer loading settings until first access
+        this._settings = null;
+        this._loaded = false;
     }
 
     /**
@@ -319,19 +309,42 @@ class SettingsManager {
      * @returns {object} Settings object
      */
     loadSettings() {
+        if (this._loaded && this._settings !== null) {
+            return this._settings;
+        }
+        
         try {
             if (SecurityUtils.safeExistsSync(this.configFile)) {
-            const content = SecurityUtils.safeReadFileSync(this.configFile, 'utf8');
+                const content = SecurityUtils.safeReadFileSync(this.configFile, 'utf8');
                 const loadedSettings = JSON.parse(content);
                 // Merge with defaults to ensure all properties exist
-                this.settings = this.mergeWithDefaults(loadedSettings);
-                return this.settings;
+                this._settings = this.mergeWithDefaults(loadedSettings);
+                this._loaded = true;
+                return this._settings;
             }
         } catch (error) {
             console.error('Error loading settings:', error.message);
         }
-        this.settings = { ...this.defaultConfig };
-        return this.settings;
+        
+        // If file doesn't exist, check for package template first
+        let baseConfig = { ...this.defaultConfig };
+        try {
+            if (SecurityUtils.safeExistsSync(this.packageConfigFile)) {
+                const packageContent = SecurityUtils.safeReadFileSync(this.packageConfigFile, 'utf8');
+                const packageSettings = JSON.parse(packageContent);
+                baseConfig = this.mergeWithDefaults(packageSettings);
+            }
+        } catch (error) {
+            // Fall back to defaultConfig if package config is invalid
+            console.warn('Could not load package template, using defaults');
+        }
+        
+        // Create project config with base settings
+        this._settings = baseConfig;
+        this._loaded = true;
+        // Save after marking as loaded to prevent re-entry
+        this.saveSettings(this._settings);
+        return this._settings;        return this._settings;
     }
 
     /**
@@ -387,21 +400,21 @@ class SettingsManager {
      * Save settings to file
      * @param {object} settings - Settings to save
      */
-    saveSettings(settings = null) {
+    async saveSettings(settings = null) {
         if (settings) {
-            this.settings = settings;
+            this._settings = settings;
         }
         
         try {
-            if (!SecurityUtils.safeExistsSync(this.configDir)) {
-                SecurityUtils.safeMkdirSync(this.configDir, process.cwd(), { recursive: true });
+            if (!await SecurityUtils.safeExistsSecure(this.configDir)) {
+                await SecurityUtils.safeMkdirSecure(this.configDir, process.cwd(), { recursive: true });
             }
             
-            const content = JSON.stringify(this.settings, null, 4);
-            SecurityUtils.safeWriteFileSync(this.configFile, content, process.cwd());
+            const content = JSON.stringify(this._settings, null, 4);
+            await SecurityUtils.safeWriteFileSecure(this.configFile, content, process.cwd());
             
             // Create backup if enabled
-            if (this.settings.backup?.enabled) {
+            if (this._settings.backup?.enabled) {
                 this.createBackup();
             }
             
@@ -443,10 +456,35 @@ class SettingsManager {
      */
     cleanupOldBackups() {
         try {
-            const files = SecurityUtils.safeReaddirSync(this.backupDir)
+            // Ensure settings are loaded
+            const settings = this.loadSettings();
+            
+            // Validate backup directory path
+            if (!this.backupDir || typeof this.backupDir !== 'string') {
+                console.warn('Invalid backup directory path, skipping cleanup');
+                return;
+            }
+            
+            // Ensure settings.backup exists
+            if (!settings.backup) {
+                console.warn('Backup settings not found, skipping cleanup');
+                return;
+            }
+            
+            const validatedBackupDir = SecurityUtils.sanitizePath(this.backupDir, process.cwd());
+        // Ensure the backup directory is within the project root
+        const projectRoot = process.cwd();
+        const resolvedBackupDir = path.resolve(projectRoot, validatedBackupDir);
+        if (!validatedBackupDir || 
+            !resolvedBackupDir.startsWith(projectRoot) ||
+            !SecurityUtils.safeExistsSync(validatedBackupDir)) {
+             return;
+        }
+            
+            const files = SecurityUtils.safeReaddirSync(validatedBackupDir)
                 .filter(file => file.startsWith('config-') && file.endsWith('.json'))
                 .map(file => {
-                    const filePath = path.join(this.backupDir, file);
+                    const filePath = path.join(validatedBackupDir, file);
                     const stat = SecurityUtils.safeStatSync(filePath);
                     return {
                         name: file,
@@ -454,15 +492,16 @@ class SettingsManager {
                         mtime: stat ? stat.mtime : new Date(0)
                     };
                 })
-                .filter(file => file.mtime.getTime() > 0)
-                .sort((a, b) => b.mtime - a.mtime);
+                .filter(file => file.mtime.getTime() > 0);
             
-            const maxBackups = this.settings.backup?.maxBackups || 10;
-            if (files.length > maxBackups) {
-                files.slice(maxBackups).forEach(file => {
-                    SecurityUtils.safeDeleteSync(file.path);
-                });
-            }
+            const retentionDays = settings.backup.retention || 7;
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+            
+            const filesToDelete = files.filter(file => file.mtime < cutoffDate);
+            filesToDelete.forEach(file => {
+                SecurityUtils.safeDeleteSync(file.path);
+            });
         } catch (error) {
             console.error('Error cleaning backups:', error.message);
         }
@@ -482,7 +521,7 @@ class SettingsManager {
      * @returns {object} Current settings
      */
     getSettings() {
-        return this.settings;
+        return this.loadSettings();
     }
 
     /**
@@ -679,6 +718,64 @@ class SettingsManager {
                             default: true
                         }
                     }
+                },
+                backup: {
+                    type: 'object',
+                    properties: {
+                        enabled: {
+                            type: 'boolean',
+                            description: 'Enable automatic backup creation',
+                            default: true
+                        },
+                        location: {
+                            type: 'string',
+                            description: 'Backup storage location',
+                            default: './backups'
+                        },
+                        frequency: {
+                            type: 'string',
+                            enum: ['daily', 'weekly', 'monthly'],
+                            description: 'Backup frequency',
+                            default: 'daily'
+                        },
+                        retention: {
+                            type: 'number',
+                            description: 'Number of days to retain backups',
+                            minimum: 1,
+                            maximum: 365,
+                            default: 7
+                        },
+                        compression: {
+                            type: 'boolean',
+                            description: 'Enable backup compression',
+                            default: true
+                        },
+                        encryption: {
+                            type: 'boolean',
+                            description: 'Enable backup encryption',
+                            default: true
+                        },
+                        autoCleanup: {
+                            type: 'boolean',
+                            description: 'Enable automatic cleanup of old backups',
+                            default: true
+                        },
+                        maxSize: {
+                            type: 'string',
+                            description: 'Maximum backup size',
+                            default: '100MB'
+                        },
+                        includeReports: {
+                            type: 'boolean',
+                            description: 'Include reports in backup',
+                            default: true
+                        },
+                        includeLogs: {
+                            type: 'boolean',
+                            description: 'Include logs in backup',
+                            default: true
+                        }
+                    }
                 }
             }
         };
@@ -690,8 +787,9 @@ class SettingsManager {
      * @param {*} value - New value
      */
     updateSetting(key, value) {
+        const settings = this.loadSettings();
         const keys = key.split('.');
-        let current = this.settings;
+        let current = settings;
         
         for (let i = 0; i < keys.length - 1; i++) {
             if (!current[keys[i]]) {
@@ -701,7 +799,7 @@ class SettingsManager {
         }
         
         current[keys[keys.length - 1]] = value;
-        this.saveSettings();
+        this.saveSettings(settings);
     }
 
     /**
@@ -711,8 +809,9 @@ class SettingsManager {
      * @returns {*} Setting value
      */
     getSetting(key, defaultValue = undefined) {
+        const settings = this.loadSettings();
         const keys = key.split('.');
-        let current = this.settings;
+        let current = settings;
         
         for (const k of keys) {
             if (current && typeof current === 'object' && k in current) {
@@ -740,6 +839,26 @@ class SettingsManager {
             { code: 'zh', name: '中文' }
         ];
     }
+
+    /**
+     * Get the full configuration object (alias for loadSettings)
+     * @returns {Object} The complete configuration object
+     */
+    getConfig() {
+        return this.loadSettings();
+    }
+
+    /**
+     * Save the configuration object (alias for saveSettings)
+     * @param {Object} config - Configuration object to save
+     */
+    saveConfig(config) {
+        const currentSettings = this.loadSettings();
+        this._settings = { ...currentSettings, ...config };
+        this.saveSettings(this._settings);
+    }
 }
 
+// Export the class for direct instantiation
 module.exports = SettingsManager;
+module.exports.SettingsManager = SettingsManager;

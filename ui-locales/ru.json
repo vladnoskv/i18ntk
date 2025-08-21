@@ -833,9 +833,9 @@
   },
   "help": {
     "title": "📊 СПРАВКА ПО УПРАВЛЕНИЮ I18NTK\n",
-    "usage": "Использование: node i18ntk-manage.js [опции]\n",
-    "interactiveMode": "\n💡 Используйте: node i18ntk-manage.js --command=<команда> для прямого выполнения\n",
-    "showHelp": "\n📖 Используйте: node i18ntk-manage.js --help для просмотра доступных команд\n",
+    "usage": "Использование: i18ntk [опции]\n",
+"interactiveMode": "\n💡 Используйте: i18ntk --command=<команда> для прямого выполнения\n",
+"showHelp": "\n📖 Используйте: i18ntk --help для просмотра доступных команд\n",
     "availableCommands": "\n📖 Доступные команды:\n",
     "initProject": "🚀 Инициализировать новые языки",
     "analyzeTranslations": "🔍 Анализ переводов",
@@ -875,11 +875,11 @@
     },
     "examples": {
       "title": "\nПримеры:\n",
-      "example1": "   node i18ntk-manage.js",
-      "example2": "   node i18ntk-manage.js --source-dir ./locales",
-      "example3": "   node i18ntk-manage.js --output summary-report.txt",
-      "example4": "   node i18ntk-manage.js --verbose",
-      "example5": "   node i18ntk-manage.js --source-dir ./locales --output report.json"
+      "example1": "   i18ntk",
+"example2": "   i18ntk --source-dir ./locales",
+"example3": "   i18ntk --output summary-report.txt",
+"example4": "   i18ntk --verbose",
+"example5": "   i18ntk --source-dir ./locales --output report.json"
     },
     "features": {
       "initProject": "🚀 Инициализировать новые языки",

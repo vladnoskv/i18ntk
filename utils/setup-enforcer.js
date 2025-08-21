@@ -21,7 +21,12 @@ class SetupEnforcer {
         try {
             const config = configManager.getConfig();
             
-            // Check if config has required fields
+            // Check if setup is marked as complete
+            if (config.setupDone === true) {
+                return true;
+            }
+            
+            // Fallback check for legacy configs
             if (!config.version || !config.sourceDir || !config.detectedFramework) {
                 this.handleIncompleteSetup();
                 return;
@@ -180,26 +185,28 @@ class SetupEnforcer {
                 try {
                     const config = configManager.getConfig();
                     
-                    // Check if config has required fields
-                    if (!config.version || !config.sourceDir) {
-                        await SetupEnforcer.handleIncompleteSetup();
-                        // After setup is done, re-check the config
-                        const newConfig = configManager.getConfig();
-                        if (newConfig.version && newConfig.sourceDir && newConfig.detectedFramework) {
-                            resolve(true);
-                        } else {
-                            process.exit(0);
-                        }
+                    // Check if setup is complete (new flag or legacy fields)
+                    if (SetupEnforcer.isSetupComplete(config)) {
+                        resolve(true);
                         return;
                     }
 
-                    resolve(true);
+                    // Not complete: prompt user to run setup
+                    await SetupEnforcer.handleIncompleteSetup();
+                    // After setup is done, re-check the config
+                    const newConfig = configManager.getConfig();
+                    if (SetupEnforcer.isSetupComplete(newConfig)) {
+                        resolve(true);
+                    } else {
+                        process.exit(0);
+                    }
+                    return;
                 } catch (error) {
                     await SetupEnforcer.handleMissingSetup();
                     // After setup is done, re-check the config
                     try {
                         const newConfig = configManager.getConfig();
-                        if (newConfig.version && newConfig.sourceDir && newConfig.detectedFramework) {
+                        if (SetupEnforcer.isSetupComplete(newConfig)) {
                             resolve(true);
                         } else {
                             process.exit(0);

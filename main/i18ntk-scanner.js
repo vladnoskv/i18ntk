@@ -462,7 +462,7 @@ class I18nTextScanner {
 
   async generateReport(results, outputDir) {
     if (!SecurityUtils.safeExistsSync(outputDir)) {
-      SecurityUtils.safeMkdirSync(outputDir);
+      SecurityUtils.safeMkdirSync(outputDir, process.cwd(), { recursive: true });
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

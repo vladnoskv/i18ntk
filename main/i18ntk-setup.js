@@ -11,9 +11,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const SettingsManager = require('../settings/settings-manager');
+const { SettingsManager } = require('../settings/settings-manager');
 const { pathConfig } = require('../utils/path-config');
 const SecurityUtils = require('../utils/security');
+const { getSettingsManager } = require('../utils/config-helper');
 
 class I18nSetupManager {
     constructor() {
@@ -30,7 +31,6 @@ class I18nSetupManager {
                 batchSize: 1000
             }
         };
-        this.supportedLanguages = ['javascript', 'typescript', 'python', 'java', 'go', 'php'];
         this.supportedFrameworks = {
             javascript: ['react', 'vue', 'angular', 'nextjs', 'nuxt', 'svelte'],
             typescript: ['react', 'vue', 'angular', 'nextjs', 'nuxt'],
@@ -38,11 +38,26 @@ class I18nSetupManager {
             java: ['spring', 'spring-boot', 'quarkus'],
             go: ['gin', 'echo', 'fiber'],
             php: ['laravel', 'symfony', 'wordpress']
-        };
+        }
     }
 
     async setup() {
         const isQuiet = process.argv.includes('--quiet') || process.env.I18N_QUIET === 'true';
+        
+        // Check if setup is already done
+        const currentSettings = getSettingsManager().loadSettings();
+        
+        if (currentSettings.setupDone && !process.argv.includes('--force')) {
+            if (!isQuiet) {
+                console.log('✅ Setup already completed. Use --force to re-run setup.');
+                console.log('   Current configuration:');
+                console.log(`   Language: ${currentSettings.detectedLanguage || 'auto'}`);
+                console.log(`   Framework: ${currentSettings.detectedFramework || 'auto'}`);
+                console.log(`   Source: ${currentSettings.sourceDir}`);
+                console.log(`   Output: ${currentSettings.outputDir}`);
+            }
+            return this.config;
+        }
         
         if (!isQuiet) {
             console.log('🔧 i18n Toolkit - Foundational Setup');
@@ -64,6 +79,9 @@ class I18nSetupManager {
             
             await this.validatePrerequisites();
             await this.optimizeForLanguage();
+            
+            // Mark setup as completed
+            getSettingsManager().updateSetting('setupDone', true);
             
             if (!isQuiet) {
                 await this.generateSetupReport();
@@ -519,8 +537,8 @@ class I18nSetupManager {
         };
 
         // Update configuration using SettingsManager - batch all updates to prevent multiple backups
-        const SettingsManager = require('../settings/settings-manager');
-        const settingsManager = new SettingsManager();
+        // Update configuration using SettingsManager - batch all updates to prevent multiple backups
+        // Use the getSettingsManager from the outer scope
         
         // Get current package version
         const packageJsonPath = path.join(__dirname, '..', 'package.json');
@@ -534,7 +552,7 @@ class I18nSetupManager {
         }
         
         // Batch all updates into a single save operation
-        const currentSettings = settingsManager.getSettings();
+        const currentSettings = getSettingsManager().loadSettings();
         const updatedSettings = {
             ...currentSettings,
             version: version,
@@ -552,7 +570,7 @@ class I18nSetupManager {
             }
         };
         
-        settingsManager.saveSettings(updatedSettings);
+        getSettingsManager().saveSettings(updatedSettings);
         
         console.log(`   Configuration updated in settings/i18ntk-config.json`);
     }
@@ -577,10 +595,8 @@ class I18nSetupManager {
                 'Run i18ntk-validate to validate your setup'
             ]
         };
-
         // Save report using SettingsManager
-        const settingsManager = new SettingsManager();
-        settingsManager.updateSetting('setupReport', report);
+        getSettingsManager().updateSetting('setupReport', report);
         
         // Also save a local copy for user reference
         const reportPath = path.join(process.cwd(), 'i18ntk-setup-report.json');

@@ -35,7 +35,7 @@ const fs = require('fs');
 const path = require('path');
 const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-const configManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig } = require('../utils/config-helper');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
@@ -55,7 +55,7 @@ loadTranslations(process.env.I18NTK_LANG);
 
 // Get configuration from settings manager
 function getConfig() {
-  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  const settings = configManager.getConfig();
   
   // Check for per-script directory override, fallback to global sourceDir
   const sourceDir = settings.scriptDirectories?.sizing || settings.sourceDir || './locales';
@@ -116,7 +116,7 @@ class I18nSizingAnalyzer {
       throw new Error(t("sizing.invalidSourceDirectoryError", { sourceDir: this.sourceDir }));
     }
 
-    if (!SecurityUtils.safeExistsSync(validatedSourceDir)) {
+    if (!SecurityUtils.safeExistsSync(validatedSourceDir, process.cwd())) {
       throw new Error(t("sizing.sourceDirectoryNotFoundError", { sourceDir: validatedSourceDir }));
     }
 
@@ -503,7 +503,7 @@ class I18nSizingAnalyzer {
     }
 
     // Ensure output directory exists
-        if (!SecurityUtils.safeExistsSync(validatedOutputDir)) {
+        if (!SecurityUtils.safeExistsSync(validatedOutputDir, process.cwd())) {
           SecurityUtils.safeMkdirSync(validatedOutputDir, { recursive: true });
         }
     

@@ -86,9 +86,14 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
       continue;
     }
     try {
-      fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
-    } catch (e) {
-      issues.push(`Permission issue: ${dir}`);
+      const hasAccess = SecurityUtils.safeAccessSync(dir, fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK);
+      if (hasAccess === false) {
+        const err = new Error('Access denied');
+        err.code = 'EACCES';
+        throw err;
+      }
+     } catch (e) {
+      issues.push(`Permission issue: ${dir} (${e && (e.code || e.message)})`);
       exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
     }
   }

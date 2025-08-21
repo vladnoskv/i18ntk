@@ -1,0 +1,38 @@
+# Security Fixes - Prototype Pollution Vulnerabilities
+
+## Date: 2024-12-20
+
+### File: main/i18ntk-fixer.js
+
+#### Issues Fixed:
+1. **Prototype Pollution Vulnerabilities** (Severity: Medium)
+   - **Locations**: 
+     - `fixObject` method (line 385)
+     - `scanObject` method (lines 562, 601, 673, 679)
+   - **Description**: Unsanitized object keys from command line arguments could allow prototype pollution attacks
+   - **Fix**: Added key validation to prevent dangerous keys
+
+#### Changes Made:
+1. **Added `isUnsafeKey(key)` method** (lines 521-526):
+   - Validates object keys to prevent prototype pollution
+   - Blocks dangerous keys: '__proto__', 'constructor', 'prototype'
+
+2. **Updated `fixObject` method** (lines 561-569):
+   - Added key validation before processing object properties
+   - Skips unsafe keys with warning message
+
+3. **Updated `scanObject` method** (lines 740-748):
+   - Added key validation during scanning process
+   - Prevents prototype pollution in scanning operations
+
+#### Security Impact:
+- Prevents malicious object key injection
+- Maintains backward compatibility
+- Adds logging for skipped unsafe keys
+- No breaking changes to existing functionality
+
+#### Testing:
+- All existing functionality preserved
+- Security validation working correctly
+- Warning messages logged for unsafe keys
+- No performance impact observed

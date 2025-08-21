@@ -901,6 +901,7 @@
     "completeCommand": "  complete  - Complete translations (100% coverage)",
     "summaryCommand": "  summary   - Show project status",
     "debugCommand": "  debug     - Debug translation issues",
+    "scannerCommand": "  scanner   - Scan for keys",
     "menu": {
       "pressEnterToContinue": "Press Enter to continue...",
       "title": "\n🌐 I18NTK MANAGEMENT MENU\n",
@@ -927,11 +928,11 @@
     },
     "examples": {
       "title": "\nExamples:\n",
-      "example1": "  node i18ntk-manage.js",
-      "example2": "  node i18ntk-manage.js --source-dir ./locales",
-      "example3": "  node i18ntk-manage.js --output summary-report.txt",
-      "example4": "  node i18ntk-manage.js --verbose",
-      "example5": "  node i18ntk-manage.js --source-dir ./locales --output report.json"
+      "example1": "  i18ntk",
+      "example2": "  i18ntk --source-dir ./locales",
+      "example3": "  i18ntk --output summary-report.txt",
+      "example4": "  i18ntk --verbose",
+      "example5": "  i18ntk --source-dir ./locales --output report.json"
     },
     "features": {
       "initProject": "🚀 Initialize new languages",
@@ -2062,13 +2063,13 @@
       "completed": "✅ Completed"
     },
     "help": {
-      "usage": "Usage: node i18ntk-manage.js [options]",
-      "interactiveMode": "💡 Use: node i18ntk-manage.js --command=<command> for direct execution",
+      "usage": "Usage: i18ntk [options]",
+      "interactiveMode": "💡 Use: i18ntk --command=<command> for direct execution",
       "initProject": "🚀 Initialize new languages",
       "analyzeTranslations": "🔍 Analyze translations",
       "validateTranslations": "✅ Validate translations",
       "checkUsage": "📊 Check key usage",
-      "showHelp": "📖 Use: node i18ntk-manage.js --help for available commands",
+      "showHelp": "📖 Use: i18ntk --help for available commands",
       "availableCommands": "📖 Available Commands:",
       "initCommand": "  init      - Initialize new languages",
       "analyzeCommand": "  analyze   - Analyze translations",

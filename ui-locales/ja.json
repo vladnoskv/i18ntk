@@ -875,11 +875,11 @@
     },
     "examples": {
       "title": "\n例:\n",
-      "example1": "   node i18ntk-manage.js",
-      "example2": "   node i18ntk-manage.js --source-dir ./locales",
-      "example3": "   node i18ntk-manage.js --output summary-report.txt",
-      "example4": "   node i18ntk-manage.js --verbose",
-      "example5": "   node i18ntk-manage.js --command=init --source-dir ./locales --output report.json"
+      "example1": "   i18ntk",
+      "example2": "   i18ntk --source-dir ./locales",
+      "example3": "   i18ntk --output summary-report.txt",
+      "example4": "   i18ntk --verbose",
+      "example5": "   i18ntk --command=init --source-dir ./locales --output report.json"
     },
     "features": {
       "initProject": "🚀 新しい言語を初期化",
@@ -2011,13 +2011,13 @@
       "completed": "✅ 完了"
     },
     "help": {
-      "usage": "使用法: node i18ntk-manage.js [options]",
-      "interactiveMode": "💡 直接実行するには: node i18ntk-manage.js --command=<command>",
+      "usage": "使用法: i18ntk [options]",
+      "interactiveMode": "💡 直接実行するには: i18ntk --command=<command>",
       "initProject": "🚀 新しい言語を初期化",
       "analyzeTranslations": "🔍 翻訳を分析",
       "validateTranslations": "✅ 翻訳を検証",
       "checkUsage": "📊 キー使用状況をチェック",
-      "showHelp": "📖 利用可能なコマンドを見るには: node i18ntk-manage.js --help",
+      "showHelp": "📖 利用可能なコマンドを見るには: i18ntk --help",
       "availableCommands": "📖 利用可能なコマンド:",
       "initCommand": "  init      - 新しい言語を初期化",
       "analyzeCommand": "  analyze   - 翻訳を分析",

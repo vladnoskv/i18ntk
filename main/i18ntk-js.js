@@ -314,7 +314,7 @@ Examples:
         return;
       }
       
-      SecurityUtils.safeMkdirSync(this.localesDir);
+      SecurityUtils.safeMkdirSync(this.localesDir, process.cwd(), { recursive: true });
       console.log(`📁 Created locales directory: ${this.localesDir}`);
     }
 
@@ -328,7 +328,7 @@ Examples:
           continue;
         }
         
-        SecurityUtils.safeMkdirSync(langDir);
+        SecurityUtils.safeMkdirSync(langDir, process.cwd(), { recursive: true });
         
         // Create framework-specific translation files
         const commonFile = path.join(langDir, 'common.json');
@@ -411,7 +411,7 @@ Examples:
       }
 
       try {
-        const content = fs.readFileSync(file, 'utf8');
+        const content = await SecurityUtils.safeReadFile(file, this.sourceDir, 'utf8');
         
         // Check patterns
         if (content.includes('i18n.t(')) analysis.patterns.i18n_t++;

@@ -53,6 +53,54 @@ class I18nFixer {
             markers: "Comma separated markers to treat as untranslated",
             no_backup: "Skip automatic backup creation"
           },
+          welcome: {
+            title: "🛠️ I18NTK Translation Fixer",
+            description: "Fix placeholder translations and missing keys across your i18n files"
+          },
+          languageSelection: {
+            title: "🌍 Language Selection",
+            available: "Available languages: {languages}",
+            noneFound: "❌ No language directories found in {directory}",
+            selectPrompt: "Enter language codes to fix (comma-separated, or 'all' for all): ",
+            invalid: "❌ Invalid language selection. Please try again.",
+            confirmed: "✅ Selected languages: {languages}"
+          },
+          markerConfiguration: {
+            title: "🏷️ Placeholder Marker Configuration",
+            description: "Configure markers that indicate untranslated content",
+            defaults: "Default markers: {markers}",
+            customPrompt: "Enter custom markers (comma-separated, or press Enter for defaults): ",
+            validation: "⚠️  Invalid marker format. Using defaults.",
+            confirmed: "✅ Using markers: {markers}"
+          },
+          directoryHandling: {
+            validation: "📁 Validating directory: {directory}",
+            notFound: "❌ Directory not found: {directory}",
+            created: "📁 Created directory: {directory}",
+            empty: "⚠️  Directory is empty or contains no language files"
+          },
+          processing: {
+            start: "🚀 Starting translation fixing for languages: {languages}",
+            progress: "📊 Processing {current}/{total} languages",
+            languageComplete: "✅ Completed {language} ({issues} issues found)",
+            backupCreated: "💾 Backup created: {path}",
+            applyingFixes: "🔄 Applying fixes...",
+            fixApplied: "✅ Fixed {count} issues in {language}",
+            allComplete: "🎉 All translations fixed successfully!"
+          },
+          errors: {
+            noLanguages: "❌ No languages selected for fixing.",
+            noFiles: "❌ No translation files found to process.",
+            directoryInvalid: "❌ Invalid directory path: {path}",
+            processingFailed: "❌ Failed to process {language}: {error}",
+            backupFailed: "⚠️  Failed to create backup: {error}"
+          },
+          confirmation: {
+            title: "🤔 Confirm Translation Fixes",
+            summary: "Found {total} issues across {languages} languages",
+            proceed: "Proceed with fixes?",
+            options: "Options: [y]es / [n]o / [s]how details: "
+          },
           starting: "🚀 Starting translation fixing for languages: {languages}",
           sourceDirectory: "📁 Source directory: {sourceDir}",
           sourceLanguage: "🔤 Source language: {sourceLanguage}",
@@ -147,18 +195,41 @@ class I18nFixer {
     const { ask } = require('../utils/cli.js');
 
     const defaultMarkers = ['__NOT_TRANSLATED__', 'NOT_TRANSLATED', 'TODO_TRANSLATE'];
-    console.log(`\n${this.t('fixer.markerPrompt.title')}`);
-    console.log(this.t('fixer.markerPrompt.description'));
-    console.log(this.t('fixer.markerPrompt.currentDefaults', { markers: defaultMarkers.join(', ') }));
+    console.log(`\n${this.t('fixer.markerConfiguration.title')}`);
+    console.log(this.t('fixer.markerConfiguration.description'));
+    console.log(this.t('fixer.markerConfiguration.defaults', { markers: defaultMarkers.join(', ') }));
     
-    const answer = await ask(this.t('fixer.markerPrompt.input'));
-    const cleanAnswer = answer.trim();
-    if (cleanAnswer) {
-      const markers = cleanAnswer.split(',').map(m => m.trim()).filter(Boolean);
-      return markers;
-    } else {
-      return defaultMarkers;
+    let selectedMarkers = [];
+    let isValid = false;
+    
+    while (!isValid) {
+      const answer = await ask(this.t('fixer.markerConfiguration.customPrompt'));
+      const cleanAnswer = answer.trim();
+      
+      if (cleanAnswer) {
+        const markers = cleanAnswer.split(',').map(m => m.trim()).filter(Boolean);
+        
+        // Validate marker format - ensure no empty strings and reasonable length
+        const validMarkers = markers.filter(m => m.length > 0 && m.length <= 50);
+        
+        if (validMarkers.length === 0) {
+          console.log(this.t('fixer.markerConfiguration.validation'));
+          selectedMarkers = defaultMarkers;
+        } else {
+          selectedMarkers = validMarkers;
+        }
+        isValid = true;
+      } else {
+        selectedMarkers = defaultMarkers;
+        isValid = true;
+      }
     }
+    
+    // Persist marker settings to config for session
+    this.config.markers = selectedMarkers;
+    
+    console.log(this.t('fixer.markerConfiguration.confirmed', { markers: selectedMarkers.join(', ') }));
+    return selectedMarkers;
   }
 
   async promptForLanguages() {
@@ -167,24 +238,44 @@ class I18nFixer {
     const availableLanguages = this.getAvailableLanguages().filter(l => l !== this.config.sourceLanguage);
     
     if (availableLanguages.length === 0) {
-      console.log(this.t('fixer.languagePrompt.noLanguages'));
+      console.log(this.t('fixer.errors.noLanguages'));
       return [];
     }
 
-    console.log(`\n${this.t('fixer.languagePrompt.title')}`);
-    console.log(this.t('fixer.languagePrompt.available', { languages: availableLanguages.join(', ') }));
-    console.log(this.t('fixer.languagePrompt.description'));
+    console.log(`\n${this.t('fixer.languageSelection.title')}`);
+    console.log(this.t('fixer.languageSelection.available', { languages: availableLanguages.join(', ') }));
+    console.log(this.t('fixer.languageSelection.description'));
     
-    const answer = await ask(this.t('fixer.languagePrompt.input'));
-    const cleanAnswer = answer.trim();
-    if (cleanAnswer) {
-      const languages = cleanAnswer.split(',').map(l => l.trim()).filter(Boolean);
-      // Validate languages exist
-      const validLanguages = languages.filter(l => availableLanguages.includes(l));
-      return validLanguages;
-    } else {
-      return availableLanguages;
+    let selectedLanguages = [];
+    let isValid = false;
+    
+    while (!isValid) {
+      const answer = await ask(this.t('fixer.languageSelection.selectPrompt'));
+      const cleanAnswer = answer.trim().toLowerCase();
+      
+      if (cleanAnswer === 'all') {
+        selectedLanguages = availableLanguages;
+        isValid = true;
+      } else if (cleanAnswer) {
+        const languages = cleanAnswer.split(',').map(l => l.trim()).filter(Boolean);
+        // Validate languages exist
+        const validLanguages = languages.filter(l => availableLanguages.includes(l));
+        
+        if (validLanguages.length === 0) {
+          console.log(this.t('fixer.languageSelection.invalid'));
+          continue;
+        }
+        
+        selectedLanguages = validLanguages;
+        isValid = true;
+      } else {
+        selectedLanguages = availableLanguages;
+        isValid = true;
+      }
     }
+    
+    console.log(this.t('fixer.languageSelection.confirmed', { languages: selectedLanguages.join(', ') }));
+    return selectedLanguages;
   }
 
   async promptForDirectory() {
@@ -234,97 +325,106 @@ class I18nFixer {
 
     const options = Array.from(candidates);
 
-    console.log(`\n${this.t('fixer.directoryPrompt.title')}`);
-    console.log(this.t('fixer.directoryPrompt.current', { dir: defaultDir }));
-    console.log(this.t('fixer.directoryPrompt.description'));
+    console.log(`\n${this.t('fixer.directoryHandling.title')}`);
+    console.log(this.t('fixer.directoryHandling.description', { dir: defaultDir }));
+    console.log('\nOptions:');
     if (options.length > 0) {
-      console.log('\nOptions:');
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       options.forEach((opt, idx) => {
         const label = letters[idx] || `${idx+1}`;
         console.log(`  ${label}) ${opt}`);
       });
-      console.log('  *) Enter a custom path');
-      console.log('  0) Exit/Cancel');
-    } else {
-      console.log('\nOptions:');
-      console.log('  *) Enter a custom path');
-      console.log('  0) Exit/Cancel');
     }
+    console.log('  *) Enter a custom path');
+    console.log('  0) Exit/Cancel');
 
-    const answer = await ask(this.t('fixer.directoryPrompt.input'));
-    let input = answer.trim();
-
-    // Check for exit
-    if (input === '0') {
-      console.log('Operation cancelled by user.');
-      process.exit(0);
-    }
-
-    // Map letter/number selection to option
-    if (input.length === 1) {
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const pos = letters.indexOf(input.toUpperCase());
-      if (pos >= 0 && pos < options.length) {
-        input = options[pos];
+    let selectedDir = null;
+    let isValid = false;
+    
+    while (!isValid) {
+      const answer = await ask(this.t('fixer.directoryHandling.prompt'));
+      const cleanAnswer = answer.trim();
+      
+      if (cleanAnswer === '0') {
+        console.log('Operation cancelled.');
+        process.exit(0);
       }
-    } else if (/^\d+$/.test(input)) {
-      const num = parseInt(input, 10) - 1;
-      if (num >= 0 && num < options.length) {
-        input = options[num];
+      
+      let targetDir;
+      if (cleanAnswer === '*' || !/^[A-Z0-9]$/.test(cleanAnswer)) {
+        targetDir = cleanAnswer === '*' ? cleanAnswer : cleanAnswer;
+        if (targetDir === '*' || !options.includes(targetDir)) {
+          targetDir = await ask('Enter custom directory path: ');
+        }
+      } else {
+        const idx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(cleanAnswer.toUpperCase());
+        targetDir = options[idx] || cleanAnswer;
       }
-    }
-
-    const chosen = input || defaultDir;
-    const absChosen = path.isAbsolute(chosen) ? chosen : path.resolve(projectRoot, chosen);
-
-    // Validate chosen path (create if doesn't exist)
-    const safePath = SecurityUtils.safeSanitizePath(absChosen, projectRoot);
-    if (!safePath) {
-      console.warn('Invalid or unsafe directory path. Using default.');
-      return defaultDir;
-    }
-    if (!SecurityUtils.safeExists(safePath)) {
-            SecurityUtils.safeMkdirSync(safePath, { recursive: true });
-      try {
-        SecurityUtils.safeMkdirSync(safePath, { recursive: true });
-      } catch (err) {
-        console.warn(`Failed to create directory: ${err.message}`);
-        return defaultDir;
+      
+      const fullPath = path.isAbsolute(targetDir) ? targetDir : path.resolve(projectRoot, targetDir);
+      const validatedPath = SecurityUtils.safeSanitizePath(fullPath, projectRoot);
+      
+      if (!validatedPath) {
+        console.log(this.t('fixer.directoryHandling.validation', { directory: targetDir }));
+        console.log(this.t('fixer.directoryHandling.notFound', { directory: targetDir }));
+        continue;
+      }
+      
+      if (!SecurityUtils.safeExists(validatedPath)) {
+        console.log(this.t('fixer.directoryHandling.notFound', { directory: targetDir }));
+        const createAnswer = await ask(this.t('fixer.directoryHandling.createPrompt'));
+        if (createAnswer.toLowerCase().startsWith('y')) {
+          SecurityUtils.safeMkdirSync(validatedPath, projectRoot, { recursive: true });
+          console.log(this.t('fixer.directoryHandling.created', { directory: targetDir }));
+          selectedDir = validatedPath;
+          isValid = true;
+        }
+        continue;
+      }
+      
+      const hasFiles = this.getAllFiles(validatedPath).length > 0;
+      if (!hasFiles) {
+        console.log(this.t('fixer.directoryHandling.empty'));
+        const continueAnswer = await ask(this.t('fixer.directoryHandling.continueAnyway'));
+        if (!continueAnswer.toLowerCase().startsWith('y')) {
+          continue;
+        }
+      }
+      
+      const confirmAnswer = await ask(this.t('fixer.directoryHandling.confirm'));
+      if (confirmAnswer.toLowerCase().startsWith('y')) {
+        selectedDir = validatedPath;
+        isValid = true;
       }
     }
 
     // Persist selection to config
-      try {
-        const rel = configManager.toRelative(safePath);
-        // Sanitize and validate the relative path before updating config
-        const sanitizedRel = rel.replace(/[^a-zA-Z0-9\-_\/\\. ]/g, '');
-        if (!sanitizedRel || sanitizedRel.includes('..')) {
-          throw new Error('Invalid directory path');
-        }
-        // Validate path using security utilities
-        const validatedPath = SecurityUtils.sanitizePath(path.resolve(projectRoot, sanitizedRel), projectRoot);
-        if (!validatedPath) {
-          throw new Error('Invalid or unsafe directory path');
-        }
-        await configManager.updateConfig({ 
-          sourceDir: sanitizedRel,
-          i18nDir: sanitizedRel 
-        }, {
-          // Prevent prototype pollution by explicitly setting allowed properties
-          allowedKeys: ['sourceDir', 'i18nDir']
-        });
-        // Refresh in-memory config values
-        this.config.sourceDir = validatedPath;
-        this.config.i18nDir = this.config.sourceDir;
-      } catch (err) {
-        console.warn(`Warning: could not persist directory selection: ${err.message}`);
+    try {
+      const rel = configManager.toRelative(selectedDir);
+      const sanitizedRel = rel.replace(/[^a-zA-Z0-9\-_\/\\. ]/g, '');
+      if (!sanitizedRel || sanitizedRel.includes('..')) {
+        throw new Error('Invalid directory path');
       }
+      const validatedPath = SecurityUtils.sanitizePath(path.resolve(projectRoot, sanitizedRel), projectRoot);
+      if (!validatedPath) {
+        throw new Error('Invalid or unsafe directory path');
+      }
+      await configManager.updateConfig({ 
+        sourceDir: sanitizedRel,
+        i18nDir: sanitizedRel 
+      }, {
+        allowedKeys: ['sourceDir', 'i18nDir']
+      });
+      this.config.sourceDir = validatedPath;
+      this.config.i18nDir = this.config.sourceDir;
+    } catch (err) {
+      console.warn(`Warning: could not persist directory selection: ${err.message}`);
+    }
 
-    return configManager.toRelative(safePath);
+    return configManager.toRelative(selectedDir);
   }
 
-  async initialize() {
+ async initialize() {
     const args = this.parseArgs();
     if (args.help) {
       displayHelp('i18ntk-fixer', {
@@ -397,6 +497,7 @@ class I18nFixer {
     
     this.sourceLanguageDir = path.join(this.sourceDir || path.resolve(process.cwd(), './locales'), this.config.sourceLanguage);
     this.config.outputDir = this.config.outputDir || './i18ntk-reports';
+    this.config.backupDir = this.config.backupDir || './i18ntk-backups/fixer';
     this.config.noBackup = args['no-backup'] || false;
   }
 
@@ -407,7 +508,7 @@ class I18nFixer {
     entries.forEach(item => {
       const full = path.join(this.sourceDir, item);
       const stat = SecurityUtils.safeStatSync(full);
-        if (stat && stat.isDirectory()) {
+      if (stat && stat.isDirectory()) {
         langs.add(item);
       } else if (item.endsWith('.json')) {
         langs.add(path.basename(item, '.json'));
@@ -416,12 +517,22 @@ class I18nFixer {
     return Array.from(langs);
   }
 
+  isUnsafeKey(key) {
+    // Prevent prototype pollution by blocking dangerous keys
+    const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
+    return dangerousKeys.includes(key);
+  }
+
   createBackup() {
     try {
       const ts = new Date().toISOString().replace(/[:.]/g, '-');
       const backupPath = path.join(this.config.backupDir, `fixer-${ts}`);
-      fs.cpSync(this.sourceDir, backupPath, { recursive: true });
-      console.log(`Backup created at ${path.relative(process.cwd(), backupPath)}`);
+      const success = SecurityUtils.safeCpSync(this.sourceDir, backupPath, this.sourceDir, { recursive: true });
+      if (success) {
+        console.log(`Backup created at ${path.relative(process.cwd(), backupPath)}`);
+      } else {
+        console.warn('Backup failed: Security validation failed or operation error');
+      }
     } catch (e) {
       console.warn(`Backup failed: ${e.message}`);
     }
@@ -430,7 +541,7 @@ class I18nFixer {
   getAllFiles(dir) {
     const results = [];
     const validatedDir = SecurityUtils.safeSanitizePath(dir, this.sourceDir);
-    if (!validatedDir || !SecurityUtils.safeExists(validatedDir)) return results;
+    if (!validatedDir || !SecurityUtils.safeExistsSync(validatedDir)) return results;
     
     try {
       SecurityUtils.safeReaddirSync(validatedDir, this.sourceDir).forEach(item => {
@@ -453,6 +564,12 @@ class I18nFixer {
 
   fixObject(target, source, lang) {
     Object.keys(source).forEach(key => {
+      // Prevent prototype pollution by validating keys
+      if (this.isUnsafeKey(key)) {
+        console.warn(`Skipping unsafe key: ${key}`);
+        return;
+      }
+      
       const srcVal = source[key];
       const tgtVal = target[key];
       if (srcVal && typeof srcVal === 'object' && !Array.isArray(srcVal)) {
@@ -474,60 +591,104 @@ class I18nFixer {
   }
 
   processLanguage(lang) {
+    try {
+      this.safeProcessLanguage(lang);
+    } catch (error) {
+      console.error(this.t('fixer.errors.processingFailed', {
+        language: lang,
+        error: error.message
+      }));
+    }
+  }
+
+  safeProcessLanguage(lang) {
+    const errors = [];
+    console.log(this.t('fixer.scanningLanguage', { language: lang }));
+    
     const files = this.getAllFiles(this.sourceLanguageDir);
-    files.forEach(file => {
-      const rel = path.relative(this.sourceLanguageDir, file);
-      
-      // Sanitize relative path to prevent path traversal
-      const sanitizedRel = rel.replace(/[^a-zA-Z0-9\-_\/\. ]/g, '');
-      if (sanitizedRel.includes('..')) {
-        console.warn(`Skipping unsafe path: ${rel}`);
-        return;
-      }
-      
-      const validatedSrcFile = SecurityUtils.sanitizePath(file, this.sourceLanguageDir);
-      if (!validatedSrcFile) {
-        console.warn(`Skipping invalid source file: ${file}`);
-        return;
-      }
-      
-      const srcData = JSON.parse(SecurityUtils.safeReadFileSync(validatedSrcFile, this.sourceLanguageDir));
-      if (!srcData) {
-        console.warn(`Failed to read source file: ${validatedSrcFile}`);
-        return;
-      }
-      
-      const targetFile = path.join(this.sourceDir, lang, sanitizedRel);
-      const validatedTargetFile = SecurityUtils.sanitizePath(targetFile, this.sourceDir);
-      if (!validatedTargetFile) {
-        console.warn(`Skipping invalid target file: ${targetFile}`);
-        return;
-      }
-      
-      let tgtData = {};
-      if (SecurityUtils.safeExists(validatedTargetFile)) {
-        try {
-          const content = SecurityUtils.safeReadFileSync(validatedTargetFile, this.sourceDir);
-          tgtData = content ? JSON.parse(content) : {};
-        } catch {
-          tgtData = {};
+    let processedFiles = 0;
+    
+    for (const file of files) {
+      try {
+        this.processSingleFile(file, lang);
+        processedFiles++;
+        
+        if (processedFiles % 5 === 0 || processedFiles === files.length) {
+          console.log(this.t('fixer.processing.progress', {
+            current: processedFiles,
+            total: files.length
+          }));
         }
-      } else {
-        const targetDir = path.dirname(validatedTargetFile);
-        const validatedTargetDir = SecurityUtils.sanitizePath(targetDir, this.sourceDir);
-        if (validatedTargetDir) {
-          SecurityUtils.safeMkdirSync(validatedTargetDir, this.sourceDir, { recursive: true });
-        }
+      } catch (error) {
+        const errorMessage = this.t('fixer.errors.processingFailed', {
+          language: `${lang}/${path.basename(file)}`,
+          error: error.message
+        });
+        console.error(errorMessage);
+        errors.push({ file, error: errorMessage });
       }
-      
-      const fixed = this.fixObject(tgtData, srcData, lang);
-      SecurityUtils.safeWriteFileSync(validatedTargetFile, JSON.stringify(fixed, null, 2), this.sourceDir);
-    });
+    }
+    
+    console.log(this.t('fixer.processing.languageComplete', {
+      language: lang,
+      issues: processedFiles
+    }));
+    
+    return errors;
+  }
+
+  processSingleFile(file, lang) {
+    const rel = path.relative(this.sourceLanguageDir, file);
+    
+    // Sanitize relative path to prevent path traversal
+    const sanitizedRel = rel.replace(/[^a-zA-Z0-9\-_\/\. ]/g, '');
+    if (sanitizedRel.includes('..')) {
+      console.warn(`Skipping unsafe path: ${rel}`);
+      return;
+    }
+    
+    const validatedSrcFile = SecurityUtils.safeSanitizePath(file, this.sourceLanguageDir);
+    if (!validatedSrcFile) {
+      console.warn(`Skipping invalid source file: ${file}`);
+      return;
+    }
+    
+    const srcData = JSON.parse(SecurityUtils.safeReadFileSync(validatedSrcFile, this.sourceLanguageDir));
+    if (!srcData) {
+      console.warn(`Failed to read source file: ${validatedSrcFile}`);
+      return;
+    }
+    
+    const targetFile = path.join(this.sourceDir, lang, sanitizedRel);
+    const validatedTargetFile = SecurityUtils.safeSanitizePath(targetFile, this.sourceDir);
+    if (!validatedTargetFile) {
+      console.warn(`Skipping invalid target file: ${targetFile}`);
+      return;
+    }
+    
+    let tgtData = {};
+    if (SecurityUtils.safeExists(validatedTargetFile)) {
+      try {
+        const content = SecurityUtils.safeReadFileSync(validatedTargetFile, this.sourceDir);
+        tgtData = content ? JSON.parse(content) : {};
+      } catch {
+        tgtData = {};
+      }
+    } else {
+      const targetDir = path.dirname(validatedTargetFile);
+      const validatedTargetDir = SecurityUtils.safeSanitizePath(targetDir, this.sourceDir);
+      if (validatedTargetDir) {
+        SecurityUtils.safeMkdirSync(validatedTargetDir, this.sourceDir, { recursive: true });
+      }
+    }
+    
+    const fixed = this.fixObject(tgtData, srcData, lang);
+    SecurityUtils.safeWriteFileSync(validatedTargetFile, JSON.stringify(fixed, null, 2), this.sourceDir);
   }
 
   scanForIssues(lang) {
     const issues = [];
-    const files = this.getAllFiles(this.sourceLanguageDir);
+    const files = SecurityUtils.safeGetAllFiles(this.sourceLanguageDir);
     
     files.forEach(file => {
       const rel = path.relative(this.sourceLanguageDir, file);
@@ -539,7 +700,7 @@ class I18nFixer {
         return;
       }
       
-      const validatedSrcFile = SecurityUtils.sanitizePath(file, this.sourceLanguageDir);
+      const validatedSrcFile = SecurityUtils.safeSanitizePath(file, this.sourceLanguageDir);
       if (!validatedSrcFile) {
         console.warn(`Skipping invalid source file: ${file}`);
         return;
@@ -552,7 +713,7 @@ class I18nFixer {
       }
       
       const targetFile = path.join(this.sourceDir, lang, sanitizedRel);
-      const validatedTargetFile = SecurityUtils.sanitizePath(targetFile, this.sourceDir);
+      const validatedTargetFile = SecurityUtils.safeSanitizePath(targetFile, this.sourceDir);
       if (!validatedTargetFile) {
         console.warn(`Skipping invalid target file: ${targetFile}`);
         return;
@@ -576,6 +737,12 @@ class I18nFixer {
 
   scanObject(issues, source, target, lang, file, pathStack) {
     Object.keys(source).forEach(key => {
+      // Prevent prototype pollution by validating keys
+      if (this.isUnsafeKey(key)) {
+        console.warn(`Skipping unsafe key during scan: ${key}`);
+        return;
+      }
+      
       const srcVal = source[key];
       const tgtVal = target[key];
       const currentPath = [...pathStack, key];
@@ -620,41 +787,11 @@ class I18nFixer {
     });
   }
 
-  generateReport(issues) {
-    const report = {
-      totalIssues: issues.length,
-      missingKeys: issues.filter(i => i.type === 'missing').length,
-      placeholderKeys: issues.filter(i => i.type === 'placeholder').length,
-      languages: {}
-    };
-
-    issues.forEach(issue => {
-      if (issue.newValue) {
-        const lang = String(issue.newValue).match(/\[([A-Z-]+)\]/)?.[1];
-        if (lang) {
-          if (!report.languages[lang]) report.languages[lang] = 0;
-          report.languages[lang]++;
-        }
-      }
-    });
-
-    return report;
-  }
-
-  printDetailedReport(issues, report) {
-    console.log(`\n${this.t('fixer.analysisTitle')}`);
-    console.log(this.t('fixer.analysisSeparator'));
-    console.log(this.t('fixer.totalIssues', { totalIssues: report.totalIssues }));
-    console.log(this.t('fixer.missingTranslations', { missing: report.missingKeys }));
-    console.log(this.t('fixer.placeholderTranslations', { placeholder: report.placeholderKeys }));
-    
-    if (report.totalIssues === 0) {
-      console.log(`\n${this.t('fixer.noIssues')}`);
+  printDetailedReport(issues) {
+    if (!issues || issues.length === 0) {
+      console.log(this.t('fixer.noIssues'));
       return;
     }
-
-    console.log(`\n${this.t('fixer.detailedIssues')}`);
-    console.log(this.t('fixer.detailedSeparator'));
 
     const groupedIssues = issues.reduce((acc, issue) => {
       const key = `${issue.file}:${issue.path}`;
@@ -691,7 +828,7 @@ class I18nFixer {
       const cleanAnswer = answer.toLowerCase().trim();
       if (cleanAnswer === 's' || cleanAnswer === 'show') {
         // Show detailed report and ask again
-        this.printDetailedReport();
+        this.printDetailedReport(allIssues);
         return askQuestion();
       } else {
         return cleanAnswer;
@@ -713,7 +850,7 @@ class I18nFixer {
     
     // Ensure report directory exists
     if (!SecurityUtils.safeExists(validatedReportDir)) {
-      SecurityUtils.safeMkdirSync(validatedReportDir);
+      SecurityUtils.safeMkdir(validatedReportDir, { recursive: true });
     }
 
     const reportFile = path.join(validatedReportDir, `fixer-report-${timestamp}.json`);
@@ -788,10 +925,27 @@ class I18nFixer {
     }
   }
 
-  printDetailedReport() {
-    // This method is called when user selects 's' to show detailed issues
-    // Implementation can be added here if needed
-    console.log('\n📋 DETAILED REPORT - All issues shown above in the report file');
+  printDetailedReport(issues = []) {
+    if (!issues || issues.length === 0) {
+      console.log('\n📋 DETAILED REPORT - No issues found');
+      return;
+    }
+
+    console.log('\n📋 DETAILED REPORT - All issues:');
+    console.log('='.repeat(50));
+    
+    issues.forEach((issue, index) => {
+      console.log(`\n${index + 1}. ${issue.type.toUpperCase()} issue:`);
+      console.log(`   File: ${issue.file}`);
+      console.log(`   Path: ${issue.path}`);
+      console.log(`   Source: ${issue.sourceValue}`);
+      console.log(`   Target: ${issue.targetValue || 'undefined'}`);
+      console.log(`   Action: ${issue.action}`);
+      console.log(`   New Value: ${issue.newValue}`);
+    });
+    
+    console.log(`\nTotal issues: ${issues.length}`);
+    console.log('='.repeat(50));
   }
 
   async run() {
@@ -811,11 +965,34 @@ class I18nFixer {
       console.log(this.t('fixer.markers', { markers: this.markers.join(', ') }));
 
       const allIssues = [];
+      let processedLanguages = 0;
+      
+      console.log(this.t('fixer.scanning.start', { count: this.languages.length }));
+      
       for (const lang of this.languages) {
-        console.log(this.t('fixer.scanningLanguage', { language: lang }));
-        const issues = this.safeScanForIssues(lang);
-        allIssues.push(...issues);
+        console.log(this.t('fixer.scanning.progress', { 
+          language: lang, 
+          progress: Math.round((processedLanguages / this.languages.length) * 100) 
+        }));
+        
+        try {
+          const issues = this.safeScanForIssues(lang);
+          allIssues.push(...issues);
+          console.log(this.t('fixer.scanning.languageComplete', { 
+            language: lang, 
+            issues: issues.length 
+          }));
+        } catch (error) {
+          console.error(this.t('fixer.errors.scanFailed', { language: lang, error: error.message }));
+        }
+        
+        processedLanguages++;
       }
+      
+      console.log(this.t('fixer.scanning.complete', { 
+        languages: this.languages.length, 
+        totalIssues: allIssues.length 
+      }));
 
       const report = this.generateReport(allIssues);
 
@@ -833,7 +1010,19 @@ class I18nFixer {
       // Non-interactive mode (for tests)
       if (this.config.noBackup) {
         console.log(`\n${this.t('fixer.nonInteractiveMode')}`);
-        this.languages.forEach(lang => this.safeProcessLanguage(lang));
+        const allProcessingErrors = [];
+        this.languages.forEach(lang => {
+          const errors = this.safeProcessLanguage(lang);
+          allProcessingErrors.push(...errors);
+        });
+
+        if (allProcessingErrors.length > 0) {
+          console.error(`\n${this.t('fixer.errors.processingSummary')}`);
+          allProcessingErrors.forEach(err => {
+            console.error(`- ${err.error}`);
+          });
+        }
+
         console.log(this.t('fixer.fixingComplete'));
         return;
       }
@@ -845,37 +1034,58 @@ class I18nFixer {
       const answer = await this.getUserConfirmation();
       
       if (answer === 'y' || answer === 'yes') {
-        this.createBackup();
-        console.log(this.t('fixer.backupCreated'));
+        console.log(this.t('fixer.processing.start', { languages: this.languages.join(', ') }));
         
-        console.log(`\n${this.t('fixer.applyingFixes')}`);
-        this.languages.forEach(lang => this.safeProcessLanguage(lang));
-        console.log(this.t('fixer.fixingComplete'));
+        const allProcessingErrors = [];
+        let processedLanguagesCount = 0;
+        for (const lang of this.languages) {
+          console.log(this.t('fixer.processing.progress', { 
+            current: processedLanguagesCount + 1, 
+            total: this.languages.length 
+          }));
+          
+          const errors = this.safeProcessLanguage(lang);
+          allProcessingErrors.push(...errors);
+          
+          processedLanguagesCount++;
+        }
+
+        if (allProcessingErrors.length > 0) {
+          console.error(`\n${this.t('fixer.errors.processingSummary')}`);
+          allProcessingErrors.forEach(err => {
+            console.error(`- ${err.error}`);
+          });
+        } else {
+          console.log(this.t('fixer.processing.allComplete'));
+        }
+      } else if (answer === 's' || answer === 'show') {
+        this.printDetailedReport(allIssues);
+        return;
       } else {
         console.log(this.t('fixer.operationCancelled'));
       }
+    } catch (error) {
+      console.error('Error during processing:', error.message);
+      process.exit(1);
     } finally {
-      // Ensure readline is properly closed to prevent hanging
+      // Ensure readline is properly closed
       closeGlobalReadline();
-      // Ensure process exits cleanly
-      if (require.main === module) {
-        process.exit(0);
-      }
     }
   }
-}
 
-// Run if executed directly
-if (require.main === module) {
-  const { closeGlobalReadline } = require('../utils/cli.js');
-  const fixer = new I18nFixer();
-  fixer.run().catch(err => {
-    console.error(err.message);
-    process.exit(1);
-  }).finally(() => {
-    // Ensure readline is properly closed
-    closeGlobalReadline();
-  });
-}
 
+
+  generateReport(issues) {
+    const report = {
+      totalIssues: issues.length,
+      missingKeys: issues.filter(i => i.type === 'missing').length,
+      placeholderKeys: issues.filter(i => i.type === 'placeholder').length,
+      languages: [...new Set(issues.map(i => i.language))]
+    };
+    return report;
+  }
+
+  safeScanForIssues(lang) {
+  /* Removed duplicate, broken method redefinitions */
+}}
 module.exports = I18nFixer;

@@ -254,7 +254,7 @@ Examples:
         return;
       }
       
-      SecurityUtils.safeMkdirSync(this.localesDir, { recursive: true });
+      await SecurityUtils.safeMkdir(this.localesDir, process.cwd(), { recursive: true });
       console.log(`📁 Created locales directory: ${this.localesDir}`);
     }
 
@@ -268,7 +268,7 @@ Examples:
           continue;
         }
         
-        SecurityUtils.safeMkdirSync(langDir, { recursive: true });
+        await SecurityUtils.safeMkdir(langDir, process.cwd(), { recursive: true });
         
         // Create basic translation files
         const commonFile = path.join(langDir, 'common.json');

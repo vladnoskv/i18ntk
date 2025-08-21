@@ -392,17 +392,16 @@ class LocaleOptimizer {
     
     return activeLocales;
   }
-}
 
   /**
    * Run the optimizer with specified options
    */
-  run(options = {})
+  async run(options = {}) {
     const { interactive = false, dryRun = false, list = false, keep = null, restore = false, json = false, indent = 2, sortKeys = false } = options;
     
     if (restore) {
       if (json) {
-        const jsonOutput = new JsonOutput('locale-optimizer', '1.9.1');
+        const jsonOutput = new JsonOutput('locale-optimizer', '1.10.1');
         jsonOutput.setStatus('ok', 'Locales restored successfully');
         console.log(JSON.stringify(jsonOutput.getOutput(sortKeys), null, indent));
       } else {
@@ -484,10 +483,11 @@ class LocaleOptimizer {
       }
       await this.interactiveSelect();
       return;
-    }
-    
+    }    
     // Default to list mode
     this.listLocales({ json, indent, sortKeys });
+  }
+}
 
 // CLI Handler
 async function main() {
@@ -573,16 +573,15 @@ async function main() {
     return;
   }
   
-  await optimizer.run({
-    ...options,
-    json: jsonArgs,
-    indent: jsonArgs.indent,
-    sortKeys: jsonArgs.sortKeys
-  });
+  // After (preserve boolean, keep formatting separately):
+await optimizer.run({
+  ...options,             // options.json remains a boolean
+  indent: jsonArgs.indent,
+  sortKeys: jsonArgs.sortKeys
+});
 }
 
 if (require.main === module) {
   main();
 }
-
 module.exports = LocaleOptimizer;

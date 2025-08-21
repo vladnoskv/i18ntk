@@ -1,9 +1,15 @@
 {
   "initialized": true,
-  "version": "1.10.0",
+  "version": "1.10.1",
   "timestamp": "2025-08-18T16:45:00.000Z",
-  "sourceDir": "./locales",
-  "i18nDir": "./locales",
-  "detectedFramework": "vanilla"
-
+  "sourceDir": "./ui-locales",
+  "i18nDir": "./ui-locales",
+  "framework": {
+    "detected": true,
+    "preference": "vanilla",
+    "prompt": "suppress",
+    "lastPromptedVersion": "1.10.0",
+    "installed": ["vanilla"],
+    "version": "1.0"
+  }
 }

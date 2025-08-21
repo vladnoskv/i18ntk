@@ -2,6 +2,9 @@
 
 console.log('=== Testing i18ntk startup ===');
 
+const verbose = process.env.STARTUP_VERBOSE === '1' || process.argv.includes('--verbose');
+let failures = 0;
+
 // Test basic imports
 console.log('1. Testing fs...');
 const fs = require('fs');
@@ -16,7 +19,8 @@ try {
   const SecurityUtils = require('./utils/security');
   console.log('✓ security loaded');
 } catch (e) {
-  console.error('✗ security failed:', e.message);
+  failures++;
+  console.error('✗ security failed:', verbose ? e.stack : e.message);
 }
 
 console.log('4. Testing settings-manager...');
@@ -25,7 +29,8 @@ try {
   console.log('✓ settings-manager loaded');
   console.log('Config dir:', configManager.configDir);
 } catch (e) {
-  console.error('✗ settings-manager failed:', e.message);
+  failures++;
+  console.error('✗ settings-manager failed:', verbose ? e.stack : e.message);
 }
 
 console.log('5. Testing config-manager...');
@@ -33,7 +38,8 @@ try {
   const configManager = require('./utils/config-manager');
   console.log('✓ config-manager loaded');
 } catch (e) {
-  console.error('✗ config-manager failed:', e.message);
+  failures++;
+  console.error('✗ config-manager failed:', verbose ? e.stack : e.message);
 }
 
 console.log('6. Testing init-helper...');
@@ -41,7 +47,13 @@ try {
   const { checkInitialized } = require('./utils/init-helper');
   console.log('✓ init-helper loaded');
 } catch (e) {
-  console.error('✗ init-helper failed:', e.message);
+  failures++;
+  console.error('✗ init-helper failed:', verbose ? e.stack : e.message);
 }
 
-console.log('=== All tests completed ===');
+if (failures > 0) {
+  console.error(`=== All tests completed (failures: ${failures}) ===`);
+  process.exitCode = 1;
+} else {
+  console.log('=== All tests completed (OK) ===');
+}

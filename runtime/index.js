@@ -70,9 +70,20 @@ function resolveBaseDir(explicitBaseDir) {
   
   // 3) Use config-manager if available (single source of truth: i18ntk-config.json)
   try {
-    const cfgRaw = configManager?.getConfig?.() || {};
-    const cfg = configManager?.resolvePaths ? configManager.resolvePaths(cfgRaw) : cfgRaw;
-    const base = cfg.i18nDir || cfg.sourceDir || './locales';
+    const cfgRaw = (configManager && typeof configManager.getConfig === 'function') ? (configManager.getConfig() || {}) : {};
+    // Ensure cfgRaw is an object before passing to resolvePaths
+    const rawObj = (cfgRaw && typeof cfgRaw === 'object') ? cfgRaw : {};
+    // Resolve paths only on a sanitized object
+    let cfg = (configManager && typeof configManager.resolvePaths === 'function')
+      ? configManager.resolvePaths(rawObj)
+      : rawObj;
+    if (!cfg || typeof cfg !== 'object') cfg = {};
+    // Helper to pick only non-empty strings
+    const pickNonEmpty = v => (typeof v === 'string' && v.trim() !== '' ? v : undefined);
+    // Only accept a non-empty i18nDir or sourceDir, else default
+    const base = pickNonEmpty(cfg.i18nDir)
+      ?? pickNonEmpty(cfg.sourceDir)
+      ?? './locales';
     
     // If config-manager resolved absolute paths, use as-is; otherwise resolve from project cwd
     const isAbs = typeof base === 'string' && path.isAbsolute(base);

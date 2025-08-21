@@ -140,21 +140,34 @@ class I18nAnalyzer {
     }
     
     const validatedSourceDir = SecurityUtils.safeSanitizePath(this.sourceDir);
-    if (!validatedSourceDir || !SecurityUtils.safeExists(validatedSourceDir)) {
+    if (!validatedSourceDir || !SecurityUtils.safeExistsSync(validatedSourceDir)) {
       throw new Error(`Source directory not found: ${this.sourceDir}`);
     }
     
-    return SecurityUtils.safeReaddir(validatedSourceDir, this.sourceDir) // Snyk false positive: input is sanitized by SecurityUtils.sanitizePath
+    // Ensure the source directory is within project boundaries
+    const projectRoot = process.cwd();
+    const normalizedSourceDir = path.resolve(validatedSourceDir);
+    if (!normalizedSourceDir.startsWith(projectRoot)) {
+      throw new Error(`Source directory must be within project root: ${this.sourceDir}`);
+    }
+    
+    return SecurityUtils.safeReaddirSync(validatedSourceDir)
       .filter(item => {
-        const itemPath = path.join(validatedSourceDir, item);
+        // Sanitize directory name to prevent traversal
+        const sanitizedItem = SecurityUtils.sanitizeInput(item);
+        if (!sanitizedItem || sanitizedItem !== item) {
+          return false;
+        }
+        
+        const itemPath = path.join(validatedSourceDir, sanitizedItem);
         const validatedItemPath = SecurityUtils.safeSanitizePath(itemPath, validatedSourceDir);
         if (!validatedItemPath) return false;
         
         try {
           const stats = SecurityUtils.safeStat(validatedItemPath);
-          return stats ? stats.isDirectory() && item !== this.config.sourceLanguage : false;
+          return stats ? stats.isDirectory() && sanitizedItem !== this.config.sourceLanguage : false;
         } catch (error) {
-          console.warn(`Skipping inaccessible directory: ${item}`);
+          console.warn(`Skipping inaccessible directory: ${sanitizedItem}`);
           return false;
         }
       });
@@ -167,34 +180,55 @@ class I18nAnalyzer {
       return [];
     }
     
-    const languageDir = path.resolve(this.sourceDir, language);
+    // Sanitize language name to prevent directory traversal
+    const sanitizedLanguage = SecurityUtils.sanitizeInput(language);
+    if (!sanitizedLanguage || sanitizedLanguage !== language) {
+      console.warn(`Invalid language name: ${language}`);
+      return [];
+    }
+    
+    const languageDir = path.resolve(this.sourceDir, sanitizedLanguage);
     
     try {
       // Ensure the path is within the source directory for security
       const validatedPath = SecurityUtils.safeSanitizePath(languageDir, this.sourceDir);
-      if (!validatedPath || !SecurityUtils.safeExists(validatedPath)) {
+      if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath, this.sourceDir)) {
         console.warn(`Language directory not found or invalid: ${languageDir}`);
         return [];
       }
       
+      // Ensure the language directory is within project boundaries
+      const projectRoot = process.cwd();
+      if (!validatedPath.startsWith(projectRoot)) {
+        console.warn(`Language directory must be within project root: ${languageDir}`);
+        return [];
+      }
+      
       // Safely read directory contents using SecurityUtils
-      const files = SecurityUtils.safeReaddir(validatedPath, validatedPath).filter(file => {
-        const filePath = path.join(validatedPath, file);
-        return SecurityUtils.safeSanitizePath(filePath, validatedPath) !== null;
-      })
+      const files = SecurityUtils.safeReaddirSync(validatedPath)
         .filter(file => {
+          // Sanitize filename to prevent traversal
+          const sanitizedFile = SecurityUtils.sanitizeInput(file);
+          if (!sanitizedFile || sanitizedFile !== file) {
+            return false;
+          }
+          
+          const filePath = path.join(validatedPath, sanitizedFile);
+          const validatedFilePath = SecurityUtils.safeSanitizePath(filePath, validatedPath);
+          if (!validatedFilePath) return false;
+          
           // Skip hidden files and non-JSON files
-          if (file.startsWith('.') || !file.endsWith('.json')) {
+          if (sanitizedFile.startsWith('.') || !sanitizedFile.endsWith('.json')) {
             return false;
           }
           
           // Check against exclude patterns
           return !(this.config.excludeFiles || []).some(pattern => {
             if (typeof pattern === 'string') {
-              return file === pattern || file.endsWith(path.sep + pattern);
+              return sanitizedFile === pattern || sanitizedFile.endsWith(path.sep + pattern);
             }
             if (pattern instanceof RegExp) {
-              return pattern.test(file);
+              return pattern.test(sanitizedFile);
             }
             return false;
           });
@@ -356,12 +390,18 @@ class I18nAnalyzer {
 
   // Analyze a single language
   analyzeLanguage(language) {
-    const languageDir = path.join(this.sourceDir, language);
+    // Sanitize language parameter
+    const sanitizedLanguage = SecurityUtils.sanitizeInput(language);
+    if (!sanitizedLanguage || sanitizedLanguage !== language) {
+      throw new Error(`Invalid language name: ${language}`);
+    }
+    
+    const languageDir = path.join(this.sourceDir, sanitizedLanguage);
     const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
-    const targetFiles = this.getLanguageFiles(language);
+    const targetFiles = this.getLanguageFiles(sanitizedLanguage);
     
     const analysis = {
-      language,
+      language: sanitizedLanguage,
       files: {},
       summary: {
         totalFiles: sourceFiles.length,
@@ -374,8 +414,17 @@ class I18nAnalyzer {
     };
     
     for (const fileName of sourceFiles) {
-      const sourceFilePath = path.join(this.config.sourceLanguage, fileName);
-      const targetFilePath = path.join(language, fileName);
+      // Sanitize filename
+      const sanitizedFileName = SecurityUtils.sanitizeInput(fileName);
+      if (!sanitizedFileName || sanitizedFileName !== fileName) {
+        analysis.files[fileName] = {
+          error: `Invalid filename: ${fileName}`
+        };
+        continue;
+      }
+      
+      const sourceFilePath = path.join(this.config.sourceLanguage, sanitizedFileName);
+      const targetFilePath = path.join(sanitizedLanguage, sanitizedFileName);
       
       const sourceFullPath = path.join(this.sourceDir, sourceFilePath);
       const targetFullPath = path.join(this.sourceDir, targetFilePath);
@@ -389,11 +438,28 @@ class I18nAnalyzer {
         continue;
       }
       
+      // Ensure source path is within project boundaries
+      const projectRoot = process.cwd();
+      if (!validatedSourcePath.startsWith(projectRoot)) {
+        analysis.files[fileName] = {
+          error: `Source file path outside project root: ${sourceFullPath}`
+        };
+        continue;
+      }
+      
       // Validate target file path
       const validatedTargetPath = SecurityUtils.safeSanitizePath(targetFullPath, this.sourceDir);
       if (!validatedTargetPath) {
         analysis.files[fileName] = {
           error: `Invalid target file path: ${targetFullPath}`
+        };
+        continue;
+      }
+      
+      // Ensure target path is within project boundaries
+      if (!validatedTargetPath.startsWith(projectRoot)) {
+        analysis.files[fileName] = {
+          error: `Target file path outside project root: ${targetFullPath}`
         };
         continue;
       }
@@ -586,11 +652,10 @@ try {
       }
       
       // Ensure the output directory exists
-    SecurityUtils.safeMkdirSync(this.outputDir);
-       if (!SecurityUtils.safeExists(this.outputDir)) {
-         console.error(`Failed to create output directory: ${this.outputDir}`);
-         return null;
-       }
+      SecurityUtils.safeMkdirSync(this.outputDir);
+      if (!SecurityUtils.safeExistsSync(this.outputDir)) {
+        throw new Error(`Failed to create output directory: ${this.outputDir}`);
+      }
       
       // Validate the output directory is within the project
       const validatedOutputDir = SecurityUtils.safeSanitizePath(this.outputDir, process.cwd());
@@ -639,11 +704,11 @@ try {
       let resolvedPath;
       
       try {
-        // Use fs.realpathSync.native for proper canonicalization on Windows
-        resolvedBase = fs.realpathSync.native(path.resolve(baseDir));
-        resolvedPath = fs.realpathSync.native(path.resolve(baseDir, inputPath));
+        // Use safeRealpathSync for secure path resolution
+        resolvedBase = SecurityUtils.safeRealpathSync(path.resolve(baseDir), baseDir) || path.resolve(baseDir);
+        resolvedPath = SecurityUtils.safeRealpathSync(path.resolve(baseDir, inputPath), baseDir) || path.resolve(baseDir, inputPath);
       } catch (error) {
-        // If realpath fails (path doesn't exist), fall back to regular resolution
+        // If safeRealpathSync fails, fall back to regular resolution
         resolvedBase = path.resolve(baseDir);
         resolvedPath = path.resolve(baseDir, inputPath);
       }
@@ -685,12 +750,16 @@ try {
         console.log(t('analyze.strictModeLabel', { mode: this.config.processing?.strictMode || this.config.strictMode ? 'ON' : 'OFF' }));
       }
       
-      // Ensure output directory exists
-      SecurityUtils.safeMkdirSync(this.outputDir);
-      if (!SecurityUtils.safeExists(this.outputDir)) {
-        throw new Error(`Failed to create output directory: ${this.outputDir}`);
+      // Ensure output directory exists (validated)
+      const validatedOutputDir = SecurityUtils.safeSanitizePath(this.outputDir, process.cwd());
+      if (!validatedOutputDir) {
+        throw new Error(`Invalid output directory: ${this.outputDir} is outside project root`);
       }
-      
+      await SecurityUtils.safeMkdir(validatedOutputDir);
+      if (!(await SecurityUtils.safeExistsAsync(validatedOutputDir, process.cwd()))) {
+        throw new Error(`Failed to create output directory: ${validatedOutputDir}`);
+      }
+      this.outputDir = validatedOutputDir;
       const languages = this.getAvailableLanguages();
       
       if (languages.length === 0) {

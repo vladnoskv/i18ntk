@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const SecurityUtils = require('./security');
-const configManager = require('./config-manager');
+const configManager = require('../utils/config-manager');
 
 /**
  * Admin Authentication Module
@@ -14,7 +14,7 @@ class AdminAuth {
     this.configPath = path.join(packageRoot, '.i18n-admin-config.json');
 
     // Get settings from config manager
-    const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+    const settings = configManager.getConfig();
     const securitySettings = settings.security || {};
     this.sessionTimeout = (securitySettings.sessionTimeout || 30) * 60 * 1000; // Convert minutes to milliseconds
     this.maxAttempts = securitySettings.maxFailedAttempts || 3;
@@ -247,7 +247,7 @@ class AdminAuth {
    */
   async isAuthRequired() {
     // Check if admin PIN is enabled in settings
-    const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+    const settings = configManager.getConfig();
     if (!(settings.security?.adminPinEnabled)) {
       return false;
     }
@@ -261,7 +261,7 @@ class AdminAuth {
    */
   async isAuthRequiredForScript(scriptName) {
     // Check if admin PIN is enabled globally
-    const globalSettings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+    const globalSettings = configManager.getConfig();
     if (!(globalSettings.security?.adminPinEnabled)) {
       return false;
     }

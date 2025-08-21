@@ -875,11 +875,11 @@
     },
     "examples": {
       "title": "\nBeispiele:\n",
-      "example1": "  node i18ntk-manage.js",
-      "example2": "  node i18ntk-manage.js --source-dir ./locales",
-      "example3": "  node i18ntk-manage.js --output summary-report.txt",
-      "example4": "  node i18ntk-manage.js --verbose",
-      "example5": "  node i18ntk-manage.js --source-dir ./locales --output report.json"
+      "example1": "  i18ntk",
+"example2": "  i18ntk --source-dir ./locales",
+"example3": "  i18ntk --output summary-report.txt",
+"example4": "  i18ntk --verbose",
+"example5": "  i18ntk --source-dir ./locales --output report.json"
     },
     "features": {
       "initProject": "🚀 Neue Sprachen initialisieren",
@@ -2011,13 +2011,13 @@
       "completed": "✅ Abgeschlossen"
     },
     "help": {
-      "usage": "Verwendung: node i18ntk-manage.js [Optionen]",
-      "interactiveMode": "💡 Tipp: Verwende node i18ntk-manage.js --command=<Befehl> für direkte Ausführung",
+      "usage": "Verwendung: i18ntk [Optionen]",
+      "interactiveMode": "💡 Tipp: Verwende i18ntk --command=<Befehl> für direkte Ausführung",
       "initProject": "🚀 Neue Sprachen initialisieren",
       "analyzeTranslations": "🔍 Übersetzungen analysieren",
       "validateTranslations": "✅ Übersetzungen validieren",
       "checkUsage": "📊 Schlüsselverwendung prüfen",
-      "showHelp": "📖 Hilfe anzeigen mit: node i18ntk-manage.js --help",
+      "showHelp": "📖 Hilfe anzeigen mit: i18ntk --help",
       "availableCommands": "📖 Verfügbare Befehle:",
       "initCommand": "  init      - Neue Sprachen initialisieren",
       "analyzeCommand": "  analyze   - Übersetzungen analysieren",

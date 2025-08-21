@@ -7,8 +7,15 @@
 const cliHelper = require('../utils/cli-helper');
 const fs = require('fs');
 const path = require('path');
-const SettingsManager = require('./settings-manager');
-const settingsManager = new SettingsManager();
+const { SettingsManager } = require('./settings-manager');
+let settingsManager = null;
+
+function getSettingsManager() {
+    if (!settingsManager) {
+        settingsManager = new SettingsManager();
+    }
+    return settingsManager;
+}
 const UIi18n = require('../main/i18ntk-ui');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
@@ -58,7 +65,7 @@ class SettingsCLI {
     async init() {
         try {
             this.settings = configManager.getConfig();
-            this.schema = settingsManager.getSettingsSchema();
+            this.schema = getSettingsManager().getSettingsSchema();
             return true;
         } catch (error) {
             this.error(t('settings.initFailed', { error: error.message }));
@@ -536,8 +543,8 @@ class SettingsCLI {
             'backup.singleFileMode': ['true', 'false']
         };
         if (key === 'language') {
-            return settingsManager.getAvailableLanguages().map(l => l.code);
-        }
+            return getSettingsManager().getAvailableLanguages()
+                                 .map(l => String(l.code).toLowerCase());        }
         return validOptions[key] || null;
     }
 
@@ -1284,11 +1291,21 @@ class SettingsCLI {
             }
             
             // Validate imported settings
-            if (!settingsManager.validateSettings(importedSettings)) {
-                this.error('Invalid settings file format.');
-                await this.pause();
-                return;
-            }
+                {
+                    const validation = getSettingsManager().validateSettings(importedSettings);
+                    const isValid =
+                        typeof validation === 'boolean'
+                            ? validation
+                            : (validation && typeof validation === 'object' && 'valid' in validation)
+                                ? Boolean(validation.valid)
+                                : false;
+                    if (!isValid) {
+                        const details = (validation && validation.errors) ? ` Details: ${JSON.stringify(validation.errors)}` : '';
+                        this.error(`Invalid settings file format.${details}`);
+                        await this.pause();
+                        return;
+                    }
+                }
 
             // Show import preview
             console.log('\nImport preview:');
@@ -1417,7 +1434,7 @@ class SettingsCLI {
                 const importedSettings = JSON.parse(SecurityUtils.safeReadFileSync(selectedBackup.path, 'utf8'));
                 
                 // Validate imported settings
-                if (!settingsManager.validateSettings(importedSettings)) {
+                if (!getSettingsManager().validateSettings(importedSettings)) {
                     this.error('Invalid backup file format.');
                     await this.pause();
                     return;
@@ -1971,7 +1988,7 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
      */
     async exportEnhancedSchema() {
         try {
-            const enhancedSchema = settingsManager.getEnhancedSettingsSchema();
+            const enhancedSchema = getSettingsManager().getEnhancedSettingsSchema();
             const fileName = `i18ntk-enhanced-schema-${Date.now()}.json`;
             const filePath = path.join(process.cwd(), fileName);
             

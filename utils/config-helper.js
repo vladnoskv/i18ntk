@@ -9,8 +9,15 @@ const path = require('path');
 const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
 const {loadTranslations} = require('./i18n-helper');
-const SettingsManager = require('../settings/settings-manager');
-const settingsManager = new SettingsManager();
+const { SettingsManager } = require('../settings/settings-manager');
+
+function getSettingsManager() {
+  // Lazily memoize a single instance to avoid repeated I/O and ensure consistency
+ if (!global.__i18ntkSettingsManager) {
+    global.__i18ntkSettingsManager = new SettingsManager();
+  }
+  return global.__i18ntkSettingsManager;
+}
 
 const { ask } = require('./cli');
 
@@ -109,7 +116,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
         cfg.i18nDir = cfg.sourceDir;
       }
 
-      settingsDir = settingsManager.configDir;
+      settingsDir = cfg.configDir || getSettingsManager().configDir;
     }
     const chosenDir = normalizePath(cliArgs.i18nDir || cliArgs.sourceDir || cfg.sourceDir || './locales');
     cfg.sourceDir = chosenDir;
@@ -154,7 +161,9 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       displayPaths,
     };
 
-    SecurityUtils.validateConfig(config);
+    if (typeof SecurityUtils.validateConfig === 'function') {
+      SecurityUtils.validateConfig(config);
+    }
     return config;
   } catch (error) {
     throw new Error(`Configuration error for ${scriptName}: ${error.message}`);
@@ -203,7 +212,9 @@ function displayBasicConfig() {
  */
 function parseCommonArgs(args) {
   const parsed = {};
-  const availableLangCodes = settingsManager.getAvailableLanguages().map(l => l.code);
+  const mgr = getSettingsManager();
+  const langs = (typeof mgr.getAvailableLanguages === 'function' ? mgr.getAvailableLanguages() : []) || [];
+  const availableLangCodes = Array.isArray(langs) ? langs.map(l => l.code).filter(Boolean) : [];
   
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];

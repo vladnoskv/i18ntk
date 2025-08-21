@@ -903,39 +903,60 @@ class I18nSummaryReporter {
         console.log('📋 Generating detailed duplicate keys report...');
         const detailedReport = this.generateDetailedReport();
         
-        // Create output directory if it doesn't exist
-        const outputDir = path.resolve(process.cwd(), 'i18ntk-reports');
-        if (!SecurityUtils.safeExistsSync(outputDir)) {
-          SecurityUtils.safeMkdirSync(outputDir);
+  ensureReportsDir(); {
+    // Prefer configured directory if present; else default to <cwd>/i18ntk-reports
+    const preferred = this.config?.reportsDir
+      ? path.resolve(this.config.reportsDir)
+      : path.resolve(process.cwd(), 'i18ntk-reports');
+    
+    // Validate and best-effort create
+    const validated = SecurityUtils.validatePath(preferred) || preferred;
+    if (!SecurityUtils.safeExistsSync(validated)) {
+      try {
+        // If your safeMkdirSync API does not accept a baseDir, drop the second argument.
+        SecurityUtils.safeMkdirSync(validated, process.cwd());
+      } catch (e) {
+        // Fallback to cwd if creation fails
+        const fallback = path.resolve(process.cwd(), 'i18ntk-reports');
+        if (!SecurityUtils.safeExistsSync(fallback)) {
+          SecurityUtils.safeMkdirSync(fallback, process.cwd());
         }
+        return fallback;
+      }
+    }
+    return validated;
+  }
+        const outputDir = this.ensureReportsDir();
         
         const detailedReportName = totalDuplicateKeys > 100 
           ? `duplicate-keys-detailed-${new Date().toISOString().slice(0,10)}.txt`
           : `duplicate-keys-summary-${new Date().toISOString().slice(0,10)}.txt`;
         const detailedReportPath = path.join(outputDir, detailedReportName);
         
-        const detailedSuccess = await SecurityUtils.safeWriteFile(detailedReportPath, detailedReport, outputDir);
-        if (detailedSuccess) {
-          if (totalDuplicateKeys > 100) {
-            console.log(`✅ Detailed duplicate keys report saved: ${detailedReportPath}`);
+        let detailedSuccess = false;
+        try {
+          detailedSuccess = SecurityUtils.safeWriteFileSync(detailedReportPath, detailedReport, outputDir);
+          if (detailedSuccess) {
+            if (totalDuplicateKeys > 100) {
+              console.log(`✅ Detailed duplicate keys report saved: ${detailedReportPath}`);
+            } else {
+              console.log(`✅ Duplicate keys summary saved: ${detailedReportPath}`);
+            }
           } else {
-            console.log(`✅ Duplicate keys summary saved: ${detailedReportPath}`);
+            console.log(`⚠️  Could not save detailed report: ${detailedReportPath}`);
           }
-        } else {
-          console.log(`⚠️  Could not save detailed report: ${detailedReportPath}`);
+        } catch (e) {
+          console.log(`⚠️  Could not save detailed report: ${detailedReportPath} (${e.message})`);
         }
       }
       
       // Output report
       if (args.outputFile) {
         // Always save summary reports to i18ntk-reports
-        const reportsDir = path.resolve(process.cwd(), 'i18ntk-reports');
-        if (!SecurityUtils.safeExistsSync(reportsDir)) {
-          SecurityUtils.safeMkdirSync(reportsDir);
-        }
+        const reportsDir = this.ensureReportsDir();
         const outputFileName = args.outputFile ? path.basename(args.outputFile) : `summary-report-${new Date().toISOString().slice(0,10)}.txt`;
         const outputPath = path.join(reportsDir, outputFileName);
-        const success = await SecurityUtils.safeWriteFile(outputPath, report, reportsDir);
+        const success = SecurityUtils.safeWriteFileSync(outputPath, report, reportsDir);
         if (success) {
           console.log(t('summary.reportSaved', { reportPath: outputPath }));
         } else {

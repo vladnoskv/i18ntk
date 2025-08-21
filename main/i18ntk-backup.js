@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-'use strict';
-
-const fs = require('fs/promises');
 const path = require('path');
 const SecurityUtils = require('../utils/security');
+// main/i18ntk-backup.js
 
-// Simple CLI argument parser
+ const fs = require('fs/promises');
+ const { constants: fsConstants } = require('fs');
 function parseArgs(args) {
   const result = { _: [] };
   let currentOption = null;
@@ -133,25 +132,25 @@ async function handleCreate(args) {
 
   // Create backup directory if it doesn't exist
   try {
-    await fs.mkdir(outputDir, { recursive: true });
+    await SecurityUtils.safeMkdir(outputDir, process.cwd(), { recursive: true });
     logger.debug(`Created backup directory: ${outputDir}`);
   } catch (err) {
     if (err.code !== 'EEXIST') {
-      logger.error(`Failed to create backup directory: ${err.message}`);
+    await SecurityUtils.safeMkdir(outputDir, { recursive: true }, process.cwd());
       throw err;
     }
     logger.debug(`Using existing backup directory: ${outputDir}`);
   }
 
   // Validate directory with path traversal protection
-  const sourceDir = SecurityUtils.validatePath(path.resolve(dir));
+  const sourceDir = SecurityUtils.safeValidatePath(path.resolve(dir));
   if (!sourceDir) {
     throw new Error(`Invalid directory path: ${dir}`);
   }
   
   try {
-    const stats = await fs.stat(sourceDir);
-    if (!stats.isDirectory()) {
+    const stats = await SecurityUtils.safeStat(sourceDir);
+    if (!stats || !stats.isDirectory()) {
       throw new Error(`Path exists but is not a directory: ${sourceDir}`);
     }
     logger.debug(`Source directory exists: ${sourceDir}`);
@@ -211,7 +210,7 @@ async function handleCreate(args) {
   }
   
   await SecurityUtils.safeWriteFile(validatedBackupPath, JSON.stringify(translations, null, 2), outputDir);
-  const stats = await fs.stat(backupPath);
+  const stats = await SecurityUtils.safeStat(backupPath);
   
   logger.success('Backup created successfully');
   logger.info(`  Location: ${backupPath}`);
@@ -228,12 +227,12 @@ async function handleRestore(args) {
     throw new Error('Backup file path is required');
   }
 
-  const backupPath = SecurityUtils.validatePath(path.resolve(process.cwd(), backupFile));
+  const backupPath = SecurityUtils.safeValidatePath(path.resolve(process.cwd(), backupFile));
   if (!backupPath) {
     throw new Error(`Invalid backup file path: ${backupFile}`);
   }
   
-  const outputDir = SecurityUtils.validatePath(
+  const outputDir = SecurityUtils.safeValidatePath(
     args.output 
       ? path.resolve(process.cwd(), args.output) 
       : path.join(process.cwd(), 'restored')
@@ -243,9 +242,13 @@ async function handleRestore(args) {
   }
   
   // Validate backup file
-  if (!SecurityUtils.safeExists(backupPath)) {
-    throw new Error(`Backup file not found: ${backupPath}`);
-  }
+// add at the top of main/i18ntk-backup.js
+const { getI18n } = require('../utils/i18n');
+
+    if (!await SecurityUtils.safeExistsSecure(backupPath, process.cwd())) {
+      const i18n = getI18n();
+      throw new Error(i18n.t('backup.backupNotFound', { path: backupPath }));
+    }
   
   logger.info('\nRestoring backup...');
   
@@ -256,7 +259,7 @@ async function handleRestore(args) {
     
     // Create output directory if it doesn't exist
     try {
-      await fs.mkdir(outputDir, { recursive: true });
+      await SecurityUtils.safeMkdir(outputDir, { recursive: true }, process.cwd());
     } catch (err) {
       if (err.code !== 'EEXIST') throw err;
     }
@@ -289,7 +292,7 @@ async function handleList() {
     }
     
     try {
-      await fs.access(validatedBackupDir);
+      await SecurityUtils.safeAccess(validatedBackupDir, fsConstants.F_OK);
     } catch (err) {
       if (err.code === 'ENOENT') {
         logger.warn('No backups found. The backup directory does not exist yet.');
@@ -310,7 +313,7 @@ async function handleList() {
             }
             
             try {
-              await fs.mkdir(validatedCustomDir, { recursive: true });
+              await SecurityUtils.safeMkdir(validatedCustomDir, { recursive: true }, process.cwd());
               logger.success(`Backup directory created: ${validatedCustomDir}`);
               
               // Update config if different from default
@@ -326,7 +329,7 @@ async function handleList() {
                       directory: validatedCustomDir
                     }
                   };
-                  configManager.saveConfig(newConfig);
+                  await configManager.saveConfig(newConfig);
                   logger.success('Configuration updated with new backup directory.');
                 }
               }
@@ -350,7 +353,7 @@ async function handleList() {
       return;
     }
 
-    const files = await fs.readdir(validatedBackupDir);
+    const files = await SecurityUtils.safeReaddirSecure(validatedBackupDir);
     const backups = [];
     
     for (const file of files) {
@@ -363,7 +366,7 @@ async function handleList() {
             continue;
           }
           
-          const stats = await fs.stat(validatedFilePath);
+          const stats = await SecurityUtils.safeStatSecure(validatedFilePath);
           backups.push({
             name: file,
             path: validatedFilePath,
@@ -414,13 +417,13 @@ async function handleVerify(args) {
   }
 
   const backupPath = path.resolve(process.cwd(), backupFile);
-  const validatedBackupPath = SecurityUtils.validatePath(backupPath);
+  const validatedBackupPath = SecurityUtils.safeValidatePath(backupPath);
   if (!validatedBackupPath) {
     throw new Error(`Invalid backup file path: ${backupPath}`);
   }
   
   // Validate backup file
-  if (!SecurityUtils.safeExists(validatedBackupPath)) {
+  if (!SecurityUtils.safeExistsSync(validatedBackupPath, process.cwd())) {
     throw new Error(`Backup file not found: ${validatedBackupPath}`);
   }
   
@@ -434,7 +437,8 @@ async function handleVerify(args) {
       const fileCount = Object.keys(content).length;
       logger.success('Backup is valid');
       logger.info(`  Contains ${fileCount} translation files`);
-      logger.info(`  Last modified: ${(await fs.stat(backupPath)).mtime.toLocaleString()}`);
+      const stats = await SecurityUtils.safeStat(backupPath);
+      logger.info(`  Last modified: ${stats ? stats.mtime.toLocaleString() : 'unknown'}`);
     } else {
       throw new Error('Invalid backup format');
     }
@@ -457,7 +461,7 @@ async function handleCleanup(args) {
       return;
     }
 
-    const files = await fs.readdir(validatedBackupDir);
+    const files = await SecurityUtils.safeReaddir(validatedBackupDir);
     const backupFiles = files
       .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
       .map(file => {
@@ -485,8 +489,12 @@ async function handleCleanup(args) {
     // Delete old backups
     for (const file of toDelete) {
       try {
-        await fs.unlink(file.path);
-        logger.info(`  - Deleted: ${file.name}`);
+        const success = SecurityUtils.safeDeleteSync(file.path);
+        if (success) {
+          logger.info(`  - Deleted: ${file.name}`);
+        } else {
+          logger.error(`  - Failed to delete ${file.name}: Permission denied or file not found`);
+        }
       } catch (err) {
         logger.error(`  - Failed to delete ${file.name}: ${err.message}`);
       }
@@ -514,7 +522,7 @@ async function cleanupOldBackups(outputDir) {
       return;
     }
 
-    const files = await fs.readdir(validatedOutputDir);
+    const files = await SecurityUtils.safeReaddir(validatedOutputDir);
     const backupFiles = files
       .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
       .map(file => {
@@ -542,8 +550,12 @@ async function cleanupOldBackups(outputDir) {
     // Delete old backups silently
     for (const file of toDelete) {
       try {
-        await fs.unlink(file.path);
-        logger.debug(`  - Deleted old backup: ${file.name}`);
+        const success = SecurityUtils.safeDeleteSync(file.path);
+        if (success) {
+          logger.debug(`  - Deleted old backup: ${file.name}`);
+        } else {
+          logger.debug(`  - Failed to delete old backup ${file.name}: Permission denied or file not found`);
+        }
       } catch (err) {
         logger.debug(`  - Failed to delete old backup ${file.name}: ${err.message}`);
       }

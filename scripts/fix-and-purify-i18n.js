@@ -137,7 +137,7 @@ function loadLanguage(lang) {
   const dir = path.join(I18N_DIR, lang);
   if (isDir(dir)) {
     const data = {};
-    for (const f of SecurityUtils.safeReaddir(dir).filter(f => f.endsWith('.json'))) {
+    for (const f of SecurityUtils.safeReaddirSync(dir).filter(f => f.endsWith('.json'))) {
       const p = path.join(dir, f);
       const name = path.basename(f, '.json');
       try { data[name] = JSON.parse(readUTF8(p) || '{}'); } catch { data[name] = {}; }

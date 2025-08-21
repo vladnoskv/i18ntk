@@ -233,7 +233,8 @@ const DEFAULT_CONFIG = {
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto"
+  "timezone": "auto",
+  "setupDone": false
 };
 
 // Mapping of supported environment variables to config keys

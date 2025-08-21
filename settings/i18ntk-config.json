@@ -7,7 +7,7 @@
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "framework": {
-    "preference": "auto",
+    "preference": "vanilla",
     "fallback": "vanilla",
     "detect": true,
     "supported": [
@@ -19,7 +19,8 @@
       "nuxt",
       "next",
       "vanilla"
-    ]
+    ],
+    "detected": false
   },
   "scriptDirectories": {
     "init": null,
@@ -208,5 +209,6 @@
   "autoSave": true,
   "dateFormat": "DD/MM/YYYY",
   "timeFormat": "24h",
-  "timezone": "auto"
+  "timezone": "auto",
+  "setupDone": true
 }

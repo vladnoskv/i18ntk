@@ -177,7 +177,7 @@ class JavaI18nManager {
     
     for (const lang of languages) {
       const langDir = path.join(localesDir, lang);
-      SecurityUtils.safeMkdirSync(langDir, null, { recursive: true });
+      SecurityUtils.safeMkdirSync(langDir, path.resolve(localesDir), { recursive: true });
       
       if (framework === 'android') {
         // Android string resources

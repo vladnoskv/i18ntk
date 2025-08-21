@@ -103,7 +103,7 @@ class GoI18nManager {
     
     for (const lang of languages) {
       const langDir = path.join(localesDir, lang);
-      SecurityUtils.safeMkdirSync(langDir, null, { recursive: true });
+      SecurityUtils.safeMkdirSync(langDir, process.cwd(), { recursive: true });
       
       // Create Go i18n format files
       SecurityUtils.safeWriteFileSync(path.join(langDir, 'active.en.toml'), `# Go i18n translations for ${lang}

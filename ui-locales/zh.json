@@ -876,11 +876,11 @@
     },
     "examples": {
       "title": "\n示例：\n",
-      "example1": "  node i18ntk-manage.js",
-      "example2": "  node i18ntk-manage.js --source-dir ./locales",
-      "example3": "  node i18ntk-manage.js --output summary-report.txt",
-      "example4": "  node i18ntk-manage.js --verbose",
-      "example5": "  node i18ntk-manage.js --source-dir ./locales --output report.json"
+      "example1": "  i18ntk",
+"example2": "  i18ntk --source-dir ./locales",
+"example3": "  i18ntk --output summary-report.txt",
+"example4": "  i18ntk --verbose",
+"example5": "  i18ntk --source-dir ./locales --output report.json"
     },
     "features": {
       "initProject": "🚀 初始化新语言",
@@ -2012,13 +2012,13 @@
       "completed": "✅ 完成"
     },
     "help": {
-      "usage": "用法：node i18ntk-manage.js [选项]",
-      "interactiveMode": "💡 使用：node i18ntk-manage.js --command=<command> 直接执行",
+      "usage": "用法：i18ntk [选项]",
+      "interactiveMode": "💡 使用：i18ntk --command=<command> 直接执行",
       "initProject": "🚀 初始化新语言",
       "analyzeTranslations": "🔍 分析翻译",
       "validateTranslations": "✅ 验证翻译",
       "checkUsage": "📊 检查键使用情况",
-      "showHelp": "📖 使用：node i18ntk-manage.js --help 获取命令",
+      "showHelp": "📖 使用：i18ntk --help 获取命令",
       "availableCommands": "📖 可用命令：",
       "initCommand": "  init      - 初始化新语言",
       "analyzeCommand": "  analyze   - 分析翻译",

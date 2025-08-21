@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const configManager = require('./config-manager');
+const configManager = require('../utils/config-manager');
 const { ensureDirectory } = require('./config-helper');
+const SecurityUtils = require('./security');
 
 /**
  * Check if the project is properly initialized
@@ -18,8 +19,24 @@ async function checkInitialized(options = {}) {
   
   // Check if source language files exist
   const langDir = path.resolve(sourceDir, sourceLanguage);
-  const hasLanguageFiles = SecurityUtils.safeExistsSync(langDir) &&
-    SecurityUtils.safeReaddirSync(langDir).some(f => f.endsWith('.json'));
+  let hasLanguageFiles = false;
+  try {
+    hasLanguageFiles = fs.existsSync(langDir) && fs.statSync(langDir).isDirectory();
+    if (hasLanguageFiles) {
+      const files = fs.readdirSync(langDir);
+      hasLanguageFiles = files.some(f => f.endsWith('.json'));
+    }
+  } catch (error) {
+    // Fallback to SecurityUtils if standard fs fails
+    const exists = SecurityUtils?.safeExistsSync?.(langDir) ?? false;
+    const isDir = SecurityUtils?.safeStatSync?.(langDir)?.isDirectory?.() ?? false;
+    const files = SecurityUtils?.safeReaddirSync?.(langDir) || [];
+    hasLanguageFiles =
+      exists &&
+      isDir &&
+      Array.isArray(files) &&
+      files.some(f => path.extname(f).toLowerCase() === '.json');
+  }
   
   // Return initialization status based on file existence
   return {

@@ -121,16 +121,16 @@ class I18nCompletionTool {
     }
     
     // Check for monolith JSON files (en.json, es.json, etc.)
-    const files = SecurityUtils.safeReaddir(this.sourceDir);
+    const files = SecurityUtils.safeReaddirSync(this.sourceDir);
     const languages = files
       .filter(file => file.endsWith('.json'))
       .map(file => path.basename(file, '.json'));
     
     // Also check for directory-based structure for backward compatibility
-    const directories = SecurityUtils.safeReaddir(this.sourceDir)
+    const directories = SecurityUtils.safeReaddirSync(this.sourceDir)
       .filter(item => {
         const itemPath = path.join(this.sourceDir, item);
-        const stats = SecurityUtils.safeStat(itemPath);
+        const stats = SecurityUtils.safeStatSync(itemPath);
         return stats ? stats.isDirectory() : false;
       });
     
@@ -141,11 +141,11 @@ class I18nCompletionTool {
   getLanguageFiles(language) {
     const languageDir = path.join(this.sourceDir, language);
     
-    if (!SecurityUtils.safeExists(languageDir)) {
+    if (!SecurityUtils.safeExists(languageDir, this.sourceDir)) {
       return [];
     }
     
-    return SecurityUtils.safeReaddir(languageDir)
+    return SecurityUtils.safeReaddirSync(languageDir)
       .filter(file => {
         return file.endsWith('.json') && 
                !this.config.excludeFiles.includes(file);
@@ -235,7 +235,7 @@ class I18nCompletionTool {
       let fileContent = {};
       
       // Load existing file or create new
-      const fileExists = SecurityUtils.safeExists(filePath);
+      const fileExists = SecurityUtils.safeExists(filePath, this.sourceDir);
       if (fileExists) {
         try {
           const content = SecurityUtils.safeReadFile(filePath, 'utf8');
@@ -248,7 +248,7 @@ class I18nCompletionTool {
         // Create directory if it doesn't exist
         const dirExists = SecurityUtils.safeExists(languageDir);
         if (!dirExists && !dryRun) {
-          SecurityUtils.safeMkdirSync(languageDir);
+          SecurityUtils.safeMkdirSync(languageDir, process.cwd(), { recursive: true });
         }
       }
       
@@ -430,7 +430,7 @@ class I18nCompletionTool {
     const reportsDir = path.join(projectRoot, 'i18ntk-reports');
     const reportsDirExists = SecurityUtils.safeExists(reportsDir);
     if (!reportsDirExists) {
-      SecurityUtils.safeMkdirSync(reportsDir);
+      SecurityUtils.safeMkdirSync(reportsDir, process.cwd(), { recursive: true });
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

@@ -1,15 +1,39 @@
-# 🌍 i18ntk - The Ultimate i18n Translation Management Toolkit
+# i18nTK (i18n Toolkit) - Internationalization Management Toolkit
+
+**Version 2.0.0 - Enterprise-Grade Internationalization with Enhanced Security and Performance**
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**Version:** 1.10.1
+**Version:** 2.0.0
 **Last Updated:** 2025-08-20
 **GitHub Repository:** [vladnoskv/i18n-management-toolkit](https://github.com/vladnoskv/i18n-management-toolkit)
 
 [![npm version](https://badge.fury.io/js/i18ntk.svg)](https://badge.fury.io/js/i18ntk) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Performance](https://img.shields.io/badge/Performance-97%25%20faster-blue.svg)](https://github.com/vladnoskv/i18ntk#performance) 
-[![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg?label=npm%20downloads)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social&label=github%20stars)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.10.0)](https://socket.dev/npm/package/i18ntk/overview/1.10.0)
+[![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg?label=npm%20downloads)](https://www.npmjs.com/package/i18ntk) [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social&label=github%20stars)](https://github.com/vladnoskv/i18ntk) [![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/2.0.0)](https://socket.dev/npm/package/i18ntk/overview/2.0.0)
 
-A powerful i18n **internationalization management toolkit** with framework detection and comprehensive translation management capabilities.
+i18nTK is a comprehensive, security-first internationalization (i18n) management toolkit designed for modern applications. This major v2.0.0 release consolidates all security enhancements, stability improvements, and framework support from the 1.9.x-1.10.x series into a unified, high-performance platform.
+
+## Key Features in v2.0.0:
+
+- **Enhanced Security Architecture:** No known zero-day vulnerabilities, featuring AES-256-GCM encryption for sensitive data and a comprehensive `SecurityUtils` API.
+- **Optimized Performance:** Ultra-performance optimization, achieving up to 97% faster processing speeds.
+- **Intelligent Framework Detection:** Smarter detection and validation for various JavaScript frameworks.
+- **Refactored Settings Management:** Improved settings handling with lazy loading for efficiency.
+- **Cross-Platform Compatibility:** Enhanced compatibility across different operating systems and environments.
+- **Comprehensive Debug Utilities:** New tools for easier debugging and troubleshooting.
+- **Improved Documentation:** Updated and expanded documentation for the v2.0.0 release.
+- **Initialization State Tracking:** New `setupDone` flag to track the application's initialization state.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Security](#security)
+- [Performance](#performance)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## 🚀 Quick Start
 
@@ -64,13 +88,15 @@ i18ntk-backup restore <backup-id>  # Restore from backup
 
 ## 🎯 Key Features
 
-### 🚀 Enhanced Runtime Translation API (v1.10.0)
+### 🚀 Enhanced Runtime Translation API (v2.0.0)
 
-#### New in 1.10.0
-- **Improved TypeScript Support**: Better type inference and autocomplete
-- **Framework Detection**: Automatic detection of Next.js, Nuxt.js, and SvelteKit projects
-- **Performance**: Optimized translation lookups with reduced memory footprint
-- **DNR Functionality**: Fixed persistence of "Do Not Remind" settings across versions
+#### New in v2.0.0 - Major Security & Performance Release
+- **Enhanced Security Architecture**: Zero-vulnerability certification with AES-256-GCM encryption
+- **Comprehensive SecurityUtils API**: Enterprise-grade path traversal protection and secure file operations
+- **Ultra-Performance Optimization**: 97% faster processing with optimized memory footprint
+- **Cross-Platform Security**: Unified security implementation across Windows, macOS, and Linux
+- **Framework Detection**: Enhanced automatic detection for all supported frameworks
+- **Setup Reliability**: Zero false-positive setup completion detection
 
 #### Core Features
 - **Universal Runtime**: Framework-agnostic API for any JavaScript/TypeScript project

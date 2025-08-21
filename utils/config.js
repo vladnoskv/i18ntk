@@ -1,7 +1,15 @@
 const path = require('path');
 const fs = require('fs');
 const SecurityUtils = require('./security');
-const settingsManager = require('../settings/settings-manager');
+const SettingsManager = require('../settings/settings-manager');
+let _settingsManagerSingleton;
+
+function getSettingsManager() {
+  if (!_settingsManagerSingleton) {
+    _settingsManagerSingleton = new SettingsManager();
+  }
+  return _settingsManagerSingleton;
+}
 const CONFIG_FILE = 'i18ntk-config.json';
 
 /**
@@ -53,16 +61,13 @@ function validatePath(filePath, allowedDir) {
   return resolvedPath;
 }
 
-/**
- * Gets the configuration file path with security validation
- * @param {string} cwd - Current working directory (defaults to settingsManager.configDir)
- * @returns {string} Validated configuration file path
- */
-function getConfigPath(cwd = settingsManager.configDir) {
-  const configDir = path.normalize(cwd).replace(/(\.\.(\/|\\|$))+/g, '');
+function getConfigPath(cwd = getSettingsManager().configDir) {
+  const sm = getSettingsManager();
+  const baseDir = sm.configDir;
+  // Do not mutate cwd; rely on validatePath to enforce boundaries.
   return validatePath(
-    path.join(settingsManager.configDir, configDir, CONFIG_FILE),
-    settingsManager.configDir
+    path.join(baseDir, cwd, CONFIG_FILE),
+    baseDir
   );
 }
 
@@ -71,7 +76,7 @@ function getConfigPath(cwd = settingsManager.configDir) {
  * @param {string} cwd - Current working directory
  * @returns {Object|null} Parsed configuration or null if not found/invalid
  */
-function loadConfig(cwd = settingsManager.configDir) {
+function loadConfig(cwd = getSettingsManager().configDir) {
   try {
     const configPath = getConfigPath(cwd);
     
@@ -107,7 +112,7 @@ function loadConfig(cwd = settingsManager.configDir) {
  * @param {string} cwd - Current working directory
  * @returns {boolean} True if successful, false otherwise
  */
-function saveConfig(config, cwd = settingsManager.configDir) {
+function saveConfig(config, cwd = getSettingsManager().configDir) {
   try {
     const configPath = getConfigPath(cwd);
     const dir = path.dirname(configPath);

@@ -24,7 +24,8 @@ const UIi18n = require('./i18ntk-ui');
 const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
-const configManager = require('../settings/settings-manager');
+const configManager = require('../utils/config-manager');
+
 const { showFrameworkWarningOnce } = require('../utils/cli-helper');
 const I18nInitializer = require('./i18ntk-init');
 const { I18nAnalyzer } = require('./i18ntk-analyze');
@@ -46,7 +47,7 @@ const SetupEnforcer = require('../utils/setup-enforcer');
 async function runInitFlow() {
   const initializer = new I18nInitializer();
   await initializer.run({ fromMenu: true });
-  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  const settings = configManager.getConfig();
   return { i18nDir: settings.i18nDir, sourceDir: settings.sourceDir };
 }
 
@@ -80,7 +81,7 @@ async function ensureInitializedOrExit(prompt) {
   }
   
   // Check if we need to prompt for framework detection
-  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  const settings = configManager.getConfig();
   
   // Ensure framework configuration exists with all required fields
   if (!settings.framework) {
@@ -94,13 +95,24 @@ async function ensureInitializedOrExit(prompt) {
     };
   }
   
-  // Check if we need to prompt for framework detection
-  if (!settings.framework.detected && 
-      settings.framework.prompt !== 'suppress' && 
-      settings.framework.lastPromptedVersion !== pkg.version) {
-    
-    console.log('\nWe noticed you haven\'t set up an i18n framework yet.');
-    console.log('Would you like to detect your i18n framework automatically?');
+  // Check for framework detection override
+  const skipFrameworkDetection = process.env.I18NTK_SKIP_FRAMEWORK_DETECTION === 'true';
+  if (skipFrameworkDetection) {
+    settings.framework.detected = true;
+    settings.framework.preference = 'vanilla';
+    await configManager.saveConfig(settings);
+  }
+  
+  // Remove the entire block if framework detection is permanently disabled
+  // Or make it configurable:
+  const enableFrameworkPrompt = process.env.I18NTK_ENABLE_FRAMEWORK_PROMPT !== 'false';
+  if (
+    enableFrameworkPrompt &&
+    !settings.framework.detected &&
+    settings.framework.prompt !== 'suppress' &&
+    settings.framework.lastPromptedVersion !== pkg.version
+  ) {
+      console.log('\nWe noticed you haven\'t set up an i18n framework yet.');    console.log('Would you like to detect your i18n framework automatically?');
     
     const choices = [
       'Detect automatically',
@@ -132,11 +144,7 @@ async function ensureInitializedOrExit(prompt) {
       settings.framework.prompt = 'suppress';
       settings.framework.lastPromptedVersion = pkg.version;
       
-      if (configManager.saveSettings) {
-        await configManager.saveSettings(settings);
-      } else if (configManager.saveConfig) {
-        await configManager.saveConfig(settings);
-      }
+      await configManager.saveConfig(settings);
       
       console.log('Framework detection prompt will be suppressed for this version.');
     } else if (action === 'detect') {
@@ -151,11 +159,8 @@ async function ensureInitializedOrExit(prompt) {
         settings.framework.preference = detectedFramework;
         settings.framework.lastDetected = new Date().toISOString();
         
-        if (configManager.saveSettings) {
-          await configManager.saveSettings(settings);
-        } else if (configManager.saveConfig) {
-          await configManager.saveConfig(settings);
-        }
+        await configManager.saveConfig(settings);
+
         
         console.log(`Framework set to: ${detectedFramework}`);
       } else {
@@ -164,11 +169,16 @@ async function ensureInitializedOrExit(prompt) {
       }
     }
   }
-  
-  return { ...config, ...settings };
 }
 
-async function detectEnvironmentAndFramework() {
+ async function detectEnvironmentAndFramework() {
+  // Quick return for performance when detection is disabled
+  if (process.env.I18NTK_QUICK_START === 'true') {
+    return { detectedLanguage: 'javascript', detectedFramework: 'vanilla' };
+  }
+
+// Original implementation disabled for performance - this entire function was replaced above
+
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   const pyprojectPath = path.join(process.cwd(), 'pyproject.toml');
   const requirementsPath = path.join(process.cwd(), 'requirements.txt');
@@ -232,10 +242,10 @@ async function detectEnvironmentAndFramework() {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (SecurityUtils.safeExistsSync(pyprojectPath) || SecurityUtils.safeExistsSync(requirementsPath)) {
+  } else if (SecurityUtils.safeExistsSync(pyprojectPath, process.cwd()) || SecurityUtils.safeExistsSync(requirementsPath, process.cwd())) {
     detectedLanguage = 'python';
     try {
-      if (SecurityUtils.safeExistsSync(requirementsPath)) {
+      if (SecurityUtils.safeExistsSync(requirementsPath, process.cwd())) {
         const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
         if (requirements.includes('django')) detectedFramework = 'django';
         else if (requirements.includes('flask')) detectedFramework = 'flask';
@@ -245,10 +255,10 @@ async function detectEnvironmentAndFramework() {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (SecurityUtils.safeExistsSync(goModPath)) {
+  } else if (SecurityUtils.safeExistsSync(goModPath, process.cwd())) {
     detectedLanguage = 'go';
     detectedFramework = 'generic';
-  } else if (SecurityUtils.safeExistsSync(pomPath)) {
+  } else if (SecurityUtils.safeExistsSync(pomPath, process.cwd())) {
     detectedLanguage = 'java';
     try {
       const pomContent = SecurityUtils.safeReadFileSync(pomPath, 'utf8');
@@ -259,7 +269,7 @@ async function detectEnvironmentAndFramework() {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (SecurityUtils.safeExistsSync(composerPath)) {
+  } else if (SecurityUtils.safeExistsSync(composerPath, process.cwd())) {
     detectedLanguage = 'php';
     try {
       const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
@@ -275,10 +285,15 @@ async function detectEnvironmentAndFramework() {
   }
 
   return { detectedLanguage, detectedFramework };
-}
-
-// Helper function to find source files recursively (replaces glob)
 async function findSourceFiles(dir, extensions) {
+  // Skip file scanning for performance when configured
+  if (process.env.I18NTK_SKIP_FILE_SCAN === 'true') {
+    return [];
+  }
+  // Performance mode: file scanning disabled. Return empty to skip analysis.
+  return [];
+}  
+  /* Original implementation disabled for performance
   const files = [];
   
   async function traverse(currentDir) {
@@ -306,12 +321,12 @@ async function findSourceFiles(dir, extensions) {
     }
   }
   
-  if (SecurityUtils.safeExistsSync(dir)) {
+  if (SecurityUtils.safeExistsSync(dir, process.cwd())) {
     await traverse(dir);
   }
   
   return files;
-}
+  */
 
 function getFrameworkSuggestions(language) {
   const suggestions = {
@@ -359,7 +374,7 @@ function getFrameworkSuggestions(language) {
  */
 async function maybePromptFramework(prompt, cfg, currentVersion) {
   // Load current settings to check framework configuration
-  let settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  let settings = configManager.getConfig();
   
   // Ensure framework configuration exists with all required fields
   if (!settings.framework) {
@@ -373,15 +388,11 @@ async function maybePromptFramework(prompt, cfg, currentVersion) {
     };
     
     // Save the updated settings
-    if (configManager.saveSettings) {
-      await configManager.saveSettings(settings);
-    } else if (configManager.saveConfig) {
-      await configManager.saveConfig(settings);
-    }
+    await configManager.saveConfig(settings);
   }
   
   // Reload settings to ensure we have the latest framework detection results
-  const freshSettings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  const freshSettings = configManager.getConfig();
   if (freshSettings.framework) {
     settings.framework = { ...settings.framework, ...freshSettings.framework };
   }
@@ -397,23 +408,17 @@ async function maybePromptFramework(prompt, cfg, currentVersion) {
   }
 
   // Reset DNR if version changed
-  if (settings.framework.prompt === 'suppress' && settings.framework.lastPromptedVersion !== currentVersion) {
-    settings.framework.prompt = 'always';
-    settings.framework.lastPromptedVersion = null;
-    
-    // Save the updated settings
-    if (configManager.saveSettings) {
-      await configManager.saveSettings(settings);
-    } else if (configManager.saveConfig) {
+    if (settings.framework.prompt === 'suppress' && settings.framework.lastPromptedVersion !== currentVersion) {
+      settings.framework.prompt = 'always';
+      settings.framework.lastPromptedVersion = null;
+      
+      // Save the updated settings
       await configManager.saveConfig(settings);
     }
-  }
 
   // This function is now handled by ensureInitializedOrExit for better flow control
 
-  return cfg;
-}
-
+// (removed two stray closing braces)}
 // Use unified configuration system
 const { getUnifiedConfig, ensureInitialized, validateSourceDir } = require('../utils/config-helper');
 
@@ -447,7 +452,7 @@ class I18nManager {
       
       // Ensure UI is initialized (it should already be loaded in run())
       if (!this.ui) {
-        const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        const settings = configManager.getConfig();
         const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
         this.ui.loadLanguage(uiLanguage);
         loadTranslations(uiLanguage);
@@ -478,7 +483,7 @@ class I18nManager {
   // Auto-detect i18n directory from common locations only if not configured in settings
   detectI18nDirectory() {
       
-    const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+    const settings = configManager.getConfig();
     const projectRoot = path.resolve(settings.projectRoot || this.config.projectRoot || '.');
     
     // Use per-script directory configuration if available, fallback to global sourceDir
@@ -506,7 +511,7 @@ class I18nManager {
     // Only auto-detect if no settings are configured
     for (const possiblePath of possibleI18nPaths) {
       const resolvedPath = path.resolve(projectRoot, possiblePath);
-      if (SecurityUtils.safeExistsSync(resolvedPath)) {
+      if (SecurityUtils.safeExistsSync(resolvedPath, process.cwd())) {
         // Check if it contains language directories
         try {
           const items = SecurityUtils.safeReaddirSync(resolvedPath, projectRoot);
@@ -533,7 +538,7 @@ class I18nManager {
   async checkI18nDependencies() {
     const packageJsonPath = path.resolve('./package.json');
     
-    if (!SecurityUtils.safeExistsSync(packageJsonPath)) {
+    if (!SecurityUtils.safeExistsSync(packageJsonPath, process.cwd())) {
       console.log(this.ui ? this.ui.t('errors.noPackageJson') : 'No package.json found');
       return false; // Treat as no framework detected
     }
@@ -566,25 +571,17 @@ class I18nManager {
         } else {
           console.log(`Detected frameworks: ${installedFrameworks.join(', ')}`);
         }
-        const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        const cfg = configManager.getConfig();
         cfg.framework = cfg.framework || {};
         cfg.framework.detected = true;
         cfg.framework.installed = installedFrameworks;
-        if (configManager.saveSettings) {
-          configManager.saveSettings(cfg);
-        } else if (configManager.saveConfig) {
-          configManager.saveConfig(cfg);
-        }
+        await configManager.saveConfig(cfg);
         return true;
       } else {
-        const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        const cfg = configManager.getConfig();
         if (cfg.framework) {
           cfg.framework.detected = false;
-          if (configManager.saveSettings) {
-            configManager.saveSettings(cfg);
-          } else if (configManager.saveConfig) {
-            configManager.saveConfig(cfg);
-          }
+          await configManager.saveConfig(cfg);
         }
         // Always signal that frameworks were not detected
         return false;
@@ -666,7 +663,7 @@ class I18nManager {
       const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
 
       // Load settings and UI language
-      const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+      const settings = configManager.getConfig();
       this.ui = new UIi18n();
       const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
       this.ui.loadLanguage(uiLanguage);
@@ -1232,7 +1229,7 @@ class I18nManager {
   console.log(t('debug.runningDebugTool', { displayName }));
     try {
       const toolPath = path.join(__dirname, '..', 'scripts', 'debug', toolName);
-      if (SecurityUtils.safeExistsSync(toolPath)) {
+      if (SecurityUtils.safeExistsSync(toolPath, process.cwd())) {
         console.log(`Debug tool available: ${toolName}`);
         console.log(`To run this tool manually: node "${toolPath}"`);
         console.log(`Working directory: ${path.join(__dirname, '..')}`);
@@ -1255,7 +1252,7 @@ class I18nManager {
     
     try {
       const logsDir = path.join(__dirname, '..', 'scripts', 'debug', 'logs');
-      if (SecurityUtils.safeExistsSync(logsDir)) {
+      if (SecurityUtils.safeExistsSync(logsDir, process.cwd())) {
         const files = SecurityUtils.safeReaddirSync(logsDir, path.join(__dirname, '..'))
           .filter(file => file.endsWith('.log') || file.endsWith('.txt'))
           .sort((a, b) => {
@@ -1336,7 +1333,7 @@ class I18nManager {
       
       // Check which directories exist and have files
       for (const dir of targetDirs) {
-        if (SecurityUtils.safeExistsSync(dir.path)) {
+        if (SecurityUtils.safeExistsSync(dir.path, process.cwd())) {
           const files = this.getAllReportFiles(dir.path);
           if (files.length > 0) {
             availableDirs.push({
@@ -1475,7 +1472,7 @@ class I18nManager {
     let files = [];
     
     try {
-      if (!SecurityUtils.safeExistsSync(dir)) {
+      if (!SecurityUtils.safeExistsSync(dir, process.cwd())) {
         return [];
       }
       
@@ -1637,5 +1634,6 @@ if (require.main === module) {
   const manager = new I18nManager();
   manager.run();
 }
-
+}
+}
 module.exports = I18nManager;

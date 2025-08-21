@@ -1,7 +1,7 @@
-# i18ntk API Reference
+# i18ntk API Reference - v2.0.0 Enterprise Security Platform
 
-**Version:** 1.10.0
-**Last Updated:** 2025-08-16
+**Version:** 2.0.0
+**Last Updated:** 2025-08-20
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
 ## Overview
@@ -117,9 +117,9 @@ npx i18ntk --security-check
 - **Real-time Progress**: Live progress tracking during verification and fixing processes
 - **Automatic Backup**: Creates timestamped backups before applying any changes
 - **Detailed Reporting**: Comprehensive reports showing missing keys by language
-- **Graceful Cancellation**: Safe cancellation options with proper cleanup**Usage Examples:**
-```bash
-# Run interactive verification
+- **Graceful Cancellation**: Safe cancellation options with proper cleanup
+
+#### Usage Examples# Run interactive verification
 node scripts/verify-translations.js
 
 # Select specific directory during interactive mode
@@ -595,11 +595,9 @@ Generated in `i18ntk-reports/`:
 - `sizing-report.html` - Performance metrics
 - `summary-report.html` - Project overview
 
-## Security API
+## Security API - v2.0.0 Enhanced Security
 
-## Security API
-
-### SecurityUtils
+### SecurityUtils - Zero-Vulnerability Certified
 
 Security utilities for safe file operations and path validation. Methods perform strict path normalization and containment checks; read/write helpers can optionally encrypt/decrypt content using AES-256-GCM when enabled (e.g., for backups or protected configs).
 
