@@ -427,7 +427,7 @@ class I18nCompletionTool {
   // Generate completion report
   async generateReport(changes, languages) {
     const projectRoot = this.config.projectRoot || process.cwd();
-    const reportsDir = path.join(projectRoot, 'i18ntk-reports');
+    const reportsDir = path.join(String(projectRoot), 'i18ntk-reports');
     const reportsDirExists = SecurityUtils.safeExists(reportsDir);
     if (!reportsDirExists) {
       SecurityUtils.safeMkdirSync(reportsDir, process.cwd(), { recursive: true });
@@ -438,23 +438,23 @@ class I18nCompletionTool {
     
     const report = {
       timestamp: new Date().toISOString(),
-      sourceLanguage: this.config.sourceLanguage,
-      sourceDir: this.sourceDir,
-      languagesProcessed: languages.length,
-      totalChanges: changes.reduce((sum, lang) => sum + lang.changes.length, 0),
-      languages: changes.map(lang => ({
-        language: lang.language,
-        changes: lang.changes.length,
-        files: lang.changes.reduce((acc, change) => {
+      sourceLanguage: String(this.config.sourceLanguage || 'en'),
+      sourceDir: String(this.sourceDir || process.cwd()),
+      languagesProcessed: Array.isArray(languages) ? languages.length : 0,
+      totalChanges: Array.isArray(changes) ? changes.reduce((sum, lang) => sum + (lang.changes?.length || 0), 0) : 0,
+      languages: Array.isArray(changes) ? changes.map(lang => ({
+        language: String(lang.language || 'unknown'),
+        changes: Array.isArray(lang.changes) ? lang.changes.length : 0,
+        files: Array.isArray(lang.changes) ? lang.changes.reduce((acc, change) => {
           if (!acc[change.file]) acc[change.file] = [];
           acc[change.file].push({
-            key: change.key,
-            value: change.value,
-            action: change.action
+            key: String(change.key || ''),
+            value: String(change.value || ''),
+            action: String(change.action || 'add')
           });
           return acc;
-        }, {})
-      }))
+        }, {}) : {}
+      })) : []
     };
     
     SecurityUtils.safeWriteFile(reportPath, JSON.stringify(report, null, 2), 'utf8');

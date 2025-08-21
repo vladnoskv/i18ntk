@@ -1058,7 +1058,7 @@ class I18nInitializer {
   // Generate detailed report
   async generateDetailedReport(results, targetLanguages) {
     try {
-      const outputDir = this.config.outputDir || path.join(process.cwd(), 'i18ntk-reports');
+      const outputDir = String(this.config.outputDir || path.join(process.cwd(), 'i18ntk-reports'));
       if (!SecurityUtils.safeExists(outputDir)) {
         SecurityUtils.safeMkdirSync(outputDir, { recursive: true });
       }
@@ -1066,13 +1066,13 @@ class I18nInitializer {
       const reportPath = path.join(outputDir, 'init-report.json');
       const report = {
         timestamp: new Date().toISOString(),
-        languages: targetLanguages,
-        results: results,
+        languages: Array.isArray(targetLanguages) ? targetLanguages : [],
+        results: results || {},
         summary: {
-          languagesProcessed: targetLanguages.length,
-          totalFiles: Object.values(results).reduce((sum, data) => sum + (data.files?.length || 0), 0),
-          totalKeys: Object.values(results).reduce((sum, data) => sum + (data.totalStats?.total || 0), 0),
-          totalMissing: Object.values(results).reduce((sum, data) => sum + (data.totalStats?.missing || 0), 0)
+          languagesProcessed: Array.isArray(targetLanguages) ? targetLanguages.length : 0,
+          totalFiles: Object.values(results || {}).reduce((sum, data) => sum + (data.files?.length || 0), 0),
+          totalKeys: Object.values(results || {}).reduce((sum, data) => sum + (data.totalStats?.total || 0), 0),
+          totalMissing: Object.values(results || {}).reduce((sum, data) => sum + (data.totalStats?.missing || 0), 0)
         }
       };
 
