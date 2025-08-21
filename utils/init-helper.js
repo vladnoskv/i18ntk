@@ -3,6 +3,7 @@ const path = require('path');
 const configManager = require('../utils/config-manager');
 const { ensureDirectory } = require('./config-helper');
 const SecurityUtils = require('./security');
+const SettingsManagerV2 = require('./settings-manager-v2');
 
 /**
  * Check if the project is properly initialized
@@ -54,17 +55,28 @@ async function checkInitialized(options = {}) {
 }
 
 /**
+ * Ensure settings directory is created
+ * @returns {Promise<string>} Path to settings directory
+ */
+async function ensureSettingsDir() {
+  return SettingsManagerV2.ensureSettingsDir();
+}
+
+/**
  * Mark the project as initialized
  * @param {Object} config - Configuration to save
  * @returns {Promise<void>}
  */
 async function markAsInitialized(config) {
-  // No longer needed as initialization status is determined by file existence
-  // The unified configuration system handles all settings
-  // This function is now a no-op to maintain backward compatibility
+  // Ensure settings directory exists
+  await ensureSettingsDir();
+  
+  // Migrate settings from old location if needed
+  SettingsManagerV2.migrateSettings();
 }
 
 module.exports = {
   checkInitialized,
-  markAsInitialized
+  markAsInitialized,
+  ensureSettingsDir
 };

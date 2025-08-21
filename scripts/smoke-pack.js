@@ -93,7 +93,7 @@ const essentialFiles = [
   'main/i18ntk-manage.js',
   'utils/i18n-helper.js',
   'utils/security.js',
-  'settings/settings-manager.js',
+  '.i18ntk-settings/settings-manager.js',
   'package.json'
 ];
 

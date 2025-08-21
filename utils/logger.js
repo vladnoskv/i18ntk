@@ -1,4 +1,4 @@
-const colors = require('./colors-new');
+const colors = require('./colors');
 
 // Enhanced logger with TTY detection and proper stream handling
 const logger = {

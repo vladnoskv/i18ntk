@@ -4,8 +4,7 @@
  */
 
 const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
+  // Text colors
   black: '\x1b[30m',
   red: '\x1b[31m',
   green: '\x1b[32m',
@@ -38,24 +37,6 @@ const colors = {
   strike: '\x1b[9m'
 };
 
-// Create color functions
-const colorFunctions = {};
-});
-
-// Support for chaining (e.g., colors.red.bgWhite.bold)
-Object.entries(colors).forEach(([name]) => {
-  colorFunctions[name] = {
-    ...colorFunctions,
-    [name]: colorFunctions[name],
-    // Add bold modifier
-    bold: (text) => `${colors.bright}${colorFunctions[name](text)}`,
-    // Add dim modifier
-    dim: (text) => `${colors.dim}${colorFunctions[name](text)}`,
-    // Add underscore modifier
-    underscore: (text) => `${colors.underscore}${colorFunctions[name](text)}`,
-  };
-});
-
 // Check if colors are supported
 const isColorSupported = !process.env.NO_COLOR && (
   process.env.FORCE_COLOR ||
@@ -63,45 +44,50 @@ const isColorSupported = !process.env.NO_COLOR && (
   process.stdout.isTTY && process.env.TERM && process.env.TERM !== 'dumb'
 );
 
-// If colors are not supported, return empty strings
-if (!isColorSupported) {
-  Object.keys(colors).forEach(key => {
-    colors[key] = '';
-  });
-  
-  Object.keys(colorFunctions).forEach(key => {
-    if (typeof colorFunctions[key] === 'function') {
-      colorFunctions[key] = (text) => text;
-    } else {
-      const obj = {};
-      Object.keys(colorFunctions[key]).forEach(subKey => {
-        obj[subKey] = (text) => text;
-      });
-      colorFunctions[key] = obj;
-    }
-  });
-}
+// Create color functions with smart TTY detection
+const colorFunctions = {};
 
-// Create the main export object
-const result = {
-  // Export colors as well in case someone needs them
-  colors,
-  // Helper to strip color codes
-  stripColor: (text) => text.replace(/\x1b\[[0-9;]*m/g, ''),
-};
-
-// Add all color functions to the export object
+// Add color functions
 Object.entries(colors).forEach(([name, code]) => {
-  result[name] = (text) => `${code}${text}${colors.reset}`;
-  
-  // Add chainable methods
-  result[name] = {
-    ...result,
-    [name]: (text) => `${code}${text}${colors.reset}`,
-    bold: (text) => `${colors.bright}${code}${text}${colors.reset}`,
-    dim: (text) => `${colors.dim}${code}${text}${colors.reset}`,
-    underscore: (text) => `${colors.underscore}${code}${text}${colors.reset}`,
+  colorFunctions[name] = (text) => {
+    if (isColorSupported && process.stdout.isTTY) {
+      return `${code}${text}${colors.reset}`;
+    }
+    return text; // No colors if not in a TTY or not supported
   };
 });
 
-module.exports = result;
+// Add chainable API
+Object.entries(colors).forEach(([name, code]) => {
+  if (!colorFunctions[name]) {
+    colorFunctions[name] = function(text) {
+      if (isColorSupported && process.stdout.isTTY) {
+        return `${code}${text}${colors.reset}`;
+      }
+      return text;
+    };
+  }
+  
+  // Enable chaining
+  Object.entries(colors).forEach(([chainName, chainCode]) => {
+    if (chainName !== name && chainName !== 'reset') {
+      colorFunctions[name][chainName] = function(text) {
+        if (isColorSupported && process.stdout.isTTY) {
+          return `${code}${chainCode}${text}${colors.reset}`;
+        }
+        return text;
+      };
+    }
+  });
+});
+
+// Add utility functions
+const stripColor = (text) => text.replace(/\x1b\[[0-9;]*m/g, '');
+
+// Export the consolidated color utility
+module.exports = {
+  ...colorFunctions,
+  colors,
+  stripColor,
+  isColorSupported
+};

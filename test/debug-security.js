@@ -1,4 +1,4 @@
-const SecurityUtils = require('./utils/security');
+const SecurityUtils = require('../utils/security');
 const fs = require('fs');
 const path = require('path');
 

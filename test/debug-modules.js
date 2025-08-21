@@ -34,7 +34,7 @@ function main() {
   test('3.', 'os');
   test('4.', './utils/security');
   test('5.', './utils/config-manager');
-  test('6.', './settings/settings-manager', 'SettingsManager');
+  test('6.', './.i18ntk-settings/settings-manager', 'SettingsManager');
   console.log('=== Debug Complete ===');
   if (failures > 0) process.exitCode = 1;
 }

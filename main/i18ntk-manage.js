@@ -33,7 +33,7 @@ const I18nValidator = require('./i18ntk-validate');
 const I18nUsageAnalyzer = require('./i18ntk-usage');
 const I18nSizingAnalyzer = require('./i18ntk-sizing');
 const I18nFixer = require('./i18ntk-fixer');
-const SettingsCLI = require('../settings/settings-cli');
+const SettingsCLI = require('../.i18ntk-settings/settings-cli');
 // const I18nDebugger = require('../scripts/debug/debugger');
 const { createPrompt, isInteractive } = require('../utils/prompt-helper');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
@@ -655,10 +655,14 @@ class I18nManager {
   async run() {
     let prompt;
     try {
+      // Parse args first to check for help before setup
+      const args = this.parseArgs();
+      
+      // Handle help immediately without setup checking
+
+      
       // Ensure setup is complete before running any operations
       await SetupEnforcer.checkSetupCompleteAsync();
-      
-      const args = this.parseArgs();
       prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
       const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
 
@@ -756,6 +760,7 @@ class I18nManager {
   }
 
   showHelp() {
+    // Use localT instead of t to avoid undefined reference
     const localT = this.ui && this.ui.t ? this.ui.t.bind(this.ui) : (key) => {
       // Fallback help text when UI is not initialized
       const helpTexts = {
@@ -780,29 +785,27 @@ class I18nManager {
       return helpTexts[key] || key;
     };
 
-    console.log(t('help.usage'));
-    console.log(t('help.interactiveMode'));
-    console.log(t('help.initProject'));
-    console.log(t('help.analyzeTranslations'));
-    console.log(t('help.validateTranslations'));
-    console.log(t('help.checkUsage'));
-    console.log(t('help.showHelp'));
-    console.log(t('help.availableCommands'));
-    console.log(t('help.initCommand'));
-    console.log(t('help.analyzeCommand'));
-    console.log(t('help.validateCommand'));
-    console.log(t('help.usageCommand'));
-    console.log(t('help.sizingCommand'));
-    console.log(t('help.completeCommand'));
-    console.log(t('help.summaryCommand'));
-    console.log(t('help.debugCommand'));
-    console.log(t('help.scannerCommand'));
+    console.log(localT('help.usage'));
+    console.log(localT('help.interactiveMode'));
+    console.log(localT('help.initProject'));
+    console.log(localT('help.analyzeTranslations'));
+    console.log(localT('help.validateTranslations'));
+    console.log(localT('help.checkUsage'));
+    console.log(localT('help.showHelp'));
+    console.log(localT('help.availableCommands'));
+    console.log(localT('help.initCommand'));
+    console.log(localT('help.analyzeCommand'));
+    console.log(localT('help.validateCommand'));
+    console.log(localT('help.usageCommand'));
+    console.log(localT('help.sizingCommand'));
+    console.log(localT('help.completeCommand'));
+    console.log(localT('help.summaryCommand'));
+    console.log(localT('help.debugCommand'));
+    console.log(localT('help.scannerCommand'));
 
     // Ensure proper exit for direct command execution
-    if (process.argv.includes('--help') || process.argv.includes('-h')) {
-      this.safeClose();
-      process.exit(0);
-    }
+    this.safeClose();
+    process.exit(0);
   }
 
 
@@ -1557,7 +1560,7 @@ class I18nManager {
         console.log(t('adminPin.accessGranted'));
       }
 
-      const SettingsCLI = require('../settings/settings-cli');
+      const SettingsCLI = require('../.i18ntk-settings/settings-cli');
       const settingsCLI = new SettingsCLI();
       await settingsCLI.run();
     } catch (error) {
@@ -1600,6 +1603,32 @@ class I18nManager {
 if (require.main === module) {
   // Handle version and help immediately before any initialization
   const args = process.argv.slice(2);
+  
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+🌍 i18n Toolkit Management (i18ntk-manage)
+
+Usage:
+  node i18ntk-manage.js [options]
+  npm run i18ntk:manage [options]
+
+Options:
+  --help, -h      Show this help message
+  --version, -v   Show version information
+  --command, -c   Run specific command directly
+                  Available commands: init, analyze, validate, usage, sizing, fix, settings
+
+Examples:
+  node i18ntk-manage.js --help
+  node i18ntk-manage.js --version
+  node i18ntk-manage.js --command=init
+  node i18ntk-manage.js --command=analyze
+
+Interactive Mode:
+  When run without arguments, starts an interactive menu system.
+`);
+    process.exit(0);
+  }
   
   if (args.includes('--version') || args.includes('-v')) {
     try {

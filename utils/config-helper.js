@@ -9,7 +9,7 @@ const path = require('path');
 const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
 const {loadTranslations} = require('./i18n-helper');
-const { SettingsManager } = require('../settings/settings-manager');
+const { SettingsManager } = require('../.i18ntk-settings/settings-manager');
 
 function getSettingsManager() {
   // Lazily memoize a single instance to avoid repeated I/O and ensure consistency
@@ -175,7 +175,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
  * @returns {object} Environment configuration
  */
 function getEnvironmentConfig() {
-  const settings = require('../settings/settings-manager').getAllSettings();
+  const settings = require('../.i18ntk-settings/settings-manager').getAllSettings();
   return {
     nodeEnv: settings.nodeEnv || 'production',
     isProduction: (settings.nodeEnv || 'production') === 'production',
@@ -437,7 +437,7 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
     }
   });
   
-  // The unified configuration system in settings/i18ntk-config.json
+  // The unified configuration system in .i18ntk-settings/i18ntk-config.json
   // will be used as the single source of truth
   // No need to create additional config files
 }

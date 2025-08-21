@@ -11,7 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { SettingsManager } = require('../settings/settings-manager');
+const { SettingsManager } = require('../.i18ntk-settings/settings-manager');
 const { pathConfig } = require('../utils/path-config');
 const SecurityUtils = require('../utils/security');
 const { getSettingsManager } = require('../utils/config-helper');
@@ -572,7 +572,7 @@ class I18nSetupManager {
         
         getSettingsManager().saveSettings(updatedSettings);
         
-        console.log(`   Configuration updated in settings/i18ntk-config.json`);
+        console.log(`   Configuration updated in .i18ntk-settings/i18ntk-config.json`);
     }
 
     async generateSetupReport() {

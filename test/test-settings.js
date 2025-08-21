@@ -5,7 +5,7 @@ console.log('=== Testing settings-manager usage ===');
 (async () => {
   try {
     console.log('1. Loading settings-manager...');
-    const configManager = require('./utils/config-manager');
+    const configManager = require('../utils/config-manager');
     console.log('✓ settings-manager loaded');
     console.log('Type:', typeof configManager);
     console.log('Has getConfig:', typeof configManager.getConfig === 'function');

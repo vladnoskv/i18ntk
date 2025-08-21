@@ -25,24 +25,35 @@
 !/config/default.json
 
 # Sensitive files
+/.i18ntk-settings/
 /settings/
 /backups/
 /security-scan-*.json
 *.encrypted
 *.vault
+*.backup
+*.log
 
-# Documentation (handled by package.json files)
+# Documentation and development files
 /docs/
+/test-projects/
+/benchmarks/
 CHANGELOG.md
 SECURITY.md
-CONTRIBUTING.md
-README.md.bak
+BACKUP_REFERENCE.md
+RELEASE-v2.0.0.md
+TODO_ROADMAP.md
 *.md.backup
 
-# Build and distribution
+# Build and development artifacts
 /dist/
 /build/
 *.tsbuildinfo
+.cache/
+.nyc_output/
+.coverage/
+.temp/
+.tmp/
 
 # Editor directories and files
 .DS_Store

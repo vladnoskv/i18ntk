@@ -15,7 +15,7 @@ We take all security concerns seriously. If you discover a vulnerability in i18n
 
 **How to Report:**
 
-Please send an email to [security@i18ntk.com](mailto:security@i18ntk.com) with the following information:
+Please submit an issue on GitHub.
 
 - **Description of the vulnerability:** Provide a clear and concise description of the vulnerability, including its potential impact.
 - **Steps to reproduce:** Detail the steps required to reproduce the vulnerability. This helps us quickly understand and verify the issue.

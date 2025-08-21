@@ -9,13 +9,13 @@
 localtest
 
 # Security and configuration files
-settings/.i18ntk-admin-config.json
+.i18ntk-settings/.i18ntk-admin-config.json
 *.backup
 *.tmp
 utils\missing-key-validator.js
-settings\admin-config.json
-settings\i18ntk-config.json
-settings\language-config.json
+.i18ntk-settings\admin-config.json
+.i18ntk-settings\i18ntk-config.json
+.i18ntk-settings\language-config.json
 
 
 # Logs
@@ -108,7 +108,7 @@ security-scan-*.json
 ## Files Exposed
 
 utils/missing-key-validator.js
-settings/.i18ntk-admin-config.json
-settings/admin-config.json
-settings/i18ntk-config.json
-settings/language-config.json
+.i18ntk-settings/.i18ntk-admin-config.json
+.i18ntk-settings/admin-config.json
+.i18ntk-settings/i18ntk-config.json
+.i18ntk-settings/language-config.json

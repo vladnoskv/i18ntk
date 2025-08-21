@@ -3,17 +3,16 @@ const SecurityUtils = require('../utils/security');
 const path = require('path');
 const os = require('os');
 const { I18nError } = require('../utils/i18n-helper');
-const SettingsManagerV2 = require('../utils/settings-manager-v2');
 
 class SettingsManager {
     constructor() {
-        // Use configurable settings directory
-        this.settingsDir = SettingsManagerV2.getSettingsDir();
-        this.configFile = path.join(this.settingsDir, 'i18ntk-config.json');
-        this.backupDir = path.join(process.cwd(), 'backups');
+        // Always use project config as the single source of truth
+        this.configDir = path.join(process.cwd(), '.i18ntk-settings');
+        this.configFile = path.join(this.configDir, 'i18ntk-config.json');
+        this.backupDir = path.join(this.configDir, 'backups');
         
         // Package config template for reference
-        this.packageConfigFile = path.join(__dirname, 'i18ntk-config.json');
+        this.packageConfigFile = path.join(__dirname, '..', 'settings', 'i18ntk-config.json');
         
         this.defaultConfig = {
             "version": "1.9.1",
@@ -34,7 +33,7 @@ class SettingsManager {
                 "main": "./main",
                 "utils": "./utils",
                 "scripts": "./scripts",
-                "settings": "./settings",
+                "settings": "./.i18ntk-settings",
                 "uiLocales": "./ui-locales"
             },
             "processing": {

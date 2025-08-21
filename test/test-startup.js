@@ -16,7 +16,7 @@ console.log('✓ path loaded');
 
 console.log('3. Testing security...');
 try {
-  const SecurityUtils = require('./utils/security');
+  const SecurityUtils = require('../utils/security');
   console.log('✓ security loaded');
 } catch (e) {
   failures++;
@@ -25,9 +25,10 @@ try {
 
 console.log('4. Testing settings-manager...');
 try {
-  const configManager = require('./settings/settings-manager');
+  const SettingsManager = require('../.i18ntk-settings/settings-manager');
+  const settingsManager = new SettingsManager();
   console.log('✓ settings-manager loaded');
-  console.log('Config dir:', configManager.configDir);
+  console.log('Config dir:', settingsManager.configDir);
 } catch (e) {
   failures++;
   console.error('✗ settings-manager failed:', verbose ? e.stack : e.message);
@@ -35,7 +36,7 @@ try {
 
 console.log('5. Testing config-manager...');
 try {
-  const configManager = require('./utils/config-manager');
+  const configManager = require('../utils/config-manager');
   console.log('✓ config-manager loaded');
 } catch (e) {
   failures++;
@@ -44,7 +45,7 @@ try {
 
 console.log('6. Testing init-helper...');
 try {
-  const { checkInitialized } = require('./utils/init-helper');
+  const { checkInitialized } = require('../utils/init-helper');
   console.log('✓ init-helper loaded');
 } catch (e) {
   failures++;

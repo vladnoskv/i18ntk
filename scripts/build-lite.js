@@ -65,7 +65,7 @@ class LiteBuild {
     const dirs = [
       'main',
       'utils',
-      'settings',
+      '.i18ntk-settings',
       'ui-locales/en',
       'scripts'
     ];
@@ -91,9 +91,9 @@ class LiteBuild {
       { src: 'utils/cli-helper.js', dest: 'utils/cli-helper.js' },
       
       // Settings
-      { src: 'settings/i18ntk-config.json', dest: 'settings/i18ntk-config.json' },
-      { src: 'settings/settings-manager.js', dest: 'settings/settings-manager.js' },
-      { src: 'settings/settings-cli.js', dest: 'settings/settings-cli.js' },
+      { src: '.i18ntk-settings/i18ntk-config.json', dest: '.i18ntk-settings/i18ntk-config.json' },
+      { src: '.i18ntk-settings/settings-manager.js', dest: '.i18ntk-settings/settings-manager.js' },
+      { src: '.i18ntk-settings/settings-cli.js', dest: '.i18ntk-settings/settings-cli.js' },
       
       // Scripts
       { src: 'scripts/build-lite.js', dest: 'scripts/build-lite.js' },

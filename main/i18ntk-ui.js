@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const SecurityUtils = require('../utils/security');
-const { SettingsManager } = require('../settings/settings-manager');
+const { SettingsManager } = require('../.i18ntk-settings/settings-manager');
 const legacyConfigManager = require('../utils/config-manager');
 
 // Lazy initialization for configManager

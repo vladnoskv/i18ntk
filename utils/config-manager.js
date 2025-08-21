@@ -382,11 +382,11 @@ async function migrateLegacyIfNeeded(baseCfg) {
         // Best-effort removal of legacy file to prevent future use
         try { SecurityUtils.safeDeleteSync(LEGACY_CONFIG_PATH); } catch (_) {}
         // Deprecation notice
-        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to settings/i18ntk-config.json. Please commit the settings/ directory to your project.');
+        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to .i18ntk-settings/i18ntk-config.json. Please commit the .i18ntk-settings/ directory to your project.');
         return merged;
       } catch (_) {
         // If write fails, fall back to in-memory config without deleting legacy
-        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Using migrated settings in memory; failed to persist to settings/. Ensure the project has write permissions.');
+        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Using migrated settings in memory; failed to persist to .i18ntk-settings/. Ensure the project has write permissions.');
         return merged;
       }
     }

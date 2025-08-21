@@ -613,7 +613,7 @@ i18ntk/
 ├── utils/                  # Core utilities
 │   ├── framework-detector.js
 │   └── logger.js
-├── settings/               # Configuration
+├── .i18ntk-settings/       # Configuration (auto-created)
 ├── package.json            # Package info
 └── README.md               # Documentation
 ```

@@ -18,6 +18,7 @@ const path = require('path');
 const cliHelper = require('../utils/cli-helper');
 const JsonOutput = require('../utils/json-output');
 const SecurityUtils = require('../utils/security');
+const { getGlobalReadline } = require('../utils/cli');
 
 class LocaleOptimizer {
   constructor() {

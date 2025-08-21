@@ -132,7 +132,8 @@ class SecurityUtils {
       // Ensure directory exists if requested
       if (createIfNotExists) {
         const dir = path.dirname(normalizedPath);
-        if (!SecurityUtils.safeExistsSync(dir)) {
+        // Use native fs.existsSync to avoid circular dependency
+        if (!fs.existsSync(dir)) {
           SecurityUtils.safeMkdirSync(dir, null, { recursive: true });
         }
       }

@@ -14,11 +14,11 @@ try {
   console.log('✓ path loaded');
   
   console.log('Requiring security...');
-  const SecurityUtils = require('./utils/security');
+  const SecurityUtils = require('../utils/security');
   console.log('✓ security loaded');
   
   console.log('Requiring config-manager...');
-  const configManager = require('./utils/config-manager');
+  const configManager = require('../utils/config-manager');
   console.log('✓ config-manager loaded');
   
   console.log('All modules loaded successfully!');

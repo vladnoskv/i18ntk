@@ -16,12 +16,12 @@ class PrepublishCleaner {
         this.directories = [
             'scripts/debug/logs',
             'scripts/debug/reports',
-            'settings/backups',
+            '.i18ntk-settings/backups',
             'i18ntk-reports',
             'reports'
         ];
         this.files = [
-            'settings/.i18n-admin-config.json',
+            '.i18ntk-settings/.i18ntk-admin-config.json',
             'test-*.json',
             'debug-*.log',
             'npm-debug.log',
@@ -42,9 +42,9 @@ class PrepublishCleaner {
             'main/i18ntk-ui.js',
             'utils/i18n-helper.js',
             'utils/security.js',
-            'settings/settings-manager.js',
-            'settings/settings-cli.js',
-            'settings/i18ntk-config.json'
+            '.i18ntk-settings/settings-manager.js',
+            '.i18ntk-settings/settings-cli.js',
+            '.i18ntk-settings/i18ntk-config.json'
         ];
         
         // Essential locale files
@@ -349,7 +349,7 @@ class PrepublishCleaner {
     }
       
       async resetSecuritySettings() {
-        const configPath = path.join(require('../settings/settings-manager').configDir, '.i18n-admin-config.json');
+        const configPath = path.join(require('../.i18ntk-settings/settings-manager').configDir, '.i18ntk-admin-config.json');
         
         if (SecurityUtils.safeExistsSync(configPath)) {
             const defaultConfig = {
@@ -363,7 +363,7 @@ class PrepublishCleaner {
                 lockedUntil: null
             };
             
-            SecurityUtils.safeWriteFileSync(configPath, JSON.stringify(defaultConfig, null, 2), require('../settings/settings-manager').configDir);
+            SecurityUtils.safeWriteFileSync(configPath, JSON.stringify(defaultConfig, null, 2), require('../.i18ntk-settings/settings-manager').configDir);
             this.log('Reset security settings to defaults');
         }
     }

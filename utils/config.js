@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const SecurityUtils = require('./security');
-const SettingsManager = require('../settings/settings-manager');
+const SettingsManager = require('../.i18ntk-settings/settings-manager');
 let _settingsManagerSingleton;
 
 function getSettingsManager() {

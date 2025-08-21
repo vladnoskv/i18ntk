@@ -21,6 +21,7 @@ const { loadTranslations, t } = require('../utils/i18n-helper');
 const { detectFramework } = require('../utils/framework-detector');
 const { getFormatAdapter } = require('../utils/format-manager');
 const { pathConfig } = require('../utils/path-config');
+const SettingsManagerV2 = require('../utils/settings-manager-v2');
 // Ensure UIi18n is available for this initializer class
 const UIi18n = require('./i18ntk-ui');
 loadTranslations(process.env.I18NTK_LANG);
@@ -1151,7 +1152,10 @@ class I18nInitializer {
       }
       
       // Setup is now handled centrally by config manager
-
+      
+      // Ensure settings directory is created
+      SettingsManagerV2.ensureSettingsDir();
+      
       // Override config with command line arguments
       if (args.languages) {
         this.config.defaultLanguages = args.languages;

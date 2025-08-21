@@ -165,7 +165,7 @@ const SecurityUtils = require('./security');
           const path = require('path');
           
           // Try to determine current language from settings
-          const { getSettingsManager } = require('../settings/settings-cli');
+          const { getSettingsManager } = require('../.i18ntk-settings/settings-cli');
           const settingsManager = getSettingsManager();
           const settings = settingsManager.loadSettings();
           const currentLang = settings.uiLanguage || 'en';

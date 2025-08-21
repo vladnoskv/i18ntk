@@ -11,7 +11,7 @@ const configManager = require('../utils/config-manager');
 class AdminAuth {
   constructor() {
     const packageRoot = path.resolve(__dirname, '..');
-    this.configPath = path.join(packageRoot, '.i18n-admin-config.json');
+    this.configPath = path.join(packageRoot, '.i18ntk-settings', '.i18ntk-admin-config.json');
 
     // Get settings from config manager
     const settings = configManager.getConfig();

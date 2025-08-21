@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const SetupEnforcer = require('../utils/setup-enforcer');
-const SettingsCLI = require('../settings/settings-cli');
+const SettingsCLI = require('../.i18ntk-settings/settings-cli');
 
 (async () => {
   try {

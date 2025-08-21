@@ -1,8 +1,9 @@
-const readline = require('node:readline');
-const { stdin: input, stdout: output } = require('node:process');
+const readline = require('readline');
+const { logger } = require('./logger');
 
 /**
- * Simple prompt utility for CLI interactions
+ * Enhanced prompt utility for CLI interactions
+ * Consolidated from prompt.js, prompt-new.js, and prompt-fixed.js
  */
 class Prompt {
   constructor() {
@@ -26,16 +27,29 @@ class Prompt {
 
   async confirm(questionText, defaultValue = false) {
     const answer = await this.question(`${questionText} (${defaultValue ? 'Y/n' : 'y/N'}) `);
-    const answer = await this.question(`${message} (${defaultValue ? 'Y/n' : 'y/N'}): `);
-    return answer ? answer.toLowerCase().startsWith('y') : defaultValue;
-  }
-
-  async select(message, choices, defaultIndex = 0) {
-    logger.log(`\n${message}:`);
-  async confirm(question, defaultValue = false) {
-    const answer = await this.question(`${question} (${defaultValue ? 'Y/n' : 'y/N'}) `);
     if (answer === '') return defaultValue;
     return /^y|yes$/i.test(answer);
+  }
+
+  async select(questionText, choices, defaultIndex = 0) {
+    logger.log(`\n${questionText}:`);
+    choices.forEach((choice, index) => {
+      logger.log(`  ${index + 1}. ${choice}`);
+    });
+
+    while (true) {
+      const answer = await this.question(`\nSelect an option (1-${choices.length}): `);
+      const selected = parseInt(answer, 10) - 1;
+      if (!isNaN(selected) && selected >= 0 && selected < choices.length) {
+        return selected;
+      }
+      logger.log('Invalid selection. Please try again.');
+    }
+  }
+
+  async input(questionText, defaultValue = '') {
+    const answer = await this.question(`${questionText}${defaultValue ? ` [${defaultValue}]` : ''}: `);
+    return answer || defaultValue;
   }
 
   /**
@@ -64,13 +78,6 @@ class Prompt {
       
       console.log('Invalid selection. Please try again.');
     }
-  }
-
-  /**
-   * Close the readline interface
-   */
-  close() {
-    this.rl.close();
   }
 }
 

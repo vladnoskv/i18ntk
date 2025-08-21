@@ -38,7 +38,7 @@ const { getExtractor } = require('../utils/extractor-manager');
 const configManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
-const { SettingsManager } = require('../settings/settings-manager');
+const { SettingsManager } = require('../.i18ntk-settings/settings-manager');
 
 // Lazy initialization for settingsManager
 let _settingsManager = null;

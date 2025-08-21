@@ -21,8 +21,8 @@ class PathEncryptionError extends Error {
     this.name = 'PathEncryptionError';
     this.context = context;
     Error.captureStackTrace(this, PathEncryptionError);
-
-}}
+  }
+}
 
 class PathEncryption {
   constructor() {
@@ -44,6 +44,7 @@ class PathEncryption {
   generateKey() {
     return crypto.randomBytes(KEY_LENGTH).toString('hex');
   }
+
   /**
    * Derive a system-specific key using scrypt
    * @returns {string} Hex-encoded 32-byte key
@@ -51,7 +52,7 @@ class PathEncryption {
   deriveSystemKey() {
     const hostname = require('os').hostname();
     const username = require('os').userInfo().username;
-    
+
     // Add random entropy to make the key unpredictable
     const entropy = crypto.randomBytes(32).toString('hex');
 
@@ -60,36 +61,35 @@ class PathEncryption {
       .update(`${hostname}-${username}-${entropy}-i18ntk`)
       .digest()  // Returns Buffer, not hex string
       .slice(0, 16);  // Use 16 bytes for salt
-    
+
     // Derive key using scrypt
     const derivedKey = crypto.scryptSync(
       `${hostname}${username}`,
       salt,
       KEY_LENGTH
     );
-    
+
     return derivedKey.toString('hex');
-  }
   }
 
   /**
    * Load or create encryption key
    * @returns {string} Encryption key
    */
-  getOrCreateKey(); {
+  getOrCreateKey() {
     if (this.keyCache.has('main')) {
       return this.keyCache.get('main');
-    }}
+    }
 
     let key;
-    
+
     // Try to load existing key
     if (fs.existsSync(this.configPath)) {
       try {
         const keyData = fs.readFileSync(this.configPath, 'utf8');
         const parsed = JSON.parse(keyData);
         key = parsed.key;
-        
+
         // Validate key format
         if (!key || !/^[a-f0-9]{64}$/i.test(key)) {
           throw new Error('Invalid key format');
@@ -107,7 +107,7 @@ class PathEncryption {
       // Generate new key if none exists
       key = this.generateKey();
     }
-    
+
     // Save key securely
     try {
       const keyData = JSON.stringify({ key, created: new Date().toISOString() });
@@ -126,7 +126,7 @@ class PathEncryption {
 
     this.keyCache.set('main', key);
     return key;
-  
+  }
 
   /**
    * Encrypt a file path
@@ -134,10 +134,10 @@ class PathEncryption {
    * @param {string} [key] - Optional encryption key (uses system key if not provided)
    * @returns {string} Encrypted path as JSON string
    */
-  encryptPath(filePath, key = null); {
+  encryptPath(filePath, key = null) {
     if (!filePath || typeof filePath !== 'string') {
       throw new PathEncryptionError('Invalid file path provided');
-    }}
+    }
 
     const encryptionKey = key || this.getOrCreateKey();
     const iv = crypto.randomBytes(IV_LENGTH);
@@ -150,9 +150,9 @@ class PathEncryption {
     try {
       let encrypted = cipher.update(filePath, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       const authTag = cipher.getAuthTag();
-      
+
       const result = {
         encrypted,
         iv: iv.toString('hex'),
@@ -161,12 +161,12 @@ class PathEncryption {
         version: 1,
         type: 'path'
       };
-      
+
       return JSON.stringify(result);
     } catch (error) {
       throw new PathEncryptionError('Failed to encrypt path', { error: error.message });
     }
-  
+  }
 
   /**
    * Decrypt a file path
@@ -174,30 +174,31 @@ class PathEncryption {
    * @param {string} [key] - Optional decryption key (uses system key if not provided)
    * @returns {string} Decrypted file path
    */
-  decryptPath(encryptedData, key = null); {
+  decryptPath(encryptedData, key = null) {
     if (!encryptedData || typeof encryptedData !== 'string') {
       throw new PathEncryptionError('Invalid encrypted data provided');
-    }}
-    
+    }
+
     try {
       const data = JSON.parse(encryptedData);
-      
+
       // Validate data structure
       if (!data.encrypted || !data.iv || !data.authTag) {
         throw new PathEncryptionError('Invalid encrypted data structure');
       }
-      
+
+      const encryptionKey = key || this.getOrCreateKey();
       const decipher = crypto.createDecipheriv(
         ALGORITHM,
         Buffer.from(encryptionKey, 'hex'),
         Buffer.from(data.iv, 'hex')
       );
-      
+
       decipher.setAuthTag(Buffer.from(data.authTag, 'hex'));
-      
+
       let decrypted = decipher.update(data.encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
-      
+
       return decrypted;
     } catch (error) {
       if (error instanceof PathEncryptionError) {
@@ -205,34 +206,35 @@ class PathEncryption {
       }
       throw new PathEncryptionError('Failed to decrypt path', { error: error.message });
     }
-
+  }
 
   /**
    * Check if a string is encrypted path data
    * @param {string} data - The data to check
    * @returns {boolean} True if encrypted path data
    */
-  isEncryptedPath(data); {
+  isEncryptedPath(data) {
     if (!data || typeof data !== 'string') {
       return false;
     }
-    
+
     try {
       const parsed = JSON.parse(data);
-      return parsed && 
-             typeof parsed === 'object' && 
-             parsed.type === 'path' && 
-             parsed.encrypted && 
-             parsed.iv && 
+      return parsed &&
+             typeof parsed === 'object' &&
+             parsed.type === 'path' &&
+             parsed.encrypted &&
+             parsed.iv &&
              parsed.authTag;
     } catch {
       return false;
-    }}
+    }
+  }
 
   /**
    * Securely clear the encryption key from memory
    */
-  clearKey(); {
+  clearKey() {
     this.keyCache.delete('main');
     if (fs.existsSync(this.configPath)) {
       try {
@@ -240,16 +242,17 @@ class PathEncryption {
       } catch (error) {
         console.warn('Failed to delete encryption key file:', error.message);
       }
-    }}
+    }
+  }
 
   /**
    * Get path information without revealing sensitive data
    * @param {string} pathOrEncrypted - Either a plain path or encrypted path
    * @returns {Object} Path information
    */
-  getPathInfo(pathOrEncrypted); {
+  getPathInfo(pathOrEncrypted) {
     const isEncrypted = this.isEncryptedPath(pathOrEncrypted);
-    
+
     if (isEncrypted) {
       try {
         const decrypted = this.decryptPath(pathOrEncrypted);
@@ -282,6 +285,8 @@ class PathEncryption {
       };
     }
   }
+}
+
 // Create singleton instance
 const pathEncryption = new PathEncryption();
 
