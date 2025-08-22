@@ -189,10 +189,10 @@ async function ensureInitializedOrExit(prompt) {
   let detectedLanguage = 'generic';
   let detectedFramework = 'generic';
 
-  if (SecurityUtils.safeExists(packageJsonPath)) {
+  if (fs.existsSync(packageJsonPath)) {
     detectedLanguage = 'javascript';
     try {
-      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       const deps = { 
         ...(packageJson.dependencies || {}), 
         ...(packageJson.devDependencies || {}),
@@ -242,11 +242,11 @@ async function ensureInitializedOrExit(prompt) {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (SecurityUtils.safeExistsSync(pyprojectPath, process.cwd()) || SecurityUtils.safeExistsSync(requirementsPath, process.cwd())) {
+  } else if (fs.existsSync(pyprojectPath) || fs.existsSync(requirementsPath)) {
     detectedLanguage = 'python';
     try {
-      if (SecurityUtils.safeExistsSync(requirementsPath, process.cwd())) {
-        const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
+      if (fs.existsSync(requirementsPath)) {
+        const requirements = fs.readFileSync(requirementsPath, 'utf8');
         if (requirements.includes('django')) detectedFramework = 'django';
         else if (requirements.includes('flask')) detectedFramework = 'flask';
         else if (requirements.includes('fastapi')) detectedFramework = 'fastapi';
@@ -255,13 +255,13 @@ async function ensureInitializedOrExit(prompt) {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (SecurityUtils.safeExistsSync(goModPath, process.cwd())) {
+  } else if (fs.existsSync(goModPath)) {
     detectedLanguage = 'go';
     detectedFramework = 'generic';
-  } else if (SecurityUtils.safeExistsSync(pomPath, process.cwd())) {
+  } else if (fs.existsSync(pomPath)) {
     detectedLanguage = 'java';
     try {
-      const pomContent = SecurityUtils.safeReadFileSync(pomPath, 'utf8');
+      const pomContent = fs.readFileSync(pomPath, 'utf8');
       if (pomContent.includes('spring-boot')) detectedFramework = 'spring-boot';
       else if (pomContent.includes('spring')) detectedFramework = 'spring';
       else if (pomContent.includes('quarkus')) detectedFramework = 'quarkus';
@@ -269,10 +269,10 @@ async function ensureInitializedOrExit(prompt) {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (SecurityUtils.safeExistsSync(composerPath, process.cwd())) {
+  } else if (fs.existsSync(composerPath)) {
     detectedLanguage = 'php';
     try {
-      const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
+      const composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
       const deps = composer.require || {};
       
       if (deps['laravel/framework']) detectedFramework = 'laravel';
@@ -1633,7 +1633,7 @@ Interactive Mode:
   if (args.includes('--version') || args.includes('-v')) {
     try {
       const packageJsonPath = path.resolve(__dirname, '../package.json');
-      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       const versionInfo = packageJson.versionInfo || {};
       
       console.log(`\n🌍 i18n Toolkit (i18ntk)`);

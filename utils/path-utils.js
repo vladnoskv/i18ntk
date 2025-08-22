@@ -39,12 +39,22 @@ function resolvePaths(base, paths) {
 function getPackageRoot() {
   // Start from current file and traverse up to find package.json
   let currentDir = __dirname;
-  while (currentDir !== path.parse(currentDir).root) {
+  const maxDepth = 10; // Prevent infinite loops
+  let depth = 0;
+  
+  while (currentDir !== path.parse(currentDir).root && depth < maxDepth) {
     const packageJsonPath = path.join(currentDir, 'package.json');
-    if (SecurityUtils.safeExistsSync(packageJsonPath)) {
-      return currentDir;
+    try {
+      if (fs.existsSync(packageJsonPath)) {
+        return currentDir;
+      }
+    } catch (error) {
+      // Handle any file system errors gracefully
+      console.warn('Error checking package.json:', error.message);
+      break;
     }
     currentDir = path.dirname(currentDir);
+    depth++;
   }
   // Fallback to current directory
   return __dirname;

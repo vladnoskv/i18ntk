@@ -338,11 +338,12 @@ function applyEnvOverrides(cfg) {
 
 function tryReadJson(filePath) {
   try {
-    if (!SecurityUtils.safeExistsSync(filePath)) {
+    // Use native fs.existsSync to avoid SecurityUtils circular dependencies
+    if (!fs.existsSync(filePath)) {
       return null;
     }
     
-    const data = SecurityUtils.safeReadFileSync(filePath, 'utf8', process.cwd());
+    const data = fs.readFileSync(filePath, 'utf8');
     if (!data || data.trim() === '') {
       console.warn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
       return null;
@@ -355,7 +356,7 @@ function tryReadJson(filePath) {
       // Create a backup of the corrupted file
       const backupPath = `${filePath}.corrupted-${Date.now()}.bak`;
       try {
-        SecurityUtils.safeWriteFileSync(backupPath, data, process.cwd());
+        fs.writeFileSync(backupPath, data);
         console.warn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
       } catch (backupError) {
         console.error(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
@@ -430,8 +431,8 @@ async function saveConfig(cfg = currentConfig) {
   
   try {
     // Ensure settings directory exists
-    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
-      SecurityUtils.safeMkdirSync(PROJECT_SETTINGS_DIR, null, { recursive: true });
+    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
     }
     
     // Validate PROJECT_CONFIG_PATH is valid
@@ -439,17 +440,9 @@ async function saveConfig(cfg = currentConfig) {
       throw new Error(`Invalid config path: ${PROJECT_CONFIG_PATH}`);
     }
     
-    // Save configuration to project settings using SecurityUtils
+    // Save configuration to project settings using native fs
     const configToSave = clone(cfg);
-    const success = SecurityUtils.safeWriteFileSync(
-      PROJECT_CONFIG_PATH, 
-      JSON.stringify(configToSave, null, 2), 
-      PROJECT_SETTINGS_DIR
-    );
-    
-    if (!success) {
-      throw new Error('Failed to write configuration file');
-    }
+    fs.writeFileSync(PROJECT_CONFIG_PATH, JSON.stringify(configToSave, null, 2));
     
     // Update in-memory config
     currentConfig = configToSave;
@@ -463,8 +456,8 @@ async function saveConfig(cfg = currentConfig) {
 function getConfig() {
   try {
     // Ensure settings directory exists
-    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
-      SecurityUtils.safeMkdirSync(PROJECT_SETTINGS_DIR, null, { recursive: true });
+    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
     }
 
     // Validate paths are valid strings
@@ -478,24 +471,24 @@ function getConfig() {
     // No need to check here - handled by getUnifiedConfig
 
     // Check if config file exists
-    if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
-      const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, 'utf8'));
+    if (fs.existsSync(PROJECT_CONFIG_PATH)) {
+      const config = JSON.parse(fs.readFileSync(PROJECT_CONFIG_PATH, 'utf8'));
       const resolved = resolvePaths(config);
       return resolved || config; // Fallback to unresolved config if resolvePaths fails
     }
 
     // Check for legacy config for migration
-    if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
+    if (fs.existsSync(LEGACY_CONFIG_PATH)) {
       console.log('📦 Migrating legacy configuration...');
-      const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, 'utf8'));
+      const legacyConfig = JSON.parse(fs.readFileSync(LEGACY_CONFIG_PATH, 'utf8'));
       const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
       saveConfig(migratedConfig);
       
       // Clean up legacy config
       try {
-        SecurityUtils.safeUnlinkSync(LEGACY_CONFIG_PATH);
-        if (SecurityUtils.safeReaddirSync(LEGACY_CONFIG_DIR).length === 0) {
-          SecurityUtils.safeRmdirSync(LEGACY_CONFIG_DIR);
+        fs.unlinkSync(LEGACY_CONFIG_PATH);
+        if (fs.readdirSync(LEGACY_CONFIG_DIR).length === 0) {
+          fs.rmdirSync(LEGACY_CONFIG_DIR);
         }
       } catch (cleanupError) {
         // Ignore cleanup errors
