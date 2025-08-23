@@ -1,17 +1,17 @@
 {
-    "version": "1.9.1",
+    "version": "1.10.1",
     "language": "en",
     "uiLanguage": "en",
     "theme": "dark",
-    "projectRoot": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0",
+    "projectRoot": "./",
     "sourceDir": "./locales",
     "i18nDir": "./i18n",
     "outputDir": "./i18ntk-reports",
     "setup": {
-        "completed": true,
-        "completedAt": "2025-08-23T02:47:14.780Z",
-        "version": "1.10.0",
-        "setupId": "setup_1755917234782_9fw8fh2nz"
+        "completed": false,
+        "completedAt": null,
+        "version": null,
+        "setupId": null
     },
     "framework": {
         "detected": false,
@@ -279,50 +279,5 @@
                 "getServerSideProps\\\\s*\\\\([^)]*\\\\)"
             ]
         }
-    },
-    "detectedLanguage": "javascript",
-    "detectedFramework": "generic",
-    "optimization": {
-        "mode": "extreme",
-        "cacheEnabled": true,
-        "batchSize": 1000,
-        "parallelProcessing": true,
-        "treeShaking": true
-    },
-    "prerequisites": {
-        "nodeVersion": "v22.14.0",
-        "nodeVersionValid": true,
-        "hasPackageJson": true,
-        "hasLocales": true,
-        "hasGit": true,
-        "hasNpm": true,
-        "hasPython": false,
-        "hasJava": false,
-        "hasGo": false,
-        "hasPhp": false,
-        "hasI18nLibrary": false
-    },
-    "setupReport": {
-        "timestamp": "2025-08-23T02:47:14.790Z",
-        "setup": {
-            "language": "javascript",
-            "framework": "generic",
-            "sourceDirectory": "./locales",
-            "optimizationMode": "extreme",
-            "prerequisitesMet": 5,
-            "totalPrerequisites": 10
-        },
-        "recommendations": [
-            {
-                "type": "info",
-                "message": "Consider installing an i18n library for better integration",
-                "action": "npm install i18next"
-            }
-        ],
-        "nextSteps": [
-            "Run i18ntk-init to initialize your project",
-            "Run i18ntk-analyze to scan for translations",
-            "Run i18ntk-validate to validate your setup"
-        ]
     }
 }
