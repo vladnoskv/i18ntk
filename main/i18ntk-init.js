@@ -736,7 +736,7 @@ class I18nInitializer {
           }
           const confirm = await askHidden(t('init.confirmAdminPin'));
           if (pin !== confirm) {
-            console.log(t('init.pinsDoNotMatch'));
+            console.log(t('init.pinMismatch'));
             pin = null;
           }
         } while (!pin);

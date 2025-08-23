@@ -4,7 +4,7 @@
  * This module provides a single readline interface instance to prevent
  * multiple instances and simplify cleanup across the application.
  * 
- * @version 1.9.0, 1.8.3
+ * @version 1.10.0
  * @since 2025-08-08
  */
 

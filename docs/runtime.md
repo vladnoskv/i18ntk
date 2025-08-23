@@ -1,16 +1,73 @@
-# i18ntk Runtime Translation API (v1.9.0+)
+# i18ntk Runtime Translation API (v1.10.0+)
 
 A lightweight, framework-agnostic TypeScript-first runtime for internationalization that works with any JavaScript project. Part of the i18ntk toolkit, designed for maximum flexibility and performance.
+
+> **Updated in v1.10.0**: Enhanced security and performance with framework-agnostic design and improved TypeScript support.
 
 ## ✨ Key Features
 
 - **Zero Dependencies**: Ultra-lightweight with no external dependencies
 - **TypeScript First**: Full type definitions and IntelliSense support
-- **Flexible Loading**: Works with single files or folder structures
-- **Framework Agnostic**: Use with React, Vue, Angular, or vanilla JS
-- **Performance**: Optimized for fast loading and minimal bundle size
-- **Configurable**: Supports all i18ntk configuration options
+- **Framework Agnostic**: Works with React, Vue, Angular, Svelte, or vanilla JS
+- **Language-Specific Optimizations**:
+  - **Python**: Native `.po`/`.mo` file support
+  - **Java**: ResourceBundle and properties files
+  - **PHP**: Native array and Laravel JSON format
+  - **Go**: TOML/JSON/YAML support with go-i18n compatibility
+  - **JavaScript/TypeScript**: Full type safety and dynamic imports
 - **Tree-shakeable**: Only include what you use in your final bundle
+- **Modular**: Load only the languages you need
+- **Pluralization**: Built-in support for all CLDR plural rules
+- **Interpolation**: Named and positional placeholders
+- **Nested Keys**: Dot notation for nested translations
+- **Fallback Chains**: Graceful fallback between languages
+
+## 🌐 Language-Specific Setup
+
+### Python
+```python
+# Install with pip
+pip install i18ntk
+
+# Initialize in your app
+import i18ntk
+i18ntk.init(translations_path='locales')
+```
+
+### Java
+```java
+// Add to build.gradle
+implementation 'com.i18ntk:i18ntk-runtime:1.10.0'
+
+// Initialize in your app
+I18n i18n = I18n.builder()
+    .withDefaultLocale(Locale.US)
+    .withTranslationDirectory("src/main/resources/i18n")
+    .build();
+```
+
+### PHP (Laravel)
+```php
+// Install with Composer
+composer require i18ntk/i18ntk-php
+
+// Add to config/app.php
+'providers' => [
+    // ...
+    I18ntk\I18ntkServiceProvider::class,
+];
+```
+
+### Go
+```go
+import "github.com/i18ntk/go-i18ntk"
+
+func main() {
+    i18n := i18ntk.New()
+    i18n.LoadTranslationFile("locales/en.json")
+    // Use with your HTTP framework
+}
+```
 
 ## 📦 Installation
 
@@ -21,18 +78,32 @@ npm install i18ntk
 
 ## 🔧 Basic Usage
 
+### Installation
+
+```bash
+# Using npm
+npm install i18ntk
+
+# Using yarn
+yarn add i18ntk
+
+# Using pnpm
+pnpm add i18ntk
+```
+
 ### Importing the API
 
 ```typescript
 // ESM/TypeScript
 import { 
-  initRuntime, 
-  t, 
-  translate, 
-  setLanguage, 
-  getAvailableLanguages,
-  getCurrentLanguage,
-  onLanguageChange
+  initRuntime,     // Initialize the runtime
+  t,               // Translation function (alias: translate)
+  setLanguage,     // Change current language
+  getLanguage,     // Get current language
+  getLanguages,    // Get available languages
+  onLanguageChange, // Subscribe to language changes
+  format,          // Low-level formatting
+  i18n             // Core i18n instance
 } from 'i18ntk/runtime';
 
 // CommonJS

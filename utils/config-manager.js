@@ -39,6 +39,12 @@ const DEFAULT_CONFIG = {
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
+  "setup": {
+    "completed": false,
+    "completedAt": null,
+    "version": null,
+    "setupId": null
+  },
   "framework": {
     "preference": "auto", // one of: auto | vanilla | react | vue | angular | svelte | i18next | nuxt | next
     "fallback": "vanilla", // when auto detects nothing, use this value
@@ -399,12 +405,27 @@ function loadConfig() {
 
 async function saveConfig(cfg = currentConfig) {
   if (!cfg) return;
-  // Prevent saving to user's project space - use package defaults only
-  // User configuration should be managed through environment variables or CLI args
-  console.warn('[i18ntk] Configuration changes are not persisted - using package defaults');
+  
+  try {
+    // Ensure settings directory exists
+    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+    }
+    
+    // Save configuration to the project settings directory
+    await fs.promises.writeFile(PROJECT_CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+    currentConfig = cfg;
+  } catch (error) {
+    console.error('[i18ntk] Error saving configuration:', error.message);
+    throw error;
+  }
 }
 
 function getConfig() {
+  if (currentConfig) {
+    return resolvePaths(currentConfig);
+  }
+  
   try {
     // Ensure settings directory exists
     if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
@@ -417,6 +438,7 @@ function getConfig() {
     // Check if config file exists
     if (fs.existsSync(PROJECT_CONFIG_PATH)) {
       const config = JSON.parse(fs.readFileSync(PROJECT_CONFIG_PATH, 'utf8'));
+      currentConfig = config;
       return resolvePaths(config);
     }
 
@@ -426,6 +448,7 @@ function getConfig() {
       const legacyConfig = JSON.parse(fs.readFileSync(LEGACY_CONFIG_PATH, 'utf8'));
       const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
       saveConfig(migratedConfig);
+      currentConfig = migratedConfig;
       
       // Clean up legacy config
       try {
@@ -443,10 +466,12 @@ function getConfig() {
     // Use package defaults for new installation
     console.log('📦 Initializing with default configuration...');
     saveConfig(DEFAULT_CONFIG);
+    currentConfig = DEFAULT_CONFIG;
     return resolvePaths(DEFAULT_CONFIG);
 
   } catch (error) {
     console.warn('⚠️  Error loading configuration, using defaults:', error.message);
+    currentConfig = DEFAULT_CONFIG;
     return resolvePaths(DEFAULT_CONFIG);
   }
 }

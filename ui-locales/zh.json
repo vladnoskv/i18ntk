@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.9.1",
-    "updated": "2025-08-15"
+    "version": "1.10.0",
+    "updated": "2025-08-16"
   },
   "common": {
     "welcome": "欢迎",
@@ -849,6 +849,7 @@
     "completeCommand": "  complete  - 完成翻译（100% 覆盖）",
     "summaryCommand": "  summary   - 显示项目状态",
     "debugCommand": "  debug     - 调试翻译问题",
+    "scannerCommand": "  scanner   - 扫描项目中的 i18n 键",
     "menu": {
       "pressEnterToContinue": "按 Enter 继续...",
       "title": "\n🌐 国际化管理菜单\n",
@@ -917,6 +918,7 @@
     "initializationTitle": "🚀 i18n 管理工具 - 项目初始化",
     "initializationCancelled": "🚫 初始化已被用户取消。",
     "sourceDirectoryLabel": "📁 源目录：{dir}",
+    "createdSourceLanguageDirectory": "✅ 创建源语言目录：{dir}",
     "requiredTitle": "需要初始化",
     "requiredBody": "在运行此命令之前，必须先初始化项目。",
     "promptRunNow": "现在要运行初始化吗？(y/N): ",

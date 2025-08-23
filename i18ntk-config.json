@@ -7,6 +7,12 @@
     "sourceDir": "./locales",
     "i18nDir": "./i18n",
     "outputDir": "./i18ntk-reports",
+    "setup": {
+        "completed": true,
+        "completedAt": "2025-08-22T23:24:46.399Z",
+        "version": "1.10.0",
+        "setupId": "setup_1755905086402_9q2shmiv8"
+    },
     "framework": {
         "detected": false,
         "preference": "none",
@@ -295,28 +301,5 @@
         "hasGo": false,
         "hasPhp": false,
         "hasI18nLibrary": false
-    },
-    "setupReport": {
-        "timestamp": "2025-08-15T04:40:57.529Z",
-        "setup": {
-            "language": "javascript",
-            "framework": "generic",
-            "sourceDirectory": "./locales",
-            "optimizationMode": "extreme",
-            "prerequisitesMet": 5,
-            "totalPrerequisites": 10
-        },
-        "recommendations": [
-            {
-                "type": "info",
-                "message": "Consider installing an i18n library for better integration",
-                "action": "npm install i18next"
-            }
-        ],
-        "nextSteps": [
-            "Run i18ntk-init to initialize your project",
-            "Run i18ntk-analyze to scan for translations",
-            "Run i18ntk-validate to validate your setup"
-        ]
     }
 }

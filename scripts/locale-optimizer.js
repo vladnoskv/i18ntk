@@ -17,6 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const cliHelper = require('../utils/cli-helper');
 const JsonOutput = require('../utils/json-output');
+const { getGlobalReadline } = require('../utils/cli');
 
 class LocaleOptimizer {
   constructor() {
@@ -57,14 +58,14 @@ class LocaleOptimizer {
       const missing = this.allLocales.filter(l => !available.includes(l));
       
       jsonOutput.setStatus('ok', 'Locale analysis completed');
-      jsonOutput.addStats({
+      jsonOutput.setStats({
         totalLocales: available.length,
         totalSize: parseFloat((totalSize / 1024).toFixed(1)),
         potentialSavings: parseFloat((totalSize/1024 - this.getLocaleSize('en')).toFixed(1)),
         missingLocales: missing.length
       });
       
-      jsonOutput.addData({
+      jsonOutput.addMetadata({
         locales,
         missing: missing.map(locale => ({
           locale,
@@ -72,7 +73,7 @@ class LocaleOptimizer {
         }))
       });
       
-      console.log(JSON.stringify(jsonOutput.getOutput(sortKeys), null, indent));
+      console.log(JSON.stringify(jsonOutput.output(), null, indent));
       return;
     }
     
@@ -289,13 +290,11 @@ class LocaleOptimizer {
     
     if (answer.toLowerCase() === 'cancel') {
       console.log('❌ Operation cancelled');
-      cliHelper.close();
       return false;
     }
     
     if (answer.trim() === '') {
       console.log('✅ Keeping all locales');
-      cliHelper.close();
       return true;
     }
     
@@ -304,7 +303,6 @@ class LocaleOptimizer {
     
     if (valid.length === 0) {
       console.log('⚠️  No valid locales selected, keeping all');
-      cliHelper.close();
       return true;
     }
     
@@ -323,7 +321,6 @@ class LocaleOptimizer {
     } else {
       console.log('❌ Operation cancelled');
     }
-    cliHelper.close();
     return true;
   }
 
@@ -390,12 +387,11 @@ class LocaleOptimizer {
     
     return activeLocales;
   }
-}
 
   /**
    * Run the optimizer with specified options
    */
-  run(options = {})
+  async run(options = {}) {
     const { interactive = false, dryRun = false, list = false, keep = null, restore = false, json = false, indent = 2, sortKeys = false } = options;
     
     if (restore) {
@@ -425,7 +421,7 @@ class LocaleOptimizer {
         const saved = allSize - selectedSize;
         
         jsonOutput.setStatus('ok', 'Locales optimized successfully');
-        jsonOutput.addStats({
+        jsonOutput.setStats({
           kept: keepList.length,
           removed: this.allLocales.length - keepList.length,
           originalSize: parseFloat(allSize.toFixed(1)),
@@ -449,13 +445,13 @@ class LocaleOptimizer {
         const enSize = this.getLocaleSize('en');
         
         jsonOutput.setStatus('ok', 'Dry run analysis completed');
-        jsonOutput.addStats({
+        jsonOutput.setStats({
           totalLocales: available.length,
           totalSize: parseFloat(totalSize.toFixed(1)),
           potentialSavings: parseFloat((totalSize - enSize).toFixed(1))
         });
         
-        jsonOutput.addData({
+        jsonOutput.addMetadata({
           scenarios: [
             {
               name: 'English only',
@@ -466,7 +462,7 @@ class LocaleOptimizer {
           ]
         });
         
-        console.log(JSON.stringify(jsonOutput.getOutput(sortKeys), null, indent));
+        console.log(JSON.stringify(jsonOutput.output(), null, indent));
       } else {
         this.dryRun();
       }
@@ -486,6 +482,8 @@ class LocaleOptimizer {
     
     // Default to list mode
     this.listLocales({ json, indent, sortKeys });
+  }
+}
 
 // CLI Handler
 async function main() {
