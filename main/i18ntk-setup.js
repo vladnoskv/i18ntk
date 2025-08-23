@@ -334,15 +334,21 @@ class I18nSetupManager {
         const SettingsManager = require('../settings/settings-manager');
         const settingsManager = new SettingsManager();
         
-        settingsManager.updateSetting('sourceDir', this.config.sourceDir);
-        settingsManager.updateSetting('outputDir', this.config.outputDir);
-        settingsManager.updateSetting('detectedLanguage', this.config.detectedLanguage);
-        settingsManager.updateSetting('detectedFramework', this.config.detectedFramework);
-        settingsManager.updateSetting('optimization', this.config.optimization);
-        settingsManager.updateSetting('prerequisites', this.config.prerequisites);
-        settingsManager.updateSetting('security.adminPinEnabled', false);
-        settingsManager.updateSetting('security.sessionTimeout', 1800000);
-        settingsManager.updateSetting('security.maxFailedAttempts', 3);
+        settingsManager.updateSettings({
+            'sourceDir': this.config.sourceDir,
+            'outputDir': this.config.outputDir,
+            'detectedLanguage': this.config.detectedLanguage,
+            'detectedFramework': this.config.detectedFramework,
+            'optimization': this.config.optimization,
+            'prerequisites': this.config.prerequisites,
+            'security.adminPinEnabled': false,
+            'security.sessionTimeout': 1800000,
+            'security.maxFailedAttempts': 3,
+            'setup.completed': true,
+            'setup.completedAt': new Date().toISOString(),
+            'setup.version': require('../package.json').version,
+            'setup.setupId': `setup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        });
         
         console.log(`   Configuration updated in settings/i18ntk-config.json`);
     }
@@ -415,4 +421,9 @@ if (require.main === module) {
     setupManager.setup().catch(console.error);
 }
 
+// Export both the class and a run function for direct usage
 module.exports = I18nSetupManager;
+module.exports.run = async function() {
+    const setupManager = new I18nSetupManager();
+    return await setupManager.setup();
+};

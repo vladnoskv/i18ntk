@@ -98,3 +98,11 @@ security-scan-*.json
 # Encrypted data files
 *.encrypted
 *.vault
+
+## Files Exposed
+
+utils/missing-key-validator.js
+settings/.i18n-admin-config.json
+settings/admin-config.json
+settings/i18ntk-config.json
+settings/language-config.json

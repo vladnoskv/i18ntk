@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const SettingsManager = require('../settings/settings-manager');
 const legacyConfigManager = require('../utils/config-manager');
+const { getIcon, isUnicodeSupported } = require('../utils/terminal-icons');
 const configManager = new SettingsManager();
 
 class UIi18n {
@@ -272,8 +273,63 @@ this.translations = {};
      * Get translated text by key path
      * @param {string} keyPath - Dot-separated key path (e.g., 'menu.title')
      * @param {object} replacements - Object with replacement values
-     * @returns {string|array|object} Translated text or data
+    /**
+     * Process translated text to handle terminal encoding issues
+     * @param {string} text - Text to process
+     * @returns {string} Processed text with terminal-safe characters
      */
+    processTerminalText(text) {
+        if (typeof text !== 'string' || isUnicodeSupported()) {
+            return text;
+        }
+
+        // Define emoji mappings for common emojis used in the UI
+        const emojiMappings = {
+            '🔧': getIcon('wrench'),
+            '✅': getIcon('checkmark'),
+            '❌': getIcon('cross'),
+            '🚀': getIcon('rocket'),
+            '📍': getIcon('search'),
+            '⚙️': getIcon('gear'),
+            '🔍': getIcon('search'),
+            '📊': getIcon('analyze'),
+            '🧹': getIcon('clean'),
+            '🎉': getIcon('complete'),
+            '⚠️': getIcon('warning'),
+            'ℹ️': getIcon('info'),
+            '📄': getIcon('file'),
+            '📁': getIcon('folder'),
+            '💾': getIcon('backup'),
+            '🌍': getIcon('info'),
+            '🌐': getIcon('info'),
+            '🔤': getIcon('info'),
+            '🗂️': getIcon('folder'),
+            '🅰️': getIcon('info'),
+            '🐍': getIcon('python'),
+            '☕': getIcon('java'),
+            '🐘': getIcon('php'),
+            '🐹': getIcon('go'),
+            '⚛️': getIcon('react'),
+            '💚': getIcon('vue'),
+            '🟨': getIcon('javascript'),
+            '•': getIcon('bullet'),
+            '→': getIcon('arrow'),
+            '═': getIcon('separator'),
+            '╔': getIcon('corner'),
+            '║': getIcon('line'),
+            '╚': getIcon('end'),
+            '✓': getIcon('checkmark')
+        };
+
+        // Replace emojis with terminal-safe alternatives
+        let processedText = text;
+        for (const [emoji, replacement] of Object.entries(emojiMappings)) {
+            processedText = processedText.replace(new RegExp(emoji.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), replacement);
+        }
+
+        return processedText;
+    }
+     *// @returns {string|array|object} Translated text or data */
     t(keyPath, replacements = {}) {
         let value = this.translations[keyPath];
 

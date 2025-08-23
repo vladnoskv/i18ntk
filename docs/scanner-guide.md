@@ -311,6 +311,6 @@ For scanner-specific issues:
 
 | i18ntk Version | Framework Support | Notes |
 | -------------- | ----------------- | ----- |
-| 1.8.3+ | React 16+, Vue 2+, Angular 9+ | Full framework detection |
+| 1.10.0+ | React 16+, Vue 2+, Angular 9+ | Full framework detection |
 | 1.8.0+ | Basic vanilla support | Manual configuration required |
 | < 1.8.0 | Limited support | Upgrade recommended |

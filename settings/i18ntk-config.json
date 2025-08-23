@@ -7,6 +7,12 @@
     "sourceDir": "./locales",
     "i18nDir": "./i18n",
     "outputDir": "./i18ntk-reports",
+    "setup": {
+        "completed": true,
+        "completedAt": "2025-08-23T02:47:14.780Z",
+        "version": "1.10.0",
+        "setupId": "setup_1755917234782_9fw8fh2nz"
+    },
     "framework": {
         "detected": false,
         "preference": "none",
@@ -297,7 +303,7 @@
         "hasI18nLibrary": false
     },
     "setupReport": {
-        "timestamp": "2025-08-15T04:40:57.529Z",
+        "timestamp": "2025-08-23T02:47:14.790Z",
         "setup": {
             "language": "javascript",
             "framework": "generic",

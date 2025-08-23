@@ -86,7 +86,7 @@ class I18ntkJavaScriptCommand {
     program
       .name('i18ntk-js')
       .description('i18ntk specialized for JavaScript and TypeScript applications')
-      .version('1.9.1')
+      .version('1.10.1')
       .option('-s, --source-dir <dir>', 'Source directory to scan', './src')
       .option('-l, --locales-dir <dir>', 'Locales directory', './locales')
       .option('--framework <type>', 'JavaScript framework type', 'auto')
@@ -469,7 +469,7 @@ class I18ntkJavaScriptCommand {
 
   async run() {
     try {
-      console.log('🚀 i18ntk JavaScript/TypeScript Command v1.9.1');
+      console.log('🚀 i18ntk JavaScript/TypeScript Command v1.10.1');
       console.log('=' * 60);
       
       await this.init();

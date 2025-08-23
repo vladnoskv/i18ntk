@@ -6,13 +6,14 @@ const SecurityUtils = require('../utils/security');
 
 class SettingsManager {
     constructor() {
-        // Use project-scoped settings directory
-        this.configDir = path.resolve(process.cwd(), 'settings');
+        // Use package settings directory (consistent with config-manager.js)
+        this.configDir = path.resolve(__dirname, '..', 'settings');
         this.configFile = path.join(this.configDir, 'i18ntk-config.json');
-        this.backupDir = path.join(this.configDir, 'backups');
+        this.backupDir = path.join(path.resolve(__dirname, '..'), 'backups');
+        this.saveTimeout = null;
         
         this.defaultConfig = {
-            "version": "1.9.1",
+            "version": "1.10.1",
             "language": "en",
             "uiLanguage": "en",
             "theme": "dark",
@@ -20,6 +21,12 @@ class SettingsManager {
             "sourceDir": "./locales",
             "i18nDir": "./i18n",
             "outputDir": "./i18ntk-reports",
+            "setup": {
+                "completed": false,
+                "completedAt": null,
+                "version": null,
+                "setupId": null
+            },
             "framework": {
                 "preference": "auto", // auto | vanilla | react | vue | angular | svelte | i18next | nuxt | next
                 "fallback": "vanilla",
@@ -292,6 +299,12 @@ class SettingsManager {
                 "preference": "none",
                 "prompt": "always",
                 "lastPromptedVersion": null
+            },
+            "setup": {
+                "completed": false,
+                "completedAt": null,
+                "version": null,
+                "setupId": null
             }
         };
         
@@ -364,6 +377,13 @@ class SettingsManager {
             };
         }
         
+        if (loadedSettings.setup) {
+            merged.setup = { 
+                ...this.defaultConfig.setup, 
+                ...loadedSettings.setup 
+            };
+        }
+        
         return merged;
     }
 
@@ -376,6 +396,40 @@ class SettingsManager {
             this.settings = settings;
         }
         
+        // Clear any pending save
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        
+        // Debounce saves to prevent rapid successive saves
+        this.saveTimeout = setTimeout(() => {
+            this._saveImmediately();
+        }, 100); // 100ms debounce
+    }
+
+    /**
+     * Save settings immediately without debounce
+     * @param {object} settings - Settings to save
+     */
+    saveSettingsImmediately(settings = null) {
+        if (settings) {
+            this.settings = settings;
+        }
+        
+        // Clear any pending save
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+            this.saveTimeout = null;
+        }
+        
+        this._saveImmediately();
+    }
+
+    /**
+     * Internal method to save settings without debounce
+     * @private
+     */
+    _saveImmediately() {
         try {
             if (!fs.existsSync(this.configDir)) {
                 fs.mkdirSync(this.configDir, { recursive: true });
@@ -393,6 +447,8 @@ class SettingsManager {
         } catch (error) {
             console.error('Error saving settings:', error.message);
         }
+        
+        this.saveTimeout = null;
     }
 
     /**
@@ -446,8 +502,174 @@ class SettingsManager {
      */
     resetToDefaults() {
         this.settings = { ...this.defaultConfig };
+        // Ensure setup section is also reset
+        this.settings.setup = {
+            "completed": false,
+            "completedAt": null,
+            "version": null,
+            "setupId": null
+        };
         this.saveSettings();
         console.log('Settings reset to defaults');
+    }
+
+    /**
+     * Complete reset - removes all configuration files and resets to fresh install state
+     */
+    async completeReset() {
+        const fs = require('fs');
+        const path = require('path');
+        
+        try {
+            console.log('🧹 Performing complete reset...');
+            
+            // 1. Reset to defaults
+            this.settings = { ...this.defaultConfig };
+            
+            // 2. Remove actual configuration files used by the system
+            const packageDir = path.resolve(__dirname, '..');
+            const settingsDir = path.join(packageDir, 'settings');
+            
+            // Main configuration file
+            const mainConfigPath = path.join(settingsDir, 'i18ntk-config.json');
+            if (fs.existsSync(mainConfigPath)) {
+                fs.unlinkSync(mainConfigPath);
+                console.log('✅ Main configuration file removed');
+            }
+            
+            // Project configuration file
+            const projectConfigPath = path.join(settingsDir, 'project-config.json');
+            if (fs.existsSync(projectConfigPath)) {
+                fs.unlinkSync(projectConfigPath);
+                console.log('✅ Project configuration removed');
+            }
+            
+            // Setup tracking file
+            const setupFile = path.join(settingsDir, 'setup.json');
+            if (fs.existsSync(setupFile)) {
+                fs.unlinkSync(setupFile);
+                console.log('✅ Setup tracking cleared');
+            }
+            
+            // 3. Clear all backup files from backups directory
+            const backupsDir = path.join(packageDir, 'backups');
+            if (fs.existsSync(backupsDir)) {
+                const backupFiles = fs.readdirSync(backupsDir);
+                for (const file of backupFiles) {
+                    if (file.endsWith('.json') || file.endsWith('.bak')) {
+                        fs.unlinkSync(path.join(backupsDir, file));
+                    }
+                }
+                console.log('✅ All backup files cleared');
+            }
+            
+            // 4. Clear admin PIN configuration (multiple possible locations including root)
+            const adminConfigPaths = [
+                path.join(packageDir, '.i18n-admin-config.json'),
+                path.join(settingsDir, '.i18n-admin-config.json'),
+                path.join(settingsDir, 'admin-config.json'),
+                path.join(packageDir, '..', '.i18n-admin-config.json') // Root level
+            ];
+            
+            for (const adminConfigPath of adminConfigPaths) {
+                if (fs.existsSync(adminConfigPath)) {
+                    fs.unlinkSync(adminConfigPath);
+                    console.log('✅ Admin PIN configuration cleared');
+                }
+            }
+            
+            // 5. Clear initialization tracking
+            const initFiles = [
+                path.join(settingsDir, 'initialization.json'),
+                path.join(settingsDir, 'init.json')
+            ];
+            
+            for (const initFile of initFiles) {
+                if (fs.existsSync(initFile)) {
+                    fs.unlinkSync(initFile);
+                    console.log('✅ Initialization tracking cleared');
+                }
+            }
+            
+            // 6. Clear any cached data
+            const cacheDirs = [
+                path.join(packageDir, '.cache'),
+                path.join(settingsDir, '.cache')
+            ];
+            
+            for (const cacheDir of cacheDirs) {
+                if (fs.existsSync(cacheDir)) {
+                    const cacheFiles = fs.readdirSync(cacheDir);
+                    for (const file of cacheFiles) {
+                        fs.unlinkSync(path.join(cacheDir, file));
+                    }
+                    console.log('✅ Cache cleared');
+                }
+            }
+            
+            // 7. Clear temporary files across directories
+            const tempFiles = [
+                path.join(settingsDir, '.temp-config.json'),
+                path.join(settingsDir, '.last-config.json'),
+                path.join(settingsDir, '.lock'),
+                path.join(settingsDir, 'i18ntk-config.json.tmp'),
+                path.join(settingsDir, 'settings.lock'),
+                path.join(packageDir, '.env-config.json'),
+                path.join(packageDir, '.temp-config.json'),
+                path.join(packageDir, 'config.tmp'),
+                path.join(packageDir, '.lock')
+            ];
+            
+            for (const tempFile of tempFiles) {
+                if (fs.existsSync(tempFile)) {
+                    fs.unlinkSync(tempFile);
+                }
+            }
+            console.log('✅ Temporary files cleared');
+            
+            // 8. Clear any additional user data files
+            const additionalFiles = [
+                path.join(settingsDir, 'user-preferences.json'),
+                path.join(settingsDir, 'custom-config.json'),
+                path.join(settingsDir, 'local-config.json'),
+                path.join(packageDir, 'user-preferences.json'),
+                path.join(packageDir, 'custom-config.json'),
+                path.join(packageDir, 'local-config.json')
+            ];
+            
+            for (const file of additionalFiles) {
+                if (fs.existsSync(file)) {
+                    fs.unlinkSync(file);
+                    console.log(`✅ Removed ${path.basename(file)}`);
+                }
+            }
+            
+            // 9. Reset all script directory overrides to defaults
+            this.settings.scriptDirectories = {
+                "main": "./main",
+                "utils": "./utils", 
+                "scripts": "./scripts",
+                "settings": "./settings",
+                "uiLocales": "./ui-locales"
+            };
+            
+            // 10. Reset setup section to ensure clean state
+            this.settings.setup = {
+                "completed": false,
+                "completedAt": null,
+                "version": null,
+                "setupId": null
+            };
+            
+            // 11. Save fresh configuration to the correct location
+            this.saveSettings();
+            console.log('✅ Fresh configuration saved');
+            
+            return this.settings;
+            
+        } catch (error) {
+            throw new Error(`Complete reset failed: ${error.message}`);
+        }
     }
 
     /**
@@ -485,7 +707,7 @@ class SettingsManager {
                 version: {
                     type: 'string',
                     description: 'Configuration version',
-                    default: '1.9.1',
+                    default: '1.10.1',
                     readOnly: true
                 },
                 language: {
@@ -661,8 +883,9 @@ class SettingsManager {
      * Update specific setting
      * @param {string} key - Setting key (dot notation supported)
      * @param {*} value - New value
+     * @param {boolean} immediateSave - Whether to save immediately (default: true)
      */
-    updateSetting(key, value) {
+    updateSetting(key, value, immediateSave = true) {
         const keys = key.split('.');
         let current = this.settings;
         
@@ -674,7 +897,32 @@ class SettingsManager {
         }
         
         current[keys[keys.length - 1]] = value;
-        this.saveSettings();
+        if (immediateSave) {
+            this.saveSettings();
+        }
+    }
+
+    /**
+     * Update multiple settings at once
+     * @param {Object} settings - Object with key-value pairs to update
+     */
+    updateSettings(settings) {
+        for (const [key, value] of Object.entries(settings)) {
+            const keys = key.split('.');
+            let current = this.settings;
+            
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (!current[keys[i]]) {
+                    current[keys[i]] = {};
+                }
+                current = current[keys[i]];
+            }
+            
+            current[keys[keys.length - 1]] = value;
+        }
+        
+        // Save once after all updates (use immediate save for batch operations)
+        this.saveSettingsImmediately();
     }
 
     /**

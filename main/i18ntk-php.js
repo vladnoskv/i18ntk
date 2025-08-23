@@ -363,7 +363,7 @@ return [
 program
   .name('i18ntk-php')
   .description('PHP language i18n management tool')
-  .version('1.9.1');
+  .version('1.10.1');
 
 program
   .command('init')

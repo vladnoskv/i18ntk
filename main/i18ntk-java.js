@@ -286,7 +286,7 @@ items.count={0} items
 program
   .name('i18ntk-java')
   .description('Java language i18n management tool')
-  .version('1.9.1');
+  .version('1.10.1');
 
 program
   .command('init')

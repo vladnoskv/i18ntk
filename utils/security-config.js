@@ -9,8 +9,7 @@ const path = require('path');
 
 class SecurityConfig {
     constructor() {
-        const projectRoot = process.cwd();
-        this.configDir = path.join(projectRoot, 'settings');
+        this.configDir = path.resolve(__dirname, '..');
         this.configPath = path.join(this.configDir, 'security-config.json');
         this.securityDefaults = {
             pin: {

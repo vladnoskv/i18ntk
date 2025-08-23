@@ -1,83 +1,51 @@
-# Development files and directories
-/dev/
-/benchmarks/
-/settings/backups/
-/.github/
-/docs/
-/reports/
-/backups/
-/EXPORT/
-/test-temp/
-/src/
-/archive/
-.trae
-/utils/ultra-performance-optimizer.js
-test
-test-*
+# Exclude security-sensitive scripts from npm package
+scripts/smoke-pack.js
 
-# Debug directory and files
-/scripts/debug/
-scripts/debug/
+# Exclude test files and development artifacts
+**/test-backup*
+**/*test*
+**/*.test.*
 
-# Test files
-*.test.js
-*.spec.js
-**/*.test.js
-**/*.spec.js
-/test-usage-fix.html
-
-# Development scripts
-scripts/test-runner.js
-scripts/verify-package.js
-scripts/path-utils.test.js
-scripts/reset-defaults.test.js
-scripts/prepublish.js
-
-# Backup files
-/settings/backups
-
-# Editor and OS files
-.DS_Store
-.vscode
-.idea
-Thumbs.db
+# Exclude development and build artifacts
+.vscode/
+.idea/
 *.swp
 *.swo
-*~
-
-# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-*.log
 
-# Exclude fpts directory
-/fpts/
-
-# Configuration files
+# Exclude sensitive configuration files
+settings/.i18n-admin-config.json
+settings/admin-config.json
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
 config.json
-settings.json
-.env
-.env.local
 
-# NPM files
-npm
+# Exclude backup files
+*.backup
+*.bak
+*.backup.*
+settings/backups/
 
-# Documentation and changelogs (GitHub-only)
-SECURITY.md
-CONTRIBUTING.md
-CHANGELOG.md
-/docs/development
-/docs/debug
-/docs/screenshots
-
-# Development configuration files
-.commitlintrc.json
-.releaserc.json
-.husky/
-.nyc_output/
-coverage/
-.cache/
+# Exclude temporary files
 *.tmp
 *.temp
- 
+*.vault
+
+# Keep only production files
+!main/
+!runtime/
+!utils/
+!settings/i18ntk-config.json
+!settings/language-config.json
+!settings/settings-cli.js
+!settings/settings-manager.js
+!ui-locales/
+!LICENSE
+!README.md
+!package.json

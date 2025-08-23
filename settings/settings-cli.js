@@ -613,7 +613,14 @@ class SettingsCLI {
             const LocaleOptimizer = require('../scripts/locale-optimizer.js');
             const optimizer = new LocaleOptimizer();
             await optimizer.interactiveSelect();
-            if (typeof this.rl.resume === 'function') this.rl.resume();
+            // Re-initialize readline if it was closed by locale optimizer
+            if (!this.rl || !this.rl.resume) {
+                const { getGlobalReadline } = require('../utils/cli');
+                this.rl = getGlobalReadline();
+            }
+            if (this.rl && typeof this.rl.resume === 'function') {
+                this.rl.resume();
+            }
             if (typeof uiI18n.refreshAvailableLanguages === 'function') {
                 uiI18n.refreshAvailableLanguages();
             }
@@ -1629,25 +1636,61 @@ class SettingsCLI {
         this.clearScreen();
         this.showHeader();
         console.log(`${colors.bright}${t('settings.resetToDefaultsTitle')}${colors.reset}\n`);
-        console.log(`${colors.yellow}${t('settings.resetWarning1')}${colors.reset}`);
-        console.log(`${colors.yellow}${t('settings.resetWarning2')}${colors.reset}\n`);
+        console.log(`${colors.red}${colors.bright}⚠️  COMPLETE RESET WARNING ⚠️${colors.reset}`);
+        console.log(`${colors.yellow}This will perform a comprehensive reset that will:${colors.reset}\n`);
+        console.log(`${colors.red}  • Completely clear all user-configured settings`);
+        console.log(`${colors.red}  • Remove all backup files and configurations`);
+        console.log(`${colors.red}  • Reset admin PIN and security settings`);
+        console.log(`${colors.red}  • Clear all script directory overrides`);
+        console.log(`${colors.red}  • Remove all cached data and logs`);
+        console.log(`${colors.red}  • Restore to initial default configuration`);
+        console.log(`${colors.red}  • Simulate a fresh installation state\n`);
         
-        const confirm = await this.prompt(t('settings.resetConfirm'));
+        const confirm = await this.prompt(`${colors.red}Type 'RESET' to confirm complete reset: ${colors.reset}`);
         
-        if (confirm.toLowerCase() === 'y') {
+        if (confirm === 'RESET') {
             try {
-                await this.adminAuth.disableAuth();
-                await configManager.resetToDefaults();
-                this.settings = configManager.getConfig();
-                this.modified = false;
-                this.adminAuthenticated = false;
+                await this.performComprehensiveReset();
                 this.success(t('settings.resetDone'));
+                console.log(`${colors.green}\n🎉 Package has been completely reset to fresh installation state!${colors.reset}`);
+                console.log(`${colors.dim}All settings have been restored to defaults.${colors.reset}`);
             } catch (error) {
                 this.error(`Failed to reset settings: ${error.message}`);
             }
+        } else {
+            this.warning('Reset cancelled. No changes were made.');
         }
         
         await this.pause();
+    }
+
+    /**
+     * Perform comprehensive reset - clears all user data and configurations
+     */
+    async performComprehensiveReset() {
+        try {
+            console.log('🧹 Starting comprehensive reset...');
+            
+            // Disable admin auth if enabled
+            await this.adminAuth.disableAuth();
+            
+            // Use settings manager for complete reset
+            const SettingsManager = require('./settings-manager');
+            const settingsManager = new SettingsManager();
+            
+            // Perform complete reset
+            await settingsManager.completeReset();
+            
+            // Update local state
+            this.settings = settingsManager.getSettings();
+            this.modified = false;
+            this.adminAuthenticated = false;
+            
+            console.log('✅ Comprehensive reset completed successfully');
+            
+        } catch (error) {
+            throw new Error(`Comprehensive reset failed: ${error.message}`);
+        }
     }
 
     /**

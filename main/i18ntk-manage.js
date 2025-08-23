@@ -50,97 +50,110 @@ async function runInitFlow() {
   return { i18nDir: settings.i18nDir, sourceDir: settings.sourceDir };
 }
 
-function askYesNo(prompt, question) {
-  return prompt.question(question).then(a => /^y(es)?$/i.test(a.trim()));
-}
 
 
 
+
+/**
+ * Ensures the project is properly initialized or exits the process
+ * @param {Object} prompt - Prompt interface for user interaction
+ * @returns {Promise<Object>} Configuration object if initialized
+ */
 async function ensureInitializedOrExit(prompt) {
-  const path = require('path');
-  const fs = require('fs');
-  const { ensureDirectory } = require('../utils/config-helper');
-  const SettingsManager = require('../settings/settings-manager');
-  const settingsManager = new SettingsManager();
+  const { checkInitialized } = require('../utils/init-helper');
+  const cliHelper = require('../utils/cli-helper');
+  const pkg = require('../package.json');
   
-  // Get configuration from settings manager
-  const settings = settingsManager.getSettings();
+  const { initialized, config } = await checkInitialized();
   
-  const cfg = {
-    sourceDir: path.resolve(settings.sourceDir || './locales'),
-    sourceLanguage: settings.sourceLanguage || 'en',
-    projectRoot: path.resolve('.'),
-    framework: settings.framework || { detected: false, prompt: 'always' }
-  };
+  if (!initialized) {
+    console.log('\nThis project is not yet initialized with i18ntk.');
+    const shouldInitialize = await cliHelper.confirm('Would you like to initialize it now?');
+    
+    if (!shouldInitialize) {
+      console.log('Exiting. Please initialize the project first.');
+      process.exit(1);
+    }
+    
+    // The initialization will be handled by the init command
+    return config;
+  }
   
-  // Check if already initialized using new tracking system
-  const initFilePath = path.join(settingsManager.configDir, 'initialization.json');
+  // Check if we need to prompt for framework detection
+  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
   
-  let isInitialized = false;
-  let initStatus = {};
-  if (fs.existsSync(initFilePath)) {
-    try {
-      initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
-      isInitialized = initStatus.initialized && initStatus.version === '1.9.1';
-    } catch (e) {
-      // Invalid init file, proceed with check
+  // Ensure framework configuration exists with all required fields
+  if (!settings.framework) {
+    settings.framework = {
+      detected: false,
+      preference: null,
+      prompt: 'always',
+      lastPromptedVersion: null,
+      installed: [],
+      version: '1.0' // Schema version for future compatibility
+    };
+  }
+  
+  // Check if we need to prompt for framework detection
+  if (!settings.framework.detected && 
+      settings.framework.prompt !== 'suppress' && 
+      settings.framework.lastPromptedVersion !== pkg.version) {
+    
+    console.log('\nWe noticed you haven\'t set up an i18n framework yet.');
+    console.log('Would you like to detect your i18n framework automatically?');
+    
+    console.log('1. Detect automatically');
+    console.log('2. I\'ll set it up manually');
+    console.log('3. Don\'t show this again');
+    
+    const answer = await prompt.question('\nSelect an option (1-3): ');
+    const choice = answer.trim();
+    
+    let action;
+    if (choice === '1') action = 'detect';
+    else if (choice === '2') action = 'manual';
+    else if (choice === '3') action = 'dont-show';
+    else action = 'manual'; // default fallback
+    
+    if (action === 'dont-show') {
+      // Update settings to suppress future prompts for this version
+      settings.framework.prompt = 'suppress';
+      settings.framework.lastPromptedVersion = pkg.version;
+      
+      if (configManager.saveSettings) {
+        await configManager.saveSettings(settings);
+      } else if (configManager.saveConfig) {
+        await configManager.saveConfig(settings);
+      }
+      
+      console.log('Framework detection prompt will be suppressed for this version.');
+    } else if (action === 'detect') {
+      // Run framework detection
+      const { detectedLanguage, detectedFramework } = detectEnvironmentAndFramework();
+      
+      if (detectedFramework && detectedFramework !== 'generic') {
+        console.log(`\nDetected framework: ${detectedFramework}`);
+        
+        // Update settings with detected framework
+        settings.framework.detected = true;
+        settings.framework.preference = detectedFramework;
+        settings.framework.lastDetected = new Date().toISOString();
+        
+        if (configManager.saveSettings) {
+          await configManager.saveSettings(settings);
+        } else if (configManager.saveConfig) {
+          await configManager.saveConfig(settings);
+        }
+        
+        console.log(`Framework set to: ${detectedFramework}`);
+      } else {
+        console.log('\nCould not detect a specific i18n framework.');
+        console.log('Please set up your i18n framework manually.');
+      }
     }
   }
   
-  if (isInitialized) {
-    return cfg;
-  }
-
-  // Setup is now handled automatically by the unified config system
-
-  // Check if source language files exist
-  const langDir = path.join(cfg.sourceDir, cfg.sourceLanguage);
-  
-  const hasLanguageFiles = fs.existsSync(langDir) &&
-    fs.readdirSync(langDir).some(f => f.endsWith('.json'));
-  
-  // If language files exist, mark as initialized
-  if (hasLanguageFiles) {
-    const initDir = path.dirname(initFilePath);
-    ensureDirectory(initDir);
-    fs.writeFileSync(initFilePath, JSON.stringify({
-      initialized: true,
-      version: '1.9.1',
-      timestamp: new Date().toISOString(),
-      sourceDir: cfg.sourceDir,
-      sourceLanguage: cfg.sourceLanguage,
-      detectedLanguage: cfg.detectedLanguage,
-      detectedFramework: cfg.detectedFramework
-    }, null, 2));
-    return cfg;
-  }
-
-  const answer = await askYesNo(prompt, 'Initialization Required\nThis project must be initialized before running this command.\nWould you like to run initialization now? (y/N): ');
-  if (!answer) {
-    console.log('Operation cancelled.');
-    process.exit(0);
-  }
-
-  const result = await runInitFlow();
-  
-  // Mark as initialized after successful init
-  const initDir = path.dirname(initFilePath);
-  ensureDirectory(initDir);
-  fs.writeFileSync(initFilePath, JSON.stringify({
-    initialized: true,
-    version: '1.9.1',
-    timestamp: new Date().toISOString(),
-    sourceDir: result.sourceDir || cfg.sourceDir,
-    sourceLanguage: cfg.sourceLanguage,
-    detectedLanguage: cfg.detectedLanguage,
-    detectedFramework: cfg.detectedFramework
-  }, null, 2));
-  
-  return {
-    ...cfg,
-    sourceDir: result.sourceDir || cfg.sourceDir,
-    i18nDir: result.i18nDir || cfg.i18nDir
-  };
+  return { ...config, ...settings };
 }
 
 async function detectEnvironmentAndFramework() {
@@ -158,15 +171,55 @@ async function detectEnvironmentAndFramework() {
     detectedLanguage = 'javascript';
     try {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-      const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+      const deps = { 
+        ...(packageJson.dependencies || {}), 
+        ...(packageJson.devDependencies || {}),
+        ...(packageJson.peerDependencies || {})
+      };
 
-      if (deps.react || deps['react-dom']) detectedFramework = 'react';
-      else if (deps.vue || deps['vue-router']) detectedFramework = 'vue';
-      else if (deps['@angular/core']) detectedFramework = 'angular';
-      else if (deps.next) detectedFramework = 'nextjs';
-      else if (deps.nuxt) detectedFramework = 'nuxt';
-      else if (deps.svelte) detectedFramework = 'svelte';
-      else detectedFramework = 'generic';
+      // Check for i18ntk-runtime first (check both package names)
+      const hasI18nTkRuntime = deps['i18ntk-runtime'] || deps['i18ntk/runtime'];
+      
+      // Check for common i18n patterns in source code if not found in package.json
+      if (!hasI18nTkRuntime) {
+        const i18nPatterns = [
+          /i18n\.t\(['\"`]/,
+          /useI18n\(/,
+          /from ['\"]i18ntk[\/\\]runtime['\"]/,
+          /require\(['\"]i18ntk[\/\\]runtime['\"]\)/
+        ];
+        
+        const sourceFiles = await glob(['src/**/*.{js,jsx,ts,tsx}'], {
+          cwd: process.cwd(),
+          ignore: ['**/node_modules/**', '**/dist/**', '**/build/**']
+        });
+        
+        for (const file of sourceFiles) {
+          try {
+            const content = await fs.promises.readFile(path.join(process.cwd(), file), 'utf8');
+            if (i18nPatterns.some(pattern => pattern.test(content))) {
+              detectedFramework = 'i18ntk-runtime';
+              break;
+            }
+          } catch (e) {
+            // Skip files we can't read
+            continue;
+          }
+        }
+      } else {
+        detectedFramework = 'i18ntk-runtime';
+      }
+      
+      // Only check other frameworks if i18ntk-runtime wasn't detected
+      if (detectedFramework !== 'i18ntk-runtime') {
+        if (deps.react || deps['react-dom']) detectedFramework = 'react';
+        else if (deps.vue || deps['vue-router']) detectedFramework = 'vue';
+        else if (deps['@angular/core']) detectedFramework = 'angular';
+        else if (deps.next) detectedFramework = 'nextjs';
+        else if (deps.nuxt) detectedFramework = 'nuxt';
+        else if (deps.svelte) detectedFramework = 'svelte';
+        else detectedFramework = 'generic';
+      }
     } catch (error) {
       detectedFramework = 'generic';
     }
@@ -252,39 +305,63 @@ function getFrameworkSuggestions(language) {
   return suggestions[language] || suggestions.javascript;
 }
 
+/**
+ * Handles framework detection and prompting logic
+ * @param {Object} prompt - Prompt interface for user interaction
+ * @param {Object} cfg - Configuration object
+ * @param {string} currentVersion - Current version of the tool
+ * @returns {Promise<Object>} Updated configuration
+ */
 async function maybePromptFramework(prompt, cfg, currentVersion) {
   // Load current settings to check framework configuration
-  const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+  let settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
   
-  // Ensure framework configuration exists
+  // Ensure framework configuration exists with all required fields
   if (!settings.framework) {
     settings.framework = {
       detected: false,
       preference: null,
       prompt: 'always',
-      lastPromptedVersion: null
+      lastPromptedVersion: null,
+      installed: [],
+      version: '1.0' // Schema version for future compatibility
     };
+    
+    // Save the updated settings
+    if (configManager.saveSettings) {
+      await configManager.saveSettings(settings);
+    } else if (configManager.saveConfig) {
+      await configManager.saveConfig(settings);
+    }
   }
   
-  // Reload settings to ensure we have latest framework detection results
+  // Reload settings to ensure we have the latest framework detection results
   const freshSettings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
   if (freshSettings.framework) {
-    settings.framework = freshSettings.framework;
+    settings.framework = { ...settings.framework, ...freshSettings.framework };
   }
   
-  // Check if framework is already detected or preference is set to none
+  // Check if framework is already detected or preference is explicitly set to none
   if (settings.framework.detected || settings.framework.preference === 'none') {
     return cfg;
   }
 
-  // Check if dnr (do not remind) is active for this version
+  // Check if DNR (Do Not Remind) is active for this version
   if (settings.framework.prompt === 'suppress' && settings.framework.lastPromptedVersion === currentVersion) {
     return cfg;
   }
 
-  // Reset suppress if version changed
+  // Reset DNR if version changed
   if (settings.framework.prompt === 'suppress' && settings.framework.lastPromptedVersion !== currentVersion) {
     settings.framework.prompt = 'always';
+    settings.framework.lastPromptedVersion = null;
+    
+    // Save the updated settings
+    if (configManager.saveSettings) {
+      await configManager.saveSettings(settings);
+    } else if (configManager.saveConfig) {
+      await configManager.saveConfig(settings);
+    }
   }
 
   // This function is now handled by ensureInitializedOrExit for better flow control
@@ -431,7 +508,8 @@ class I18nManager {
         'i18next',
         'next-i18next',
         'svelte-i18n',
-        '@nuxtjs/i18n'
+        '@nuxtjs/i18n',
+        'i18ntk-runtime'
       ];
       
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
@@ -587,7 +665,8 @@ class I18nManager {
       // Handle debug flag
       if (args.debug) {
         // Enable debug mode for this session
-        console.log(chalk.blue('Debug mode enabled'));
+        const { blue } = require('../utils/colors-new');
+        console.log(blue('Debug mode enabled'));
       }
 
       // Check for --command= argument first

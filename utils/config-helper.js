@@ -342,7 +342,7 @@ function displayPaths(cfg = {}) {
 async function ensureInitialized(cfg) {
   try {
     // Check if initialization has been marked as complete
-    const configPath = path.join(settingsManager.configDir, 'initialization.json');
+    const configPath = path.join(path.dirname(require.main.filename), '..', 'settings', 'initialization.json');
     let initStatus = { initialized: false, version: null, timestamp: null };
     
     if (fs.existsSync(configPath)) {

@@ -49,7 +49,14 @@ class I18nAnalyzer {
           'output-reports': 'Generate detailed reports',
           'setup-admin': 'Configure admin PIN protection',
           'disable-admin': 'Disable admin PIN protection',
-          'admin-status': 'Check admin PIN status'
+          'admin-status': 'Check admin PIN status',
+          'setup-wizard': 'Interactive setup wizard for analysis configuration',
+          'wizard': 'Alias for --setup-wizard',
+          'source': 'Source directory path',
+          'output': 'Output directory for reports',
+          'json': 'Output results as JSON',
+          'exclude-files': 'Comma-separated list of files to exclude',
+          'exclude': 'Pattern to exclude files'
         });
         process.exit(0);
       }
@@ -123,6 +130,9 @@ class I18nAnalyzer {
             parsed.indent = parseInt(value) || 2;
           } else if (sanitizedKey === 'newline') {
             parsed.newline = value || 'lf';
+          } else if (sanitizedKey === 'setup-wizard' || sanitizedKey === 'wizard') {
+            parsed['setup-wizard'] = true;
+            parsed.wizard = true;
           }
         }
       });
@@ -135,31 +145,155 @@ class I18nAnalyzer {
 
   // Get all available languages
   getAvailableLanguages() {
-    if (!fs.existsSync(this.sourceDir)) {
-      throw new Error(`Source directory not found: ${this.sourceDir}`);
+    try {
+      const items = fs.readdirSync(this.sourceDir, { withFileTypes: true });
+      const languages = [];
+      
+      // Check for directory-based structure
+      const directories = items
+        .filter(item => item.isDirectory())
+        .map(item => item.name)
+        .filter(name => name !== 'node_modules' && !name.startsWith('.') && name !== this.config.sourceLanguage);
+      
+      // Check for monolith files (language.json files)
+      const files = items
+        .filter(item => item.isFile() && item.name.endsWith('.json'))
+        .map(item => item.name);
+      
+      // Add directories as languages
+      languages.push(...directories);
+      
+      // Add monolith files as languages (without .json extension)
+      const monolithLanguages = files
+        .map(file => file.replace('.json', ''))
+        .filter(lang => !languages.includes(lang) && lang !== this.config.sourceLanguage);
+      languages.push(...monolithLanguages);
+      
+      // Check for nested structures
+      for (const dir of directories) {
+        const dirPath = path.join(this.sourceDir, dir);
+        try {
+          const dirItems = fs.readdirSync(dirPath, { withFileTypes: true });
+          const jsonFiles = dirItems
+            .filter(item => item.isFile() && item.name.endsWith('.json'))
+            .map(item => item.name.replace('.json', ''));
+          
+          // If directory contains JSON files, it's likely a language directory
+          if (jsonFiles.length > 0) {
+            if (!languages.includes(dir)) {
+              languages.push(dir);
+            }
+          }
+        } catch (error) {
+          // Skip directories we can't read
+        }
+      }
+      
+      return [...new Set(languages)].sort();
+    } catch (error) {
+      console.error('Error reading source directory:', error.message);
+      return [];
     }
-    
-    return fs.readdirSync(this.sourceDir)
-      .filter(item => {
-        const itemPath = path.join(this.sourceDir, item);
-        return fs.statSync(itemPath).isDirectory() && item !== this.config.sourceLanguage;
-      });
   }
 
   // Get all JSON files from a language directory
   getLanguageFiles(language) {
-    const languageDir = path.join(this.sourceDir, language);
-    
-    const validatedPath = SecurityUtils.validatePath(languageDir, this.sourceDir);
-    if (!validatedPath || !fs.existsSync(validatedPath)) {
+    if (!this.sourceDir) {
+      console.warn('Source directory not set');
       return [];
     }
     
-    return fs.readdirSync(validatedPath)
-      .filter(file => {
-        return file.endsWith('.json') && 
-               !this.config.excludeFiles.includes(file);
-      });
+    const languageDir = path.resolve(this.sourceDir, language);
+    const languageFile = path.resolve(this.sourceDir, `${language}.json`);
+    const files = [];
+    
+    // Handle monolith file structure
+    if (fs.existsSync(languageFile) && fs.statSync(languageFile).isFile()) {
+      return [path.basename(languageFile)];
+    }
+    
+    // Handle directory-based structure
+    if (fs.existsSync(languageDir) && fs.statSync(languageDir).isDirectory()) {
+      try {
+        // Ensure the path is within the source directory for security
+        const validatedPath = SecurityUtils.validatePath(languageDir, this.sourceDir);
+        if (!validatedPath) {
+          console.warn(`Language directory not found or invalid: ${languageDir}`);
+          return [];
+        }
+        
+        const findJsonFiles = (dir) => {
+          const results = [];
+          const items = fs.readdirSync(dir, { withFileTypes: true });
+          
+          for (const item of items) {
+            const fullPath = path.join(dir, item.name);
+            
+            if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
+              // Recursively search subdirectories
+              results.push(...findJsonFiles(fullPath));
+            } else if (item.isFile() && item.name.endsWith('.json')) {
+              // Check exclusion patterns
+              const relativePath = path.relative(this.sourceDir, fullPath);
+              const shouldExclude = (this.config.excludeFiles || []).some(pattern => {
+                if (typeof pattern === 'string') {
+                  return relativePath === pattern || relativePath.endsWith(path.sep + pattern);
+                }
+                if (pattern instanceof RegExp) {
+                  return pattern.test(relativePath);
+                }
+                return false;
+              });
+              
+              if (!shouldExclude && !item.name.startsWith('.')) {
+                results.push(path.relative(languageDir, fullPath));
+              }
+            }
+          }
+          
+          return results;
+        };
+        
+        return findJsonFiles(validatedPath);
+      } catch (error) {
+        console.error(`Error reading language directory ${languageDir}:`, error.message);
+        return [];
+      }
+    }
+    
+    // Check for namespace-based structure (language.json files in any subdirectory)
+    const findNamespaceFiles = () => {
+      const results = [];
+      const searchDir = this.sourceDir;
+      
+      try {
+        if (fs.existsSync(searchDir)) {
+          const items = fs.readdirSync(searchDir, { withFileTypes: true });
+          
+          for (const item of items) {
+            if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
+              const namespaceDir = path.join(searchDir, item.name);
+              const namespaceFile = path.join(namespaceDir, `${language}.json`);
+              
+              if (fs.existsSync(namespaceFile)) {
+                results.push(path.relative(path.join(this.sourceDir, item.name), namespaceFile));
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`Error searching for namespace files: ${error.message}`);
+      }
+      
+      return results;
+    };
+    
+    const namespaceFiles = findNamespaceFiles();
+    if (namespaceFiles.length > 0) {
+      return namespaceFiles;
+    }
+    
+    return files;
   }
 
   // Get all keys recursively from an object
@@ -500,21 +634,59 @@ try {
     return report;
   }
 
-  // Save report to file
+  // Save analysis report to a file
   async saveReport(language, report) {
-    const reportPath = path.join(this.outputDir, `analysis-${language}.txt`);
-    const validatedPath = SecurityUtils.validatePath(reportPath, this.outputDir);
-    
-    if (!validatedPath) {
-      throw new Error(t('analyze.invalidReportFilePath') || 'Invalid report file path');
+    try {
+      // Ensure we have a valid output directory
+      if (!this.outputDir) {
+        this.outputDir = path.join(process.cwd(), 'i18n-reports');
+        console.warn(`No output directory specified, using default: ${this.outputDir}`);
+      }
+      
+      // Ensure the output directory exists
+      try {
+        fs.mkdirSync(this.outputDir, { recursive: true });
+      } catch (error) {
+        if (error.code !== 'EEXIST') {
+          console.error(`Failed to create output directory ${this.outputDir}:`, error.message);
+          return null;
+        }
+      }
+      
+      // Validate the output directory is within the project
+      const validatedOutputDir = SecurityUtils.validatePath(this.outputDir, process.cwd());
+      if (!validatedOutputDir) {
+        console.error(`Invalid output directory: ${this.outputDir} is outside project root`);
+        return null;
+      }
+      
+      // Create a safe filename
+      const safeLanguage = language.replace(/[^\w-]/g, '_');
+      const reportPath = path.resolve(validatedOutputDir, `translation-report-${safeLanguage}.json`);
+      
+      // Ensure the final path is still within the output directory
+      if (!reportPath.startsWith(validatedOutputDir)) {
+        console.error('Invalid report path detected, potential directory traversal attack');
+        return null;
+      }
+      
+      // Use safeWriteFile if available, otherwise fall back to writeFileSync
+      if (SecurityUtils.safeWriteFile) {
+        const success = await SecurityUtils.safeWriteFile(reportPath, report, this.outputDir);
+        if (!success) {
+          throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
+        }
+      } else {
+        fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
+      }
+      
+      console.log(`Report saved to: ${reportPath}`);
+      return reportPath;
+      
+    } catch (error) {
+      console.error(`Failed to save report for ${language}:`, error.message);
+      return null;
     }
-    
-    const success = await SecurityUtils.safeWriteFile(validatedPath, report, this.outputDir);
-    if (!success) {
-      throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
-    }
-    
-    return validatedPath;
   }
 
   // Show help message
@@ -545,12 +717,20 @@ try {
       
       if (languages.length === 0) {
         const error = t('analyze.noLanguages') || '⚠️  No target languages found.';
+        const guidance = this.provideSetupGuidance();
+        
         if (args.json) {
           jsonOutput.setStatus('error', error);
-          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+          jsonOutput.setOutput({
+            error,
+            guidance,
+            structure: this.detectStructureType()
+          });
+          console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
           return;
         }
         console.log(error);
+        console.log('\n' + guidance);
         return;
       }
       
@@ -619,7 +799,7 @@ try {
       }
       
       if (args.json) {
-        console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+        jsonOutput.output();
         return results;
       }
       
@@ -663,6 +843,11 @@ try {
       if (args.help) {
         this.showHelp();
         return;
+      }
+      
+      // Handle setup wizard
+      if (args['setup-wizard'] || args.wizard) {
+        return await this.runSetupWizard();
       }
       
       // Initialize configuration properly when called from menu
@@ -752,6 +937,137 @@ try {
       if (!fromMenu && require.main === module) {
         process.exit(1);
       }
+    }
+  }
+  
+  async runSetupWizard() {
+    console.log('🧙‍♂️  Translation Analysis Setup Wizard');
+    console.log('='.repeat(50));
+    
+    const prompts = require('prompts');
+    
+    try {
+      // Detect current structure
+      const structure = this.detectStructureType();
+      console.log(`Current structure detected: ${structure.type}`);
+      
+      const questions = [
+        {
+          type: 'select',
+          name: 'structureType',
+          message: 'Choose your translation file structure:',
+          choices: [
+            { title: 'Monolith files (en.json, de.json, etc.)', value: 'monolith' },
+            { title: 'Directory structure (en/common.json, de/common.json)', value: 'directory' },
+            { title: 'Namespace structure (common/en.json, forms/en.json)', value: 'namespace' },
+            { title: 'Mixed structure (auto-detect)', value: 'mixed' }
+          ],
+          initial: structure.type === 'monolith' ? 0 : structure.type === 'directory' ? 1 : 2
+        },
+        {
+          type: 'text',
+          name: 'sourceDir',
+          message: 'Enter source directory path:',
+          initial: this.sourceDir,
+          validate: value => fs.existsSync(value) ? true : 'Directory does not exist'
+        },
+        {
+          type: 'text',
+          name: 'languages',
+          message: 'Enter languages to analyze (comma-separated, e.g., de,fr,es):',
+          initial: 'de,fr,es,ja,ru',
+          validate: value => value.trim() ? true : 'Please enter at least one language'
+        },
+        {
+          type: 'confirm',
+          name: 'outputReports',
+          message: 'Generate detailed reports for each language?',
+          initial: true
+        },
+        {
+          type: 'text',
+          name: 'outputDir',
+          message: 'Enter output directory for reports:',
+          initial: this.outputDir
+        }
+      ];
+      
+      const response = await prompts(questions);
+      
+      if (!response.structureType) {
+        console.log('Setup cancelled.');
+        return { success: false, cancelled: true };
+      }
+      
+      // Update configuration
+      this.sourceDir = path.resolve(response.sourceDir);
+      this.outputDir = path.resolve(response.outputDir);
+      this.outputReports = response.outputReports;
+      
+      const languages = response.languages.split(',').map(lang => lang.trim()).filter(Boolean);
+      
+      console.log('\n📊 Configuration Summary:');
+      console.log(`Source: ${this.sourceDir}`);
+      console.log(`Output: ${this.outputDir}`);
+      console.log(`Languages: ${languages.join(', ')}`);
+      console.log(`Structure: ${response.structureType}`);
+      
+      const confirm = await prompts({
+        type: 'confirm',
+        name: 'proceed',
+        message: 'Proceed with analysis?',
+        initial: true
+      });
+      
+      if (!confirm.proceed) {
+        console.log('Setup cancelled.');
+        return { success: false, cancelled: true };
+      }
+      
+      // Run analysis with specified languages
+      const results = [];
+      for (const language of languages) {
+        try {
+          console.log(`\n🔍 Analyzing ${language}...`);
+          const result = await this.analyzeLanguage(language);
+          results.push({ language, ...result });
+          
+          if (this.outputReports) {
+            await this.saveReport(language, result);
+            console.log(`✅ Report saved: ${language}.json`);
+          }
+        } catch (error) {
+          console.error(`❌ Error analyzing ${language}:`, error.message);
+          results.push({ language, error: error.message });
+        }
+      }
+      
+      // Generate summary
+      const summary = {
+        totalLanguages: results.length,
+        successful: results.filter(r => !r.error).length,
+        failed: results.filter(r => r.error).length,
+        results
+      };
+      
+      await this.saveReport('wizard-summary', {
+        summary,
+        configuration: response,
+        timestamp: new Date().toISOString()
+      });
+      
+      console.log('\n🎉 Setup complete!');
+      console.log(`Analyzed ${summary.successful}/${summary.totalLanguages} languages successfully`);
+      
+      return {
+        success: true,
+        summary,
+        configuration: response
+      };
+      
+    } catch (error) {
+      console.error('Setup wizard error:', error.message);
+      return { success: false, error: error.message };
     }
   }
 }

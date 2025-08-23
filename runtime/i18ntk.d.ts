@@ -1,6 +1,6 @@
 // runtime/i18ntk.d.ts
 // Complete TypeScript definitions for i18ntk internationalization framework
-// Version 1.9.1 - Full TypeScript support with AES-256-GCM encryption
+// Version 1.10.1 - Full TypeScript support with AES-256-GCM encryption
 
 /**
  * Core translation parameters interface

@@ -6,6 +6,14 @@ const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
 
+// Import secure error handling
+const { 
+  SecureError, 
+  ValidationError, 
+  SecurityError, 
+  EncryptionError 
+} = require('../utils/secure-errors');
+
 // Import existing runtime for backward compatibility
 const baseRuntime = require('./index.js');
 
@@ -19,6 +27,9 @@ const SALT_LENGTH = 32;
 class I18nEnhancedRuntime extends EventEmitter {
   constructor() {
     super();
+    // Generate a unique salt for this instance
+    const instanceSalt = crypto.randomBytes(16).toString('hex');
+    
     this.config = {
       baseDir: './locales',
       defaultLanguage: 'en',
@@ -31,11 +42,16 @@ class I18nEnhancedRuntime extends EventEmitter {
         keyLength: KEY_LENGTH,
         ivLength: IV_LENGTH,
         authTagLength: AUTH_TAG_LENGTH,
+        salt: instanceSalt, // Store the instance-specific salt
+        saltRounds: 16, // Number of bytes for salt generation
       },
       cache: {
         enabled: true,
-        maxSize: 1000,
+        maxSize: 1000, // Maximum number of entries
+        maxMemoryMB: 100, // Maximum memory in MB before eviction
         ttl: 300000, // 5 minutes
+        checkFrequency: 100, // Check memory every 100 operations
+        entrySizeLimit: 1024 * 10, // 10KB max per entry
       },
       security: {
         validateInputs: true,
@@ -46,6 +62,8 @@ class I18nEnhancedRuntime extends EventEmitter {
     };
     this.encryptionKey = null;
     this.cache = new Map();
+    this.cacheSize = 0; // Track total cache size in bytes
+    this.cacheOpsSinceLastCheck = 0;
     this.plugins = [];
     this.metrics = {
       totalTranslations: 0,
@@ -53,8 +71,26 @@ class I18nEnhancedRuntime extends EventEmitter {
       averageTranslationTime: 0,
       encryptionTime: 0,
       memoryUsage: 0,
+      cacheEvictions: 0,
+      cacheSizeBytes: 0,
+      cacheEntryCount: 0,
+      cacheHits: 0,
+      cacheMisses: 0,
     };
     this.namespaces = new Map();
+    
+    // Setup periodic memory checks
+    this.memoryCheckInterval = setInterval(
+      () => this.checkMemoryUsage(), 
+      30000 // Check every 30 seconds
+    );
+    
+    // Ensure cleanup on process exit
+    if (process && process.on) {
+      process.on('exit', () => this.cleanup());
+      process.on('SIGINT', () => this.cleanup());
+      process.on('uncaughtException', () => this.cleanup());
+    }
     
     // Add default translations namespace
     this.addNamespace('default', {
@@ -73,18 +109,42 @@ class I18nEnhancedRuntime extends EventEmitter {
     });
   }
 
-  // AES-256-GCM encryption implementation
+  // Encryption/decryption methods with secure error handling
   async encryptData(data, key = this.encryptionKey) {
-    if (!key) throw new Error('Encryption key not set');
+    if (!key) {
+      throw new EncryptionError('Encryption key not set', { 
+        operation: 'encrypt',
+        keyType: typeof key
+      });
+    }
     
     const startTime = Date.now();
     
     try {
+      if (typeof data !== 'string') {
+        try {
+          data = JSON.stringify(data);
+        } catch (e) {
+          throw new ValidationError('Failed to stringify data for encryption', {
+            dataType: typeof data,
+            error: e.message
+          });
+        }
+      }
+      
       const iv = crypto.randomBytes(IV_LENGTH);
       const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(key, 'hex'), iv);
       
-      let encrypted = cipher.update(data, 'utf8', 'hex');
-      encrypted += cipher.final('hex');
+      let encrypted;
+      try {
+        encrypted = cipher.update(data, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+      } catch (e) {
+        throw new EncryptionError('Failed to encrypt data', {
+          dataLength: data ? data.length : 0,
+          error: e.message
+        });
+      }
       
       const authTag = cipher.getAuthTag();
       
@@ -93,12 +153,27 @@ class I18nEnhancedRuntime extends EventEmitter {
         iv: iv.toString('hex'),
         authTag: authTag.toString('hex'),
         timestamp: Date.now(),
+        version: 1
       };
       
       this.metrics.encryptionTime += Date.now() - startTime;
-      return JSON.stringify(result);
+      
+      try {
+        return JSON.stringify(result);
+      } catch (e) {
+        throw new EncryptionError('Failed to stringify encrypted result', {
+          resultType: typeof result,
+          error: e.message
+        });
+      }
     } catch (error) {
-      throw new Error(`Encryption failed: ${error.message}`);
+      if (error instanceof SecureError) throw error;
+      
+      // Sanitize error message to prevent information leakage
+      throw new EncryptionError('Encryption failed', {
+        operation: 'encrypt',
+        errorId: crypto.randomBytes(4).toString('hex')
+      });
     }
   }
 
@@ -120,25 +195,63 @@ class I18nEnhancedRuntime extends EventEmitter {
     }
   }
 
-  // Generate secure encryption key
-  generateEncryptionKey() {
-    return crypto.randomBytes(KEY_LENGTH).toString('hex');
+  // Generate secure encryption key with optional salt
+  generateEncryptionKey(salt = null) {
+    // If no salt provided, generate a new one
+    if (!salt) {
+      salt = crypto.randomBytes(16).toString('hex');
+    }
+    // Derive key using scrypt for additional security
+    const key = crypto.scryptSync(
+      crypto.randomBytes(32).toString('hex'),
+      salt,
+      KEY_LENGTH
+    );
+    return {
+      key: key.toString('hex'),
+      salt: salt
+    };
   }
 
-  // Hash key for storage (using Argon2id-like approach with crypto)
-  hashKey(key) {
-    return crypto.scryptSync(key, 'i18ntk-salt', KEY_LENGTH).toString('hex');
+  // Hash key for storage with secure salt management
+  hashKey(key, salt = null) {
+    // Generate a new random salt if none provided
+    if (!salt) {
+      salt = crypto.randomBytes(16).toString('hex');
+      // Store the salt in config if not already set
+      if (!this.config.encryption.salt) {
+        this.config.encryption.salt = salt;
+      }
+    }
+    // Use scrypt with the salt (either provided, generated, or from config)
+    const derivedKey = crypto.scryptSync(
+      key, 
+      salt || this.config.encryption.salt, 
+      KEY_LENGTH
+    );
+    return {
+      key: derivedKey.toString('hex'),
+      salt: salt || this.config.encryption.salt
+    };
   }
 
-  // Enhanced translation with TypeScript support
+  // Enhanced translation with TypeScript support and secure error handling
   async translate(key, params = {}, options = {}) {
     const startTime = Date.now();
     
     try {
-      // Validate inputs
+      // Validate inputs with secure error handling
       if (this.config.security.validateInputs) {
-        this.validateTranslationKey(key);
-        this.validateParams(params);
+        try {
+          this.validateTranslationKey(key);
+          this.validateParams(params);
+        } catch (error) {
+          throw new ValidationError('Invalid translation input', {
+            key: key ? 'Provided' : 'Missing',
+            params: params ? 'Provided' : 'Missing',
+            details: error.message
+          });
+        }
       }
 
       // Merge options with config
@@ -349,21 +462,209 @@ class I18nEnhancedRuntime extends EventEmitter {
       .replace(/'/g, '&#x27;');
   }
 
-  // Cache management
+  // Cache management with secure key generation
   getCacheKey(key, params, language) {
-    return `${language}:${key}:${JSON.stringify(params)}`;
-  }
-
-  setCache(key, value) {
-    if (this.cache.size >= this.config.cache.maxSize) {
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+    // Sanitize inputs
+    const sanitizedKey = this.sanitizeCacheKey(key);
+    const sanitizedLanguage = this.sanitizeLanguageCode(language);
+    
+    // Create a stable string representation of params
+    let paramsString = '';
+    if (params && typeof params === 'object') {
+      try {
+        // Sort keys to ensure consistent ordering
+        const sortedParams = {};
+        Object.keys(params).sort().forEach(k => {
+          if (params[k] !== undefined && params[k] !== null) {
+            sortedParams[k] = params[k];
+          }
+        });
+        paramsString = JSON.stringify(sortedParams);
+      } catch (e) {
+        // If we can't stringify params, use a hash of the params object
+        paramsString = crypto.createHash('sha256')
+          .update(JSON.stringify(params) || '')
+          .digest('hex')
+          .substring(0, 16);
+      }
     }
     
-    this.cache.set(key, {
+    // Create a hash of the combined components to prevent injection
+    const cacheKey = crypto.createHash('sha256')
+      .update(`${sanitizedLanguage}:${sanitizedKey}:${paramsString}`)
+      .digest('hex');
+      
+    return `i18n:${cacheKey}`;
+  }
+  
+  // Sanitize cache key input
+  sanitizeCacheKey(key) {
+    if (typeof key !== 'string') {
+      throw new ValidationError('Cache key must be a string');
+    }
+    
+    // Remove any potentially dangerous characters
+    return key.replace(/[^\w\-.:@]/g, '_');
+  }
+  
+  // Sanitize language code
+  sanitizeLanguageCode(lang) {
+    if (typeof lang !== 'string') {
+      return 'en'; // Default to English
+    }
+    
+    // Only allow letters and hyphens, convert to lowercase
+    return lang.replace(/[^a-zA-Z\-]/g, '').toLowerCase();
+  }
+
+  // Calculate the approximate size of an object in bytes
+  getObjectSize(obj) {
+    if (obj === null || obj === undefined) return 0;
+    
+    let bytes = 0;
+    
+    if (typeof obj === 'string') {
+      // UTF-16 uses 2 bytes per character
+      bytes = obj.length * 2;
+    } else if (typeof obj === 'number') {
+      // Numbers are 8 bytes (64 bits)
+      bytes = 8;
+    } else if (typeof obj === 'boolean') {
+      // Booleans are 4 bytes
+      bytes = 4;
+    } else if (typeof obj === 'object') {
+      // For objects and arrays, sum the size of all properties
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          bytes += this.getObjectSize(obj[key]);
+          // Add the size of the key itself
+          bytes += key.length * 2; // UTF-16
+        }
+      }
+    }
+    
+    return bytes;
+  }
+  
+  // Check if we need to free up memory
+  checkMemoryUsage(force = false) {
+    this.cacheOpsSinceLastCheck++;
+    
+    // Only check every N operations or if forced
+    if (!force && this.cacheOpsSinceLastCheck < this.config.cache.checkFrequency) {
+      return;
+    }
+    
+    this.cacheOpsSinceLastCheck = 0;
+    
+    // Check memory usage
+    const memoryUsage = process.memoryUsage();
+    const heapUsedMB = memoryUsage.heapUsed / (1024 * 1024);
+    
+    // If we're using too much memory, clear some cache entries
+    if (heapUsedMB > this.config.cache.maxMemoryMB || force) {
+      const targetReduction = Math.ceil(this.cache.size * 0.2); // Remove 20% of entries
+      let removed = 0;
+      
+      // Sort entries by last access time (oldest first)
+      const entries = Array.from(this.cache.entries())
+        .sort((a, b) => a[1].timestamp - b[1].timestamp);
+      
+      // Remove oldest entries
+      for (const [key, entry] of entries) {
+        if (removed >= targetReduction) break;
+        
+        // Reduce cache size
+        this.cacheSize -= this.getObjectSize(entry);
+        this.cache.delete(key);
+        removed++;
+        this.metrics.cacheEvictions++;
+      }
+      
+      this.emit('cachePruned', {
+        timestamp: new Date(),
+        entriesRemoved: removed,
+        remainingEntries: this.cache.size,
+        heapUsedMB,
+        maxMemoryMB: this.config.cache.maxMemoryMB
+      });
+    }
+    
+    // Update metrics
+    this.metrics.memoryUsage = heapUsedMB;
+    this.metrics.cacheSizeBytes = this.cacheSize;
+    this.metrics.cacheEntryCount = this.cache.size;
+  }
+  
+  // Clean up resources
+  cleanup() {
+    if (this.memoryCheckInterval) {
+      clearInterval(this.memoryCheckInterval);
+      this.memoryCheckInterval = null;
+    }
+    
+    // Clear all caches
+    this.cache.clear();
+    this.cacheSize = 0;
+    
+    // Clear namespaces
+    this.namespaces.clear();
+    
+    // Clear encryption key from memory
+    if (this.encryptionKey) {
+      this.encryptionKey = null;
+    }
+    
+    // Clear any sensitive data from config
+    if (this.config.encryption) {
+      this.config.encryption.salt = null;
+    }
+  }
+  
+  // Add or update a cache entry
+  setCache(key, value) {
+    // Check entry size limit
+    const entrySize = this.getObjectSize(value);
+    if (entrySize > this.config.cache.entrySizeLimit) {
+      this.emit('cacheReject', {
+        reason: 'entry_too_large',
+        key,
+        size: entrySize,
+        maxSize: this.config.cache.entrySizeLimit
+      });
+      return false;
+    }
+    
+    // Check if we need to make space
+    if (this.cache.size >= this.config.cache.maxSize) {
+      // Remove the least recently used entry
+      const lruKey = this.cache.keys().next().value;
+      const lruEntry = this.cache.get(lruKey);
+      
+      if (lruEntry) {
+        this.cacheSize -= this.getObjectSize(lruEntry);
+        this.cache.delete(lruKey);
+        this.metrics.cacheEvictions++;
+      }
+    }
+    
+    // Add the new entry
+    const entry = {
       value,
       timestamp: Date.now(),
-    });
+      size: entrySize
+    };
+    
+    // Update cache size
+    this.cacheSize += entrySize;
+    
+    // Store the entry
+    this.cache.set(key, entry);
+    
+    // Check memory usage periodically
+    this.checkMemoryUsage();
+    
+    return true;
   }
 
   // Configuration management
@@ -372,7 +673,9 @@ class I18nEnhancedRuntime extends EventEmitter {
     this.cache.clear();
     
     if (updates.encryption?.enabled && !this.encryptionKey) {
-      this.encryptionKey = this.generateEncryptionKey();
+      const { key, salt } = this.generateEncryptionKey(updates.encryption.salt);
+      this.encryptionKey = key;
+      this.config.encryption.salt = salt;
     }
   }
 
@@ -418,15 +721,34 @@ class I18nEnhancedRuntime extends EventEmitter {
       averageTranslationTime: 0,
       encryptionTime: 0,
       memoryUsage: process.memoryUsage().heapUsed,
+      cacheHits: 0,
+      cacheMisses: 0,
+      cacheEvictions: 0,
     };
   }
 
   getCacheInfo() {
+    const memoryUsage = process.memoryUsage();
+    
     return {
-      size: this.cache.size,
-      maxSize: this.config.cache.maxSize,
-      hits: this.metrics.cacheHitRate,
-      misses: this.metrics.totalTranslations - this.metrics.cacheHitRate,
+      entries: this.cache.size,
+      maxEntries: this.config.cache.maxSize,
+      sizeBytes: this.cacheSize,
+      maxMemoryMB: this.config.cache.maxMemoryMB,
+      entrySizeLimit: this.config.cache.entrySizeLimit,
+      hits: this.metrics.cacheHits,
+      misses: this.metrics.cacheMisses,
+      hitRate: this.metrics.cacheHits / (this.metrics.cacheHits + this.metrics.cacheMisses) || 0,
+      evictions: this.metrics.cacheEvictions,
+      memoryUsage: {
+        heapUsedMB: memoryUsage.heapUsed / (1024 * 1024),
+        heapTotalMB: memoryUsage.heapTotal / (1024 * 1024),
+        externalMB: memoryUsage.external / (1024 * 1024) || 0,
+        arrayBuffersMB: memoryUsage.arrayBuffers / (1024 * 1024) || 0,
+        rssMB: memoryUsage.rss / (1024 * 1024)
+      },
+      ttl: this.config.cache.ttl,
+      lastChecked: new Date().toISOString()
     };
   }
 

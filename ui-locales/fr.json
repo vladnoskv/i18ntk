@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.9.1",
-    "updated": "2025-08-15"
+    "version": "1.10.0",
+    "updated": "2025-08-16"
   },
   "common": {
     "welcome": "Bienvenue",
@@ -861,7 +861,8 @@
       "sizing": "  sizing    - Analyser le dimensionnement",
       "complete": "  complete  - Compléter les traductions (100 % de couverture)",
       "summary": "  summary   - Afficher le statut du projet",
-      "debug": "  debug     - Déboguer les problèmes de traduction"
+      "debug": "  debug     - Déboguer les problèmes de traduction",
+      "scanner": "  scanner   - Scanner le projet pour les clés i18n"
     },
     "options": {
       "sourceDir": "\n  --source-dir <dir>     Répertoire source à analyser",
@@ -914,6 +915,7 @@
   "init": {
     "initializationTitle": "🚀 Boîte à outils de gestion i18n – Initialisation du projet",
     "sourceDirectoryLabel": "📁 Répertoire source : {dir}",
+    "createdSourceLanguageDirectory": "✅ Créé le répertoire de langue source: {dir}",
     "requiredTitle": "Initialisation requise",
     "requiredBody": "Ce projet doit être initialisé avant d'exécuter cette commande.",
     "promptRunNow": "Voulez-vous exécuter l'initialisation maintenant ? (o/N): ",
@@ -1108,7 +1110,7 @@
       "translation_replacement_complete": "\n✅ Remplacement des traductions terminé !",
       "total_replacements": "📊 Remplacements totaux : {count}",
       "dry_run_mode": "\n⚠️ MODE DRY RUN – Aucun fichier n’a été modifié",
-      "tool_title": "🌍 Remplaceur de traductions natives v1.9.1",
+      "tool_title": "🌍 Remplaceur de traductions natives v1.10.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Exécution en mode DRY RUN – aucun fichier ne sera modifié\n",
       "error_during_replacement": "❌ Erreur lors du remplacement des traductions :"
@@ -2005,8 +2007,8 @@
       "sizingCommand": "   sizing    - Analyser la taille",
       "completeCommand": "   complete  - Compléter les traductions (couverture 100%)",
       "summaryCommand": "   summary   - Afficher l'état du projet",
-      "scannerCommand": "   scanner   - Scanner les problèmes i18n",
-      "debugCommand": "   debug     - Debug translation issues"
+      "debugCommand": "   debug     - Déboguer les problèmes de traduction",
+      "scannerCommand": "   scanner   - Scanner le projet pour les clés i18n"
     },
     "test_complete_system": {
       "starting_test": "🧪 Démarrage du test complet du système\n",

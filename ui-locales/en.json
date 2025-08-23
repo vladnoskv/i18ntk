@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.9.1",
-    "updated": "2025-08-15"
+    "version": "1.10.0",
+    "updated": "2025-08-16"
   },
   
   "common": {
@@ -901,6 +901,7 @@
     "completeCommand": "  complete  - Complete translations (100% coverage)",
     "summaryCommand": "  summary   - Show project status",
     "debugCommand": "  debug     - Debug translation issues",
+    "scannerCommand": "  scanner   - Scan project for i18n keys",
     "menu": {
       "pressEnterToContinue": "Press Enter to continue...",
       "title": "\n🌐 I18NTK MANAGEMENT MENU\n",
@@ -973,6 +974,7 @@
     "requiredBody": "This project must be initialized before running this command.",
     "promptRunNow": "Would you like to run initialization now? (y/N): ",
     "sourceLanguageLabel": "🌍 Source Language: {language}",
+    "createdSourceLanguageDirectory": "✅ Created source language directory: {dir}",
     "detectedI18nFrameworks": "🔍 Detected i18n framework(s): {frameworks}",
     "pinMustBe4Digits": "🔐 PIN must be 4 digits.",
     "existingDirectoriesFound": "📁 Existing translation directories found:",
@@ -1163,7 +1165,7 @@
       "translation_replacement_complete": "\n✅ Translation replacement complete!",
       "total_replacements": "📊 Total replacements: {count}",
       "dry_run_mode": "\n⚠️ DRY RUN MODE - No files were modified",
-      "tool_title": "🌍 Native Translation Replacer v1.9.1",
+      "tool_title": "🌍 Native Translation Replacer v1.10.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Running in DRY RUN mode - no files will be modified\n",
       "error_during_replacement": "❌ Error during translation replacement:"

@@ -5,7 +5,7 @@
  * Creates an optimized package containing only essential files
  * and the English UI locale to reduce bundle size.
  * 
- * @version 1.9.0, 1.8.3
+ * @version 1.10.0
  * @since 2025-08-08
  */
 
