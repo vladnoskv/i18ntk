@@ -7,7 +7,6 @@
  * 
  */
 
-const fs = require('fs');
 const path = require('path');
 const cliHelper = require('../utils/cli-helper');
 const { loadTranslations, t } = require('../utils/i18n-helper');
@@ -146,7 +145,12 @@ class I18nAnalyzer {
   // Get all available languages
   getAvailableLanguages() {
     try {
-      const items = fs.readdirSync(this.sourceDir, { withFileTypes: true });
+      const items = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd(), { withFileTypes: true });
+      if (!items) {
+        console.error('Error reading source directory: Unable to access directory');
+        return [];
+      }
+      
       const languages = [];
       
       // Check for directory-based structure
@@ -173,15 +177,17 @@ class I18nAnalyzer {
       for (const dir of directories) {
         const dirPath = path.join(this.sourceDir, dir);
         try {
-          const dirItems = fs.readdirSync(dirPath, { withFileTypes: true });
-          const jsonFiles = dirItems
-            .filter(item => item.isFile() && item.name.endsWith('.json'))
-            .map(item => item.name.replace('.json', ''));
-          
-          // If directory contains JSON files, it's likely a language directory
-          if (jsonFiles.length > 0) {
-            if (!languages.includes(dir)) {
-              languages.push(dir);
+          const dirItems = SecurityUtils.safeReaddirSync(dirPath, process.cwd(), { withFileTypes: true });
+          if (dirItems) {
+            const jsonFiles = dirItems
+              .filter(item => item.isFile() && item.name.endsWith('.json'))
+              .map(item => item.name.replace('.json', ''));
+            
+            // If directory contains JSON files, it's likely a language directory
+            if (jsonFiles.length > 0) {
+              if (!languages.includes(dir)) {
+                languages.push(dir);
+              }
             }
           }
         } catch (error) {
@@ -208,12 +214,14 @@ class I18nAnalyzer {
     const files = [];
     
     // Handle monolith file structure
-    if (fs.existsSync(languageFile) && fs.statSync(languageFile).isFile()) {
+    const languageFileStat = SecurityUtils.safeStatSync(languageFile, this.sourceDir);
+    if (languageFileStat && languageFileStat.isFile()) {
       return [path.basename(languageFile)];
     }
     
     // Handle directory-based structure
-    if (fs.existsSync(languageDir) && fs.statSync(languageDir).isDirectory()) {
+    const languageDirStat = SecurityUtils.safeStatSync(languageDir, this.sourceDir);
+    if (languageDirStat && languageDirStat.isDirectory()) {
       try {
         // Ensure the path is within the source directory for security
         const validatedPath = SecurityUtils.validatePath(languageDir, this.sourceDir);
@@ -224,7 +232,9 @@ class I18nAnalyzer {
         
         const findJsonFiles = (dir) => {
           const results = [];
-          const items = fs.readdirSync(dir, { withFileTypes: true });
+          const items = SecurityUtils.safeReaddirSync(dir, this.sourceDir, { withFileTypes: true });
+          
+          if (!items) return results;
           
           for (const item of items) {
             const fullPath = path.join(dir, item.name);
@@ -267,16 +277,20 @@ class I18nAnalyzer {
       const searchDir = this.sourceDir;
       
       try {
-        if (fs.existsSync(searchDir)) {
-          const items = fs.readdirSync(searchDir, { withFileTypes: true });
+        const searchDirExists = SecurityUtils.safeExistsSync(searchDir, this.sourceDir);
+        if (searchDirExists) {
+          const items = SecurityUtils.safeReaddirSync(searchDir, this.sourceDir, { withFileTypes: true });
           
-          for (const item of items) {
-            if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
-              const namespaceDir = path.join(searchDir, item.name);
-              const namespaceFile = path.join(namespaceDir, `${language}.json`);
-              
-              if (fs.existsSync(namespaceFile)) {
-                results.push(path.relative(path.join(this.sourceDir, item.name), namespaceFile));
+          if (items) {
+            for (const item of items) {
+              if (item.isDirectory() && !item.name.startsWith('.') && item.name !== 'node_modules') {
+                const namespaceDir = path.join(searchDir, item.name);
+                const namespaceFile = path.join(namespaceDir, `${language}.json`);
+                
+                const namespaceFileExists = SecurityUtils.safeExistsSync(namespaceFile, this.sourceDir);
+                if (namespaceFileExists) {
+                  results.push(path.relative(path.join(this.sourceDir, item.name), namespaceFile));
+                }
               }
             }
           }
@@ -468,15 +482,28 @@ class I18nAnalyzer {
       const sourceFullPath = path.join(this.sourceDir, sourceFilePath);
       const targetFullPath = path.join(this.sourceDir, targetFilePath);
       
-      if (!fs.existsSync(sourceFullPath)) {
+      const sourceExists = SecurityUtils.safeExistsSync(sourceFullPath, this.sourceDir);
+      if (!sourceExists) {
         continue;
       }
       
       let sourceContent, targetContent;
       
       try {
-        const sourceFileContent = fs.readFileSync(sourceFullPath, 'utf8');
-        sourceContent = JSON.parse(sourceFileContent);
+        const sourceFileContent = SecurityUtils.safeReadFileSync(sourceFullPath, this.sourceDir, 'utf8');
+        if (!sourceFileContent) {
+          analysis.files[fileName] = {
+            error: `Failed to read source file: File not accessible or empty`
+          };
+          continue;
+        }
+        sourceContent = SecurityUtils.safeParseJSON(sourceFileContent);
+        if (!sourceContent) {
+          analysis.files[fileName] = {
+            error: `Failed to parse source file: Invalid JSON format`
+          };
+          continue;
+        }
       } catch (error) {
         analysis.files[fileName] = {
           error: `Failed to parse source file: ${error.message}`
@@ -484,7 +511,8 @@ class I18nAnalyzer {
         continue;
       }
       
-      if (!fs.existsSync(targetFullPath)) {
+      const targetExists = SecurityUtils.safeExistsSync(targetFullPath, this.sourceDir);
+      if (!targetExists) {
         analysis.files[fileName] = {
           status: 'missing',
           sourceKeys: this.getAllKeys(sourceContent).size
@@ -493,9 +521,15 @@ class I18nAnalyzer {
       }
       
 try {
-    const targetFileContent = fs.readFileSync(targetFullPath, 'utf8');
-    const parsed = JSON.parse(targetFileContent);
-
+    const targetFileContent = SecurityUtils.safeReadFileSync(targetFullPath, this.sourceDir, 'utf8');
+    if (!targetFileContent) {
+      analysis.files[fileName] = {
+        error: `Failed to read target file: File not accessible or empty`
+      };
+      continue;
+    }
+    
+    const parsed = SecurityUtils.safeParseJSON(targetFileContent);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       analysis.files[fileName] = {
         error: `Invalid structure in target file: must be a plain object (not array/null/type)`
@@ -644,13 +678,10 @@ try {
       }
       
       // Ensure the output directory exists
-      try {
-        fs.mkdirSync(this.outputDir, { recursive: true });
-      } catch (error) {
-        if (error.code !== 'EEXIST') {
-          console.error(`Failed to create output directory ${this.outputDir}:`, error.message);
-          return null;
-        }
+      const dirCreated = SecurityUtils.safeMkdirSync(this.outputDir, process.cwd(), { recursive: true });
+      if (!dirCreated) {
+        console.error(`Failed to create output directory ${this.outputDir}`);
+        return null;
       }
       
       // Validate the output directory is within the project
@@ -670,14 +701,10 @@ try {
         return null;
       }
       
-      // Use safeWriteFile if available, otherwise fall back to writeFileSync
-      if (SecurityUtils.safeWriteFile) {
-        const success = await SecurityUtils.safeWriteFile(reportPath, report, this.outputDir);
-        if (!success) {
-          throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
-        }
-      } else {
-        fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8');
+      // Use safeWriteFile for secure file writing
+      const success = await SecurityUtils.safeWriteFile(reportPath, JSON.stringify(report, null, 2), process.cwd(), 'utf8');
+      if (!success) {
+        throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
       }
       
       console.log(`Report saved to: ${reportPath}`);
@@ -709,8 +736,9 @@ try {
       }
       
       // Ensure output directory exists
-      if (!fs.existsSync(this.outputDir)) {
-        fs.mkdirSync(this.outputDir, { recursive: true });
+      const outputDirExists = SecurityUtils.safeExistsSync(this.outputDir, process.cwd());
+      if (!outputDirExists) {
+        SecurityUtils.safeMkdirSync(this.outputDir, process.cwd(), { recursive: true });
       }
       
       const languages = this.getAvailableLanguages();
@@ -1100,7 +1128,14 @@ async function analyzeTranslations(datasetPath) {
   analyzer.outputDir = './reports';
   
   // Load and analyze the dataset
-  const dataset = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
+  const datasetContent = SecurityUtils.safeReadFileSync(datasetPath, process.cwd(), 'utf8');
+  if (!datasetContent) {
+    throw new Error('Failed to load dataset for benchmark');
+  }
+  const dataset = SecurityUtils.safeParseJSON(datasetContent);
+  if (!dataset) {
+    throw new Error('Failed to parse dataset JSON');
+  }
   
   // Simulate analysis processing
   const languages = Object.keys(dataset).filter(lang => lang !== 'en');

@@ -334,6 +334,15 @@ class I18nSetupManager {
         const SettingsManager = require('../settings/settings-manager');
         const settingsManager = new SettingsManager();
         
+console.log('🔧 About to update settings with:', {
+  setup: {
+    completed: true,
+    completedAt: new Date().toISOString(),
+    version: require('../package.json').version,
+    setupId: `setup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  }
+});
+        
         settingsManager.updateSettings({
             'sourceDir': this.config.sourceDir,
             'outputDir': this.config.outputDir,

@@ -6,7 +6,7 @@
  * This script verifies that versions have been properly deprecated
  */
 
-const { execSync } = require('child_process');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
@@ -21,9 +21,21 @@ console.log(`🎯 Current Version: ${packageJson.version}`);
 console.log('=====================================\n');
 
 // Get deprecation info for all versions
-function getDeprecationInfo() {
+async function getDeprecationInfo() {
   try {
-    const output = execSync('npm view i18ntk --json', { encoding: 'utf8' });
+    const output = await new Promise((resolve, reject) => {
+      https.get('https://registry.npmjs.org/i18ntk', (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          resolve(data);
+        });
+      }).on('error', (err) => {
+        reject(err);
+      });
+    });
     const packageInfo = JSON.parse(output);
 
     if (packageInfo.versions) {
@@ -52,10 +64,10 @@ function getDeprecationInfo() {
 }
 
 // Main verification process
-function verifyDeprecations() {
+async function verifyDeprecations() {
   console.log('📊 Checking deprecation status...\n');
 
-  const deprecationInfo = getDeprecationInfo();
+  const deprecationInfo = await getDeprecationInfo();
 
   if (!deprecationInfo) {
     console.log('❌ Could not retrieve deprecation information');
@@ -131,16 +143,16 @@ function verifyDeprecations() {
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) {
   console.log(`
-i18ntk Deprecation Verification Script
+  i18ntk Deprecation Verification Script
 
-Usage:
-  node scripts/verify-deprecations.js [options]
+  Usage:
+    node scripts/verify-deprecations.js [options]
 
-Description:
-  This script verifies that i18ntk versions have been properly deprecated.
+  Description:
+    This script verifies that i18ntk versions have been properly deprecated.
 
-Examples:
-  node scripts/verify-deprecations.js
+  Examples:
+    node scripts/verify-deprecations.js
 `);
   process.exit(0);
 }

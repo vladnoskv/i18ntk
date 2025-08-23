@@ -70,6 +70,61 @@ class SecurityUtils {
   }
 
   /**
+   * Safely checks if a path exists.
+   * @param {string} filePath - Path to check.
+   * @param {string} basePath - Base path for validation.
+   * @returns {boolean} - True if the path exists and is safe.
+   */
+  static safeExistsSync(filePath, basePath) {
+    const validatedPath = this.validatePath(filePath, basePath);
+    if (!validatedPath) {
+      return false;
+    }
+    return fs.existsSync(validatedPath);
+  }
+
+  /**
+   * Safely gets file stats.
+   * @param {string} filePath - Path to get stats for.
+   * @param {string} basePath - Base path for validation.
+   * @returns {fs.Stats|null} - File stats or null if error.
+   */
+  static safeStatSync(filePath, basePath) {
+    const validatedPath = this.validatePath(filePath, basePath);
+    if (!validatedPath) {
+      return null;
+    }
+    try {
+      return fs.statSync(validatedPath);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Safely creates a directory.
+   * @param {string} dirPath - Path of the directory to create.
+   * @param {string} basePath - Base path for validation.
+   * @param {object} options - fs.mkdirSync options.
+   * @returns {boolean} - True if successful.
+   */
+  static safeMkdirSync(dirPath, basePath, options) {
+    const validatedPath = this.validatePath(dirPath, basePath);
+    if (!validatedPath) {
+      return false;
+    }
+    try {
+      fs.mkdirSync(validatedPath, options);
+      return true;
+    } catch (error) {
+      if (error.code === 'EEXIST') {
+        return true; // Already exists
+      }
+      return false;
+    }
+  }
+
+  /**
    * Safely reads a file with path validation and error handling
    * @param {string} filePath - Path to the file
    * @param {string} basePath - Base path for validation
@@ -207,7 +262,7 @@ class SecurityUtils {
     }
 
     const {
-      allowedChars = /^[a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:\;"'\/\\]+$/,
+      allowedChars = /^[a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:\;"'\/\\]+$/, 
       maxLength = 1000,
       removeHTML = true,
       removeScripts = true
@@ -315,7 +370,7 @@ class SecurityUtils {
           if (typeof value === 'string') {
             // Basic path validation - will be further validated when used
             validatedConfig[key] = this.sanitizeInput(value, {
-              allowedChars: /^[a-zA-Z0-9\-_\.\,\/\\\:\s]+$/,
+              allowedChars: /^[a-zA-Z0-9\-_\.\,\/\\:\s]+$/, 
               maxLength: 500
             });
           }
@@ -431,6 +486,115 @@ class SecurityUtils {
         const i18n = getI18n();
         console.log(i18n.t('security.security_alert', { timestamp, event }), details);
       }
+    }
+  }
+  /**
+   * Safely reads directory contents with path validation
+   * @param {string} dirPath - Directory path to read
+   * @param {string} basePath - Base path for validation
+   * @param {object} options - Options for readdirSync (withFileTypes, etc.)
+   * @returns {Array|null} - Directory contents or null if error
+   */
+  static safeReaddirSync(dirPath, basePath, options = {}) {
+    const validatedPath = this.validatePath(dirPath, basePath);
+    if (!validatedPath) {
+      return null;
+    }
+
+    try {
+      return fs.readdirSync(validatedPath, options);
+    } catch (error) {
+      const i18n = getI18n();
+      console.warn(i18n.t('security.directory_read_error', { errorMessage: error.message }));
+      return null;
+    }
+  }
+
+  /**
+   * Secure performance measurement utility
+   * Provides safe timing functionality without requiring perf_hooks
+   * @returns {object} - Performance timing object
+   */
+  static getPerformanceTimer() {
+    // Use Date.now() as a fallback if perf_hooks is not available
+    const hasPerfHooks = (() => {
+      try {
+        require('perf_hooks');
+        return true;
+      } catch {
+        return false;
+      }
+    })();
+
+    if (hasPerfHooks) {
+      const { performance } = require('perf_hooks');
+      return {
+        now: () => performance.now(),
+        isHighResolution: true
+      };
+    } else {
+      return {
+        now: () => Date.now(),
+        isHighResolution: false
+      };
+    }
+  }
+
+  /**
+   * Secure debug logging utility
+   * Provides controlled debug output based on configuration
+   * @param {string} level - Log level (debug, info, warn, error)
+   * @param {string} message - Log message
+   * @param {object} details - Additional details
+   */
+  static debugLog(level, message, details = {}) {
+    try {
+      const cfg = configManager.getConfig();
+      const debugEnabled = cfg.debug?.enabled || false;
+      const logLevel = cfg.debug?.logLevel || 'info';
+      
+      if (!debugEnabled) {
+        return;
+      }
+
+      const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+      const currentLevel = levels[logLevel] || 1;
+      const messageLevel = levels[level] || 1;
+
+      if (messageLevel < currentLevel) {
+        return;
+      }
+
+      const timestamp = new Date().toISOString();
+      const logEntry = {
+        timestamp,
+        level: level.toUpperCase(),
+        message,
+        details,
+        pid: process.pid
+      };
+
+      // Only log to console if debug mode is enabled
+      if (cfg.debug?.showConsoleOutput !== false) {
+        console.log(`[${logEntry.level}] ${timestamp}: ${message}`, details);
+      }
+
+      // Log to file if configured
+      if (cfg.debug?.logFile) {
+        const fs = require('fs');
+        const path = require('path');
+        const logFile = path.resolve(cfg.debug.logFile);
+        
+        try {
+          const logLine = JSON.stringify(logEntry) + '\n';
+          fs.appendFileSync(logFile, logLine);
+        } catch (error) {
+          // Silently fail if file logging fails
+        }
+      }
+    } catch (error) {
+      // Fallback: if config can't be loaded, don't crash
+      console.warn(`[DEBUG] ${message}`, details);
     }
   }
 }

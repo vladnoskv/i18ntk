@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { envManager } = require('./env-manager');
 
 class SecurityChecker {
     constructor() {
@@ -20,11 +21,14 @@ class SecurityChecker {
      */
     shouldBeSilent() {
         // Determine silent mode based on environment variables
-        return (
+        const logLevel = envManager.get('I18NTK_LOG_LEVEL');
+        const silentMode = envManager.get('I18NTK_SILENT');
+        const isSilent = (
             process.env.npm_config_loglevel === 'silent' ||
-            process.env.I18NTK_SILENT === 'true' ||
+            silentMode === 'true' ||
             process.env.CI === 'true'
         );
+        return isSilent;
     }
 
     /**

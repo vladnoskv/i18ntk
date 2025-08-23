@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.2] - 2025-08-23
+
+### 🚨 Critical Fix
+- **Fixed projectRoot default path**: Resetting settings now correctly restores `projectRoot` to `/` instead of `./`, ensuring fresh installs work out-of-the-box
+
+### 🆕 New Features
+- **Centralized Environment Variable Management**: Added comprehensive environment variable support with validation and security controls
+- **Enhanced Debug Logging**: Improved debug logging with environment variable support for better troubleshooting
+- **Secure Plugin Loading**: Added path sanitization for module loading to prevent security issues
+
+### 🔒 Security Enhancements
+- **Enhanced Path Validation**: Strengthened path validation and file operations security
+- **Secure Module Loading**: Added path sanitization for all plugin/module loading operations
+- **Environment Variable Security**: Implemented centralized environment variable management with security filtering
+
+### 🛠️ Improvements
+- **Refactored Configuration Handling**: Updated config system with integrated environment variable support
+- **Enhanced Logging System**: Improved debug logging capabilities with environment variable integration
+- **Better Error Handling**: Enhanced error messages and debugging information
+
+### 📚 Documentation
+- **Environment Variables Guide**: Added comprehensive documentation for all supported environment variables
+- **Migration Notes**: Added clear migration guidance for projectRoot path changes
+
+### 🔧 Technical Changes
+- **Package Version**: Updated to v1.10.2 across all files
+- **Security Patches**: Applied security improvements to path handling and file operations
+
 ## [1.10.1] - 2025-08-22
 
 ### Added

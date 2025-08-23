@@ -10,6 +10,7 @@ const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
 const {loadTranslations} = require('./i18n-helper');
 const SettingsManager = require('../settings/settings-manager');
+const { envManager } = require('./env-manager');
 const settingsManager = new SettingsManager();
 
 const { ask } = require('./cli');
@@ -56,7 +57,14 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       cfg.outputDir = path.resolve(projectRoot, toStr(cfg.outputDir) || './i18ntk-reports');
     } else {
       cfg = configManager.getConfig();
-      projectRoot = path.resolve(cfg.projectRoot || '.');
+      // Use current working directory instead of hardcoded path
+      const isHardcodedPath = cfg.projectRoot && cfg.projectRoot.includes('i18n-management-toolkit-main');
+      projectRoot = isHardcodedPath ? process.cwd() : path.resolve(cfg.projectRoot || '.');
+      
+      // Update config with dynamic project root
+      if (isHardcodedPath) {
+        cfg.projectRoot = '.';
+      }
 
       const updates = {};
       const sourceDirArg = toStr(cliArgs.sourceDir);
@@ -231,6 +239,18 @@ function parseCommonArgs(args) {
         case 'ui-language':
           parsed.uiLanguage = sanitizedValue;
           break;
+        case 'log-level':
+          parsed.logLevel = sanitizedValue;
+          break;
+        case 'framework':
+          parsed.frameworkPreference = sanitizedValue;
+          break;
+        case 'silent':
+          parsed.silent = sanitizedValue === 'true' || sanitizedValue === true;
+          break;
+        case 'debug-locales':
+          parsed.debugLocales = sanitizedValue === 'true' || sanitizedValue === true;
+          break;
         case 'strict':
           parsed.strictMode = true;
           break;
@@ -260,6 +280,49 @@ function parseCommonArgs(args) {
     }
   }
   
+  // Apply environment variable defaults if CLI args not provided
+  if (!parsed.logLevel) {
+    const envLogLevel = envManager.get('I18NTK_LOG_LEVEL');
+    if (envLogLevel && envLogLevel !== 'error') {
+      parsed.logLevel = envLogLevel;
+    }
+  }
+  
+  if (!parsed.uiLanguage) {
+    const envLang = envManager.get('I18NTK_LANG');
+    if (envLang && envLang !== 'en') {
+      parsed.uiLanguage = envLang;
+    }
+  }
+  
+  if (!parsed.outputDir) {
+    const envOutDir = envManager.get('I18NTK_OUTDIR');
+    if (envOutDir && envOutDir !== './i18ntk-reports') {
+      parsed.outputDir = envOutDir;
+    }
+  }
+  
+  if (!parsed.sourceDir) {
+    const envSourceDir = envManager.get('I18NTK_SOURCE_DIR');
+    if (envSourceDir && envSourceDir !== './locales') {
+      parsed.sourceDir = envSourceDir;
+    }
+  }
+  
+  if (!parsed.i18nDir) {
+    const envI18nDir = envManager.get('I18NTK_I18N_DIR');
+    if (envI18nDir && envI18nDir !== './locales') {
+      parsed.i18nDir = envI18nDir;
+    }
+  }
+  
+  if (!parsed.frameworkPreference) {
+    const envFramework = envManager.get('I18NTK_FRAMEWORK_PREFERENCE');
+    if (envFramework && envFramework !== 'auto') {
+      parsed.frameworkPreference = envFramework;
+    }
+  }
+  
   return parsed;
 }
 
@@ -275,6 +338,10 @@ function displayHelp(scriptName, additionalOptions = {}) {
     'output-dir': 'Output directory for reports',
     'source-language': 'Source language code (e.g., en, de)',
     'ui-language': 'UI language for messages',
+    'log-level': 'Logging level (error, warn, info, debug, silent)',
+    'framework': 'Preferred framework (auto, react, vue, etc.)',
+    'silent': 'Run in silent mode (true/false)',
+    'debug-locales': 'Enable debug logging for locale loading (true/false)',
     'strict': 'Enable strict validation mode',
     'no-prompt': 'Skip interactive prompts',
     'help': 'Show this help message',
@@ -301,15 +368,28 @@ function displayHelp(scriptName, additionalOptions = {}) {
     console.log(`  --${flag.padEnd(15)} ${description}`);
   });
   
+  console.log(`\nEnvironment Variables:`);
+  console.log(`  I18NTK_LOG_LEVEL     Logging level (error, warn, info, debug, silent)`);
+  console.log(`  I18NTK_OUTDIR        Output directory for reports`);
+  console.log(`  I18NTK_LANG          UI language (en, de, es, fr, ru, ja, zh)`);
+  console.log(`  I18NTK_SILENT        Run in silent mode (true/false)`);
+  console.log(`  I18NTK_DEBUG_LOCALES Enable debug logging for locale loading`);
+  console.log(`  I18NTK_SOURCE_DIR    Source directory for scanning`);
+  console.log(`  I18NTK_I18N_DIR      Directory containing i18n files`);
+  console.log(`  I18NTK_PROJECT_ROOT  Project root directory`);
+  console.log(`  I18NTK_FRAMEWORK_PREFERENCE Preferred framework (auto, react, vue, etc.)`);
+  
   console.log(`\nExamples:`);
   console.log(`  node ${scriptName}.js --source-dir=./locales`);
   console.log(`  node ${scriptName}.js --source-dir=./app --i18n-dir=./locales`);
   console.log(`  node ${scriptName}.js --output-dir=./i18ntk-reports`);
+  console.log(`  I18NTK_LOG_LEVEL=debug node ${scriptName}.js --source-dir=./locales`);
   console.log(`  npx i18ntk ${scriptName.replace('i18ntk-', '')} --help`);
   
   console.log('\nConfiguration:');
   console.log(`  Settings are loaded from ${configManager.CONFIG_PATH}`);
   console.log('  Use --source-dir, --i18n-dir, and --output-dir to override');
+  console.log('  Environment variables can also be used for configuration');
 }
 
 /**

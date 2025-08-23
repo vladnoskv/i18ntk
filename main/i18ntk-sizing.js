@@ -33,7 +33,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const configManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
@@ -116,23 +115,24 @@ class I18nSizingAnalyzer {
       throw new Error(t("sizing.invalidSourceDirectoryError", { sourceDir: this.sourceDir }));
     }
 
-    if (!fs.existsSync(validatedSourceDir)) {
+    if (!SecurityUtils.safeExistsSync(validatedSourceDir)) {
       throw new Error(t("sizing.sourceDirectoryNotFoundError", { sourceDir: validatedSourceDir }));
     }
 
     const files = [];
-    const items = fs.readdirSync(validatedSourceDir);
+    const items = SecurityUtils.safeReaddirSync(validatedSourceDir);
     
     // Check for nested language directories
     for (const item of items) {
       const itemPath = SecurityUtils.validatePath(path.join(validatedSourceDir, item), process.cwd());
       if (!itemPath) continue;
       
-      const stat = fs.statSync(itemPath);
+      const stat = SecurityUtils.safeStatSync(itemPath);
+      if (!stat) continue;
       
       if (stat.isDirectory()) {
         // This is a language directory, combine all JSON files
-        const langFiles = fs.readdirSync(itemPath)
+        const langFiles = SecurityUtils.safeReaddirSync(itemPath)
           .filter(file => file.endsWith('.json'))
           .map(file => SecurityUtils.validatePath(path.join(itemPath, file), process.cwd()))
           .filter(file => file !== null);
@@ -165,7 +165,7 @@ class I18nSizingAnalyzer {
 
   // Analyze file sizes
   analyzeFileSizes(files) {
-    console.log(t("sizing.analyzing_file_sizes"));
+    SecurityUtils.debugLog('info', t("sizing.analyzing_file_sizes"));
     
     files.forEach(({ language, file, path: filePath, files: langFiles }) => {
       if (langFiles) {
@@ -176,7 +176,9 @@ class I18nSizingAnalyzer {
         let lastModified = new Date(0);
         
         langFiles.forEach(langFile => {
-          const stats = fs.statSync(langFile);
+          const stats = SecurityUtils.safeStatSync(langFile, process.cwd());
+          if (!stats) return;
+          
           let content = SecurityUtils.safeReadFileSync(langFile, process.cwd());
           if (typeof content !== "string") content = "";
           totalSize += stats.size;
@@ -198,7 +200,9 @@ class I18nSizingAnalyzer {
         };
       } else {
         // Handle single file structure
-        const stats = fs.statSync(filePath);
+        const stats = SecurityUtils.safeStatSync(filePath, process.cwd());
+        if (!stats) return;
+        
         let content = SecurityUtils.safeReadFileSync(filePath, process.cwd());
         if (typeof content !== "string") content = "";
         this.stats.files[language] = {
@@ -216,7 +220,7 @@ class I18nSizingAnalyzer {
 
   // Analyze translation content
   analyzeTranslationContent(files) {
-    console.log(t("sizing.analyzing_translation_content"));
+    SecurityUtils.debugLog('info', t("sizing.analyzing_translation_content"));
     
     files.forEach(({ language, path: filePath, files: langFiles }) => {
       try {
@@ -262,7 +266,7 @@ class I18nSizingAnalyzer {
         });
         
       } catch (error) {
-        console.error(t("sizing.failed_to_parse_language_error", { language, errorMessage: error.message }));
+        SecurityUtils.debugLog('error', t("sizing.failed_to_parse_language_error", { language, errorMessage: error.message }));
       }
     });
   }
@@ -312,13 +316,13 @@ class I18nSizingAnalyzer {
 
   // Generate size comparison analysis
   generateSizeComparison() {
-    console.log(t("sizing.generating_size_comparisons"));
+    SecurityUtils.debugLog('info', t("sizing.generating_size_comparisons"));
     
     const languages = Object.keys(this.stats.languages);
     const baseLanguage = languages[0]; // Use first language as baseline
     
     if (!baseLanguage) {
-      console.warn(t("sizing.no_languages_found_for_comparison"));
+      SecurityUtils.debugLog('warn', t("sizing.no_languages_found_for_comparison"));
       return;
     }
     
@@ -491,7 +495,7 @@ class I18nSizingAnalyzer {
   async generateHumanReadableReport() {
     if (!this.outputReport) return;
     
-    console.log(t("sizing.generating_detailed_report"));
+    SecurityUtils.debugLog('info', t("sizing.generating_detailed_report"));
     
     const validatedOutputDir = SecurityUtils.validatePath(this.outputDir, process.cwd());
     if (!validatedOutputDir) {
@@ -499,8 +503,8 @@ class I18nSizingAnalyzer {
     }
 
     // Ensure output directory exists
-    if (!fs.existsSync(validatedOutputDir)) {
-      fs.mkdirSync(validatedOutputDir, { recursive: true });
+    if (!SecurityUtils.safeExistsSync(validatedOutputDir)) {
+      SecurityUtils.safeMkdirSync(validatedOutputDir, { recursive: true });
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -514,7 +518,7 @@ class I18nSizingAnalyzer {
     let textReport = this.generateTextReport(timestamp);
     const textSuccess = await SecurityUtils.safeWriteFile(textReportPath, textReport, process.cwd());
     if (textSuccess) {
-      console.log(t("sizing.human_report_saved", { reportPath: textReportPath }));
+      SecurityUtils.debugLog('info', t("sizing.human_report_saved", { reportPath: textReportPath }));
     }
     
     // Generate JSON for programmatic access
@@ -660,7 +664,7 @@ Generated: ${new Date().toISOString()}
     
     const success = await SecurityUtils.safeWriteFile(csvPath, csvContent, process.cwd());
     if (success) {
-      console.log(t("sizing.csv_report_saved_to", { csvPath }));
+      SecurityUtils.debugLog('info', t("sizing.csv_report_saved_to", { csvPath }));
       SecurityUtils.logSecurityEvent('CSV report saved', 'info', { csvPath });
     } else {
       throw new Error(t("sizing.failedToSaveCsvError"));
@@ -669,20 +673,21 @@ Generated: ${new Date().toISOString()}
 
   // Main analysis method
   async analyze() {
-    const startTime = performance.now();
+    const perfTimer = SecurityUtils.getPerformanceTimer();
+    const startTime = perfTimer.now();
     
     try {
-      console.log(t("sizing.starting_i18n_sizing_analysis"));
-      console.log(t("sizing.source_directory", { sourceDir: this.sourceDir }));
+      SecurityUtils.debugLog('info', t("sizing.starting_i18n_sizing_analysis"));
+      SecurityUtils.debugLog('info', t("sizing.source_directory", { sourceDir: this.sourceDir }));
       
       const files = this.getLanguageFiles();
       
       if (files.length === 0) {
-        console.log(t("sizing.no_translation_files_found"));
+        SecurityUtils.debugLog('warn', t("sizing.no_translation_files_found"));
         return;
       }
       
-      console.log(t("sizing.found_languages", { languages: files.map(f => f.language).join(', ') }));
+      SecurityUtils.debugLog('info', t("sizing.found_languages", { languages: files.map(f => f.language).join(', ') }));
       
       this.analyzeFileSizes(files);
       this.analyzeTranslationContent(files);
@@ -691,16 +696,16 @@ Generated: ${new Date().toISOString()}
       if (this.format === 'table') {
         this.displayFolderResults();
       } else if (this.format === 'json') {
-        console.log(t("sizing.analysisStats", { stats: JSON.stringify(this.stats, null, 2) }));
+        SecurityUtils.debugLog('info', t("sizing.analysisStats", { stats: JSON.stringify(this.stats, null, 2) }));
       }
       
       await this.generateHumanReadableReport();
       
-      const endTime = performance.now();
-      console.log(t("sizing.analysis_completed", { duration: (endTime - startTime).toFixed(2) }));
+      const endTime = perfTimer.now();
+      SecurityUtils.debugLog('info', t("sizing.analysis_completed", { duration: (endTime - startTime).toFixed(2) }));
       
     } catch (error) {
-      console.error(t("sizing.analysis_failed", { errorMessage: error.message }));
+      SecurityUtils.debugLog('error', t("sizing.analysis_failed", { errorMessage: error.message }));
       process.exit(1);
     }
   }
@@ -901,19 +906,20 @@ Options:
   // Main analysis method
   async analyze() {
     try {
-      console.log(t("sizing.starting_analysis"));
-      console.log(t("sizing.source_directory", { sourceDir: this.sourceDir }));
+      SecurityUtils.debugLog('info', t("sizing.starting_analysis"));
+      SecurityUtils.debugLog('info', t("sizing.source_directory", { sourceDir: this.sourceDir }));
       
-      const startTime = performance.now();
+      const perfTimer = SecurityUtils.getPerformanceTimer();
+      const startTime = perfTimer.now();
       
       // Get language files
       const files = this.getLanguageFiles();
       if (files.length === 0) {
-        console.warn(t("sizing.no_translation_files_found"));
+        SecurityUtils.debugLog('warn', t("sizing.no_translation_files_found"));
         return { success: false, error: "No translation files found" };
       }
       
-      console.log(t("sizing.found_files", { count: files.length }));
+      SecurityUtils.debugLog('info', t("sizing.found_files", { count: files.length }));
       
       // Analyze file sizes
       this.analyzeFileSizes(files);
@@ -930,15 +936,15 @@ Options:
       // Generate reports if requested
       await this.generateHumanReadableReport();
       
-      const endTime = performance.now();
+      const endTime = perfTimer.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
-      console.log(t("sizing.analysis_completed", { duration }));
+      SecurityUtils.debugLog('info', t("sizing.analysis_completed", { duration }));
       
       return { success: true, stats: this.stats };
       
     } catch (error) {
-      console.error(t("sizing.analysis_failed", { errorMessage: error.message }));
+      SecurityUtils.debugLog('error', t("sizing.analysis_failed", { errorMessage: error.message }));
       return { success: false, error: error.message };
     }
   }

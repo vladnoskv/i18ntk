@@ -6,7 +6,7 @@
  */
 
 const os = require('os');
-const { execSync } = require('child_process');
+
 
 // Detect if terminal supports Unicode/emoji
 function supportsUnicode() {

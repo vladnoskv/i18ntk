@@ -1,4 +1,5 @@
 const colors = require('./colors-new');
+const { envManager } = require('./env-manager');
 
 // Enhanced logger with TTY detection and proper stream handling
 const logger = {
@@ -44,9 +45,12 @@ const logger = {
     logger.log(output, colors.blue);
   },
   
-  // Debug logging (only when DEBUG env var is set)
+  // Debug logging (only when DEBUG env var is set or log level is debug)
   debug: (message) => {
-    if (process.env.DEBUG) {
+    const logLevel = envManager.get('I18NTK_LOG_LEVEL');
+    const debugEnabled = process.env.DEBUG || logLevel === 'debug';
+    
+    if (debugEnabled) {
       const output = `[DEBUG] ${message}`;
       if (process.stderr.isTTY) {
         process.stderr.write(colors.gray(output) + '\n');

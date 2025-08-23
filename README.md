@@ -12,7 +12,7 @@
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-ZERO-red.svg)](https://github.com/vladnoskv/i18ntk#features)
 [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
 [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
-[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.10.1)](https://socket.dev/npm/package/i18ntk/overview/1.10.1)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.10.2)](https://socket.dev/npm/package/i18ntk/overview/1.10.2)
 
 [📦 Install Now](#-installation) • [⚡ Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [🎯 Features](#-why-choose-i18ntk)
 
@@ -22,7 +22,7 @@
 
 **15.38ms** for 200k translation keys • **<2MB** memory usage • **97% faster** than traditional tools
 
-**v1.10.1** - Stable & Secure • **v2.0.0** - Coming Soon
+**v1.10.2** - Stable & Secure • **v2.0.0** - Coming Soon
 
 </div>
 
@@ -58,9 +58,15 @@ i18ntk fixer --interactive
 
 # 5. Validate everything
 i18ntk validate
+
+# 6. Mangage Mre
 ```
 
 That's it! Your i18n infrastructure is ready. 🎉
+
+> **🚨 v1.10.2 Update**: Fresh installs now work out-of-the-box! We've fixed the default `projectRoot` path from `"./"` to `"/"` when resetting settings. No more configuration issues on first run!
+>
+> **Migration Note**: If you're upgrading from v1.10.1 or earlier, your existing `projectRoot` settings will remain unchanged. Only new installations or manual resets will use the improved default.
 
 ## 🎯 Why Choose i18ntk?
 

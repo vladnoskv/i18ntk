@@ -509,6 +509,8 @@ class SettingsManager {
             "version": null,
             "setupId": null
         };
+        // Set projectRoot to "/" for fresh install state
+        this.settings.projectRoot = "/";
         this.saveSettings();
         console.log('Settings reset to defaults');
     }
@@ -523,8 +525,9 @@ class SettingsManager {
         try {
             console.log('🧹 Performing complete reset...');
             
-            // 1. Reset to defaults
+            // 1. Reset to defaults with projectRoot set to "/" for fresh install
             this.settings = { ...this.defaultConfig };
+            this.settings.projectRoot = "/"; // Set to root for fresh install
             
             // 2. Remove actual configuration files used by the system
             const packageDir = path.resolve(__dirname, '..');
@@ -647,7 +650,7 @@ class SettingsManager {
             // 9. Reset all script directory overrides to defaults
             this.settings.scriptDirectories = {
                 "main": "./main",
-                "utils": "./utils", 
+                "utils": "./utils",
                 "scripts": "./scripts",
                 "settings": "./settings",
                 "uiLocales": "./ui-locales"

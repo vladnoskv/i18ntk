@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-
+const { envManager } = require('./env-manager');
 
 // Determine package directory and user project root
 const packageDir = path.resolve(__dirname, '..');
@@ -250,6 +250,9 @@ const ENV_VAR_MAP = {
   I18NTK_FRAMEWORK_PREFERENCE: 'framework.preference',
   I18NTK_FRAMEWORK_FALLBACK: 'framework.fallback',
   I18NTK_FRAMEWORK_DETECT: 'framework.detect',
+  I18NTK_LOG_LEVEL: 'advanced.logLevel',
+  I18NTK_LANG: 'uiLanguage',
+  I18NTK_SILENT: 'processing.minimalLogging',
 };
 
 let currentConfig = null;
@@ -295,8 +298,9 @@ function deepMerge(target, source, basePath = '') {
 
 function applyEnvOverrides(cfg) {
   for (const [envVar, keyPath] of Object.entries(ENV_VAR_MAP)) {
-    const value = process.env[envVar];
-    if (value === undefined) continue;
+    const value = envManager.get(envVar);
+    if (value === null || value === undefined) continue;
+    
     const keys = keyPath.split('.');
     let current = cfg;
     for (let i = 0; i < keys.length - 1; i++) {
@@ -305,8 +309,11 @@ function applyEnvOverrides(cfg) {
       current = current[k];
     }
     const leaf = keys[keys.length - 1];
-    if (keyPath === 'framework.detect') {
-      current[leaf] = String(value).toLowerCase() !== 'false';
+    
+    if (keyPath === 'framework.detect' || envVar === 'I18NTK_FRAMEWORK_DETECT') {
+      current[leaf] = String(value).toLowerCase() !== 'false' && value !== '0';
+    } else if (envVar === 'I18NTK_SILENT') {
+      current[leaf] = String(value).toLowerCase() === 'true' || value === '1';
     } else {
       current[leaf] = normalizePathValue(keyPath, value);
     }

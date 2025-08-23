@@ -1,6 +1,6 @@
 # i18ntk API Reference
 
-**Version:** 1.10.0
+**Version:** 1.10.2
 **Last Updated:** 2025-08-22
 **GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
 
@@ -82,7 +82,7 @@ npx i18ntk complete --auto --language es --provider google
 - `--provider <name>` - Translation provider (google, deepl, openai)
 - `--no-prompt` - Skip interactive prompts (CI/CD mode)
 
-#### `i18ntk fixer` (Enhanced in v1.10.0)
+#### `i18ntk fixer` (Enhanced in v1.10.2)
 Interactive translation fixer with custom placeholder markers and mass fix capabilities
 ```bash
 npx i18ntk fixer --interactive
@@ -178,7 +178,7 @@ Manage configuration
 npx i18ntk settings --reset --export settings.json
 ```
 
-## Enhanced Features (v1.10.0)
+## Enhanced Features (v1.10.2)
 
 ### Placeholder Validation
 Enhanced placeholder validation ensures consistency across all translations:

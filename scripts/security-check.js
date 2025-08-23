@@ -18,12 +18,13 @@ class SecurityCheck {
       /execFileSync\(/,
       /spawn\(/,
       /exec\(/,
-      /execFile\(/
+      /execFile\(/ 
     ];
     this.allowedFiles = [
       'dev/',           // Development files allowed to use child_process
       'benchmarks/',    // Benchmark scripts
       'test/',          // Test files
+      'scripts/deprecate-versions.js', // Allowed to use child_process for npm commands
       'verify-package.js' // Package verification (development)
     ];
     this.violations = [];
@@ -81,6 +82,14 @@ class SecurityCheck {
   }
 
   async checkFile(filePath) {
+    const relativePath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
+
+    for (const allowed of this.allowedFiles) {
+      if (relativePath.startsWith(allowed)) {
+        return;
+      }
+    }
+
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');
     
@@ -89,7 +98,6 @@ class SecurityCheck {
       
       for (const pattern of this.forbiddenPatterns) {
         if (pattern.test(line)) {
-          const relativePath = path.relative(process.cwd(), filePath);
           this.violations.push({
             file: relativePath,
             line: i + 1,

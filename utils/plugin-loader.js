@@ -1,8 +1,15 @@
 const path = require('path');
 
 function loadOptionalModule(name, cwd = process.cwd()) {
+  // Sanitize the module name to prevent path traversal
+  const sanitizedName = name.replace(/[^a-zA-Z0-9@/_-]/g, '');
+  if (sanitizedName !== name) {
+    // If the name was changed, it was invalid
+    return null;
+  }
+
   try {
-    const resolved = require.resolve(name, { paths: [cwd] });
+    const resolved = require.resolve(sanitizedName, { paths: [cwd] });
     return require(resolved);
  } catch {
     return null;
