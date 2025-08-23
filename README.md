@@ -12,6 +12,7 @@
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-ZERO-red.svg)](https://github.com/vladnoskv/i18ntk#features)
 [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
 [![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/1.10.1)](https://socket.dev/npm/package/i18ntk/overview/1.10.1)
 
 [📦 Install Now](#-installation) • [⚡ Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [🎯 Features](#-why-choose-i18ntk)
 
@@ -20,6 +21,8 @@
 ## ⚡ Lightning Fast Performance
 
 **15.38ms** for 200k translation keys • **<2MB** memory usage • **97% faster** than traditional tools
+
+**v1.10.1** - Stable & Secure • **v2.0.0** - Coming Soon
 
 </div>
 
@@ -72,7 +75,7 @@ That's it! Your i18n infrastructure is ready. 🎉
 | **🌍 Languages** | 7 UI languages | Usually 1-2 | Manual |
 | **🤖 CI/CD Ready** | ✅ JSON output | ❌ Manual | ❌ |
 
-**i18ntk is 97% faster than traditional i18n tools while using 98% less memory.** 
+**i18ntk v1.10.0 is 97% faster than traditional i18n tools while using 98% less memory.** 
 
 ## 🌟 Core Features
 
@@ -92,18 +95,12 @@ initRuntime({
 const greeting = t('welcome.message', { name: 'World' });
 ```
 
-**✨ What's New in v1.10.1:**
-- ⚡ **New Terminal-Icons Utility** - Added `terminal-icons` utility for better emoji support in terminal output
-- 🎯 **Enhanced UI Text Processing** - Improved text processing with terminal-safe fallbacks for special characters
-- 🔍 **Fixed Infinite Setup Loop** - Resolved critical setup issue in v1.10.0
-- 🧠 **Version Consistency** - Fixed version string update inconsistencies
-- 🔄 **Removed Outdated Files** - Cleaned up package-lock.json and backup config
-
 **✨ What's New in v1.10.0:**
 - ⚡ **97% Performance Boost** - 15.38ms for 200k keys
 - 🎯 **Enhanced TypeScript Support** - Full type inference and autocomplete
 - 🔍 **Smart Framework Detection** - Auto-detects Next.js, Nuxt.js, SvelteKit
 - 🧠 **Intelligent Caching** - Reduced memory footprint with persistent caching
+- 🔄 **Hot Reloading** - Update translations without page reload
 
 ### 🎯 **AI-Powered Translation Scanner**
 Automatically finds hardcoded text in your codebase and suggests translations.
@@ -559,6 +556,7 @@ Enable automatic backups in your project configuration:
 ```
 i18ntk/
 ├── main/                    # CLI commands
+├── main/                    # CLI commands
 │   ├── i18ntk-manage.js    # Main interface
 │   ├── i18ntk-analyze.js   # Analysis
 │   └── i18ntk-validate.js  # Validation
@@ -571,10 +569,13 @@ i18ntk/
 ```
 
 ## ⚙️ Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 
+
 ```bash
+# Source directory for translation files
 # Source directory for translation files
 I18N_SOURCE_DIR=./locales
 
@@ -605,7 +606,12 @@ Create an `i18n.config.json` file in your project root:
   "backup": {
     "enabled": true,
     "directory": "./i18n-backups"
+    "directory": "./i18n-backups"
   },
+  "features": {
+    "autoBackup": true,
+    "validation": true,
+    "analysis": true
   "features": {
     "autoBackup": true,
     "validation": true,
@@ -614,6 +620,26 @@ Create an `i18n.config.json` file in your project root:
 }
 ```
 
+## ❓ Common Issues & Solutions
+
+### Missing Translations
+
+```
+Warning: Translation key not found: my.key
+```
+
+**Solution**:
+1. Add the missing key to your translation files
+2. Run `i18ntk validate` to check for other missing translations
+3. Use `i18ntk analyze` to find unused translations
+
+### Permission Issues
+
+```
+Error: EACCES: permission denied
+```
+
+**Solution**:
 ## ❓ Common Issues & Solutions
 
 ### Missing Translations
@@ -662,7 +688,47 @@ sudo chown -R $USER:$USER /path/to/project
 
 ### Enable Debug Mode
 
+# Fix directory permissions
+chmod 755 /path/to/project
+
+# Or run with sudo (not recommended for production)
+sudo chown -R $USER:$USER /path/to/project
+```
+
+### Backup Issues
+
+**Problem**: Backup fails with encryption error  
+**Solution**: Ensure you have proper permissions and sufficient disk space
+
+**Problem**: Can't restore from backup  
+**Solution**: Verify backup integrity and check version compatibility
+
+### Performance Issues
+
+**Problem**: Slow analysis with large projects  
+**Solution**:
+- Exclude node_modules and other large directories
+- Use `.i18nignore` to skip files
+- Increase Node.js memory limit: `NODE_OPTIONS=--max-old-space-size=4096 i18ntk analyze`
+
+## 📊 Troubleshooting
+
+### Enable Debug Mode
+
 ```bash
+# Set debug environment variable
+export I18N_DEBUG=true
+
+# Or use the debug flag
+i18ntk --debug <command>
+```
+
+### View Logs
+
+Logs are stored in `.i18ntk/logs/` by default. Check the latest log for detailed error information.
+
+### Get Help
+
 # Set debug environment variable
 export I18N_DEBUG=true
 
@@ -687,9 +753,6 @@ i18ntk <command> --help
 i18ntk --version
 ```
 
-## 🔒 Security
-
-### Key Security Features
 ## 🌍 Locale Optimization
 
 Optimize your translation files to reduce bundle size:
@@ -697,25 +760,18 @@ Optimize your translation files to reduce bundle size:
 ```bash
 # Optimize all locales
 i18ntk optimize
+# Optimize all locales
+i18ntk optimize
 
+# Optimize specific languages
+i18ntk optimize --lang=en,es,de
 # Optimize specific languages
 i18ntk optimize --lang=en,es,de
 ```
 
 **Example:** 830.4KB → 115.3KB for English-only optimization
 
-## 📊 i18ntk vs Traditional Tools
 
-| Feature | i18ntk 1.10.0 | Traditional Tools | Manual Process |
-|---------|--------------|-------------------|----------------|
-| **Speed** | 15.38ms (200k keys) | 2-5 minutes | Hours |
-| **Memory** | <2MB | 50-200MB | Variable |
-| **Package Size** | 315KB packed | 5-50MB | N/A |
-| **Dependencies** | Zero | 10-50 packages | Zero |
-| **Framework Support** | Auto-detect 8+ frameworks | Manual config | Manual |
-| **Security** | AES-256 + PIN | Basic | None |
-| **Languages** | 7 UI languages | Usually 1-2 | Manual |
-| **CI/CD Ready** | ✅ JSON output | ❌ Manual | ❌ |
 
 ## 🎯 Enhanced Translation Fixer
 
@@ -740,6 +796,7 @@ i18ntk fixer --languages all
 
 **Features:**
 - 7-language UI support
+- 7-language UI support
 - Smart marker detection
 - Selective fixing by language/file
 - Comprehensive reporting
@@ -754,6 +811,9 @@ All documentation is built into the toolkit. Use:
 i18ntk --help        # General help
 i18ntk [command] --help  # Command-specific help
 ```
+
+### 📊 Technical Documentation
+- **[JSON Performance Analysis](./JSON_PERFORMANCE_ANALYSIS.md)** - Detailed analysis of V8 JSON performance improvements and Node.js 22 optimization benefits
 
 ## 📄 License
 
@@ -1014,8 +1074,6 @@ i18ntk analyze
 
 ### **Coming Soon in v1.11.0**
 - 🤖 **AI-Powered Translation** - Automatic translation suggestions
-- 🌐 **Real-time Collaboration** - Team translation workflows
-- 📱 **Mobile App** - iOS and Android companion apps
 - 🔗 **API Integrations** - Connect with translation services
 - 📊 **Advanced Analytics** - Translation quality metrics
 
@@ -1124,4 +1182,4 @@ i18ntk analyze
 
 **#i18n #internationalization #localization #javascript #typescript #python #java #php #go #developer-tools**
 
-</div></search></search>
+</div>
