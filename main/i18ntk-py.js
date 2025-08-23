@@ -46,7 +46,7 @@ class I18ntkPythonCommand {
     program
       .name('i18ntk-py')
       .description('i18ntk specialized for Python applications')
-      .version('1.9.1')
+      .version('1.10.1')
       .option('-s, --source-dir <dir>', 'Source directory to scan', './')
       .option('-l, --locales-dir <dir>', 'Locales directory', './locales')
       .option('--framework <type>', 'Python framework type', 'auto')
@@ -339,7 +339,7 @@ class I18ntkPythonCommand {
 
   async run() {
     try {
-      console.log('🚀 i18ntk Python Command v1.9.1');
+      console.log('🚀 i18ntk Python Command v1.10.1');
       console.log('=' * 50);
       
       await this.init();

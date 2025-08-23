@@ -189,7 +189,7 @@ other = "{{.Count}} items"
 program
   .name('i18ntk-go')
   .description('Go language i18n management tool')
-  .version('1.9.1');
+  .version('1.10.1');
 
 program
   .command('init')

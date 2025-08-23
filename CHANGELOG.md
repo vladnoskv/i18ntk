@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1] - 2025-08-22
+
+### Added
+- **New Terminal-Icons Utility**: Added `terminal-icons` utility for better emoji support in terminal output
+- **Enhanced UI Text Processing**: Improved text processing with terminal-safe fallbacks for special characters
+
+### Fixed
+- Fixed infinite setup loop issue (Hotfix)
+- Resolved version string update inconsistencies
+
+### Changed
+- Update version strings across all files from 1.9.1 to 1.10.1
+- Remove outdated package-lock.json and backup config
+
 ## [1.10.0] - 2025-08-22
 
 ### Added

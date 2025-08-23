@@ -1113,7 +1113,7 @@
       "translation_replacement_complete": "\n✅ ¡Reemplazo de traducciones completado!",
       "total_replacements": "📊 Total de reemplazos: {count}",
       "dry_run_mode": "\n⚠️ MODO PRUEBA - No se modificaron archivos",
-      "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.9.1",
+      "tool_title": "🌍 Reemplazador de Traducciones Nativas v1.10.1",
       "tool_separator": "======================================\n",
       "dry_run_warning": "⚠️ Ejecutando en modo PRUEBA - no se modificarán archivos\n",
       "error_during_replacement": "❌ Error durante el reemplazo de traducción:"

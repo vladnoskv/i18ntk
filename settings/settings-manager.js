@@ -13,7 +13,7 @@ class SettingsManager {
         this.saveTimeout = null;
         
         this.defaultConfig = {
-            "version": "1.9.1",
+            "version": "1.10.1",
             "language": "en",
             "uiLanguage": "en",
             "theme": "dark",
@@ -707,7 +707,7 @@ class SettingsManager {
                 version: {
                     type: 'string',
                     description: 'Configuration version',
-                    default: '1.9.1',
+                    default: '1.10.1',
                     readOnly: true
                 },
                 language: {

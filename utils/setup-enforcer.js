@@ -7,6 +7,7 @@
  * Provides interactive setup prompting for a better user experience.
  */
 
+const { getIcon } = require('./terminal-icons');
 const fs = require('fs');
 const path = require('path');
 const { blue, yellow, gray, cyan, green, red } = require('./colors-new');
@@ -46,7 +47,7 @@ class SetupEnforcer {
     }
 
     static async handleMissingSetup() {
-        console.log(blue('🔧 Setup Required'));
+        console.log(blue(`${getIcon('wrench')} Setup Required`));
         console.log(yellow('Welcome to i18n Toolkit! This appears to be your first time running the toolkit.'));
         console.log(gray('Setup is required to configure your project for internationalization management.'));
         console.log('');
@@ -67,7 +68,7 @@ class SetupEnforcer {
                     process.exit(0);
                 }
                 
-                console.log(green('🚀 Running setup...'));
+                console.log(green(`${getIcon('rocket')} Running setup...`));
                 
                 try {
                     // Import and run setup directly
@@ -87,18 +88,18 @@ class SetupEnforcer {
                             console.log(gray('You can now run your original command.'));
                             resolve(true);
                         } catch (error) {
-                            console.error(red('❌ Setup failed:'), error.message);
+                            console.error(red(`${getIcon('cross')} Setup failed:`), error.message);
                             console.error(cyan('   Please try running setup manually:'));
                             console.error(cyan('   npm run i18ntk-setup'));
                             process.exit(1);
                         }
                     } else {
-                        console.error(red('❌ Setup script not found. Please run:'));
+                        console.error(red(`${getIcon('cross')} Setup script not found. Please run:`));
                         console.error(cyan('   npm run i18ntk-setup'));
                         process.exit(1);
                     }
                 } catch (error) {
-                    console.error(red('❌ Error running setup:'), error.message);
+                    console.error(red(`${getIcon('cross')} Error running setup:`), error.message);
                     console.error(cyan('   npm run i18ntk-setup'));
                     process.exit(1);
                 }
@@ -107,7 +108,7 @@ class SetupEnforcer {
     }
 
 static async handleIncompleteSetup() {
-        console.log(blue('🔧 Incomplete Setup'));
+        console.log(blue(`${getIcon('wrench')} Incomplete Setup`));
         console.log(yellow('Your setup appears to be incomplete or outdated.'));
         console.log(gray('This might happen after updating to a new version.'));
         console.log('');
@@ -127,7 +128,7 @@ static async handleIncompleteSetup() {
                     process.exit(0);
                 }
                 
-                console.log(green('🚀 Running setup...'));
+                console.log(green(`${getIcon('rocket')} Running setup...`));
                 
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
@@ -145,18 +146,18 @@ static async handleIncompleteSetup() {
                             }
                             resolve(true);
                         } catch (error) {
-                            console.error(red('❌ Setup failed:'), error.message);
+                            console.error(red(`${getIcon('cross')} Setup failed:`), error.message);
                             console.error(cyan('   Please try running setup manually:'));
                             console.error(cyan('   npm run i18ntk-setup'));
                             process.exit(1);
                         }
                     } else {
-                        console.error(red('❌ Setup script not found. Please run:'));
+                        console.error(red(`${getIcon('cross')} Setup script not found. Please run:`));
                         console.error(cyan('   npm run i18ntk-setup'));
                         process.exit(1);
                     }
                 } catch (error) {
-                    console.error(red('❌ Error running setup:'), error.message);
+                    console.error(red(`${getIcon('cross')} Error running setup:`), error.message);
                     process.exit(1);
                 }
             });
@@ -164,7 +165,7 @@ static async handleIncompleteSetup() {
     }
 
 static async handleInvalidConfig() {
-        console.log(blue('🔧 Invalid Configuration'));
+        console.log(blue(`${getIcon('wrench')} Invalid Configuration`));
         console.log(yellow('Your configuration file appears to be corrupted or invalid.'));
         console.log(gray('This might happen due to file corruption or manual editing.'));
         console.log('');
@@ -184,7 +185,7 @@ static async handleInvalidConfig() {
                     process.exit(0);
                 }
                 
-                console.log(green('🚀 Running setup...'));
+                console.log(green(`${getIcon('rocket')} Running setup...`));
                 
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
@@ -202,18 +203,18 @@ static async handleInvalidConfig() {
                             }
                             resolve(true);
                         } catch (error) {
-                            console.error(red('❌ Setup failed:'), error.message);
+                            console.error(red(`${getIcon('cross')} Setup failed:`), error.message);
                             console.error(cyan('   Please try running setup manually:'));
                             console.error(cyan('   npm run i18ntk-setup'));
                             process.exit(1);
                         }
                     } else {
-                        console.error(red('❌ Setup script not found. Please run:'));
+                        console.error(red(`${getIcon('cross')} Setup script not found. Please run:`));
                         console.error(cyan('   npm run i18ntk-setup'));
                         process.exit(1);
                     }
                 } catch (error) {
-                    console.error(red('❌ Error running setup:'), error.message);
+                    console.error(red(`${getIcon('cross')} Error running setup:`), error.message);
                     process.exit(1);
                 }
             });

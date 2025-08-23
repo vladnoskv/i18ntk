@@ -92,12 +92,18 @@ initRuntime({
 const greeting = t('welcome.message', { name: 'World' });
 ```
 
+**✨ What's New in v1.10.1:**
+- ⚡ **New Terminal-Icons Utility** - Added `terminal-icons` utility for better emoji support in terminal output
+- 🎯 **Enhanced UI Text Processing** - Improved text processing with terminal-safe fallbacks for special characters
+- 🔍 **Fixed Infinite Setup Loop** - Resolved critical setup issue in v1.10.0
+- 🧠 **Version Consistency** - Fixed version string update inconsistencies
+- 🔄 **Removed Outdated Files** - Cleaned up package-lock.json and backup config
+
 **✨ What's New in v1.10.0:**
 - ⚡ **97% Performance Boost** - 15.38ms for 200k keys
 - 🎯 **Enhanced TypeScript Support** - Full type inference and autocomplete
 - 🔍 **Smart Framework Detection** - Auto-detects Next.js, Nuxt.js, SvelteKit
 - 🧠 **Intelligent Caching** - Reduced memory footprint with persistent caching
-- 🔄 **Hot Reloading** - Update translations without page reload
 
 ### 🎯 **AI-Powered Translation Scanner**
 Automatically finds hardcoded text in your codebase and suggests translations.

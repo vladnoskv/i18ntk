@@ -231,7 +231,7 @@
       "OPTIMIZATION: Memory usage <2MB for any operation",
       "FEATURE: Comprehensive backup and recovery system",
       "BUGFIX: Windows path resolution improvements",
-      "DOCUMENTATION: Updated for v1.9.1 with Python support",
+      "DOCUMENTATION: Updated for v1.10.1 with Python support",
       "MAINTENANCE: Clean package structure - 2.0 MB total size"
     ],
     "breakingChanges": [],
@@ -258,7 +258,7 @@
       "1.8.2",
       "1.8.3",
       "1.9.0",
-      "1.9.1"
+      "1.10.1"
     ],
     "nextVersion": "1.11.0",
     "supportedNodeVersions": ">=16.0.0",

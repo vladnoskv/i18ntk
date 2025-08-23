@@ -35,7 +35,7 @@ class LocaleOptimizer {
     const { json = false, indent = 2, sortKeys = false } = options;
     
     if (json) {
-      const jsonOutput = new JsonOutput('locale-optimizer', '1.9.1');
+      const jsonOutput = new JsonOutput('locale-optimizer', '1.10.1');
       
       const available = this.getAvailableLocales();
       let totalSize = 0;
@@ -396,7 +396,7 @@ class LocaleOptimizer {
     
     if (restore) {
       if (json) {
-        const jsonOutput = new JsonOutput('locale-optimizer', '1.9.1');
+        const jsonOutput = new JsonOutput('locale-optimizer', '1.10.1');
         jsonOutput.setStatus('ok', 'Locales restored successfully');
         console.log(JSON.stringify(jsonOutput.getOutput(sortKeys), null, indent));
       } else {
@@ -412,7 +412,7 @@ class LocaleOptimizer {
     
     if (keep) {
       if (json) {
-        const jsonOutput = new JsonOutput('locale-optimizer', '1.9.1');
+        const jsonOutput = new JsonOutput('locale-optimizer', '1.10.1');
         const keepList = Array.isArray(keep) ? keep : keep.split(',').map(l => l.trim().toLowerCase());
         
         // Calculate impact
@@ -439,7 +439,7 @@ class LocaleOptimizer {
     
     if (dryRun) {
       if (json) {
-        const jsonOutput = new JsonOutput('locale-optimizer', '1.9.1');
+        const jsonOutput = new JsonOutput('locale-optimizer', '1.10.1');
         const available = this.getAvailableLocales();
         const totalSize = this.getTotalSize();
         const enSize = this.getLocaleSize('en');
@@ -471,7 +471,7 @@ class LocaleOptimizer {
     
     if (interactive) {
       if (json) {
-        const jsonOutput = new JsonOutput('locale-optimizer', '1.9.1');
+        const jsonOutput = new JsonOutput('locale-optimizer', '1.10.1');
         jsonOutput.setStatus('error', 'Interactive mode not supported with JSON output');
         console.log(JSON.stringify(jsonOutput.getOutput(sortKeys), null, indent));
         return;

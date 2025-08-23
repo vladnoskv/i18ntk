@@ -38,10 +38,11 @@
   ],
 
   "excludeVersions": [
-    "1.10.0"
+    "1.10.0",
+    "1.10.1"
   ],
 
-  "customMessage": "⚠️  DEPRECATED: This version contains security vulnerabilities and missing features. Please upgrade to i18ntk@1.10.0 for: 🔒 Enhanced security, 🚀 97% performance improvement, 🐍 Python framework support, and 🛡️ PIN protection. Run: npm install i18ntk@latest",
+  "customMessage": "⚠️  DEPRECATED: This version contains security vulnerabilities and missing features. Please upgrade to i18ntk@1.10.1 for: 🔒 Enhanced security, 🚀 97% performance improvement, 🐍 Python framework support, and 🛡️ PIN protection. Run: npm install i18ntk@latest",
 
   "adminNotes": {
     "createdBy": "Vladimir Noskov",
