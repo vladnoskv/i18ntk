@@ -556,6 +556,7 @@ Enable automatic backups in your project configuration:
 ```
 i18ntk/
 ├── main/                    # CLI commands
+├── main/                    # CLI commands
 │   ├── i18ntk-manage.js    # Main interface
 │   ├── i18ntk-analyze.js   # Analysis
 │   └── i18ntk-validate.js  # Validation
@@ -568,10 +569,13 @@ i18ntk/
 ```
 
 ## ⚙️ Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 
+
 ```bash
+# Source directory for translation files
 # Source directory for translation files
 I18N_SOURCE_DIR=./locales
 
@@ -602,7 +606,12 @@ Create an `i18n.config.json` file in your project root:
   "backup": {
     "enabled": true,
     "directory": "./i18n-backups"
+    "directory": "./i18n-backups"
   },
+  "features": {
+    "autoBackup": true,
+    "validation": true,
+    "analysis": true
   "features": {
     "autoBackup": true,
     "validation": true,
@@ -611,6 +620,26 @@ Create an `i18n.config.json` file in your project root:
 }
 ```
 
+## ❓ Common Issues & Solutions
+
+### Missing Translations
+
+```
+Warning: Translation key not found: my.key
+```
+
+**Solution**:
+1. Add the missing key to your translation files
+2. Run `i18ntk validate` to check for other missing translations
+3. Use `i18ntk analyze` to find unused translations
+
+### Permission Issues
+
+```
+Error: EACCES: permission denied
+```
+
+**Solution**:
 ## ❓ Common Issues & Solutions
 
 ### Missing Translations
@@ -659,7 +688,47 @@ sudo chown -R $USER:$USER /path/to/project
 
 ### Enable Debug Mode
 
+# Fix directory permissions
+chmod 755 /path/to/project
+
+# Or run with sudo (not recommended for production)
+sudo chown -R $USER:$USER /path/to/project
+```
+
+### Backup Issues
+
+**Problem**: Backup fails with encryption error  
+**Solution**: Ensure you have proper permissions and sufficient disk space
+
+**Problem**: Can't restore from backup  
+**Solution**: Verify backup integrity and check version compatibility
+
+### Performance Issues
+
+**Problem**: Slow analysis with large projects  
+**Solution**:
+- Exclude node_modules and other large directories
+- Use `.i18nignore` to skip files
+- Increase Node.js memory limit: `NODE_OPTIONS=--max-old-space-size=4096 i18ntk analyze`
+
+## 📊 Troubleshooting
+
+### Enable Debug Mode
+
 ```bash
+# Set debug environment variable
+export I18N_DEBUG=true
+
+# Or use the debug flag
+i18ntk --debug <command>
+```
+
+### View Logs
+
+Logs are stored in `.i18ntk/logs/` by default. Check the latest log for detailed error information.
+
+### Get Help
+
 # Set debug environment variable
 export I18N_DEBUG=true
 
@@ -691,7 +760,11 @@ Optimize your translation files to reduce bundle size:
 ```bash
 # Optimize all locales
 i18ntk optimize
+# Optimize all locales
+i18ntk optimize
 
+# Optimize specific languages
+i18ntk optimize --lang=en,es,de
 # Optimize specific languages
 i18ntk optimize --lang=en,es,de
 ```
@@ -723,6 +796,7 @@ i18ntk fixer --languages all
 
 **Features:**
 - 7-language UI support
+- 7-language UI support
 - Smart marker detection
 - Selective fixing by language/file
 - Comprehensive reporting
@@ -737,6 +811,9 @@ All documentation is built into the toolkit. Use:
 i18ntk --help        # General help
 i18ntk [command] --help  # Command-specific help
 ```
+
+### 📊 Technical Documentation
+- **[JSON Performance Analysis](./JSON_PERFORMANCE_ANALYSIS.md)** - Detailed analysis of V8 JSON performance improvements and Node.js 22 optimization benefits
 
 ## 📄 License
 
@@ -997,8 +1074,6 @@ i18ntk analyze
 
 ### **Coming Soon in v1.11.0**
 - 🤖 **AI-Powered Translation** - Automatic translation suggestions
-- 🌐 **Real-time Collaboration** - Team translation workflows
-- 📱 **Mobile App** - iOS and Android companion apps
 - 🔗 **API Integrations** - Connect with translation services
 - 📊 **Advanced Analytics** - Translation quality metrics
 
