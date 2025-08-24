@@ -1,7 +1,20 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const configManager = require('./config-manager');
+
+// Lazy load configManager to avoid circular dependency
+let configManager;
+function getConfigManager() {
+  if (!configManager) {
+    try {
+      configManager = require('./config-manager');
+    } catch (error) {
+      // Return null if config-manager can't be loaded
+      return null;
+    }
+  }
+  return configManager;
+}
 
 // Lazy load i18n to prevent initialization race conditions
 let i18n;
@@ -22,6 +35,8 @@ function getI18n() {
  * Security utility module for i18nTK
  * Provides secure file operations, path validation, and input sanitization
  * to prevent path traversal, code injection, and other security vulnerabilities
+  // Add debugging for SecurityUtils loading
+  console.log('🔍 DEBUG: SecurityUtils class loaded successfully');
  */
 class SecurityUtils {
   /**
@@ -35,6 +50,7 @@ class SecurityUtils {
       if (!filePath || typeof filePath !== 'string') {
         const i18n = getI18n();
       SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationFailed'), 'error', { inputPath: filePath, reason: i18n.t('security.invalidInputType') });
+       return null;
         return null;
       }
 
@@ -55,6 +71,7 @@ class SecurityUtils {
       if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
         const i18n = getI18n();
         SecurityUtils.logSecurityEvent(i18n.t('security.pathTraversalAttempt'), 'warning', { inputPath: filePath, resolvedPath: finalPath, basePath: base });
+         return null;
         return null;
       }
       
@@ -65,6 +82,7 @@ class SecurityUtils {
     } catch (error) {
       const i18n = getI18n();
       SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationError'), 'error', { inputPath: filePath, error: error.message });
+       return null;
       return null;
     }
   }
@@ -80,7 +98,11 @@ class SecurityUtils {
     if (!validatedPath) {
       return false;
     }
-    return fs.existsSync(validatedPath);
+    try {
+      return fs.existsSync(validatedPath);
+    } catch (error) {
+      return false;
+    }
   }
 
   /**
@@ -475,7 +497,7 @@ class SecurityUtils {
 
     // Only show security logs if debug mode is enabled and showSecurityLogs is true
     try {
-      const cfg = configManager.getConfig();
+      const cfg = getConfigManager()?.getConfig();
       if (cfg.debug?.enabled && cfg.debug?.showSecurityLogs) {
         console.log(`[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`, details);
       }
@@ -512,32 +534,14 @@ class SecurityUtils {
 
   /**
    * Secure performance measurement utility
-   * Provides safe timing functionality without requiring perf_hooks
+   * Provides safe timing functionality using Date.now()
    * @returns {object} - Performance timing object
    */
   static getPerformanceTimer() {
-    // Use Date.now() as a fallback if perf_hooks is not available
-    const hasPerfHooks = (() => {
-      try {
-        require('perf_hooks');
-        return true;
-      } catch {
-        return false;
-      }
-    })();
-
-    if (hasPerfHooks) {
-      const { performance } = require('perf_hooks');
-      return {
-        now: () => performance.now(),
-        isHighResolution: true
-      };
-    } else {
-      return {
-        now: () => Date.now(),
-        isHighResolution: false
-      };
-    }
+    return {
+      now: () => Date.now(),
+      isHighResolution: false
+    };
   }
 
   /**
@@ -549,7 +553,7 @@ class SecurityUtils {
    */
   static debugLog(level, message, details = {}) {
     try {
-      const cfg = configManager.getConfig();
+      const cfg = getConfigManager()?.getConfig();
       const debugEnabled = cfg.debug?.enabled || false;
       const logLevel = cfg.debug?.logLevel || 'info';
       

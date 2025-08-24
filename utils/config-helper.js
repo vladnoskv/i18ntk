@@ -49,7 +49,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
       settingsDir = safeConfigDir;
       const configFile = path.join(settingsDir, 'i18ntk-config.json');
-      cfg = fs.existsSync(configFile) ? JSON.parse(fs.readFileSync(configFile, 'utf8')) : {};
+      cfg = SecurityUtils.safeExistsSync(configFile) ? JSON.parse(SecurityUtils.safeWriteFileSync(configFile, 'utf8')) : {};
       projectRoot = settingsDir;
       cfg.projectRoot = projectRoot;
       cfg.sourceDir = path.resolve(projectRoot, toStr(cfg.sourceDir) || './locales');
@@ -108,7 +108,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
 
       // Auto-fix i18nDir if missing but sourceDir exists
-      if (!fs.existsSync(cfg.i18nDir) && fs.existsSync(cfg.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(cfg.i18nDir) && SecurityUtils.safeExistsSync(cfg.sourceDir)) {
         await configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
         cfg.i18nDir = cfg.sourceDir;
       }
@@ -397,7 +397,7 @@ function displayHelp(scriptName, additionalOptions = {}) {
  * @param {string} dirPath - Directory path
  */
 function ensureDirectory(dirPath) {
-  if (!fs.existsSync(dirPath)) {
+  if (!SecurityUtils.safeExistsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 }
@@ -425,9 +425,9 @@ async function ensureInitialized(cfg) {
     const configPath = path.join(path.dirname(require.main.filename), '..', 'settings', 'initialization.json');
     let initStatus = { initialized: false, version: null, timestamp: null };
     
-    if (fs.existsSync(configPath)) {
+    if (SecurityUtils.safeExistsSync(configPath)) {
       try {
-        initStatus = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        initStatus = JSON.parse(SecurityUtils.safeWriteFileSync(configPath, 'utf8'));
         // If initialized and version matches current, skip further checks
         if (initStatus.initialized && initStatus.version === '1.8.3') {
           return true;
@@ -441,14 +441,14 @@ async function ensureInitialized(cfg) {
     const sourceLanguage = cfg.sourceLanguage || 'en';
     const langDir = path.join(sourceDir, sourceLanguage);
 
-    const hasLanguageFiles = fs.existsSync(langDir) &&
+    const hasLanguageFiles = SecurityUtils.safeExistsSync(langDir) &&
       fs.readdirSync(langDir).some(f => f.endsWith('.json'));
     
     // If language files exist and we're upgrading, mark as initialized
     if (hasLanguageFiles) {
       const initDir = path.dirname(configPath);
       ensureDirectory(initDir);
-      fs.writeFileSync(configPath, JSON.stringify({
+      SecurityUtils.safeWriteFileSync(configPath, JSON.stringify({
         initialized: true,
         version: '1.8.3',
         timestamp: new Date().toISOString(),
@@ -467,7 +467,7 @@ async function ensureInitialized(cfg) {
       // Mark initialization as complete
       const initDir = path.dirname(configPath);
       ensureDirectory(initDir);
-      fs.writeFileSync(configPath, JSON.stringify({
+      SecurityUtils.safeWriteFileSync(configPath, JSON.stringify({
         initialized: true,
         version: '1.8.3',
         timestamp: new Date().toISOString(),
@@ -487,7 +487,7 @@ async function ensureInitialized(cfg) {
       // Mark initialization as complete
       const initDir = path.dirname(configPath);
       ensureDirectory(initDir);
-      fs.writeFileSync(configPath, JSON.stringify({
+      SecurityUtils.safeWriteFileSync(configPath, JSON.stringify({
         initialized: true,
         version: '1.8.3',
         timestamp: new Date().toISOString(),
@@ -532,27 +532,27 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
   ensureDirectory(sourceDir);
   
   // Write the default source language file
-  fs.writeFileSync(sourceFile, JSON.stringify(defaultContent, null, 2));
+  SecurityUtils.safeWriteFileSync(sourceFile, JSON.stringify(defaultContent, null, 2));
   
   // Create directories for supported languages
   const supportedLanguages = ['es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'];
   
   supportedLanguages.forEach(lang => {
     const langFile = path.join(sourceDir, `${lang}.json`);
-    if (!fs.existsSync(langFile)) {
+    if (!SecurityUtils.safeExistsSync(langFile)) {
       // Create empty object structure for each language
       const emptyStructure = {
         app: {},
         common: {},
         navigation: {}
       };
-      fs.writeFileSync(langFile, JSON.stringify(emptyStructure, null, 2));
+      SecurityUtils.safeWriteFileSync(langFile, JSON.stringify(emptyStructure, null, 2));
     }
   });
   
   // Create i18ntk-config.json if it doesn't exist
   const configFile = 'i18ntk-config.json';
-  if (!fs.existsSync(configFile)) {
+  if (!SecurityUtils.safeExistsSync(configFile)) {
     const defaultConfig = {
       version: "1.8.3",
       sourceDir: sourceDir,
@@ -570,7 +570,7 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
         batchSize: 1000
       }
     };
-    fs.writeFileSync(configFile, JSON.stringify(defaultConfig, null, 2));
+    SecurityUtils.safeWriteFileSync(configFile, JSON.stringify(defaultConfig, null, 2));
   }
 }
 

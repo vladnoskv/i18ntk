@@ -1,16 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { envManager } = require('./env-manager');
+const SecurityUtils = require('./security');
 
 // Determine package directory and user project root
 const packageDir = path.resolve(__dirname, '..');
 const userProjectRoot = process.cwd();
 
-// Always use package's internal settings directory to avoid polluting user projects
-// The settings directory should be within the package, not in user space
-const PROJECT_SETTINGS_DIR = path.join(packageDir, 'settings');
-const PROJECT_CONFIG_PATH = path.join(PROJECT_SETTINGS_DIR, 'i18ntk-config.json');
+// Always use current working directory for settings to support test environments
+// This ensures config works correctly when tests change the working directory
+const PROJECT_CONFIG_PATH = path.join(process.cwd(), '.i18ntk-settings');
+const PROJECT_SETTINGS_DIR = path.dirname(PROJECT_CONFIG_PATH);
 
 // Setup tracking file
 const SETUP_COMPLETED_FILE = path.join(PROJECT_SETTINGS_DIR, 'setup.json');
@@ -241,19 +241,7 @@ const DEFAULT_CONFIG = {
   "timezone": "auto"
 };
 
-// Mapping of supported environment variables to config keys
-const ENV_VAR_MAP = {
-  I18NTK_PROJECT_ROOT: 'projectRoot',
-  I18NTK_SOURCE_DIR: 'sourceDir',
-  I18NTK_I18N_DIR: 'i18nDir',
-  I18NTK_OUTPUT_DIR: 'outputDir',
-  I18NTK_FRAMEWORK_PREFERENCE: 'framework.preference',
-  I18NTK_FRAMEWORK_FALLBACK: 'framework.fallback',
-  I18NTK_FRAMEWORK_DETECT: 'framework.detect',
-  I18NTK_LOG_LEVEL: 'advanced.logLevel',
-  I18NTK_LANG: 'uiLanguage',
-  I18NTK_SILENT: 'processing.minimalLogging',
-};
+// Environment variable support has been removed in favor of exclusive .i18ntk-settings configuration
 
 let currentConfig = null;
 
@@ -323,11 +311,11 @@ function applyEnvOverrides(cfg) {
 
 function tryReadJson(filePath) {
   try {
-    if (!fs.existsSync(filePath)) {
+    if (!SecurityUtils.safeExistsSync(filePath)) {
       return null;
     }
     
-    const data = fs.readFileSync(filePath, 'utf8');
+    const data = SecurityUtils.safeReadFileSync(filePath, 'utf8');
     if (!data || data.trim() === '') {
       console.warn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
       return null;
@@ -340,7 +328,7 @@ function tryReadJson(filePath) {
       // Create a backup of the corrupted file
       const backupPath = `${filePath}.corrupted-${Date.now()}.bak`;
       try {
-        fs.writeFileSync(backupPath, data, 'utf8');
+        SecurityUtils.safeWriteFileSync(backupPath, data, 'utf8');
         console.warn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
       } catch (backupError) {
         console.error(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
@@ -355,7 +343,7 @@ function tryReadJson(filePath) {
 
 async function migrateLegacyIfNeeded(baseCfg) {
   // If project config does not exist but legacy exists, migrate once
-  if (!fs.existsSync(PROJECT_CONFIG_PATH) && fs.existsSync(LEGACY_CONFIG_PATH)) {
+  if (!SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH) && SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
     const legacy = tryReadJson(LEGACY_CONFIG_PATH);
     if (legacy && typeof legacy === 'object') {
       const merged = deepMerge(clone(baseCfg), legacy);
@@ -367,7 +355,7 @@ async function migrateLegacyIfNeeded(baseCfg) {
         // Best-effort removal of legacy file to prevent future use
         try { fs.unlinkSync(LEGACY_CONFIG_PATH); } catch (_) {}
         // Deprecation notice
-        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to settings/i18ntk-config.json. Please commit the settings/ directory to your project.');
+        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to .i18ntk-settings. Please commit the .i18ntk-settings file to your project.');
         return merged;
       } catch (_) {
         // If write fails, fall back to in-memory config without deleting legacy
@@ -415,7 +403,7 @@ async function saveConfig(cfg = currentConfig) {
   
   try {
     // Ensure settings directory exists
-    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
       fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
     }
     
@@ -435,7 +423,7 @@ function getConfig() {
   
   try {
     // Ensure settings directory exists
-    if (!fs.existsSync(PROJECT_SETTINGS_DIR)) {
+    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
       fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
     }
 
@@ -443,16 +431,16 @@ function getConfig() {
     // No need to check here - handled by getUnifiedConfig
 
     // Check if config file exists
-    if (fs.existsSync(PROJECT_CONFIG_PATH)) {
-      const config = JSON.parse(fs.readFileSync(PROJECT_CONFIG_PATH, 'utf8'));
+    if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
+      const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, 'utf8'));
       currentConfig = config;
       return resolvePaths(config);
     }
 
     // Check for legacy config for migration
-    if (fs.existsSync(LEGACY_CONFIG_PATH)) {
+    if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
       console.log('📦 Migrating legacy configuration...');
-      const legacyConfig = JSON.parse(fs.readFileSync(LEGACY_CONFIG_PATH, 'utf8'));
+      const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, 'utf8'));
       const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
       saveConfig(migratedConfig);
       currentConfig = migratedConfig;
@@ -502,7 +490,10 @@ async function resetToDefaults() {
   return currentConfig;
 }
 
-function resolvePaths(cfg = getConfig()) {
+function resolvePaths(cfg) {
+  if (!cfg) {
+    cfg = DEFAULT_CONFIG;
+  }
   const root = path.resolve(projectRoot, cfg.projectRoot || '.');
   const resolved = clone(cfg);
   resolved.projectRoot = root;

@@ -54,7 +54,7 @@ class LiteBuild {
   }
 
   async cleanBuildDir() {
-    if (fs.existsSync(this.buildDir)) {
+    if (SecurityUtils.safeExistsSync(this.buildDir)) {
       fs.rmSync(this.buildDir, { recursive: true, force: true });
     }
     fs.mkdirSync(this.buildDir, { recursive: true });
@@ -106,7 +106,7 @@ class LiteBuild {
       const srcPath = path.join(this.projectRoot, src);
       const destPath = path.join(this.buildDir, dest);
       
-      if (fs.existsSync(srcPath)) {
+      if (SecurityUtils.safeExistsSync(srcPath)) {
         fs.copyFileSync(srcPath, destPath);
       }
     });
@@ -116,7 +116,7 @@ class LiteBuild {
     const enLocaleDir = path.join(this.projectRoot, 'ui-locales', 'en');
     const destDir = path.join(this.buildDir, 'ui-locales', 'en');
     
-    if (fs.existsSync(enLocaleDir)) {
+    if (SecurityUtils.safeExistsSync(enLocaleDir)) {
       const files = fs.readdirSync(enLocaleDir);
       files.forEach(file => {
         if (file.endsWith('.json')) {
@@ -150,7 +150,7 @@ class LiteBuild {
       homepage: this.packageJson.homepage
     };
 
-    fs.writeFileSync(
+    SecurityUtils.safeWriteFileSync(
       path.join(this.buildDir, 'package.json'),
       JSON.stringify(litePackageJson, null, 2)
     );
@@ -205,7 +205,7 @@ Thumbs.db
 .DS_Store
 `;
 
-    fs.writeFileSync(
+    SecurityUtils.safeWriteFileSync(
       path.join(this.buildDir, '.npmignore'),
       npmIgnoreContent.trim()
     );
@@ -225,7 +225,7 @@ Thumbs.db
       }
     };
 
-    fs.writeFileSync(
+    SecurityUtils.safeWriteFileSync(
       path.join(this.buildDir, 'build-report.json'),
       JSON.stringify(report, null, 2)
     );

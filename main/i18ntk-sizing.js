@@ -50,7 +50,7 @@ const SetupEnforcer = require('../utils/setup-enforcer');
   }
 })();
 
-loadTranslations(process.env.I18NTK_LANG);
+loadTranslations();
 
 // Get configuration from settings manager
 function getConfig() {

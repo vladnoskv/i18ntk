@@ -136,7 +136,7 @@ class I18nUsageAnalyzer {
       this.i18nDir = this.config.i18nDir;
       this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
 
-      if (!fs.existsSync(this.i18nDir)) {
+      if (!SecurityUtils.safeExistsSync(this.i18nDir, process.cwd())) {
         console.warn(t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         this.i18nDir = this.sourceDir;
         this.config.i18nDir = this.i18nDir;
@@ -222,7 +222,7 @@ class I18nUsageAnalyzer {
         const absoluteDir = path.resolve(currentDir);
         const validatedPath = SecurityUtils.validatePath(absoluteDir, process.cwd());
         
-        if (!validatedPath || !fs.existsSync(validatedPath)) {
+        if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
           return;
         }
         
@@ -312,7 +312,7 @@ class I18nUsageAnalyzer {
         const absoluteDir = path.resolve(currentDir);
         const validatedPath = SecurityUtils.validatePath(absoluteDir, process.cwd());
         
-        if (!validatedPath || !fs.existsSync(validatedPath)) {
+        if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
           return;
         }
         
@@ -482,7 +482,7 @@ class I18nUsageAnalyzer {
         
         for (const dir of possibleSourceDirs) {
           const testPath = path.resolve(projectRoot, dir);
-          if (fs.existsSync(testPath)) {
+          if (SecurityUtils.safeExistsSync(testPath)) {
             this.config.sourceDir = testPath;
             this.sourceDir = testPath;
             break;
@@ -501,7 +501,7 @@ class I18nUsageAnalyzer {
         const fallback = path.resolve(this.config.projectRoot || '.', 'src');
         console.warn(t('usage.sourceEqualsI18nWarn') ||
           `⚠️ sourceDir equals i18nDir (${this.sourceDir}). Falling back to ${fallback} for source scanning.`);
-        if (fs.existsSync(fallback)) {
+        if (SecurityUtils.safeExistsSync(fallback)) {
           this.sourceDir = fallback;
         } else {
           console.warn(`⚠️ Fallback directory ${fallback} does not exist. Using project root for source scanning.`);
@@ -682,7 +682,7 @@ Analysis Features (v1.8.3):
           await SecurityUtils.validatePath(fileInfo.filePath);
           
           // Check if file exists and is readable
-          if (!fs.existsSync(fileInfo.filePath)) {
+          if (!SecurityUtils.safeExistsSync(fileInfo.filePath)) {
             if (isDebug || isStrict) {
               console.warn(`⚠️  File not found: ${path.basename(fileInfo.filePath)}`);
             }
@@ -827,7 +827,7 @@ Analysis Features (v1.8.3):
       console.log(t('usage.checkUsage.analyzing_source_files'));
       
       // Check if source directory exists
-      if (!fs.existsSync(this.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
         throw new Error(this.t('usage.sourceDirectoryDoesNotExist', { dir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
       }
       
@@ -898,7 +898,7 @@ Analysis Features (v1.8.3):
       const isStrict = process.argv.includes('--strict');
       
       // Check if i18n directory exists
-      if (!fs.existsSync(this.i18nDir)) {
+      if (!SecurityUtils.safeExistsSync(this.i18nDir, process.cwd())) {
         console.warn(t('usage.i18nDirectoryNotFound', { i18nDir: this.i18nDir }));
         return;
       }
@@ -912,7 +912,7 @@ Analysis Features (v1.8.3):
           .filter(item => {
             try {
               const itemPath = path.join(this.i18nDir, item);
-              return fs.existsSync(itemPath) && fs.statSync(itemPath).isDirectory();
+              return SecurityUtils.safeExistsSync(itemPath) && fs.statSync(itemPath).isDirectory();
             } catch (error) {
               return false;
             }
@@ -951,7 +951,7 @@ Analysis Features (v1.8.3):
           
           for (const fileInfo of translationFiles) {
             try {
-              if (!fs.existsSync(fileInfo.filePath)) {
+              if (!SecurityUtils.safeExistsSync(fileInfo.filePath)) {
                 if (isDebug || isStrict) {
                   console.warn(`⚠️  File not found: ${path.basename(fileInfo.filePath)}`);
                 }
@@ -1353,7 +1353,7 @@ Analysis Features (v1.8.3):
   async saveReport(report, outputDir = './i18ntk-reports/usage') {
     try {
       // Ensure output directory exists
-      if (!fs.existsSync(outputDir)) {
+      if (!SecurityUtils.safeExistsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
       }
       
@@ -1578,12 +1578,12 @@ Analysis Features (v1.8.3):
       await SecurityUtils.validatePath(this.sourceDir);
       await SecurityUtils.validatePath(this.i18nDir);
       
-      if (!fs.existsSync(this.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
         throw new Error(this.t('usage.sourceDirectoryDoesNotExist', { dir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
 
       }
       
-      if (!fs.existsSync(this.i18nDir)) {
+      if (!SecurityUtils.safeExistsSync(this.i18nDir, process.cwd())) {
         throw new Error(this.t('usage.i18nDirectoryDoesNotExist', { dir: this.i18nDir }) || `I18n directory not found: ${this.i18nDir}`);
       }
       

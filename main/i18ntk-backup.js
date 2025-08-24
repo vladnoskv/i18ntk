@@ -195,7 +195,7 @@ async function handleRestore(args) {
     : path.join(process.cwd(), 'restored');
   
   // Validate backup file
-  if (!fs.existsSync(backupPath)) {
+  if (!SecurityUtils.safeExistsSync(backupPath, process.cwd())) {
     throw new Error(`Backup file not found: ${backupPath}`);
   }
   
@@ -300,7 +300,7 @@ async function handleVerify(args) {
   const backupPath = path.resolve(process.cwd(), backupFile);
   
   // Validate backup file
-  if (!fs.existsSync(backupPath)) {
+  if (!SecurityUtils.safeExistsSync(backupPath, process.cwd())) {
     throw new Error(`Backup file not found: ${backupPath}`);
   }
   

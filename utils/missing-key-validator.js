@@ -777,12 +777,12 @@ class MissingKeyValidator {
   async validateLanguageKeys(language) {
     const localePath = path.join(this.projectRoot, 'ui-locales', `${language}.json`);
     
-    if (!fs.existsSync(localePath)) {
+    if (!SecurityUtils.safeExistsSync(localePath)) {
       return this.requiredKeys; // All keys missing if file doesn't exist
     }
     
     try {
-      const localeData = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+      const localeData = JSON.parse(SecurityUtils.safeReadFileSync(localePath, 'utf8'));
       const existingKeys = Object.keys(localeData);
       
       return this.requiredKeys.filter(key => !existingKeys.includes(key));
@@ -807,7 +807,7 @@ class MissingKeyValidator {
     };
 
     const reportPath = path.join(__dirname, 'missing-keys-report.json');
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
     
     console.log('\n📊 Missing Keys Report:');
     console.log(`Total Languages: ${report.summary.totalLanguages}`);
@@ -837,7 +837,7 @@ class MissingKeyValidator {
     });
 
     const templatePath = path.join(__dirname, 'translation-template.json');
-    fs.writeFileSync(templatePath, JSON.stringify(template, null, 2));
+    SecurityUtils.safeWriteFileSync(templatePath, JSON.stringify(template, null, 2));
     
     console.log(`Translation template saved to: ${templatePath}`);
     return template;

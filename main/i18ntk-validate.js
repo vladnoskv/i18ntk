@@ -112,7 +112,7 @@ class I18nValidator {
         } else {
           console.warn(t('config.dirFallbackWarning', { dir: this.sourceDir, fallback: this.sourceLanguageDir }) ||
             `Warning: Directory ${this.sourceDir} not found. Using ${this.sourceLanguageDir}.`);
-          if (!fs.existsSync(this.sourceLanguageDir)) {
+          if (!SecurityUtils.safeExistsSync(this.sourceLanguageDir)) {
             fs.mkdirSync(this.sourceLanguageDir, { recursive: true });
           }
         }
@@ -189,7 +189,7 @@ class I18nValidator {
   // Get all available languages
   getAvailableLanguages() {
     try {
-      if (!fs.existsSync(this.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
         throw new Error(`Source directory not found: ${this.sourceDir}`);
       }
       
@@ -211,7 +211,7 @@ class I18nValidator {
       const sanitizedLanguage = SecurityUtils.sanitizeInput(language);
       const languageDir = path.join(this.sourceDir, sanitizedLanguage);
       
-      if (!fs.existsSync(languageDir)) {
+      if (!SecurityUtils.safeExistsSync(languageDir)) {
         return [];
       }
       
@@ -265,7 +265,7 @@ class I18nValidator {
   // Validate JSON file syntax
   async validateJsonSyntax(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
       const parsed = SecurityUtils.safeParseJSON(content);
       
       SecurityUtils.logSecurityEvent(
@@ -481,7 +481,7 @@ class I18nValidator {
       };
       
       // Check for missing language directory
-      if (!fs.existsSync(languageDir)) {
+      if (!SecurityUtils.safeExistsSync(languageDir)) {
         this.addError(
           `Language directory missing: ${sanitizedLanguage}`,
           { language: sanitizedLanguage, expectedPath: languageDir }
@@ -495,7 +495,7 @@ class I18nValidator {
       const targetFilePath = path.join(languageDir, fileName);
       
       // Check if source file exists
-      if (!fs.existsSync(sourceFilePath)) {
+      if (!SecurityUtils.safeExistsSync(sourceFilePath)) {
         this.addWarning(
           `Source file missing: ${this.config.sourceLanguage}/${fileName}`,
           { fileName, language: this.config.sourceLanguage }
@@ -504,7 +504,7 @@ class I18nValidator {
       }
       
       // Check if target file exists
-      if (!fs.existsSync(targetFilePath)) {
+      if (!SecurityUtils.safeExistsSync(targetFilePath)) {
         this.addError(
           `Translation file missing: ${language}/${fileName}`,
           { fileName, language, expectedPath: targetFilePath }
@@ -639,7 +639,7 @@ class I18nValidator {
         const reportPath = path.join(process.cwd(), 'validation-report.txt');
         SecurityUtils.validatePath(reportPath);
         
-        if (fs.existsSync(reportPath)) {
+        if (SecurityUtils.safeExistsSync(reportPath)) {
           fs.unlinkSync(reportPath);
           console.log(t('validate.deletedOldReport'));
           
@@ -672,7 +672,7 @@ class I18nValidator {
       // Validate source language directory exists
       SecurityUtils.validatePath(this.sourceLanguageDir);
       
-      if (!fs.existsSync(this.sourceLanguageDir)) {
+      if (!SecurityUtils.safeExistsSync(this.sourceLanguageDir)) {
         const error = t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || 'Source language directory not found';
         this.addError(error, { sourceLanguage: this.config.sourceLanguage });
         

@@ -36,7 +36,7 @@ function getEnglishFiles() {
  */
 function readJsonFile(filePath) {
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
     return JSON.parse(content);
   } catch (error) {
     console.error(`Error reading JSON file ${filePath}:`, error.message);
@@ -50,7 +50,7 @@ function readJsonFile(filePath) {
 function writeJsonFile(filePath, data) {
   try {
     const jsonString = JSON.stringify(data, null, 2);
-    fs.writeFileSync(filePath, jsonString + '\n');
+    SecurityUtils.safeWriteFileSync(filePath, jsonString + '\n');
     return true;
   } catch (error) {
     console.error(`Error writing JSON file ${filePath}:`, error.message);
@@ -74,7 +74,7 @@ function syncLanguage(language) {
   const languageDir = path.join(UI_LOCALES_DIR, language);
   
   // Ensure language directory exists
-  if (!fs.existsSync(languageDir)) {
+  if (!SecurityUtils.safeExistsSync(languageDir)) {
     fs.mkdirSync(languageDir, { recursive: true });
   }
   

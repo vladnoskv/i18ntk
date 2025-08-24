@@ -36,8 +36,8 @@ const KEY_PATTERNS = [
 
 const EXCLUDE_DIRS = new Set(['node_modules', '.git', path.basename(I18N_DIR)]);
 
-function readUTF8(p) { try { return fs.readFileSync(p, 'utf8'); } catch { return null; } }
-function writeJSON(p, obj) { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8'); }
+function readUTF8(p) { try { return SecurityUtils.safeWriteFileSync(p, 'utf8'); } catch { return null; } }
+function writeJSON(p, obj) { fs.mkdirSync(path.dirname(p), { recursive: true }); SecurityUtils.safeWriteFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8'); }
 function isDir(p) { try { return fs.statSync(p).isDirectory(); } catch { return false; } }
 function isFile(p) { try { return fs.statSync(p).isFile(); } catch { return false; } }
 

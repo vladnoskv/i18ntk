@@ -2,7 +2,7 @@
 
 /**
  * i18ntk-setup.js - Foundational Setup Script
- * 
+ *
  * This script runs before all other initialization or operational scripts.
  * It configures the core framework, detects programming language/framework,
  * specifies translation file locations, and establishes essential prerequisites.
@@ -11,7 +11,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const SettingsManager = require('../settings/settings-manager');
+const SecurityUtils = require('../utils/security');
+const configManager = require('../utils/config-manager');
 
 class I18nSetupManager {
     constructor() {
@@ -42,14 +43,14 @@ class I18nSetupManager {
     async setup() {
         console.log('🔧 i18n Toolkit - Foundational Setup');
         console.log('=====================================');
-        
+
         try {
             await this.detectEnvironment();
             await this.configureFramework();
             await this.validatePrerequisites();
             await this.optimizeForLanguage();
             await this.generateSetupReport();
-            
+
             console.log('✅ Setup completed successfully!');
             return this.config;
         } catch (error) {
@@ -60,7 +61,7 @@ class I18nSetupManager {
 
     async detectEnvironment() {
         console.log('📍 Detecting environment...');
-        
+
         const packageJsonPath = path.join(process.cwd(), 'package.json');
         const pyprojectPath = path.join(process.cwd(), 'pyproject.toml');
         const requirementsPath = path.join(process.cwd(), 'requirements.txt');
@@ -68,19 +69,19 @@ class I18nSetupManager {
         const pomPath = path.join(process.cwd(), 'pom.xml');
         const composerPath = path.join(process.cwd(), 'composer.json');
 
-        if (fs.existsSync(packageJsonPath)) {
+        if (SecurityUtils.safeExistsSync(packageJsonPath)) {
             this.config.detectedLanguage = 'javascript';
             await this.detectNodeFramework(packageJsonPath);
-        } else if (fs.existsSync(pyprojectPath) || fs.existsSync(requirementsPath)) {
+        } else if (SecurityUtils.safeExistsSync(pyprojectPath) || SecurityUtils.safeExistsSync(requirementsPath)) {
             this.config.detectedLanguage = 'python';
             await this.detectPythonFramework();
-        } else if (fs.existsSync(goModPath)) {
+        } else if (SecurityUtils.safeExistsSync(goModPath)) {
             this.config.detectedLanguage = 'go';
             this.config.detectedFramework = 'generic';
-        } else if (fs.existsSync(pomPath)) {
+        } else if (SecurityUtils.safeExistsSync(pomPath)) {
             this.config.detectedLanguage = 'java';
             await this.detectJavaFramework(pomPath);
-        } else if (fs.existsSync(composerPath)) {
+        } else if (SecurityUtils.safeExistsSync(composerPath)) {
             this.config.detectedLanguage = 'php';
             await this.detectPhpFramework(composerPath);
         } else {
@@ -94,7 +95,7 @@ class I18nSetupManager {
 
     async detectNodeFramework(packageJsonPath) {
         try {
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
             const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
             if (deps.react || deps['react-dom']) this.config.detectedFramework = 'react';
@@ -112,8 +113,8 @@ class I18nSetupManager {
     async detectPythonFramework() {
         try {
             const requirementsPath = path.join(process.cwd(), 'requirements.txt');
-            if (fs.existsSync(requirementsPath)) {
-                const requirements = fs.readFileSync(requirementsPath, 'utf8');
+            if (SecurityUtils.safeExistsSync(requirementsPath)) {
+                const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
                 if (requirements.includes('django')) this.config.detectedFramework = 'django';
                 else if (requirements.includes('flask')) this.config.detectedFramework = 'flask';
                 else if (requirements.includes('fastapi')) this.config.detectedFramework = 'fastapi';
@@ -128,7 +129,7 @@ class I18nSetupManager {
 
     async detectJavaFramework(pomPath) {
         try {
-            const pomContent = fs.readFileSync(pomPath, 'utf8');
+            const pomContent = SecurityUtils.safeReadFileSync(pomPath, 'utf8');
             if (pomContent.includes('spring-boot')) this.config.detectedFramework = 'spring-boot';
             else if (pomContent.includes('spring')) this.config.detectedFramework = 'spring';
             else if (pomContent.includes('quarkus')) this.config.detectedFramework = 'quarkus';
@@ -140,9 +141,9 @@ class I18nSetupManager {
 
     async detectPhpFramework(composerPath) {
         try {
-            const composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
+            const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
             const deps = composer.require || {};
-            
+
             if (deps['laravel/framework']) this.config.detectedFramework = 'laravel';
             else if (deps['symfony/framework-bundle']) this.config.detectedFramework = 'symfony';
             else if (deps['wordpress']) this.config.detectedFramework = 'wordpress';
@@ -154,7 +155,7 @@ class I18nSetupManager {
 
     async configureFramework() {
         console.log('⚙️  Configuring framework...');
-        
+
         const frameworkConfigs = {
             javascript: {
                 sourcePatterns: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
@@ -204,7 +205,7 @@ class I18nSetupManager {
         };
 
         this.config.frameworkConfig = frameworkConfigs[this.config.detectedLanguage] || frameworkConfigs.javascript;
-        
+
         // Auto-detect source directory
         const possiblePaths = [
             this.config.frameworkConfig.defaultLocalePath,
@@ -216,7 +217,7 @@ class I18nSetupManager {
         ];
 
         for (const dirPath of possiblePaths) {
-            if (fs.existsSync(dirPath)) {
+            if (SecurityUtils.safeExistsSync(dirPath)) {
                 this.config.sourceDir = dirPath;
                 break;
             }
@@ -227,12 +228,12 @@ class I18nSetupManager {
 
     async validatePrerequisites() {
         console.log('🔍 Validating prerequisites...');
-        
+
         this.config.prerequisites = {
             nodeVersion: process.version,
             nodeVersionValid: parseInt(process.version.slice(1).split('.')[0]) >= 16,
-            hasPackageJson: fs.existsSync('package.json'),
-            hasLocales: fs.existsSync(this.config.sourceDir),
+            hasPackageJson: SecurityUtils.safeExistsSync('package.json'),
+            hasLocales: SecurityUtils.safeExistsSync(this.config.sourceDir),
             hasGit: this.checkCommand('git'),
             hasNpm: this.checkCommand('npm'),
             hasPython: this.checkCommand('python3') || this.checkCommand('python'),
@@ -244,11 +245,11 @@ class I18nSetupManager {
         // Check for i18n libraries
         if (this.config.detectedLanguage === 'javascript') {
             const packageJsonPath = path.join(process.cwd(), 'package.json');
-            if (fs.existsSync(packageJsonPath)) {
-                const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+                const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
                 const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
-                
-                this.config.prerequisites.hasI18nLibrary = Object.keys(deps).some(dep => 
+
+                this.config.prerequisites.hasI18nLibrary = Object.keys(deps).some(dep =>
                     this.config.frameworkConfig.i18nLibraries.some(lib => dep.includes(lib))
                 );
             }
@@ -268,12 +269,12 @@ class I18nSetupManager {
         const extensions = process.platform === 'win32' ? ['.exe', '.cmd', '.bat'] : [''];
         const pathEnv = process.env.PATH || process.env.Path || '';
         const pathDirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
-        
+
         for (const dir of pathDirs) {
             for (const ext of extensions) {
                 const fullPath = path.join(dir, command + ext);
                 try {
-                    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+                    if (SecurityUtils.safeExistsSync(fullPath) && fs.statSync(fullPath).isFile()) {
                         return true;
                     }
                 } catch {
@@ -286,7 +287,7 @@ class I18nSetupManager {
 
     async optimizeForLanguage() {
         console.log('🚀 Optimizing for language...');
-        
+
         const optimizationStrategies = {
             javascript: {
                 mode: 'extreme',
@@ -331,40 +332,77 @@ class I18nSetupManager {
         };
 
         // Update configuration using SettingsManager
-        const SettingsManager = require('../settings/settings-manager');
-        const settingsManager = new SettingsManager();
+        const configManager = require('../utils/config-manager');
+
+        // Get package version safely
+        let packageVersion = '1.10.2'; // fallback version
+        try {
+            const packageJsonPath = path.join(__dirname, '..', 'package.json');
+            if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+                const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+                packageVersion = packageJson.version || '1.10.2';
+            }
+        } catch (error) {
+            console.warn('Could not read package.json version, using fallback:', error.message);
+        }
+
+        const setupId = `setup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
-console.log('🔧 About to update settings with:', {
-  setup: {
-    completed: true,
-    completedAt: new Date().toISOString(),
-    version: require('../package.json').version,
-    setupId: `setup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  }
-});
-        
-        settingsManager.updateSettings({
-            'sourceDir': this.config.sourceDir,
-            'outputDir': this.config.outputDir,
-            'detectedLanguage': this.config.detectedLanguage,
-            'detectedFramework': this.config.detectedFramework,
-            'optimization': this.config.optimization,
-            'prerequisites': this.config.prerequisites,
-            'security.adminPinEnabled': false,
-            'security.sessionTimeout': 1800000,
-            'security.maxFailedAttempts': 3,
-            'setup.completed': true,
-            'setup.completedAt': new Date().toISOString(),
-            'setup.version': require('../package.json').version,
-            'setup.setupId': `setup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+        console.log('🔧 About to update settings with:', {
+            setup: {
+                completed: true,
+                completedAt: new Date().toISOString(),
+                version: packageVersion,
+                setupId: setupId
+            }
         });
-        
-        console.log(`   Configuration updated in settings/i18ntk-config.json`);
+
+        try {
+            // Load current config and update it
+            const currentConfig = configManager.loadConfig() || configManager.DEFAULT_CONFIG;
+
+            // Update the configuration with setup data
+            const updatedConfig = {
+                ...currentConfig,
+                version: packageVersion,
+                sourceDir: this.config.sourceDir,
+                outputDir: this.config.outputDir,
+                framework: {
+                    ...currentConfig.framework,
+                    detected: true,
+                    preference: this.config.detectedFramework
+                },
+                processing: {
+                    ...currentConfig.processing,
+                    ...this.config.optimization
+                },
+                security: {
+                    ...currentConfig.security,
+                    adminPinEnabled: false,
+                    sessionTimeout: 1800000,
+                    maxFailedAttempts: 3
+                },
+                setup: {
+                    completed: true,
+                    completedAt: new Date().toISOString(),
+                    version: packageVersion,
+                    setupId: setupId
+                }
+            };
+
+            // Save the updated configuration
+            await configManager.saveConfig(updatedConfig);
+            console.log(`   Configuration updated in .i18ntk-settings`);
+        } catch (error) {
+            console.error('❌ Error updating settings:', error.message);
+            throw error;
+        }
     }
 
     async generateSetupReport() {
         console.log('📊 Generating setup report...');
-        
+
         const report = {
             timestamp: new Date().toISOString(),
             setup: {
@@ -384,12 +422,11 @@ console.log('🔧 About to update settings with:', {
         };
 
         // Save report using SettingsManager
-        const settingsManager = new SettingsManager();
-        settingsManager.updateSetting('setupReport', report);
         
+
         // Also save a local copy for user reference
         const reportPath = path.join(process.cwd(), 'i18ntk-setup-report.json');
-        fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+        SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
         console.log(`   Setup report saved: ${reportPath}`);
     }
 

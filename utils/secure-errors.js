@@ -76,7 +76,7 @@ function secureErrorHandler(options = {}) {
   const config = { ...defaults, ...options };
   
   // Ensure log directory exists
-  if (config.logFilePath && !fs.existsSync(path.dirname(config.logFilePath))) {
+  if (config.logFilePath && !SecurityUtils.safeExistsSync(path.dirname(config.logFilePath))) {
     try {
       fs.mkdirSync(path.dirname(config.logFilePath), { recursive: true });
     } catch (e) {
@@ -126,12 +126,12 @@ function secureErrorHandler(options = {}) {
 
       // Log to console
       if (typeof config.logFunction === 'function') {
-        config.logFunction(JSON.stringify(logEntry, null, 2));
+        SecurityUtils.safeWriteFileSync(config.logFilePath, JSON.stringify(logEntry, null, 2));
       }
 
       // Log to file if configured
       if (config.logFilePath) {
-        fs.appendFileSync(
+        SecurityUtils.safeWriteFileSync(
           config.logFilePath,
           JSON.stringify(logEntry) + '\n',
           'utf8'

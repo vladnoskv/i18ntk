@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 function watchDirectory(dir, callback, watchers) {
-  if (!fs.existsSync(dir)) return;
+  if (!SecurityUtils.safeExistsSync(dir)) return;
   const watcher = fs.watch(dir, (event, filename) => {
     if (filename && filename.endsWith('.json')) {
       callback(path.join(dir, filename));

@@ -6,10 +6,10 @@ const SecurityUtils = require('../utils/security');
 
 class SettingsManager {
     constructor() {
-        // Use package settings directory (consistent with config-manager.js)
-        this.configDir = path.resolve(__dirname, '..', 'settings');
-        this.configFile = path.join(this.configDir, 'i18ntk-config.json');
-        this.backupDir = path.join(path.resolve(__dirname, '..'), 'backups');
+        // Use centralized .i18ntk-settings file as single source of truth
+        this.configDir = path.resolve(__dirname, '..');
+        this.configFile = path.join(process.cwd(), '.i18ntk-settings');
+        this.backupDir = path.join(process.cwd(), 'backups');
         this.saveTimeout = null;
         
         this.defaultConfig = {
@@ -317,8 +317,8 @@ class SettingsManager {
      */
     loadSettings() {
         try {
-            if (fs.existsSync(this.configFile)) {
-                const content = fs.readFileSync(this.configFile, 'utf8');
+            if (SecurityUtils.safeExistsSync(this.configFile)) {
+                const content = SecurityUtils.safeWriteFileSync(this.configFile, 'utf8');
                 const loadedSettings = JSON.parse(content);
                 // Merge with defaults to ensure all properties exist
                 this.settings = this.mergeWithDefaults(loadedSettings);
@@ -431,12 +431,12 @@ class SettingsManager {
      */
     _saveImmediately() {
         try {
-            if (!fs.existsSync(this.configDir)) {
+            if (!SecurityUtils.safeExistsSync(this.configDir)) {
                 fs.mkdirSync(this.configDir, { recursive: true });
             }
             
             const content = JSON.stringify(this.settings, null, 4);
-            fs.writeFileSync(this.configFile, content, 'utf8');
+            SecurityUtils.safeWriteFileSync(this.configFile, content, 'utf8');
             
             // Create backup if enabled
             if (this.settings.backup?.enabled) {
@@ -456,7 +456,7 @@ class SettingsManager {
      */
     createBackup() {
         try {
-            if (!fs.existsSync(this.backupDir)) {
+            if (!SecurityUtils.safeExistsSync(this.backupDir)) {
                 fs.mkdirSync(this.backupDir, { recursive: true });
             }
             
@@ -535,28 +535,28 @@ class SettingsManager {
             
             // Main configuration file
             const mainConfigPath = path.join(settingsDir, 'i18ntk-config.json');
-            if (fs.existsSync(mainConfigPath)) {
+            if (SecurityUtils.safeExistsSync(mainConfigPath)) {
                 fs.unlinkSync(mainConfigPath);
                 console.log('✅ Main configuration file removed');
             }
             
             // Project configuration file
             const projectConfigPath = path.join(settingsDir, 'project-config.json');
-            if (fs.existsSync(projectConfigPath)) {
+            if (SecurityUtils.safeExistsSync(projectConfigPath)) {
                 fs.unlinkSync(projectConfigPath);
                 console.log('✅ Project configuration removed');
             }
             
             // Setup tracking file
             const setupFile = path.join(settingsDir, 'setup.json');
-            if (fs.existsSync(setupFile)) {
+            if (SecurityUtils.safeExistsSync(setupFile)) {
                 fs.unlinkSync(setupFile);
                 console.log('✅ Setup tracking cleared');
             }
             
             // 3. Clear all backup files from backups directory
             const backupsDir = path.join(packageDir, 'backups');
-            if (fs.existsSync(backupsDir)) {
+            if (SecurityUtils.safeExistsSync(backupsDir)) {
                 const backupFiles = fs.readdirSync(backupsDir);
                 for (const file of backupFiles) {
                     if (file.endsWith('.json') || file.endsWith('.bak')) {
@@ -575,7 +575,7 @@ class SettingsManager {
             ];
             
             for (const adminConfigPath of adminConfigPaths) {
-                if (fs.existsSync(adminConfigPath)) {
+                if (SecurityUtils.safeExistsSync(adminConfigPath)) {
                     fs.unlinkSync(adminConfigPath);
                     console.log('✅ Admin PIN configuration cleared');
                 }
@@ -588,7 +588,7 @@ class SettingsManager {
             ];
             
             for (const initFile of initFiles) {
-                if (fs.existsSync(initFile)) {
+                if (SecurityUtils.safeExistsSync(initFile)) {
                     fs.unlinkSync(initFile);
                     console.log('✅ Initialization tracking cleared');
                 }
@@ -601,7 +601,7 @@ class SettingsManager {
             ];
             
             for (const cacheDir of cacheDirs) {
-                if (fs.existsSync(cacheDir)) {
+                if (SecurityUtils.safeExistsSync(cacheDir)) {
                     const cacheFiles = fs.readdirSync(cacheDir);
                     for (const file of cacheFiles) {
                         fs.unlinkSync(path.join(cacheDir, file));
@@ -624,7 +624,7 @@ class SettingsManager {
             ];
             
             for (const tempFile of tempFiles) {
-                if (fs.existsSync(tempFile)) {
+                if (SecurityUtils.safeExistsSync(tempFile)) {
                     fs.unlinkSync(tempFile);
                 }
             }
@@ -641,7 +641,7 @@ class SettingsManager {
             ];
             
             for (const file of additionalFiles) {
-                if (fs.existsSync(file)) {
+                if (SecurityUtils.safeExistsSync(file)) {
                     fs.unlinkSync(file);
                     console.log(`✅ Removed ${path.basename(file)}`);
                 }

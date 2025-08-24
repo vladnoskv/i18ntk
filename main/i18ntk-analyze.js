@@ -997,7 +997,7 @@ try {
           name: 'sourceDir',
           message: 'Enter source directory path:',
           initial: this.sourceDir,
-          validate: value => fs.existsSync(value) ? true : 'Directory does not exist'
+          validate: value => SecurityUtils.safeExistsSync(value, process.cwd()) ? true : 'Directory does not exist'
         },
         {
           type: 'text',

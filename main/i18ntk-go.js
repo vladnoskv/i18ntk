@@ -44,8 +44,8 @@ class GoI18nManager {
 
   async detectFramework(sourceDir) {
     const goModPath = path.join(sourceDir, 'go.mod');
-    if (fs.existsSync(goModPath)) {
-      const content = fs.readFileSync(goModPath, 'utf8');
+    if (SecurityUtils.safeExistsSync(goModPath)) {
+      const content = SecurityUtils.safeWriteFileSync(goModPath, 'utf8');
       
       if (content.includes('go-i18n')) return 'go-i18n';
       if (content.includes('nicksnyder/go-i18n')) return 'go-i18n-v2';
@@ -70,7 +70,7 @@ class GoI18nManager {
     const goFiles = this.findFiles(sourceDir, '.go');
     
     for (const file of goFiles) {
-      const content = fs.readFileSync(file, 'utf8');
+      const content = SecurityUtils.safeWriteFileSync(file, 'utf8');
       
       // Extract Go i18n patterns
       const patterns = [
@@ -106,7 +106,7 @@ class GoI18nManager {
       fs.mkdirSync(langDir, { recursive: true });
       
       // Create Go i18n format files
-      fs.writeFileSync(path.join(langDir, 'active.en.toml'), `# Go i18n translations for ${lang}
+      SecurityUtils.safeWriteFileSync(path.join(langDir, 'active.en.toml'), `# Go i18n translations for ${lang}
 [hello]
 other = "Hello, World!"
 
@@ -115,7 +115,7 @@ one = "{{.Count}} item"
 other = "{{.Count}} items"
 `);
       
-      fs.writeFileSync(path.join(langDir, 'active.en.json'), JSON.stringify({
+      SecurityUtils.safeWriteFileSync(path.join(langDir, 'active.en.json'), JSON.stringify({
         hello: "Hello, World!",
         items: {
           one: "{{.Count}} item",
@@ -161,7 +161,7 @@ other = "{{.Count}} items"
     };
     
     const reportPath = path.join(outputDir, 'i18ntk-go-report.json');
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
     
     return reportPath;
   }

@@ -27,7 +27,7 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  const raw = fs.readFileSync(file, 'utf8');
+  const raw = SecurityUtils.safeWriteFileSync(file, 'utf8');
   return JSON.parse(stripBOMAndComments(raw));
 }
 
@@ -85,7 +85,7 @@ function listJsonFilesRecursively(dir) {
   const stack = [dir];
   while (stack.length) {
     const d = stack.pop();
-    if (!fs.existsSync(d)) continue;
+    if (!SecurityUtils.safeExistsSync(d)) continue;
     for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
       const full = path.join(d, entry.name);
       if (entry.isDirectory()) {
@@ -104,7 +104,7 @@ function readLanguageFromBase(baseDir, lang) {
   const langDir = path.join(baseDir, lang);
 
   // Prefer folder if exists, otherwise single file
-  if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+  if (SecurityUtils.safeExistsSync(langDir) && fs.statSync(langDir).isDirectory()) {
     const files = listJsonFilesRecursively(langDir);
     for (const file of files) {
       try {
@@ -114,7 +114,7 @@ function readLanguageFromBase(baseDir, lang) {
         // Skip unreadable/invalid files
       }
     }
-  } else if (fs.existsSync(langFile) && fs.statSync(langFile).isFile()) {
+  } else if (SecurityUtils.safeExistsSync(langFile) && fs.statSync(langFile).isFile()) {
     try {
       const data = readJsonSafe(langFile);
       if (data && typeof data === 'object') deepMerge(merged, data);
@@ -203,7 +203,7 @@ function getLanguage() {
 function getAvailableLanguages() {
   const langs = new Set();
   if (!state.baseDir) state.baseDir = resolveBaseDir();
-  if (!fs.existsSync(state.baseDir)) return ['en'];
+  if (!SecurityUtils.safeExistsSync(state.baseDir)) return ['en'];
   for (const entry of fs.readdirSync(state.baseDir, { withFileTypes: true })) {
     if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
       langs.add(entry.name.replace(/\.json$/i, ''));
@@ -211,7 +211,7 @@ function getAvailableLanguages() {
       // language folder convention
       const lang = entry.name;
       const idx = path.join(state.baseDir, lang, `${lang}.json`);
-      if (fs.existsSync(idx)) langs.add(lang);
+      if (SecurityUtils.safeExistsSync(idx)) langs.add(lang);
       else langs.add(lang); // be permissive
     }
   }

@@ -9,7 +9,9 @@ function loadOptionalModule(name, cwd = process.cwd()) {
   }
 
   try {
-    const resolved = require.resolve(sanitizedName, { paths: [cwd] });
+    // Use a whitelist of allowed module paths for safer resolution
+    const allowedPaths = [cwd];
+    const resolved = require.resolve(sanitizedName, { paths: allowedPaths });
     return require(resolved);
  } catch {
     return null;

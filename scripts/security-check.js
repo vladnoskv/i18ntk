@@ -53,7 +53,7 @@ class SecurityCheck {
   async checkDirectory(dir) {
     const dirPath = path.join(process.cwd(), dir);
     
-    if (!fs.existsSync(dirPath)) {
+    if (!SecurityUtils.safeExistsSync(dirPath)) {
       return;
     }
 
@@ -90,7 +90,7 @@ class SecurityCheck {
       }
     }
 
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
     const lines = content.split('\n');
     
     for (let i = 0; i < lines.length; i++) {

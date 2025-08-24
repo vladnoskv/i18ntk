@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const SettingsManager = require('../settings/settings-manager');
+const SecurityUtils = require('../utils/security');
 const legacyConfigManager = require('../utils/config-manager');
 const { getIcon, isUnicodeSupported } = require('../utils/terminal-icons');
 const configManager = new SettingsManager();
@@ -57,7 +58,7 @@ this.translations = {};
         const all = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
         return all.filter(lang => {
             const filePath = path.join(this.uiLocalesDir, `${lang}.json`);
-            return fs.existsSync(filePath);
+            return SecurityUtils.safeExistsSync(filePath);
         });
     }
 
@@ -93,9 +94,9 @@ this.translations = {};
             // Primary: Use monolith JSON file (en.json, de.json, etc.)
             const monolithTranslationFile = path.join(this.uiLocalesDir, `${language}.json`);
             
-            if (fs.existsSync(monolithTranslationFile)) {
+            if (SecurityUtils.safeExistsSync(monolithTranslationFile)) {
                 try {
-                    const content = fs.readFileSync(monolithTranslationFile, 'utf8');
+                    const content = SecurityUtils.safeWriteFileSync(monolithTranslationFile, 'utf8');
                     const fullTranslations = JSON.parse(content);
                     
                     // Flatten the nested structure for easier key access
@@ -113,7 +114,7 @@ this.translations = {};
                 // Fallback: Use folder-based structure if monolith file doesn't exist
                 const langDir = path.join(this.uiLocalesDir, language);
                 
-                if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+                if (SecurityUtils.safeExistsSync(langDir) && fs.statSync(langDir).isDirectory()) {
                     const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
                     if (debugEnabled) {
                         console.log(`UI: Found files in ${langDir}: ${files.join(', ')}`);
@@ -122,7 +123,7 @@ this.translations = {};
                     for (const file of files) {
                         const filePath = path.join(langDir, file);
                         try {
-                            const content = fs.readFileSync(filePath, 'utf8');
+                            const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
                             const fileTranslations = JSON.parse(content);
                             const moduleName = path.basename(file, '.json');
                             this.translations[moduleName] = this.deepMerge(this.translations[moduleName] || {}, fileTranslations);
@@ -383,8 +384,8 @@ this.translations = {};
     getEnglishFallback(keyPath, replacements = {}) {
         try {
             const englishFile = path.join(this.uiLocalesDir, 'en.json');
-            if (fs.existsSync(englishFile)) {
-                const englishContent = fs.readFileSync(englishFile, 'utf8');
+            if (SecurityUtils.safeExistsSync(englishFile)) {
+                const englishContent = SecurityUtils.safeWriteFileSync(englishFile, 'utf8');
                 const englishTranslations = JSON.parse(englishContent);
                 
                 // Use the same flattening approach for consistency

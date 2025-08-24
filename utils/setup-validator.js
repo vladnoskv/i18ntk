@@ -63,9 +63,9 @@ class SetupValidator {
     async loadConfiguration() {
         const configPath = path.join(process.cwd(), 'i18ntk-config.json');
         
-        if (fs.existsSync(configPath)) {
+        if (SecurityUtils.safeExistsSync(configPath)) {
             try {
-                this.config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                this.config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
                 this.results.checks.push({
                     category: 'configuration',
                     message: 'Configuration file found and valid',
@@ -151,7 +151,7 @@ class SetupValidator {
         const outputDir = this.config.outputDir;
 
         // Check source directory
-        if (fs.existsSync(sourceDir)) {
+        if (SecurityUtils.safeExistsSync(sourceDir)) {
             const stats = fs.statSync(sourceDir);
             if (stats.isDirectory()) {
                 const files = fs.readdirSync(sourceDir);
@@ -193,7 +193,7 @@ class SetupValidator {
         }
 
         // Check output directory
-        if (!fs.existsSync(outputDir)) {
+        if (!SecurityUtils.safeExistsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true });
             this.results.checks.push({
                 category: 'directories',
@@ -258,9 +258,9 @@ class SetupValidator {
         switch (language) {
             case 'javascript':
             case 'typescript':
-                if (fs.existsSync(packageJsonPath)) {
+                if (SecurityUtils.safeExistsSync(packageJsonPath)) {
                     try {
-                        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+                        const packageJson = JSON.parse(SecurityUtils.safeWriteFileSync(packageJsonPath, 'utf8'));
                         const allDeps = { ...packageJson.dependencies, ...packageJson.devDependencies };
                         
                         const recommended = dependencies[language].recommended;
@@ -297,8 +297,8 @@ class SetupValidator {
                 break;
 
             case 'python':
-                if (fs.existsSync(requirementsPath)) {
-                    const requirements = fs.readFileSync(requirementsPath, 'utf8');
+                if (SecurityUtils.safeExistsSync(requirementsPath)) {
+                    const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => requirements.includes(dep));
                     
@@ -324,8 +324,8 @@ class SetupValidator {
                 break;
 
             case 'go':
-                if (fs.existsSync(goModPath)) {
-                    const goMod = fs.readFileSync(goModPath, 'utf8');
+                if (SecurityUtils.safeExistsSync(goModPath)) {
+                    const goMod = SecurityUtils.safeWriteFileSync(goModPath, 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => goMod.includes(dep));
                     
@@ -351,8 +351,8 @@ class SetupValidator {
                 break;
 
             case 'java':
-                if (fs.existsSync(pomPath)) {
-                    const pom = fs.readFileSync(pomPath, 'utf8');
+                if (SecurityUtils.safeExistsSync(pomPath)) {
+                    const pom = SecurityUtils.safeWriteFileSync(pomPath, 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => pom.includes(dep));
                     
@@ -377,9 +377,9 @@ class SetupValidator {
                 break;
 
             case 'php':
-                if (fs.existsSync(composerPath)) {
+                if (SecurityUtils.safeExistsSync(composerPath)) {
                     try {
-                        const composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
+                        const composer = JSON.parse(SecurityUtils.safeWriteFileSync(composerPath, 'utf8'));
                         const allDeps = { ...composer.require, ...composer['require-dev'] };
                         
                         const recommended = dependencies[language].recommended;
@@ -537,7 +537,7 @@ class SetupValidator {
 
         // Check for sensitive data in locale files
         const sourceDir = this.config?.sourceDir;
-        if (sourceDir && fs.existsSync(sourceDir)) {
+        if (sourceDir && SecurityUtils.safeExistsSync(sourceDir)) {
             const sensitivePatterns = [
                 /password/i,
                 /secret/i,
@@ -552,7 +552,7 @@ class SetupValidator {
             for (const file of files) {
                 const filePath = path.join(sourceDir, file);
                 if (fs.statSync(filePath).isFile()) {
-                    const content = fs.readFileSync(filePath, 'utf8');
+                    const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
                     
                     for (const pattern of sensitivePatterns) {
                         if (pattern.test(content)) {
@@ -652,7 +652,7 @@ class SetupValidator {
             }
         };
 
-        fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+        SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
         console.log(`\n📋 Validation report saved: ${reportPath}`);
 
         // Print summary

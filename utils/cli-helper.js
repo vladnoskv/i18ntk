@@ -146,8 +146,8 @@ function showFrameworkWarningOnce(ui) {
         const path = require('path');
         const fs = require('fs');
         const localePath = path.join(__dirname, '..', 'ui-locales', 'en.json');
-        if (fs.existsSync(localePath)) {
-          const translations = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+        if (SecurityUtils.safeExistsSync(localePath)) {
+          const translations = JSON.parse(SecurityUtils.safeWriteFileSync(localePath, 'utf8'));
           t = (key) => {
             const keys = key.split('.');
             let result = translations;
@@ -171,8 +171,8 @@ function showFrameworkWarningOnce(ui) {
           const currentLang = settings.uiLanguage || 'en';
           
           const localePath = path.join(__dirname, '..', 'ui-locales', `${currentLang}.json`);
-          if (fs.existsSync(localePath)) {
-            const translations = JSON.parse(fs.readFileSync(localePath, 'utf8'));
+          if (SecurityUtils.safeExistsSync(localePath)) {
+            const translations = JSON.parse(SecurityUtils.safeWriteFileSync(localePath, 'utf8'));
             t = (key) => {
               const keys = key.split('.');
               let result = translations;
@@ -184,8 +184,8 @@ function showFrameworkWarningOnce(ui) {
           } else {
             // Fallback to English
             const enLocalePath = path.join(__dirname, '..', 'ui-locales', 'en.json');
-            if (fs.existsSync(enLocalePath)) {
-              const translations = JSON.parse(fs.readFileSync(enLocalePath, 'utf8'));
+            if (SecurityUtils.safeExistsSync(enLocalePath)) {
+              const translations = JSON.parse(SecurityUtils.safeWriteFileSync(enLocalePath, 'utf8'));
               t = (key) => {
                 const keys = key.split('.');
                 let result = translations;

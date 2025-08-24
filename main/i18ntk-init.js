@@ -22,7 +22,7 @@ const { detectFramework } = require('../utils/framework-detector');
 const { getFormatAdapter } = require('../utils/format-manager');
 // Ensure UIi18n is available for this initializer class
 const UIi18n = require('./i18ntk-ui');
-loadTranslations(process.env.I18NTK_LANG);
+loadTranslations();
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const { showFrameworkWarningOnce } = require('../utils/cli-helper');
 const { createPrompt, isInteractive } = require('../utils/prompt-helper');
@@ -89,13 +89,13 @@ class I18nInitializer {
   async checkI18nDependencies(noPrompt = false) {
     const packageJsonPath = path.resolve('./package.json');
     
-    if (!fs.existsSync(packageJsonPath)) {
+    if (!SecurityUtils.safeExistsSync(packageJsonPath)) {
       console.log(t('errors.noPackageJson'));
       return true; // Allow to continue without framework
     }
     
     try {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeWriteFileSync(packageJsonPath, 'utf8'));
       // Include peerDependencies in the check
       const dependencies = { 
         ...packageJson.dependencies, 
@@ -221,7 +221,7 @@ class I18nInitializer {
     
     // Check for existing translation directories
     for (const location of possibleLocations) {
-      if (fs.existsSync(location)) {
+      if (SecurityUtils.safeExistsSync(location)) {
         try {
           const items = fs.readdirSync(location);
           const englishFormats = ['en', 'en-US', 'en-GB', 'english'];
@@ -229,7 +229,7 @@ class I18nInitializer {
           // Check for English directories first
           for (const format of englishFormats) {
             const englishPath = path.join(location, format);
-            if (fs.existsSync(englishPath) && fs.statSync(englishPath).isDirectory()) {
+            if (SecurityUtils.safeExistsSync(englishPath) && fs.statSync(englishPath).isDirectory()) {
               const englishFiles = fs.readdirSync(englishPath).filter(file => file.endsWith(this.format.extension));
               if (englishFiles.length > 0) {
                 // Found English files, prioritize this
@@ -324,7 +324,7 @@ class I18nInitializer {
         if (newDirName && newDirName.trim()) {
           const newDirPath = path.resolve(newDirName.trim());
 
-          if (!fs.existsSync(newDirPath)) {
+          if (!SecurityUtils.safeExistsSync(newDirPath)) {
             fs.mkdirSync(newDirPath, { recursive: true });
             console.log(t('init.createdNewDirectory', { dir: newDirPath }));
           } else {
@@ -332,7 +332,7 @@ class I18nInitializer {
           }
 
           const sourceLangDir = path.join(newDirPath, this.config.sourceLanguage);
-          if (!fs.existsSync(sourceLangDir)) {
+          if (!SecurityUtils.safeExistsSync(sourceLangDir)) {
             fs.mkdirSync(sourceLangDir, { recursive: true });
             console.log(t('init.createdSourceLanguageDirectory', { dir: sourceLangDir }));
             await this.createSampleTranslationFile(sourceLangDir);
@@ -387,10 +387,10 @@ class I18nInitializer {
     }
     
     // Create directories if they do not exist
-    if (!fs.existsSync(validatedSourceDir)) {
+    if (!SecurityUtils.safeExistsSync(validatedSourceDir)) {
       fs.mkdirSync(validatedSourceDir, { recursive: true });
     }
-    if (this.config.structure !== 'single' && !fs.existsSync(validatedSourceLanguageDir)) {
+    if (this.config.structure !== 'single' && !SecurityUtils.safeExistsSync(validatedSourceLanguageDir)) {
       fs.mkdirSync(validatedSourceLanguageDir, { recursive: true });
     }
 
@@ -445,7 +445,7 @@ class I18nInitializer {
     const i18ntkCommonFilePath = path.join(validatedSourceLanguageDir, `i18ntk-common${this.format.extension}`);
     
     let sampleFilePath;
-    if (!fs.existsSync(commonFilePath)) {
+    if (!SecurityUtils.safeExistsSync(commonFilePath)) {
       sampleFilePath = commonFilePath;
     } else {
       sampleFilePath = i18ntkCommonFilePath;
@@ -471,11 +471,11 @@ class I18nInitializer {
   
   // Check if source directory and language exist
   validateSource() {
-    if (!fs.existsSync(this.sourceDir)) {
+    if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
       throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
     }
     
-    if (!fs.existsSync(this.sourceLanguageDir)) {
+    if (!SecurityUtils.safeExistsSync(this.sourceLanguageDir)) {
       throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceLanguageDir }) || `Source language directory not found: ${this.sourceLanguageDir}`);
     }
     
@@ -486,7 +486,7 @@ class I18nInitializer {
   getSourceFiles() {
     try {
       if (this.config.structure === 'single') {
-        if (!fs.existsSync(this.sourceDir)) {
+        if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
           throw new Error(t('validate.sourceLanguageDirectoryNotFound', { sourceDir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
         }
         const files = fs.readdirSync(this.sourceDir)
@@ -497,10 +497,10 @@ class I18nInitializer {
         return files;
       }
 
-      if (!fs.existsSync(this.sourceLanguageDir)) {
+      if (!SecurityUtils.safeExistsSync(this.sourceLanguageDir)) {
         // Try to find English files in parent directory or subdirectories
         const parentDir = path.dirname(this.sourceLanguageDir);
-        if (fs.existsSync(parentDir)) {
+        if (SecurityUtils.safeExistsSync(parentDir)) {
           const subdirs = fs.readdirSync(parentDir).filter(item => {
             const fullPath = path.join(parentDir, item);
             return fs.statSync(fullPath).isDirectory();
@@ -509,7 +509,7 @@ class I18nInitializer {
           // Look for English files in any subdirectory
           for (const subdir of subdirs) {
             const englishDir = path.join(parentDir, subdir);
-            if (fs.existsSync(englishDir)) {
+            if (SecurityUtils.safeExistsSync(englishDir)) {
               const files = fs.readdirSync(englishDir);
               const formatFiles = files.filter(file =>
                 file.endsWith(this.format.extension) &&
@@ -586,7 +586,7 @@ class I18nInitializer {
       } else {
         // Modular: folder per language mirroring source file
         const targetDir = path.join(this.sourceDir, targetLanguage);
-        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+        if (!SecurityUtils.safeExistsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
         targetFilePath = path.join(targetDir, sourceFile);
       }
 
@@ -604,14 +604,14 @@ class I18nInitializer {
       }
       
       // Create target directory if it doesn't exist
-      if (!fs.existsSync(targetDir)) {
+      if (!SecurityUtils.safeExistsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
       
       let targetContent;
       
       // If target file exists, preserve existing translations
-      if (fs.existsSync(validatedTargetPath)) {
+      if (SecurityUtils.safeExistsSync(validatedTargetPath)) {
         try {
           const existingContent = await SecurityUtils.safeReadFile(validatedTargetPath, process.cwd());
           if (existingContent) {
@@ -1040,7 +1040,7 @@ class I18nInitializer {
   async generateDetailedReport(results, targetLanguages) {
     try {
       const outputDir = this.config.outputDir || path.join(process.cwd(), 'i18ntk-reports');
-      if (!fs.existsSync(outputDir)) {
+      if (!SecurityUtils.safeExistsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
       }
       
@@ -1111,7 +1111,7 @@ class I18nInitializer {
       const args = this.parseArgs();
 
       // On first run, prompt user for preferred UI language
-      if (!fs.existsSync(configManager.CONFIG_PATH)) {
+      if (!SecurityUtils.safeExistsSync(configManager.CONFIG_PATH)) {
         const { getGlobalReadline } = require('../utils/cli');
         getGlobalReadline();
         const selectedLang = await this.ui.selectLanguage();

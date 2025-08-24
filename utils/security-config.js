@@ -124,7 +124,7 @@ class SecurityConfig {
 
         // Ensure config directory exists
         const configDir = path.dirname(this.configPath);
-        if (!fs.existsSync(configDir)) {
+        if (!SecurityUtils.safeExistsSync(configDir)) {
             fs.mkdirSync(configDir, { recursive: true });
         }
 
@@ -138,7 +138,7 @@ class SecurityConfig {
             }
         };
 
-        fs.writeFileSync(this.configPath, JSON.stringify(safeConfig, null, 2));
+        SecurityUtils.safeWriteFileSync(this.configPath, JSON.stringify(safeConfig, null, 2));
         
         return {
             configPath: this.configPath,
@@ -150,12 +150,12 @@ class SecurityConfig {
      * Load and validate existing configuration
      */
     loadSecurityConfig() {
-        if (!fs.existsSync(this.configPath)) {
+        if (!SecurityUtils.safeExistsSync(this.configPath)) {
             return this.createSecureConfig();
         }
 
         try {
-            const config = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
+            const config = JSON.parse(SecurityUtils.safeWriteFileSync(this.configPath, 'utf8'));
             const validation = this.validateSecurityConfig(config);
             
             return {
@@ -178,7 +178,7 @@ class SecurityConfig {
         const timestamp = new Date().toISOString();
         
         // Create backup of old config
-        if (fs.existsSync(this.configPath)) {
+        if (SecurityUtils.safeExistsSync(this.configPath)) {
             fs.copyFileSync(this.configPath, `${this.configPath}.backup.${timestamp}`);
         }
 

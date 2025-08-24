@@ -8,10 +8,10 @@
     "i18nDir": "./i18n",
     "outputDir": "./i18ntk-reports",
     "setup": {
-        "completed": false,
-        "completedAt": null,
-        "version": null,
-        "setupId": null
+        "completed": true,
+        "completedAt": "2025-08-23T16:47:49.232Z",
+        "version": "1.10.2",
+        "setupId": "setup_1755967669233_0xhzlh1fs"
     },
     "framework": {
         "detected": false,

@@ -28,9 +28,9 @@ async function checkInitialized(options = {}) {
   const initFilePath = path.resolve(configDir, 'initialization.json');
   
   // If initialization file exists and is valid, return early
-  if (fs.existsSync(initFilePath)) {
+  if (SecurityUtils.safeExistsSync(initFilePath)) {
     try {
-      const initStatus = JSON.parse(fs.readFileSync(initFilePath, 'utf8'));
+      const initStatus = JSON.parse(SecurityUtils.safeWriteFileSync(initFilePath, 'utf8'));
       const isInitialized = initStatus.initialized && 
                           initStatus.version && 
                           initStatus.version.split('.')[0] === currentVersion.split('.')[0];
@@ -54,7 +54,7 @@ async function checkInitialized(options = {}) {
 
   // Check if source language files exist
   const langDir = path.resolve(defaultConfig.sourceDir, defaultConfig.sourceLanguage);
-  const hasLanguageFiles = fs.existsSync(langDir) &&
+  const hasLanguageFiles = SecurityUtils.safeExistsSync(langDir) &&
     fs.readdirSync(langDir).some(f => f.endsWith('.json'));
 
   // If language files exist but no init file, create one
@@ -71,7 +71,7 @@ async function checkInitialized(options = {}) {
     };
     
     ensureDirectory(path.dirname(initFilePath));
-    fs.writeFileSync(initFilePath, JSON.stringify(initData, null, 2));
+    SecurityUtils.safeWriteFileSync(initFilePath, JSON.stringify(initData, null, 2));
     
     return {
       initialized: true,
@@ -108,7 +108,7 @@ async function markAsInitialized(config) {
   };
   
   ensureDirectory(path.dirname(initFilePath));
-  fs.writeFileSync(initFilePath, JSON.stringify(initData, null, 2));
+  SecurityUtils.safeWriteFileSync(initFilePath, JSON.stringify(initData, null, 2));
   
   // Update the settings object if it has a save method
   if (configManager.saveSettings) {

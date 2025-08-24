@@ -18,7 +18,6 @@
  *   node i18ntk-manage.js --command=init
  */
 
-const fs = require('fs');
 const path = require('path');
 const UIi18n = require('./i18ntk-ui');
 const AdminAuth = require('../utils/admin-auth');
@@ -49,10 +48,6 @@ async function runInitFlow() {
   const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
   return { i18nDir: settings.i18nDir, sourceDir: settings.sourceDir };
 }
-
-
-
-
 
 /**
  * Ensures the project is properly initialized or exits the process
@@ -170,7 +165,7 @@ async function detectEnvironmentAndFramework() {
   if (fs.existsSync(packageJsonPath)) {
     detectedLanguage = 'javascript';
     try {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
       const deps = { 
         ...(packageJson.dependencies || {}), 
         ...(packageJson.devDependencies || {}),
@@ -223,11 +218,11 @@ async function detectEnvironmentAndFramework() {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (fs.existsSync(pyprojectPath) || fs.existsSync(requirementsPath)) {
+  } else if (SecurityUtils.safeExistsSync(pyprojectPath) || SecurityUtils.safeExistsSync(requirementsPath)) {
     detectedLanguage = 'python';
     try {
-      if (fs.existsSync(requirementsPath)) {
-        const requirements = fs.readFileSync(requirementsPath, 'utf8');
+      if (SecurityUtils.safeExistsSync(requirementsPath)) {
+        const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
         if (requirements.includes('django')) detectedFramework = 'django';
         else if (requirements.includes('flask')) detectedFramework = 'flask';
         else if (requirements.includes('fastapi')) detectedFramework = 'fastapi';
@@ -236,13 +231,13 @@ async function detectEnvironmentAndFramework() {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (fs.existsSync(goModPath)) {
+  } else if (SecurityUtils.safeExistsSync(goModPath)) {
     detectedLanguage = 'go';
     detectedFramework = 'generic';
-  } else if (fs.existsSync(pomPath)) {
+  } else if (SecurityUtils.safeExistsSync(pomPath)) {
     detectedLanguage = 'java';
     try {
-      const pomContent = fs.readFileSync(pomPath, 'utf8');
+      const pomContent = SecurityUtils.safeReadFileSync(pomPath, 'utf8');
       if (pomContent.includes('spring-boot')) detectedFramework = 'spring-boot';
       else if (pomContent.includes('spring')) detectedFramework = 'spring';
       else if (pomContent.includes('quarkus')) detectedFramework = 'quarkus';
@@ -250,10 +245,10 @@ async function detectEnvironmentAndFramework() {
     } catch (error) {
       detectedFramework = 'generic';
     }
-  } else if (fs.existsSync(composerPath)) {
+  } else if (SecurityUtils.safeExistsSync(composerPath)) {
     detectedLanguage = 'php';
     try {
-      const composer = JSON.parse(fs.readFileSync(composerPath, 'utf8'));
+      const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
       const deps = composer.require || {};
       
       if (deps['laravel/framework']) detectedFramework = 'laravel';
@@ -461,7 +456,7 @@ class I18nManager {
     // Only auto-detect if no settings are configured
     for (const possiblePath of possibleI18nPaths) {
       const resolvedPath = path.resolve(projectRoot, possiblePath);
-      if (fs.existsSync(resolvedPath)) {
+      if (SecurityUtils.safeExistsSync(resolvedPath)) {
         // Check if it contains language directories
         try {
           const items = fs.readdirSync(resolvedPath);
@@ -487,13 +482,13 @@ class I18nManager {
   async checkI18nDependencies() {
     const packageJsonPath = path.resolve('./package.json');
     
-    if (!fs.existsSync(packageJsonPath)) {
+    if (!SecurityUtils.safeExistsSync(packageJsonPath)) {
       console.log(this.ui ? this.ui.t('errors.noPackageJson') : 'No package.json found');
       return false; // Treat as no framework detected
     }
     
     try {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
       // Include peerDependencies in the check
       const dependencies = { 
         ...packageJson.dependencies, 
@@ -610,6 +605,17 @@ class I18nManager {
 
   // Add this run method after the checkI18nDependencies method
   async run() {
+   // Add timeout to prevent hanging
+   const timeout = setTimeout(() => {
+     console.error('❌ CLI startup timeout - something is hanging');
+     console.error('🔍 DEBUG: Last known execution point reached');
+     process.exit(1);
+   }, 10000); // 10 second timeout
+   // Add debugging for CLI startup
+   console.log('🔍 DEBUG: Starting i18ntk-manage.js...');
+   console.log('🔍 DEBUG: Process.argv:', process.argv);
+   console.log('🔍 DEBUG: Args parsed:', args);
+   console.log('🔍 DEBUG: About to call SetupEnforcer.checkSetupCompleteAsync()');
     let prompt;
     try {
       // Ensure setup is complete before running any operations
@@ -1186,7 +1192,7 @@ class I18nManager {
   console.log(t('debug.runningDebugTool', { displayName }));
     try {
       const toolPath = path.join(__dirname, '..', 'scripts', 'debug', toolName);
-      if (fs.existsSync(toolPath)) {
+      if (SecurityUtils.safeExistsSync(toolPath)) {
         console.log(`Debug tool available: ${toolName}`);
         console.log(`To run this tool manually: node "${toolPath}"`);
         console.log(`Working directory: ${path.join(__dirname, '..')}`);
@@ -1209,7 +1215,7 @@ class I18nManager {
     
     try {
       const logsDir = path.join(__dirname, '..', 'scripts', 'debug', 'logs');
-      if (fs.existsSync(logsDir)) {
+      if (SecurityUtils.safeExistsSync(logsDir)) {
         const files = fs.readdirSync(logsDir)
           .filter(file => file.endsWith('.log') || file.endsWith('.txt'))
           .sort((a, b) => {
@@ -1230,7 +1236,7 @@ class I18nManager {
           const fileIndex = parseInt(choice) - 1;
           
           if (fileIndex >= 0 && fileIndex < files.length) {
-            const logContent = fs.readFileSync(path.join(logsDir, files[fileIndex]), 'utf8');
+            const logContent = SecurityUtils.safeReadFileSync(path.join(logsDir, files[fileIndex]), 'utf8');
             console.log(`\n${t('debug.contentOf', { filename: files[fileIndex] })}:`);
             console.log('============================================================');
             console.log(logContent.slice(-2000)); // Show last 2000 characters
@@ -1290,7 +1296,7 @@ class I18nManager {
       
       // Check which directories exist and have files
       for (const dir of targetDirs) {
-        if (fs.existsSync(dir.path)) {
+        if (SecurityUtils.safeExistsSync(dir.path)) {
           const files = this.getAllReportFiles(dir.path);
           if (files.length > 0) {
             availableDirs.push({
@@ -1429,7 +1435,7 @@ class I18nManager {
     let files = [];
     
     try {
-      if (!fs.existsSync(dir)) {
+      if (!SecurityUtils.safeExistsSync(dir)) {
         return [];
       }
       
@@ -1561,7 +1567,7 @@ if (require.main === module) {
   if (args.includes('--version') || args.includes('-v')) {
     try {
       const packageJsonPath = path.resolve(__dirname, '../package.json');
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
       const versionInfo = packageJson.versionInfo || {};
       
       console.log(`\n🌍 i18n Toolkit (i18ntk)`);

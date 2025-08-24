@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 const settingsManager = require('../settings/settings-manager');
 const CONFIG_FILE = 'i18ntk-config.json';
@@ -46,12 +47,12 @@ function loadConfig(cwd = settingsManager.configDir) {
     const configPath = getConfigPath(cwd);
     
     // Check if file exists and is accessible
-    if (!fs.existsSync(configPath)) {
+    if (!SecurityUtils.safeExistsSync(configPath)) {
       return null;
     }
     
     // Read file with explicit encoding
-    const raw = fs.readFileSync(configPath, { encoding: 'utf8', flag: 'r' });
+    const raw = SecurityUtils.safeWriteFileSync(configPath, { encoding: 'utf8', flag: 'r' });
     
     // Basic validation of file content
     if (!raw || typeof raw !== 'string') {
@@ -83,12 +84,12 @@ function saveConfig(config, cwd = settingsManager.configDir) {
     const dir = path.dirname(configPath);
     
     // Ensure directory exists
-    if (!fs.existsSync(dir)) {
+    if (!SecurityUtils.safeExistsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
     }
     
     // Write file with secure permissions (read/write for owner only)
-    fs.writeFileSync(
+    SecurityUtils.safeWriteFileSync(
       configPath,
       JSON.stringify(config, null, 2),
       { mode: 0o600, encoding: 'utf8' }

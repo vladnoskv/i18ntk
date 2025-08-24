@@ -152,31 +152,6 @@ let translations = {};
 let currentLanguage = 'en';
 let isInitialized = false;
 const missingWarned = new Set();
-/**
- * Safely validate language code from environment variable
- * @param {string} envLang - Language code from environment variable
- * @returns {string} - Validated language code or null if invalid
- */
-function validateEnvironmentLanguage(envLang) {
-  if (!envLang || typeof envLang !== 'string') {
-    return null;
-  }
-
-  // Remove any whitespace and convert to lowercase
-  const cleanLang = envLang.trim().toLowerCase();
-
-  // Validate format: 2-5 characters, alphanumeric + hyphens only
-  if (!/^[a-z]{2,5}(-[a-z]{2,5})?$/.test(cleanLang)) {
-    return null;
-  }
-
-  // Additional security: prevent path traversal patterns
-  if (cleanLang.includes('..') || cleanLang.includes('/') || cleanLang.includes('\\')) {
-    return null;
-  }
-
-  return cleanLang;
-}
 
 function loadTranslations(language) {
   const cfg = safeRequireConfig();

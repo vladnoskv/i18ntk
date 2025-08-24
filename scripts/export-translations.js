@@ -14,7 +14,7 @@ const TARGET_LANGUAGES = ['de', 'fr', 'es', 'ru', 'ja', 'zh'];
 function createLanguageTemplate(lang) {
   const langDir = path.join(SOURCE_DIR, lang);
   
-  if (!fs.existsSync(langDir)) {
+  if (!SecurityUtils.safeExistsSync(langDir)) {
     fs.mkdirSync(langDir, { recursive: true });
     console.log(t('exportTranslations.createdDirectory', { dir: langDir }));
   }
@@ -31,10 +31,10 @@ function createLanguageTemplate(lang) {
     const sourceFile = path.join(enDir, file);
     const targetFile = path.join(langDir, file);
     
-    if (!fs.existsSync(targetFile)) {
-      const sourceContent = JSON.parse(fs.readFileSync(sourceFile, 'utf8'));
+    if (!SecurityUtils.safeExistsSync(targetFile)) {
+      const sourceContent = JSON.parse(SecurityUtils.safeWriteFileSync(sourceFile, 'utf8'));
       const templateContent = createTemplateFromEnglish(sourceContent);
-      fs.writeFileSync(targetFile, JSON.stringify(templateContent, null, 2));
+      SecurityUtils.safeWriteFileSync(targetFile, JSON.stringify(templateContent, null, 2));
       console.log(t('exportTranslations.createdTemplate', { lang, file }));
     } else {
       console.log(t('exportTranslations.skippedExisting', { lang, file }));

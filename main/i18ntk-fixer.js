@@ -24,7 +24,7 @@ const SetupEnforcer = require('../utils/setup-enforcer');
   }
 })();
 
-loadTranslations(process.env.I18NTK_LANG);
+loadTranslations();
 
 class I18nFixer {
   constructor(config = {}) {
@@ -41,7 +41,7 @@ class I18nFixer {
     const localeFile = path.join(uiLocalesDir, 'en.json');
     
     try {
-      const localeContent = fs.readFileSync(localeFile, 'utf8');
+      const localeContent = SecurityUtils.safeReadFileSync(localeFile, path.dirname(localeFile), 'utf8');
       return JSON.parse(localeContent);
     } catch (error) {
       // Fallback to basic English strings if locale file not found
@@ -198,7 +198,7 @@ class I18nFixer {
     const addIf = p => {
       try {
         const abs = path.isAbsolute(p) ? p : path.resolve(projectRoot, p);
-        if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) {
+        if (SecurityUtils.safeExistsSync(abs) && fs.statSync(abs).isDirectory()) {
           candidates.add(configManager.toRelative(abs));
         }
       } catch (_) { /* ignore */ }
@@ -276,7 +276,7 @@ class I18nFixer {
       console.warn('Invalid or unsafe directory path. Using default.');
       return defaultDir;
     }
-    if (!fs.existsSync(safePath)) {
+    if (!SecurityUtils.safeExistsSync(safePath)) {
       try {
         fs.mkdirSync(safePath, { recursive: true });
       } catch (err) {
@@ -376,12 +376,13 @@ class I18nFixer {
   }
 
   getAvailableLanguages() {
-    if (!fs.existsSync(this.sourceDir)) return [];
-    const entries = fs.readdirSync(this.sourceDir);
+    if (!SecurityUtils.safeExistsSync(this.sourceDir, process.cwd())) return [];
+    const entries = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd()) || [];
     const langs = new Set();
     entries.forEach(item => {
       const full = path.join(this.sourceDir, item);
-      if (fs.statSync(full).isDirectory()) {
+      const stats = SecurityUtils.safeStatSync(full, process.cwd());
+       if (stats && stats.isDirectory()) {
         langs.add(item);
       } else if (item.endsWith('.json')) {
         langs.add(path.basename(item, '.json'));
@@ -403,7 +404,7 @@ class I18nFixer {
 
   getAllFiles(dir) {
     const results = [];
-    if (!fs.existsSync(dir)) return results;
+    if (!SecurityUtils.safeExistsSync(dir)) return results;
     fs.readdirSync(dir).forEach(item => {
       const full = path.join(dir, item);
       const stat = fs.statSync(full);
@@ -442,12 +443,12 @@ class I18nFixer {
     const files = this.getAllFiles(this.sourceLanguageDir);
     files.forEach(file => {
       const rel = path.relative(this.sourceLanguageDir, file);
-      const srcData = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const srcData = JSON.parse(SecurityUtils.safeWriteFileSync(file, 'utf8'));
       const targetFile = path.join(this.sourceDir, lang, rel);
       let tgtData = {};
-      if (fs.existsSync(targetFile)) {
+      if (SecurityUtils.safeExistsSync(targetFile)) {
         try {
-          tgtData = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+          tgtData = JSON.parse(SecurityUtils.safeWriteFileSync(targetFile, 'utf8'));
         } catch {
           tgtData = {};
         }
@@ -455,7 +456,7 @@ class I18nFixer {
         fs.mkdirSync(path.dirname(targetFile), { recursive: true });
       }
       const fixed = this.fixObject(tgtData, srcData, lang);
-      fs.writeFileSync(targetFile, JSON.stringify(fixed, null, 2));
+      SecurityUtils.safeWriteFileSync(targetFile, JSON.stringify(fixed, null, 2));
     });
   }
 
@@ -465,13 +466,13 @@ class I18nFixer {
     
     files.forEach(file => {
       const rel = path.relative(this.sourceLanguageDir, file);
-      const srcData = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const srcData = JSON.parse(SecurityUtils.safeWriteFileSync(file, 'utf8'));
       const targetFile = path.join(this.sourceDir, lang, rel);
       let tgtData = {};
       
-      if (fs.existsSync(targetFile)) {
+      if (SecurityUtils.safeExistsSync(targetFile)) {
         try {
-          tgtData = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+          tgtData = JSON.parse(SecurityUtils.safeWriteFileSync(targetFile, 'utf8'));
         } catch {
           tgtData = {};
         }
@@ -615,7 +616,7 @@ class I18nFixer {
     const reportDir = path.join(this.config.outputDir || './i18ntk-reports', 'fixer-reports');
     
     // Ensure report directory exists
-    if (!fs.existsSync(reportDir)) {
+    if (!SecurityUtils.safeExistsSync(reportDir)) {
       fs.mkdirSync(reportDir, { recursive: true });
     }
 
@@ -640,7 +641,7 @@ class I18nFixer {
       }))
     };
 
-    fs.writeFileSync(reportFile, JSON.stringify(reportData, null, 2));
+    SecurityUtils.safeWriteFileSync(reportFile, JSON.stringify(reportData, null, 2));
     
     console.log(this.t('fixer.reportGenerated', { path: path.relative(process.cwd(), reportFile) }));
     

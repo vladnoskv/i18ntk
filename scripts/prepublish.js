@@ -95,7 +95,7 @@ class PrepublishCleaner {
     }
 
     async cleanDirectory(dirPath) {
-        if (!fs.existsSync(dirPath)) {
+        if (!SecurityUtils.safeExistsSync(dirPath)) {
             return;
         }
 
@@ -138,7 +138,7 @@ class PrepublishCleaner {
             const dir = path.dirname(searchPath);
             const filenamePattern = path.basename(searchPath);
             
-            if (fs.existsSync(dir)) {
+            if (SecurityUtils.safeExistsSync(dir)) {
                 const files = fs.readdirSync(dir);
                 const regex = new RegExp(filenamePattern.replace('*', '.*'));
                 
@@ -152,7 +152,7 @@ class PrepublishCleaner {
             }
         } else {
             // Handle exact files
-            if (fs.existsSync(searchPath)) {
+            if (SecurityUtils.safeExistsSync(searchPath)) {
                 fs.unlinkSync(searchPath);
                 this.log(`Deleted ${path.relative(this.projectRoot, searchPath)}`);
             }
@@ -165,7 +165,7 @@ class PrepublishCleaner {
         let missingFiles = [];
         for (const file of this.essentialFiles) {
             const filePath = path.join(this.projectRoot, file);
-            if (!fs.existsSync(filePath)) {
+            if (!SecurityUtils.safeExistsSync(filePath)) {
                 missingFiles.push(file);
             } else if (!fs.statSync(filePath).isFile()) {
                 this.log(`❌ ${file} is not a file`);
@@ -187,13 +187,13 @@ class PrepublishCleaner {
         let invalidFiles = [];
         for (const localeFile of this.essentialLocales) {
             const filePath = path.join(this.projectRoot, localeFile);
-            if (!fs.existsSync(filePath)) {
+            if (!SecurityUtils.safeExistsSync(filePath)) {
                 invalidFiles.push(localeFile);
                 continue;
             }
             
             try {
-                const content = fs.readFileSync(filePath, 'utf8');
+                const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
                 const parsed = JSON.parse(content);
                 
                 // Validate structure
@@ -224,7 +224,7 @@ class PrepublishCleaner {
         
         const packagePath = path.join(this.projectRoot, 'package.json');
         try {
-            const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+            const pkg = JSON.parse(SecurityUtils.safeWriteFileSync(packagePath, 'utf8'));
             
             // Validate required fields
             const requiredFields = ['name', 'version', 'description', 'main', 'bin', 'files'];
@@ -255,7 +255,7 @@ class PrepublishCleaner {
                 }
                 
                 const binPath = path.join(this.projectRoot, pkg.bin[bin]);
-                if (!fs.existsSync(binPath)) {
+                if (!SecurityUtils.safeExistsSync(binPath)) {
                     this.log(`❌ Missing bin script: ${pkg.bin[bin]}`);
                     process.exit(1);
                 }
@@ -282,7 +282,7 @@ class PrepublishCleaner {
         
         for (const artifact of devArtifacts) {
             const artifactPath = path.join(this.projectRoot, artifact);
-            if (fs.existsSync(artifactPath)) {
+            if (SecurityUtils.safeExistsSync(artifactPath)) {
                 this.log(`⚠️ Development artifact found: ${artifact}`);
             }
         }
@@ -303,7 +303,7 @@ class PrepublishCleaner {
         
         for (const script of scripts) {
             const scriptPath = path.join(this.projectRoot, script);
-            if (fs.existsSync(scriptPath)) {
+            if (SecurityUtils.safeExistsSync(scriptPath)) {
                 try {
                     fs.accessSync(scriptPath, fs.constants.X_OK);
                 } catch (e) {
@@ -318,7 +318,7 @@ class PrepublishCleaner {
     async resetSecuritySettings() {
         const configPath = path.join(require('../settings/settings-manager').configDir, '.i18n-admin-config.json');
         
-        if (fs.existsSync(configPath)) {
+        if (SecurityUtils.safeExistsSync(configPath)) {
             const defaultConfig = {
                 enabled: false,
                 pinHash: null,
@@ -330,7 +330,7 @@ class PrepublishCleaner {
                 lockedUntil: null
             };
             
-            fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+            SecurityUtils.safeWriteFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
             this.log('Reset security settings to defaults');
         }
     }

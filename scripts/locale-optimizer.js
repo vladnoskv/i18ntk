@@ -139,7 +139,7 @@ class LocaleOptimizer {
     console.log(`   Keeping: ${keepList.join(', ').toUpperCase()}`);
     
     // Create backup directory
-    if (!fs.existsSync(this.backupDir)) {
+    if (!SecurityUtils.safeExistsSync(this.backupDir)) {
       fs.mkdirSync(this.backupDir, { recursive: true });
     }
     
@@ -151,7 +151,7 @@ class LocaleOptimizer {
       const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
       const backupPath = path.join(this.backupDir, `${locale}.json`);
       
-      if (!keepList.includes(locale) && fs.existsSync(filePath)) {
+      if (!keepList.includes(locale) && SecurityUtils.safeExistsSync(filePath)) {
         // Backup the file
         fs.copyFileSync(filePath, backupPath);
         
@@ -173,7 +173,7 @@ class LocaleOptimizer {
       
       // Create warning file
       const warningPath = path.join(this.backupDir, 'REMOVED_LOCALES.txt');
-      fs.writeFileSync(warningPath, `Removed locales: ${removedLocales.join(',')}\nRestore with: node scripts/locale-optimizer.js --restore`);
+      SecurityUtils.safeWriteFileSync(warningPath, `Removed locales: ${removedLocales.join(',')}\nRestore with: node scripts/locale-optimizer.js --restore`);
     }
     
     const savedKB = (savedSpace / 1024).toFixed(1);
@@ -189,7 +189,7 @@ class LocaleOptimizer {
   restoreLocales() {
     console.log('🔄 Restoring locales from backup...');
     
-    if (!fs.existsSync(this.backupDir)) {
+    if (!SecurityUtils.safeExistsSync(this.backupDir)) {
       console.log('   ❌ No backup directory found');
       return;
     }
@@ -348,7 +348,7 @@ class LocaleOptimizer {
   getAvailableLocales() {
     return this.allLocales.filter(locale => {
       const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-      return fs.existsSync(filePath);
+      return SecurityUtils.safeExistsSync(filePath);
     });
   }
 
@@ -357,7 +357,7 @@ class LocaleOptimizer {
    */
   getLocaleSize(locale) {
     const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-    if (fs.existsSync(filePath)) {
+    if (SecurityUtils.safeExistsSync(filePath)) {
       return fs.statSync(filePath).size / 1024;
     }
     return 0;
@@ -380,7 +380,7 @@ class LocaleOptimizer {
     
     this.allLocales.forEach(locale => {
       const filePath = path.join(this.uiLocalesDir, `${locale}.json`);
-      if (fs.existsSync(filePath)) {
+      if (SecurityUtils.safeExistsSync(filePath)) {
         activeLocales.push(locale);
       }
     });

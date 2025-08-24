@@ -73,6 +73,8 @@ config.json
 .idea/
 *.swp
 *.swo
+.roo/
+.roomodes
 
 # OS
 .DS_Store
@@ -97,6 +99,10 @@ security-scan-*.json
 
 # Encrypted data files
 *.encrypted
+# Encrypted data files
+*.encrypted
+*.vault
+.vault_pass
 *.vault
 
 ## Files Exposed

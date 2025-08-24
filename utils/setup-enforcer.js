@@ -11,6 +11,7 @@ const { getIcon } = require('./terminal-icons');
 const fs = require('fs');
 const path = require('path');
 const { blue, yellow, gray, cyan, green, red } = require('./colors-new');
+const SecurityUtils = require('./security');
 
 class SetupEnforcer {
     static _setupCheckInProgress = false;
@@ -20,13 +21,13 @@ class SetupEnforcer {
         const configManager = require('./config-manager');
         const configPath = configManager.CONFIG_PATH;
         
-        if (!fs.existsSync(configPath)) {
+        if (!SecurityUtils.safeExistsSync(configPath)) {
             this.handleMissingSetup();
             return;
         }
 
         try {
-            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
             
             // Check if setup has been explicitly marked as completed
             if (config.setup && config.setup.completed === true) {
@@ -34,7 +35,7 @@ class SetupEnforcer {
             }
             
             // Fallback: check if config has required fields (for backward compatibility)
-            if (!config.version || !config.sourceDir || !config.detectedFramework) {
+            if (!config.version || !config.sourceDir || (!config.detectedFramework && !(config.framework && config.framework.detected !== false))) {
                 this.handleIncompleteSetup();
                 return;
             }
@@ -73,7 +74,7 @@ class SetupEnforcer {
                 try {
                     // Import and run setup directly
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (fs.existsSync(setupPath)) {
+                    if (SecurityUtils.safeExistsSync(setupPath)) {
                         try {
                             const setup = require(setupPath);
                             // Use the run function which properly instantiates the class
@@ -132,7 +133,7 @@ static async handleIncompleteSetup() {
                 
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (fs.existsSync(setupPath)) {
+                    if (SecurityUtils.safeExistsSync(setupPath)) {
                         try {
                             const setup = require(setupPath);
                             // Use the run function which properly instantiates the class
@@ -189,7 +190,7 @@ static async handleInvalidConfig() {
                 
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (fs.existsSync(setupPath)) {
+                    if (SecurityUtils.safeExistsSync(setupPath)) {
                         try {
                             const setup = require(setupPath);
                             // Use the run function which properly instantiates the class
@@ -223,6 +224,7 @@ static async handleInvalidConfig() {
 
     static checkSetupCompleteAsync() {
         // Return existing promise if already in progress
+        // Add debugging for setup check
         if (SetupEnforcer._setupCheckInProgress && SetupEnforcer._setupCheckPromise) {
             return SetupEnforcer._setupCheckPromise;
         }
@@ -231,12 +233,13 @@ static async handleInvalidConfig() {
         SetupEnforcer._setupCheckInProgress = true;
         SetupEnforcer._setupCheckPromise = new Promise(async (resolve, reject) => {
             try {
-                const configPath = path.join(process.cwd(), 'settings', 'i18ntk-config.json');
+                const configManager = require('./config-manager');
+                const configPath = configManager.CONFIG_PATH;
                 
-                if (!fs.existsSync(configPath)) {
+                if (!SecurityUtils.safeExistsSync(configPath)) {
                     await SetupEnforcer.handleMissingSetup();
                     // After setup is done, re-check the config
-                    if (fs.existsSync(configPath)) {
+                    if (SecurityUtils.safeExistsSync(configPath)) {
                         resolve(true);
                     } else {
                         process.exit(0);
@@ -245,7 +248,7 @@ static async handleInvalidConfig() {
                 }
 
                 try {
-                    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                    const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
                     
                     // Check if setup has been explicitly marked as completed
                     if (config.setup && config.setup.completed === true) {
@@ -254,13 +257,13 @@ static async handleInvalidConfig() {
                     }
                     
                     // Fallback: check if config has required fields (for backward compatibility)
-                    if (!config.version || !config.sourceDir || !config.detectedFramework) {
+                    if (!config.version || !config.sourceDir || (!config.detectedFramework && !(config.framework && config.framework.detected !== false))) {
                         await SetupEnforcer.handleIncompleteSetup();
                         // After setup is done, re-check the config
-                        const newConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
                         if (newConfig.setup && newConfig.setup.completed === true) {
                             resolve(true);
-                        } else if (newConfig.version && newConfig.sourceDir && newConfig.detectedFramework) {
+                        } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {
                             resolve(true);
                         } else {
                             process.exit(0);
@@ -273,10 +276,10 @@ static async handleInvalidConfig() {
                     await SetupEnforcer.handleInvalidConfig();
                     // After setup is done, re-check the config
                     try {
-                        const newConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
                         if (newConfig.setup && newConfig.setup.completed === true) {
                             resolve(true);
-                        } else if (newConfig.version && newConfig.sourceDir && newConfig.detectedFramework) {
+                        } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {
                             resolve(true);
                         } else {
                             process.exit(0);

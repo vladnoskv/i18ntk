@@ -12,7 +12,7 @@ const settingsManager = new SettingsManager();
 const UIi18n = require('../main/i18ntk-ui');
 const configManager = require('../utils/config-manager');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(process.env.I18NTK_LANG, path.resolve(__dirname, '..', 'ui-locales'));
+loadTranslations(null, path.resolve(__dirname, '..', 'ui-locales'));
 
 const AdminAuth = require('../utils/admin-auth');
 const uiI18n = new UIi18n();
@@ -1226,7 +1226,7 @@ class SettingsCLI {
         }
 
         try {
-            fs.writeFileSync(exportFile, exportData);
+            SecurityUtils.safeWriteFileSync(exportFile, exportData);
             const stats = fs.statSync(exportFile);
             this.success(`Settings exported to ${exportFile}`);
             console.log(`  Size: ${Math.round(stats.size / 1024)}KB`);
@@ -1259,13 +1259,13 @@ class SettingsCLI {
         }
         
         try {
-            if (!fs.existsSync(filename)) {
+            if (!SecurityUtils.safeExistsSync(filename)) {
                 this.error('File not found.');
                 await this.pause();
                 return;
             }
 
-            const fileContent = fs.readFileSync(filename, 'utf8');
+            const fileContent = SecurityUtils.safeWriteFileSync(filename, 'utf8');
             let importedSettings;
             
             try {
@@ -1339,7 +1339,7 @@ class SettingsCLI {
         try {
             const source = configManager.CONFIG_PATH;
             const backupDir = path.join(path.dirname(source), 'backups');
-            if (!fs.existsSync(backupDir)) {
+            if (!SecurityUtils.safeExistsSync(backupDir)) {
                 fs.mkdirSync(backupDir, { recursive: true });
             }
             const backupFile = path.join(backupDir, `config-backup-${Date.now()}.json`);
@@ -1378,7 +1378,7 @@ class SettingsCLI {
         try {
             const backupDir = path.join(path.dirname(configManager.CONFIG_PATH), 'backups');
             
-            if (!fs.existsSync(backupDir)) {
+            if (!SecurityUtils.safeExistsSync(backupDir)) {
                 this.error('No backup directory found.');
                 await this.pause();
                 return;
@@ -1420,7 +1420,7 @@ class SettingsCLI {
             
             const confirm = await this.prompt(`Restore from ${selectedBackup.name}? This will overwrite current settings. (y/n): `);
             if (confirm.toLowerCase() === 'y') {
-                const importedSettings = JSON.parse(fs.readFileSync(selectedBackup.path, 'utf8'));
+                const importedSettings = JSON.parse(SecurityUtils.safeWriteFileSync(selectedBackup.path, 'utf8'));
                 
                 // Validate imported settings
                 if (!settingsManager.validateSettings(importedSettings)) {
@@ -1464,7 +1464,7 @@ class SettingsCLI {
         try {
             const backupDir = path.join(path.dirname(configManager.CONFIG_PATH), 'backups');
             
-            if (!fs.existsSync(backupDir)) {
+            if (!SecurityUtils.safeExistsSync(backupDir)) {
                 this.error('No backup directory found.');
                 await this.pause();
                 return;
@@ -2005,7 +2005,7 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
             const fileName = `i18ntk-enhanced-schema-${Date.now()}.json`;
             const filePath = path.join(process.cwd(), fileName);
             
-            fs.writeFileSync(filePath, JSON.stringify(enhancedSchema, null, 2), 'utf8');
+            SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(enhancedSchema, null, 2), 'utf8');
             this.success(`Enhanced schema exported to: ${filePath}`);
             
             await this.pause();

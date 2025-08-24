@@ -31,7 +31,7 @@ const MARKER   = argv.marker || '⚠️ TRANSLATION NEEDED ⚠️';
 
 // ------------ helpers ------------
 function readJSON(p) {
-  try { return JSON.parse(fs.readFileSync(p, 'utf8')); }
+  try { return JSON.parse(SecurityUtils.safeWriteFileSync(p, 'utf8')); }
   catch { return {}; }
 }
 
@@ -50,7 +50,7 @@ function flatten(obj, prefix = '') {
 
 function listLocaleFile(lang) {
   const file = path.join(I18N_DIR, `${lang}.json`);
-  if (fs.existsSync(file)) return file;
+  if (SecurityUtils.safeExistsSync(file)) return file;
   throw new Error(`Locale file not found: ${file}`);
 }
 
@@ -124,7 +124,7 @@ function validate() {
   });
 
   const reportFile = path.join(I18N_DIR, 'validation-purity-report.json');
-  fs.writeFileSync(reportFile, JSON.stringify(report, null, 2), 'utf8');
+  SecurityUtils.safeWriteFileSync(reportFile, JSON.stringify(report, null, 2), 'utf8');
   console.log(`✅ Validation report saved: ${reportFile}`);
   console.log(`   Review this file for full details of problematic keys.`);
 }

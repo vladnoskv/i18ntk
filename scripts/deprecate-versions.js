@@ -12,13 +12,25 @@
  */
 
 const { execSync } = require('child_process');
-const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 // Configuration
 const CONFIG_FILE = path.join(__dirname, '..', 'deprecation-config.json');
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+// Securely read package.json
+const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8');
+if (!packageJsonContent) {
+  console.error('❌ Failed to read package.json');
+  process.exit(1);
+}
+
+const packageJson = SecurityUtils.safeParseJSON(packageJsonContent);
+if (!packageJson) {
+  console.error('❌ Failed to parse package.json');
+  process.exit(1);
+}
 
 const deprecationMessage = '⚠️  DEPRECATED: This version contains security vulnerabilities and missing features. Please upgrade to i18ntk@1.10.0 for: 🔒 Zero shell access security, 🚀 97% performance improvement, 🐍 Python framework support, and 🛡️ PIN protection. Run: npm install i18ntk@latest';
 
@@ -27,11 +39,16 @@ const defaultVersionsToDeprecate = packageJson.versionInfo.deprecations;
 
 // Load admin configuration if available
 function loadAdminConfig() {
-  if (fs.existsSync(CONFIG_FILE)) {
+  if (SecurityUtils.safeExistsSync(CONFIG_FILE, path.dirname(CONFIG_FILE))) {
     try {
-      const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-      console.log('📋 Using admin configuration from deprecation-config.json');
-      return config;
+      const configContent = SecurityUtils.safeReadFileSync(CONFIG_FILE, path.dirname(CONFIG_FILE), 'utf8');
+      if (configContent) {
+        const config = SecurityUtils.safeParseJSON(configContent);
+        if (config) {
+          console.log('📋 Using admin configuration from deprecation-config.json');
+          return config;
+        }
+      }
     } catch (error) {
       console.warn('⚠️  Could not read admin config, using defaults:', error.message);
     }

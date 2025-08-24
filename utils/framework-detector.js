@@ -1,6 +1,6 @@
-const fs = require('fs');
 const path = require('path');
 const { gte } = require('./version-utils');
+const SecurityUtils = require('./security');
 
 // Framework compatibility information
 const FRAMEWORK_COMPATIBILITY = {
@@ -38,9 +38,9 @@ const FRAMEWORKS = {
     configFilePatterns: [
       /i18n\.(js|ts)$/,
       /i18ntk\.config\.(js|ts)$/,
-      /\.i18nrc(\.(js|json))?$/
+      /\.i18nrc(\.(js|json))?$/,
     ],
-    setupGuide: 'https://github.com/vladnosiv/i18n-management-toolkit',
+    setupGuide: 'Refer to the official i18ntk documentation on GitHub for setup instructions.',
     priority: 100, // Higher priority to detect before other frameworks
     ignore: [
       'node_modules/**',
@@ -52,7 +52,7 @@ const FRAMEWORKS = {
       '**/*.test.{js,jsx,ts,tsx}'
     ]
   },
-  
+
   // Vue i18n has highest specificity due to its unique syntax
   'vue-i18n': {
     name: 'vue-i18n',
@@ -66,7 +66,7 @@ const FRAMEWORKS = {
     ],
     ignore: ['node_modules/**']
   },
-  
+
   // React i18next has medium specificity
   'react-i18next': {
     name: 'React i18next',
@@ -76,9 +76,9 @@ const FRAMEWORKS = {
     regex: /\b(?:useTranslation|withTranslation|Trans|I18n|i18n\.t|t\(?=\s*[`'"])/,
     configFile: 'i18n.js',
     configFilePatterns: [/i18n\.(js|ts)$/, /i18next\.config\.(js|ts)$/],
-    setupGuide: 'https://react.i18next.com/'
+    setupGuide: 'Refer to the official react-i18next documentation for setup instructions.'
   },
-  
+
   // Base i18next has lowest specificity
   'i18next': {
     name: 'i18next',
@@ -278,11 +278,6 @@ const FRAMEWORKS = {
 };
 
 /**
- * Detect the i18n framework being used in the project
- * @param {string} projectRoot - Path to the project root
- * @returns {Promise<Object>} Object containing framework info and detection confidence
- */
-/**
  * Detects the i18n framework being used in the project
  * @param {string} projectRoot - Path to the project root
  * @returns {Promise<Object|null>} Detected framework info or null if none found
@@ -294,23 +289,31 @@ async function detectFramework(projectRoot) {
 
   const packageJsonPath = path.join(projectRoot, 'package.json');
   const detectedFrameworks = [];
-  
+
   // Only proceed if package.json exists
-  if (!fs.existsSync(packageJsonPath)) {
+  if (!SecurityUtils.safeExistsSync(packageJsonPath, projectRoot)) {
     return null;
   }
 
   try {
     // Read and parse package.json
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    const deps = { 
-      ...(packageJson.dependencies || {}), 
+    const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, projectRoot, 'utf8');
+    if (!packageJsonContent) {
+      return null;
+    }
+    const packageJson = SecurityUtils.safeParseJSON(packageJsonContent);
+    if (!packageJson) {
+      return null;
+    }
+
+    const deps = {
+      ...(packageJson.dependencies || {}),
       ...(packageJson.devDependencies || {}),
       ...(packageJson.peerDependencies || {})
     };
 
     // Sort frameworks by priority (highest first)
-    const sortedFrameworks = Object.entries(FRAMEWORKS).sort((a, b) => 
+    const sortedFrameworks = Object.entries(FRAMEWORKS).sort((a, b) =>
       (b[1].priority || 0) - (a[1].priority || 0)
     );
 
@@ -350,7 +353,7 @@ async function detectFramework(projectRoot) {
         // First sort by confidence
         const confidenceDiff = b.confidence - a.confidence;
         if (confidenceDiff !== 0) return confidenceDiff;
-        
+
         // If confidence is equal, sort by priority
         return (b.priority || 0) - (a.priority || 0);
       })[0];
