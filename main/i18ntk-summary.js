@@ -19,7 +19,7 @@ const SetupEnforcer = require('../utils/setup-enforcer');
   }
 })();
 
-loadTranslations( 'en', path.resolve(__dirname, '..', 'ui-locales'));
+loadTranslations( 'en', path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
 
 
 class I18nSummaryReporter {
@@ -54,7 +54,7 @@ class I18nSummaryReporter {
       this.config = baseConfig;
 
       const uiLanguage = this.config.uiLanguage || 'en';
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
 
       this.sourceDir = this.config.sourceDir;
 
@@ -831,7 +831,7 @@ class I18nSummaryReporter {
     this.config = { ...this.config, ...baseConfig };
     
     const uiLanguage = this.config.uiLanguage || 'en';
-    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
     if (!this.config.sourceDir) {
       this.config.sourceDir = this.detectI18nDirectory();
     }

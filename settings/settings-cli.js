@@ -12,7 +12,7 @@ const settingsManager = new SettingsManager();
 const UIi18n = require('../main/i18ntk-ui');
 const configManager = require('../utils/config-manager');
 const { loadTranslations, t } = require('../utils/i18n-helper');
-loadTranslations(null, path.resolve(__dirname, '..', 'ui-locales'));
+loadTranslations(null, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
 
 const AdminAuth = require('../utils/admin-auth');
 const uiI18n = new UIi18n();

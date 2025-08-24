@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Load all language files
-const localesPath = path.join(__dirname, '../ui-locales');
+const localesPath = path.join(__dirname, '../resources/i18n/ui-locales');
 const files = fs.readdirSync(localesPath).filter(file => file.endsWith('.json') && file !== 'en.json');
 
 // Load English as the base for comparison

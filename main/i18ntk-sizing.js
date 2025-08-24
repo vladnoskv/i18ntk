@@ -83,7 +83,7 @@ class I18nSizingAnalyzer {
     
     // Initialize i18n with UI language from config
     const uiLanguage = options.uiLanguage || config.uiLanguage || 'en';
-    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+    loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
     this.stats = {
       files: {},
       languages: {},

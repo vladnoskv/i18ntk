@@ -8,7 +8,7 @@ const { loadTranslations, t } = require('../utils/i18n-helper');
 loadTranslations('en');
 
 // Configuration
-const SOURCE_DIR = path.join(__dirname, '..', 'ui-locales');
+const SOURCE_DIR = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales');
 const TARGET_LANGUAGES = ['de', 'fr', 'es', 'ru', 'ja', 'zh'];
 
 function createLanguageTemplate(lang) {

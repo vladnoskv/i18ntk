@@ -775,7 +775,7 @@ class MissingKeyValidator {
   }
 
   async validateLanguageKeys(language) {
-    const localePath = path.join(this.projectRoot, 'ui-locales', `${language}.json`);
+    const localePath = path.join(this.projectRoot, 'resources', 'i18n', 'ui-locales', `${language}.json`);
     
     if (!SecurityUtils.safeExistsSync(localePath)) {
       return this.requiredKeys; // All keys missing if file doesn't exist

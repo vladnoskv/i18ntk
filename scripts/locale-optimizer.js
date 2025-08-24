@@ -21,7 +21,7 @@ const { getGlobalReadline } = require('../utils/cli');
 
 class LocaleOptimizer {
   constructor() {
-    this.uiLocalesDir = path.join(__dirname, '..', 'ui-locales');
+    this.uiLocalesDir = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales');
     this.allLocales = ['en', 'de', 'es', 'fr', 'ja', 'ru', 'zh'];
     this.backupDir = path.join(__dirname, '..', 'backups', 'locales');
     this.rl = getGlobalReadline();

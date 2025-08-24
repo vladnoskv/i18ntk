@@ -456,7 +456,7 @@ class I18nCompletionTool {
       this.config = { ...baseConfig, ...(this.config || {}) };
       
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));this.sourceDir = this.config.sourceDir;
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));this.sourceDir = this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     } else {
       await this.initialize();

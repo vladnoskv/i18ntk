@@ -65,7 +65,7 @@ class LiteBuild {
       'main',
       'utils',
       'settings',
-      'ui-locales/en',
+      'resources/i18n/ui-locales/en',
       'scripts'
     ];
 
@@ -113,8 +113,8 @@ class LiteBuild {
   }
 
   async copyEnglishLocale() {
-    const enLocaleDir = path.join(this.projectRoot, 'ui-locales', 'en');
-    const destDir = path.join(this.buildDir, 'ui-locales', 'en');
+    const enLocaleDir = path.join(this.projectRoot, 'resources', 'i18n', 'ui-locales', 'en');
+    const destDir = path.join(this.buildDir, 'resources', 'i18n', 'ui-locales', 'en');
     
     if (SecurityUtils.safeExistsSync(enLocaleDir)) {
       const files = fs.readdirSync(enLocaleDir);
@@ -167,12 +167,12 @@ docs/
 .i18ntk/
 
 # Non-English locales
-ui-locales/es/
-ui-locales/fr/
-ui-locales/de/
-ui-locales/ja/
-ui-locales/ru/
-ui-locales/zh/
+resources/i18n/ui-locales/es/
+resources/i18n/ui-locales/fr/
+resources/i18n/ui-locales/de/
+resources/i18n/ui-locales/ja/
+resources/i18n/ui-locales/ru/
+resources/i18n/ui-locales/zh/
 
 # Debug and test files
 *.test.js

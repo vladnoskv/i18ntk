@@ -35,7 +35,7 @@ function getSecurityUtils() {
 function toPosix(p) { return String(p).replace(/\\/g, '/'); }
 function isBundledPath(p) {
   const s = toPosix(p);
-  return s.includes('/node_modules/i18ntk/') || s.includes('/i18ntk/ui-locales/');
+  return s.includes('/node_modules/i18ntk/') || s.includes('/i18ntk/resources/i18n/ui-locales/');
 }
 
 function safeRequireConfig() {
@@ -127,7 +127,7 @@ function findLocaleFilesAllDirs(lang) {
             // Validate file is readable and parseable
             fs.accessSync(candidate, fs.constants.R_OK);
             // Quick JSON validation
-            const content = SecurityUtils.safeWriteFileSync(candidate, 'utf8');
+            const content = SecurityUtils.safeReadFileSync(candidate, path.dirname(candidate), 'utf8') || '';
             if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
               files.push(candidate);
             } else {

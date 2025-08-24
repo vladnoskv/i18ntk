@@ -1128,7 +1128,7 @@ class I18nInitializer {
         // Load translations for UI messages
       const uiLanguage = this.config.uiLanguage || 'en';
       const { loadTranslations } = require('../utils/i18n-helper');
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
       }
       
       // Setup is now handled centrally by config manager
@@ -1211,7 +1211,7 @@ class I18nInitializer {
       // Load translations for UI messages
       const uiLanguage = this.config.uiLanguage || 'en';
       const { loadTranslations } = require('../utils/i18n-helper');
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
       
       // Skip i18n framework check in non-interactive mode
       console.log('Running initialization in non-interactive mode...');

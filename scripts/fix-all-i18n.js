@@ -19,7 +19,7 @@ const argv = Object.fromEntries(
 );
 
 const SOURCE_DIR   = path.resolve(argv['source-dir'] || './');
-const I18N_DIR     = path.resolve(argv['i18n-dir']   || './ui-locales');
+const I18N_DIR     = path.resolve(argv['i18n-dir']   || './resources/i18n/ui-locales');
 const LANGS        = (argv.languages || 'en,de,es,fr,ru,ja,zh').split(',').map(s => s.trim());
 const WRITE        = !!argv.write;
 const PRUNE_EXTRAS = !!argv['prune-extras'];

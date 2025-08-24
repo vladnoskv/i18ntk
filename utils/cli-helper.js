@@ -145,7 +145,7 @@ function showFrameworkWarningOnce(ui) {
       try {
         const path = require('path');
         const fs = require('fs');
-        const localePath = path.join(__dirname, '..', 'ui-locales', 'en.json');
+        const localePath = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales', 'en.json');
         if (SecurityUtils.safeExistsSync(localePath)) {
           const translations = JSON.parse(SecurityUtils.safeReadFileSync(localePath, 'utf8'));
           t = (key) => {
@@ -170,7 +170,7 @@ function showFrameworkWarningOnce(ui) {
           const settings = settingsManager.loadSettings();
           const currentLang = settings.uiLanguage || 'en';
           
-          const localePath = path.join(__dirname, '..', 'ui-locales', `${currentLang}.json`);
+          const localePath = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales', `${currentLang}.json`);
           if (SecurityUtils.safeExistsSync(localePath)) {
             const translations = JSON.parse(SecurityUtils.safeReadFileSync(localePath, 'utf8'));
             t = (key) => {
@@ -183,7 +183,7 @@ function showFrameworkWarningOnce(ui) {
             };
           } else {
             // Fallback to English
-            const enLocalePath = path.join(__dirname, '..', 'ui-locales', 'en.json');
+            const enLocalePath = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales', 'en.json');
             if (SecurityUtils.safeExistsSync(enLocalePath)) {
               const translations = JSON.parse(SecurityUtils.safeReadFileSync(enLocalePath, 'utf8'));
               t = (key) => {

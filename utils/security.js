@@ -104,8 +104,11 @@ class SecurityUtils {
     try {
       if (!filePath || typeof filePath !== 'string') {
         const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationFailed'), 'error', { inputPath: filePath, reason: i18n.t('security.invalidInputType') });
-       return null;
+        SecurityUtils.logSecurityEvent(
+          i18n.t('security.pathValidationFailed'),
+          'error',
+          { inputPath: filePath, reason: i18n.t('security.invalidInputType') }
+        );
         return null;
       }
 
@@ -125,19 +128,28 @@ class SecurityUtils {
       const relativePath = path.relative(base, finalPath);
       if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
         const i18n = getI18n();
-        SecurityUtils.logSecurityEvent(i18n.t('security.pathTraversalAttempt'), 'warning', { inputPath: filePath, resolvedPath: finalPath, basePath: base });
-         return null;
+        SecurityUtils.logSecurityEvent(
+          i18n.t('security.pathTraversalAttempt'),
+          'warning',
+          { inputPath: filePath, resolvedPath: finalPath, basePath: base }
+        );
         return null;
       }
       
       const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidated'), 'info', { inputPath: filePath, resolvedPath: finalPath });
-      
+            SecurityUtils.logSecurityEvent(
+        i18n.t('security.pathValidated'),
+        'info',
+        { inputPath: filePath, resolvedPath: finalPath }
+      );
       return finalPath;
     } catch (error) {
       const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.pathValidationError'), 'error', { inputPath: filePath, error: error.message });
-       return null;
+            SecurityUtils.logSecurityEvent(
+        i18n.t('security.pathValidationError'),
+        'error',
+        { inputPath: filePath, error: error.message }
+      );
       return null;
     }
   }
@@ -577,31 +589,28 @@ class SecurityUtils {
    * @param {object} details - Additional details
    */
   static logSecurityEvent(event, level = 'info', details = {}) {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      level,
-      event,
-      details: {
-        ...details,
-        pid: process.pid,
-        nodeVersion: process.version
-      }
-    };
+    // Prevent recursive logging which can occur during configuration loading
+    if (this._logging) {
+      return;
+    }
 
-    // Only show security logs if debug mode is enabled and showSecurityLogs is true
+    this._logging = true;
     try {
-      const cfg = getConfigManager()?.getConfig();
-      if (cfg.debug?.enabled && cfg.debug?.showSecurityLogs) {
-        console.log(`[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`, details);
-      }
-    } catch (error) {
-      // Fallback: if settings can't be loaded, don't show security logs to maintain clean UI
-      // Only log critical security events in this case
-      if (event.includes('CRITICAL') || event.includes('BREACH') || event.includes('ATTACK')) {
-        const i18n = getI18n();
-        console.log(i18n.t('security.security_alert', { timestamp, event }), details);
-      }
+      const timestamp = new Date().toISOString();
+      const logEntry = {
+        timestamp,
+        level,
+        event,
+        details: {
+          ...details,
+          pid: process.pid,
+          nodeVersion: process.version
+        }
+      };
+
+      console.log(`[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`, details);
+    } finally {
+      this._logging = false;
     }
   }
   /**

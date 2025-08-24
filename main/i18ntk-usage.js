@@ -55,7 +55,7 @@ const SetupEnforcer = require('../utils/setup-enforcer');
   }
 })();
 
-loadTranslations( 'en', path.resolve(__dirname, '..', 'ui-locales'));
+loadTranslations( 'en', path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
 
 async function getConfig() {
   return await getUnifiedConfig('usage');
@@ -120,7 +120,7 @@ class I18nUsageAnalyzer {
       
       // Load translations for UI
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
       const projectRoot = path.resolve(this.config.projectRoot || '.');
             const detected = detectFramework(projectRoot);
       if (detected) {
@@ -393,7 +393,7 @@ class I18nUsageAnalyzer {
         this.config = { ...baseConfig, ...(this.config || {}) };
         
         const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
+        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
         if (!Array.isArray(this.config.translationPatterns)) {
           this.config.translationPatterns = [
             /t\(['"`]([^'"`]+)['"`]/g,

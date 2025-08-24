@@ -49,13 +49,13 @@ class PrepublishCleaner {
         
         // Essential locale files
         this.essentialLocales = [
-            'ui-locales/en.json',
-            'ui-locales/es.json',
-            'ui-locales/fr.json',
-            'ui-locales/de.json',
-            'ui-locales/ja.json',
-            'ui-locales/ru.json',
-            'ui-locales/zh.json'
+            'resources/i18n/ui-locales/en.json',
+            'resources/i18n/ui-locales/es.json',
+            'resources/i18n/ui-locales/fr.json',
+            'resources/i18n/ui-locales/de.json',
+            'resources/i18n/ui-locales/ja.json',
+            'resources/i18n/ui-locales/ru.json',
+            'resources/i18n/ui-locales/zh.json'
         ];
     }
 

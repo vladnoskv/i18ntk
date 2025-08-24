@@ -47,7 +47,7 @@ class I18nTextScanner {
   }
 
   loadLocale() {
-    const uiLocalesDir = path.join(__dirname, '..', 'ui-locales');
+    const uiLocalesDir = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales');
     const localeFile = path.join(uiLocalesDir, 'en.json');
 
     try {

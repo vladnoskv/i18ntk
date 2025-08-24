@@ -1,0 +1,574 @@
+{
+  "timestamp": "2025-08-24T20:59:36.432Z",
+  "languages": [
+    "de"
+  ],
+  "results": {
+    "de": {
+      "files": [
+        {
+          "name": ".json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\.json",
+          "stats": {
+            "total": 1,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 1
+          }
+        },
+        {
+          "name": "about.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\about.json",
+          "stats": {
+            "total": 39,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 39
+          }
+        },
+        {
+          "name": "activities.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\activities.json",
+          "stats": {
+            "total": 154,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 154
+          }
+        },
+        {
+          "name": "admin.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\admin.json",
+          "stats": {
+            "total": 280,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 280
+          }
+        },
+        {
+          "name": "aiAssist.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\aiAssist.json",
+          "stats": {
+            "total": 83,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 83
+          }
+        },
+        {
+          "name": "applyTemplate.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\applyTemplate.json",
+          "stats": {
+            "total": 1,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 1
+          }
+        },
+        {
+          "name": "auth.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\auth.json",
+          "stats": {
+            "total": 220,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 220
+          }
+        },
+        {
+          "name": "calendar.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\calendar.json",
+          "stats": {
+            "total": 97,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 97
+          }
+        },
+        {
+          "name": "commissions.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\commissions.json",
+          "stats": {
+            "total": 57,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 57
+          }
+        },
+        {
+          "name": "common.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\common.json",
+          "stats": {
+            "total": 466,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 466
+          }
+        },
+        {
+          "name": "contacts.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\contacts.json",
+          "stats": {
+            "total": 118,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 118
+          }
+        },
+        {
+          "name": "dashboard.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\dashboard.json",
+          "stats": {
+            "total": 160,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 160
+          }
+        },
+        {
+          "name": "deals.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\deals.json",
+          "stats": {
+            "total": 60,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 60
+          }
+        },
+        {
+          "name": "debug.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\debug.json",
+          "stats": {
+            "total": 5,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 5
+          }
+        },
+        {
+          "name": "deleteTemplate.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\deleteTemplate.json",
+          "stats": {
+            "total": 1,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 1
+          }
+        },
+        {
+          "name": "exportData.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\exportData.json",
+          "stats": {
+            "total": 6,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 6
+          }
+        },
+        {
+          "name": "followUps.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\followUps.json",
+          "stats": {
+            "total": 81,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 81
+          }
+        },
+        {
+          "name": "funnel.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\funnel.json",
+          "stats": {
+            "total": 41,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 41
+          }
+        },
+        {
+          "name": "goals.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\goals.json",
+          "stats": {
+            "total": 100,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 100
+          }
+        },
+        {
+          "name": "hotLeads.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\hotLeads.json",
+          "stats": {
+            "total": 43,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 43
+          }
+        },
+        {
+          "name": "importData.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\importData.json",
+          "stats": {
+            "total": 108,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 108
+          }
+        },
+        {
+          "name": "importGoogle.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\importGoogle.json",
+          "stats": {
+            "total": 36,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 36
+          }
+        },
+        {
+          "name": "importSummary.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\importSummary.json",
+          "stats": {
+            "total": 1,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 1
+          }
+        },
+        {
+          "name": "landing.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\landing.json",
+          "stats": {
+            "total": 312,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 312
+          }
+        },
+        {
+          "name": "membership.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\membership.json",
+          "stats": {
+            "total": 111,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 111
+          }
+        },
+        {
+          "name": "messagesPage.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\messagesPage.json",
+          "stats": {
+            "total": 4,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 4
+          }
+        },
+        {
+          "name": "nav.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\nav.json",
+          "stats": {
+            "total": 75,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 75
+          }
+        },
+        {
+          "name": "notifications.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\notifications.json",
+          "stats": {
+            "total": 2,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 2
+          }
+        },
+        {
+          "name": "onboarding.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\onboarding.json",
+          "stats": {
+            "total": 69,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 69
+          }
+        },
+        {
+          "name": "pagination.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\pagination.json",
+          "stats": {
+            "total": 4,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 4
+          }
+        },
+        {
+          "name": "people.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\people.json",
+          "stats": {
+            "total": 241,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 241
+          }
+        },
+        {
+          "name": "pipeline.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\pipeline.json",
+          "stats": {
+            "total": 84,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 84
+          }
+        },
+        {
+          "name": "premium.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\premium.json",
+          "stats": {
+            "total": 2,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 2
+          }
+        },
+        {
+          "name": "pricing.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\pricing.json",
+          "stats": {
+            "total": 172,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 172
+          }
+        },
+        {
+          "name": "profile.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\profile.json",
+          "stats": {
+            "total": 82,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 82
+          }
+        },
+        {
+          "name": "prospects.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\prospects.json",
+          "stats": {
+            "total": 223,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 223
+          }
+        },
+        {
+          "name": "referral.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\referral.json",
+          "stats": {
+            "total": 62,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 62
+          }
+        },
+        {
+          "name": "reportGenerator.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\reportGenerator.json",
+          "stats": {
+            "total": 125,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 125
+          }
+        },
+        {
+          "name": "reportsPremium.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\reportsPremium.json",
+          "stats": {
+            "total": 94,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 94
+          }
+        },
+        {
+          "name": "saveTemplate.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\saveTemplate.json",
+          "stats": {
+            "total": 2,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 2
+          }
+        },
+        {
+          "name": "settings.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\settings.json",
+          "stats": {
+            "total": 112,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 112
+          }
+        },
+        {
+          "name": "sidebar.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\sidebar.json",
+          "stats": {
+            "total": 38,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 38
+          }
+        },
+        {
+          "name": "stats.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\stats.json",
+          "stats": {
+            "total": 10,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 10
+          }
+        },
+        {
+          "name": "support.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\support.json",
+          "stats": {
+            "total": 2,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 2
+          }
+        },
+        {
+          "name": "tasks.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\tasks.json",
+          "stats": {
+            "total": 133,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 133
+          }
+        },
+        {
+          "name": "team.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\team.json",
+          "stats": {
+            "total": 137,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 137
+          }
+        },
+        {
+          "name": "teamMembers.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\teamMembers.json",
+          "stats": {
+            "total": 14,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 14
+          }
+        },
+        {
+          "name": "teamPremium.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\teamPremium.json",
+          "stats": {
+            "total": 298,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 298
+          }
+        },
+        {
+          "name": "trainingRedirect.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\trainingRedirect.json",
+          "stats": {
+            "total": 5,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 5
+          }
+        },
+        {
+          "name": "ui.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\ui.json",
+          "stats": {
+            "total": 357,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 357
+          }
+        },
+        {
+          "name": "uploadStep.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\uploadStep.json",
+          "stats": {
+            "total": 3,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 3
+          }
+        },
+        {
+          "name": "user-messages.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\user-messages.json",
+          "stats": {
+            "total": 1,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 1
+          }
+        },
+        {
+          "name": "userMessages.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\userMessages.json",
+          "stats": {
+            "total": 1,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 1
+          }
+        },
+        {
+          "name": "validationStep.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\validationStep.json",
+          "stats": {
+            "total": 1,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 1
+          }
+        },
+        {
+          "name": "views.json",
+          "path": "E:\\i18n-management-toolkit-main\\i18ntk-1.9.0\\src\\i18n\\locales\\de\\views.json",
+          "stats": {
+            "total": 16,
+            "translated": 0,
+            "percentage": 0,
+            "missing": 16
+          }
+        }
+      ],
+      "totalStats": {
+        "total": 4950,
+        "translated": 0,
+        "missing": 4950,
+        "percentage": 0
+      }
+    }
+  },
+  "summary": {
+    "languagesProcessed": 1,
+    "totalFiles": 55,
+    "totalKeys": 4950,
+    "totalMissing": 4950
+  }
+}
