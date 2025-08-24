@@ -6,7 +6,7 @@ const localesPath = path.join(__dirname, '../ui-locales');
 const files = fs.readdirSync(localesPath).filter(file => file.endsWith('.json') && file !== 'en.json');
 
 // Load English as the base for comparison
-const enContent = JSON.parse(SecurityUtils.safeWriteFileSync(path.join(localesPath, 'en.json'), 'utf8'));
+const enContent = JSON.parse(SecurityUtils.safeReadFileSync(path.join(localesPath, 'en.json'), 'utf8'));
 
 // Function to get all keys from an object
 function getAllKeys(obj, prefix = '') {
@@ -28,7 +28,7 @@ console.log('\n🔍 Verifying translation keys across all language files...\n');
 files.forEach(file => {
   const langCode = path.basename(file, '.json');
   const filePath = path.join(localesPath, file);
-  const content = JSON.parse(SecurityUtils.safeWriteFileSync(filePath, 'utf8'));
+  const content = JSON.parse(SecurityUtils.safeReadFileSync(filePath, 'utf8'));
   const langKeys = new Set(getAllKeys(content));
   
   // Find missing keys

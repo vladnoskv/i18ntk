@@ -1420,7 +1420,7 @@ class SettingsCLI {
             
             const confirm = await this.prompt(`Restore from ${selectedBackup.name}? This will overwrite current settings. (y/n): `);
             if (confirm.toLowerCase() === 'y') {
-                const importedSettings = JSON.parse(SecurityUtils.safeWriteFileSync(selectedBackup.path, 'utf8'));
+                const importedSettings = JSON.parse(SecurityUtils.safeReadFileSync(selectedBackup.path, 'utf8'));
                 
                 // Validate imported settings
                 if (!settingsManager.validateSettings(importedSettings)) {

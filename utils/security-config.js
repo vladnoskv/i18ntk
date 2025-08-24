@@ -155,7 +155,7 @@ class SecurityConfig {
         }
 
         try {
-            const config = JSON.parse(SecurityUtils.safeWriteFileSync(this.configPath, 'utf8'));
+            const config = JSON.parse(SecurityUtils.safeReadFileSync(this.configPath, 'utf8'));
             const validation = this.validateSecurityConfig(config);
             
             return {

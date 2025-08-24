@@ -318,7 +318,7 @@ class SettingsManager {
     loadSettings() {
         try {
             if (SecurityUtils.safeExistsSync(this.configFile)) {
-                const content = SecurityUtils.safeWriteFileSync(this.configFile, 'utf8');
+                const content = SecurityUtils.safeReadFileSync(this.configFile, process.cwd(), 'utf8');
                 const loadedSettings = JSON.parse(content);
                 // Merge with defaults to ensure all properties exist
                 this.settings = this.mergeWithDefaults(loadedSettings);
@@ -436,7 +436,7 @@ class SettingsManager {
             }
             
             const content = JSON.stringify(this.settings, null, 4);
-            SecurityUtils.safeWriteFileSync(this.configFile, content, 'utf8');
+            SecurityUtils.safeWriteFileSync(this.configFile, content, process.cwd(), 'utf8');
             
             // Create backup if enabled
             if (this.settings.backup?.enabled) {

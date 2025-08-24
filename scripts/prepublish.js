@@ -224,7 +224,7 @@ class PrepublishCleaner {
         
         const packagePath = path.join(this.projectRoot, 'package.json');
         try {
-            const pkg = JSON.parse(SecurityUtils.safeWriteFileSync(packagePath, 'utf8'));
+            const pkg = JSON.parse(SecurityUtils.safeReadFileSync(packagePath, 'utf8'));
             
             // Validate required fields
             const requiredFields = ['name', 'version', 'description', 'main', 'bin', 'files'];

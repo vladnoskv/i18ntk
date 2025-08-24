@@ -52,7 +52,7 @@ function loadConfig(cwd = settingsManager.configDir) {
     }
     
     // Read file with explicit encoding
-    const raw = SecurityUtils.safeWriteFileSync(configPath, { encoding: 'utf8', flag: 'r' });
+    const raw = SecurityUtils.safeReadFileSync(configPath, settingsManager.configDir, 'utf8');
     
     // Basic validation of file content
     if (!raw || typeof raw !== 'string') {

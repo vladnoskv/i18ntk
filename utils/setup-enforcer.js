@@ -17,9 +17,24 @@ class SetupEnforcer {
     static _setupCheckInProgress = false;
     static _setupCheckPromise = null;
 
+    /**
+     * Detect if running in non-interactive environment
+     * @returns {boolean} - True if non-interactive
+     */
+    static isNonInteractive() {
+        return !process.stdout.isTTY ||
+               !process.stdin.isTTY ||
+               process.env.CI === 'true' ||
+               process.env.CONTINUOUS_INTEGRATION === 'true' ||
+               process.env.NODE_ENV === 'test' ||
+               process.env.npm_lifecycle_event === 'test' ||
+               Boolean(process.env.NO_INTERACTIVE);
+    }
+
     static checkSetupComplete() {
-        const configManager = require('./config-manager');
-        const configPath = configManager.CONFIG_PATH;
+         // Avoid circular dependency - use direct path resolution
+         const path = require('path');
+         const configPath = path.join(process.cwd(), '.i18ntk-config');
         
         if (!SecurityUtils.safeExistsSync(configPath)) {
             this.handleMissingSetup();
@@ -52,25 +67,43 @@ class SetupEnforcer {
         console.log(yellow('Welcome to i18n Toolkit! This appears to be your first time running the toolkit.'));
         console.log(gray('Setup is required to configure your project for internationalization management.'));
         console.log('');
-        
-        // Use readline for interactive prompt
+
+        // Check if running in non-interactive environment
+        if (SetupEnforcer.isNonInteractive()) {
+            console.log(yellow('⚠️  Non-interactive environment detected.'));
+            console.log(gray('Please run setup manually:'));
+            console.log(cyan('   npm run i18ntk-setup'));
+            console.log(gray('Or set NO_INTERACTIVE=false to force interactive mode.'));
+            process.exit(1);
+        }
+
+        // Use readline for interactive prompt with timeout
         const readline = require('readline');
         const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
-        
+
         return new Promise((resolve, reject) => {
-            rl.question(cyan('Would you like to run setup now? (Y/n): '), async (answer) => {
+            // Set timeout for user input (30 seconds)
+            const timeout = setTimeout(() => {
+                console.log(yellow('\n⏰ Timeout reached - no response received.'));
+                console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                 rl.close();
-                
+                process.exit(1);
+            }, 30000); // 30 second timeout
+
+            rl.question(cyan('Would you like to run setup now? (Y/n): '), async (answer) => {
+                clearTimeout(timeout);
+                rl.close();
+
                 if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
                     console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                     process.exit(0);
                 }
-                
+
                 console.log(green(`${getIcon('rocket')} Running setup...`));
-                
+
                 try {
                     // Import and run setup directly
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
@@ -113,24 +146,42 @@ static async handleIncompleteSetup() {
         console.log(yellow('Your setup appears to be incomplete or outdated.'));
         console.log(gray('This might happen after updating to a new version.'));
         console.log('');
-        
+
+        // Check if running in non-interactive environment
+        if (SetupEnforcer.isNonInteractive()) {
+            console.log(yellow('⚠️  Non-interactive environment detected.'));
+            console.log(gray('Please run setup manually:'));
+            console.log(cyan('   npm run i18ntk-setup'));
+            console.log(gray('Or set NO_INTERACTIVE=false to force interactive mode.'));
+            process.exit(1);
+        }
+
         const readline = require('readline');
         const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
-        
+
         return new Promise((resolve, reject) => {
-            rl.question(cyan('Would you like to re-run setup? (Y/n): '), async (answer) => {
+            // Set timeout for user input (30 seconds)
+            const timeout = setTimeout(() => {
+                console.log(yellow('\n⏰ Timeout reached - no response received.'));
+                console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                 rl.close();
-                
+                process.exit(1);
+            }, 30000); // 30 second timeout
+
+            rl.question(cyan('Would you like to re-run setup? (Y/n): '), async (answer) => {
+                clearTimeout(timeout);
+                rl.close();
+
                 if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
                     console.log(gray('Operation cancelled.'));
                     process.exit(0);
                 }
-                
+
                 console.log(green(`${getIcon('rocket')} Running setup...`));
-                
+
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
                     if (SecurityUtils.safeExistsSync(setupPath)) {
@@ -170,24 +221,42 @@ static async handleInvalidConfig() {
         console.log(yellow('Your configuration file appears to be corrupted or invalid.'));
         console.log(gray('This might happen due to file corruption or manual editing.'));
         console.log('');
-        
+
+        // Check if running in non-interactive environment
+        if (SetupEnforcer.isNonInteractive()) {
+            console.log(yellow('⚠️  Non-interactive environment detected.'));
+            console.log(gray('Please run setup manually:'));
+            console.log(cyan('   npm run i18ntk-setup'));
+            console.log(gray('Or set NO_INTERACTIVE=false to force interactive mode.'));
+            process.exit(1);
+        }
+
         const readline = require('readline');
         const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
-        
+
         return new Promise((resolve, reject) => {
-            rl.question(cyan('Would you like to re-run setup to fix this? (Y/n): '), async (answer) => {
+            // Set timeout for user input (30 seconds)
+            const timeout = setTimeout(() => {
+                console.log(yellow('\n⏰ Timeout reached - no response received.'));
+                console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                 rl.close();
-                
+                process.exit(1);
+            }, 30000); // 30 second timeout
+
+            rl.question(cyan('Would you like to re-run setup to fix this? (Y/n): '), async (answer) => {
+                clearTimeout(timeout);
+                rl.close();
+
                 if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
                     console.log(gray('Operation cancelled.'));
                     process.exit(0);
                 }
-                
+
                 console.log(green(`${getIcon('rocket')} Running setup...`));
-                
+
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
                     if (SecurityUtils.safeExistsSync(setupPath)) {
@@ -232,9 +301,10 @@ static async handleInvalidConfig() {
         // Create new promise and store it
         SetupEnforcer._setupCheckInProgress = true;
         SetupEnforcer._setupCheckPromise = new Promise(async (resolve, reject) => {
-            try {
-                const configManager = require('./config-manager');
-                const configPath = configManager.CONFIG_PATH;
+             try {
+                 // Avoid circular dependency - use direct path resolution
+                 const path = require('path');
+                 const configPath = path.join(process.cwd(), '.i18ntk-config');
                 
                 if (!SecurityUtils.safeExistsSync(configPath)) {
                     await SetupEnforcer.handleMissingSetup();

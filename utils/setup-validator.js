@@ -260,7 +260,7 @@ class SetupValidator {
             case 'typescript':
                 if (SecurityUtils.safeExistsSync(packageJsonPath)) {
                     try {
-                        const packageJson = JSON.parse(SecurityUtils.safeWriteFileSync(packageJsonPath, 'utf8'));
+                        const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
                         const allDeps = { ...packageJson.dependencies, ...packageJson.devDependencies };
                         
                         const recommended = dependencies[language].recommended;
@@ -379,7 +379,7 @@ class SetupValidator {
             case 'php':
                 if (SecurityUtils.safeExistsSync(composerPath)) {
                     try {
-                        const composer = JSON.parse(SecurityUtils.safeWriteFileSync(composerPath, 'utf8'));
+                        const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
                         const allDeps = { ...composer.require, ...composer['require-dev'] };
                         
                         const recommended = dependencies[language].recommended;

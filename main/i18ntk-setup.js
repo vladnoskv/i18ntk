@@ -422,10 +422,11 @@ class I18nSetupManager {
         };
 
         // Save report using SettingsManager
-        
+
 
         // Also save a local copy for user reference
         const reportPath = path.join(process.cwd(), 'i18ntk-setup-report.json');
+        console.log(`   Configuration saved to .i18ntk-config`);
         SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
         console.log(`   Setup report saved: ${reportPath}`);
     }

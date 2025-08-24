@@ -49,7 +49,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
       settingsDir = safeConfigDir;
       const configFile = path.join(settingsDir, 'i18ntk-config.json');
-      cfg = SecurityUtils.safeExistsSync(configFile) ? JSON.parse(SecurityUtils.safeWriteFileSync(configFile, 'utf8')) : {};
+      cfg = SecurityUtils.safeExistsSync(configFile) ? JSON.parse(SecurityUtils.safeReadFileSync(configFile, settingsDir, 'utf8')) : {};
       projectRoot = settingsDir;
       cfg.projectRoot = projectRoot;
       cfg.sourceDir = path.resolve(projectRoot, toStr(cfg.sourceDir) || './locales');
@@ -427,7 +427,7 @@ async function ensureInitialized(cfg) {
     
     if (SecurityUtils.safeExistsSync(configPath)) {
       try {
-        initStatus = JSON.parse(SecurityUtils.safeWriteFileSync(configPath, 'utf8'));
+        initStatus = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
         // If initialized and version matches current, skip further checks
         if (initStatus.initialized && initStatus.version === '1.8.3') {
           return true;

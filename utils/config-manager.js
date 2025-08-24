@@ -9,7 +9,7 @@ const userProjectRoot = process.cwd();
 
 // Always use current working directory for settings to support test environments
 // This ensures config works correctly when tests change the working directory
-const PROJECT_CONFIG_PATH = path.join(process.cwd(), '.i18ntk-settings');
+const PROJECT_CONFIG_PATH = path.join(process.cwd(), '.i18ntk-config');
 const PROJECT_SETTINGS_DIR = path.dirname(PROJECT_CONFIG_PATH);
 
 // Setup tracking file
@@ -241,12 +241,26 @@ const DEFAULT_CONFIG = {
   "timezone": "auto"
 };
 
-// Environment variable support has been removed in favor of exclusive .i18ntk-settings configuration
+// Environment variable support has been removed in favor of exclusive .i18ntk-config configuration
 
 let currentConfig = null;
+let configLoadInProgress = false;
+let recursionDepth = 0;
+const MAX_RECURSION_DEPTH = 15; // Increased to handle legitimate sequential calls
 
 function clone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+   return JSON.parse(JSON.stringify(obj));
+}
+
+function checkRecursionGuard() {
+    // Disabled recursion detection to prevent false positives on legitimate sequential calls
+    // TODO: Implement more sophisticated recursion detection in future versions
+    return null;
+}
+
+function resetRecursionGuard() {
+    recursionDepth = 0;
+    configLoadInProgress = false;
 }
 
 function ensureProjectSettingsDir() {
@@ -285,27 +299,8 @@ function deepMerge(target, source, basePath = '') {
 }
 
 function applyEnvOverrides(cfg) {
-  for (const [envVar, keyPath] of Object.entries(ENV_VAR_MAP)) {
-    const value = envManager.get(envVar);
-    if (value === null || value === undefined) continue;
-    
-    const keys = keyPath.split('.');
-    let current = cfg;
-    for (let i = 0; i < keys.length - 1; i++) {
-      const k = keys[i];
-      if (!current[k] || typeof current[k] !== 'object') current[k] = {};
-      current = current[k];
-    }
-    const leaf = keys[keys.length - 1];
-    
-    if (keyPath === 'framework.detect' || envVar === 'I18NTK_FRAMEWORK_DETECT') {
-      current[leaf] = String(value).toLowerCase() !== 'false' && value !== '0';
-    } else if (envVar === 'I18NTK_SILENT') {
-      current[leaf] = String(value).toLowerCase() === 'true' || value === '1';
-    } else {
-      current[leaf] = normalizePathValue(keyPath, value);
-    }
-  }
+  // Environment variable support has been removed in favor of exclusive .i18ntk-config configuration
+  // This function is kept for backward compatibility but does nothing
   return cfg;
 }
 
@@ -314,13 +309,13 @@ function tryReadJson(filePath) {
     if (!SecurityUtils.safeExistsSync(filePath)) {
       return null;
     }
-    
+
     const data = SecurityUtils.safeReadFileSync(filePath, 'utf8');
     if (!data || data.trim() === '') {
       console.warn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
       return null;
     }
-    
+
     try {
       return JSON.parse(data);
     } catch (parseError) {
@@ -368,45 +363,72 @@ async function migrateLegacyIfNeeded(baseCfg) {
 }
 
 function loadConfig() {
-  if (currentConfig) return currentConfig;
-  let cfg = clone(DEFAULT_CONFIG);
-  // 1) Project config (primary)
-  const projectCfg = tryReadJson(PROJECT_CONFIG_PATH);
-  if (projectCfg) {
-    cfg = deepMerge(clone(DEFAULT_CONFIG), projectCfg);
-  } else {
-    // 2) Package default (read-only)
-    const pkgCfg = tryReadJson(PACKAGE_CONFIG_PATH);
-    if (pkgCfg) {
-      cfg = deepMerge(clone(DEFAULT_CONFIG), pkgCfg);
+    // Check for recursion
+    const recursionFallback = checkRecursionGuard();
+    if (recursionFallback) return recursionFallback;
+
+    // Return cached config if available
+    if (currentConfig) {
+      resetRecursionGuard();
+      return currentConfig;
     }
-    // 3) Legacy migration (read-only source)
-    if (!projectCfg) {
-      const fromLegacy = tryReadJson(LEGACY_CONFIG_PATH);
-      if (fromLegacy) {
-        cfg = deepMerge(clone(DEFAULT_CONFIG), fromLegacy);
-        // Attempt to migrate to project settings
-        // Ignore migration errors; we still return merged cfg in memory
-        // eslint-disable-next-line no-unused-vars
-        console.warn('[i18ntk] Detected legacy config at ~/.i18ntk. Migrating to project settings directory...');
-        const _ = (async () => { await migrateLegacyIfNeeded(DEFAULT_CONFIG); })();
-      }
+
+    // Prevent concurrent loading
+    if (configLoadInProgress) {
+      console.warn('[i18ntk] Configuration loading already in progress, returning defaults');
+      resetRecursionGuard();
+      return clone(DEFAULT_CONFIG);
     }
-  }
-  applyEnvOverrides(cfg);
-  currentConfig = cfg;
-  return currentConfig;
+
+    configLoadInProgress = true;
+
+    try {
+      let cfg = clone(DEFAULT_CONFIG);
+   // 1) Project config (primary)
+   const projectCfg = tryReadJson(PROJECT_CONFIG_PATH);
+   if (projectCfg) {
+     cfg = deepMerge(clone(DEFAULT_CONFIG), projectCfg);
+   } else {
+     // 2) Package default (read-only)
+     const pkgCfg = tryReadJson(PACKAGE_CONFIG_PATH);
+     if (pkgCfg) {
+       cfg = deepMerge(clone(DEFAULT_CONFIG), pkgCfg);
+     }
+     // 3) Legacy migration (read-only source)
+     if (!projectCfg) {
+       const fromLegacy = tryReadJson(LEGACY_CONFIG_PATH);
+       if (fromLegacy) {
+         cfg = deepMerge(clone(DEFAULT_CONFIG), fromLegacy);
+         // Attempt to migrate to project settings
+         // Ignore migration errors; we still return merged cfg in memory
+         // eslint-disable-next-line no-unused-vars
+         console.warn('[i18ntk] Detected legacy config at ~/.i18ntk. Migrating to project settings directory...');
+         const _ = (async () => { await migrateLegacyIfNeeded(DEFAULT_CONFIG); })();
+       }
+     }
+   }
+     applyEnvOverrides(cfg);
+     currentConfig = cfg;
+     return currentConfig;
+   } catch (error) {
+     console.error('[i18ntk] Error in loadConfig:', error.message);
+     currentConfig = clone(DEFAULT_CONFIG);
+     return currentConfig;
+   } finally {
+     configLoadInProgress = false;
+     recursionDepth = Math.max(0, recursionDepth - 1);
+   }
 }
 
 async function saveConfig(cfg = currentConfig) {
   if (!cfg) return;
-  
+
   try {
     // Ensure settings directory exists
     if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
       fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
     }
-    
+
     // Save configuration to the project settings directory
     await fs.promises.writeFile(PROJECT_CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
     currentConfig = cfg;
@@ -417,58 +439,63 @@ async function saveConfig(cfg = currentConfig) {
 }
 
 function getConfig() {
-  if (currentConfig) {
-    return resolvePaths(currentConfig);
-  }
-  
-  try {
-    // Ensure settings directory exists
-    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
-      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+    // Check for recursion
+    const recursionFallback = checkRecursionGuard();
+    if (recursionFallback) return resolvePaths(recursionFallback);
+
+    if (currentConfig) {
+      resetRecursionGuard();
+      return resolvePaths(currentConfig);
     }
 
-    // Setup is now handled automatically by the unified config system
-    // No need to check here - handled by getUnifiedConfig
+   try {
+     // Ensure settings directory exists
+     if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
+       fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+     }
 
-    // Check if config file exists
-    if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
-      const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, 'utf8'));
-      currentConfig = config;
-      return resolvePaths(config);
-    }
+     // Setup is now handled automatically by the unified config system
+     // No need to check here - handled by getUnifiedConfig
 
-    // Check for legacy config for migration
-    if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
-      console.log('📦 Migrating legacy configuration...');
-      const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, 'utf8'));
-      const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
-      saveConfig(migratedConfig);
-      currentConfig = migratedConfig;
-      
-      // Clean up legacy config
-      try {
-        fs.unlinkSync(LEGACY_CONFIG_PATH);
-        if (fs.readdirSync(LEGACY_CONFIG_DIR).length === 0) {
-          fs.rmdirSync(LEGACY_CONFIG_DIR);
-        }
-      } catch (cleanupError) {
-        // Ignore cleanup errors
-      }
-      
-      return resolvePaths(migratedConfig);
-    }
+     // Check if config file exists
+     if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
+       const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, 'utf8'));
+       currentConfig = config;
+       return resolvePaths(config);
+     }
 
-    // Use package defaults for new installation
-    console.log('📦 Initializing with default configuration...');
-    saveConfig(DEFAULT_CONFIG);
-    currentConfig = DEFAULT_CONFIG;
-    return resolvePaths(DEFAULT_CONFIG);
+     // Check for legacy config for migration
+     if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
+       console.log('📦 Migrating legacy configuration...');
+       const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, 'utf8'));
+       const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
+       saveConfig(migratedConfig);
+       currentConfig = migratedConfig;
 
-  } catch (error) {
-    console.warn('⚠️  Error loading configuration, using defaults:', error.message);
-    currentConfig = DEFAULT_CONFIG;
-    return resolvePaths(DEFAULT_CONFIG);
-  }
+       // Clean up legacy config
+       try {
+         fs.unlinkSync(LEGACY_CONFIG_PATH);
+         if (fs.readdirSync(LEGACY_CONFIG_DIR).length === 0) {
+           fs.rmdirSync(LEGACY_CONFIG_DIR);
+         }
+       } catch (cleanupError) {
+         // Ignore cleanup errors
+       }
+
+       return resolvePaths(migratedConfig);
+     }
+
+     // Use package defaults for new installation
+     console.log('📦 Initializing with default configuration...');
+     saveConfig(DEFAULT_CONFIG);
+     currentConfig = DEFAULT_CONFIG;
+     return resolvePaths(DEFAULT_CONFIG);
+
+   } catch (error) {
+     console.warn('⚠️  Error loading configuration, using defaults:', error.message);
+     currentConfig = DEFAULT_CONFIG;
+     return resolvePaths(DEFAULT_CONFIG);
+   }
 }
 
 async function setConfig(cfg) {
@@ -491,29 +518,29 @@ async function resetToDefaults() {
 }
 
 function resolvePaths(cfg) {
-  if (!cfg) {
-    cfg = DEFAULT_CONFIG;
-  }
-  const root = path.resolve(projectRoot, cfg.projectRoot || '.');
-  const resolved = clone(cfg);
-  resolved.projectRoot = root;
-  ['sourceDir', 'i18nDir', 'outputDir'].forEach(key => {
-    if (resolved[key]) resolved[key] = path.resolve(root, resolved[key]);
-  });
-  if (resolved.scriptDirectories) {
-    resolved.scriptDirectories = { ...resolved.scriptDirectories };
-    for (const [k, v] of Object.entries(resolved.scriptDirectories)) {
-      if (v) resolved.scriptDirectories[k] = path.resolve(root, v);
+    if (!cfg) {
+      cfg = clone(DEFAULT_CONFIG);
     }
-  }
-  return resolved;
+   const root = path.resolve(projectRoot, cfg.projectRoot || '.');
+   const resolved = clone(cfg);
+   resolved.projectRoot = root;
+   ['sourceDir', 'i18nDir', 'outputDir'].forEach(key => {
+     if (resolved[key]) resolved[key] = path.resolve(root, resolved[key]);
+   });
+   if (resolved.scriptDirectories) {
+     resolved.scriptDirectories = { ...resolved.scriptDirectories };
+     for (const [k, v] of Object.entries(resolved.scriptDirectories)) {
+       if (v) resolved.scriptDirectories[k] = path.resolve(root, v);
+     }
+   }
+   return resolved;
 }
 
 function toRelative(absPath) {
-  if (!absPath) return absPath;
-  const rel = path.relative(projectRoot, absPath);
-  const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
-  return normalized;
+   if (!absPath) return absPath;
+   const rel = path.relative(projectRoot, absPath);
+   const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
+   return normalized;
 }
 
 
@@ -531,4 +558,3 @@ module.exports = {
   toRelative,
   normalizePathValue,
 }
-

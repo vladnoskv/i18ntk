@@ -32,7 +32,7 @@ function createLanguageTemplate(lang) {
     const targetFile = path.join(langDir, file);
     
     if (!SecurityUtils.safeExistsSync(targetFile)) {
-      const sourceContent = JSON.parse(SecurityUtils.safeWriteFileSync(sourceFile, 'utf8'));
+      const sourceContent = JSON.parse(SecurityUtils.safeReadFileSync(sourceFile, 'utf8'));
       const templateContent = createTemplateFromEnglish(sourceContent);
       SecurityUtils.safeWriteFileSync(targetFile, JSON.stringify(templateContent, null, 2));
       console.log(t('exportTranslations.createdTemplate', { lang, file }));

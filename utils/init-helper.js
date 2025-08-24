@@ -30,7 +30,7 @@ async function checkInitialized(options = {}) {
   // If initialization file exists and is valid, return early
   if (SecurityUtils.safeExistsSync(initFilePath)) {
     try {
-      const initStatus = JSON.parse(SecurityUtils.safeWriteFileSync(initFilePath, 'utf8'));
+      const initStatus = JSON.parse(SecurityUtils.safeReadFileSync(initFilePath, path.dirname(initFilePath), 'utf8'));
       const isInitialized = initStatus.initialized && 
                           initStatus.version && 
                           initStatus.version.split('.')[0] === currentVersion.split('.')[0];

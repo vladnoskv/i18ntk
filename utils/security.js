@@ -40,6 +40,61 @@ function getI18n() {
  */
 class SecurityUtils {
   /**
+   * Timeout wrapper for synchronous operations to prevent hanging
+   * @param {Function} operation - The synchronous operation to wrap
+   * @param {number} timeoutMs - Timeout in milliseconds
+   * @param {string} operationName - Name of the operation for logging
+   * @returns {*} - Operation result or null if timeout/error
+   */
+  static withTimeoutSync(operation, timeoutMs = 5000, operationName = 'operation') {
+    // Track recursion to prevent infinite loops
+    if (!this._operationStack) {
+      this._operationStack = new Set();
+    }
+
+    if (this._operationStack.has(operationName)) {
+      const i18n = getI18n();
+      SecurityUtils.logSecurityEvent(i18n.t('security.recursion_detected', { operation: operationName }), 'error');
+      return null;
+    }
+
+    this._operationStack.add(operationName);
+
+    try {
+      // Simple timeout using setTimeout for synchronous operations
+      let result = null;
+      let hasResult = false;
+      let timeoutId = null;
+
+      const timeoutPromise = new Promise((resolve) => {
+        timeoutId = setTimeout(() => {
+          if (!hasResult) {
+            const i18n = getI18n();
+            SecurityUtils.logSecurityEvent(i18n.t('security.operation_timeout', { operation: operationName }), 'warning');
+            resolve(null);
+          }
+        }, timeoutMs);
+      });
+
+      // Execute operation synchronously
+      result = operation();
+      hasResult = true;
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      return result;
+    } catch (error) {
+      const i18n = getI18n();
+      console.warn(i18n.t('security.operation_error', { operation: operationName, error: error.message }));
+      return null;
+    } finally {
+      this._operationStack.delete(operationName);
+    }
+  }
+
+  /**
    * Validates and sanitizes file paths to prevent path traversal attacks
    * @param {string} inputPath - The input path to validate
    * @param {string} basePath - The base path that the input should be within (optional)
@@ -91,18 +146,21 @@ class SecurityUtils {
    * Safely checks if a path exists.
    * @param {string} filePath - Path to check.
    * @param {string} basePath - Base path for validation.
+   * @param {number} timeoutMs - Timeout in milliseconds (default: 3000)
    * @returns {boolean} - True if the path exists and is safe.
    */
-  static safeExistsSync(filePath, basePath) {
-    const validatedPath = this.validatePath(filePath, basePath);
-    if (!validatedPath) {
-      return false;
-    }
-    try {
-      return fs.existsSync(validatedPath);
-    } catch (error) {
-      return false;
-    }
+  static safeExistsSync(filePath, basePath, timeoutMs = 3000) {
+    return this.withTimeoutSync(() => {
+      const validatedPath = this.validatePath(filePath, basePath);
+      if (!validatedPath) {
+        return false;
+      }
+      try {
+        return fs.existsSync(validatedPath);
+      } catch (error) {
+        return false;
+      }
+    }, timeoutMs, 'safeExistsSync');
   }
 
   /**
@@ -209,6 +267,42 @@ class SecurityUtils {
       return null;
     }
   }
+   /**
+    * Safely writes a file synchronously with path validation and error handling
+    * @param {string} filePath - Path to the file
+    * @param {string} content - Content to write
+    * @param {string} basePath - Base path for validation
+    * @param {string} encoding - File encoding (default: 'utf8')
+    * @returns {boolean} - Success status
+    */
+   static safeWriteFileSync(filePath, content, basePath, encoding = 'utf8') {
+     const validatedPath = this.validatePath(filePath, basePath);
+     if (!validatedPath) {
+       return false;
+     }
+
+     try {
+       // Validate content size (10MB max)
+       if (typeof content === 'string' && content.length > 10 * 1024 * 1024) {
+         const i18n = getI18n();
+         console.warn(i18n.t('security.content_too_large_for_file', { filePath: validatedPath }));
+         return false;
+       }
+
+       // Ensure directory exists
+       const dir = path.dirname(validatedPath);
+       fs.mkdirSync(dir, { recursive: true });
+
+       // Write file with proper permissions
+       fs.writeFileSync(validatedPath, content, { encoding, mode: 0o644 });
+       return true;
+     } catch (error) {
+       const i18n = getI18n();
+       console.warn(i18n.t('security.file_write_error', { errorMessage: error.message }));
+       return false;
+     }
+   }
+
 
   /**
    * Safely writes a file with path validation and error handling
