@@ -22,6 +22,8 @@ const path = require('path');
 const UIi18n = require('./i18ntk-ui');
 const AdminAuth = require('../utils/admin-auth');
 const SecurityUtils = require('../utils/security');
+
+
 const AdminCLI = require('../utils/admin-cli');
 const configManager = require('../settings/settings-manager');
 const { showFrameworkWarningOnce } = require('../utils/cli-helper');
@@ -126,7 +128,7 @@ async function ensureInitializedOrExit(prompt) {
       console.log('Framework detection prompt will be suppressed for this version.');
     } else if (action === 'detect') {
       // Run framework detection
-      const { detectedLanguage, detectedFramework } = detectEnvironmentAndFramework();
+      const { detectedLanguage, detectedFramework } = await detectEnvironmentAndFramework();
       
       if (detectedFramework && detectedFramework !== 'generic') {
         console.log(`\nDetected framework: ${detectedFramework}`);
@@ -153,7 +155,90 @@ async function ensureInitializedOrExit(prompt) {
   return { ...config, ...settings };
 }
 
+/**
+ * Custom glob implementation using Node.js built-in modules (zero dependencies)
+ * @param {string[]} patterns - Array of glob patterns
+ * @param {Object} options - Options object with cwd and ignore properties
+ * @returns {Promise<string[]>} Array of matching file paths
+ */
+async function customGlob(patterns, options = {}) {
+  const fs = require('fs');
+  const path = require('path');
+  const cwd = options.cwd || process.cwd();
+  const ignorePatterns = options.ignore || [];
+
+  function matchesPattern(filename, pattern) {
+    // Simple pattern matching for **/*.{js,jsx,ts,tsx} style patterns
+    if (pattern.includes('**/*')) {
+      const extensionPart = pattern.split('*.')[1];
+      if (extensionPart) {
+        const extensions = extensionPart.replace('{', '').replace('}', '').split(',');
+        return extensions.some(ext => filename.endsWith('.' + ext.trim()));
+      }
+    }
+    return filename.includes(pattern.replace('**/', ''));
+  }
+
+  function shouldIgnore(filePath) {
+    return ignorePatterns.some(pattern => {
+      if (pattern.includes('**/')) {
+        const patternEnd = pattern.replace('**/', '');
+        return filePath.includes('/' + patternEnd) || filePath.includes('\\' + patternEnd);
+      }
+      return filePath.includes(pattern);
+    });
+  }
+
+  function findFiles(dir, results = []) {
+    try {
+      const items = fs.readdirSync(dir);
+
+      for (const item of items) {
+        const fullPath = path.join(dir, item);
+        const relativePath = path.relative(cwd, fullPath);
+
+        if (shouldIgnore(relativePath)) {
+          continue;
+        }
+
+        try {
+          const stat = fs.statSync(fullPath);
+
+          if (stat.isDirectory()) {
+            findFiles(fullPath, results);
+          } else if (stat.isFile()) {
+            // Check if file matches any of our patterns
+            for (const pattern of patterns) {
+              if (matchesPattern(item, pattern)) {
+                results.push(relativePath);
+                break;
+              }
+            }
+          }
+        } catch (error) {
+          // Skip files we can't access
+          continue;
+        }
+      }
+    } catch (error) {
+      // Skip directories we can't access
+    }
+
+    return results;
+  }
+
+  return findFiles(cwd);
+}
+
 async function detectEnvironmentAndFramework() {
+  // Defensive check to ensure SecurityUtils is available
+  if (!SecurityUtils) {
+    throw new Error('SecurityUtils is not available. This may indicate a module loading issue.');
+  }
+  const fs = require('fs');
+  const path = require('path');
+  
+  
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   const pyprojectPath = path.join(process.cwd(), 'pyproject.toml');
   const requirementsPath = path.join(process.cwd(), 'requirements.txt');
@@ -164,7 +249,7 @@ async function detectEnvironmentAndFramework() {
   let detectedLanguage = 'generic';
   let detectedFramework = 'generic';
 
-  if (fs.existsSync(packageJsonPath)) {
+  if (SecurityUtils.safeExistsSync(packageJsonPath)) {
     detectedLanguage = 'javascript';
     try {
       const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
@@ -186,7 +271,7 @@ async function detectEnvironmentAndFramework() {
           /require\(['\"]i18ntk[\/\\]runtime['\"]\)/
         ];
         
-        const sourceFiles = await glob(['src/**/*.{js,jsx,ts,tsx}'], {
+        const sourceFiles = await customGlob(['src/**/*.{js,jsx,ts,tsx}'], {
           cwd: process.cwd(),
           ignore: ['**/node_modules/**', '**/dist/**', '**/build/**']
         });

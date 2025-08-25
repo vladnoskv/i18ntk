@@ -1226,7 +1226,7 @@ class SettingsCLI {
         }
 
         try {
-            SecurityUtils.safeWriteFileSync(exportFile, exportData);
+            SecurityUtils.safeWriteFileSync(exportFile, exportData, path.dirname(exportFile));
             const stats = fs.statSync(exportFile);
             this.success(`Settings exported to ${exportFile}`);
             console.log(`  Size: ${Math.round(stats.size / 1024)}KB`);
@@ -1265,7 +1265,7 @@ class SettingsCLI {
                 return;
             }
 
-            const fileContent = SecurityUtils.safeWriteFileSync(filename, 'utf8');
+            const fileContent = SecurityUtils.safeReadFileSync(filename, path.dirname(filename), 'utf8');
             let importedSettings;
             
             try {
@@ -2005,7 +2005,7 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
             const fileName = `i18ntk-enhanced-schema-${Date.now()}.json`;
             const filePath = path.join(process.cwd(), fileName);
             
-            SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(enhancedSchema, null, 2), 'utf8');
+            SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(enhancedSchema, null, 2), path.dirname(filePath));
             this.success(`Enhanced schema exported to: ${filePath}`);
             
             await this.pause();

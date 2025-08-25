@@ -15,6 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 // ---------------- CLI ARGUMENTS ----------------
 const argv = Object.fromEntries(
@@ -45,7 +46,7 @@ const COUNTRY_CODES = { de: 'DE', es: 'ES', fr: 'FR', ru: 'RU', ja: 'JA', zh: 'Z
 
 // ---------------- HELPERS ----------------
 function readUTF8(p) {
-  try { return SecurityUtils.safeWriteFileSync(p, 'utf8'); } catch { return null; }
+  try { return SecurityUtils.safeReadFileSync(p, path.dirname(p), 'utf8'); } catch { return null; }
 }
 function writeJSON(p, obj) {
   fs.mkdirSync(path.dirname(p), { recursive: true });

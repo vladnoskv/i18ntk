@@ -1280,3 +1280,54 @@ if (require.main === module) {
 
   main();
 }
+
+// Run if called directly
+if (require.main === module) {
+  async function main() {
+    const args = parseCommonArgs(process.argv.slice(2));
+    const prompt = createPrompt({ noPrompt: args.noPrompt });
+    try {
+      if (args.help) {
+        displayHelp('i18ntk-init', {
+          'languages': 'Comma-separated list of target languages',
+          'source-dir': 'Directory for translation files',
+          'source-language': 'Source language code',
+          'no-prompt': 'Run without interactive prompts'
+        });
+        return;
+      }
+
+      // Handle legacy language flags
+      if (args.languages && typeof args.languages === 'string') {
+        args.languages = args.languages.split(',').map(l => l.trim());
+      }
+      if (args['target-languages'] && typeof args['target-languages'] === 'string') {
+        args.languages = args['target-languages'].split(',').map(l => l.trim());
+      }
+
+      const config = await getUnifiedConfig('init', args);
+      if (args.languages) {
+        config.defaultLanguages = args.languages;
+      }
+
+      const initializer = new I18nInitializer({ ...config, noPrompt: args.noPrompt });
+      initializer.promptInstance = prompt;
+
+      if (args.noPrompt) {
+        await initializer.runNonInteractive();
+      } else {
+        await initializer.run();
+      }
+
+    } catch (error) {
+      console.error('Error:', error.message);
+      process.exit(1);
+    } finally {
+      if (prompt && typeof prompt.close === 'function') {
+        prompt.close();
+      }
+    }
+  }
+
+  main();
+}

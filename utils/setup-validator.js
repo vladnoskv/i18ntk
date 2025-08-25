@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 
 class SetupValidator {
@@ -325,7 +326,7 @@ class SetupValidator {
 
             case 'go':
                 if (SecurityUtils.safeExistsSync(goModPath)) {
-                    const goMod = SecurityUtils.safeWriteFileSync(goModPath, 'utf8');
+                    const goMod = SecurityUtils.safeReadFileSync(goModPath, path.dirname(goModPath), 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => goMod.includes(dep));
                     
@@ -352,7 +353,7 @@ class SetupValidator {
 
             case 'java':
                 if (SecurityUtils.safeExistsSync(pomPath)) {
-                    const pom = SecurityUtils.safeWriteFileSync(pomPath, 'utf8');
+                    const pom = SecurityUtils.safeReadFileSync(pomPath, path.dirname(pomPath), 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => pom.includes(dep));
                     
@@ -415,6 +416,15 @@ class SetupValidator {
                 }
                 break;
         }
+    }
+
+    estimatePerformance(mode) {
+        const performanceMap = {
+            extreme: { improvement: 87, time: '38.90ms' },
+            ultra: { improvement: 78, time: '336.8ms' },
+            optimized: { improvement: 45, time: '847.9ms' }
+        };
+        return performanceMap[mode] || { improvement: 0, time: 'unknown' };
     }
 
     async validatePerformanceSettings() {
@@ -486,15 +496,6 @@ class SetupValidator {
         };
     }
 
-    estimatePerformance(mode) {
-        const performanceMap = {
-            extreme: { improvement: 87, time: '38.90ms' },
-            ultra: { improvement: 78, time: '336.8ms' },
-            optimized: { improvement: 45, time: '847.9ms' }
-        };
-        return performanceMap[mode] || { improvement: 0, time: 'unknown' };
-    }
-
     async validateSecuritySettings() {
         const security = this.config?.security || {};
         
@@ -552,7 +553,7 @@ class SetupValidator {
             for (const file of files) {
                 const filePath = path.join(sourceDir, file);
                 if (fs.statSync(filePath).isFile()) {
-                    const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
+                    const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
                     
                     for (const pattern of sensitivePatterns) {
                         if (pattern.test(content)) {

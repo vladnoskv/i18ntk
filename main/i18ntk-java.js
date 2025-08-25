@@ -61,14 +61,14 @@ class JavaI18nManager {
     const gradleFile = path.join(sourceDir, 'build.gradle');
     
     if (SecurityUtils.safeExistsSync(pomXml)) {
-      const content = SecurityUtils.safeWriteFileSync(pomXml, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(pomXml, path.dirname(pomXml), 'utf8');
       if (content.includes('spring-boot')) {
         return 'spring-boot';
       }
     }
     
     if (SecurityUtils.safeExistsSync(gradleFile)) {
-      const content = SecurityUtils.safeWriteFileSync(gradleFile, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(gradleFile, path.dirname(gradleFile), 'utf8');
       if (content.includes('spring-boot')) {
         return 'spring-boot';
       }
@@ -97,7 +97,7 @@ class JavaI18nManager {
     const javaFiles = [...this.findFiles(sourceDir, '.java'), ...this.findFiles(sourceDir, '.kt')];
     
     for (const file of javaFiles) {
-      const content = SecurityUtils.safeWriteFileSync(file, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8');
       
       // Extract Android string references
       const androidPatterns = [
@@ -131,7 +131,7 @@ class JavaI18nManager {
     const xmlFiles = this.findFiles(sourceDir, '.xml');
     for (const file of xmlFiles) {
       if (file.includes('strings.xml')) {
-        const content = SecurityUtils.safeWriteFileSync(file, 'utf8');
+        const content = SecurityUtils.safeWriteFileSync(file, 'utf8', path.dirname(file));
         const stringPatterns = [
           /<string name="([^"]+)"/g,
           /<string-array name="([^"]+)"/g,
@@ -181,7 +181,7 @@ class JavaI18nManager {
       
       if (framework === 'android') {
         // Android string resources
-        SecurityUtils.safeWriteFileSync(path.join(langDir, 'strings.xml'), `<?xml version="1.0" encoding="utf-8"?>
+        SecurityUtils.safeWriteFileSync(path.join(langDir, 'strings.xml'), `<?xml version="1.0" encoding="utf-8"?>`, path.dirname(path.join(langDir, 'strings.xml')));
 <resources>
     <string name="app_name">My App</string>
     <string name="hello">Hello, World!</string>
@@ -192,14 +192,6 @@ class JavaI18nManager {
         <item quantity="other">%d items</item>
     </plurals>
 </resources>
-`);
-      } else {
-        // Java properties format
-        SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.properties'), `# Java i18n properties for ${lang}
-app.name=My Application
-hello.message=Hello, World!
-items.count={0} items
-`);
         
         // JSON format
         SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.json'), JSON.stringify({

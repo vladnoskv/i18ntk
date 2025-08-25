@@ -30,7 +30,7 @@ class PrepublishCleaner {
         // Essential files that must exist for release
         this.essentialFiles = [
             'package.json',
-            'main/i18ntk-manage.js',
+            'main/manage/index.js',
             'main/i18ntk-init.js',
             'main/i18ntk-analyze.js',
             'main/i18ntk-validate.js',
@@ -193,7 +193,7 @@ class PrepublishCleaner {
             }
             
             try {
-                const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
+                const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
                 const parsed = JSON.parse(content);
                 
                 // Validate structure
@@ -289,7 +289,7 @@ class PrepublishCleaner {
         
         // Validate file permissions for executable scripts
         const scripts = [
-            'main/i18ntk-manage.js',
+            'main/manage/index.js',
             'main/i18ntk-init.js',
             'main/i18ntk-analyze.js',
             'main/i18ntk-validate.js',

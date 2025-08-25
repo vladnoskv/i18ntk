@@ -77,7 +77,7 @@ class LiteBuild {
   async copyEssentialFiles() {
     const essentialFiles = [
       // Main CLI scripts
-      { src: 'main/i18ntk-manage.js', dest: 'main/i18ntk-manage.js' },
+      { src: 'main/manage/index.js', dest: 'main/manage/index.js' },
       { src: 'main/i18ntk-init.js', dest: 'main/i18ntk-init.js' },
       { src: 'main/i18ntk-analyze.js', dest: 'main/i18ntk-analyze.js' },
       { src: 'main/i18ntk-validate.js', dest: 'main/i18ntk-validate.js' },
@@ -137,7 +137,7 @@ class LiteBuild {
       main: this.packageJson.main,
       bin: this.packageJson.bin,
       scripts: {
-        start: 'node main/i18ntk-manage.js',
+        start: 'node main/manage/index.js',
         analyze: 'node main/i18ntk-analyze.js',
         validate: 'node main/i18ntk-validate.js'
       },

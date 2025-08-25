@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 function watchDirectory(dir, callback, watchers) {
   if (!SecurityUtils.safeExistsSync(dir)) return;

@@ -1802,3 +1802,39 @@ if (require.main === module) {
 }
 
 module.exports = I18nUsageAnalyzer;
+
+// Run if called directly
+if (require.main === module) {
+  async function main() {
+    try {
+      const cliArgs = parseCommonArgs(process.argv.slice(2));
+
+      if (cliArgs.help) {
+        displayHelp('usage');
+        process.exit(0);
+      }
+
+      // Let run() handle full initialization to avoid duplicate setup output
+      const analyzer = new I18nUsageAnalyzer();
+      await analyzer.run();
+    } catch (error) {
+      console.error('Error:', error.message);
+      process.exit(1);
+    }
+  }
+
+  // Check if we're being called from the menu system (stdin has data)
+  const hasStdinData = !process.stdin.isTTY;
+
+  if (hasStdinData) {
+    // When called from menu, consume stdin data and run with defaults
+    process.stdin.resume();
+    process.stdin.on('data', () => {});
+    process.stdin.on('end', () => {
+      main();
+    });
+  } else {
+    // Normal direct execution
+    main();
+  }
+}

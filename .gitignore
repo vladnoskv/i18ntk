@@ -54,6 +54,9 @@ jspm_packages/
 # Configuration files
 config.json
 settings.json
+.i18ntk-config
+.i18ntk-settings
+i18ntk-config.json
 
 # Security sensitive files
 admin-pin.json

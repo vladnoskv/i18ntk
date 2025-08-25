@@ -1,5 +1,5 @@
 // Simple test to verify configuration loading without recursion issues
-const { loadConfig, getConfig } = require('./utils/config-manager');
+const { loadConfig, getConfig } = require('../utils/config-manager');
 
 console.log('Testing configuration loading...');
 

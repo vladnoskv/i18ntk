@@ -18,7 +18,14 @@ function getSecurityUtils() {
             return false;
           }
         },
-        safeWriteFileSync: (path, encoding) => {
+        safeWriteFileSync: (path, data, encoding) => {
+          try {
+            return require('fs').writeFileSync(path, data, encoding);
+          } catch {
+            return null;
+          }
+        },
+        safeReadFileSync: (path, encoding) => {
           try {
             return require('fs').readFileSync(path, encoding);
           } catch {
@@ -51,7 +58,7 @@ function stripBOMAndComments(s) {
 
 function readJsonSafe(file) {
   const SecurityUtils = getSecurityUtils();
-  const raw = SecurityUtils.safeWriteFileSync(file, 'utf8');
+  const raw = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8');
   return JSON.parse(stripBOMAndComments(raw));
 }
 
@@ -127,7 +134,7 @@ function findLocaleFilesAllDirs(lang) {
             // Validate file is readable and parseable
             fs.accessSync(candidate, fs.constants.R_OK);
             // Quick JSON validation
-            const content = SecurityUtils.safeReadFileSync(candidate, 'utf8');
+            const content = SecurityUtils.safeReadFileSync(candidate, path.dirname(candidate), 'utf8');
             if (content) {
               if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
                 files.push(candidate);

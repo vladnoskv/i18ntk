@@ -27,7 +27,7 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  const raw = SecurityUtils.safeWriteFileSync(file, 'utf8');
+  const raw = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8');
   return JSON.parse(stripBOMAndComments(raw));
 }
 

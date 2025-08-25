@@ -237,7 +237,7 @@ return [
     ],
     'welcome' => 'Welcome to our application'
 ];
-`, localesDir);
+`, path.dirname(langDir));
 
         SecurityUtils.safeWriteFileSync(path.join(langDir, 'validation.php'), `<?php
 // Laravel validation messages for ${lang}
@@ -246,7 +246,7 @@ return [
     'email' => 'The :attribute must be a valid email address.',
     'unique' => 'The :attribute has already been taken.'
 ];
-`, localesDir);
+`, path.dirname(localesDir));
       } else if (framework === 'symfony') {
         // Symfony structure
         SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.yml'), `# Symfony i18n for ${lang}
@@ -255,13 +255,13 @@ items:
   one: "%count% item"
   other: "%count% items"
 welcome: "Welcome to our application"
-`, localesDir);
+`, path.dirname(localesDir));
 
         SecurityUtils.safeWriteFileSync(path.join(langDir, 'validators.yml'), `# Symfony validation for ${lang}
 required: "The {{ field }} field is required."
 email: "The {{ field }} must be a valid email address."
 unique: "The {{ field }} has already been taken."
-`, localesDir);
+`, path.dirname(localesDir));
       } else {
         // Standard PHP
         SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.php'), `<?php
@@ -274,7 +274,7 @@ return [
     ],
     'welcome' => 'Welcome to our application'
 ];
-`, localesDir);
+`, path.dirname(langDir));
 
         SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.json'), JSON.stringify({
           hello: "Hello, World!",
@@ -283,7 +283,7 @@ return [
             other: "{0} items"
           },
           welcome: "Welcome to our application"
-        }, null, 2), localesDir);
+        }, null, 2), path.dirname(langDir));
       }
     }
 

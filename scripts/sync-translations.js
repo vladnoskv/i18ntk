@@ -36,7 +36,7 @@ function getEnglishFiles() {
  */
 function readJsonFile(filePath) {
   try {
-    const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
+    const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
     return JSON.parse(content);
   } catch (error) {
     console.error(`Error reading JSON file ${filePath}:`, error.message);

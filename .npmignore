@@ -19,6 +19,9 @@ yarn-error.log*
 # Exclude sensitive configuration files
 settings/.i18n-admin-config.json
 settings/admin-config.json
+.i18ntk-config
+.i18ntk-settings
+i18ntk-config.json
 *.key
 *.pem
 *.p12

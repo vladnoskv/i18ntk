@@ -265,7 +265,7 @@ class I18nValidator {
   // Validate JSON file syntax
   async validateJsonSyntax(filePath) {
     try {
-      const content = SecurityUtils.safeWriteFileSync(filePath, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
       const parsed = SecurityUtils.safeParseJSON(content);
       
       SecurityUtils.logSecurityEvent(

@@ -4,7 +4,7 @@
  * Test script to verify SecurityUtils.safeWriteFileSync fix
  */
 
-const SecurityUtils = require('./utils/security');
+const SecurityUtils = require('../utils/security');
 const path = require('path');
 
 console.log('🔍 Testing SecurityUtils.safeWriteFileSync fix...\n');

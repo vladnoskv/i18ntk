@@ -436,7 +436,7 @@ class SettingsManager {
             }
             
             const content = JSON.stringify(this.settings, null, 4);
-            SecurityUtils.safeWriteFileSync(this.configFile, content, process.cwd(), 'utf8');
+            SecurityUtils.safeWriteFileSync(this.configFile, content, path.dirname(this.configFile), 'utf8');
             
             // Create backup if enabled
             if (this.settings.backup?.enabled) {

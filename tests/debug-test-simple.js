@@ -5,15 +5,15 @@ console.log('🔍 DEBUG: Starting simple debug test...');
 
 try {
   console.log('🔍 DEBUG: Loading SecurityUtils...');
-  const SecurityUtils = require('./utils/security');
+  const SecurityUtils = require('../utils/security');
   console.log('✅ DEBUG: SecurityUtils loaded successfully');
 
   console.log('🔍 DEBUG: Loading SetupEnforcer...');
-  const SetupEnforcer = require('./utils/setup-enforcer');
+  const SetupEnforcer = require('../utils/setup-enforcer');
   console.log('✅ DEBUG: SetupEnforcer loaded successfully');
 
   console.log('🔍 DEBUG: Loading config manager...');
-  const configManager = require('./utils/config-manager');
+  const configManager = require('../utils/config-manager');
   console.log('✅ DEBUG: Config manager loaded successfully');
 
   console.log('🔍 DEBUG: Config path:', configManager.CONFIG_PATH);

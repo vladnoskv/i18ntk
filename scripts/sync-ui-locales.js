@@ -14,6 +14,6 @@ for (const file of fs.readdirSync(baseDir)) {
   for (const [k,v] of Object.entries(enFlat)) {
     if (!(k in flat)) { flat[k] = v || 'NOT_TRANSLATED'; changed = true; }
   }
-  if (changed) { SecurityUtils.safeWriteFileSync(p, JSON.stringify(unflatten(flat), null, 2)); }
+  if (changed) { SecurityUtils.safeWriteFileSync(p, JSON.stringify(unflatten(flat), null, 2), path.dirname(p)); }
 }
 console.log('UI locales synced.');

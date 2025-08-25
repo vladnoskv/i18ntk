@@ -5,7 +5,7 @@ console.log('🔍 DEBUG: Starting tryReadJson debug test...');
 
 try {
   console.log('🔍 DEBUG: About to require config-manager...');
-  const configManager = require('./utils/config-manager');
+  const configManager = require('../utils/config-manager');
   console.log('✅ DEBUG: Config manager loaded successfully');
 
   console.log('🔍 DEBUG: About to test tryReadJson...');

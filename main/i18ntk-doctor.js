@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const SecurityUtils = require('../utils/security');
 const fs = require('fs');
 const path = require('path');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
@@ -63,7 +64,7 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
     i18nDir: config.i18nDir,
     outputDir: config.outputDir,
   };
-  
+
   let exitCode = ExitCodes.SUCCESS;
   const issues = [];
 
@@ -119,8 +120,8 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
       const srcPath = path.join(srcDir, file);
       const tgtPath = path.join(langDir, file);
       if (!SecurityUtils.safeExistsSync(srcPath) || !SecurityUtils.safeExistsSync(tgtPath)) continue;
-      const srcContent = SecurityUtils.safeWriteFileSync(srcPath, 'utf8');
-      const tgtContent = SecurityUtils.safeWriteFileSync(tgtPath, 'utf8');
+      const srcContent = SecurityUtils.safeReadFileSync(srcPath, path.dirname(srcPath), 'utf8');
+      const tgtContent = SecurityUtils.safeReadFileSync(tgtPath, path.dirname(tgtPath), 'utf8');
       if (hasBOM(srcContent) || hasBOM(tgtContent)) {
         issues.push(`BOM detected in ${lang}/${file}`);
         exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);

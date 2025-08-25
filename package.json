@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "description": "🚀 The fastest i18n toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -116,10 +116,10 @@
     "url": "https://github.com/vladnoskv"
   },
   "type": "commonjs",
-  "main": "main/i18ntk-manage.js",
+  "main": "main/manage/index.js",
   "types": "runtime/i18ntk.d.ts",
   "exports": {
-    ".": "./main/i18ntk-manage.js",
+    ".": "./main/manage/index.js",
     "./runtime": {
       "types": "./runtime/i18ntk.d.ts",
       "require": "./runtime/index.js",
@@ -139,9 +139,9 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "i18ntk": "main/i18ntk-manage.js",
+    "i18ntk": "main/manage/index.js",
     "i18ntk-setup": "main/i18ntk-setup.js",
-    "i18ntk-manage": "main/i18ntk-manage.js",
+    "i18ntk-manage": "main/manage/index.js",
     "i18ntk-init": "main/i18ntk-init.js",
     "i18ntk-analyze": "main/i18ntk-analyze.js",
     "i18ntk-validate": "main/i18ntk-validate.js",
@@ -150,9 +150,9 @@
     "i18ntk-sizing": "main/i18ntk-sizing.js",
     "i18ntk-summary": "main/i18ntk-summary.js",
     "i18ntk-doctor": "main/i18ntk-doctor.js",
-    "i18ntk-fixer": "./main/i18ntk-fixer.js",
-    "i18ntk-scanner": "./main/i18ntk-scanner.js",
-    "i18ntk-backup": "./main/i18ntk-backup.js"
+    "i18ntk-fixer": "main/i18ntk-fixer.js",
+    "i18ntk-scanner": "main/i18ntk-scanner.js",
+    "i18ntk-backup": "main/i18ntk-backup.js"
   },
   "directories": {
     "doc": "docs",
@@ -171,9 +171,9 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "i18ntk": "node main/i18ntk-manage.js",
+    "i18ntk": "node main/manage/index.js",
     "i18ntk-setup": "node main/i18ntk-setup.js",
-    "i18ntk-manage": "node main/i18ntk-manage.js",
+    "i18ntk-manage": "node main/manage/index.js",
     "i18ntk-init": "node main/i18ntk-init.js",
     "i18ntk-analyze": "node main/i18ntk-analyze.js",
     "i18ntk-validate": "node main/i18ntk-validate.js",
@@ -190,7 +190,7 @@
     "i18ntk-java": "node main/i18ntk-java.js",
     "i18ntk-php": "node main/i18ntk-php.js",
     "i18ntk-go": "node main/i18ntk-go.js",
-    "start": "node main/i18ntk-manage.js",
+    "start": "node main/manage/index.js",
     "security:check": "node utils/security-check-improved.js",
     "security:test": "node --test tests/security.test.js",
     "security:audit": "npm run security:check && npm run security:test",
@@ -219,9 +219,9 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.10.2",
+    "version": "1.10.3",
     "releaseDate": "23/08/2025",
-    "lastUpdated": "23/08/2025",
+    "lastUpdated": "25/08/2025",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",

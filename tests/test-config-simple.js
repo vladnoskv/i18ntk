@@ -7,7 +7,7 @@
 console.log('Testing basic Node.js functionality');
 
 try {
-  const configManager = require('./utils/config-manager');
+  const configManager = require('../utils/config-manager');
   console.log('Config manager loaded successfully');
 
   const config = configManager.loadConfig();
