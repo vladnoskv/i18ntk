@@ -191,7 +191,7 @@
     "i18ntk-php": "node main/i18ntk-php.js",
     "i18ntk-go": "node main/i18ntk-go.js",
     "start": "node main/i18ntk-manage.js",
-    "security:check": "node utils/security-check.js",
+    "security:check": "node utils/security-check-improved.js",
     "security:test": "node --test tests/security.test.js",
     "security:audit": "npm run security:check && npm run security:test",
     "test": "npm run security:test",

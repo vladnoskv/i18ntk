@@ -1231,6 +1231,10 @@
     "content_too_large_for_file": "Sécurité : Contenu trop volumineux pour le fichier : {filePath}",
     "file_write_error": "Sécurité : Erreur d’écriture du fichier : {errorMessage}",
     "json_string_too_large": "Sécurité : Chaîne JSON trop volumineuse",
+    "recursion_detected": "Sécurité : Récursion détectée dans {operation}",
+    "operation_timeout": "Sécurité : Délai dépassé pour l’opération : {operation}",
+    "operation_error": "Sécurité : Erreur lors de l’opération {operation} : {error}",
+    "directory_read_error": "Sécurité : Erreur de lecture du répertoire : {errorMessage}",
     "security_alert": "Sécurité : Alerte"
   },
   "settings-cli": {

@@ -2,26 +2,44 @@
 const path = require('path');
 const fs = require('fs');
 
+// Lazy load SecurityUtils to prevent circular dependencies
+let securityUtils;
+function getSecurityUtils() {
+  if (!securityUtils) {
+    try {
+      securityUtils = require('./security');
+    } catch (error) {
+      // Fallback: use basic fs operations if SecurityUtils is not available
+      return {
+        safeExistsSync: (path) => {
+          try {
+            return require('fs').existsSync(path);
+          } catch {
+            return false;
+          }
+        },
+        safeWriteFileSync: (path, encoding) => {
+          try {
+            return require('fs').readFileSync(path, encoding);
+          } catch {
+            return null;
+          }
+        }
+      };
+    }
+  }
+  return securityUtils;
+}
+
 // Helper functions for OS-agnostic path handling
 function toPosix(p) { return String(p).replace(/\\/g, '/'); }
 function isBundledPath(p) {
   const s = toPosix(p);
-  return s.includes('/node_modules/i18ntk/') || s.includes('/i18ntk/resources/i18n/ui-locales/');
+  return s.includes('/node_modules/i18ntk/') || s.includes('/i18ntk/ui-locales/');
 }
 
 function safeRequireConfig() {
-  try {
-    const configPath = path.join(process.cwd(), '.i18ntk-config');
-    if (fs.existsSync(configPath)) {
-      const stats = fs.statSync(configPath);
-      if (stats.size > 0 && stats.size <= 10 * 1024 * 1024) {
-        const raw = fs.readFileSync(configPath, 'utf8');
-        const cfg = JSON.parse(stripBOMAndComments(raw));
-        return { getConfig: () => cfg };
-      }
-    }
-  } catch {}
-  return null;
+  try { return require('./config-manager'); } catch { return null; }
 }
 
 function stripBOMAndComments(s) {
@@ -32,16 +50,9 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  try {
-    const stats = fs.statSync(file);
-    if (stats.size > 10 * 1024 * 1024) {
-      throw new Error(`File too large: ${file}`);
-    }
-    const raw = fs.readFileSync(file, 'utf8');
-    return JSON.parse(stripBOMAndComments(raw));
-  } catch (error) {
-    throw error;
-  }
+  const SecurityUtils = getSecurityUtils();
+  const raw = SecurityUtils.safeWriteFileSync(file, 'utf8');
+  return JSON.parse(stripBOMAndComments(raw));
 }
 
 function pkgUiLocalesDirViaThisFile() {
@@ -62,7 +73,8 @@ function resolveLocalesDirs() {
       try {
         const normalized = path.normalize(path.resolve(dir.trim()));
 
-        if (fs.existsSync(normalized) && fs.statSync(normalized).isDirectory()) {
+        const SecurityUtils = getSecurityUtils();
+        if (SecurityUtils.safeExistsSync(normalized) && fs.statSync(normalized).isDirectory()) {
           dirs.push(normalized);
         }
       } catch {
@@ -108,17 +120,22 @@ function findLocaleFilesAllDirs(lang) {
   for (const dir of dirs) {
     for (const candidate of candidatesForLang(dir, lang)) {
       try {
-        if (fs.existsSync(candidate)) {
+        const SecurityUtils = getSecurityUtils();
+        if (SecurityUtils.safeExistsSync(candidate)) {
           const stats = fs.statSync(candidate);
-          if (stats.isFile() && stats.size > 0 && stats.size <= 10 * 1024 * 1024) {
+          if (stats.isFile() && stats.size > 0) {
             // Validate file is readable and parseable
             fs.accessSync(candidate, fs.constants.R_OK);
             // Quick JSON validation
-            const content = fs.readFileSync(candidate, 'utf8') || '';
-            if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
-              files.push(candidate);
+            const content = SecurityUtils.safeReadFileSync(candidate, 'utf8');
+            if (content) {
+              if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
+                files.push(candidate);
+              } else {
+                errors.push({ file: candidate, error: 'Invalid JSON format' });
+              }
             } else {
-              errors.push({ file: candidate, error: 'Invalid JSON format' });
+              errors.push({ file: candidate, error: 'Empty or unreadable file' });
             }
           }
         }
@@ -139,31 +156,6 @@ let translations = {};
 let currentLanguage = 'en';
 let isInitialized = false;
 const missingWarned = new Set();
-/**
- * Safely validate language code from environment variable
- * @param {string} envLang - Language code from environment variable
- * @returns {string} - Validated language code or null if invalid
- */
-function validateEnvironmentLanguage(envLang) {
-  if (!envLang || typeof envLang !== 'string') {
-    return null;
-  }
-
-  // Remove any whitespace and convert to lowercase
-  const cleanLang = envLang.trim().toLowerCase();
-
-  // Validate format: 2-5 characters, alphanumeric + hyphens only
-  if (!/^[a-z]{2,5}(-[a-z]{2,5})?$/.test(cleanLang)) {
-    return null;
-  }
-
-  // Additional security: prevent path traversal patterns
-  if (cleanLang.includes('..') || cleanLang.includes('/') || cleanLang.includes('\\')) {
-    return null;
-  }
-
-  return cleanLang;
-}
 
 function loadTranslations(language) {
   const cfg = safeRequireConfig();
@@ -353,12 +345,13 @@ function getAvailableLanguages() {
   const langs = new Set();
   for (const d of dirs) {
     try {
-      if (!fs.existsSync(d)) continue;
+      const SecurityUtils = getSecurityUtils();
+      if (!SecurityUtils.safeExistsSync(d)) continue;
       for (const f of fs.readdirSync(d)) {
         if (f.endsWith('.json')) langs.add(path.basename(f, '.json'));
       }
       for (const f of fs.readdirSync(d, { withFileTypes: true })) {
-        if (f.isDirectory() && fs.existsSync(path.join(d, f.name, `${f.name}.json`))) {
+        if (f.isDirectory() && SecurityUtils.safeExistsSync(path.join(d, f.name, `${f.name}.json`))) {
           langs.add(f.name);
         }
       }

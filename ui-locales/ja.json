@@ -1232,6 +1232,10 @@
     "content_too_large_for_file": "セキュリティ: ファイルに対してコンテンツが大きすぎます",
     "file_write_error": "セキュリティ: ファイル書き込みエラー",
     "json_string_too_large": "セキュリティ: JSON文字列が大きすぎます",
+    "recursion_detected": "セキュリティ: 再帰が検出されました: {operation}",
+    "operation_timeout": "セキュリティ: 操作のタイムアウト: {operation}",
+    "operation_error": "セキュリティ: 操作 {operation} のエラー: {error}",
+    "directory_read_error": "セキュリティ: ディレクトリ読み取りエラー: {errorMessage}",
     "security_alert": "セキュリティ: アラート"
   },
   "settings-cli": {

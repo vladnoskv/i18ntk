@@ -100,7 +100,7 @@ class SecurityUtils {
   * @param {string} basePath - The base path that the input should be within (optional)
   * @returns {string|null} - Sanitized path or null if invalid
   */
-  static validatePath(filePath, basePath = process.cwd()) {
+  static validatePath(filePath, basePath = process.cwd(), verbose = false) {
     const i18n = getI18n();
     const useI18n = i18n && i18n.isInitialized && typeof i18n.t === 'function';
 
@@ -145,13 +145,15 @@ class SecurityUtils {
         return null;
       }
 
-      const successMsg = useI18n
-        ? i18n.t('security.pathValidated')
-        : 'Path validated';
-      SecurityUtils.logSecurityEvent(successMsg, 'info', {
-        inputPath: filePath,
-        resolvedPath: finalPath
-      });
+      if (verbose) {
+        const successMsg = useI18n
+          ? i18n.t('security.pathValidated')
+          : 'Path validated';
+        SecurityUtils.logSecurityEvent(successMsg, 'info', {
+          inputPath: filePath,
+          resolvedPath: finalPath
+        });
+      }
       return finalPath;
     } catch (error) {
       const message = useI18n
@@ -598,7 +600,7 @@ class SecurityUtils {
    * @param {string} event - Security event description
    * @param {string} level - Log level (info, warn, error)
    * @param {object} details - Additional details
-   */
+  */
   static logSecurityEvent(event, level = 'info', details = {}) {
     // Prevent recursive logging which can occur during configuration loading
     if (this._logging) {
@@ -607,6 +609,18 @@ class SecurityUtils {
 
     this._logging = true;
     try {
+      const cfg = getConfigManager()?.getConfig?.() || {};
+      const envLevel = (process.env.SECURITY_LOG_LEVEL || process.env.I18NTK_SECURITY_LOG_LEVEL || '').toLowerCase();
+      const configLevel = (cfg.security?.logLevel || cfg.security?.audit?.logLevel || '').toLowerCase();
+      const currentLevel = envLevel || configLevel || 'warn';
+
+      const levels = { error: 0, warn: 1, warning: 1, info: 2 };
+      const messageLevel = levels[level.toLowerCase()] ?? 2;
+      const allowedLevel = levels[currentLevel] ?? 1;
+      if (messageLevel > allowedLevel) {
+        return;
+      }
+
       const timestamp = new Date().toISOString();
       const logEntry = {
         timestamp,
@@ -619,7 +633,14 @@ class SecurityUtils {
         }
       };
 
-      console.log(`[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`, details);
+      const message = `[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`;
+      if (level === 'error') {
+        console.error(message, details);
+      } else if (level === 'warn' || level === 'warning') {
+        console.warn(message, details);
+      } else {
+        console.log(message, details);
+      }
     } finally {
       this._logging = false;
     }

@@ -10,6 +10,7 @@
  */
 
 const path = require('path');
+const { describe, test } = require('node:test');
 const SecurityUtils = require('../utils/security');
 const { detectFramework } = require('../utils/framework-detector');
 
@@ -180,12 +181,15 @@ describe('Security Tests', () => {
       const originalConsoleLog = console.log;
       const logs = [];
       console.log = (...args) => logs.push(args.join(' '));
+      const originalLevel = process.env.SECURITY_LOG_LEVEL;
+      process.env.SECURITY_LOG_LEVEL = 'info';
 
       try {
         SecurityUtils.logSecurityEvent('Test security event', 'info', { test: true });
         expect(logs.length).toBeGreaterThan(0);
         expect(logs[0]).toContain('Test security event');
       } finally {
+        process.env.SECURITY_LOG_LEVEL = originalLevel;
         console.log = originalConsoleLog;
       }
     });

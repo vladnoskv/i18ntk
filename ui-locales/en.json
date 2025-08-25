@@ -1284,6 +1284,10 @@
     "content_too_large_for_file": "Content too large for file",
     "file_write_error": "File write error",
     "json_string_too_large": "Json string too large",
+    "recursion_detected": "Recursion detected in {operation}",
+    "operation_timeout": "Operation timeout: {operation}",
+    "operation_error": "Operation error in {operation}: {error}",
+    "directory_read_error": "Directory read error: {errorMessage}",
     "security_alert": "Security alert"
   },
   "settings-cli": {

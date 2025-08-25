@@ -607,23 +607,29 @@ class I18nManager {
 
   // Add this run method after the checkI18nDependencies method
   async run() {
-   // Add timeout to prevent hanging
-   const timeout = setTimeout(() => {
-     console.error('❌ CLI startup timeout - something is hanging');
-     console.error('🔍 DEBUG: Last known execution point reached');
-     process.exit(1);
-   }, 10000); // 10 second timeout
-   // Add debugging for CLI startup
-  console.log('🔍 DEBUG: Starting i18ntk-manage.js...');
-  console.log('🔍 DEBUG: Process.argv:', process.argv);
-  console.log('🔍 DEBUG: About to call SetupEnforcer.checkSetupCompleteAsync()');
-   let prompt;
-   try {
+    // Add timeout to prevent hanging
+    const args = this.parseArgs();
+
+    const timeout = setTimeout(() => {
+      console.error('❌ CLI startup timeout - something is hanging');
+      if (args.debug) {
+        console.error('🔍 DEBUG: Last known execution point reached');
+      }
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
+    if (args.debug) {
+      console.log('🔍 DEBUG: Starting i18ntk-manage.js...');
+      console.log('🔍 DEBUG: Process.argv:', process.argv);
+      console.log('🔍 DEBUG: Parsed args:', args);
+      console.log('🔍 DEBUG: About to call SetupEnforcer.checkSetupCompleteAsync()');
+    }
+
+    let prompt;
+    try {
       // Ensure setup is complete before running any operations
       await SetupEnforcer.checkSetupCompleteAsync();
-      
-      const args = this.parseArgs();
-      console.log('🔍 DEBUG: Args parsed:', args);
+
       prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
       const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
 

@@ -1232,6 +1232,10 @@
     "content_too_large_for_file": "Безопасность: Содержимое слишком велико для файла",
     "file_write_error": "Безопасность: Ошибка записи файла",
     "json_string_too_large": "Безопасность: JSON-строка слишком длинная",
+    "recursion_detected": "Безопасность: Обнаружена рекурсия в {operation}",
+    "operation_timeout": "Безопасность: Тайм-аут операции: {operation}",
+    "operation_error": "Безопасность: Ошибка операции {operation}: {error}",
+    "directory_read_error": "Безопасность: Ошибка чтения каталога: {errorMessage}",
     "security_alert": "Безопасность: Уведомление"
   },
   "settings-cli": {

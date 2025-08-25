@@ -40,7 +40,7 @@ const { existsSync } = require('fs');
 const configManager = require('../utils/config-manager');
 const { logger } = require('../utils/logger');
 const { colors } = require('../utils/logger');
-const prompt = require('../utils/prompt-fixed');
+const prompt = require('../utils/prompt');
 
 // Backup configuration
 const config = configManager.getConfig();

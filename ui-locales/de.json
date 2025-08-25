@@ -1232,6 +1232,10 @@
     "content_too_large_for_file": "Sicherheit: Inhalt zu groß für Datei: {validatedPath}",
     "file_write_error": "Sicherheit: Fehler beim Schreiben der Datei: {errorMessage}",
     "json_string_too_large": "Sicherheit: JSON-String zu groß",
+    "recursion_detected": "Sicherheit: Rekursion bei {operation} erkannt",
+    "operation_timeout": "Sicherheit: Zeitüberschreitung bei Vorgang {operation}",
+    "operation_error": "Sicherheit: Fehler bei Vorgang {operation}: {error}",
+    "directory_read_error": "Sicherheit: Fehler beim Lesen des Verzeichnisses: {errorMessage}",
     "security_alert": "Sicherheit: Alarm"
   },
   "settings-cli": {

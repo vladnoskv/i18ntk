@@ -1234,6 +1234,10 @@
     "content_too_large_for_file": "内容过大，无法写入文件",
     "file_write_error": "文件写入错误",
     "json_string_too_large": "JSON 字符串过大",
+    "recursion_detected": "检测到递归：{operation}",
+    "operation_timeout": "操作超时：{operation}",
+    "operation_error": "操作错误：{operation}：{error}",
+    "directory_read_error": "目录读取错误：{errorMessage}",
     "security_alert": "安全警报"
   },
   "settings-cli": {
