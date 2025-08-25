@@ -373,7 +373,7 @@ class AdminPinManager {
         const shouldCloseRL = !externalRl && !hadGlobal;
 
         try {
-            const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, 'utf8'));
+            const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, path.dirname(this.pinFile), 'utf8'));
             
             if (pinData.locked) {
                 const i18n = getI18n();
@@ -492,7 +492,7 @@ class AdminPinManager {
         }
         
         try {
-            const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, 'utf8'));
+            const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, path.dirname(this.pinFile), 'utf8'));
             const key = Buffer.from(pinData.key, 'hex');
             const decryptedPin = this.decryptPin(pinData.encrypted, key);
             

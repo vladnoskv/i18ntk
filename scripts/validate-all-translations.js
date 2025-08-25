@@ -31,7 +31,7 @@ const MARKER   = argv.marker || '⚠️ TRANSLATION NEEDED ⚠️';
 
 // ------------ helpers ------------
 function readJSON(p) {
-  try { return JSON.parse(SecurityUtils.safeReadFileSync(p, 'utf8')); }
+  try { return JSON.parse(SecurityUtils.safeReadFileSync(p, path.dirname(p), 'utf8')); }
   catch { return {}; }
 }
 

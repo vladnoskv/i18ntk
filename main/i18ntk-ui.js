@@ -96,7 +96,7 @@ this.translations = {};
             
             if (SecurityUtils.safeExistsSync(monolithTranslationFile)) {
                 try {
-                    const content = SecurityUtils.safeReadFileSync(monolithTranslationFile, 'utf8');
+                    const content = SecurityUtils.safeReadFileSync(monolithTranslationFile, path.dirname(monolithTranslationFile), 'utf8');
                     const fullTranslations = JSON.parse(content);
                     
                     // Flatten the nested structure for easier key access
@@ -123,7 +123,7 @@ this.translations = {};
                     for (const file of files) {
                         const filePath = path.join(langDir, file);
                         try {
-                            const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
+                            const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
                             const fileTranslations = JSON.parse(content);
                             const moduleName = path.basename(file, '.json');
                             this.translations[moduleName] = this.deepMerge(this.translations[moduleName] || {}, fileTranslations);
@@ -385,7 +385,7 @@ this.translations = {};
         try {
             const englishFile = path.join(this.uiLocalesDir, 'en.json');
             if (SecurityUtils.safeExistsSync(englishFile)) {
-                const englishContent = SecurityUtils.safeReadFileSync(englishFile, 'utf8');
+                const englishContent = SecurityUtils.safeReadFileSync(englishFile, path.dirname(englishFile), 'utf8');
                 const englishTranslations = JSON.parse(englishContent);
                 
                 // Use the same flattening approach for consistency

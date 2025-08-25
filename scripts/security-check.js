@@ -90,7 +90,7 @@ class SecurityCheck {
       }
     }
 
-    const content = SecurityUtils.safeReadFileSync(filePath, 'utf8');
+    const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
     const lines = content.split('\n');
     
     for (let i = 0; i < lines.length; i++) {

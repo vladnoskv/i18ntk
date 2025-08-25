@@ -42,7 +42,7 @@ class SetupEnforcer {
         }
 
         try {
-            const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
+            const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
             
             // Check if setup has been explicitly marked as completed
             if (config.setup && config.setup.completed === true) {
@@ -318,7 +318,7 @@ static async handleInvalidConfig() {
                 }
 
                 try {
-                    const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
+                    const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
                     
                     // Check if setup has been explicitly marked as completed
                     if (config.setup && config.setup.completed === true) {
@@ -330,7 +330,7 @@ static async handleInvalidConfig() {
                     if (!config.version || !config.sourceDir || (!config.detectedFramework && !(config.framework && config.framework.detected !== false))) {
                         await SetupEnforcer.handleIncompleteSetup();
                         // After setup is done, re-check the config
-                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
+                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
                         if (newConfig.setup && newConfig.setup.completed === true) {
                             resolve(true);
                         } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {
@@ -346,7 +346,7 @@ static async handleInvalidConfig() {
                     await SetupEnforcer.handleInvalidConfig();
                     // After setup is done, re-check the config
                     try {
-                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
+                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
                         if (newConfig.setup && newConfig.setup.completed === true) {
                             resolve(true);
                         } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {

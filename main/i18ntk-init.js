@@ -95,7 +95,7 @@ class I18nInitializer {
     }
     
     try {
-      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
       // Include peerDependencies in the check
       const dependencies = { 
         ...packageJson.dependencies, 

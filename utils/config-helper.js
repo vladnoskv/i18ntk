@@ -427,7 +427,7 @@ async function ensureInitialized(cfg) {
     
     if (SecurityUtils.safeExistsSync(configPath)) {
       try {
-        initStatus = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
+        initStatus = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
         // If initialized and version matches current, skip further checks
         if (initStatus.initialized && initStatus.version === '1.8.3') {
           return true;

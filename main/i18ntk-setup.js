@@ -95,7 +95,7 @@ class I18nSetupManager {
 
     async detectNodeFramework(packageJsonPath) {
         try {
-            const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+            const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
             const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
             if (deps.react || deps['react-dom']) this.config.detectedFramework = 'react';
@@ -114,7 +114,7 @@ class I18nSetupManager {
         try {
             const requirementsPath = path.join(process.cwd(), 'requirements.txt');
             if (SecurityUtils.safeExistsSync(requirementsPath)) {
-                const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
+                const requirements = SecurityUtils.safeReadFileSync(requirementsPath, path.dirname(requirementsPath), 'utf8');
                 if (requirements.includes('django')) this.config.detectedFramework = 'django';
                 else if (requirements.includes('flask')) this.config.detectedFramework = 'flask';
                 else if (requirements.includes('fastapi')) this.config.detectedFramework = 'fastapi';
@@ -129,7 +129,7 @@ class I18nSetupManager {
 
     async detectJavaFramework(pomPath) {
         try {
-            const pomContent = SecurityUtils.safeReadFileSync(pomPath, 'utf8');
+            const pomContent = SecurityUtils.safeReadFileSync(pomPath, path.dirname(pomPath), 'utf8');
             if (pomContent.includes('spring-boot')) this.config.detectedFramework = 'spring-boot';
             else if (pomContent.includes('spring')) this.config.detectedFramework = 'spring';
             else if (pomContent.includes('quarkus')) this.config.detectedFramework = 'quarkus';
@@ -141,7 +141,7 @@ class I18nSetupManager {
 
     async detectPhpFramework(composerPath) {
         try {
-            const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
+            const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, path.dirname(composerPath), 'utf8'));
             const deps = composer.require || {};
 
             if (deps['laravel/framework']) this.config.detectedFramework = 'laravel';
@@ -246,7 +246,7 @@ class I18nSetupManager {
         if (this.config.detectedLanguage === 'javascript') {
             const packageJsonPath = path.join(process.cwd(), 'package.json');
             if (SecurityUtils.safeExistsSync(packageJsonPath)) {
-                const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+                const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
                 const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
                 this.config.prerequisites.hasI18nLibrary = Object.keys(deps).some(dep =>
@@ -339,7 +339,7 @@ class I18nSetupManager {
         try {
             const packageJsonPath = path.join(__dirname, '..', 'package.json');
             if (SecurityUtils.safeExistsSync(packageJsonPath)) {
-                const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+                const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
                 packageVersion = packageJson.version || '1.10.2';
             }
         } catch (error) {

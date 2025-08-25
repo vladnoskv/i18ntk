@@ -65,7 +65,7 @@ class SetupValidator {
         
         if (SecurityUtils.safeExistsSync(configPath)) {
             try {
-                this.config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, 'utf8'));
+                this.config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
                 this.results.checks.push({
                     category: 'configuration',
                     message: 'Configuration file found and valid',
@@ -260,7 +260,7 @@ class SetupValidator {
             case 'typescript':
                 if (SecurityUtils.safeExistsSync(packageJsonPath)) {
                     try {
-                        const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+                        const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
                         const allDeps = { ...packageJson.dependencies, ...packageJson.devDependencies };
                         
                         const recommended = dependencies[language].recommended;
@@ -298,7 +298,7 @@ class SetupValidator {
 
             case 'python':
                 if (SecurityUtils.safeExistsSync(requirementsPath)) {
-                    const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
+                    const requirements = SecurityUtils.safeReadFileSync(requirementsPath, path.dirname(requirementsPath), 'utf8');
                     const recommended = dependencies[language].recommended;
                     const found = recommended.filter(dep => requirements.includes(dep));
                     
@@ -379,7 +379,7 @@ class SetupValidator {
             case 'php':
                 if (SecurityUtils.safeExistsSync(composerPath)) {
                     try {
-                        const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
+                        const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, path.dirname(composerPath), 'utf8'));
                         const allDeps = { ...composer.require, ...composer['require-dev'] };
                         
                         const recommended = dependencies[language].recommended;

@@ -35,6 +35,8 @@ const SettingsCLI = require('../settings/settings-cli');
 // const I18nDebugger = require('../scripts/debug/debugger');
 const { createPrompt, isInteractive } = require('../utils/prompt-helper');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
+// Preload translations early to avoid missing key warnings
+loadTranslations();
 const cliHelper = require('../utils/cli-helper');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../utils/config');
 const pkg = require('../package.json');
@@ -165,7 +167,7 @@ async function detectEnvironmentAndFramework() {
   if (fs.existsSync(packageJsonPath)) {
     detectedLanguage = 'javascript';
     try {
-      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
       const deps = { 
         ...(packageJson.dependencies || {}), 
         ...(packageJson.devDependencies || {}),
@@ -222,7 +224,7 @@ async function detectEnvironmentAndFramework() {
     detectedLanguage = 'python';
     try {
       if (SecurityUtils.safeExistsSync(requirementsPath)) {
-        const requirements = SecurityUtils.safeReadFileSync(requirementsPath, 'utf8');
+        const requirements = SecurityUtils.safeReadFileSync(requirementsPath, path.dirname(requirementsPath), 'utf8');
         if (requirements.includes('django')) detectedFramework = 'django';
         else if (requirements.includes('flask')) detectedFramework = 'flask';
         else if (requirements.includes('fastapi')) detectedFramework = 'fastapi';
@@ -237,7 +239,7 @@ async function detectEnvironmentAndFramework() {
   } else if (SecurityUtils.safeExistsSync(pomPath)) {
     detectedLanguage = 'java';
     try {
-      const pomContent = SecurityUtils.safeReadFileSync(pomPath, 'utf8');
+      const pomContent = SecurityUtils.safeReadFileSync(pomPath, path.dirname(pomPath), 'utf8');
       if (pomContent.includes('spring-boot')) detectedFramework = 'spring-boot';
       else if (pomContent.includes('spring')) detectedFramework = 'spring';
       else if (pomContent.includes('quarkus')) detectedFramework = 'quarkus';
@@ -248,7 +250,7 @@ async function detectEnvironmentAndFramework() {
   } else if (SecurityUtils.safeExistsSync(composerPath)) {
     detectedLanguage = 'php';
     try {
-      const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, 'utf8'));
+      const composer = JSON.parse(SecurityUtils.safeReadFileSync(composerPath, path.dirname(composerPath), 'utf8'));
       const deps = composer.require || {};
       
       if (deps['laravel/framework']) detectedFramework = 'laravel';
@@ -488,7 +490,7 @@ class I18nManager {
     }
     
     try {
-      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
       // Include peerDependencies in the check
       const dependencies = { 
         ...packageJson.dependencies, 
@@ -612,16 +614,16 @@ class I18nManager {
      process.exit(1);
    }, 10000); // 10 second timeout
    // Add debugging for CLI startup
-   console.log('🔍 DEBUG: Starting i18ntk-manage.js...');
-   console.log('🔍 DEBUG: Process.argv:', process.argv);
-   console.log('🔍 DEBUG: Args parsed:', args);
-   console.log('🔍 DEBUG: About to call SetupEnforcer.checkSetupCompleteAsync()');
-    let prompt;
-    try {
+  console.log('🔍 DEBUG: Starting i18ntk-manage.js...');
+  console.log('🔍 DEBUG: Process.argv:', process.argv);
+  console.log('🔍 DEBUG: About to call SetupEnforcer.checkSetupCompleteAsync()');
+   let prompt;
+   try {
       // Ensure setup is complete before running any operations
       await SetupEnforcer.checkSetupCompleteAsync();
       
       const args = this.parseArgs();
+      console.log('🔍 DEBUG: Args parsed:', args);
       prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
       const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
 
@@ -1236,7 +1238,7 @@ class I18nManager {
           const fileIndex = parseInt(choice) - 1;
           
           if (fileIndex >= 0 && fileIndex < files.length) {
-            const logContent = SecurityUtils.safeReadFileSync(path.join(logsDir, files[fileIndex]), 'utf8');
+            const logContent = SecurityUtils.safeReadFileSync(path.join(logsDir, files[fileIndex]), logsDir, 'utf8');
             console.log(`\n${t('debug.contentOf', { filename: files[fileIndex] })}:`);
             console.log('============================================================');
             console.log(logContent.slice(-2000)); // Show last 2000 characters
@@ -1567,7 +1569,7 @@ if (require.main === module) {
   if (args.includes('--version') || args.includes('-v')) {
     try {
       const packageJsonPath = path.resolve(__dirname, '../package.json');
-      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
       const versionInfo = packageJson.versionInfo || {};
       
       console.log(`\n🌍 i18n Toolkit (i18ntk)`);

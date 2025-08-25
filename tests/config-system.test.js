@@ -237,7 +237,7 @@ class ConfigSystemTestSuite {
       return "SecurityUtils should be able to check config file existence";
     }
 
-    const configData = SecurityUtils.safeReadFileSync(configPath, 'utf8');
+    const configData = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
     if (!configData) {
       return "SecurityUtils should be able to read config file";
     }

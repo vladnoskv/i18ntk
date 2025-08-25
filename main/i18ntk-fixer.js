@@ -443,12 +443,12 @@ class I18nFixer {
     const files = this.getAllFiles(this.sourceLanguageDir);
     files.forEach(file => {
       const rel = path.relative(this.sourceLanguageDir, file);
-      const srcData = JSON.parse(SecurityUtils.safeReadFileSync(file, 'utf8'));
+      const srcData = JSON.parse(SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8'));
       const targetFile = path.join(this.sourceDir, lang, rel);
       let tgtData = {};
       if (SecurityUtils.safeExistsSync(targetFile)) {
         try {
-          tgtData = JSON.parse(SecurityUtils.safeReadFileSync(targetFile, 'utf8'));
+          tgtData = JSON.parse(SecurityUtils.safeReadFileSync(targetFile, path.dirname(targetFile), 'utf8'));
         } catch {
           tgtData = {};
         }
@@ -466,13 +466,13 @@ class I18nFixer {
     
     files.forEach(file => {
       const rel = path.relative(this.sourceLanguageDir, file);
-      const srcData = JSON.parse(SecurityUtils.safeReadFileSync(file, 'utf8'));
+      const srcData = JSON.parse(SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8'));
       const targetFile = path.join(this.sourceDir, lang, rel);
       let tgtData = {};
       
       if (SecurityUtils.safeExistsSync(targetFile)) {
         try {
-          tgtData = JSON.parse(SecurityUtils.safeReadFileSync(targetFile, 'utf8'));
+          tgtData = JSON.parse(SecurityUtils.safeReadFileSync(targetFile, path.dirname(targetFile), 'utf8'));
         } catch {
           tgtData = {};
         }

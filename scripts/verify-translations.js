@@ -28,7 +28,7 @@ console.log('\n🔍 Verifying translation keys across all language files...\n');
 files.forEach(file => {
   const langCode = path.basename(file, '.json');
   const filePath = path.join(localesPath, file);
-  const content = JSON.parse(SecurityUtils.safeReadFileSync(filePath, 'utf8'));
+  const content = JSON.parse(SecurityUtils.safeReadFileSync(filePath, localesPath, 'utf8'));
   const langKeys = new Set(getAllKeys(content));
   
   // Find missing keys

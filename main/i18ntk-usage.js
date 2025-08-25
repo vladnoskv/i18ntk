@@ -804,7 +804,7 @@ Analysis Features (v1.8.3):
   // Extract translation keys from source code with enhanced patterns
   extractKeysFromFile(filePath) {
     try {
-      const content = SecurityUtils.safeReadFileSync(filePath);
+      const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
       if (!content) return [];
       
       // Skip JSON files entirely to prevent scanning translation files

@@ -2,35 +2,6 @@
 const path = require('path');
 const fs = require('fs');
 
-// Lazy load SecurityUtils to prevent circular dependencies
-let securityUtils;
-function getSecurityUtils() {
-  if (!securityUtils) {
-    try {
-      securityUtils = require('./security');
-    } catch (error) {
-      // Fallback: use basic fs operations if SecurityUtils is not available
-      return {
-        safeExistsSync: (path) => {
-          try {
-            return require('fs').existsSync(path);
-          } catch {
-            return false;
-          }
-        },
-        safeWriteFileSync: (path, encoding) => {
-          try {
-            return require('fs').readFileSync(path, encoding);
-          } catch {
-            return null;
-          }
-        }
-      };
-    }
-  }
-  return securityUtils;
-}
-
 // Helper functions for OS-agnostic path handling
 function toPosix(p) { return String(p).replace(/\\/g, '/'); }
 function isBundledPath(p) {
@@ -39,7 +10,18 @@ function isBundledPath(p) {
 }
 
 function safeRequireConfig() {
-  try { return require('./config-manager'); } catch { return null; }
+  try {
+    const configPath = path.join(process.cwd(), '.i18ntk-config');
+    if (fs.existsSync(configPath)) {
+      const stats = fs.statSync(configPath);
+      if (stats.size > 0 && stats.size <= 10 * 1024 * 1024) {
+        const raw = fs.readFileSync(configPath, 'utf8');
+        const cfg = JSON.parse(stripBOMAndComments(raw));
+        return { getConfig: () => cfg };
+      }
+    }
+  } catch {}
+  return null;
 }
 
 function stripBOMAndComments(s) {
@@ -50,9 +32,16 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  const SecurityUtils = getSecurityUtils();
-  const raw = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8');
-  return JSON.parse(stripBOMAndComments(raw));
+  try {
+    const stats = fs.statSync(file);
+    if (stats.size > 10 * 1024 * 1024) {
+      throw new Error(`File too large: ${file}`);
+    }
+    const raw = fs.readFileSync(file, 'utf8');
+    return JSON.parse(stripBOMAndComments(raw));
+  } catch (error) {
+    throw error;
+  }
 }
 
 function pkgUiLocalesDirViaThisFile() {
@@ -73,8 +62,7 @@ function resolveLocalesDirs() {
       try {
         const normalized = path.normalize(path.resolve(dir.trim()));
 
-        const SecurityUtils = getSecurityUtils();
-        if (SecurityUtils.safeExistsSync(normalized) && fs.statSync(normalized).isDirectory()) {
+        if (fs.existsSync(normalized) && fs.statSync(normalized).isDirectory()) {
           dirs.push(normalized);
         }
       } catch {
@@ -120,14 +108,13 @@ function findLocaleFilesAllDirs(lang) {
   for (const dir of dirs) {
     for (const candidate of candidatesForLang(dir, lang)) {
       try {
-        const SecurityUtils = getSecurityUtils();
-        if (SecurityUtils.safeExistsSync(candidate)) {
+        if (fs.existsSync(candidate)) {
           const stats = fs.statSync(candidate);
-          if (stats.isFile() && stats.size > 0) {
+          if (stats.isFile() && stats.size > 0 && stats.size <= 10 * 1024 * 1024) {
             // Validate file is readable and parseable
             fs.accessSync(candidate, fs.constants.R_OK);
             // Quick JSON validation
-            const content = SecurityUtils.safeReadFileSync(candidate, path.dirname(candidate), 'utf8') || '';
+            const content = fs.readFileSync(candidate, 'utf8') || '';
             if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
               files.push(candidate);
             } else {
@@ -366,13 +353,12 @@ function getAvailableLanguages() {
   const langs = new Set();
   for (const d of dirs) {
     try {
-      const SecurityUtils = getSecurityUtils();
-      if (!SecurityUtils.safeExistsSync(d)) continue;
+      if (!fs.existsSync(d)) continue;
       for (const f of fs.readdirSync(d)) {
         if (f.endsWith('.json')) langs.add(path.basename(f, '.json'));
       }
       for (const f of fs.readdirSync(d, { withFileTypes: true })) {
-        if (f.isDirectory() && SecurityUtils.safeExistsSync(path.join(d, f.name, `${f.name}.json`))) {
+        if (f.isDirectory() && fs.existsSync(path.join(d, f.name, `${f.name}.json`))) {
           langs.add(f.name);
         }
       }

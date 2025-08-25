@@ -96,19 +96,26 @@ class SecurityUtils {
 
   /**
    * Validates and sanitizes file paths to prevent path traversal attacks
-   * @param {string} inputPath - The input path to validate
-   * @param {string} basePath - The base path that the input should be within (optional)
-   * @returns {string|null} - Sanitized path or null if invalid
-   */
+  * @param {string} inputPath - The input path to validate
+  * @param {string} basePath - The base path that the input should be within (optional)
+  * @returns {string|null} - Sanitized path or null if invalid
+  */
   static validatePath(filePath, basePath = process.cwd()) {
+    const i18n = getI18n();
+    const useI18n = i18n && i18n.isInitialized && typeof i18n.t === 'function';
+
     try {
       if (!filePath || typeof filePath !== 'string') {
-        const i18n = getI18n();
-        SecurityUtils.logSecurityEvent(
-          i18n.t('security.pathValidationFailed'),
-          'error',
-          { inputPath: filePath, reason: i18n.t('security.invalidInputType') }
-        );
+        const message = useI18n
+          ? i18n.t('security.pathValidationFailed')
+          : 'Path validation failed';
+        const reason = useI18n
+          ? i18n.t('security.invalidInputType')
+          : 'Invalid input type';
+        SecurityUtils.logSecurityEvent(message, 'error', {
+          inputPath: filePath,
+          reason
+        });
         return null;
       }
 
@@ -127,29 +134,33 @@ class SecurityUtils {
       // Ensure the target path is within the base directory
       const relativePath = path.relative(base, finalPath);
       if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
-        const i18n = getI18n();
-        SecurityUtils.logSecurityEvent(
-          i18n.t('security.pathTraversalAttempt'),
-          'warning',
-          { inputPath: filePath, resolvedPath: finalPath, basePath: base }
-        );
+        const message = useI18n
+          ? i18n.t('security.pathTraversalAttempt')
+          : 'Path traversal attempt';
+        SecurityUtils.logSecurityEvent(message, 'warning', {
+          inputPath: filePath,
+          resolvedPath: finalPath,
+          basePath: base
+        });
         return null;
       }
-      
-      const i18n = getI18n();
-            SecurityUtils.logSecurityEvent(
-        i18n.t('security.pathValidated'),
-        'info',
-        { inputPath: filePath, resolvedPath: finalPath }
-      );
+
+      const successMsg = useI18n
+        ? i18n.t('security.pathValidated')
+        : 'Path validated';
+      SecurityUtils.logSecurityEvent(successMsg, 'info', {
+        inputPath: filePath,
+        resolvedPath: finalPath
+      });
       return finalPath;
     } catch (error) {
-      const i18n = getI18n();
-            SecurityUtils.logSecurityEvent(
-        i18n.t('security.pathValidationError'),
-        'error',
-        { inputPath: filePath, error: error.message }
-      );
+      const message = useI18n
+        ? i18n.t('security.pathValidationError')
+        : 'Path validation error';
+      SecurityUtils.logSecurityEvent(message, 'error', {
+        inputPath: filePath,
+        error: error.message
+      });
       return null;
     }
   }

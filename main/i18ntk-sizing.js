@@ -179,7 +179,7 @@ class I18nSizingAnalyzer {
           const stats = SecurityUtils.safeStatSync(langFile, process.cwd());
           if (!stats) return;
           
-          let content = SecurityUtils.safeReadFileSync(langFile, process.cwd());
+          let content = SecurityUtils.safeReadFileSync(langFile, process.cwd(), 'utf8');
           if (typeof content !== "string") content = "";
           totalSize += stats.size;
           totalLines += content.split('\n').length;
@@ -203,7 +203,7 @@ class I18nSizingAnalyzer {
         const stats = SecurityUtils.safeStatSync(filePath, process.cwd());
         if (!stats) return;
         
-        let content = SecurityUtils.safeReadFileSync(filePath, process.cwd());
+        let content = SecurityUtils.safeReadFileSync(filePath, process.cwd(), 'utf8');
         if (typeof content !== "string") content = "";
         this.stats.files[language] = {
           file,
@@ -229,7 +229,7 @@ class I18nSizingAnalyzer {
         if (langFiles) {
           // Handle nested directory structure - combine all JSON files
           langFiles.forEach(langFile => {
-            const rawContent = SecurityUtils.safeReadFileSync(langFile, process.cwd());
+            const rawContent = SecurityUtils.safeReadFileSync(langFile, process.cwd(), 'utf8');
             const fileContent = SecurityUtils.safeParseJSON(rawContent);
             if (fileContent) {
               const fileName = path.basename(langFile, '.json');
@@ -238,7 +238,7 @@ class I18nSizingAnalyzer {
           });
         } else {
           // Handle single file structure
-          const rawContent = SecurityUtils.safeReadFileSync(filePath, process.cwd());
+          const rawContent = SecurityUtils.safeReadFileSync(filePath, process.cwd(), 'utf8');
           combinedContent = SecurityUtils.safeParseJSON(rawContent) || {};
         }
         

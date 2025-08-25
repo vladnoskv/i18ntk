@@ -11,7 +11,7 @@ const path = require('path');
 
 // Read package.json to get deprecation list
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
-const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, 'utf8'));
+const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
 
 console.log('🔍 i18ntk Deprecation Verification');
 console.log('=====================================');
@@ -28,7 +28,7 @@ async function getDeprecationInfo() {
     let packageInfo = { versions: {} };
 
     if (SecurityUtils.safeExistsSync(deprecationConfigPath)) {
-      packageInfo = JSON.parse(SecurityUtils.safeReadFileSync(deprecationConfigPath, 'utf8'));
+      packageInfo = JSON.parse(SecurityUtils.safeReadFileSync(deprecationConfigPath, path.dirname(deprecationConfigPath), 'utf8'));
     } else {
       console.warn('⚠️ deprecation-config.json not found. Cannot verify deprecations locally.');
       return;

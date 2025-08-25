@@ -310,7 +310,7 @@ function tryReadJson(filePath) {
       return null;
     }
 
-    const data = SecurityUtils.safeReadFileSync(filePath, 'utf8');
+    const data = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
     if (!data || data.trim() === '') {
       console.warn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
       return null;
@@ -459,7 +459,7 @@ function getConfig() {
 
      // Check if config file exists
      if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
-       const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, 'utf8'));
+       const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, path.dirname(PROJECT_CONFIG_PATH), 'utf8'));
        currentConfig = config;
        return resolvePaths(config);
      }
@@ -467,7 +467,7 @@ function getConfig() {
      // Check for legacy config for migration
      if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
        console.log('📦 Migrating legacy configuration...');
-       const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, 'utf8'));
+       const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, path.dirname(LEGACY_CONFIG_PATH), 'utf8'));
        const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
        saveConfig(migratedConfig);
        currentConfig = migratedConfig;
