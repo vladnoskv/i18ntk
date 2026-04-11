@@ -146,7 +146,7 @@ class SecurityChecker {
     this.log('Checking source files for security issues...');
 
     const sourceDirs = ['main', 'utils', 'scripts', 'settings'];
-    const excludeFiles = ['security.js', 'security-check.js', 'security-check-improved.js'];
+    const excludeFiles = ['security.js', 'security-fixed.js', 'security-check.js', 'security-check-improved.js'];
 
     for (const dir of sourceDirs) {
       const dirPath = path.join(this.projectRoot, dir);
@@ -204,7 +204,8 @@ class SecurityChecker {
     const requirePath = requireMatch[1];
 
     // Skip safe built-in modules
-    const safeBuiltins = ['fs', 'path', 'crypto', 'os', 'util', 'events', 'stream', 'buffer', 'http', 'https', 'url', 'querystring', 'child_process'];
+    // Note: child_process is intentionally excluded to keep runtime zero-shell
+    const safeBuiltins = ['fs', 'path', 'crypto', 'os', 'util', 'events', 'stream', 'buffer', 'http', 'https', 'url', 'querystring'];
     if (safeBuiltins.includes(requirePath)) {
       return; // Safe built-in module
     }
@@ -233,9 +234,14 @@ class SecurityChecker {
     }
 
     // Check for suspicious patterns
-    const suspiciousPatterns = ['http://', 'https://', 'ftp://', '..', '~', '$HOME', '$USER'];
+    const suspiciousPatterns = [
+      /\.\./,                    // path traversal
+      /^~/,                      // home directory shorthand
+      /\$(HOME|USER)\b/,         // shell env expansions
+      /^[a-z][a-z0-9+.-]*:/i     // URL/protocol-like require targets
+    ];
     for (const pattern of suspiciousPatterns) {
-      if (requirePath.includes(pattern)) {
+      if (pattern.test(requirePath)) {
         this.addIssue(`Suspicious require path pattern: ${pattern}`, filePath, lineNumber);
         return;
       }

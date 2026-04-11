@@ -60,7 +60,8 @@
       "invalidSourceDirectory": "❌ Неверная исходная директория: {directory}",
       "securityViolation": "⚠️ Нарушение безопасности обнаружено",
       "authenticationFailed": "❌ Аутентификация не удалась",
-      "sourceEqualsI18nWarn": "⚠️ sourceDir equals i18nDir ({sourceDir}). Falling back to {fallback} for source scanning."
+      "sourceEqualsI18nWarn": "⚠️ sourceDir equals i18nDir ({sourceDir}). Falling back to {fallback} for source scanning.",
+      "initializationCancelled": "❌ Initialization cancelled by user."
     },
     "errorGeneratingStatusSummary": "Ошибка генерации сводки статуса: {error}",
     "errorRunningDebugTool": "Ошибка запуска инструмента отладки '{displayName}': {error}",
@@ -99,13 +100,16 @@
     "home": "Дом",
     "settings": "Настройки",
     "startingSettings": "🎛️  Начальные настройки CLI...",
-    "confirm": "Подтвердить"
+    "confirm": "Подтвердить",
+    "errorExiting": "Error while exiting."
   },
   "errors": {
     "readlineClosed": "Поток ввода закрыт; работа в неинтерактивном режиме.",
     "noPackageJson": "Файл package.json не найден. Невозможно автоматически определить фреймворк i18n.",
     "noI18nDir": "Директория i18n не найдена в корне проекта.",
-    "noI18nConfig": "Файл конфигурации i18n не найден в корне проекта."
+    "noI18nConfig": "Файл конфигурации i18n не найден в корне проекта.",
+    "errorReadingDebugLogs": "Error reading debug logs: {error}",
+    "invalidOption": "❌ Invalid option: {option}. Please try again."
   },
   "fixer": {
     "help_message": "\nI18n Исправление Переводов\n\nИспользование: node i18ntk-fixer.js [опции]\n\nОпции:\n  --source-dir <dir>     Исходный каталог для сканирования (по умолчанию: ./locales)\n  --languages <langs>    Список языков для исправления, разделенный запятыми\n  --markers <markers>    Список маркеров, которые считать непереведенными, разделенный запятыми\n  --no-backup           Пропустить автоматическое создание резервной копии\n  --help                Показать эту справку\n\nПримеры:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -142,12 +146,7 @@
     "choicePrompt": "Ваш выбор (д/н/п): ",
     "nonInteractiveMode": "⚡ Обнаружен неинтерактивный режим - автоматическое применение исправлений...",
     "reportGenerated": "📊 Сгенерирован отчет об исправлении: {path}",
-    "summary": {
-      "totalIssues": "Всего проблем: {total}",
-      "missingKeys": "Отсутствующие ключи: {missing}",
-      "placeholderKeys": "Ключи с маркерами: {placeholder}",
-      "languages": "Языки: {languages}"
-    },
+    "summary": "Fixer summary:",
     "welcome": {
       "title": "🎯 Добро пожаловать в инструмент исправления переводов!",
       "description": "Этот инструмент поможет вам исправить сломанные переводы и маркеры в ваших языковых файлах."
@@ -170,7 +169,17 @@
       "current": "Текущая директория: {dir}",
       "description": "Введите директорию с вашими языковыми файлами (или Enter для текущей директории):",
       "input": "Директория: "
-    }
+    },
+    "backupLocation": "Backup location: {dir}",
+    "completed": "Fixing completed.",
+    "creatingBackup": "Creating backup in {dir}...",
+    "dryRunMode": "Dry run mode: {mode}",
+    "error": "Fixer failed: {error}",
+    "fixing": "Fixing {language}...",
+    "foundLanguages": "Found {count} languages: {languages}",
+    "languageFixed": "{language}: fixed {fixed} key(s), skipped {skipped}.",
+    "running": "Running translation fixer...",
+    "totalFixed": "Total fixed: {count}"
   },
   "autorun": {
     "stepAnalyzeTranslations": "Анализ переводов",
@@ -434,7 +443,13 @@
       "keys_have_significant_size_variations": "ключи имеют значительные вариации в размерах",
       "consider_reviewing_translations": "Рассмотрите возможность пересмотра переводов {lang} — они на {percentageDifference}% {comparison} базового",
       "long_translations_detected": "{lang} содержит {longKeys} переводов длиной более {threshold} символов — рассмотрите возможность их разбить"
-    }
+    },
+    "detailed_key_analysis_title": "Detailed Key Analysis",
+    "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
+    "key_analysis_header": "Key: {key}",
+    "status_empty": "empty",
+    "status_long": "long",
+    "status_ok": "ok"
   },
   "usage": {
     "help_message": "\nI18n Анализатор использования\n\nИспользование: node i18ntk-usage.js [опции]\n\nОпции:\n  --source-dir <dir>     Директория исходников для сканирования (по умолчанию: ./src)\n  --i18n-dir <dir>       Директория I18n (по умолчанию: ./src/locales)\n  --output-report        Сгенерировать подробный отчёт\n  --output-dir <dir>     Директория для отчётов (по умолчанию: ./reports)\n  --help                 Показать справку\n\nПримеры:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
@@ -511,7 +526,7 @@
       "and_unusedkeyslength_5_more": "...и ещё {count}.",
       "n_sample_missing_keys": "\n❌ ПРИМЕРЫ ОТСУТСТВУЮЩИХ КЛЮЧЕЙ (первые 5):",
       "and_missingkeyslength_5_more": "... и еще {count} отсутствующих ключей",
-      "n_generating_detailed_report": "\n📊 Генерация подробного отчета...", 
+      "n_generating_detailed_report": "\n📊 Генерация подробного отчета...",
       "report_saved_reportpath": "📄 Отчет сохранен: {reportPath}",
       "n_recommendations": "\n📋 РЕКОМЕНДАЦИИ",
       "consider_removing_unused_trans": "💡 Рассмотрите удаление неиспользуемых переводов для чистоты проекта.",
@@ -570,7 +585,12 @@
     },
     "noTranslationLanguagesFound": "🌍 Целевых языков не найдено",
     "failedToAnalyzeLanguage": "❌ Не удалось проанализировать язык",
-    "translationCompletenessAnalysisFailed": "❌ Анализ полноты перевода не удался"
+    "translationCompletenessAnalysisFailed": "❌ Анализ полноты перевода не удался",
+    "failedToProcessFile": "Failed to process file:",
+    "failedToSaveReport": "Failed to save usage report: {error}",
+    "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
+    "reportSavedTo": "Usage report saved to: {reportPath}",
+    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}"
   },
   "validate": {
     "help_message": "\nI18n Валидатор переводов\n\nИспользование: node i18ntk-validate.js [опции]\n\nОпции:\n  --source-dir <dir>     Директория исходников для сканирования (по умолчанию: ./locales)\n  --i18n-dir <dir>       Директория I18n (по умолчанию: ./locales)\n  --output-report        Сгенерировать подробный отчёт\n  --output-dir <dir>     Директория для отчётов (по умолчанию: ./i18ntk-reports)\n  --help                 Показать справку\n\nПримеры:\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
@@ -667,7 +687,9 @@
     "invalidSampleFilePath": "Недопустимый путь к примерному файлу",
     "failedToCreateSampleTranslationFile": "Не удалось создать примерный файл перевода",
     "invalidFilePathDetected": "Обнаружен недопустимый путь к файлу",
-    "failedToWriteFile": "Не удалось записать файл: {filePath}"
+    "failedToWriteFile": "Не удалось записать файл: {filePath}",
+    "invalidSourceDirectory": "Invalid source directory: {sourceDir}",
+    "invalidSourceLanguageDirectory": "Invalid source language directory: {sourceDir}"
   },
   "adminCli": {
     "setupPinProtectionTitle": "\n🔐 Настройка защиты админ-PIN",
@@ -1012,13 +1034,22 @@
       "sourceLanguageDirectoryNotFound": "Директория исходного языка не найдена: {dir}",
       "noJsonFilesInSourceDirectory": "В директории исходников не найдено JSON-файлов: {dir}",
       "invalidFilePathDetected": "Обнаружен недопустимый путь к файлу",
-      "initializationFailed": "Инициализация не удалась: {error}"
+      "initializationFailed": "Инициализация не удалась: {error}",
+      "noFramework": "No i18n framework detected. Continue with generic mode.",
+      "packageJsonRead": "Error reading package.json."
     },
     "processingFile": "Обработка {file} для языка {language}...",
     "fileAlreadyExistsMerging": "Файл {file} уже существует. Объединяются новые ключи.",
     "createdNewFile": "Создан новый файл: {file}",
     "updatedFile": "Обновлён файл: {file}",
-    "skippingExcludedFile": "Пропуск {file} для языка {language} — файл исключён."
+    "skippingExcludedFile": "Пропуск {file} для языка {language} — файл исключён.",
+    "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
+    "noTargetLanguagesSpecified": "No target languages specified.",
+    "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
+    "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
+    "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
+    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
   },
   "language": {
     "title": "🌍 Сменить язык",
@@ -1372,7 +1403,9 @@
       "prompt": "Хотите обновить пакет сейчас? (y/N): ",
       "promptDesc": "Это обновит пакет i18ntk до последней версии.",
       "confirm": "y",
-      "cancelled": "Обновление отменено."
+      "cancelled": "Обновление отменено.",
+      "error": "Failed to update package",
+      "updating": "Updating package..."
     },
     "admin": {
       "selectOption": "Выберите опцию: ",
@@ -1428,7 +1461,12 @@
       "importSuccess": "Настройки успешно импортированы.",
       "importFailed": "Не удалось импортировать настройки: {error}",
       "backupSuccess": "Резервная копия создана: {file}",
-      "backupFailed": "Не удалось создать резервную копию: {error}"
+      "backupFailed": "Не удалось создать резервную копию: {error}",
+      "exportFilenamePrompt": "Enter export filename: ",
+      "importConfirm": "Import this settings file? (y/N): ",
+      "importFilenamePrompt": "Enter import filename: ",
+      "manageBackups": "Manage backups",
+      "restore": "Restore settings"
     },
     "selectOption": "Выберите опцию: ",
     "resetToDefaultsTitle": "Сброс настроек к значениям по умолчанию",
@@ -1509,35 +1547,37 @@
       }
     },
     "fields": {
-      "backup.enabled": {
-        "label": "Включить резервное копирование",
-        "description": "Включить автоматическое резервное копирование настроек",
-        "help": "Включить/отключить функцию резервного копирования"
-      },
-      "backup.singleFileMode": {
-        "label": "Режим единственного файла",
-        "description": "Использовать единый файл для резервных копий",
-        "help": "Режим резервного копирования в единый файл"
-      },
-      "backup.singleBackupFile": {
-        "label": "Путь к файлу резервной копии",
-        "description": "Путь к файлу резервной копии",
-        "help": "Путь к файлу резервной копии"
-      },
-      "backup.retentionDays": {
-        "label": "Срок хранения резервных копий",
-        "description": "Число дней, за которое нужно хранить резервные копии",
-        "help": "Число дней, за которое нужно хранить резервные копии"
-      },
-      "backup.maxBackups": {
-        "label": "Максимальное число резервных копий",
-        "description": "Максимальное число резервных копий",
-        "help": "Максимальное число резервных копий"
-      },
-      "backup.confirm": {
-        "label": "Подтверждение резервного копирования",
-        "description": "Требуется подтверждение для операций резервного копирования",
-        "help": "Подтвердите операцию резервного копирования"
+      "backup": {
+        "enabled": {
+          "label": "Включить резервное копирование",
+          "description": "Включить автоматическое резервное копирование настроек",
+          "help": "Включить/отключить функцию резервного копирования"
+        },
+        "singleFileMode": {
+          "label": "Режим единственного файла",
+          "description": "Использовать единый файл для резервных копий",
+          "help": "Режим резервного копирования в единый файл"
+        },
+        "singleBackupFile": {
+          "label": "Путь к файлу резервной копии",
+          "description": "Путь к файлу резервной копии",
+          "help": "Путь к файлу резервной копии"
+        },
+        "retentionDays": {
+          "label": "Срок хранения резервных копий",
+          "description": "Число дней, за которое нужно хранить резервные копии",
+          "help": "Число дней, за которое нужно хранить резервные копии"
+        },
+        "maxBackups": {
+          "label": "Максимальное число резервных копий",
+          "description": "Максимальное число резервных копий",
+          "help": "Максимальное число резервных копий"
+        },
+        "confirm": {
+          "label": "Подтверждение резервного копирования",
+          "description": "Требуется подтверждение для операций резервного копирования",
+          "help": "Подтвердите операцию резервного копирования"
+        }
       },
       "i18nDir": {
         "label": "Директория переводов",
@@ -1834,7 +1874,7 @@
     },
     "languages": {
       "en": "Английский",
-      "de": "Немецкий", 
+      "de": "Немецкий",
       "es": "Испанский",
       "fr": "Французский",
       "ru": "Русский",
@@ -1877,6 +1917,11 @@
       "confirmHelp": "Подтвердить операцию резервного копирования",
       "confirmYes": "Да",
       "confirmNo": "Нет"
+    },
+    "validation": {
+      "valid": "Valid",
+      "validatingPaths": "Validating configured paths...",
+      "validationComplete": "Path validation complete: {valid}/{total} valid."
     }
   },
   "summary": {
@@ -2110,7 +2155,15 @@
       "coverage_percentage": "Коэффициент перевода",
       "error_general": "Общая ошибка",
       "use_help": "Используйте --help, чтобы получить справку"
-    }
+    },
+    "cleaningUpReportFiles": "Cleaning up old report files...",
+    "couldNotDelete": "Could not delete {file}: {error}",
+    "deletedOldReportFiles": "Deleted {count} old report file(s).",
+    "errorCleaningUpReports": "Error cleaning up reports: {error}",
+    "noOldReportFilesToDelete": "No old report files to delete.",
+    "reportFilesPreserved": "Report files preserved.",
+    "reportSaveFailed": "Failed to save report to: {reportPath}",
+    "reportSaved": "Report saved to: {reportPath}"
   },
   "ui": {
     "autoDetectedI18nDirectory": "Автоопределённая директория i18n: {path}",
@@ -2311,7 +2364,10 @@
       "extensions": "Расширения файлов для сканирования",
       "exclude": "Паттерны для исключения",
       "minLength": "Минимальная длина текста для сканирования",
-      "maxLength": "Максимальная длина текста для сканирования"
+      "maxLength": "Максимальная длина текста для сканирования",
+      "includeTests": "Include test files?",
+      "excludeDirs": "Directories to exclude (comma-separated):",
+      "customPatterns": "Custom patterns to scan for (regex):"
     },
     "status": {
       "scanning": "🔍 Сканирование файлов...",
@@ -2358,6 +2414,50 @@
       "min_length": "Минимальная длина текста для включения",
       "max_length": "Максимальная длина текста для включения",
       "include_tests": "Включать тестовые файлы в сканирование"
+    },
+    "reportGenerated": "Scan report generated: {path}",
+    "help_message": "\nI18n Text Scanner\n\nUsage: node i18ntk-scanner.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)\n  --framework <name>     Framework to target (react, vue, angular, vanilla)\n  --patterns <patterns>  Custom regex patterns (comma-separated)\n  --include-tests        Include test files in scan\n  --exclude-dirs <dirs>  Directories to exclude (comma-separated)\n  --help                Show this help\n\nExamples:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./scan-results.json\n",
+    "starting": "🔍 Starting text scanner for framework: {framework}",
+    "sourceDirectory": "📁 Scanning directory: {sourceDir}",
+    "frameworkDetected": "🎯 Detected framework: {framework}",
+    "scanningFiles": "📊 Scanning {fileCount} files...",
+    "foundTexts": "📝 Found {textCount} texts requiring translation",
+    "generatingReport": "📊 Generating detailed report...",
+    "reportSaved": "💾 Scan report saved to: {reportPath}",
+    "noTextsFound": "✅ No hardcoded English texts found",
+    "scanComplete": "🎉 Scan completed successfully!",
+    "analysisTitle": "🔍 TRANSLATION SCAN ANALYSIS",
+    "fileSummary": "📄 {file}: {count} texts found",
+    "textLocation": "📍 Line {line}: {text}",
+    "foundText": "Found {count} potential hardcoded text instances",
+    "context": "📝 Context: {context}",
+    "severity": "⚠️  Severity: {severity}",
+    "recommendation": "💡 Recommendation: {recommendation}",
+    "welcome": {
+      "title": "🎯 Welcome to the Text Scanner!",
+      "description": "This tool scans your source code for hardcoded English text that may need translation."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Select Framework",
+      "available": "Available frameworks: react, vue, angular, vanilla",
+      "description": "Enter the framework type (or press Enter for auto-detection):",
+      "input": "Framework: "
+    },
+    "directoryPrompt": {
+      "title": "📁 Select Source Directory",
+      "current": "Current directory: {dir}",
+      "description": "Enter the directory to scan (or press Enter for current):",
+      "input": "Directory: "
     }
+  },
+  "checkUsage": {
+    "usage_analysis_failed": "Usage analysis failed."
+  },
+  "completeTranslations": {
+    "warning_could_not_parse_filepa": "Warning: could not parse file path: {filePath}"
+  },
+  "pressEnterToContinue": "Press Enter to continue...",
+  "status": {
+    "exitingCompleted": "Workflow completed. Exiting..."
   }
 }

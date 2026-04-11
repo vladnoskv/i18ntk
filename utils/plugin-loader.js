@@ -1,6 +1,20 @@
-const path = require('path');
+function loadOptionalModule(name) {
+  // Security hardening: allow only known built-in optional plugins.
+  // This avoids dynamic runtime require of arbitrary package names.
+  const builtinPlugins = {
+    regex: () => require('./extractors/regex'),
+    'i18ntk-extractor-regex': () => require('./extractors/regex')
+  };
 
-function loadOptionalModule(name, cwd = process.cwd()) {
+  const direct = builtinPlugins[name];
+  if (direct) {
+    try {
+      return direct();
+    } catch {
+      return null;
+    }
+  }
+
   // Sanitize the module name to prevent path traversal
   const sanitizedName = name.replace(/[^a-zA-Z0-9@/_-]/g, '');
   if (sanitizedName !== name) {
@@ -8,14 +22,9 @@ function loadOptionalModule(name, cwd = process.cwd()) {
     return null;
   }
 
-  try {
-    // Use a whitelist of allowed module paths for safer resolution
-    const allowedPaths = [cwd];
-    const resolved = require.resolve(sanitizedName, { paths: allowedPaths });
-    return require(resolved);
- } catch {
-    return null;
-  }
+  // Unknown optional modules are disabled by default.
+  // Register plugins programmatically through PluginLoader.registerPlugin instead.
+  return null;
 }
 class PluginLoader {
   constructor() {

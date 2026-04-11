@@ -1,84 +1,50 @@
-# Documentation Overview
+# i18ntk Documentation (v2)
 
-**Version:** 1.10.2
-**Last Updated:** 2025-08-23
-**GitHub Repository:** [vladnoskv/i18ntk](https://github.com/vladnoskv/i18ntk)
+This documentation set is for **i18ntk 2.x**.
 
-Version 1.10.2 delivers critical fixes for projectRoot path resolution, enhanced environment variable management, improved security with path validation, and comprehensive migration support.
+## Start Here
 
-## Structure
+- [API Reference](./api/API_REFERENCE.md)
+- [Configuration Guide](./api/CONFIGURATION.md)
+- [Runtime API Guide](./runtime.md)
+- [Scanner Guide](./scanner-guide.md)
+- [Environment Variables](./environment-variables.md)
+- [Migration Guide v2.0.0](./migration-guide-v2.0.0.md)
 
-### Core Guides
-- [Installation Guide](./INSTALLATION.md) - Detailed installation instructions
-- [PIN Protection Guide](./PIN_PROTECTION_GUIDE.md) - Configure PIN-based security
-- [Ultra Performance Guide](./ULTRA_PERFORMANCE_GUIDE.md) - Optimize for maximum speed
-- [Environment Variables](./environment-variables.md) - Complete environment variable reference
-- [Migration Guide v1.10.2](./migration-guide-v1.10.2.md) - Critical projectRoot path fix
+## Command Model
 
-### Reference
-- [API Reference](./api/API_REFERENCE.md) - Complete API documentation
-- [Configuration Guide](./api/CONFIGURATION.md) - Configuration options
+Primary CLI:
 
-### Development
-- [Development Rules](./development/DEVELOPMENT_RULES.md) - Coding standards and practices
-- [AI Agent Guidelines](./development/AGENTS.md) - Instructions for AI-assisted changes
+```bash
+i18ntk
+i18ntk --command=init
+i18ntk --command=analyze
+i18ntk --command=validate
+```
 
-### Additional Resources
- - [Release Notes](./release-notes/) - Version history and upgrade notes
- - [Reports](./reports/) - Analysis and validation reports
- - [Screenshots](./screenshots/) - Visual examples
- - [Version 1.10.2 Docs](./version-1.10.0/) - Current version documentation
- - [TODO & Roadmap](./TODO_ROADMAP.md) - Planned features and upcoming work
- - [License](./LICENSE) - MIT License information
- - [Contributing](./CONTRIBUTING.md) - Guidelines for contributing to i18ntk
- - [Development Scripts and Tools](./dev/) - Scripts and tools for development
+Standalone binaries also exist for script-specific flows:
 
+```bash
+i18ntk-init
+i18ntk-analyze
+i18ntk-validate
+i18ntk-usage
+i18ntk-scanner
+i18ntk-sizing
+i18ntk-complete
+i18ntk-summary
+i18ntk-doctor
+i18ntk-fixer
+i18ntk-backup
+```
 
-## Highlights in 1.10.2
+## Configuration Source
 
-- **🚨 Critical Fix**: Fixed projectRoot path resolution - fresh installs now work out-of-the-box
-- **Enhanced Environment Variables**: Centralized management with security filtering and validation
-- **Improved Security**: Enhanced path validation and secure module loading
-- **Better Debugging**: Comprehensive debug logging with environment variable support
-- **Performance Boost**: Maintained 97% faster processing while keeping memory usage under 1MB
+i18ntk reads project settings from:
 
-## Migration Guide
+- `.i18ntk-config`
 
-### Upgrading to 1.10.2 (Recommended)
+## Notes
 
-#### From any version < 1.10.2
-1. **Backup your current configuration**:
-   ```bash
-   cp -r ./settings ./settings-backup-$(date +%Y%m%d)
-   ```
-
-2. **Install the latest secure version**:
-     ```bash
-     npm install i18ntk@1.10.2
-     ```
-
-3. **Run security validation**:
-     ```bash
-     npx i18ntk@1.10.2 --security-check
-     ```
-
-4. **Verify installation**:
-     ```bash
-     npx i18ntk@1.10.2 --version
-     npx i18ntk@1.10.2 --validate
-     ```
-
-#### Critical Fix: projectRoot Path
-- **Fixed**: Settings reset now correctly uses `/` instead of `./` for projectRoot
-- **Impact**: Fresh installations work immediately without configuration
-- **Compatibility**: Existing configurations remain unchanged
-
-#### Breaking Changes
-- **None** - 1.10.2 is fully backward compatible with enhanced security
-
-### Migration Support
-If you encounter issues during migration:
-1. Check the [migration guide v1.10.2](./migration-guide-v1.10.2.md)
-2. Check the [troubleshooting guide](./environment-variables.md#troubleshooting)
-3. Open an issue on [GitHub](https://github.com/vladnoskv/i18ntk/issues)
-
+- The docs intentionally avoid internal implementation details.
+- For release/update workflow, see `DEVUPDATE.md` in the repository root.

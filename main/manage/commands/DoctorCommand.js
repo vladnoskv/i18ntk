@@ -5,9 +5,6 @@
  *
  * Handles diagnostic functionality for i18n toolkit.
  */
-
-const I18nDoctor = require('../../i18ntk-doctor');
-
 class DoctorCommand {
     constructor(config = {}, ui = null) {
         this.config = config;
@@ -31,6 +28,7 @@ class DoctorCommand {
      */
     async execute(options = {}) {
         try {
+            const I18nDoctor = require('../../i18ntk-doctor');
             const doctor = new I18nDoctor();
             await doctor.run(options);
             return { success: true, command: 'doctor' };

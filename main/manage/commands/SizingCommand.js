@@ -5,9 +5,6 @@
  *
  * Handles translation sizing analysis functionality.
  */
-
-const I18nSizingAnalyzer = require('../../i18ntk-sizing');
-
 class SizingCommand {
     constructor(config = {}, ui = null) {
         this.config = config;
@@ -31,6 +28,7 @@ class SizingCommand {
      */
     async execute(options = {}) {
         try {
+            const I18nSizingAnalyzer = require('../../i18ntk-sizing');
             const sizingAnalyzer = new I18nSizingAnalyzer();
             await sizingAnalyzer.run(options);
             return { success: true, command: 'sizing' };

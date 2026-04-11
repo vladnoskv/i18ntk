@@ -409,6 +409,48 @@ class InitService {
     return true;
   }
 
+  createBootstrapSourceFile(targetDir) {
+    try {
+      if (!SecurityUtils.safeExistsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+
+      const sampleName = `common${this.format.extension}`;
+      const samplePath = path.join(targetDir, sampleName);
+
+      if (SecurityUtils.safeExistsSync(samplePath)) {
+        return sampleName;
+      }
+
+      const sampleContent = {
+        app: {
+          title: 'Application',
+          description: 'Application description'
+        },
+        common: {
+          yes: 'Yes',
+          no: 'No',
+          save: 'Save',
+          cancel: 'Cancel'
+        }
+      };
+
+      const serializer = typeof this.format?.write === 'function'
+        ? this.format.write.bind(this.format)
+        : (typeof this.format?.serialize === 'function'
+          ? this.format.serialize.bind(this.format)
+          : (data) => JSON.stringify(data, null, 2));
+
+      const serialized = serializer(sampleContent);
+      SecurityUtils.safeWriteFileSync(samplePath, `${serialized}\n`, path.dirname(samplePath), 'utf8');
+      console.log(t('init.createdSampleTranslationFile', { file: samplePath }) || `Created sample translation file: ${samplePath}`);
+
+      return sampleName;
+    } catch {
+      return null;
+    }
+  }
+
   // Get all JSON files from source language directory (supports single/modular)
   getSourceFiles() {
     try {
@@ -419,6 +461,8 @@ class InitService {
         const files = fs.readdirSync(this.sourceDir)
           .filter(file => file.endsWith(this.format.extension) && !this.config.excludeFiles.includes(file));
         if (files.length === 0) {
+          const sampleFile = this.createBootstrapSourceFile(this.sourceDir);
+          if (sampleFile) return [sampleFile];
           throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceDir }) || `No JSON files found in source directory: ${this.sourceDir}`);
         }
         return files;
@@ -460,6 +504,8 @@ class InitService {
       });
 
       if (files.length === 0) {
+        const sampleFile = this.createBootstrapSourceFile(this.sourceLanguageDir);
+        if (sampleFile) return [sampleFile];
         throw new Error(t('validate.noJsonFilesFound', { sourceDir: this.sourceLanguageDir }) || `No JSON files found in source directory: ${this.sourceLanguageDir}`);
       }
 

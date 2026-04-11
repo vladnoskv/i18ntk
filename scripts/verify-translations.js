@@ -1,12 +1,13 @@
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 // Load all language files
 const localesPath = path.join(__dirname, '../resources/i18n/ui-locales');
 const files = fs.readdirSync(localesPath).filter(file => file.endsWith('.json') && file !== 'en.json');
 
 // Load English as the base for comparison
-const enContent = JSON.parse(SecurityUtils.safeReadFileSync(path.join(localesPath, 'en.json'), 'utf8'));
+const enContent = JSON.parse(SecurityUtils.safeReadFileSync(path.join(localesPath, 'en.json'), localesPath, 'utf8'));
 
 // Function to get all keys from an object
 function getAllKeys(obj, prefix = '') {

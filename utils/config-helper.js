@@ -289,7 +289,7 @@ function parseCommonArgs(args) {
   }
   
   if (!parsed.uiLanguage) {
-    const envLang = envManager.get('I18NTK_LANG');
+    const envLang = envManager.get('I18NTK_UI_LANGUAGE');
     if (envLang && envLang !== 'en') {
       parsed.uiLanguage = envLang;
     }
@@ -371,7 +371,7 @@ function displayHelp(scriptName, additionalOptions = {}) {
   console.log(`\nEnvironment Variables:`);
   console.log(`  I18NTK_LOG_LEVEL     Logging level (error, warn, info, debug, silent)`);
   console.log(`  I18NTK_OUTDIR        Output directory for reports`);
-  console.log(`  I18NTK_LANG          UI language (en, de, es, fr, ru, ja, zh)`);
+  console.log(`  I18NTK_UI_LANGUAGE  UI language (en, de, es, fr, ru, ja, zh)`);
   console.log(`  I18NTK_SILENT        Run in silent mode (true/false)`);
   console.log(`  I18NTK_DEBUG_LOCALES Enable debug logging for locale loading`);
   console.log(`  I18NTK_SOURCE_DIR    Source directory for scanning`);
@@ -397,6 +397,10 @@ function displayHelp(scriptName, additionalOptions = {}) {
  * @param {string} dirPath - Directory path
  */
 function ensureDirectory(dirPath) {
+  if (!dirPath || typeof dirPath !== 'string') {
+    // Silently handle undefined or invalid paths to prevent security errors
+    return;
+  }
   if (!SecurityUtils.safeExistsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
@@ -421,79 +425,31 @@ function displayPaths(cfg = {}) {
 // Ensure project has been initialized with source language files
 async function ensureInitialized(cfg) {
   try {
-    // Check if initialization has been marked as complete
-    const configPath = path.join(path.dirname(require.main.filename), '..', 'settings', 'initialization.json');
-    let initStatus = { initialized: false, version: null, timestamp: null };
-    
-    if (SecurityUtils.safeExistsSync(configPath)) {
-      try {
-        initStatus = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
-        // If initialized and version matches current, skip further checks
-        if (initStatus.initialized && initStatus.version === '1.8.3') {
-          return true;
-        }
-      } catch (e) {
-        // Invalid initialization file, proceed with normal check
-      }
-    }
+    const { checkInitialized } = require('./init-helper');
+    const sourceDir = cfg?.sourceDir || './locales';
+    const sourceLanguage = cfg?.sourceLanguage || 'en';
 
-    const sourceDir = cfg.sourceDir;
-    const sourceLanguage = cfg.sourceLanguage || 'en';
-    const langDir = path.join(sourceDir, sourceLanguage);
-
-    const hasLanguageFiles = SecurityUtils.safeExistsSync(langDir) &&
-      fs.readdirSync(langDir).some(f => f.endsWith('.json'));
-    
-    // If language files exist and we're upgrading, mark as initialized
-    if (hasLanguageFiles) {
-      const initDir = path.dirname(configPath);
-      ensureDirectory(initDir);
-      SecurityUtils.safeWriteFileSync(configPath, JSON.stringify({
-        initialized: true,
-        version: '1.8.3',
-        timestamp: new Date().toISOString(),
-        sourceDir: sourceDir,
-        sourceLanguage: sourceLanguage
-      }, null, 2));
+    const { initialized } = await checkInitialized({ sourceDir, sourceLanguage });
+    if (initialized) {
       return true;
     }
 
     const nonInteractive = !process.stdin.isTTY;
 
     if (nonInteractive) {
+      const langDir = path.join(sourceDir, sourceLanguage);
       console.warn(`Missing source language files in ${langDir}. Running initialization...`);
       await initializeSourceFiles(sourceDir, sourceLanguage);
-      
-      // Mark initialization as complete
-      const initDir = path.dirname(configPath);
-      ensureDirectory(initDir);
-      SecurityUtils.safeWriteFileSync(configPath, JSON.stringify({
-        initialized: true,
-        version: '1.8.3',
-        timestamp: new Date().toISOString(),
-        sourceDir: sourceDir,
-        sourceLanguage: sourceLanguage
-      }, null, 2));
       return true;
     }
 
+    const langDir = path.join(sourceDir, sourceLanguage);
     const answer = await ask(`Source language files not found in ${langDir}. Run initialization now? (y/N) `);
     const { closeGlobalReadline } = require('./cli');
     closeGlobalReadline();
 
     if (answer.trim().toLowerCase().startsWith('y')) {
       await initializeSourceFiles(sourceDir, sourceLanguage);
-      
-      // Mark initialization as complete
-      const initDir = path.dirname(configPath);
-      ensureDirectory(initDir);
-      SecurityUtils.safeWriteFileSync(configPath, JSON.stringify({
-        initialized: true,
-        version: '1.8.3',
-        timestamp: new Date().toISOString(),
-        sourceDir: sourceDir,
-        sourceLanguage: sourceLanguage
-      }, null, 2));
       return true;
     }
     return false;
@@ -550,15 +506,28 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
     }
   });
   
-  // Create i18ntk-config.json if it doesn't exist
-  const configFile = 'i18ntk-config.json';
+  // Create v2 project config if it doesn't exist
+  const configFile = '.i18ntk-config';
   if (!SecurityUtils.safeExistsSync(configFile)) {
+    const version = (() => {
+      try {
+        return require('../package.json').version;
+      } catch {
+        return '2.0.0';
+      }
+    })();
     const defaultConfig = {
-      version: "1.8.3",
+      version,
       sourceDir: sourceDir,
       outputDir: "./i18ntk-reports",
       defaultLanguage: sourceLang,
       supportedLanguages: [sourceLang, 'es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'],
+      setup: {
+        completed: true,
+        completedAt: new Date().toISOString(),
+        version,
+        setupId: `setup_${Date.now()}`
+      },
       security: {
         adminPinEnabled: true,
         sessionTimeout: 1800000,

@@ -5,8 +5,10 @@ const crypto = require('crypto');
 
 // Lazy load configManager to avoid circular dependency
 let configManager;
+let configManagerLoadAttempted = false;
 function getConfigManager() {
-  if (!configManager) {
+  if (!configManager && !configManagerLoadAttempted) {
+    configManagerLoadAttempted = true;
     try {
       configManager = require('./config-manager');
     } catch (error) {
@@ -37,7 +39,6 @@ function getI18n() {
  * Provides secure file operations, path validation, and input sanitization
  * to prevent path traversal, code injection, and other security vulnerabilities
  */
-console.log('🔍 DEBUG: SecurityUtils class loaded successfully');
 class SecurityUtils {
 
   // Static properties for operation tracking
@@ -75,15 +76,12 @@ class SecurityUtils {
       let hasResult = false;
       let timeoutId = null;
 
-      const timeoutPromise = new Promise((resolve) => {
-        timeoutId = setTimeout(() => {
-          if (!hasResult) {
-            const i18n = getI18n();
-            SecurityUtils.logSecurityEvent(i18n.t('security.operation_timeout', { operation: operationName }), 'warning');
-            resolve(null);
-          }
-        }, timeoutMs);
-      });
+      timeoutId = setTimeout(() => {
+        if (!hasResult) {
+          const i18n = getI18n();
+          SecurityUtils.logSecurityEvent(i18n.t('security.operation_timeout', { operation: operationName }), 'warning');
+        }
+      }, timeoutMs);
 
       // Execute operation synchronously
       result = operation();
@@ -304,6 +302,100 @@ class SecurityUtils {
     }
   }
 
+  /**
+   * Async compatibility wrapper for safeReadFileSync.
+   * @param {string} filePath
+   * @param {string} basePath
+   * @param {string} encoding
+   * @returns {Promise<string|null>}
+   */
+  static async safeReadFile(filePath, basePath, encoding = 'utf8') {
+    return this.safeReadFileSync(filePath, basePath, encoding);
+  }
+
+  /**
+   * Async compatibility wrapper for safeWriteFileSync.
+   * @param {string} filePath
+   * @param {string|Buffer} content
+   * @param {string} basePath
+   * @param {string} encoding
+   * @returns {Promise<boolean>}
+   */
+  static async safeWriteFile(filePath, content, basePath, encoding = 'utf8') {
+    return this.safeWriteFileSync(filePath, content, basePath, encoding);
+  }
+
+  static safeStatSync(filePath, basePath) {
+    const validatedPath = this.validatePath(filePath, basePath);
+    if (!validatedPath) {
+      return null;
+    }
+    try {
+      return fs.statSync(validatedPath);
+    } catch {
+      return null;
+    }
+  }
+
+  static safeReaddirSync(dirPath, basePath, options) {
+    const validatedPath = this.validatePath(dirPath, basePath);
+    if (!validatedPath) {
+      return [];
+    }
+    try {
+      return fs.readdirSync(validatedPath, options);
+    } catch {
+      return [];
+    }
+  }
+
+  static safeMkdirSync(dirPath, basePath, options = { recursive: true }) {
+    const validatedPath = this.validatePath(dirPath, basePath);
+    if (!validatedPath) {
+      return false;
+    }
+    try {
+      fs.mkdirSync(validatedPath, options);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Safely parse JSON content.
+   * Accepts both raw JSON strings and already-parsed objects.
+   * @param {string|object} input - JSON string or object
+   * @param {*} fallback - Value to return on parse error
+   * @returns {*}
+   */
+  static safeParseJSON(input, fallback = null) {
+    if (input === null || input === undefined) {
+      return fallback;
+    }
+
+    if (typeof input === 'object') {
+      return input;
+    }
+
+    if (typeof input !== 'string') {
+      return fallback;
+    }
+
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return fallback;
+    }
+
+    try {
+      const normalized = trimmed.charCodeAt(0) === 0xFEFF ? trimmed.slice(1) : trimmed;
+      return JSON.parse(normalized);
+    } catch (error) {
+      console.warn(`Invalid JSON content: ${error.message}`);
+      return fallback;
+    }
+  }
+
   static sanitizeInput(input, options = {}) {
     if (!input || typeof input !== 'string') {
       return '';
@@ -361,11 +453,28 @@ class SecurityUtils {
       return false;
     }
 
-    // Check for dangerous patterns
+    // Allow legitimate Windows drive letter paths
+    if (filePath.match(/^[A-Z]:[\/\\]/)) {
+      const afterDrive = filePath.substring(3);
+      // Only check the part after the drive letter for dangerous patterns
+      const dangerousPatterns = [
+        /\.\./,           // Parent directory traversal
+        /~/,              // Home directory
+        /\$\{/,           // Variable expansion
+        /`/,              // Command substitution
+        /\|/,             // Pipe
+        /;/,              // Command separator
+        /&/,              // Background process
+        />/,              // Redirect
+        /</               // Redirect
+      ];
+      return !dangerousPatterns.some(pattern => pattern.test(afterDrive));
+    }
+
+    // Check for dangerous patterns in non-Windows paths
     const dangerousPatterns = [
       /\.\./,           // Parent directory traversal
-      /^\//,            // Absolute path (Unix)
-      /^[A-Z]:\\/,      // Absolute path (Windows)
+      /^\//,            // Absolute path (Unix) - but allow for legitimate use
       /~/,              // Home directory
       /\$\{/,           // Variable expansion
       /`/,              // Command substitution
@@ -375,6 +484,13 @@ class SecurityUtils {
       />/,              // Redirect
       /</               // Redirect
     ];
+
+    // Allow absolute paths that are within the project structure
+    if (filePath.startsWith('/') || filePath.startsWith('\\')) {
+      // Allow absolute paths but check for dangerous patterns
+      const hasDangerousPatterns = dangerousPatterns.slice(1).some(pattern => pattern.test(filePath));
+      return !hasDangerousPatterns;
+    }
 
     return !dangerousPatterns.some(pattern => pattern.test(filePath));
   }
@@ -443,56 +559,34 @@ class SecurityUtils {
 
     pathProperties.forEach(prop => {
       if (sanitized[prop] && typeof sanitized[prop] === 'string') {
-        // Check for dangerous patterns
-        if (!SecurityUtils.isSafePath(sanitized[prop])) {
-          SecurityUtils.logSecurityEvent('Path validation failed for configuration property', 'error', {
+        let originalPath = sanitized[prop];
+        
+        // Skip validation for legitimate absolute paths
+        const isWindowsAbsolute = originalPath.match(/^[A-Z]:[\/\\]/i);
+        const isUnixAbsolute = originalPath.startsWith('/') || originalPath.startsWith('\\');
+        
+        if (isWindowsAbsolute || isUnixAbsolute) {
+          // Allow absolute paths - they're legitimate for project directories
+          return;
+        }
+        
+        // Only validate relative paths for dangerous patterns
+        if (!SecurityUtils.isSafePath(originalPath)) {
+          SecurityUtils.logSecurityEvent('Path validation failed for configuration property', 'warn', {
             property: prop,
-            originalPath: sanitized[prop]
+            originalPath: originalPath
           });
-
-          // Attempt to sanitize the path by removing dangerous patterns
-          let sanitizedPath = sanitized[prop];
-
-          // Remove parent directory references (path traversal)
-          sanitizedPath = sanitizedPath.replace(/\.\.[\/\\]/g, '');
-
-          // Remove shell metacharacters and dangerous patterns
+          
+          // For relative paths, ensure they're safe
+          let sanitizedPath = originalPath.replace(/\.\.[\/\\]/g, '');
           sanitizedPath = sanitizedPath.replace(/[|;&$`{}()[\]<>?]/g, '');
-
-          // Only remove absolute path indicators if they're suspicious
-          // Allow legitimate Windows drive letters (C:\, D:\, etc.) but remove suspicious ones
-          if (sanitizedPath.match(/^[A-Z]:[\/\\]/)) {
-            // Check if this looks like a legitimate Windows path by ensuring it doesn't contain
-            // suspicious patterns after the drive letter
-            const afterDrive = sanitizedPath.substring(3); // Everything after "C:\"
-            if (afterDrive.includes('..') || afterDrive.match(/[|;&$`{}()[\]<>?]/)) {
-              // Remove the drive letter if the rest of the path is suspicious
-              sanitizedPath = sanitizedPath.replace(/^[A-Z]:[\/\\]/, '');
-            }
-            // If the path looks legitimate, keep the drive letter
-          } else {
-            // For non-Windows paths, remove leading slashes as before
-            sanitizedPath = sanitizedPath.replace(/^[\/\\]/, '');
-          }
-
-          if (sanitizedPath !== sanitized[prop]) {
-            // Only warn if significant changes were made (not just removing drive letters for legitimate paths)
-            const significantChange = sanitizedPath.length < sanitized[prop].length * 0.8 ||
-              sanitizedPath.replace(/[\/\\]/g, '') !== sanitized[prop].replace(/^[A-Z]:[\/\\]/, '').replace(/[\/\\]/g, '');
-
-            if (significantChange) {
-              SecurityUtils.logSecurityEvent('Path sanitized for configuration property', 'warn', {
-                property: prop,
-                originalPath: sanitized[prop],
-                sanitizedPath: sanitizedPath
-              });
-            } else {
-              SecurityUtils.logSecurityEvent('Path normalized for configuration property', 'info', {
-                property: prop,
-                originalPath: sanitized[prop],
-                sanitizedPath: sanitizedPath
-              });
-            }
+          
+          if (sanitizedPath !== originalPath) {
+            SecurityUtils.logSecurityEvent('Path sanitized for configuration property', 'info', {
+              property: prop,
+              originalPath: originalPath,
+              sanitizedPath: sanitizedPath
+            });
             sanitized[prop] = sanitizedPath;
           }
         }

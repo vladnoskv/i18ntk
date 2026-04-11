@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 let configManager = null;
 try { configManager = require('../utils/config-manager'); } catch (_) { /* optional */ }

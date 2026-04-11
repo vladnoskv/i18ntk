@@ -248,7 +248,7 @@ const FRAMEWORKS = {
   },
   go: {
     name: 'go',
-    deps: ['golang.org/x/text/language', 'github.com/nicksnyder/go-i18n/v2/i18n'],
+    deps: ['go-i18n', 'x-text'],
     globs: ['**/*.go'],
     patterns: [
       /i18n\.NewMessage\([^,]+,\s*["`]([^"`]+)["`]/g,

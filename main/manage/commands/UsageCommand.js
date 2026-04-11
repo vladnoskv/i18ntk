@@ -5,9 +5,6 @@
  *
  * Handles usage analysis functionality.
  */
-
-const I18nUsageAnalyzer = require('../../i18ntk-usage');
-
 class UsageCommand {
     constructor(config = {}, ui = null) {
         this.config = config;
@@ -31,6 +28,7 @@ class UsageCommand {
      */
     async execute(options = {}) {
         try {
+            const I18nUsageAnalyzer = require('../../i18ntk-usage');
             const usageAnalyzer = new I18nUsageAnalyzer();
             await usageAnalyzer.run(options);
             return { success: true, command: 'usage' };

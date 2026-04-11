@@ -304,6 +304,63 @@ class SecurityUtils {
     }
   }
 
+  /**
+   * Async compatibility wrapper for safeReadFileSync.
+   * @param {string} filePath
+   * @param {string} basePath
+   * @param {string} encoding
+   * @returns {Promise<string|null>}
+   */
+  static async safeReadFile(filePath, basePath, encoding = 'utf8') {
+    return this.safeReadFileSync(filePath, basePath, encoding);
+  }
+
+  /**
+   * Async compatibility wrapper for safeWriteFileSync.
+   * @param {string} filePath
+   * @param {string|Buffer} content
+   * @param {string} basePath
+   * @param {string} encoding
+   * @returns {Promise<boolean>}
+   */
+  static async safeWriteFile(filePath, content, basePath, encoding = 'utf8') {
+    return this.safeWriteFileSync(filePath, content, basePath, encoding);
+  }
+
+  /**
+   * Safely parse JSON content.
+   * Accepts both raw JSON strings and already-parsed objects.
+   * @param {string|object} input - JSON string or object
+   * @param {*} fallback - Value to return on parse error
+   * @returns {*}
+   */
+  static safeParseJSON(input, fallback = null) {
+    if (input === null || input === undefined) {
+      return fallback;
+    }
+
+    if (typeof input === 'object') {
+      return input;
+    }
+
+    if (typeof input !== 'string') {
+      return fallback;
+    }
+
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return fallback;
+    }
+
+    try {
+      const normalized = trimmed.charCodeAt(0) === 0xFEFF ? trimmed.slice(1) : trimmed;
+      return JSON.parse(normalized);
+    } catch (error) {
+      console.warn(`Invalid JSON content: ${error.message}`);
+      return fallback;
+    }
+  }
+
   static sanitizeInput(input, options = {}) {
     if (!input || typeof input !== 'string') {
       return '';

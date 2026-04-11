@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "1.10.3",
+  "version": "2.0.0",
   "description": "🚀 The fastest i18n toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -206,6 +206,7 @@
     "languages:select": "node settings/settings-cli.js",
     "languages:list": "node settings/settings-cli.js --list-languages",
     "languages:status": "node settings/settings-cli.js --language-status",
+    "lint:locales": "node scripts/lint-locales.js",
     "deprecate:versions": "node scripts/deprecate-versions.js",
     "deprecate:dry-run": "node scripts/deprecate-versions.js --dry-run",
     "deprecate:verify": "node scripts/verify-deprecations.js"
@@ -219,26 +220,20 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "1.10.3",
-    "releaseDate": "23/08/2025",
-    "lastUpdated": "25/08/2025",
+    "version": "2.0.0",
+    "releaseDate": "01/01/2026",
+    "lastUpdated": "11/04/2026",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "SECURITY: Complete removal of child_process dependencies - zero shell access",
-      "FEATURE: Python framework support (Django, Flask, FastAPI)",
-      "PERFORMANCE: 97% faster processing (15.38ms for 200k keys)",
-      "FEATURE: Enhanced framework detection with 95% accuracy",
-      "ENHANCEMENT: Multi-language support with 8 built-in UI languages",
-      "FEATURE: Interactive translation fixer with custom placeholders",
-      "SECURITY: PIN protection and encrypted configuration storage",
-      "OPTIMIZATION: Memory usage <2MB for any operation",
-      "FEATURE: Comprehensive backup and recovery system",
-      "BUGFIX: Windows path resolution improvements",
-      "DOCUMENTATION: Updated for v1.10.1 with Python support",
-      "MAINTENANCE: Clean package structure - 2.2 MB total size"
+      "BREAKING: Unified v2 command surface and release metadata",
+      "SECURITY: Zero runtime dependencies and hardened config IO",
+      "I18N: Added missing translation keys used by init/fixer/sizing/summary/usage/settings flows",
+      "RELIABILITY: Initialization detection now honors .i18ntk-config setup state",
+      "RELIABILITY: Added async safeReadFile/safeWriteFile + safeParseJSON compatibility helpers",
+      "INIT: Auto-bootstrap source locale file when source language directory is empty"
     ],
     "breakingChanges": [],
     "deprecations": [
@@ -264,9 +259,11 @@
       "1.8.2",
       "1.8.3",
       "1.9.0",
-      "1.10.1"
+      "1.10.1",
+      "1.10.2",
+      "1.10.3"
     ],
-    "nextVersion": "1.11.0",
+    "nextVersion": "2.1.0",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",

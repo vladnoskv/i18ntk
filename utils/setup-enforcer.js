@@ -35,14 +35,19 @@ class SetupEnforcer {
          // Avoid circular dependency - use direct path resolution
          const path = require('path');
          const configPath = path.join(process.cwd(), '.i18ntk-config');
-        
-        if (!SecurityUtils.safeExistsSync(configPath)) {
+        const exists = SecurityUtils.safeExistsSync(configPath);
+        if (!exists) {
             this.handleMissingSetup();
             return;
         }
 
         try {
-            const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
+            const configRaw = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
+            const config = SecurityUtils.safeParseJSON(configRaw);
+            if (!config || typeof config !== 'object') {
+                this.handleInvalidConfig();
+                return;
+            }
             
             // Check if setup has been explicitly marked as completed
             if (config.setup && config.setup.completed === true) {
@@ -305,11 +310,12 @@ static async handleInvalidConfig() {
                  // Avoid circular dependency - use direct path resolution
                  const path = require('path');
                  const configPath = path.join(process.cwd(), '.i18ntk-config');
-                
-                if (!SecurityUtils.safeExistsSync(configPath)) {
+                const exists = SecurityUtils.safeExistsSync(configPath);
+                if (!exists) {
                     await SetupEnforcer.handleMissingSetup();
                     // After setup is done, re-check the config
-                    if (SecurityUtils.safeExistsSync(configPath)) {
+                    const existsAfter = SecurityUtils.safeExistsSync(configPath);
+                    if (existsAfter) {
                         resolve(true);
                     } else {
                         process.exit(0);
@@ -318,7 +324,12 @@ static async handleInvalidConfig() {
                 }
 
                 try {
-                    const config = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
+                    const configRaw = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
+                    const config = SecurityUtils.safeParseJSON(configRaw);
+                    if (!config || typeof config !== 'object') {
+                        await SetupEnforcer.handleInvalidConfig();
+                        process.exit(0);
+                    }
                     
                     // Check if setup has been explicitly marked as completed
                     if (config.setup && config.setup.completed === true) {
@@ -330,7 +341,11 @@ static async handleInvalidConfig() {
                     if (!config.version || !config.sourceDir || (!config.detectedFramework && !(config.framework && config.framework.detected !== false))) {
                         await SetupEnforcer.handleIncompleteSetup();
                         // After setup is done, re-check the config
-                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
+                        const newConfigRaw = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
+                        const newConfig = SecurityUtils.safeParseJSON(newConfigRaw);
+                        if (!newConfig || typeof newConfig !== 'object') {
+                            process.exit(0);
+                        }
                         if (newConfig.setup && newConfig.setup.completed === true) {
                             resolve(true);
                         } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {
@@ -346,7 +361,11 @@ static async handleInvalidConfig() {
                     await SetupEnforcer.handleInvalidConfig();
                     // After setup is done, re-check the config
                     try {
-                        const newConfig = JSON.parse(SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8'));
+                        const newConfigRaw = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
+                        const newConfig = SecurityUtils.safeParseJSON(newConfigRaw);
+                        if (!newConfig || typeof newConfig !== 'object') {
+                            process.exit(0);
+                        }
                         if (newConfig.setup && newConfig.setup.completed === true) {
                             resolve(true);
                         } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {

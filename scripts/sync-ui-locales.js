@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 const baseDir = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales');
 const en = JSON.parse(SecurityUtils.safeReadFileSync(path.join(baseDir,'en.json'), baseDir, 'utf8'));
 function flatten(obj,pfx='',out={}){ for(const [k,v] of Object.entries(obj)){ const nk=pfx?`${pfx}.${k}`:k; if(v && typeof v==='object' && !Array.isArray(v)) flatten(v,nk,out); else out[nk]=v; } return out; }
@@ -14,6 +15,6 @@ for (const file of fs.readdirSync(baseDir)) {
   for (const [k,v] of Object.entries(enFlat)) {
     if (!(k in flat)) { flat[k] = v || 'NOT_TRANSLATED'; changed = true; }
   }
-  if (changed) { SecurityUtils.safeWriteFileSync(p, JSON.stringify(unflatten(flat), null, 2), path.dirname(p)); }
+  if (changed) { SecurityUtils.safeWriteFileSync(p, JSON.stringify(unflatten(flat), null, 2), path.dirname(p), 'utf8'); }
 }
 console.log('UI locales synced.');

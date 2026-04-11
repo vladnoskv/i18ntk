@@ -19,17 +19,6 @@ const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displ
 const I18nInitializer = require('../../i18ntk-init');
 const JsonOutput = require('../../../utils/json-output');
 const ExitCodes = require('../../../utils/exit-codes');
-const SetupEnforcer = require('../../../utils/setup-enforcer');
-
-// Ensure setup is complete before running
-(async () => {
-    try {
-        await SetupEnforcer.checkSetupCompleteAsync();
-    } catch (error) {
-        console.error('Setup check failed:', error.message);
-        process.exit(1);
-    }
-})();
 
 loadTranslations('en', path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
 

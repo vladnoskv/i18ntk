@@ -162,4 +162,29 @@ try {
     console.error('\n❌ Isolated import test failed with error:', error.message);
     console.error('Stack trace:', error.stack);
     process.exit(1);
+} finally {
+    // Clean up module cache to prevent pollution of subsequent runs
+    console.log('\n🧹 Cleaning up module cache...');
+    const modulesToClean = [
+        './settings/settings-manager',
+        './utils/security',
+        './utils/setup-enforcer',
+        './main/i18ntk-ui',
+        './utils/admin-auth',
+        './main/manage/commands/CommandRouter'
+    ];
+    
+    modulesToClean.forEach(modulePath => {
+        try {
+            const resolvedPath = originalRequire.resolve(modulePath);
+            if (require.cache[resolvedPath] &&
+                require.cache[resolvedPath].exports !== originalRequire(modulePath)) {
+                console.log(`   ✅ Cleaning cache for: ${modulePath}`);
+                delete require.cache[resolvedPath];
+            }
+        } catch (error) {
+            // Ignore cleanup errors for modules that might not exist
+        }
+    });
+    console.log('✅ Module cache cleanup completed');
 }

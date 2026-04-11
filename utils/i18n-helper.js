@@ -167,10 +167,10 @@ const missingWarned = new Set();
 function loadTranslations(language) {
   const cfg = safeRequireConfig();
   const settings = cfg?.getConfig?.() || {};
-  const configuredLanguage = settings.uiLanguage || settings.language || 'en';
+  const configuredLanguage = settings.uiLanguage || settings.language;
 
-  // Prioritize settings file language over environment variable
-  const requested = (configuredLanguage || language || 'en').toString();
+  // Prioritize CLI argument, then UI language, then language fallback
+  const requested = (language || configuredLanguage || 'en').toString();
   const short = requested.split('-')[0].toLowerCase();
   const tryOrder = [requested, short, 'en'];
 
@@ -394,7 +394,7 @@ function deepMerge(target, source) {
 function refreshLanguageFromSettings() {
   const cfg = safeRequireConfig();
   const settings = cfg?.getConfig?.() || {};
-  const configuredLanguage = settings.language || settings.uiLanguage || 'en';
+  const configuredLanguage = settings.uiLanguage || settings.language || 'en';
 
   if (configuredLanguage !== currentLanguage) {
     isInitialized = false;

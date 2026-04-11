@@ -3,7 +3,6 @@
     "version": "1.10.3",
     "updated": "2025-08-24"
   },
-  
   "common": {
     "welcome": "Welcome",
     "hello": "Hello",
@@ -100,15 +99,17 @@
     "partialKeys": "Partial keys:",
     "home": "Home",
     "settings": "Settings",
-  "startingSettings": "🎛️  Starting Settings CLI...",
-  "confirm": "Confirm"
+    "startingSettings": "🎛️  Starting Settings CLI...",
+    "confirm": "Confirm",
+    "errorExiting": "Error while exiting."
   },
-    "errors": {
+  "errors": {
     "invalidOption": "❌ Invalid option: {option}. Please try again.",
     "readlineClosed": "Input stream is closed; running in non-interactive mode.",
     "noPackageJson": "No package.json found. Cannot auto-detect i18n framework.",
     "noI18nDir": "No i18n directory found in the project root.",
-    "noI18nConfig": "No i18n configuration file found in the project root."
+    "noI18nConfig": "No i18n configuration file found in the project root.",
+    "errorReadingDebugLogs": "Error reading debug logs: {error}"
   },
   "scanner": {
     "help_message": "\nI18n Text Scanner\n\nUsage: node i18ntk-scanner.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)\n  --framework <name>     Framework to target (react, vue, angular, vanilla)\n  --patterns <patterns>  Custom regex patterns (comma-separated)\n  --include-tests        Include test files in scan\n  --exclude-dirs <dirs>  Directories to exclude (comma-separated)\n  --help                Show this help\n\nExamples:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./scan-results.json\n",
@@ -159,7 +160,8 @@
       "includeTests": "Include test files?",
       "excludeDirs": "Directories to exclude (comma-separated):",
       "customPatterns": "Custom patterns to scan for (regex):"
-    }
+    },
+    "reportGenerated": "Scan report generated: {path}"
   },
   "fixer": {
     "help_message": "\nI18n Translation Fixer\n\nUsage: node i18ntk-fixer.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./locales)\n  --languages <langs>    Comma separated list of languages to fix\n  --markers <markers>    Comma separated markers to treat as untranslated\n  --no-backup           Skip automatic backup creation\n  --help                Show this help\n\nExamples:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -196,12 +198,7 @@
     "choicePrompt": "Your choice (y/n/s): ",
     "nonInteractiveMode": "⚡ Non-interactive mode detected - applying fixes automatically...",
     "reportGenerated": "📊 Fixer report generated: {path}",
-    "summary": {
-      "totalIssues": "Total issues: {total}",
-      "missingKeys": "Missing keys: {missing}",
-      "placeholderKeys": "Placeholder keys: {placeholder}",
-      "languages": "Languages: {languages}"
-    },
+    "summary": "Fixer summary:",
     "welcome": {
       "title": "🎯 Welcome to the Translation Fixer!",
       "description": "This tool will help you fix broken translations and placeholders across your locale files."
@@ -224,7 +221,17 @@
       "current": "Current directory: {dir}",
       "description": "Enter the directory containing your locale files (or press Enter for current):",
       "input": "Directory: "
-    }
+    },
+    "backupLocation": "Backup location: {dir}",
+    "completed": "Fixing completed.",
+    "creatingBackup": "Creating backup in {dir}...",
+    "dryRunMode": "Dry run mode: {mode}",
+    "error": "Fixer failed: {error}",
+    "fixing": "Fixing {language}...",
+    "foundLanguages": "Found {count} languages: {languages}",
+    "languageFixed": "{language}: fixed {fixed} key(s), skipped {skipped}.",
+    "running": "Running translation fixer...",
+    "totalFixed": "Total fixed: {count}"
   },
   "autorun": {
     "stepAnalyzeTranslations": "Analyze translations",
@@ -488,7 +495,13 @@
       "keys_have_significant_size_variations": "keys have significant size variations",
       "consider_reviewing_translations": "Consider reviewing {lang} translations - they are {percentageDifference}% {comparison} than baseline",
       "long_translations_detected": "{lang} has {longKeys} translations longer than {threshold} characters - consider breaking them down"
-    }
+    },
+    "detailed_key_analysis_title": "Detailed Key Analysis",
+    "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
+    "key_analysis_header": "Key: {key}",
+    "status_empty": "empty",
+    "status_long": "long",
+    "status_ok": "ok"
   },
   "usage": {
     "help_message": "\nI18n Usage Analyzer\n\nUsage: node i18ntk-usage.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --i18n-dir <dir>       I18n directory (default: ./src/locales)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
@@ -515,7 +528,7 @@
     "failedToAnalyzeUsage": "❌ Failed to analyze usage: {error}",
     "failedToAnalyzeFile": "❌ Failed to analyze file: {error}",
     "failedToExtractKeys": "❌ Failed to extract keys from {filePath}: {error}",
-    "analysisFailedError":"❌ Analysis failed: {error}",
+    "analysisFailedError": "❌ Analysis failed: {error}",
     "analyzerInitialized": "Analyzer initialized",
     "analyzerInitFailed": "Analyzer initialization failed: {error}",
     "argsParsed": "Arguments parsed",
@@ -624,7 +637,12 @@
     },
     "noTranslationLanguagesFound": "No Translation Languages Found",
     "failedToAnalyzeLanguage": "Failed To Analyze Language",
-    "translationCompletenessAnalysisFailed": "Translation Completeness Analysis Failed"
+    "translationCompletenessAnalysisFailed": "Translation Completeness Analysis Failed",
+    "failedToProcessFile": "Failed to process file:",
+    "failedToSaveReport": "Failed to save usage report: {error}",
+    "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
+    "reportSavedTo": "Usage report saved to: {reportPath}",
+    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}"
   },
   "validate": {
     "help_message": "\nI18n Translation Validator\n\nUsage: node i18ntk-validate.js [options]\n\nOptions:\n  --source-dir <dir>     Source directory to scan (default: ./src)\n  --i18n-dir <dir>       I18n directory (default: ./src/locales)\n  --output-report        Generate detailed report\n  --output-dir <dir>     Output directory for reports (default: ./reports)\n  --help                 Show this help\n\nExamples:\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
@@ -721,7 +739,9 @@
     "invalidSampleFilePath": "Invalid sample file path",
     "failedToCreateSampleTranslationFile": "Failed to create sample translation file",
     "invalidFilePathDetected": "Invalid file path detected",
-    "failedToWriteFile": "Failed to write file: {filePath}"
+    "failedToWriteFile": "Failed to write file: {filePath}",
+    "invalidSourceDirectory": "Invalid source directory: {sourceDir}",
+    "invalidSourceLanguageDirectory": "Invalid source language directory: {sourceDir}"
   },
   "adminCli": {
     "setupPinProtectionTitle": "\n🔐 Setting up Admin PIN Protection",
@@ -885,9 +905,9 @@
   },
   "help": {
     "title": "📊 I18NTK MANAGEMENT HELP\n\n",
-    "usage": "Usage: node i18ntk-manage.js [options]\n",
-    "interactiveMode": "\n💡 Use: node i18ntk-manage.js --command=<command> for direct execution\n",
-    "showHelp": "\n📖 Use: node i18ntk-manage.js --help for available commands\n",
+    "usage": "Usage: node main/manage/index.js [options]\n",
+    "interactiveMode": "\n💡 Use: node main/manage/index.js --command=<command> for direct execution\n",
+    "showHelp": "\n📖 Use: node main/manage/index.js --help for available commands\n",
     "availableCommands": "\n📖 Available Commands:\n",
     "initProject": "🚀 Initialize new languages",
     "analyzeTranslations": "🔍 Analyze translations",
@@ -901,6 +921,7 @@
     "completeCommand": "  complete  - Complete translations (100% coverage)",
     "summaryCommand": "  summary   - Show project status",
     "debugCommand": "  debug     - Debug translation issues",
+    "scannerCommand": "  scanner   - Scan for keys",
     "menu": {
       "pressEnterToContinue": "Press Enter to continue...",
       "title": "\n🌐 I18NTK MANAGEMENT MENU\n",
@@ -950,7 +971,7 @@
     },
     "messages": {
       "selectOption": "Select an option:",
-      "invalidOption": "❌ Invalid option. Please try again.",
+      "invalidOption": "Invalid option. Please try again.",
       "operationCompleted": "✅ Operation completed successfully!",
       "pressEnter": "Press Enter to continue...",
       "goodbye": "👋 Goodbye!",
@@ -999,7 +1020,7 @@
     "adminPinSetupFailure": "🔐 Admin PIN setup failed. Please try again.",
     "adminProtectionEnabled": "🔐 Admin protection enabled. All actions require PIN authentication.",
     "adminProtectionDisabled": "🔐 Admin protection disabled. All actions are now available without PIN.",
-    "autoDetectedI18nDirectory": "📂 Auto-detected i18n directory: {directory}",
+    "autoDetectedI18nDirectory": "Auto-detected i18n directory: {directory}",
     "initializingProject": "⚙️  Initializing project configuration...",
     "createdSampleTranslationFile": "✅ Created sample translation file: {file}",
     "languageSelectionTitle": "🌐 Language Configuration",
@@ -1064,13 +1085,23 @@
       "sourceLanguageDirectoryNotFound": "Source language directory not found: {dir}",
       "noJsonFilesInSourceDirectory": "No JSON files found in source directory: {dir}",
       "invalidFilePathDetected": "Invalid file path detected",
-      "initializationFailed": "Initialization failed: {error}"
+      "initializationFailed": "Initialization failed: {error}",
+      "noFramework": "No i18n framework detected. Continue with generic mode.",
+      "packageJsonRead": "Error reading package.json."
     },
     "processingFile": "Processing {file} for {language}...",
     "fileAlreadyExistsMerging": "File {file} already exists. Merging new keys.",
     "createdNewFile": "Created new file: {file}",
     "updatedFile": "Updated file: {file}",
-    "skippingExcludedFile": "Skipping {file} for {language} as it's excluded."
+    "skippingExcludedFile": "Skipping {file} for {language} as it's excluded.",
+    "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "createdSourceLanguageDirectory": "Created source language directory: {dir}",
+    "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
+    "noTargetLanguagesSpecified": "No target languages specified.",
+    "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
+    "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
+    "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
+    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
   },
   "language": {
     "title": "🌍 Change Language",
@@ -1125,18 +1156,18 @@
     },
     "update": "📦 Update Package",
     "goodbye": "👋 Goodbye!",
-    "invalidChoice": "❌ Invalid choice. Please select 0-15.",
-    "returning": "🔄 Returning to main menu...",
-    "invalidOption": "❌ Invalid option. Please try again.",
-    "nonInteractiveModeWarning": "⚠️ Non-interactive mode detected. Menu displayed for reference only.",
-    "useDirectExecution": "💡 Use: node main/i18ntk-manage.js --command=<command> for direct execution.",
-    "useHelpForCommands": "📖 Use: node main/i18ntk-manage.js --help for available commands.",
+    "invalidChoice": "Invalid choice. Please select 0-15.",
+    "returning": "Returning to main menu...",
+    "invalidOption": "Invalid option. Please try again.",
+    "nonInteractiveModeWarning": "Non-interactive mode detected. Menu displayed for reference only.",
+    "useDirectExecution": "Use: node main/manage/index.js --command=<command> for direct execution.",
+    "useHelpForCommands": "Use: node main/manage/index.js --help for available commands.",
     "returnToMainMenu": "Press Enter to return to Main Menu.",
     "pressEnterToContinue": "Press Enter to continue...",
     "selectOptionPrompt": "Select an option:",
     "selectDebugToolPrompt": "Select a debug tool:",
     "selectLogPrompt": "Select a log file (1-{count}):",
-    "autoDetectedI18nDirectory": "📂 Auto-detected i18n directory: {directory}",
+    "autoDetectedI18nDirectory": "Auto-detected i18n directory: {directory}",
     "executingCommand": "Executing command: {command}",
     "unknownCommand": "Unknown command: {command}",
     "languageOption": "  {index}. {displayName}{current}",
@@ -1284,6 +1315,10 @@
     "content_too_large_for_file": "Content too large for file",
     "file_write_error": "File write error",
     "json_string_too_large": "Json string too large",
+    "recursion_detected": "Recursion detected in {operation}",
+    "operation_timeout": "Operation timeout: {operation}",
+    "operation_error": "Operation error in {operation}: {error}",
+    "directory_read_error": "Directory read error: {errorMessage}",
     "security_alert": "Security alert"
   },
   "settings-cli": {
@@ -1360,15 +1395,15 @@
     "startingSettings": "Starting Settings:",
     "pin": "PIN:",
     "reportBug": {
-        "title": "Report Bug",
-        "description": "Report any issues or bugs you encounter",
-        "guidance": "To report issues effectively:",
-        "checkLogs": "1. Check debug logs in your project directory",
-        "documentIssue": "2. Document the issue with steps to reproduce",
-        "contactSupport": "3. Contact your system administrator or support team",
-        "completed": "Bug reporting guidance displayed",
-        "instructions": "Follow the above instructions to report the bug."
-      },
+      "title": "Report Bug",
+      "description": "Report any issues or bugs you encounter",
+      "guidance": "To report issues effectively:",
+      "checkLogs": "1. Check debug logs in your project directory",
+      "documentIssue": "2. Document the issue with steps to reproduce",
+      "contactSupport": "3. Contact your system administrator or support team",
+      "completed": "Bug reporting guidance displayed",
+      "instructions": "Follow the above instructions to report the bug."
+    },
     "mainMenu": {
       "title": "Main Menu:",
       "uiSettings": "UI Settings",
@@ -1420,7 +1455,9 @@
       "prompt": "Do you want to update the package now? (y/N): ",
       "promptDesc": "Note: This will update the i18ntk package to the latest version.",
       "confirm": "y",
-      "cancelled": "Update cancelled."
+      "cancelled": "Update cancelled.",
+      "error": "Failed to update package",
+      "updating": "Updating package..."
     },
     "admin": {
       "selectOption": "Select option: ",
@@ -1476,7 +1513,12 @@
       "importSuccess": "Settings imported successfully.",
       "importFailed": "Failed to import settings: {error}",
       "backupSuccess": "Backup created: {file}",
-      "backupFailed": "Failed to create backup: {error}"
+      "backupFailed": "Failed to create backup: {error}",
+      "exportFilenamePrompt": "Enter export filename: ",
+      "importConfirm": "Import this settings file? (y/N): ",
+      "importFilenamePrompt": "Enter import filename: ",
+      "manageBackups": "Manage backups",
+      "restore": "Restore settings"
     },
     "selectOption": "Select an option: ",
     "resetToDefaultsTitle": "Reset Settings to Defaults",
@@ -1925,6 +1967,11 @@
       "confirmHelp": "Confirm backup operation",
       "confirmYes": "Yes",
       "confirmNo": "No"
+    },
+    "validation": {
+      "valid": "Valid",
+      "validatingPaths": "Validating configured paths...",
+      "validationComplete": "Path validation complete: {valid}/{total} valid."
     }
   },
   "summary": {
@@ -2045,13 +2092,13 @@
       "completed": "✅ Completed"
     },
     "help": {
-      "usage": "Usage: node i18ntk-manage.js [options]",
-      "interactiveMode": "💡 Use: node i18ntk-manage.js --command=<command> for direct execution",
+      "usage": "Usage: node main/manage/index.js [options]",
+      "interactiveMode": "💡 Use: node main/manage/index.js --command=<command> for direct execution",
       "initProject": "🚀 Initialize new languages",
       "analyzeTranslations": "🔍 Analyze translations",
       "validateTranslations": "✅ Validate translations",
       "checkUsage": "📊 Check key usage",
-      "showHelp": "📖 Use: node i18ntk-manage.js --help for available commands",
+      "showHelp": "📖 Use: node main/manage/index.js --help for available commands",
       "availableCommands": "📖 Available Commands:",
       "initCommand": "  init      - Initialize new languages",
       "analyzeCommand": "  analyze   - Analyze translations",
@@ -2158,27 +2205,35 @@
       "coverage_percentage": "   Coverage: {coverage}%\n",
       "error_general": "❌ Error:",
       "use_help": "Use --help for usage information"
-    }
+    },
+    "cleaningUpReportFiles": "Cleaning up old report files...",
+    "couldNotDelete": "Could not delete {file}: {error}",
+    "deletedOldReportFiles": "Deleted {count} old report file(s).",
+    "errorCleaningUpReports": "Error cleaning up reports: {error}",
+    "noOldReportFilesToDelete": "No old report files to delete.",
+    "reportFilesPreserved": "Report files preserved.",
+    "reportSaveFailed": "Failed to save report to: {reportPath}",
+    "reportSaved": "Report saved to: {reportPath}"
   },
   "ui": {
     "autoDetectedI18nDirectory": "Auto-detected i18n directory: {path}",
-    "executingCommand": "🔄 Executing command: {command}",
-    "unknownCommand": "❌ Unknown command: {command}",
-    "errorExecutingCommand": "❌ Error executing command: {error}",
-    "errorLoadingTranslationFile": "❌ Error loading translation file for '{language}': {error}",
-    "errorSavingLanguagePreference": "❌ Error saving language preference: {error}",
-    "noActiveReadlineInterface": "❌ No active readline interface available",
-    "uiLanguageUpdated": "🌍 UI language updated to: {language}",
+    "executingCommand": "Executing command: {command}",
+    "unknownCommand": "Unknown command: {command}",
+    "errorExecutingCommand": "Error executing command: {error}",
+    "errorLoadingTranslationFile": "Error loading translation file for '{language}': {error}",
+    "errorSavingLanguagePreference": "Error saving language preference: {error}",
+    "noActiveReadlineInterface": "No active readline interface available",
+    "uiLanguageUpdated": "UI language updated to: {language}",
     "selectOptionPrompt": "Select an option:",
     "pressEnterToReturn": "Press Enter to return to main menu...",
     "detectedSourceDirectory": "Detected source directory: {sourceDir}",
     "detectedI18nDirectory": "Detected i18n directory: {directory}",
-    "toolkitTitle": "🌍 i18ntk - Enterprise i18n Management Toolkit",
-    "versionInfo": "📦 Version: {version}",
-    "releaseDate": "📅 Release Date: {date}",
-    "maintainer": "👤 Maintainer: {maintainer}",
-    "nodeVersion": "🔧 Node.js: {version}",
-    "license": "📄 License: {license}",
+    "toolkitTitle": "i18ntk - Enterprise i18n Management Toolkit",
+    "versionInfo": "Version: {version}",
+    "releaseDate": "Release Date: {date}",
+    "maintainer": "Maintainer: {maintainer}",
+    "nodeVersion": "Node.js: {version}",
+    "license": "License: {license}",
     "whatsNew": "✨ What's New in v{version}:",
     "changeItem": "   {change}",
     "documentation": "📚 Documentation: {url}",
@@ -2346,5 +2401,15 @@
     "signIn": "Sign In",
     "forgotPassword": "Forgot Password",
     "signUp": "Sign Up"
+  },
+  "checkUsage": {
+    "usage_analysis_failed": "Usage analysis failed."
+  },
+  "completeTranslations": {
+    "warning_could_not_parse_filepa": "Warning: could not parse file path: {filePath}"
+  },
+  "pressEnterToContinue": "Press Enter to continue...",
+  "status": {
+    "exitingCompleted": "Workflow completed. Exiting..."
   }
 }

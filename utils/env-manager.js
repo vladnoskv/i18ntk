@@ -21,7 +21,7 @@ const ALLOWED_ENV_VARS = {
   },
   
   // UI and interaction
-  'I18NTK_LANG': {
+  'I18NTK_UI_LANGUAGE': {
     default: 'en',
     validate: (value) => ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(value.toLowerCase()),
     transform: (value) => value.toLowerCase()
@@ -229,7 +229,7 @@ class EnvironmentManager {
     const descriptions = {
       'I18NTK_LOG_LEVEL': 'Logging level (error, warn, info, debug, silent)',
       'I18NTK_OUTDIR': 'Output directory for reports and generated files',
-      'I18NTK_LANG': 'UI language (en, de, es, fr, ru, ja, zh)',
+      'I18NTK_UI_LANGUAGE': 'UI language (en, de, es, fr, ru, ja, zh)',
       'I18NTK_SILENT': 'Run in silent mode without interactive prompts',
       'I18NTK_DEBUG_LOCALES': 'Enable debug logging for locale loading',
       'I18NTK_RUNTIME_DIR': 'Custom runtime directory path',
@@ -247,20 +247,6 @@ class EnvironmentManager {
 
 // Create singleton instance
 const envManager = new EnvironmentManager();
-
-// Security check: Log any attempts to access blocked variables
-if (process.env.NODE_ENV === 'development' || process.env.DEBUG) {
-  const originalEnv = process.env;
-  process.env = new Proxy(originalEnv, {
-    get(target, prop) {
-      if (typeof prop === 'string' && envManager.isBlocked(prop)) {
-        console.warn(`[i18ntk] Security: Blocked access to sensitive environment variable: ${prop}`);
-        return undefined;
-      }
-      return target[prop];
-    }
-  });
-}
 
 module.exports = {
   EnvironmentManager,

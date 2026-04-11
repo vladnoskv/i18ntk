@@ -19,7 +19,7 @@ const SecurityUtils = require(path.join(__dirname, '../utils/security'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { program } = require('../utils/mini-commander');
 
 (async () => {
   try {
@@ -131,7 +131,7 @@ class JavaI18nManager {
     const xmlFiles = this.findFiles(sourceDir, '.xml');
     for (const file of xmlFiles) {
       if (file.includes('strings.xml')) {
-        const content = SecurityUtils.safeWriteFileSync(file, 'utf8', path.dirname(file));
+        const content = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8') || '';
         const stringPatterns = [
           /<string name="([^"]+)"/g,
           /<string-array name="([^"]+)"/g,
@@ -151,7 +151,7 @@ class JavaI18nManager {
     const propertiesFiles = this.findFiles(sourceDir, '.properties');
     for (const file of propertiesFiles) {
       if (file.includes('messages') || file.includes('i18n')) {
-        const content = SecurityUtils.safeWriteFileSync(file, 'utf8');
+        const content = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8') || '';
         const lines = content.split('\n');
         
         for (const line of lines) {
@@ -181,17 +181,20 @@ class JavaI18nManager {
       
       if (framework === 'android') {
         // Android string resources
-        SecurityUtils.safeWriteFileSync(path.join(langDir, 'strings.xml'), `<?xml version="1.0" encoding="utf-8"?>`, path.dirname(path.join(langDir, 'strings.xml')));
+        SecurityUtils.safeWriteFileSync(
+          path.join(langDir, 'strings.xml'),
+          `<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">My App</string>
     <string name="hello">Hello, World!</string>
     <string name="items_count">%d items</string>
-    
     <plurals name="items">
         <item quantity="one">%d item</item>
         <item quantity="other">%d items</item>
     </plurals>
-</resources>
+</resources>`,
+          path.dirname(path.join(langDir, 'strings.xml'))
+        );
         
         // JSON format
         SecurityUtils.safeWriteFileSync(path.join(langDir, 'messages.json'), JSON.stringify({

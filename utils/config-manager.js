@@ -316,20 +316,21 @@ function tryReadJson(filePath) {
       return null;
     }
 
-    try {
-      return JSON.parse(data);
-    } catch (parseError) {
-      console.error(`[i18ntk] Error parsing JSON from ${filePath}: ${parseError.message}`);
-      // Create a backup of the corrupted file
-      const backupPath = `${filePath}.corrupted-${Date.now()}.bak`;
-      try {
-        SecurityUtils.safeWriteFileSync(backupPath, data, 'utf8');
-        console.warn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
-      } catch (backupError) {
-        console.error(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
-      }
-      return null;
+    const parsed = SecurityUtils.safeParseJSON(data);
+    if (parsed && typeof parsed === 'object') {
+      return parsed;
     }
+
+    console.error(`[i18ntk] Error parsing JSON from ${filePath}: Invalid JSON content`);
+    // Create a backup of the corrupted file
+    const backupPath = `${filePath}.corrupted-${Date.now()}.bak`;
+    try {
+      SecurityUtils.safeWriteFileSync(backupPath, data, path.dirname(backupPath), 'utf8');
+      console.warn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
+    } catch (backupError) {
+      console.error(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
+    }
+    return null;
   } catch (error) {
     console.error(`[i18ntk] Error reading config file at ${filePath}: ${error.message}`);
     return null;
@@ -350,11 +351,11 @@ async function migrateLegacyIfNeeded(baseCfg) {
         // Best-effort removal of legacy file to prevent future use
         try { fs.unlinkSync(LEGACY_CONFIG_PATH); } catch (_) {}
         // Deprecation notice
-        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Your config has been migrated to .i18ntk-settings. Please commit the .i18ntk-settings file to your project.');
+        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Configuration was migrated to project .i18ntk-config.');
         return merged;
       } catch (_) {
         // If write fails, fall back to in-memory config without deleting legacy
-        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Using migrated settings in memory; failed to persist to settings/. Ensure the project has write permissions.');
+        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Using migrated settings in memory; failed to persist to .i18ntk-config.');
         return merged;
       }
     }
@@ -421,7 +422,7 @@ function loadConfig() {
 }
 
 async function saveConfig(cfg = currentConfig) {
-  if (!cfg) return;
+  if (!cfg || typeof cfg !== 'object') return;
 
   try {
     // Ensure settings directory exists
@@ -429,8 +430,15 @@ async function saveConfig(cfg = currentConfig) {
       fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
     }
 
-    // Save configuration to the project settings directory
-    await fs.promises.writeFile(PROJECT_CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+    const serialized = JSON.stringify(cfg, null, 2);
+    if (typeof serialized !== 'string' || serialized.length === 0) {
+      throw new Error('Cannot save empty configuration payload');
+    }
+
+    // Atomic write prevents partially-written/empty config files.
+    const tempPath = `${PROJECT_CONFIG_PATH}.tmp`;
+    await fs.promises.writeFile(tempPath, serialized, 'utf8');
+    await fs.promises.rename(tempPath, PROJECT_CONFIG_PATH);
     currentConfig = cfg;
   } catch (error) {
     console.error('[i18ntk] Error saving configuration:', error.message);
@@ -459,15 +467,23 @@ function getConfig() {
 
      // Check if config file exists
      if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
-       const config = JSON.parse(SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, path.dirname(PROJECT_CONFIG_PATH), 'utf8'));
-       currentConfig = config;
-       return resolvePaths(config);
+       const rawConfig = SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, path.dirname(PROJECT_CONFIG_PATH), 'utf8');
+       const config = SecurityUtils.safeParseJSON(rawConfig);
+       if (config && typeof config === 'object') {
+         currentConfig = config;
+         return resolvePaths(config);
+       }
+       throw new Error('Invalid project configuration JSON');
      }
 
      // Check for legacy config for migration
      if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
        console.log('📦 Migrating legacy configuration...');
-       const legacyConfig = JSON.parse(SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, path.dirname(LEGACY_CONFIG_PATH), 'utf8'));
+       const legacyRaw = SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, path.dirname(LEGACY_CONFIG_PATH), 'utf8');
+       const legacyConfig = SecurityUtils.safeParseJSON(legacyRaw);
+       if (!legacyConfig || typeof legacyConfig !== 'object') {
+         throw new Error('Invalid legacy configuration JSON');
+       }
        const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
        saveConfig(migratedConfig);
        currentConfig = migratedConfig;

@@ -16,7 +16,7 @@ const SecurityUtils = require(path.join(__dirname, '../utils/security'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { program } = require('../utils/mini-commander');
 
 (async () => {
   try {
@@ -45,11 +45,10 @@ class GoI18nManager {
   async detectFramework(sourceDir) {
     const goModPath = path.join(sourceDir, 'go.mod');
     if (SecurityUtils.safeExistsSync(goModPath)) {
-      const content = SecurityUtils.safeWriteFileSync(goModPath, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(goModPath, sourceDir, 'utf8') || '';
       
-      if (content.includes('go-i18n')) return 'go-i18n';
-      if (content.includes('nicksnyder/go-i18n')) return 'go-i18n-v2';
-      if (content.includes('golang.org/x/text')) return 'golang-text';
+      if (content.includes('go-i18n')) return 'go-i18n-v2';
+      if (/x\/text\b/.test(content)) return 'golang-text';
       
       return 'standard-go';
     }
@@ -70,7 +69,7 @@ class GoI18nManager {
     const goFiles = this.findFiles(sourceDir, '.go');
     
     for (const file of goFiles) {
-      const content = SecurityUtils.safeWriteFileSync(file, 'utf8');
+      const content = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8') || '';
       
       // Extract Go i18n patterns
       const patterns = [

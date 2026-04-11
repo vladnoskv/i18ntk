@@ -969,130 +969,110 @@ try {
   }
   
   async runSetupWizard() {
-    console.log('🧙‍♂️  Translation Analysis Setup Wizard');
+    console.log('Translation Analysis Setup Wizard');
     console.log('='.repeat(50));
-    
-    const prompts = require('prompts');
-    
+
     try {
-      // Detect current structure
       const structure = this.detectStructureType();
       console.log(`Current structure detected: ${structure.type}`);
-      
-      const questions = [
-        {
-          type: 'select',
-          name: 'structureType',
-          message: 'Choose your translation file structure:',
-          choices: [
-            { title: 'Monolith files (en.json, de.json, etc.)', value: 'monolith' },
-            { title: 'Directory structure (en/common.json, de/common.json)', value: 'directory' },
-            { title: 'Namespace structure (common/en.json, forms/en.json)', value: 'namespace' },
-            { title: 'Mixed structure (auto-detect)', value: 'mixed' }
-          ],
-          initial: structure.type === 'monolith' ? 0 : structure.type === 'directory' ? 1 : 2
-        },
-        {
-          type: 'text',
-          name: 'sourceDir',
-          message: 'Enter source directory path:',
-          initial: this.sourceDir,
-          validate: value => SecurityUtils.safeExistsSync(value, process.cwd()) ? true : 'Directory does not exist'
-        },
-        {
-          type: 'text',
-          name: 'languages',
-          message: 'Enter languages to analyze (comma-separated, e.g., de,fr,es):',
-          initial: 'de,fr,es,ja,ru',
-          validate: value => value.trim() ? true : 'Please enter at least one language'
-        },
-        {
-          type: 'confirm',
-          name: 'outputReports',
-          message: 'Generate detailed reports for each language?',
-          initial: true
-        },
-        {
-          type: 'text',
-          name: 'outputDir',
-          message: 'Enter output directory for reports:',
-          initial: this.outputDir
-        }
-      ];
-      
-      const response = await prompts(questions);
-      
-      if (!response.structureType) {
-        console.log('Setup cancelled.');
+
+      const structureOptions = ['monolith', 'directory', 'namespace', 'mixed'];
+      const defaultStructureIndex = structureOptions.indexOf(structure.type);
+      const defaultStructureChoice = defaultStructureIndex >= 0 ? String(defaultStructureIndex + 1) : '4';
+
+      console.log('Choose your translation file structure:');
+      console.log('1) Monolith files (en.json, de.json, etc.)');
+      console.log('2) Directory structure (en/common.json, de/common.json)');
+      console.log('3) Namespace structure (common/en.json, forms/en.json)');
+      console.log('4) Mixed structure (auto-detect)');
+      const structureChoiceInput = await this.prompt(`Select option [${defaultStructureChoice}]: `);
+      const structureChoice = structureChoiceInput.trim() || defaultStructureChoice;
+      const structureType = structureOptions[Number(structureChoice) - 1] || 'mixed';
+
+      const sourceDirInput = await this.prompt(`Enter source directory path [${this.sourceDir}]: `);
+      const sourceDir = sourceDirInput.trim() || this.sourceDir;
+      if (!SecurityUtils.safeExistsSync(sourceDir, process.cwd())) {
+        console.log('Setup cancelled: directory does not exist.');
         return { success: false, cancelled: true };
       }
-      
-      // Update configuration
+
+      const languagesInput = await this.prompt('Enter languages to analyze (comma-separated) [de,fr,es,ja,ru]: ');
+      const languagesValue = languagesInput.trim() || 'de,fr,es,ja,ru';
+      const languages = languagesValue.split(',').map(lang => lang.trim()).filter(Boolean);
+      if (languages.length === 0) {
+        console.log('Setup cancelled: no languages provided.');
+        return { success: false, cancelled: true };
+      }
+
+      const outputReportsInput = await this.prompt('Generate detailed reports for each language? (Y/n): ');
+      const outputReports = !['n', 'no'].includes(outputReportsInput.trim().toLowerCase());
+
+      const outputDirInput = await this.prompt(`Enter output directory for reports [${this.outputDir}]: `);
+      const outputDir = outputDirInput.trim() || this.outputDir;
+
+      const response = {
+        structureType,
+        sourceDir,
+        languages: languagesValue,
+        outputReports,
+        outputDir
+      };
+
       this.sourceDir = path.resolve(response.sourceDir);
       this.outputDir = path.resolve(response.outputDir);
       this.outputReports = response.outputReports;
-      
-      const languages = response.languages.split(',').map(lang => lang.trim()).filter(Boolean);
-      
-      console.log('\n📊 Configuration Summary:');
+
+      console.log('\nConfiguration Summary:');
       console.log(`Source: ${this.sourceDir}`);
       console.log(`Output: ${this.outputDir}`);
-      console.log(`Languages: ${languages.join(', ')}`);
+      console.log(`Languages: ${languages.join(", ")}`);
       console.log(`Structure: ${response.structureType}`);
-      
-      const confirm = await prompts({
-        type: 'confirm',
-        name: 'proceed',
-        message: 'Proceed with analysis?',
-        initial: true
-      });
-      
-      if (!confirm.proceed) {
+
+      const proceedInput = await this.prompt('Proceed with analysis? (Y/n): ');
+      const proceed = !['n', 'no'].includes(proceedInput.trim().toLowerCase());
+      if (!proceed) {
         console.log('Setup cancelled.');
         return { success: false, cancelled: true };
       }
-      
-      // Run analysis with specified languages
+
       const results = [];
       for (const language of languages) {
         try {
-          console.log(`\n🔍 Analyzing ${language}...`);
+          console.log(`\nAnalyzing ${language}...`);
           const result = await this.analyzeLanguage(language);
           results.push({ language, ...result });
-          
+
           if (this.outputReports) {
             await this.saveReport(language, result);
-            console.log(`✅ Report saved: ${language}.json`);
+            console.log(`Report saved: ${language}.json`);
           }
         } catch (error) {
-          console.error(`❌ Error analyzing ${language}:`, error.message);
+          console.error(`Error analyzing ${language}:`, error.message);
           results.push({ language, error: error.message });
         }
       }
-      
-      // Generate summary
+
       const summary = {
         totalLanguages: results.length,
         successful: results.filter(r => !r.error).length,
         failed: results.filter(r => r.error).length,
         results
       };
-      
+
       await this.saveReport('wizard-summary', {
         summary,
         configuration: response,
         timestamp: new Date().toISOString()
       });
-      
-      console.log('\n🎉 Setup complete!');
+
+      console.log('\nSetup complete.');
       console.log(`Analyzed ${summary.successful}/${summary.totalLanguages} languages successfully`);
-      
+
       return {
         success: true,
         summary,
         configuration: response
       };
-      
     } catch (error) {
       console.error('Setup wizard error:', error.message);
       return { success: false, error: error.message };
@@ -1169,3 +1149,4 @@ module.exports = {
   I18nAnalyzer,
   analyzeTranslations
 };
+

@@ -19,8 +19,12 @@ const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 const SetupEnforcer = require('../utils/setup-enforcer');
 
-// Ensure setup is complete before running
+// Ensure setup is complete before running, except for help output.
 (async () => {
+  const isHelpRequest = process.argv.slice(2).some(arg => arg === '--help' || arg === '-h');
+  if (isHelpRequest) {
+    return;
+  }
   try {
     await SetupEnforcer.checkSetupCompleteAsync();
   } catch (error) {
@@ -107,6 +111,8 @@ class I18nCompletionTool {
           parsed.dryRun = true;
         } else if (key === 'no-prompt') {
           parsed.noPrompt = true;
+        } else if (key === 'help' || key === 'h') {
+          parsed.help = true;
         }
       }
     });
@@ -122,18 +128,37 @@ class I18nCompletionTool {
     
     // Check for monolith JSON files (en.json, es.json, etc.)
     const files = SecurityUtils.safeReaddirSync(this.sourceDir, this.config.projectRoot);
-    const languages = files
+    const languagesFromFiles = files
       .filter(file => file.endsWith('.json'))
-      .map(file => path.basename(file, '.json'));
+      .map(file => path.basename(file, '.json'))
+      .filter(code => this.isValidLanguageCode(code));
     
     // Also check for directory-based structure for backward compatibility
-    const directories = fs.readdirSync(this.sourceDir)
+    const directories = SecurityUtils.safeReaddirSync(this.sourceDir, this.config.projectRoot)
       .filter(item => {
+        if (this.isExcludedLanguageDirectory(item)) return false;
+        if (!this.isValidLanguageCode(item)) return false;
         const itemPath = path.join(this.sourceDir, item);
-        return SecurityUtils.safeStatSync(itemPath, this.config.projectRoot).isDirectory();
+        const stat = SecurityUtils.safeStatSync(itemPath, this.config.projectRoot);
+        if (!stat || !stat.isDirectory()) return false;
+
+        const localeFiles = SecurityUtils.safeReaddirSync(itemPath, this.config.projectRoot)
+          .filter(name => name.endsWith('.json'));
+        return localeFiles.length > 0;
       });
     
-    return [...new Set([...languages, ...directories])];
+    return [...new Set([...languagesFromFiles, ...directories])];
+  }
+
+  isValidLanguageCode(code) {
+    if (!code || typeof code !== 'string') return false;
+    return /^[a-z]{2}(?:-[A-Za-z0-9]{2,8})*$/i.test(code.trim());
+  }
+
+  isExcludedLanguageDirectory(name) {
+    if (!name || typeof name !== 'string') return true;
+    const lowered = name.toLowerCase();
+    return lowered.startsWith('backup-') || lowered === 'backup' || lowered === 'reports' || lowered === 'i18ntk-reports';
   }
 
   // Get all JSON files from a language directory
@@ -527,7 +552,7 @@ class I18nCompletionTool {
       console.log(t("complete.languagesProcessed", { languagesProcessed: languages.length }));
       console.log(t("complete.missingKeysAdded", { missingKeysAdded: missingKeys.length }));
       
-      if (!args.dryRun && allChanges.length > 0) {
+      if (!args.dryRun && allChanges.length > 0 && !args.noPrompt) {
         const rl = this.rl || this.initReadline();
         const answer = await this.prompt('\n' + t('complete.generateReportPrompt') + ' (Y/N): ');
         
@@ -539,12 +564,12 @@ class I18nCompletionTool {
       if (!args.dryRun) {
         console.log('\n' + t("complete.nextStepsTitle"));
         console.log(t("complete.separator"));
-        console.log(t("complete.nextStep1"));
-        console.log('   node i18ntk-usage.js --output-report');
-        console.log(t("complete.nextStep2"));
-        console.log('   node i18ntk-validate.js');
-        console.log(t("complete.nextStep3"));
-        console.log('   node i18ntk-analyze.js');
+        console.log('1. Run usage analysis:');
+        console.log('   i18ntk --command=usage');
+        console.log('2. Validate translations:');
+        console.log('   i18ntk --command=validate');
+        console.log('3. Analyze translation status:');
+        console.log('   i18ntk --command=analyze');
         console.log('\n' + t("complete.allKeysAvailable"));
       } else {
         console.log('\n' + t("complete.runWithoutDryRun"));

@@ -6,7 +6,9 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const { performance } = require('perf_hooks');
+const perf = (globalThis.performance && typeof globalThis.performance.now === 'function')
+  ? globalThis.performance
+  : { now: () => Date.now() };
 
 class UltraPerformanceOptimizer {
   constructor(options = {}) {
@@ -42,7 +44,7 @@ class UltraPerformanceOptimizer {
    * Initialize ultra-optimization
    */
   async initialize() {
-    this.stats.startTime = performance.now();
+    this.stats.startTime = perf.now();
     this.stats.memoryStart = process.memoryUsage();
     
     // Force garbage collection if available
@@ -265,7 +267,7 @@ class UltraPerformanceOptimizer {
    * Get performance statistics
    */
   getStats() {
-    this.stats.endTime = performance.now();
+    this.stats.endTime = perf.now();
     this.stats.memoryEnd = process.memoryUsage();
     
     const processingTime = this.stats.endTime - this.stats.startTime;
@@ -289,9 +291,9 @@ class UltraPerformanceOptimizer {
   async runUltraBenchmark(filePaths) {
     console.log('🚀 Starting Ultra-Extreme Performance Benchmark...');
     
-    const start = performance.now();
+    const start = perf.now();
     const results = await this.processFiles(filePaths);
-    const end = performance.now();
+    const end = perf.now();
     
     const stats = this.getStats();
     

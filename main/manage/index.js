@@ -16,7 +16,6 @@
 const path = require('path');
 const AdminAuth = require('../../utils/admin-auth');
 const SecurityUtils = require('../../utils/security');
-const AdminCLI = require('../../utils/admin-cli');
 const configManager = require('../../settings/settings-manager');
 const { showFrameworkWarningOnce } = require('../../utils/cli-helper');
 const { createPrompt, isInteractive } = require('../../utils/prompt-helper');
@@ -58,10 +57,11 @@ class I18nManager {
     }
 
     // Initialize configuration using unified system
-    async initialize() {
+    async initialize(options = {}) {
         try {
             // Parse args here for other initialization needs (but language is already loaded)
             const args = this.parseArgs();
+            const interactive = options.interactive ?? isInteractive({ noPrompt: options.noPrompt || args.noPrompt });
             if (args.help) {
                 this.showHelp();
                 process.exit(0);
@@ -79,12 +79,17 @@ class I18nManager {
             } catch (err) {
                 console.log(t('init.requiredTitle'));
                 console.log(t('init.requiredBody'));
-                const answer = await cliHelper.prompt(t('init.promptRunNow'));
-                if (answer.trim().toLowerCase() === 'y') {
-                    // Note: Initialization should be handled by the calling code
-                    // to avoid circular dependencies
-                    console.log('Please run initialization manually or use the init command');
+                if (interactive) {
+                    const answer = await cliHelper.prompt(t('init.promptRunNow'));
+                    if (answer.trim().toLowerCase() === 'y') {
+                        // Note: Initialization should be handled by the calling code
+                        // to avoid circular dependencies
+                        console.log('Please run initialization manually or use the init command');
+                    } else {
+                        throw err;
+                    }
                 } else {
+                    // Non-interactive: surface the original error to avoid hanging
                     throw err;
                 }
             }
@@ -264,28 +269,43 @@ class I18nManager {
 
     // Add this run method after the checkI18nDependencies method
     async run() {
-        // Add timeout to prevent hanging
+        // Parse args early so we can short-circuit help/version flows before setup
         const args = this.parseArgs();
+        const rawArgs = process.argv.slice(2);
+        const directCommands = [
+            'init', 'analyze', 'validate', 'usage', 'scanner', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow'
+        ];
+        const commandFlagArg = rawArgs.find(arg => arg.startsWith('--command='));
+        const requestedCommand = commandFlagArg
+            ? commandFlagArg.split('=')[1]
+            : (rawArgs.length > 0 && directCommands.includes(rawArgs[0]) ? rawArgs[0] : null);
+        const shouldSkipInitCheck = requestedCommand === 'init';
 
-        const timeout = setTimeout(() => {
+        // Show help immediately without any setup/auth (useful for CI/uninitialized projects)
+        if (args.help) {
+            this.showHelp();
+            return;
+        }
+
+        let startupTimeout = setTimeout(() => {
             console.error('❌ CLI startup timeout - something is hanging');
-            if (args.debug) {
-                console.error('🔍 DEBUG: Last known execution point reached');
-            }
             process.exit(1);
         }, 10000); // 10 second timeout
 
-        if (args.debug) {
-            console.log('🔍 DEBUG: Starting i18ntk-manage.js...');
-            console.log('🔍 DEBUG: Process.argv:', process.argv);
-            console.log('🔍 DEBUG: Parsed args:', args);
-            console.log('🔍 DEBUG: About to call SetupEnforcer.checkSetupCompleteAsync()');
-        }
+        const clearStartupTimeout = () => {
+            if (startupTimeout) {
+                clearTimeout(startupTimeout);
+                startupTimeout = null;
+            }
+        };
 
         let prompt;
         try {
-            // Ensure setup is complete before running any operations
-            await SetupEnforcer.checkSetupCompleteAsync();
+            // Allow `init` to run even when setup is not complete.
+            if (!shouldSkipInitCheck) {
+                await SetupEnforcer.checkSetupCompleteAsync();
+            }
+            clearStartupTimeout();
 
             prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
             const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
@@ -309,7 +329,7 @@ class I18nManager {
             }
 
             let cfgAfterInitCheck = {};
-            if (interactive) {
+            if (interactive && !shouldSkipInitCheck) {
                 cfgAfterInitCheck = await this.ensureInitializedOrExit(prompt);
                 const frameworksDetected = await this.checkI18nDependencies();
                 if (!frameworksDetected) {
@@ -318,15 +338,9 @@ class I18nManager {
             }
 
             this.config = { ...this.config, ...cfgAfterInitCheck };
-            await this.initialize();
-
-            const rawArgs = process.argv.slice(2); // Preserve original CLI args array for positional checks
-            let commandToExecute = null;
-
-            // Define valid direct commands
-            const directCommands = [
-                'init', 'analyze', 'validate', 'usage', 'scanner', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow'
-            ];
+            await this.initialize({ interactive, noPrompt: args.noPrompt || Boolean(args.adminPin) });
+            clearStartupTimeout();
+            let commandToExecute = requestedCommand;
 
             // Handle help immediately without dependency checks
             if (args.help) {
@@ -342,17 +356,7 @@ class I18nManager {
                 console.log(blue('Debug mode enabled'));
             }
 
-            // Check for --command= argument first
-            const commandFlagArg = rawArgs.find(arg => arg.startsWith('--command='));
-            if (commandFlagArg) {
-                commandToExecute = commandFlagArg.split('=')[1];
-            } else if (rawArgs.length > 0 && directCommands.includes(rawArgs[0])) {
-                // If no --command=, check if the first argument is a direct command
-                commandToExecute = rawArgs[0];
-            }
-
             if (commandToExecute) {
-                console.log(t('ui.executingCommand', { command: commandToExecute }));
                 await this.executeCommand(commandToExecute);
                 this.safeClose();
                 return;
@@ -378,6 +382,7 @@ class I18nManager {
             }
             process.exit(1);
         } finally {
+            clearStartupTimeout();
             if (prompt && typeof prompt.close === 'function') {
                 prompt.close();
             }
@@ -1414,7 +1419,16 @@ if (require.main === module) {
     if (args.includes('--version') || args.includes('-v')) {
         try {
             const packageJsonPath = path.resolve(__dirname, '..', '..', 'package.json');
-            const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
+            // Use a safe base path for SecurityUtils validation
+            const basePath = path.dirname(packageJsonPath) || process.cwd();
+            const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, basePath, 'utf8');
+            
+            if (!packageJsonContent) {
+                console.log(`\n❌ Version information unavailable - could not read package.json`);
+                process.exit(0);
+            }
+            
+            const packageJson = JSON.parse(packageJsonContent);
             const versionInfo = packageJson.versionInfo || {};
 
             console.log(`\n🌍 i18n Toolkit (i18ntk)`);

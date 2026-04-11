@@ -13,9 +13,8 @@ const path = require('path');
 const SecurityUtils = require(path.join(__dirname, '../utils/security'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper'));
-const I18ntkCore = require(path.join(__dirname, '../framework/i18ntk-core.js'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { program } = require('../utils/mini-commander');
 
 (async () => {
   try {
@@ -232,8 +231,8 @@ class I18ntkPythonCommand {
         const initialContent = {
           "python": {
             "welcome": `Welcome to Python (${lang})`,
-            "framework_detected": `Framework detected: ${framework}`,
-            "files_processed": `Processed ${count} files`
+            "framework_detected": "Framework detected: {framework}",
+            "files_processed": "Processed {count} files"
           }
         };
 
@@ -340,7 +339,7 @@ class I18ntkPythonCommand {
   async run() {
     try {
       console.log('🚀 i18ntk Python Command v1.10.1');
-      console.log('=' * 50);
+      console.log('='.repeat(50));
 
       await this.init();
 

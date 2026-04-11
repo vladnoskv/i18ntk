@@ -1,0 +1,20 @@
+{
+  "common": {
+    "welcome": "[RU] Welcome",
+    "hello": "[RU] Hello",
+    "goodbye": "[RU] Goodbye",
+    "yes": "[RU] Yes",
+    "no": "[RU] No",
+    "save": "[RU] Save",
+    "cancel": "[RU] Cancel",
+    "delete": "[RU] Delete",
+    "edit": "[RU] Edit",
+    "loading": "[RU] Loading..."
+  },
+  "navigation": {
+    "home": "[RU] Home",
+    "about": "[RU] About",
+    "contact": "[RU] Contact",
+    "settings": "[RU] Settings"
+  }
+}

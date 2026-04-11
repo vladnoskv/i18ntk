@@ -13,7 +13,7 @@ const SecurityUtils = require(path.join(__dirname, '../utils/security.js'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper.js'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper.js'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { program } = require('../utils/mini-commander');
 
 (async () => {
   try {
@@ -472,7 +472,7 @@ class I18ntkJavaScriptCommand {
   async run() {
     try {
       console.log('🚀 i18ntk JavaScript/TypeScript Command v1.10.1');
-      console.log('=' * 60);
+      console.log('='.repeat(60));
 
       await this.init();
 

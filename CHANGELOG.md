@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-01
+
+### Added
+- Added missing runtime translation keys across `init`, `fixer`, `sizing`, `summary`, `usage`, and settings import/export flows.
+- Added `SecurityUtils.safeParseJSON`, `SecurityUtils.safeReadFile`, and `SecurityUtils.safeWriteFile` compatibility APIs used by v2 command paths.
+- Added source-locale bootstrap behavior during `init` when the source language directory exists but has no translation files.
+
+### Fixed
+- Fixed initialization state detection to use project `.i18ntk-config` setup metadata as the v2 source of truth.
+- Fixed false setup-invalid states caused by BOM-encoded config files during setup checks.
+- Fixed config persistence risk by using atomic writes in `config-manager` save flow.
+- Fixed self-dependency metadata so the package remains zero-dependency in v2.
+
+### Changed
+- Updated package release metadata for the v2 line (`versionInfo`, deprecations, nextVersion).
+
 ## [1.10.2] - 2025-08-23
 
 ### 🚨 Critical Fix

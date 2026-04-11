@@ -1,0 +1,20 @@
+{
+  "common": {
+    "welcome": "[ES] Welcome",
+    "hello": "[ES] Hello",
+    "goodbye": "[ES] Goodbye",
+    "yes": "[ES] Yes",
+    "no": "[ES] No",
+    "save": "[ES] Save",
+    "cancel": "[ES] Cancel",
+    "delete": "[ES] Delete",
+    "edit": "[ES] Edit",
+    "loading": "[ES] Loading..."
+  },
+  "navigation": {
+    "home": "[ES] Home",
+    "about": "[ES] About",
+    "contact": "[ES] Contact",
+    "settings": "[ES] Settings"
+  }
+}

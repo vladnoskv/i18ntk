@@ -17,6 +17,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 const argv = Object.fromEntries(
   process.argv.slice(2).map(a => {
@@ -124,7 +125,7 @@ function validate() {
   });
 
   const reportFile = path.join(I18N_DIR, 'validation-purity-report.json');
-  SecurityUtils.safeWriteFileSync(reportFile, JSON.stringify(report, null, 2), 'utf8');
+  SecurityUtils.safeWriteFileSync(reportFile, JSON.stringify(report, null, 2), path.dirname(reportFile), 'utf8');
   console.log(`✅ Validation report saved: ${reportFile}`);
   console.log(`   Review this file for full details of problematic keys.`);
 }

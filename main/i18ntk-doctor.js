@@ -5,15 +5,17 @@ const path = require('path');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SetupEnforcer = require('../utils/setup-enforcer');
 
-// Ensure setup is complete before running
-(async () => {
-  try {
-    await SetupEnforcer.checkSetupCompleteAsync();
-  } catch (error) {
-    console.error('Setup check failed:', error.message);
-    process.exit(1);
-  }
-})();
+// Ensure setup is complete before running (only for standalone execution)
+if (require.main === module) {
+  (async () => {
+    try {
+      await SetupEnforcer.checkSetupCompleteAsync();
+    } catch (error) {
+      console.error('Setup check failed:', error.message);
+      process.exit(1);
+    }
+  })();
+}
 
 const ExitCodes = require('../utils/exit-codes');
 
@@ -51,115 +53,132 @@ function compareTypes(src, tgt, prefix = '', issues = []) {
   return issues;
 }
 
-(async () => {
-  const args = parseCommonArgs(process.argv.slice(2));
-  if (args.help) {
-    displayHelp('i18ntk-doctor');
-    process.exit(0);
-  }
-  const config = await getUnifiedConfig('doctor', args);
-  const dirs = {
-    projectRoot: config.projectRoot,
-    sourceDir: config.sourceDir,
-    i18nDir: config.i18nDir,
-    outputDir: config.outputDir,
-  };
-
-  let exitCode = ExitCodes.SUCCESS;
-  const issues = [];
-
-  console.log('i18ntk doctor');
-  for (const [name, dir] of Object.entries(dirs)) {
-    const rel = path.relative(config.projectRoot, dir);
-    if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      issues.push(`path traversal detected: ${dir}`);
-      exitCode = Math.max(exitCode, ExitCodes.SECURITY_VIOLATION);
-      continue;
+// Export the I18nDoctor class for module usage
+class I18nDoctor {
+  async run(options = {}) {
+    const args = parseCommonArgs(process.argv.slice(2));
+    if (args.help) {
+      displayHelp('i18ntk-doctor');
+      process.exit(0);
     }
-    const exists = SecurityUtils.safeExistsSync(dir);
-    console.log(`${name}: ${dir} ${exists ? '✅' : '❌'}`);
-    if (!exists) {
-      if (name !== 'outputDir') {
-        issues.push(`Missing directory: ${dir}`);
-        exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-      }
-      continue;
-    }
-    try {
-      fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
-    } catch (e) {
-      issues.push(`Permission issue: ${dir}`);
-      exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-    }
-  }
+    const config = await getUnifiedConfig('doctor', args);
+    const dirs = {
+      projectRoot: config.projectRoot,
+      sourceDir: config.sourceDir,
+      i18nDir: config.i18nDir,
+      outputDir: config.outputDir,
+    };
 
-  const pkgVersion = require('../package.json').version;
-  if (config.version && config.version !== pkgVersion) {
-    issues.push(`Config version mismatch: ${config.version} != ${pkgVersion}`);
-    exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-  }
+    let exitCode = ExitCodes.SUCCESS;
+    const issues = [];
 
-  const sourceLang = config.sourceLanguage || 'en';
-  const languages = config.defaultLanguages || [];
-  const srcDir = path.join(config.i18nDir, sourceLang);
-  const srcFiles = SecurityUtils.safeExistsSync(srcDir) ? fs.readdirSync(srcDir).filter(f => f.endsWith('.json')) : [];
-
-  for (const lang of languages) {
-    const langDir = path.join(config.i18nDir, lang);
-    if (!SecurityUtils.safeExistsSync(langDir)) {
-      issues.push(`Missing locale directory: ${lang}`);
-      exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-      continue;
-    }
-    const files = fs.readdirSync(langDir).filter(f => f.endsWith('.json'));
-    for (const file of files) {
-      if (!srcFiles.includes(file)) {
-        issues.push(`Dangling namespace file: ${lang}/${file}`);
-        exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-      }
-      const srcPath = path.join(srcDir, file);
-      const tgtPath = path.join(langDir, file);
-      if (!SecurityUtils.safeExistsSync(srcPath) || !SecurityUtils.safeExistsSync(tgtPath)) continue;
-      const srcContent = SecurityUtils.safeReadFileSync(srcPath, path.dirname(srcPath), 'utf8');
-      const tgtContent = SecurityUtils.safeReadFileSync(tgtPath, path.dirname(tgtPath), 'utf8');
-      if (hasBOM(srcContent) || hasBOM(tgtContent)) {
-        issues.push(`BOM detected in ${lang}/${file}`);
-        exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-      }
-      let srcJson, tgtJson;
-      try {
-        srcJson = JSON.parse(srcContent.replace(/^\uFEFF/, ''));
-      } catch (e) {
-        issues.push(`Invalid JSON in source ${file}: ${e.message}`);
-        exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+    console.log('i18ntk doctor');
+    for (const [name, dir] of Object.entries(dirs)) {
+      const rel = path.relative(config.projectRoot, dir);
+      if (rel.startsWith('..') || path.isAbsolute(rel)) {
+        issues.push(`path traversal detected: ${dir}`);
+        exitCode = Math.max(exitCode, ExitCodes.SECURITY_VIOLATION);
         continue;
       }
-      try {
-        tgtJson = JSON.parse(tgtContent.replace(/^\uFEFF/, ''));
-      } catch (e) {
-        issues.push(`Invalid JSON in ${lang}/${file}: ${e.message}`);
-        exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-        continue;
-      }
-      const srcPlurals = collectPluralKeys(srcJson);
-      const tgtPlurals = collectPluralKeys(tgtJson);
-      for (const key of srcPlurals) {
-        if (!tgtPlurals.has(key)) {
-          issues.push(`Inconsistent plural forms in ${lang}/${file}: missing ${key}`);
+      const exists = SecurityUtils.safeExistsSync(dir);
+      console.log(`${name}: ${dir} ${exists ? '✅' : '❌'}`);
+      if (!exists) {
+        if (name !== 'outputDir') {
+          issues.push(`Missing directory: ${dir}`);
           exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
         }
+        continue;
       }
-      const typeMismatches = compareTypes(srcJson, tgtJson);
-      typeMismatches.forEach(k => {
-        issues.push(`Type mismatch for key ${k} in ${lang}/${file}`);
+      try {
+        fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
+      } catch (e) {
+        issues.push(`Permission issue: ${dir}`);
         exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
-      });
+      }
     }
-  }
 
-  if (issues.length > 0) {
-    console.log('\nIssues found:');
-    issues.forEach(i => console.log(` - ${i}`));
+    const pkgVersion = require('../package.json').version;
+    if (config.version && config.version !== pkgVersion) {
+      issues.push(`Config version mismatch: ${config.version} != ${pkgVersion}`);
+      exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+    }
+
+    const sourceLang = config.sourceLanguage || 'en';
+    const languages = config.defaultLanguages || [];
+    const srcDir = path.join(config.i18nDir, sourceLang);
+    const srcFiles = SecurityUtils.safeExistsSync(srcDir) ? fs.readdirSync(srcDir).filter(f => f.endsWith('.json')) : [];
+
+    for (const lang of languages) {
+      const langDir = path.join(config.i18nDir, lang);
+      if (!SecurityUtils.safeExistsSync(langDir)) {
+        issues.push(`Missing locale directory: ${lang}`);
+        exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+        continue;
+      }
+      const files = fs.readdirSync(langDir).filter(f => f.endsWith('.json'));
+      for (const file of files) {
+        if (!srcFiles.includes(file)) {
+          issues.push(`Dangling namespace file: ${lang}/${file}`);
+          exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+        }
+        const srcPath = path.join(srcDir, file);
+        const tgtPath = path.join(langDir, file);
+        if (!SecurityUtils.safeExistsSync(srcPath) || !SecurityUtils.safeExistsSync(tgtPath)) continue;
+        const srcContent = SecurityUtils.safeReadFileSync(srcPath, path.dirname(srcPath), 'utf8');
+        const tgtContent = SecurityUtils.safeReadFileSync(tgtPath, path.dirname(tgtPath), 'utf8');
+        if (hasBOM(srcContent) || hasBOM(tgtContent)) {
+          issues.push(`BOM detected in ${lang}/${file}`);
+          exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+        }
+        let srcJson, tgtJson;
+        try {
+          srcJson = JSON.parse(srcContent.replace(/^\uFEFF/, ''));
+        } catch (e) {
+          issues.push(`Invalid JSON in source ${file}: ${e.message}`);
+          exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+          continue;
+        }
+        try {
+          tgtJson = JSON.parse(tgtContent.replace(/^\uFEFF/, ''));
+        } catch (e) {
+          issues.push(`Invalid JSON in ${lang}/${file}: ${e.message}`);
+          exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+          continue;
+        }
+        const srcPlurals = collectPluralKeys(srcJson);
+        const tgtPlurals = collectPluralKeys(tgtJson);
+        for (const key of srcPlurals) {
+          if (!tgtPlurals.has(key)) {
+            issues.push(`Inconsistent plural forms in ${lang}/${file}: missing ${key}`);
+            exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+          }
+        }
+        const typeMismatches = compareTypes(srcJson, tgtJson);
+        typeMismatches.forEach(k => {
+          issues.push(`Type mismatch for key ${k} in ${lang}/${file}`);
+          exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);
+        });
+      }
+    }
+
+    if (issues.length > 0) {
+      console.log('\nIssues found:');
+      issues.forEach(i => console.log(` - ${i}`));
+    }
+    
+    // Return the result instead of exiting for modular usage
+    if (require.main === module) {
+      process.exit(exitCode);
+    }
+    
+    return { success: exitCode === ExitCodes.SUCCESS, issues, exitCode };
   }
-  process.exit(exitCode);
-})();
+}
+
+// Only run as standalone script if called directly
+if (require.main === module) {
+  const doctor = new I18nDoctor();
+  doctor.run();
+}
+
+module.exports = I18nDoctor;

@@ -19,7 +19,7 @@ const SecurityUtils = require(path.join(__dirname, '../utils/security'));
 const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper'));
 const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper'));
 const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
-const { program } = require('commander');
+const { program } = require('../utils/mini-commander');
 
 (async () => {
   try {

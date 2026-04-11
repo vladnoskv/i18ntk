@@ -232,7 +232,7 @@ class SetupValidator {
             },
             go: {
                 required: [],
-                recommended: ['github.com/nicksnyder/go-i18n/v2/i18n'],
+                recommended: ['go-i18n'],
                 dev: []
             },
             java: {

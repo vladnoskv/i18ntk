@@ -124,7 +124,7 @@ i18n-management-toolkit/
 ├── settings/                # Configuration management
 │   ├── settings-manager.js # Main settings manager
 │   ├── settings-cli.js     # Settings command-line interface
-│   ├── i18ntk-config.json  # User configuration
+│   ├── .i18ntk-config  # User configuration
 │   ├── admin-config.json   # Admin configuration
 │   └── backups/            # Configuration backups
 ├── dev/                     # Development and debugging tools
@@ -165,7 +165,7 @@ locales/                     # Your project's translation files
 settings/
 ├── admin-pin.json          # Encrypted PIN storage (AES-256-GCM)
 ├── admin-config.json       # Admin configuration
-└── i18ntk-config.json      # User preferences
+└── .i18ntk-config      # User preferences
 
 utils/
 ├── admin-pin.js            # Enhanced PIN security with session management

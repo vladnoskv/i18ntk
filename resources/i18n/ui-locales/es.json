@@ -100,7 +100,8 @@
     "home": "Inicio",
     "settings": "Configuración",
     "startingSettings": "🎛️ Iniciando CLI de Configuración...",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "errorExiting": "Error while exiting."
   },
   "errors": {
     "readlineClosed": "Flujo de entrada cerrado; ejecutando en modo no interactivo.",
@@ -108,7 +109,8 @@
     "invalidOption": "❌ Opción inválida: {option}. Por favor, inténtelo de nuevo.",
     "noPackageJson": "No se encontró package.json. No se puede autodetectar el framework i18n.",
     "noI18nDir": "No se encontró directorio i18n en la raíz del proyecto.",
-    "noI18nConfig": "No se encontró archivo de configuración i18n en la raíz del proyecto."
+    "noI18nConfig": "No se encontró archivo de configuración i18n en la raíz del proyecto.",
+    "errorReadingDebugLogs": "Error reading debug logs: {error}"
   },
   "fixer": {
     "help_message": "\nCorrector de Traducciones I18n\n\nUso: node i18ntk-fixer.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./locales)\n  --languages <langs>    Lista de idiomas a corregir separados por comas\n  --markers <markers>    Marcadores separados por comas para tratar como no traducido\n  --no-backup           Omitir creación automática de respaldo\n  --help                Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-fixer.js --languages de,fr\n  node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED\n  node i18ntk-fixer.js --no-backup\n",
@@ -145,12 +147,7 @@
     "choicePrompt": "Tu elección (y/n/s): ",
     "nonInteractiveMode": "⚡ Modo no interactivo detectado - aplicando correcciones automáticamente...",
     "reportGenerated": "📊 Informe del corrector generado: {path}",
-    "summary": {
-      "totalIssues": "Total de problemas: {total}",
-      "missingKeys": "Claves faltantes: {missing}",
-      "placeholderKeys": "Claves provisionales: {placeholder}",
-      "languages": "Idiomas: {languages}"
-    },
+    "summary": "Fixer summary:",
     "welcome": {
       "title": "🎯 ¡Bienvenido al Corrector de Traducciones!",
       "description": "Esta herramienta te ayudará a corregir traducciones rotas y marcadores provisionales en tus archivos de localización."
@@ -173,12 +170,22 @@
       "current": "Directorio actual: {dir}",
       "description": "Ingresa el directorio que contiene tus archivos de localización (o presiona Enter para el actual):",
       "input": "Directorio: "
-    }
+    },
+    "backupLocation": "Backup location: {dir}",
+    "completed": "Fixing completed.",
+    "creatingBackup": "Creating backup in {dir}...",
+    "dryRunMode": "Dry run mode: {mode}",
+    "error": "Fixer failed: {error}",
+    "fixing": "Fixing {language}...",
+    "foundLanguages": "Found {count} languages: {languages}",
+    "languageFixed": "{language}: fixed {fixed} key(s), skipped {skipped}.",
+    "running": "Running translation fixer...",
+    "totalFixed": "Total fixed: {count}"
   },
   "autorun": {
     "stepAnalyzeTranslations": "Analizar traducciones",
     "stepCompletedWithIcon": "✅ Completado: {stepName}",
-    "stepValidateTranslations": "Validar traducciones", 
+    "stepValidateTranslations": "Validar traducciones",
     "stepRunning": "▶️  Paso {stepNumber}/{totalSteps}: {stepName}",
     "separator": "==================================================",
     "stepFailed": "❌ Fallido: {stepName}",
@@ -370,11 +377,11 @@
     "configurationValidationFailed": "Falló la validación de configuración: faltan campos requeridos"
   },
   "sizing": {
-    "separator": "================================================================================", 
+    "separator": "================================================================================",
     "lineSeparator": " --------------------------------------------------------------------------------",
     "analysisStats": "{stats}",
     "sourceDirectoryLabel": "📁 Directorio fuente: {sourceDir}",
-    "sourceLanguageLabel": "🌍 Idioma fuente: {sourceLanguage}", 
+    "sourceLanguageLabel": "🌍 Idioma fuente: {sourceLanguage}",
     "strictModeLabel": "⚙️ Modo estricto: {mode}",
     "invalidSourceDirectoryError": "Ruta de directorio fuente inválida: {sourceDir}",
     "sourceDirectoryNotFoundError": "Directorio fuente no encontrado: {sourceDir}",
@@ -413,7 +420,7 @@
     "keysHaveSignificantSizeVariations": "las claves tienen variaciones significativas de tamaño",
     "longTranslationsDetected": "${lang} tiene ${data.longKeys} traducciones más largas que 100 caracteres - considere dividirlas",
     "longer": "más largo",
-    "shorter": "más corto", 
+    "shorter": "más corto",
     "review_translations": "Considere revisar las traducciones de {lang} - son {percentageDifference}% {comparison} que la línea base",
     "report_saved_to": "Informe guardado en: {reportPath}",
     "considerReviewingTranslations": "Considere revisar las traducciones de ${lang} - son ${data.percentageDifference}% más largas que la línea base",
@@ -437,7 +444,13 @@
       "keys_have_significant_size_variations": "las claves tienen variaciones significativas de tamaño",
       "consider_reviewing_translations": "Considere revisar las traducciones de {lang} - son {percentageDifference}% {comparison} que la línea base",
       "long_translations_detected": "{lang} tiene {longKeys} traducciones más largas que {threshold} caracteres - considere dividirlas"
-    }
+    },
+    "detailed_key_analysis_title": "Detailed Key Analysis",
+    "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
+    "key_analysis_header": "Key: {key}",
+    "status_empty": "empty",
+    "status_long": "long",
+    "status_ok": "ok"
   },
   "usage": {
     "help_message": "\nAnalizador de Uso I18n\n\nUso: node i18ntk-usage.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./src)\n  --i18n-dir <dir>       Directorio i18n (predeterminado: ./src/locales)\n  --output-report        Generar informe detallado\n  --output-dir <dir>     Directorio de salida para informes (predeterminado: ./reports)\n  --help                 Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-usage.js --output-report\n  node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-usage.js --output-dir=./analysis --output-report\n",
@@ -542,7 +555,7 @@
       "title": "🌍 COMPLETADO DE TRADUCCIÓN I18NTK",
       "separator": "============================================================",
       "sourceDir": "📁 Directorio fuente: {sourceDir}",
-      "sourceLanguage": "🌐 Idioma fuente: {sourceLanguage}", 
+      "sourceLanguage": "🌐 Idioma fuente: {sourceLanguage}",
       "dryRunMode": "🧪 Modo de prueba - no se realizarán cambios",
       "languages": "🌍 Idiomas disponibles: {languages}",
       "addingMissingKeys": "➕ Agregando claves faltantes a archivos de traducción...",
@@ -573,7 +586,12 @@
     },
     "noTranslationLanguagesFound": "No se encontraron idiomas de traducción.",
     "failedToAnalyzeLanguage": "Error al analizar el idioma {language}: {error}",
-    "translationCompletenessAnalysisFailed": "El análisis de completitud de traducción falló: {error}"
+    "translationCompletenessAnalysisFailed": "El análisis de completitud de traducción falló: {error}",
+    "failedToProcessFile": "Failed to process file:",
+    "failedToSaveReport": "Failed to save usage report: {error}",
+    "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
+    "reportSavedTo": "Usage report saved to: {reportPath}",
+    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}"
   },
   "validate": {
     "help_message": "\nValidador de Traducciones I18n\n\nUso: node i18ntk-validate.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./src)\n  --i18n-dir <dir>       Directorio i18n (predeterminado: ./src/locales)\n  --output-report        Generar informe detallado\n  --output-dir <dir>     Directorio de salida para informes (predeterminado: ./reports)\n  --help                 Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-validate.js --output-report\n  node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales\n  node i18ntk-validate.js --output-dir=./analysis --output-report\n",
@@ -670,7 +688,9 @@
     "invalidSampleFilePath": "Ruta de archivo de ejemplo inválida",
     "failedToCreateSampleTranslationFile": "Falló al crear archivo de traducción de ejemplo",
     "invalidFilePathDetected": "Ruta de archivo inválida detectada",
-    "failedToWriteFile": "Falló al escribir archivo: {filePath}"
+    "failedToWriteFile": "Falló al escribir archivo: {filePath}",
+    "invalidSourceDirectory": "Invalid source directory: {sourceDir}",
+    "invalidSourceLanguageDirectory": "Invalid source language directory: {sourceDir}"
   },
   "adminCli": {
     "setupPinProtectionTitle": "\n🔐 Configurando Protección PIN de Administrador",
@@ -984,7 +1004,9 @@
       "apply_all_prompt": "¿Aplicar esta estructura a todos los idiomas? (s/N): ",
       "per_language_intro": "Has elegido configurar los idiomas individualmente. Estos son los idiomas disponibles:",
       "available_languages": "Idiomas disponibles: {languages}",
-      "include_prompt": "Ingresa los códigos de idioma separados por comas (ej. 'de,fr,es'): "
+      "include_prompt": "Ingresa los códigos de idioma separados por comas (ej. 'de,fr,es'): ",
+      "title": "Setup",
+      "question": "Setup question"
     },
     "warnings": {
       "noPackageJson": "No se encontró package.json. No se puede auto-detectar el framework i18n."
@@ -997,7 +1019,7 @@
     },
     "frameworks": {
       "react": "- React i18next (react-i18next)",
-      "vue": "- Vue i18n (vue-i18n)", 
+      "vue": "- Vue i18n (vue-i18n)",
       "i18next": "- i18next (i18next)",
       "nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
       "svelte": "- Svelte i18n (svelte-i18n)"
@@ -1014,13 +1036,23 @@
       "sourceLanguageDirectoryNotFound": "Directorio de idioma fuente no encontrado: {dir}",
       "noJsonFilesInSourceDirectory": "No se encontraron archivos JSON en el directorio fuente: {dir}",
       "invalidFilePathDetected": "Ruta de archivo inválida detectada",
-      "initializationFailed": "Falló la inicialización: {error}"
+      "initializationFailed": "Falló la inicialización: {error}",
+      "noFramework": "No i18n framework detected. Continue with generic mode.",
+      "packageJsonRead": "Error reading package.json."
     },
     "processingFile": "Procesando {file} para {language}...",
     "fileAlreadyExistsMerging": "El archivo {file} ya existe. Fusionando nuevas claves.",
     "createdNewFile": "Archivo nuevo creado: {file}",
     "updatedFile": "Archivo actualizado: {file}",
-    "skippingExcludedFile": "Omitiendo {file} para {language} ya que está excluido."
+    "skippingExcludedFile": "Omitiendo {file} para {language} ya que está excluido.",
+    "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
+    "noTargetLanguagesSpecified": "No target languages specified.",
+    "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
+    "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
+    "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
+    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework.",
+    "initializationCancelled": "🚫 Initialization cancelled by user."
   },
   "language": {
     "title": "🌍 Cambiar Idioma",
@@ -1234,6 +1266,10 @@
     "content_too_large_for_file": "Contenido demasiado grande para archivo",
     "file_write_error": "Error de escritura de archivo",
     "json_string_too_large": "Cadena JSON demasiado grande",
+    "recursion_detected": "Recursión detectada en {operation}",
+    "operation_timeout": "Tiempo de espera de la operación: {operation}",
+    "operation_error": "Error en la operación {operation}: {error}",
+    "directory_read_error": "Error de lectura de directorio: {errorMessage}",
     "security_alert": "Alerta de seguridad"
   },
   "settings-cli": {
@@ -1370,7 +1406,9 @@
       "prompt": "¿Deseas actualizar el paquete ahora? (s/N): ",
       "promptDesc": "Nota: Esto actualizará el paquete i18ntk a la última versión.",
       "confirm": "s",
-      "cancelled": "Actualización cancelada."
+      "cancelled": "Actualización cancelada.",
+      "error": "Failed to update package",
+      "updating": "Updating package..."
     },
     "admin": {
       "selectOption": "Selecciona opción: ",
@@ -1426,7 +1464,12 @@
       "importSuccess": "Configuración importada exitosamente.",
       "importFailed": "Error al importar configuración: {error}",
       "backupSuccess": "Respaldo creado: {file}",
-      "backupFailed": "Error al crear respaldo: {error}"
+      "backupFailed": "Error al crear respaldo: {error}",
+      "exportFilenamePrompt": "Enter export filename: ",
+      "importConfirm": "Import this settings file? (y/N): ",
+      "importFilenamePrompt": "Enter import filename: ",
+      "manageBackups": "Manage backups",
+      "restore": "Restore settings"
     },
     "selectOption": "Selecciona opción: ",
     "resetToDefaultsTitle": "Restablecer Configuraciones a Valores Predeterminados",
@@ -1507,35 +1550,37 @@
       }
     },
     "fields": {
-      "backup.enabled": {
-        "label": "  Habilitar Copia de Seguridad",
-        "description": "  Habilitar copia de seguridad automática de configuraciones",
-        "help": "  Habilitar/deshabilitar función de copia de seguridad"
-      },
-      "backup.singleFileMode": {
-        "label": "  Modo de Archivo Único",
-        "description": " ar archivo único para copias de seguridad",
-        "help": " ardar configuraciones en un archivo único"
-      },
-      "backup.singleBackupFile": {
-        "label": " ta de Archivo de Copia de Seguridad",
-        "description": "  Ruta al archivo de copia de seguridad",
-        "help": " ta al archivo de copia de seguridad único"
-      },
-      "backup.retentionDays": {
-        "label": "  Período de Retención",
-        "description": "  Días para mantener archivos de copia de seguridad",
-        "help": "  Número de días para retener archivos de copia de seguridad antiguos"
-      },
-      "backup.maxBackups": {
-        "label": "  Máximo de Copias de Seguridad",
-        "description": "  Máximo número de archivos de copia de seguridad a mantener",
-        "help": "  Máximo número de archivos de copia de seguridad a mantener"
-      },
-      "backup.confirm": {
-        "label": "  Confirmar Copia de Seguridad",
-        "description": "  Requerir confirmación para operaciones de copia de seguridad",
-        "help": "  Confirmar operación de copia de seguridad"
+      "backup": {
+        "enabled": {
+          "label": "  Habilitar Copia de Seguridad",
+          "description": "  Habilitar copia de seguridad automática de configuraciones",
+          "help": "  Habilitar/deshabilitar función de copia de seguridad"
+        },
+        "singleFileMode": {
+          "label": "  Modo de Archivo Único",
+          "description": " ar archivo único para copias de seguridad",
+          "help": " ardar configuraciones en un archivo único"
+        },
+        "singleBackupFile": {
+          "label": " ta de Archivo de Copia de Seguridad",
+          "description": "  Ruta al archivo de copia de seguridad",
+          "help": " ta al archivo de copia de seguridad único"
+        },
+        "retentionDays": {
+          "label": "  Período de Retención",
+          "description": "  Días para mantener archivos de copia de seguridad",
+          "help": "  Número de días para retener archivos de copia de seguridad antiguos"
+        },
+        "maxBackups": {
+          "label": "  Máximo de Copias de Seguridad",
+          "description": "  Máximo número de archivos de copia de seguridad a mantener",
+          "help": "  Máximo número de archivos de copia de seguridad a mantener"
+        },
+        "confirm": {
+          "label": "  Confirmar Copia de Seguridad",
+          "description": "  Requerir confirmación para operaciones de copia de seguridad",
+          "help": "  Confirmar operación de copia de seguridad"
+        }
       },
       "i18nDir": {
         "label": "  Directorio de Traducciones",
@@ -1798,6 +1843,9 @@
       },
       "pinProtection_${helperKey}": {
         "help": "  Ayuda"
+      },
+      "${helperKey}": {
+        "help": "Help"
       }
     },
     "actions": {
@@ -1877,6 +1925,11 @@
       "confirmNo": "  No",
       "backupFile": "  Archivo de Respaldo",
       "backupFileHelp": "  Ruta al archivo de respaldo"
+    },
+    "validation": {
+      "valid": "Valid",
+      "validatingPaths": "Validating configured paths...",
+      "validationComplete": "Path validation complete: {valid}/{total} valid."
     }
   },
   "summary": {
@@ -2110,7 +2163,15 @@
       "coverage_percentage": "    Cobertura: {coverage}%\n",
       "error_general": "❌ Error:",
       "use_help": "Use --help para ver información de uso"
-    }
+    },
+    "cleaningUpReportFiles": "Cleaning up old report files...",
+    "couldNotDelete": "Could not delete {file}: {error}",
+    "deletedOldReportFiles": "Deleted {count} old report file(s).",
+    "errorCleaningUpReports": "Error cleaning up reports: {error}",
+    "noOldReportFilesToDelete": "No old report files to delete.",
+    "reportFilesPreserved": "Report files preserved.",
+    "reportSaveFailed": "Failed to save report to: {reportPath}",
+    "reportSaved": "Report saved to: {reportPath}"
   },
   "scanner": {
     "help_message": "\nEscáner de Texto i18n\n\nUso: node i18ntk-scanner.js [opciones]\n\nOpciones:\n  --source-dir <dir>     Directorio fuente para escanear (por defecto: ./src)\n  --output <file>        Archivo de salida para resultados (por defecto: ./i18ntk-scanner-report.json)\n  --framework <nombre>   Framework a analizar (react, vue, angular, vanilla)\n  --patterns <patrones>  Patrones regex personalizados (separados por comas)\n  --include-tests        Incluir archivos de prueba en el escaneo\n  --exclude-dirs <dirs>  Directorios a excluir (separados por comas)\n  --help                 Mostrar esta ayuda\n\nEjemplos:\n  node i18ntk-scanner.js --source-dir=./src --framework=react\n  node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests\n  node i18ntk-scanner.js --output=./resultados-escaneo.json\n",
@@ -2161,7 +2222,8 @@
       "includeTests": "¿Incluir archivos de prueba?",
       "excludeDirs": "Directorios a excluir (separados por comas):",
       "customPatterns": "Patrones personalizados a escanear (regex):"
-    }
+    },
+    "reportGenerated": "Scan report generated: {path}"
   },
   "ui": {
     "autoDetectedI18nDirectory": "Directorio i18n autodetectado: {path}",
@@ -2349,5 +2411,15 @@
     "signIn": "Iniciar sesión",
     "forgotPassword": "Olvidé mi contraseña",
     "signUp": "Registrarse"
+  },
+  "checkUsage": {
+    "usage_analysis_failed": "Usage analysis failed."
+  },
+  "completeTranslations": {
+    "warning_could_not_parse_filepa": "Warning: could not parse file path: {filePath}"
+  },
+  "pressEnterToContinue": "Press Enter to continue...",
+  "status": {
+    "exitingCompleted": "Workflow completed. Exiting..."
   }
 }
