@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "🚀 The fastest i18n toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
