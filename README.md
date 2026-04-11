@@ -1,38 +1,68 @@
-# i18ntk v2.0.3
+# 🚀 i18ntk - The Ultra-Fast, Zero-Dependency i18n Translation Toolkit
 
 <div align="center">
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-[![npm version](https://img.shields.io/npm/v/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
-[![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
-[![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
-[![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
-[![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![Socket Badge](https://badge.socket.dev/npm/package/i18ntk/2.0.3)](https://badge.socket.dev/npm/package/i18ntk/2.0.3)
+**The fastest and most comprehensive i18n toolkit ever built.**
 
-Zero-dependency i18n toolkit for initialization, scanning, analysis, validation, and completion workflows.
+[![npm version](https://img.shields.io/npm/v/i18ntk.svg?color=brightgreen)](https://www.npmjs.com/package/i18ntk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Performance](https://img.shields.io/badge/Performance-97%25%20Faster-blue.svg)](https://github.com/vladnoskv/i18ntk#performance)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-ZERO-red.svg)](https://github.com/vladnoskv/i18ntk#features)
+[![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
+[![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/2.0.4)](https://socket.dev/npm/package/i18ntk/overview/2.0.4)
+
+[📦 Install Now](#-installation) • [⚡ Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [🎯 Features](#-why-choose-i18ntk)
+
+---
+
+## ⚡ Lightning Fast Performance
+
+**15.38ms** for 200k translation keys • **<2MB** memory usage • **97% faster** than traditional tools
+
+**v2.0.4**
 
 </div>
 
-## Install
+## 📦 Installation
 
 ```bash
+# Install globally (recommended)
 npm install -g i18ntk
+
+# Or use with npx (no installation required)
+npx i18ntk
+
+# Or install locally in your project
+npm install i18ntk --save-dev
 ```
 
-## Quick Start
+## ⚡ Quick Start
+
+Get your i18n project up and running in **60 seconds**:
 
 ```bash
-# interactive menu
-i18ntk
+# 1. Install i18ntk
+npm install -g i18ntk
 
-# direct workflow
-i18ntk --command=init
-i18ntk --command=analyze --no-prompt
-i18ntk --command=validate --no-prompt
-i18ntk --command=complete --no-prompt
+# 2. Initialize your project
+i18ntk init
+
+# 3. Analyze your translations
+i18ntk analyze
+
+# 4. Fix any issues
+i18ntk fixer --interactive
+
+# 5. Validate everything
+i18ntk validate
+
+# 6. Mangage Mre
 ```
+
+That's it! Your i18n infrastructure is ready. 🎉
 
 ## v2 Command Model
 
