@@ -9,7 +9,7 @@
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.0.3)](https://socket.dev/npm/package/i18ntk/overview/2.0.3)
+[![Socket Badge](https://badge.socket.dev/npm/package/i18ntk/2.0.3)](https://badge.socket.dev/npm/package/i18ntk/2.0.3)
 
 Zero-dependency i18n toolkit for initialization, scanning, analysis, validation, and completion workflows.
 
