@@ -129,97 +129,25 @@ function showFrameworkWarningOnce(ui) {
   if (frameworkWarningShown) return;
   frameworkWarningShown = true;
 
-  // Try to use the proper translation system first
-  let t;
-  if (ui && typeof ui.t === 'function') {
-    t = ui.t.bind(ui);
-  } else {
-    // Fallback to loading the UI i18n system properly
-    try {
-      const UIi18n = require('../main/i18ntk-ui');
-      const fallbackUI = new UIi18n();
-      fallbackUI.loadLanguage('en'); // Load English as fallback
-      t = fallbackUI.t.bind(fallbackUI);
-    } catch (error) {
-      // Last resort: use locale files directly
-      try {
-        const path = require('path');
-        const fs = require('fs');
-        const localePath = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales', 'en.json');
-        if (SecurityUtils.safeExistsSync(localePath)) {
-          const translations = JSON.parse(SecurityUtils.safeReadFileSync(localePath, path.dirname(localePath), 'utf8'));
-          t = (key) => {
-            const keys = key.split('.');
-            let result = translations;
-            for (const k of keys) {
-              result = result && result[k];
-            }
-            return result || key;
-          };
-        } else {
-          throw new Error('Locale file not found');
-        }
-      } catch (fallbackError) {
-        // Final fallback: load from current UI locale or English
-        try {
-          const path = require('path');
-          const fs = require('fs');
-          
-          // Try to determine current language from settings
-          const settingsManager = require('../settings/settings-manager');
-          const settings = settingsManager.loadSettings();
-          const currentLang = settings.uiLanguage || 'en';
-          
-          const localePath = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales', `${currentLang}.json`);
-          if (SecurityUtils.safeExistsSync(localePath)) {
-            const translations = JSON.parse(SecurityUtils.safeReadFileSync(localePath, path.dirname(localePath), 'utf8'));
-            t = (key) => {
-              const keys = key.split('.');
-              let result = translations;
-              for (const k of keys) {
-                result = result && result[k];
-              }
-              return result || key;
-            };
-          } else {
-            // Fallback to English
-            const enLocalePath = path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales', 'en.json');
-            if (SecurityUtils.safeExistsSync(enLocalePath)) {
-              const translations = JSON.parse(SecurityUtils.safeReadFileSync(enLocalePath, path.dirname(enLocalePath), 'utf8'));
-              t = (key) => {
-                const keys = key.split('.');
-                let result = translations;
-                for (const k of keys) {
-                  result = result && result[k];
-                }
-                return result || key;
-              };
-            } else {
-              throw new Error('No locale files found');
-            }
-          }
-        } catch (finalError) {
-          // Absolute last resort: basic hardcoded fallback
-          const messages = {
-            'init.suggestions.noFramework': 'No i18n framework detected. Consider using one of the following:',
-            'init.frameworks.react': ' - React i18next (react-i18next)',
-            'init.frameworks.vue': ' - Vue i18n (vue-i18next)',
-            'init.frameworks.i18next': ' - i18next (i18next)',
-            'init.frameworks.nuxt': ' - Nuxt i18n (@nuxtjs/i18next)',
-            'init.frameworks.svelte': ' - Svelte i18n (svelte-i18next)'
-          };
-          t = (key) => messages[key] || key;
-        }
-      }
-    }
-  }
+  const translate = ui && typeof ui.t === 'function'
+    ? ui.t.bind(ui)
+    : require('./i18n-helper').t;
 
-  console.log(t('init.suggestions.noFramework'));
-  console.log(t('init.frameworks.react'));
-  console.log(t('init.frameworks.vue'));
-  console.log(t('init.frameworks.i18next'));
-  console.log(t('init.frameworks.nuxt'));
-  console.log(t('init.frameworks.svelte'));
+  const fallback = {
+    noFramework: 'No i18n framework detected. Consider using one of the following:',
+    react: ' - React i18next (react-i18next)',
+    vue: ' - Vue i18n (vue-i18next)',
+    i18next: ' - i18next (i18next)',
+    nuxt: ' - Nuxt i18n (@nuxtjs/i18n)',
+    svelte: ' - Svelte i18n (svelte-i18n)'
+  };
+
+  console.log(translate('init.suggestions.noFramework') || fallback.noFramework);
+  console.log(translate('init.frameworks.react') || fallback.react);
+  console.log(translate('init.frameworks.vue') || fallback.vue);
+  console.log(translate('init.frameworks.i18next') || fallback.i18next);
+  console.log(translate('init.frameworks.nuxt') || fallback.nuxt);
+  console.log(translate('init.frameworks.svelte') || fallback.svelte);
 }
 
 // Export a singleton instance and attach utility for backward compatibility

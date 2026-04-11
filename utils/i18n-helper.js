@@ -57,8 +57,7 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  const SecurityUtils = getSecurityUtils();
-  const raw = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8');
+  const raw = fs.readFileSync(file, 'utf8');
   return JSON.parse(stripBOMAndComments(raw));
 }
 
@@ -80,15 +79,17 @@ function pkgUiLocalesDirViaResolve() {
         }
     }
 
-function resolveLocalesDirs() {
+function legacyResourcesUiLocalesDir() {
+  return path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales');
+}
+
+function resolveLocalesDirs(preferredDir) {
   const dirs = [];
   const addDir = (dir) => {
     if (typeof dir === 'string' && dir.trim()) {
       try {
         const normalized = path.normalize(path.resolve(dir.trim()));
-
-        const SecurityUtils = getSecurityUtils();
-        if (SecurityUtils.safeExistsSync(normalized) && fs.statSync(normalized).isDirectory()) {
+        if (fs.existsSync(normalized) && fs.statSync(normalized).isDirectory()) {
           dirs.push(normalized);
         }
       } catch {
@@ -97,12 +98,19 @@ function resolveLocalesDirs() {
     }
   };
 
+  addDir(preferredDir);
+
   const pkgA = pkgUiLocalesDirViaThisFile();
   addDir(pkgA);
 
   const pkgB = pkgUiLocalesDirViaResolve();
   if (pkgB && pkgB !== pkgA) {
     addDir(pkgB);
+  }
+
+  const legacyDir = legacyResourcesUiLocalesDir();
+  if (legacyDir !== pkgA && legacyDir !== pkgB) {
+    addDir(legacyDir);
   }
 
   // Deduplicate while preserving order
@@ -121,8 +129,8 @@ function candidatesForLang(dir, lang) {
   ];
 }
 
-function findLocaleFilesAllDirs(lang) {
-  const dirs = resolveLocalesDirs();
+function findLocaleFilesAllDirs(lang, preferredDir) {
+  const dirs = resolveLocalesDirs(preferredDir);
 
   if (process.env.I18NTK_DEBUG_LOCALES === '1') {
     console.log('🔎 i18ntk locale search dirs:', dirs);
@@ -134,14 +142,13 @@ function findLocaleFilesAllDirs(lang) {
   for (const dir of dirs) {
     for (const candidate of candidatesForLang(dir, lang)) {
       try {
-        const SecurityUtils = getSecurityUtils();
-        if (SecurityUtils.safeExistsSync(candidate)) {
+        if (fs.existsSync(candidate)) {
           const stats = fs.statSync(candidate);
           if (stats.isFile() && stats.size > 0) {
             // Validate file is readable and parseable
             fs.accessSync(candidate, fs.constants.R_OK);
             // Quick JSON validation
-            const content = SecurityUtils.safeReadFileSync(candidate, path.dirname(candidate), 'utf8');
+            const content = fs.readFileSync(candidate, 'utf8');
             if (content) {
               if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
                 files.push(candidate);
@@ -183,8 +190,10 @@ function loadTranslations(language) {
 
   const loadErrors = [];
 
+  const preferredDir = arguments.length > 1 ? arguments[1] : null;
+
   for (const lang of tryOrder) {
-    const files = findLocaleFilesAllDirs(lang);
+    const files = findLocaleFilesAllDirs(lang, preferredDir);
 
     // Prioritize bundled locales over project ones
       const prioritizedFiles = files.sort((a, b) => Number(isBundledPath(b)) - Number(isBundledPath(a)));

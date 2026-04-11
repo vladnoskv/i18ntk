@@ -54,14 +54,14 @@
       "errors": "Ошибки:",
       "genericError": "❌ Ошибка: {error}",
       "initializationFailed": "❌ Инициализация не удалась: {error}",
+      "initializationCancelled": "❌ Initialization cancelled by user.",
       "translationKeyNotFound": "❌ Ключ перевода не найден: {key}",
       "sourceDirectoryNotFound": "❌ Исходная директория не найдена: {directory}",
       "configLoadingFailed": "❌ Загрузка конфигурации не удалась",
       "invalidSourceDirectory": "❌ Неверная исходная директория: {directory}",
       "securityViolation": "⚠️ Нарушение безопасности обнаружено",
       "authenticationFailed": "❌ Аутентификация не удалась",
-      "sourceEqualsI18nWarn": "⚠️ sourceDir equals i18nDir ({sourceDir}). Falling back to {fallback} for source scanning.",
-      "initializationCancelled": "❌ Initialization cancelled by user."
+      "sourceEqualsI18nWarn": "⚠️ sourceDir equals i18nDir ({sourceDir}). Falling back to {fallback} for source scanning."
     },
     "errorGeneratingStatusSummary": "Ошибка генерации сводки статуса: {error}",
     "errorRunningDebugTool": "Ошибка запуска инструмента отладки '{displayName}': {error}",
@@ -104,12 +104,64 @@
     "errorExiting": "Error while exiting."
   },
   "errors": {
+    "invalidOption": "❌ Invalid option: {option}. Please try again.",
     "readlineClosed": "Поток ввода закрыт; работа в неинтерактивном режиме.",
     "noPackageJson": "Файл package.json не найден. Невозможно автоматически определить фреймворк i18n.",
     "noI18nDir": "Директория i18n не найдена в корне проекта.",
     "noI18nConfig": "Файл конфигурации i18n не найден в корне проекта.",
-    "errorReadingDebugLogs": "Error reading debug logs: {error}",
-    "invalidOption": "❌ Invalid option: {option}. Please try again."
+    "errorReadingDebugLogs": "Error reading debug logs: {error}"
+  },
+  "scanner": {
+    "help_message": "I18n Text Scanner  Usage: node i18ntk-scanner.js [options]  Options:   --source-dir <dir>     Source directory to scan (default: ./src)   --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)   --framework <name>     Framework to target (react, vue, angular, vanilla)   --patterns <patterns>  Custom regex patterns (comma-separated)   --include-tests        Include test files in scan   --exclude-dirs <dirs>  Directories to exclude (comma-separated)   --help                Show this help  Examples:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./scan-results.json",
+    "help_options": {
+      "source_dir": "Директория для сканирования",
+      "output_dir": "Файл для вывода результатов",
+      "framework": "Целевой фреймворк (react, vue, angular, vanilla)",
+      "patterns": "Пользовательские паттерны регулярных выражений (через запятую)",
+      "exclude": "Директории для исключения (через запятую)",
+      "output_report": "Файл для вывода отчета",
+      "min_length": "Минимальная длина текста для включения",
+      "max_length": "Максимальная длина текста для включения",
+      "include_tests": "Включать тестовые файлы в сканирование"
+    },
+    "starting": "🔍 Starting text scanner for framework: {framework}",
+    "sourceDirectory": "📁 Scanning directory: {sourceDir}",
+    "frameworkDetected": "🎯 Detected framework: {framework}",
+    "scanningFiles": "📊 Scanning {fileCount} files...",
+    "foundTexts": "📝 Found {textCount} texts requiring translation",
+    "generatingReport": "📊 Generating detailed report...",
+    "reportSaved": "💾 Scan report saved to: {reportPath}",
+    "noTextsFound": "✅ No hardcoded English texts found",
+    "scanComplete": "🎉 Scan completed successfully!",
+    "analysisTitle": "🔍 TRANSLATION SCAN ANALYSIS",
+    "fileSummary": "📄 {file}: {count} texts found",
+    "textLocation": "📍 Line {line}: {text}",
+    "foundText": "Found {count} potential hardcoded text instances",
+    "context": "📝 Context: {context}",
+    "severity": "⚠️  Severity: {severity}",
+    "recommendation": "💡 Recommendation: {recommendation}",
+    "welcome": {
+      "title": "🎯 Welcome to the Text Scanner!",
+      "description": "This tool scans your source code for hardcoded English text that may need translation."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Select Framework",
+      "available": "Available frameworks: react, vue, angular, vanilla",
+      "description": "Enter the framework type (or press Enter for auto-detection):",
+      "input": "Framework:"
+    },
+    "directoryPrompt": {
+      "title": "📁 Select Source Directory",
+      "current": "Current directory: {dir}",
+      "description": "Enter the directory to scan (or press Enter for current):",
+      "input": "Directory:"
+    },
+    "options": {
+      "includeTests": "Include test files?",
+      "excludeDirs": "Directories to exclude (comma-separated):",
+      "customPatterns": "Custom patterns to scan for (regex):"
+    },
+    "reportGenerated": "Scan report generated: {path}"
   },
   "fixer": {
     "help_message": "I18n Исправление Переводов  Использование: node i18ntk-fixer.js [опции]  Опции:   --source-dir <dir>     Исходный каталог для сканирования (по умолчанию: ./locales)   --languages <langs>    Список языков для исправления, разделенный запятыми   --markers <markers>    Список маркеров, которые считать непереведенными, разделенный запятыми   --no-backup           Пропустить автоматическое создание резервной копии   --help                Показать эту справку  Примеры:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -546,7 +598,7 @@
       "failedToAnalyzeFile": "Не удалось проанализировать файл {filePath}: {error}",
       "failedToAnalyzeLanguage": "Не удалось проанализировать язык {language}: {error}",
       "translationCompletenessAnalysisFailed": "Анализ полноты перевода не удался: {error}",
-      "n": ""
+      "n": "\n"
     },
     "complete": {
       "configLoadedSuccessfully": "⚙️  Конфигурация успешно загружена",
@@ -938,18 +990,17 @@
     "initializationTitle": "🚀 Набор инструментов i18n — Инициализация проекта",
     "initializationCancelled": "🚫 Инициализация отменена пользователем.",
     "sourceDirectoryLabel": "📁 Директория исходников: {dir}",
-    "createdSourceLanguageDirectory": "✅ Создано директория исходников: {dir}",
     "requiredTitle": "Требуется инициализация",
     "requiredBody": "Этот проект должен быть инициализирован перед запуском этой команды.",
     "promptRunNow": "Хотите выполнить инициализацию сейчас? (y/N):",
     "sourceLanguageLabel": "🌍 Исходный язык: {language}",
     "detectedI18nFrameworks": "🔍 Обнаружены фреймворки i18n: {frameworks}",
+    "pinMustBe4Digits": "🔐 PIN должен содержать 4 цифры.",
     "existingDirectoriesFound": "📁 Найдены существующие директории переводов:",
     "useExistingDirectoryPrompt": "Вы хотите использовать существующую директорию? (y/n)",
     "selectDirectoryPrompt": "Выберите директорию, введите номер (или выберите 'Создать новую директорию'):",
     "enterNewDirectoryName": "Введите имя новой директории:",
     "createdNewDirectory": "✅ Создана новая директория: {dir}",
-    "pinMustBe4Digits": "🔐 PIN должен содержать 4 цифры.",
     "directoryAlreadyExists": "⚠️ Директория уже существует: {dir}",
     "invalidDirectoryName": "❌ Неверное имя директории: {dir}",
     "usingExistingDirectory": "Использует существующую директорию: {dir}",
@@ -1044,6 +1095,7 @@
     "updatedFile": "Обновлён файл: {file}",
     "skippingExcludedFile": "Пропуск {file} для языка {language} — файл исключён.",
     "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "createdSourceLanguageDirectory": "✅ Создано директория исходников: {dir}",
     "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
     "noTargetLanguagesSpecified": "No target languages specified.",
     "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
@@ -1092,6 +1144,7 @@
       "complete": "🎯 Завершить переводы (100% покрытия)",
       "sizing": "📏 Анализ размеров",
       "fix": "🛠️  Исправить переводы-заглушки",
+      "scanner": "🔍 Сканировать проблемы i18n",
       "workflow": "🔄 Запустить полный рабочий процесс",
       "status": "📋 Показать статус проекта",
       "delete": "🗑️ Удалить все отчёты",
@@ -1099,7 +1152,6 @@
       "settings": "⚙️ Настройки",
       "help": "❓ Справка",
       "debug": "🔧 Инструменты отладки",
-      "scanner": "🔍 Сканировать проблемы i18n",
       "exit": "🚪 Выход"
     },
     "update": "📦 Обновить пакет",
@@ -2057,8 +2109,8 @@
       "sizingCommand": "Оценка команды",
       "completeCommand": "Завершение команды",
       "summaryCommand": "Сводка команды",
-      "debugCommand": "Отладка команды",
-      "scannerCommand": "scanner   - 🔍 Сканирование проблем i18n"
+      "scannerCommand": "scanner   - 🔍 Сканирование проблем i18n",
+      "debugCommand": "Отладка команды"
     },
     "test_complete_system": {
       "starting_test": "Начало теста",
@@ -2319,9 +2371,6 @@
     "found_hardcoded_messages": "Найдены жестко закодированные сообщения",
     "all_console_messages_use_translation": "Все сообщения консоли используют перевод"
   },
-  "\\nSelect directory to clean (0-${availableDirs": {
-    "length + 1}): ": ""
-  },
   "exportTranslations": {
     "createdDirectory": "Создана директория",
     "foundFiles": "Найдены файлы",
@@ -2337,9 +2386,6 @@
     "location": "Расположение",
     "nextSteps": "Следующие шаги"
   },
-  ")) {\n          console": {
-    "log(": "Лог("
-  },
   "dashboard": {
     "title": "Заголовок",
     "overview": "Обзор"
@@ -2351,104 +2397,6 @@
     "signIn": "Войти",
     "forgotPassword": "Забыли пароль",
     "signUp": "Зарегистрироваться"
-  },
-  "scanner": {
-    "title": "🕵️ i18n Сканнер Текста",
-    "description": "Сканирует исходные файлы на наличие жестко закодированного английского текста",
-    "usage": "Использование: i18ntk-scanner [опции]",
-    "options": {
-      "sourceDir": "Директория для сканирования",
-      "outputDir": "Директория для отчетов",
-      "patterns": "Пользовательские паттерны регулярных выражений",
-      "framework": "Фреймворк (react, vue, angular, vanilla)",
-      "extensions": "Расширения файлов для сканирования",
-      "exclude": "Паттерны для исключения",
-      "minLength": "Минимальная длина текста для сканирования",
-      "maxLength": "Максимальная длина текста для сканирования",
-      "includeTests": "Include test files?",
-      "excludeDirs": "Directories to exclude (comma-separated):",
-      "customPatterns": "Custom patterns to scan for (regex):"
-    },
-    "status": {
-      "scanning": "🔍 Сканирование файлов...",
-      "analyzing": "📊 Анализ найденного текста...",
-      "generating": "📄 Генерация отчета...",
-      "complete": "✅ Сканирование завершено",
-      "found": "🎯 Найдено {count} элементов для перевода"
-    },
-    "results": {
-      "title": "📊 Результаты Сканирования",
-      "summary": "Сводка",
-      "filesScanned": "Просканировано файлов",
-      "textItemsFound": "Найдено текстовых элементов",
-      "uniqueTexts": "Уникальные тексты",
-      "filesWithText": "Файлы с текстом",
-      "exportLocation": "Расположение экспорта"
-    },
-    "prompts": {
-      "selectFramework": "Выберите фреймворк:",
-      "enterSourceDir": "Введите директорию исходников",
-      "enterOutputDir": "Введите директорию вывода",
-      "confirmScan": "Начать сканирование?",
-      "saveReport": "Сохранить отчет?"
-    },
-    "errors": {
-      "invalidDirectory": "Неверная директория",
-      "noFilesFound": "Файлы для сканирования не найдены",
-      "scanFailed": "Ошибка сканирования",
-      "exportFailed": "Ошибка экспорта отчета"
-    },
-    "help": {
-      "examples": "Примеры использования:",
-      "example1": "i18ntk-scanner --source-dir ./src --framework react",
-      "example2": "i18ntk-scanner --patterns 'console\\.log\\s*\\([^)]*'",
-      "example3": "i18ntk-scanner --extensions js,ts,tsx --min-length 3"
-    },
-    "help_options": {
-      "source_dir": "Директория для сканирования",
-      "output_dir": "Файл для вывода результатов",
-      "framework": "Целевой фреймворк (react, vue, angular, vanilla)",
-      "patterns": "Пользовательские паттерны регулярных выражений (через запятую)",
-      "exclude": "Директории для исключения (через запятую)",
-      "output_report": "Файл для вывода отчета",
-      "min_length": "Минимальная длина текста для включения",
-      "max_length": "Максимальная длина текста для включения",
-      "include_tests": "Включать тестовые файлы в сканирование"
-    },
-    "reportGenerated": "Scan report generated: {path}",
-    "help_message": "I18n Text Scanner  Usage: node i18ntk-scanner.js [options]  Options:   --source-dir <dir>     Source directory to scan (default: ./src)   --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)   --framework <name>     Framework to target (react, vue, angular, vanilla)   --patterns <patterns>  Custom regex patterns (comma-separated)   --include-tests        Include test files in scan   --exclude-dirs <dirs>  Directories to exclude (comma-separated)   --help                Show this help  Examples:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./scan-results.json",
-    "starting": "🔍 Starting text scanner for framework: {framework}",
-    "sourceDirectory": "📁 Scanning directory: {sourceDir}",
-    "frameworkDetected": "🎯 Detected framework: {framework}",
-    "scanningFiles": "📊 Scanning {fileCount} files...",
-    "foundTexts": "📝 Found {textCount} texts requiring translation",
-    "generatingReport": "📊 Generating detailed report...",
-    "reportSaved": "💾 Scan report saved to: {reportPath}",
-    "noTextsFound": "✅ No hardcoded English texts found",
-    "scanComplete": "🎉 Scan completed successfully!",
-    "analysisTitle": "🔍 TRANSLATION SCAN ANALYSIS",
-    "fileSummary": "📄 {file}: {count} texts found",
-    "textLocation": "📍 Line {line}: {text}",
-    "foundText": "Found {count} potential hardcoded text instances",
-    "context": "📝 Context: {context}",
-    "severity": "⚠️  Severity: {severity}",
-    "recommendation": "💡 Recommendation: {recommendation}",
-    "welcome": {
-      "title": "🎯 Welcome to the Text Scanner!",
-      "description": "This tool scans your source code for hardcoded English text that may need translation."
-    },
-    "frameworkPrompt": {
-      "title": "🎯 Select Framework",
-      "available": "Available frameworks: react, vue, angular, vanilla",
-      "description": "Enter the framework type (or press Enter for auto-detection):",
-      "input": "Framework:"
-    },
-    "directoryPrompt": {
-      "title": "📁 Select Source Directory",
-      "current": "Current directory: {dir}",
-      "description": "Enter the directory to scan (or press Enter for current):",
-      "input": "Directory:"
-    }
   },
   "checkUsage": {
     "usage_analysis_failed": "Usage analysis failed."

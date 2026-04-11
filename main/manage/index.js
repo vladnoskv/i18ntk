@@ -153,6 +153,33 @@ class I18nManager {
 
     // Check if i18n framework is installed - configuration-based check without prompts
     async checkI18nDependencies() {
+        const markInternalFrameworkDetected = () => {
+            const cfg = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+            cfg.framework = cfg.framework || {};
+            cfg.framework.detected = true;
+            cfg.framework.preference = cfg.framework.preference || 'i18ntk';
+            const existing = Array.isArray(cfg.framework.installed) ? cfg.framework.installed : [];
+            if (!existing.includes('i18ntk')) {
+                cfg.framework.installed = [...existing, 'i18ntk'];
+            }
+            if (configManager.saveSettings) {
+                configManager.saveSettings(cfg);
+            } else if (configManager.saveConfig) {
+                configManager.saveConfig(cfg);
+            }
+        };
+
+        try {
+            const { checkInitialized } = require('../../utils/init-helper');
+            const initStatus = await checkInitialized();
+            if (initStatus?.initialized || initStatus?.config?.setup?.completed) {
+                markInternalFrameworkDetected();
+                return true;
+            }
+        } catch (_) {
+            // Continue with package.json detection.
+        }
+
         const packageJsonPath = path.resolve('./package.json');
 
         if (!SecurityUtils.safeExistsSync(packageJsonPath)) {
@@ -177,7 +204,8 @@ class I18nManager {
                 'next-i18next',
                 'svelte-i18n',
                 '@nuxtjs/i18n',
-                'i18ntk-runtime'
+                'i18ntk-runtime',
+                'i18ntk'
             ];
 
             const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
@@ -495,6 +523,24 @@ class I18nManager {
             };
         }
 
+        const setupCompleted = Boolean(config?.setup?.completed || settings?.setup?.completed);
+        if (setupCompleted) {
+            settings.framework.detected = true;
+            settings.framework.preference = settings.framework.preference || 'i18ntk';
+            settings.framework.installed = Array.isArray(settings.framework.installed)
+                ? Array.from(new Set([...settings.framework.installed, 'i18ntk']))
+                : ['i18ntk'];
+            settings.framework.lastDetected = new Date().toISOString();
+
+            if (configManager.saveSettings) {
+                await configManager.saveSettings(settings);
+            } else if (configManager.saveConfig) {
+                await configManager.saveConfig(settings);
+            }
+
+            return { ...config, ...settings };
+        }
+
         // Check if we need to prompt for framework detection
         if (!settings.framework.detected &&
             settings.framework.prompt !== 'suppress' &&
@@ -575,6 +621,16 @@ class I18nManager {
         let detectedLanguage = 'generic';
         let detectedFramework = 'generic';
 
+        try {
+            const { checkInitialized } = require('../../utils/init-helper');
+            const initStatus = await checkInitialized();
+            if (initStatus?.initialized || initStatus?.config?.setup?.completed) {
+                return { detectedLanguage: 'javascript', detectedFramework: 'i18ntk' };
+            }
+        } catch (_) {
+            // Continue with filesystem/package detection.
+        }
+
         if (SecurityUtils.safeExistsSync(packageJsonPath)) {
             detectedLanguage = 'javascript';
             try {
@@ -587,9 +643,14 @@ class I18nManager {
 
                 // Check for i18ntk-runtime first (check both package names)
                 const hasI18nTkRuntime = deps['i18ntk-runtime'] || deps['i18ntk/runtime'];
+                const hasI18nTkToolkit = Boolean(deps['i18ntk']);
+
+                if (hasI18nTkToolkit) {
+                    detectedFramework = 'i18ntk';
+                }
 
                 // Check for common i18n patterns in source code if not found in package.json
-                if (!hasI18nTkRuntime) {
+                if (!hasI18nTkRuntime && detectedFramework !== 'i18ntk') {
                     const i18nPatterns = [
                         /i18n\.t\(['\"`]/,
                         /useI18n\(/,
@@ -614,7 +675,7 @@ class I18nManager {
                             continue;
                         }
                     }
-                } else {
+                } else if (hasI18nTkRuntime) {
                     detectedFramework = 'i18ntk-runtime';
                 }
 
@@ -852,25 +913,32 @@ class I18nManager {
         switch (choice.trim()) {
             case '1':
                 await this.executeCommand('init', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '2':
                 await this.executeCommand('analyze', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '3':
                 await this.executeCommand('validate', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '4':
                 await this.executeCommand('usage', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '5':
                 await this.executeCommand('complete', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '6':
                 await this.executeCommand('sizing', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '7':
                 await this.executeCommand('fix', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '8':
                 // Check for PIN protection
                 const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
@@ -945,7 +1013,8 @@ class I18nManager {
                 break;
             case '13':
                 await this.executeCommand('scanner', {fromMenu: true});
-                break;
+                await this.showInteractiveMenu();
+                return;
             case '0':
                 console.log(t('menu.goodbye'));
                 this.safeClose();

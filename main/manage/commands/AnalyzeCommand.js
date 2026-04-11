@@ -150,6 +150,17 @@ class AnalyzeCommand {
     }
 
     // Get all available languages
+    isValidLanguageCode(code) {
+        if (!code || typeof code !== 'string') return false;
+        return /^[a-z]{2}(?:-[A-Za-z0-9]{2,8})*$/i.test(code.trim());
+    }
+
+    isExcludedLanguageDirectory(name) {
+        if (!name || typeof name !== 'string') return true;
+        const lowered = name.toLowerCase();
+        return lowered.startsWith('backup-') || lowered === 'backup' || lowered === 'reports' || lowered === 'i18ntk-reports';
+    }
+
     getAvailableLanguages() {
         try {
             const items = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd(), { withFileTypes: true });
@@ -164,7 +175,18 @@ class AnalyzeCommand {
             const directories = items
                 .filter(item => item.isDirectory())
                 .map(item => item.name)
-                .filter(name => name !== 'node_modules' && !name.startsWith('.') && name !== this.config.sourceLanguage);
+                .filter(name =>
+                    name !== 'node_modules' &&
+                    !name.startsWith('.') &&
+                    name !== this.config.sourceLanguage &&
+                    !this.isExcludedLanguageDirectory(name) &&
+                    this.isValidLanguageCode(name)
+                )
+                .filter(name => {
+                    const dirPath = path.join(this.sourceDir, name);
+                    const dirItems = SecurityUtils.safeReaddirSync(dirPath, process.cwd(), { withFileTypes: true }) || [];
+                    return dirItems.some(item => item.isFile() && item.name.endsWith('.json'));
+                });
 
             // Check for monolith files (language.json files)
             const files = items
@@ -177,30 +199,13 @@ class AnalyzeCommand {
             // Add monolith files as languages (without .json extension)
             const monolithLanguages = files
                 .map(file => file.replace('.json', ''))
-                .filter(lang => !languages.includes(lang) && lang !== this.config.sourceLanguage);
+                .filter(lang =>
+                    !languages.includes(lang) &&
+                    lang !== this.config.sourceLanguage &&
+                    !this.isExcludedLanguageDirectory(lang) &&
+                    this.isValidLanguageCode(lang)
+                );
             languages.push(...monolithLanguages);
-
-            // Check for nested structures
-            for (const dir of directories) {
-                const dirPath = path.join(this.sourceDir, dir);
-                try {
-                    const dirItems = SecurityUtils.safeReaddirSync(dirPath, process.cwd(), { withFileTypes: true });
-                    if (dirItems) {
-                        const jsonFiles = dirItems
-                            .filter(item => item.isFile() && item.name.endsWith('.json'))
-                            .map(item => item.name.replace('.json', ''));
-
-                        // If directory contains JSON files, it's likely a language directory
-                        if (jsonFiles.length > 0) {
-                            if (!languages.includes(dir)) {
-                                languages.push(dir);
-                            }
-                        }
-                    }
-                } catch (error) {
-                    // Skip directories we can't read
-                }
-            }
 
             return [...new Set(languages)].sort();
         } catch (error) {
@@ -714,7 +719,6 @@ class AnalyzeCommand {
                 throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
             }
 
-            console.log(`Report saved to: ${reportPath}`);
             return reportPath;
 
         } catch (error) {
@@ -787,13 +791,14 @@ class AnalyzeCommand {
 
                 // Save report
                 const reportPath = await this.saveReport(language, report);
+                const processedCount = results.length + 1;
 
                 if (!args.json) {
                     console.log(t('analyze.completed', { language }) || `✅ Analysis completed for ${language}`);
                     console.log(t('analyze.progress', {
-                        translated: results.length,
+                        translated: processedCount,
                         total: languages.length
-                    }) || `   Progress: ${results.length}/${languages.length} languages processed`);
+                    }) || `   Progress: ${processedCount}/${languages.length} languages processed`);
                     console.log(t('analyze.reportSaved', { reportPath }) || `   Report saved: ${reportPath}`);
                 }
 

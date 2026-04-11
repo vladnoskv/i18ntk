@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-04-11
+
+### Added
+- Added a v2.1.0 migration guide and updated release runbook references.
+- Added stricter language-directory filtering in analysis paths to ignore backup/report folders.
+
+### Fixed
+- Fixed interactive menu command flow so it reliably returns to the main menu after command completion.
+- Fixed analysis progress output to report the correct processed-language count.
+- Fixed duplicate report-save output lines during analysis.
+- Fixed framework detection behavior to treat setup-complete projects as internally configured i18ntk projects.
+- Fixed false-positive security warnings for valid configuration fields like `dateFormat`, `timeFormat`, and `reportLanguage`.
+- Fixed locale-loading path fallback behavior to avoid noisy startup errors in global installs.
+
+### Changed
+- Synchronized and normalized UI locale keys across `resources/i18n/ui-locales` and `ui-locales`.
+- Updated package/release metadata to `2.1.0`.
+
 ## [2.0.0] - 2026-01-01
 
 ### Added

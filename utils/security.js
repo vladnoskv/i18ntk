@@ -533,7 +533,9 @@ class SecurityUtils {
       'security', 'settings', 'preferences', 'config', 'configuration',
       // Additional common properties
       'autoSave', 'autoBackup', 'validateOnSave', 'showWarnings', 'verbose',
-      'timeout', 'retries', 'batchSize', 'maxConcurrency', 'cacheEnabled'
+      'timeout', 'retries', 'batchSize', 'maxConcurrency', 'cacheEnabled',
+      // Date and reporting options used by existing settings
+      'dateFormat', 'timeFormat', 'timezone', 'reportLanguage', 'dateTime'
     ]);
 
     // Remove unknown properties

@@ -1,73 +1,59 @@
-# 🚀 i18ntk - The Ultra-Fast, Zero-Dependency i18n Translation Toolkit
+# i18ntk v2.1.0
 
-<div align="center">
+Zero-dependency i18n toolkit for initialization, scanning, analysis, validation, usage tracking, and translation completion.
 
 ![i18ntk Logo](docs/screenshots/i18ntk-logo-public.PNG)
 
-**The fastest and most comprehensive i18n toolkit ever built.**
-
 [![npm version](https://img.shields.io/npm/v/i18ntk.svg?color=brightgreen)](https://www.npmjs.com/package/i18ntk)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Performance](https://img.shields.io/badge/Performance-97%25%20Faster-blue.svg)](https://github.com/vladnoskv/i18ntk#performance)
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-ZERO-red.svg)](https://github.com/vladnoskv/i18ntk#features)
 [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
-[![GitHub stars](https://img.shields.io/github/stars/vladnoskv/i18ntk?style=social)](https://github.com/vladnoskv/i18ntk)
-[![Socket Badge](https://socket.dev/api/badge/npm/package/i18ntk/2.0.4)](https://socket.dev/npm/package/i18ntk/overview/2.0.4)
+[![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
+[![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
+[![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.1.0)](https://socket.dev/npm/package/i18ntk/overview/2.1.0)
 
-[📦 Install Now](#-installation) • [⚡ Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [🎯 Features](#-why-choose-i18ntk)
+## Why i18ntk
 
----
+- Zero runtime dependencies
+- Works across JS/TS, React, Vue, Angular, and generic projects
+- Supports non-interactive CI runs (`--no-prompt`)
+- Includes usage/coverage validation and missing-key completion
+- Ships with runtime translation helpers via `i18ntk/runtime`
 
-## ⚡ Lightning Fast Performance
-
-**15.38ms** for 200k translation keys • **<2MB** memory usage • **97% faster** than traditional tools
-
-**v2.0.4**
-
-</div>
-
-## 📦 Installation
+## Install
 
 ```bash
-# Install globally (recommended)
+# global (recommended for CLI use)
 npm install -g i18ntk
 
-# Or use with npx (no installation required)
-npx i18ntk
+# local
+npm install --save-dev i18ntk
 
-# Or install locally in your project
-npm install i18ntk --save-dev
+# one-off
+npx i18ntk --help
 ```
 
-## ⚡ Quick Start
-
-Get your i18n project up and running in **60 seconds**:
+## Quick Start
 
 ```bash
-# 1. Install i18ntk
-npm install -g i18ntk
+# initialize locales/project settings
+i18ntk --command=init
 
-# 2. Initialize your project
-i18ntk init
+# analyze translation completeness
+i18ntk --command=analyze
 
-# 3. Analyze your translations
-i18ntk analyze
+# validate translation structure/content
+i18ntk --command=validate
 
-# 4. Fix any issues
-i18ntk fixer --interactive
-
-# 5. Validate everything
-i18ntk validate
-
+# complete missing keys
+i18ntk --command=complete
 ```
 
-That's it! Your i18n infrastructure is ready. 🎉
+## Command Model (v2)
 
-## v2 Command Model
-
-Primary CLI commands:
+Primary CLI:
 
 ```bash
+i18ntk
 i18ntk --command=init
 i18ntk --command=analyze
 i18ntk --command=validate
@@ -79,7 +65,7 @@ i18ntk --command=summary
 i18ntk --command=debug
 ```
 
-Standalone binaries:
+Standalone executables:
 
 ```bash
 i18ntk-init
@@ -95,18 +81,7 @@ i18ntk-fixer
 i18ntk-backup
 ```
 
-Backup helper:
-
-```bash
-i18ntk-backup --help
-i18ntk-backup create ./locales
-i18ntk-backup list
-i18ntk-backup restore <backup-file>
-```
-
 ## Common Flags
-
-Most commands support:
 
 - `--source-dir <path>`
 - `--i18n-dir <path>`
@@ -119,13 +94,13 @@ Most commands support:
 
 ## Configuration
 
-i18ntk reads project settings from `.i18ntk-config` in the project root.
+i18ntk reads project settings from `.i18ntk-config` in your project root.
 
 Example:
 
 ```json
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -154,7 +129,7 @@ setLanguage('fr');
 console.log(getLanguage());
 ```
 
-## Docs
+## Documentation
 
 - [Documentation Index](docs/README.md)
 - [API Reference](docs/api/API_REFERENCE.md)
@@ -162,7 +137,7 @@ console.log(getLanguage());
 - [Runtime API Guide](docs/runtime.md)
 - [Scanner Guide](docs/scanner-guide.md)
 - [Environment Variables](docs/environment-variables.md)
-- [Migration Guide v2.0.0](docs/migration-guide-v2.0.0.md)
+- [Migration Guide v2.1.0](docs/migration-guide-v2.1.0.md)
 - [Release Runbook](DEVUPDATE.md)
 
 ## License

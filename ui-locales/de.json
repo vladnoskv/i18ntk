@@ -53,8 +53,8 @@
     "errors": {
       "errors": "Fehler:",
       "genericError": "❌ Fehler: {error}",
-      "initializationCancelled": "🚫 Initialisierung wurde vom Benutzer abgebrochen.",
       "initializationFailed": "❌ Initialisierung fehlgeschlagen: {error}",
+      "initializationCancelled": "🚫 Initialisierung wurde vom Benutzer abgebrochen.",
       "translationKeyNotFound": "Übersetzungsschlüssel nicht gefunden: {key}",
       "sourceDirectoryNotFound": "Quellverzeichnis nicht gefunden: {directory}",
       "configLoadingFailed": "Konfigurationsladung fehlgeschlagen",
@@ -104,12 +104,64 @@
     "errorExiting": "Error while exiting."
   },
   "errors": {
+    "invalidOption": "❌ Invalid option: {option}. Please try again.",
     "readlineClosed": "Eingabestrom ist geschlossen; läuft im nicht-interaktiven Modus.",
     "noPackageJson": "Keine package.json gefunden. Kann i18n-Framework nicht automatisch erkennen.",
     "noI18nDir": "Kein i18n-Verzeichnis im Projekt-Root gefunden.",
     "noI18nConfig": "Keine i18n-Konfigurationsdatei im Projekt-Root gefunden.",
-    "errorReadingDebugLogs": "Error reading debug logs: {error}",
-    "invalidOption": "❌ Invalid option: {option}. Please try again."
+    "errorReadingDebugLogs": "Error reading debug logs: {error}"
+  },
+  "scanner": {
+    "help_message": "I18n Text-Scanner  Verwendung: node i18ntk-scanner.js [optionen]  Optionen:   --source-dir <dir>     Quellverzeichnis zu scannen (Standard: ./src)   --output <file>        Ausgabedatei für Ergebnisse (Standard: ./i18ntk-scanner-report.json)   --framework <name>     Ziel-Framework (react, vue, angular, vanilla)   --patterns <patterns>  Benutzerdefinierte Regex-Muster (durch Kommas getrennt)   --include-tests        Testdateien in den Scan einbeziehen   --exclude-dirs <dirs>  Auszuschließende Verzeichnisse (durch Kommas getrennt)   --help                 Diese Hilfe anzeigen  Beispiele:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./scan-ergebnisse.json",
+    "help_options": {
+      "source_dir": "Quellverzeichnis zu scannen",
+      "output_dir": "Ausgabedatei für Ergebnisse",
+      "framework": "Ziel-Framework (react, vue, angular, vanilla)",
+      "patterns": "Benutzerdefinierte Regex-Muster (durch Kommas getrennt)",
+      "exclude": "Auszuschließende Verzeichnisse (durch Kommas getrennt)",
+      "output_report": "Ausgabedatei für den Bericht",
+      "min_length": "Mindestlänge des einzubeziehenden Textes",
+      "max_length": "Maximallänge des einzubeziehenden Textes",
+      "include_tests": "Testdateien in den Scan einbeziehen"
+    },
+    "starting": "🔍 Starte Text-Scanner für Framework: {framework}",
+    "sourceDirectory": "📁 Scanne Verzeichnis: {sourceDir}",
+    "frameworkDetected": "🎯 Framework erkannt: {framework}",
+    "scanningFiles": "📊 Scanne {fileCount} Dateien...",
+    "foundTexts": "📝 {textCount} zu übersetzende Texte gefunden",
+    "generatingReport": "📊 Generiere detaillierten Bericht...",
+    "reportSaved": "💾 Scan-Bericht gespeichert in: {reportPath}",
+    "noTextsFound": "✅ Keine hartcodierten englischen Texte gefunden",
+    "scanComplete": "🎉 Scan erfolgreich abgeschlossen!",
+    "analysisTitle": "🔍 ÜBERSETZUNGSSCANNER-ANALYSE",
+    "fileSummary": "📄 {file}: {count} Texte gefunden",
+    "textLocation": "📍 Zeile {line}: {text}",
+    "foundText": "Found {count} potential hardcoded text instances",
+    "context": "📝 Kontext: {context}",
+    "severity": "⚠️  Schweregrad: {severity}",
+    "recommendation": "💡 Empfehlung: {recommendation}",
+    "welcome": {
+      "title": "🎯 Willkommen beim Text-Scanner!",
+      "description": "Dieses Tool scannt Ihren Quellcode nach hartcodierten englischen Texten, die möglicherweise übersetzt werden müssen."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Framework auswählen",
+      "available": "Verfügbare Frameworks: react, vue, angular, vanilla",
+      "description": "Framework-Typ eingeben (oder Enter für automatische Erkennung):",
+      "input": "Framework:"
+    },
+    "directoryPrompt": {
+      "title": "📁 Quellverzeichnis auswählen",
+      "current": "Aktuelles Verzeichnis: {dir}",
+      "description": "Verzeichnis zum Scannen eingeben (oder Enter für aktuelles Verzeichnis):",
+      "input": "Verzeichnis:"
+    },
+    "options": {
+      "includeTests": "Testdateien einbeziehen?",
+      "excludeDirs": "Auszuschließende Verzeichnisse (durch Kommas getrennt):",
+      "customPatterns": "Benutzerdefinierte Muster zu scannen (Regex):"
+    },
+    "reportGenerated": "Scan report generated: {path}"
   },
   "fixer": {
     "help_message": "I18n Übersetzungs-Fixer  Verwendung: node i18ntk-fixer.js [optionen]  Optionen:   --source-dir <dir>     Quellverzeichnis zu analysieren (Standard: ./locales)   --languages <langs>    Komma-getrennte Liste der zu korrigierenden Sprachen   --markers <markers>    Komma-getrennte Liste der als nicht übersetzt zu behandelnden Markierungen   --no-backup           Automatische Backup-Erstellung überspringen   --help                Diese Hilfe anzeigen  Beispiele:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -546,7 +598,7 @@
       "failedToAnalyzeFile": "Analyse der Datei {filePath} fehlgeschlagen: {error}",
       "failedToAnalyzeLanguage": "Analyse der Sprache {language} fehlgeschlagen: {error}",
       "translationCompletenessAnalysisFailed": "Analyse der Übersetzungsvollständigkeit fehlgeschlagen: {error}",
-      "n": ""
+      "n": "\n"
     },
     "complete": {
       "configLoadedSuccessfully": "Konfiguration erfolgreich geladen",
@@ -936,13 +988,14 @@
   },
   "init": {
     "initializationTitle": "🚀 i18n-Management-Toolkit – Projektinitialisierung",
+    "initializationCancelled": "🚫 Initialization cancelled by user.",
     "sourceDirectoryLabel": "📁 Quellverzeichnis: {dir}",
-    "createdSourceLanguageDirectory": "✅ Quellverzeichnis für Sprache erstellt: {dir}",
     "requiredTitle": "Initialisierung erforderlich",
     "requiredBody": "Dieses Projekt muss vor dem Ausführen dieses Befehls initialisiert werden.",
     "promptRunNow": "Möchten Sie die Initialisierung jetzt ausführen? (j/N):",
     "sourceLanguageLabel": "🌍 Quellsprache: {language}",
     "detectedI18nFrameworks": "🔍 Erkanntes i18n-Framework: {frameworks}",
+    "pinMustBe4Digits": "PIN muss 4-stellig sein.",
     "existingDirectoriesFound": "📁 Vorhandene Übersetzungsverzeichnisse gefunden:",
     "useExistingDirectoryPrompt": "Möchten Sie das vorhandene Verzeichnis verwenden? (j/n)",
     "selectDirectoryPrompt": "Wählen Sie ein Verzeichnis durch Eingabe der Nummer (oder wählen Sie 'Neues Verzeichnis erstellen')",
@@ -977,7 +1030,6 @@
     "targetLanguages": "🌍 Zielsprachen",
     "foundSourceFiles": "📄 {count} Quelldateien zur Analyse gefunden",
     "processingLanguage": "🔄 Verarbeite Sprache: {language}",
-    "pinMustBe4Digits": "PIN muss 4-stellig sein.",
     "fileProcessingResult": "✅ Verarbeitet {file}: {translated}/{total} Schlüssel ({percentage}%)",
     "overallProgress": "📊 Gesamtfortschritt: {translated}/{total} Schlüssel verarbeitet ({percentage}%)",
     "initializationSummaryTitle": "📋 Initialisierungsübersicht",
@@ -1043,13 +1095,13 @@
     "updatedFile": "Datei aktualisiert: {file}",
     "skippingExcludedFile": "Überspringe {file} für {language}, da ausgeschlossen.",
     "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "createdSourceLanguageDirectory": "✅ Quellverzeichnis für Sprache erstellt: {dir}",
     "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
     "noTargetLanguagesSpecified": "No target languages specified.",
     "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
     "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
     "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
-    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework.",
-    "initializationCancelled": "🚫 Initialization cancelled by user."
+    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
   },
   "language": {
     "title": "🌍 Sprache ändern",
@@ -1092,6 +1144,7 @@
       "complete": "🎯 Übersetzungen vervollständigen (100% Abdeckung)",
       "sizing": "📏 Größenanalyse",
       "fix": "🛠️  Platzhalterübersetzungen reparieren",
+      "scanner": "🔍 i18n-Probleme scannen",
       "workflow": "🔄 Gesamten Workflow ausführen",
       "status": "📋 Projektstatus anzeigen",
       "delete": "🗑️  Alle Berichte löschen",
@@ -1099,7 +1152,6 @@
       "settings": "⚙️  Einstellungen",
       "help": "❓ Hilfe",
       "debug": "🔧 Debug-Werkzeuge",
-      "scanner": "🔍 i18n-Probleme scannen",
       "exit": "🚪 Beenden"
     },
     "update": "📦 Paket aktualisieren",
@@ -2319,9 +2371,6 @@
     "found_hardcoded_messages": "Gefundene harcodierte Nachrichten",
     "all_console_messages_use_translation": "Alle Konsolennachrichten verwenden Übersetzung"
   },
-  "\\nSelect directory to clean (0-${availableDirs": {
-    "length + 1}): ": ""
-  },
   "exportTranslations": {
     "createdDirectory": "Erstelltes Verzeichnis",
     "foundFiles": "Gefundene Dateien",
@@ -2337,9 +2386,6 @@
     "location": "Ort",
     "nextSteps": "Nächste Schritte"
   },
-  ")) {\n          console": {
-    "log(": "Log("
-  },
   "dashboard": {
     "title": "Titel",
     "overview": "Übersicht"
@@ -2351,58 +2397,6 @@
     "signIn": "Anmelden",
     "forgotPassword": "Passwort vergessen",
     "signUp": "Registrieren"
-  },
-  "scanner": {
-    "help_message": "I18n Text-Scanner  Verwendung: node i18ntk-scanner.js [optionen]  Optionen:   --source-dir <dir>     Quellverzeichnis zu scannen (Standard: ./src)   --output <file>        Ausgabedatei für Ergebnisse (Standard: ./i18ntk-scanner-report.json)   --framework <name>     Ziel-Framework (react, vue, angular, vanilla)   --patterns <patterns>  Benutzerdefinierte Regex-Muster (durch Kommas getrennt)   --include-tests        Testdateien in den Scan einbeziehen   --exclude-dirs <dirs>  Auszuschließende Verzeichnisse (durch Kommas getrennt)   --help                 Diese Hilfe anzeigen  Beispiele:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./scan-ergebnisse.json",
-    "help_options": {
-      "source_dir": "Quellverzeichnis zu scannen",
-      "output_dir": "Ausgabedatei für Ergebnisse",
-      "framework": "Ziel-Framework (react, vue, angular, vanilla)",
-      "patterns": "Benutzerdefinierte Regex-Muster (durch Kommas getrennt)",
-      "exclude": "Auszuschließende Verzeichnisse (durch Kommas getrennt)",
-      "output_report": "Ausgabedatei für den Bericht",
-      "min_length": "Mindestlänge des einzubeziehenden Textes",
-      "max_length": "Maximallänge des einzubeziehenden Textes",
-      "include_tests": "Testdateien in den Scan einbeziehen"
-    },
-    "starting": "🔍 Starte Text-Scanner für Framework: {framework}",
-    "sourceDirectory": "📁 Scanne Verzeichnis: {sourceDir}",
-    "frameworkDetected": "🎯 Framework erkannt: {framework}",
-    "scanningFiles": "📊 Scanne {fileCount} Dateien...",
-    "foundTexts": "📝 {textCount} zu übersetzende Texte gefunden",
-    "generatingReport": "📊 Generiere detaillierten Bericht...",
-    "reportSaved": "💾 Scan-Bericht gespeichert in: {reportPath}",
-    "noTextsFound": "✅ Keine hartcodierten englischen Texte gefunden",
-    "scanComplete": "🎉 Scan erfolgreich abgeschlossen!",
-    "analysisTitle": "🔍 ÜBERSETZUNGSSCANNER-ANALYSE",
-    "fileSummary": "📄 {file}: {count} Texte gefunden",
-    "textLocation": "📍 Zeile {line}: {text}",
-    "context": "📝 Kontext: {context}",
-    "severity": "⚠️  Schweregrad: {severity}",
-    "recommendation": "💡 Empfehlung: {recommendation}",
-    "welcome": {
-      "title": "🎯 Willkommen beim Text-Scanner!",
-      "description": "Dieses Tool scannt Ihren Quellcode nach hartcodierten englischen Texten, die möglicherweise übersetzt werden müssen."
-    },
-    "frameworkPrompt": {
-      "title": "🎯 Framework auswählen",
-      "available": "Verfügbare Frameworks: react, vue, angular, vanilla",
-      "description": "Framework-Typ eingeben (oder Enter für automatische Erkennung):",
-      "input": "Framework:"
-    },
-    "directoryPrompt": {
-      "title": "📁 Quellverzeichnis auswählen",
-      "current": "Aktuelles Verzeichnis: {dir}",
-      "description": "Verzeichnis zum Scannen eingeben (oder Enter für aktuelles Verzeichnis):",
-      "input": "Verzeichnis:"
-    },
-    "options": {
-      "includeTests": "Testdateien einbeziehen?",
-      "excludeDirs": "Auszuschließende Verzeichnisse (durch Kommas getrennt):",
-      "customPatterns": "Benutzerdefinierte Muster zu scannen (Regex):"
-    },
-    "reportGenerated": "Scan report generated: {path}",
-    "foundText": "Found {count} potential hardcoded text instances"
   },
   "checkUsage": {
     "usage_analysis_failed": "Usage analysis failed."

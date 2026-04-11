@@ -53,8 +53,8 @@
     "errors": {
       "errors": "Errores:",
       "genericError": "❌ Error: {error}",
-      "initializationCancelled": "🚫 Inicialización cancelada por el usuario.",
       "initializationFailed": "❌ Inicialización fallida: {error}",
+      "initializationCancelled": "🚫 Inicialización cancelada por el usuario.",
       "translationKeyNotFound": "Traducción no encontrada: {key}",
       "sourceDirectoryNotFound": "Directorio fuente no encontrado: {directory}",
       "configLoadingFailed": "Carga de configuración fallida",
@@ -104,13 +104,64 @@
     "errorExiting": "Error while exiting."
   },
   "errors": {
-    "readlineClosed": "Flujo de entrada cerrado; ejecutando en modo no interactivo.",
-    "initializationCancelled": "🚫 Inicialización cancelada por el usuario.",
     "invalidOption": "❌ Opción inválida: {option}. Por favor, inténtelo de nuevo.",
+    "readlineClosed": "Flujo de entrada cerrado; ejecutando en modo no interactivo.",
     "noPackageJson": "No se encontró package.json. No se puede autodetectar el framework i18n.",
     "noI18nDir": "No se encontró directorio i18n en la raíz del proyecto.",
     "noI18nConfig": "No se encontró archivo de configuración i18n en la raíz del proyecto.",
     "errorReadingDebugLogs": "Error reading debug logs: {error}"
+  },
+  "scanner": {
+    "help_message": "Escáner de Texto i18n  Uso: node i18ntk-scanner.js [opciones]  Opciones:   --source-dir <dir>     Directorio fuente para escanear (por defecto: ./src)   --output <file>        Archivo de salida para resultados (por defecto: ./i18ntk-scanner-report.json)   --framework <nombre>   Framework a analizar (react, vue, angular, vanilla)   --patterns <patrones>  Patrones regex personalizados (separados por comas)   --include-tests        Incluir archivos de prueba en el escaneo   --exclude-dirs <dirs>  Directorios a excluir (separados por comas)   --help                 Mostrar esta ayuda  Ejemplos:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./resultados-escaneo.json",
+    "help_options": {
+      "source_dir": "Directorio fuente para escanear",
+      "output_dir": "Archivo de salida para resultados",
+      "framework": "Framework a analizar (react, vue, angular, vanilla)",
+      "patterns": "Patrones regex personalizados (separados por comas)",
+      "exclude": "Directorios a excluir (separados por comas)",
+      "output_report": "Archivo de salida para el informe",
+      "min_length": "Longitud mínima del texto para incluir",
+      "max_length": "Longitud máxima del texto para incluir",
+      "include_tests": "Incluir archivos de prueba en el escaneo"
+    },
+    "starting": "🔍 Iniciando escáner de texto para framework: {framework}",
+    "sourceDirectory": "📁 Escaneando directorio: {sourceDir}",
+    "frameworkDetected": "🎯 Framework detectado: {framework}",
+    "scanningFiles": "📊 Escaneando {fileCount} archivos...",
+    "foundTexts": "📝 Encontrados {textCount} textos que requieren traducción",
+    "generatingReport": "📊 Generando informe detallado...",
+    "reportSaved": "💾 Informe de escaneo guardado en: {reportPath}",
+    "noTextsFound": "✅ No se encontraron textos en inglés hardcodeados",
+    "scanComplete": "🎉 ¡Escaneo completado exitosamente!",
+    "analysisTitle": "🔍 ANÁLISIS DE ESCÁNER DE TRADUCCIÓN",
+    "fileSummary": "📄 {file}: {count} textos encontrados",
+    "textLocation": "📍 Línea {line}: {text}",
+    "foundText": "Encontrado {count} instancias de texto potencialmente codificado",
+    "context": "📝 Contexto: {context}",
+    "severity": "⚠️  Severidad: {severity}",
+    "recommendation": "💡 Recomendación: {recommendation}",
+    "welcome": {
+      "title": "🎯 ¡Bienvenido al Escáner de Texto!",
+      "description": "Esta herramienta escanea tu código fuente en busca de textos en inglés hardcodeados que puedan necesitar traducción."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Seleccionar Framework",
+      "available": "Frameworks disponibles: react, vue, angular, vanilla",
+      "description": "Ingrese el tipo de framework (o presione Enter para detección automática):",
+      "input": "Framework:"
+    },
+    "directoryPrompt": {
+      "title": "📁 Seleccionar Directorio Fuente",
+      "current": "Directorio actual: {dir}",
+      "description": "Ingrese el directorio a escanear (o presione Enter para el actual):",
+      "input": "Directorio:"
+    },
+    "options": {
+      "includeTests": "¿Incluir archivos de prueba?",
+      "excludeDirs": "Directorios a excluir (separados por comas):",
+      "customPatterns": "Patrones personalizados a escanear (regex):"
+    },
+    "reportGenerated": "Scan report generated: {path}"
   },
   "fixer": {
     "help_message": "Corrector de Traducciones I18n  Uso: node i18ntk-fixer.js [opciones]  Opciones:   --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./locales)   --languages <langs>    Lista de idiomas a corregir separados por comas   --markers <markers>    Marcadores separados por comas para tratar como no traducido   --no-backup           Omitir creación automática de respaldo   --help                Mostrar esta ayuda  Ejemplos:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -547,7 +598,7 @@
       "failedToAnalyzeFile": "Error al analizar archivo {filePath}: {error}",
       "failedToAnalyzeLanguage": "Error al analizar el idioma {language}: {error}",
       "translationCompletenessAnalysisFailed": "El análisis de completitud de traducción falló: {error}",
-      "n": ""
+      "n": "\n"
     },
     "complete": {
       "configLoadedSuccessfully": "Configuración cargada correctamente",
@@ -937,19 +988,19 @@
   },
   "init": {
     "initializationTitle": "🚀 Kit de Gestión i18n - Inicialización del Proyecto",
+    "initializationCancelled": "🚫 Initialization cancelled by user.",
     "sourceDirectoryLabel": "📁 Directorio Fuente: {dir}",
-    "createdSourceLanguageDirectory": "✅  Directorio de idioma fuente creado: {dir}",
     "requiredTitle": "Inicialización Requerida",
     "requiredBody": "Este proyecto debe ser inicializado antes de ejecutar este comando.",
     "promptRunNow": "¿Deseas ejecutar la inicialización ahora? (y/N):",
     "sourceLanguageLabel": "🌍 Idioma Fuente: {language}",
     "detectedI18nFrameworks": "🔍 Marco(s) i18n detectado(s): {frameworks}",
+    "pinMustBe4Digits": "🔐 PIN debe tener 4 dígitos.",
     "existingDirectoriesFound": "📁 Directorios de traducción existentes encontrados:",
     "useExistingDirectoryPrompt": "¿Deseas usar el directorio existente? (y/n)",
     "selectDirectoryPrompt": "Selecciona un directorio ingresando el número (o elige 'Crear nuevo directorio')",
     "enterNewDirectoryName": "Ingresa el nombre para tu nuevo directorio de traducción",
     "createdNewDirectory": "✅ Nuevo directorio creado: {dir}",
-    "pinMustBe4Digits": "🔐 PIN debe tener 4 dígitos.",
     "directoryAlreadyExists": "⚠️ El directorio ya existe: {dir}",
     "invalidDirectoryName": "❌ Nombre de directorio inválido proporcionado.",
     "usingExistingDirectory": "Usando directorio existente: {dir}",
@@ -993,8 +1044,8 @@
     "nextStep3": "3. Ejecuta 'npm run i18ntk' nuevamente para validar traducciones",
     "detectedFrameworks": "✅ Framework(s) i18n detectado(s): {frameworks}",
     "setup": {
-      "título": "Configuración",
-      "pregunta": "Pregunta de configuración",
+      "title": "Setup",
+      "question": "Setup question",
       "opt_single": "Archivo único",
       "opt_modular": "Modular",
       "opt_existing": "Existente",
@@ -1004,9 +1055,7 @@
       "apply_all_prompt": "¿Aplicar esta estructura a todos los idiomas? (s/N):",
       "per_language_intro": "Has elegido configurar los idiomas individualmente. Estos son los idiomas disponibles:",
       "available_languages": "Idiomas disponibles: {languages}",
-      "include_prompt": "Ingresa los códigos de idioma separados por comas (ej. 'de,fr,es'):",
-      "title": "Setup",
-      "question": "Setup question"
+      "include_prompt": "Ingresa los códigos de idioma separados por comas (ej. 'de,fr,es'):"
     },
     "warnings": {
       "noPackageJson": "No se encontró package.json. No se puede auto-detectar el framework i18n."
@@ -1046,13 +1095,13 @@
     "updatedFile": "Archivo actualizado: {file}",
     "skippingExcludedFile": "Omitiendo {file} para {language} ya que está excluido.",
     "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "createdSourceLanguageDirectory": "✅  Directorio de idioma fuente creado: {dir}",
     "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
     "noTargetLanguagesSpecified": "No target languages specified.",
     "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
     "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
     "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
-    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework.",
-    "initializationCancelled": "🚫 Initialization cancelled by user."
+    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
   },
   "language": {
     "title": "🌍 Cambiar Idioma",
@@ -1841,9 +1890,6 @@
         "description": "Eliminar idiomas de la interfaz no instalados",
         "help": "Eliminar idiomas de la interfaz no instalados en el sistema"
       },
-      "pinProtection_${helperKey}": {
-        "help": "Ayuda"
-      },
       "${helperKey}": {
         "help": "Help"
       }
@@ -1922,9 +1968,7 @@
       "maxBackupsHelp": "mero máximo de archivos de respaldo a mantener",
       "confirmHelp": "Confirmar operación de respaldo",
       "confirmYes": "Sí",
-      "confirmNo": "No",
-      "backupFile": "Archivo de Respaldo",
-      "backupFileHelp": "Ruta al archivo de respaldo"
+      "confirmNo": "No"
     },
     "validation": {
       "valid": "Valid",
@@ -2173,58 +2217,6 @@
     "reportSaveFailed": "Failed to save report to: {reportPath}",
     "reportSaved": "Report saved to: {reportPath}"
   },
-  "scanner": {
-    "help_message": "Escáner de Texto i18n  Uso: node i18ntk-scanner.js [opciones]  Opciones:   --source-dir <dir>     Directorio fuente para escanear (por defecto: ./src)   --output <file>        Archivo de salida para resultados (por defecto: ./i18ntk-scanner-report.json)   --framework <nombre>   Framework a analizar (react, vue, angular, vanilla)   --patterns <patrones>  Patrones regex personalizados (separados por comas)   --include-tests        Incluir archivos de prueba en el escaneo   --exclude-dirs <dirs>  Directorios a excluir (separados por comas)   --help                 Mostrar esta ayuda  Ejemplos:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./resultados-escaneo.json",
-    "help_options": {
-      "source_dir": "Directorio fuente para escanear",
-      "output_dir": "Archivo de salida para resultados",
-      "framework": "Framework a analizar (react, vue, angular, vanilla)",
-      "patterns": "Patrones regex personalizados (separados por comas)",
-      "exclude": "Directorios a excluir (separados por comas)",
-      "output_report": "Archivo de salida para el informe",
-      "min_length": "Longitud mínima del texto para incluir",
-      "max_length": "Longitud máxima del texto para incluir",
-      "include_tests": "Incluir archivos de prueba en el escaneo"
-    },
-    "starting": "🔍 Iniciando escáner de texto para framework: {framework}",
-    "sourceDirectory": "📁 Escaneando directorio: {sourceDir}",
-    "frameworkDetected": "🎯 Framework detectado: {framework}",
-    "scanningFiles": "📊 Escaneando {fileCount} archivos...",
-    "foundTexts": "📝 Encontrados {textCount} textos que requieren traducción",
-    "generatingReport": "📊 Generando informe detallado...",
-    "foundText": "Encontrado {count} instancias de texto potencialmente codificado",
-    "reportSaved": "💾 Informe de escaneo guardado en: {reportPath}",
-    "noTextsFound": "✅ No se encontraron textos en inglés hardcodeados",
-    "scanComplete": "🎉 ¡Escaneo completado exitosamente!",
-    "analysisTitle": "🔍 ANÁLISIS DE ESCÁNER DE TRADUCCIÓN",
-    "fileSummary": "📄 {file}: {count} textos encontrados",
-    "textLocation": "📍 Línea {line}: {text}",
-    "context": "📝 Contexto: {context}",
-    "severity": "⚠️  Severidad: {severity}",
-    "recommendation": "💡 Recomendación: {recommendation}",
-    "welcome": {
-      "title": "🎯 ¡Bienvenido al Escáner de Texto!",
-      "description": "Esta herramienta escanea tu código fuente en busca de textos en inglés hardcodeados que puedan necesitar traducción."
-    },
-    "frameworkPrompt": {
-      "title": "🎯 Seleccionar Framework",
-      "available": "Frameworks disponibles: react, vue, angular, vanilla",
-      "description": "Ingrese el tipo de framework (o presione Enter para detección automática):",
-      "input": "Framework:"
-    },
-    "directoryPrompt": {
-      "title": "📁 Seleccionar Directorio Fuente",
-      "current": "Directorio actual: {dir}",
-      "description": "Ingrese el directorio a escanear (o presione Enter para el actual):",
-      "input": "Directorio:"
-    },
-    "options": {
-      "includeTests": "¿Incluir archivos de prueba?",
-      "excludeDirs": "Directorios a excluir (separados por comas):",
-      "customPatterns": "Patrones personalizados a escanear (regex):"
-    },
-    "reportGenerated": "Scan report generated: {path}"
-  },
   "ui": {
     "autoDetectedI18nDirectory": "Directorio i18n autodetectado: {path}",
     "executingCommand": "🔄 Ejecutando comando: {command}",
@@ -2379,9 +2371,6 @@
     "found_hardcoded_messages": "Mensajes hardcodeados encontrados",
     "all_console_messages_use_translation": "Todos los mensajes de consola usan traducción"
   },
-  "\\nSelect directory to clean (0-${availableDirs": {
-    "length + 1}): ": "Seleccione directorio para limpiar (0-${availableDirs"
-  },
   "exportTranslations": {
     "createdDirectory": "Directorio creado",
     "foundFiles": "Archivos encontrados",
@@ -2396,9 +2385,6 @@
     "success": "Éxito",
     "location": "Ubicación",
     "nextSteps": "Siguientes pasos"
-  },
-  ")) {\n          console": {
-    "log(": "Registro("
   },
   "dashboard": {
     "title": "Tablero",

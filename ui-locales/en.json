@@ -598,7 +598,7 @@
       "failedToAnalyzeFile": "Failed to analyze file {filePath}: {error}",
       "failedToAnalyzeLanguage": "Failed to analyze language {language}: {error}",
       "translationCompletenessAnalysisFailed": "Translation completeness analysis failed: {error}",
-      "n": ""
+      "n": "\n"
     },
     "complete": {
       "configLoadedSuccessfully": "Configuration loaded successfully",
@@ -2369,9 +2369,6 @@
     "found_hardcoded_messages": "Found hardcoded messages",
     "all_console_messages_use_translation": "All console messages use translation"
   },
-  "\\nSelect directory to clean (0-${availableDirs": {
-    "length + 1}): ": ""
-  },
   "exportTranslations": {
     "createdDirectory": "Created Directory",
     "foundFiles": "Found Files",
@@ -2386,9 +2383,6 @@
     "success": "Success",
     "location": "Location",
     "nextSteps": "Next Steps"
-  },
-  ")) {\n          console": {
-    "log(": "Log("
   },
   "dashboard": {
     "title": "Title",

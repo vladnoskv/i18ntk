@@ -54,14 +54,14 @@
       "errors": "エラー：",
       "genericError": "❌ エラー：{error}",
       "initializationFailed": "❌ 初期化に失敗しました: {error}",
+      "initializationCancelled": "❌ Initialization cancelled by user.",
       "translationKeyNotFound": "翻訳キーが見つかりません: {key}",
       "sourceDirectoryNotFound": "ソースディレクトリが見つかりません: {directory}",
       "configLoadingFailed": "構成の読み込みに失敗しました",
       "invalidSourceDirectory": "無効なソースディレクトリ: {directory}",
       "securityViolation": "セキュリティ違反が検出されました",
       "authenticationFailed": "認証が失敗しました",
-      "sourceEqualsI18nWarn": "⚠️ ソースディレクトリと I18n ディレクトリが等しいため、ソーススキャンを {fallback} にフォールバックします。",
-      "initializationCancelled": "❌ Initialization cancelled by user."
+      "sourceEqualsI18nWarn": "⚠️ ソースディレクトリと I18n ディレクトリが等しいため、ソーススキャンを {fallback} にフォールバックします。"
     },
     "errorGeneratingStatusSummary": "ステータスサマリーの生成エラー：{error}",
     "errorRunningDebugTool": "デバッグツール'{displayName}'の実行エラー：{error}",
@@ -69,6 +69,12 @@
     "errorAnalyzingLogFile": "ログファイルの分析エラー：{error}",
     "errorAnalyzingTranslationKeys": "翻訳キーの分析エラー：{error}",
     "errorAnalyzingTranslationCompleteness": "翻訳の完全性分析エラー：{error}",
+    "analyzingTranslationCompleteness": "翻訳の完全性を分析中...",
+    "i18nDirectoryNotFound": "⚠️  i18nディレクトリが見つかりません: {i18nDir}",
+    "translationCompletenessAnalysisFailed": "⚠️  翻訳の完全性分析が失敗しました: {error}",
+    "failedToAnalyzeLanguage": "❌ 言語 {language} の分析に失敗しました: {error}",
+    "errorReadingI18nDirectory": "❌ i18nディレクトリの読み取りに失敗しました: {error}",
+    "languageCompletenessTitle": "📈 翻訳の完全性を言語別に表示",
     "errorAnalyzingTranslationFormat": "翻訳形式の分析エラー：{error}",
     "errorAnalyzingTranslationType": "翻訳タイプの分析エラー：{error}",
     "errorAnalyzingTranslationStructure": "翻訳構造の分析エラー：{error}",
@@ -93,23 +99,69 @@
     "partialKeys": "部分的なキー：",
     "home": "ホーム",
     "settings": "設定",
-    "confirm": "確認",
-    "analyzingTranslationCompleteness": "翻訳の完全性を分析中...",
-    "i18nDirectoryNotFound": "⚠️  i18nディレクトリが見つかりません: {i18nDir}",
-    "translationCompletenessAnalysisFailed": "⚠️  翻訳の完全性分析が失敗しました: {error}",
-    "failedToAnalyzeLanguage": "❌ 言語 {language} の分析に失敗しました: {error}",
-    "errorReadingI18nDirectory": "❌ i18nディレクトリの読み取りに失敗しました: {error}",
-    "languageCompletenessTitle": "📈 翻訳の完全性を言語別に表示",
     "startingSettings": "🎛️  設定 CLI を開始します...",
+    "confirm": "確認",
     "errorExiting": "Error while exiting."
   },
   "errors": {
+    "invalidOption": "❌ Invalid option: {option}. Please try again.",
     "readlineClosed": "入力ストリームが閉じられています。非対話モードで実行中です。",
     "noPackageJson": "package.jsonが見つかりません。i18nフレームワークを自動検出できません。",
     "noI18nDir": "プロジェクトルートにi18nディレクトリが見つかりません。",
     "noI18nConfig": "プロジェクトルートにi18n設定ファイルが見つかりません。",
-    "errorReadingDebugLogs": "Error reading debug logs: {error}",
-    "invalidOption": "❌ Invalid option: {option}. Please try again."
+    "errorReadingDebugLogs": "Error reading debug logs: {error}"
+  },
+  "scanner": {
+    "help_message": "I18n Text Scanner  Usage: node i18ntk-scanner.js [options]  Options:   --source-dir <dir>     Source directory to scan (default: ./src)   --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)   --framework <name>     Framework to target (react, vue, angular, vanilla)   --patterns <patterns>  Custom regex patterns (comma-separated)   --include-tests        Include test files in scan   --exclude-dirs <dirs>  Directories to exclude (comma-separated)   --help                Show this help  Examples:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./scan-results.json",
+    "help_options": {
+      "source_dir": "スキャンするディレクトリ",
+      "output_dir": "結果出力ファイル",
+      "framework": "対象フレームワーク (react, vue, angular, vanilla)",
+      "patterns": "カスタム正規表現パターン (カンマ区切り)",
+      "exclude": "除外するディレクトリ (カンマ区切り)",
+      "output_report": "レポート出力ファイル",
+      "min_length": "含めるテキストの最小長",
+      "max_length": "含めるテキストの最大長",
+      "include_tests": "テストファイルをスキャンに含める"
+    },
+    "starting": "🔍 Starting text scanner for framework: {framework}",
+    "sourceDirectory": "📁 Scanning directory: {sourceDir}",
+    "frameworkDetected": "🎯 Detected framework: {framework}",
+    "scanningFiles": "📊 Scanning {fileCount} files...",
+    "foundTexts": "📝 Found {textCount} texts requiring translation",
+    "generatingReport": "📊 Generating detailed report...",
+    "reportSaved": "💾 Scan report saved to: {reportPath}",
+    "noTextsFound": "✅ No hardcoded English texts found",
+    "scanComplete": "🎉 Scan completed successfully!",
+    "analysisTitle": "🔍 TRANSLATION SCAN ANALYSIS",
+    "fileSummary": "📄 {file}: {count} texts found",
+    "textLocation": "📍 Line {line}: {text}",
+    "foundText": "{count} 件のハードコードされた英語テキストが見つかりました",
+    "context": "📝 Context: {context}",
+    "severity": "⚠️  Severity: {severity}",
+    "recommendation": "💡 Recommendation: {recommendation}",
+    "welcome": {
+      "title": "🎯 Welcome to the Text Scanner!",
+      "description": "This tool scans your source code for hardcoded English text that may need translation."
+    },
+    "frameworkPrompt": {
+      "title": "🎯 Select Framework",
+      "available": "Available frameworks: react, vue, angular, vanilla",
+      "description": "Enter the framework type (or press Enter for auto-detection):",
+      "input": "Framework:"
+    },
+    "directoryPrompt": {
+      "title": "📁 Select Source Directory",
+      "current": "Current directory: {dir}",
+      "description": "Enter the directory to scan (or press Enter for current):",
+      "input": "Directory:"
+    },
+    "options": {
+      "includeTests": "Include test files?",
+      "excludeDirs": "Directories to exclude (comma-separated):",
+      "customPatterns": "Custom patterns to scan for (regex):"
+    },
+    "reportGenerated": "Scan report generated: {path}"
   },
   "fixer": {
     "help_message": "I18n Translation Fixer  Usage: node i18ntk-fixer.js [options]  Options:   --source-dir <dir>     Source directory to scan (default: ./locales)   --languages <langs>    Comma separated list of languages to fix   --markers <markers>    Comma separated markers to treat as untranslated   --no-backup           Skip automatic backup creation   --help                Show this help  Examples:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -436,14 +488,14 @@
     "no_translation_files_found": "翻訳ファイルが見つかりません",
     "analysis_completed": "分析が完了しました（{duration}ms）",
     "analysis_failed": "分析に失敗しました: {errorMessage}",
+    "starting_analysis": "分析を開始します...",
+    "found_files": "検出されたファイル: {count}",
     "failed_to_parse_language_error": "{language} の翻訳の解析に失敗しました: {errorMessage}",
     "recommendations": {
       "keys_have_significant_size_variations": "キーに大きなサイズのばらつきがあります",
       "consider_reviewing_translations": "{lang} の翻訳を見直すことを検討してください - ベースラインより {percentageDifference}% {comparison} です",
       "long_translations_detected": "{lang} では長さが {threshold} 文字を超える翻訳が {longKeys} 件検出されました - 分割を検討してください"
     },
-    "starting_analysis": "分析を開始します...",
-    "found_files": "検出されたファイル: {count}",
     "detailed_key_analysis_title": "Detailed Key Analysis",
     "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
     "key_analysis_header": "Key: {key}",
@@ -455,7 +507,6 @@
     "help_message": "I18n 使用解析ツール  使い方: node i18ntk-usage.js [オプション]  オプション:   --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./src）   --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./src/locales）   --output-report        詳細レポートを生成する   --output-dir <dir>     レポートの出力ディレクトリ（デフォルト: ./reports）   --help                 このヘルプを表示する  例:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
     "source_directory_thissourcedir": "📁 ソースディレクトリ: {sourceDir}",
     "translationCompletenessTitle": "🌍 翻訳の完全性:",
-    "failedToExtractKeys": "⚠️  キーの抽出中にエラーが発生しました: {error}",
     "i18n_directory_thisi18ndir": "🌐 I18n ディレクトリ: {i18nDir}",
     "failed_to_parse_filename_error": "⚠️  {fileName} の解析に失敗しました: {errorMessage}",
     "analyzing_source_files": "🔍 ソースファイルを解析中...",
@@ -465,6 +516,7 @@
     "loading_available_translation_": "📋 利用可能な翻訳キーを読み込み中...",
     "found_thisavailablekeyssize_av": "✅ 利用可能なキーを {availableKeysSize} 件検出",
     "foundTranslationFiles": "✅ {count} 件の翻訳ファイルを検出",
+    "errorReadingI18nDirectory": "⚠️  i18nディレクトリの読み取りに失敗しました: {error}",
     "pressEnterToReturnToMenu": "Enter キーを押してメインメニューに戻ります",
     "notTranslatedKeysTotal": "⚠️  翻訳されていないキー: {total}",
     "noSourceFilesFound": "⚠️  ソースディレクトリにファイルが見つかりません。",
@@ -475,6 +527,8 @@
     "fileInfo": "📄 {namespace}: {keys} 件のキー",
     "failedToAnalyzeUsage": "❌ 使用状況の解析に失敗しました: {error}",
     "failedToAnalyzeFile": "❌ ファイルの解析に失敗しました: {error}",
+    "failedToExtractKeys": "⚠️  キーの抽出中にエラーが発生しました: {error}",
+    "analysisFailedError": "❌ 分析が失敗しました: {error}",
     "analyzerInitialized": "アナライザが初期化されました",
     "analyzerInitFailed": "アナライザの初期化に失敗しました: {error}",
     "argsParsed": "引数を解析しました",
@@ -482,11 +536,11 @@
     "argsParseFailed": "引数の解析に失敗しました: {error}",
     "translationDiscoveryError": "翻訳の検出エラー: {error}",
     "fileTraversalError": "ファイル走査エラー: {error}",
+    "sourceEqualsI18nWarn": "⚠️  ソースディレクトリと i18n ディレクトリは同じです。分析に問題が発生する可能性があります。",
+    "i18nEqualsSourceWarn": "⚠️  I18n ディレクトリとソースディレクトリは同じです。分析に問題が発生する可能性があります。",
     "usageAnalysisFailed": "使用状況分析に失敗しました: {error}",
     "translationFileParseError": "翻訳ファイルの解析エラー: {error}",
     "translationKeysLoadError": "翻訳キーの読み込みエラー: {error}",
-    "sourceEqualsI18nWarn": "⚠️  ソースディレクトリと i18n ディレクトリは同じです。分析に問題が発生する可能性があります。",
-    "i18nEqualsSourceWarn": "⚠️  I18n ディレクトリとソースディレクトリは同じです。分析に問題が発生する可能性があります。",
     "languageCompletenessStats": "🌍 {language}: {translated}/{total} ({completeness}% 翻訳済み)",
     "missingKeysCount": "⚠️  不足しているキー: {count}",
     "analyzingTranslationCompleteness": "翻訳の完全性を分析中...",
@@ -498,28 +552,18 @@
     "sourceDirectoryNotFound": "⚠️  ソースディレクトリが見つかりません: {dir}",
     "checkUsage": {
       "title": "🔍 I18NTK 使用状況分析",
-      "message": "プロジェクト全体の i18n キー使用を分析しています。",
-      "help_message": "I18n 使用解析ツール  使い方: node i18ntk-usage.js [オプション]  オプション:   --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./src）   --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./src/locales）   --output-report        詳細レポートを生成する   --output-dir <dir>     レポートの出力ディレクトリ（デフォルト: ./reports）   --help                 このヘルプを表示する  例:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
+      "analyzing_source_files": "🔍 ソースファイルを解析中...",
       "source_directory_thissourcedir": "📁 ソースディレクトリ: {sourceDir}",
       "i18n_directory_thisi18ndir": "🌐 I18n ディレクトリ: {i18nDir}",
-      "loading_available_translation_": "📋 利用可能な翻訳キーを読み込み中...",
-      "found_thisavailablekeyssize_av": "✅ 利用可能なキーを {availableKeysSize} 件検出",
-      "analyzing_source_files": "🔍 ソースファイルを解析中...",
       "found_files_in_source": "📂 ソースディレクトリで {numFiles} 件のファイルを検出",
+      "no_source_files_found": "⚠️  指定されたディレクトリにソースファイルが見つかりません",
+      "processedFiles": "{totalFiles} ファイルのうち {processedFiles} を処理済み。",
+      "failedToProcessFile": "❌ ファイルの処理に失敗しました: {filePath}",
       "found_thisusedkeyssize_unique_": "🎯 一意の使用中キーを {usedKeysSize} 件検出",
       "total_key_usages_totalkeysfoun": "📊 キーの使用合計: {totalKeysFound}",
-      "translation_completeness_title": "📊 翻訳の完全性",
-      "language_completeness_stats": "{language}: {translated}/{total} ({completeness}% 翻訳済み)",
-      "n_sample_unused_keys": "未使用のキーの例:",
-      "key": "- {key}",
-      "and_unusedkeyslength_5_more": "...およびさらに {count} 件。",
-      "n_recommendations": "📋 推奨事項",
-      "consider_removing_unused_trans": "💡 プロジェクトをクリーンに保つために未使用の翻訳を削除することを検討してください。",
-      "n_next_steps": "📋 次のステップ",
-      "1_review_the_analysis_results": "1. コンソールまたは生成されたレポートで分析結果を確認します。",
-      "2_run_with_outputreport_for_de": "2. 詳細なレポートを得るには --output-report を付けて実行します。",
-      "3_remove_unused_keys_or_add_mi": "3. 未使用のキーを削除するか、欠落しているキーをソースコードに追加します。",
-      "4_rerun_analysis_to_verify_imp": "4. 改善を確認するために再度分析を実行します。",
+      "loading_available_translation_": "📋 利用可能な翻訳キーを読み込み中...",
+      "found_thisavailablekeyssize_av": "✅ 利用可能なキーを {availableKeysSize} 件検出",
+      "message": "プロジェクト全体の i18n キー使用を分析しています。",
       "usage_analysis_results": "📊 使用状況分析の結果",
       "source_files_scanned_thisfileu": "スキャンされたソースファイル: {fileUsageSize}",
       "available_translation_keys_thi": "利用可能な翻訳キー: {availableKeysSize}",
@@ -527,24 +571,34 @@
       "dynamic_keys_detected_dynamick": "検出された動的キー: {dynamicKeysLength}",
       "unused_keys_unusedkeyslength": "未使用のキー: {unusedKeysLength}",
       "missing_keys_missingkeyslength": "不足しているキー: {missingKeysLength}",
+      "translation_completeness_title": "📊 翻訳の完全性",
+      "language_completeness_stats": "{language}: {translated}/{total} ({completeness}% 翻訳済み)",
+      "n_sample_unused_keys": "未使用のキーの例:",
+      "key": "- {key}",
+      "and_unusedkeyslength_5_more": "...およびさらに {count} 件。",
+      "n_sample_missing_keys": "❌ 不足しているキーのサンプル (最初の 5 件):",
+      "and_missingkeyslength_5_more": "... そしてさらに {count} 件の不足しているキー",
+      "n_generating_detailed_report": "📊 詳細レポートを生成中...",
+      "report_saved_reportpath": "📄 レポートが保存されました: {reportPath}",
+      "n_recommendations": "📋 推奨事項",
+      "consider_removing_unused_trans": "💡 プロジェクトをクリーンに保つために未使用の翻訳を削除することを検討してください。",
+      "add_missing_translation_keys_t": "➕ 不足している翻訳キーを追加して一貫性を保つ",
+      "review_dynamic_keys_manually_t": "🔍 動的キーを手動で確認 (有効な場合があります)",
+      "all_translation_keys_are_prope": "✅ すべての翻訳キーが適切に使用されています！",
+      "n_next_steps": "📋 次のステップ",
+      "2_check_the_detailed_report_fo": "2. 詳細レポートを確認して特定の問題を特定します",
+      "help_message": "I18n 使用解析ツール  使い方: node i18ntk-usage.js [オプション]  オプション:   --source-dir <dir>     スキャンするソースディレクトリ（デフォルト: ./src）   --i18n-dir <dir>       I18n ディレクトリ（デフォルト: ./src/locales）   --output-report        詳細レポートを生成する   --output-dir <dir>     レポートの出力ディレクトリ（デフォルト: ./reports）   --help                 このヘルプを表示する  例:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
+      "1_review_the_analysis_results": "1. コンソールまたは生成されたレポートで分析結果を確認します。",
+      "2_run_with_outputreport_for_de": "2. 詳細なレポートを得るには --output-report を付けて実行します。",
+      "3_remove_unused_keys_or_add_mi": "3. 未使用のキーを削除するか、欠落しているキーをソースコードに追加します。",
+      "4_rerun_analysis_to_verify_imp": "4. 改善を確認するために再度分析を実行します。",
       "noSourceFilesFound": "解析するソースファイルが見つかりませんでした。",
-      "processedFiles": "{totalFiles} ファイルのうち {processedFiles} を処理済み。",
       "i18nDirectoryNotFound": "I18n ディレクトリが見つかりません: {i18nDir}",
       "noTranslationLanguagesFound": "翻訳言語が見つかりませんでした。",
       "failedToAnalyzeFile": "{filePath} の解析に失敗しました: {error}",
       "failedToAnalyzeLanguage": "{language} の解析に失敗しました: {error}",
       "translationCompletenessAnalysisFailed": "翻訳の完全性分析に失敗しました: {error}",
-      "n": "",
-      "no_source_files_found": "⚠️  指定されたディレクトリにソースファイルが見つかりません",
-      "failedToProcessFile": "❌ ファイルの処理に失敗しました: {filePath}",
-      "n_sample_missing_keys": "❌ 不足しているキーのサンプル (最初の 5 件):",
-      "and_missingkeyslength_5_more": "... そしてさらに {count} 件の不足しているキー",
-      "n_generating_detailed_report": "📊 詳細レポートを生成中...",
-      "report_saved_reportpath": "📄 レポートが保存されました: {reportPath}",
-      "add_missing_translation_keys_t": "➕ 不足している翻訳キーを追加して一貫性を保つ",
-      "review_dynamic_keys_manually_t": "🔍 動的キーを手動で確認 (有効な場合があります)",
-      "all_translation_keys_are_prope": "✅ すべての翻訳キーが適切に使用されています！",
-      "2_check_the_detailed_report_fo": "2. 詳細レポートを確認して特定の問題を特定します"
+      "n": "\n"
     },
     "complete": {
       "configLoadedSuccessfully": "設定が正常に読み込まれました",
@@ -584,8 +638,6 @@
     "noTranslationLanguagesFound": "翻訳言語が見つかりませんでした。",
     "failedToAnalyzeLanguage": "{language} の解析に失敗しました: {error}",
     "translationCompletenessAnalysisFailed": "{language} の翻訳完全性分析に失敗しました: {error}",
-    "errorReadingI18nDirectory": "⚠️  i18nディレクトリの読み取りに失敗しました: {error}",
-    "analysisFailedError": "❌ 分析が失敗しました: {error}",
     "failedToProcessFile": "Failed to process file:",
     "failedToSaveReport": "Failed to save usage report: {error}",
     "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
@@ -936,8 +988,8 @@
   },
   "init": {
     "initializationTitle": "🚀 i18n 管理ツールキット – プロジェクト初期化",
+    "initializationCancelled": "🚫 Initialization cancelled by user.",
     "sourceDirectoryLabel": "📁 ソースディレクトリ: {dir}",
-    "createdSourceLanguageDirectory": "✅ ソース言語ディレクトリを作成しました: {dir}",
     "requiredTitle": "初期化が必要です",
     "requiredBody": "このコマンドを実行する前にプロジェクトを初期化する必要があります。",
     "promptRunNow": "今すぐ初期化を実行しますか？(y/N):",
@@ -1043,13 +1095,13 @@
     "updatedFile": "ファイルを更新しました: {file}",
     "skippingExcludedFile": "{language} の {file} は除外リストにあるためスキップされました。",
     "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "createdSourceLanguageDirectory": "✅ ソース言語ディレクトリを作成しました: {dir}",
     "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
     "noTargetLanguagesSpecified": "No target languages specified.",
     "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
     "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
     "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
-    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework.",
-    "initializationCancelled": "🚫 Initialization cancelled by user."
+    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
   },
   "language": {
     "title": "🌍 言語を変更",
@@ -1092,6 +1144,7 @@
       "complete": "🎯 翻訳を完了 (100% カバレッジ)",
       "sizing": "📏 サイズを分析",
       "fix": "🛠️  プレースホルダー翻訳を修正",
+      "scanner": "🔍 i18n問題をスキャン",
       "workflow": "🔄 フルワークフローを実行",
       "status": "📋 プロジェクトステータスを表示",
       "delete": "🗑️  すべてのレポートを削除",
@@ -1099,7 +1152,6 @@
       "settings": "⚙️  設定",
       "help": "❓ ヘルプ",
       "debug": "🔧 デバッグツール",
-      "scanner": "🔍 i18n問題をスキャン",
       "exit": "🚪 終了"
     },
     "update": "📦 パッケージを更新",
@@ -1340,6 +1392,7 @@
     "goodbyeMessage": "i18ntk設定マネージャーをご利用いただきありがとうございます！",
     "relativePathHint": "このディレクトリからの相対パスを使用 (例: ./src/i18n/locales)",
     "currentDirectory": "現在のプロジェクトディレクトリ",
+    "startingSettings": "設定を開始します...",
     "pin": "PIN:",
     "reportBug": {
       "title": "バグを報告",
@@ -1917,7 +1970,6 @@
       "confirmYes": "はい",
       "confirmNo": "いいえ"
     },
-    "startingSettings": "設定を開始します...",
     "validation": {
       "valid": "Valid",
       "validatingPaths": "Validating configured paths...",
@@ -2057,8 +2109,8 @@
       "sizingCommand": "sizing    - サイズを分析",
       "completeCommand": "complete  - 翻訳を完了 (100% カバレッジ)",
       "summaryCommand": "summary   - プロジェクトステータスを表示",
-      "debugCommand": "debug     - 翻訳の問題をデバッグ",
-      "scannerCommand": "scanner   - 🔍 i18nの問題をスキャン"
+      "scannerCommand": "scanner   - 🔍 i18nの問題をスキャン",
+      "debugCommand": "debug     - 翻訳の問題をデバッグ"
     },
     "test_complete_system": {
       "starting_test": "🧪 完全システムテストを開始します",
@@ -2319,9 +2371,6 @@
     "found_hardcoded_messages": "ハードコードされたメッセージが見つかりました",
     "all_console_messages_use_translation": "すべてのコンソールメッセージが翻訳を使用しています"
   },
-  "\\nSelect directory to clean (0-${availableDirs": {
-    "length + 1}): ": ""
-  },
   "exportTranslations": {
     "createdDirectory": "ディレクトリを作成しました",
     "foundFiles": "ファイルが見つかりました",
@@ -2337,9 +2386,6 @@
     "location": "場所",
     "nextSteps": "次のステップ"
   },
-  ")) {\n          console": {
-    "log(": "ログ("
-  },
   "dashboard": {
     "title": "タイトル",
     "overview": "概要"
@@ -2351,104 +2397,6 @@
     "signIn": "サインイン",
     "forgotPassword": "パスワードを忘れた",
     "signUp": "サインアップ"
-  },
-  "scanner": {
-    "title": "🕵️ i18n テキストスキャナー",
-    "description": "ソースファイル内のハードコードされた英語テキストをスキャンします",
-    "usage": "使用方法: i18ntk-scanner [オプション]",
-    "foundText": "{count} 件のハードコードされた英語テキストが見つかりました",
-    "options": {
-      "sourceDir": "スキャンするディレクトリ",
-      "outputDir": "レポート出力ディレクトリ",
-      "patterns": "カスタム正規表現パターン",
-      "framework": "フレームワーク (react, vue, angular, vanilla)",
-      "extensions": "スキャンするファイル拡張子",
-      "exclude": "除外するパターン",
-      "minLength": "スキャンするテキストの最小長",
-      "maxLength": "スキャンするテキストの最大長",
-      "includeTests": "Include test files?",
-      "excludeDirs": "Directories to exclude (comma-separated):",
-      "customPatterns": "Custom patterns to scan for (regex):"
-    },
-    "status": {
-      "scanning": "🔍 ファイルをスキャン中...",
-      "analyzing": "📊 検出されたテキストを分析中...",
-      "generating": "📄 レポートを生成中...",
-      "complete": "✅ スキャンが完了しました",
-      "found": "🎯 {count} 個の翻訳が必要な項目を検出しました"
-    },
-    "results": {
-      "title": "📊 スキャン結果",
-      "summary": "サマリー",
-      "filesScanned": "スキャンしたファイル数",
-      "textItemsFound": "検出したテキスト項目数",
-      "uniqueTexts": "一意のテキスト",
-      "filesWithText": "テキストを含むファイル数",
-      "exportLocation": "エクスポート先"
-    },
-    "prompts": {
-      "selectFramework": "フレームワークを選択してください:",
-      "enterSourceDir": "ソースディレクトリを入力してください",
-      "enterOutputDir": "出力ディレクトリを入力してください",
-      "confirmScan": "スキャンを開始しますか？",
-      "saveReport": "レポートを保存しますか？"
-    },
-    "errors": {
-      "invalidDirectory": "無効なディレクトリです",
-      "noFilesFound": "スキャンするファイルが見つかりませんでした",
-      "scanFailed": "スキャンに失敗しました",
-      "exportFailed": "レポートのエクスポートに失敗しました"
-    },
-    "help": {
-      "examples": "使用例:",
-      "example1": "i18ntk-scanner --source-dir ./src --framework react",
-      "example2": "i18ntk-scanner --patterns 'console\\.log\\s*\\([^)]*'",
-      "example3": "i18ntk-scanner --extensions js,ts,tsx --min-length 3"
-    },
-    "help_options": {
-      "source_dir": "スキャンするディレクトリ",
-      "output_dir": "結果出力ファイル",
-      "framework": "対象フレームワーク (react, vue, angular, vanilla)",
-      "patterns": "カスタム正規表現パターン (カンマ区切り)",
-      "exclude": "除外するディレクトリ (カンマ区切り)",
-      "output_report": "レポート出力ファイル",
-      "min_length": "含めるテキストの最小長",
-      "max_length": "含めるテキストの最大長",
-      "include_tests": "テストファイルをスキャンに含める"
-    },
-    "reportGenerated": "Scan report generated: {path}",
-    "help_message": "I18n Text Scanner  Usage: node i18ntk-scanner.js [options]  Options:   --source-dir <dir>     Source directory to scan (default: ./src)   --output <file>        Output file for scan results (default: ./i18ntk-scanner-report.json)   --framework <name>     Framework to target (react, vue, angular, vanilla)   --patterns <patterns>  Custom regex patterns (comma-separated)   --include-tests        Include test files in scan   --exclude-dirs <dirs>  Directories to exclude (comma-separated)   --help                Show this help  Examples:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./scan-results.json",
-    "starting": "🔍 Starting text scanner for framework: {framework}",
-    "sourceDirectory": "📁 Scanning directory: {sourceDir}",
-    "frameworkDetected": "🎯 Detected framework: {framework}",
-    "scanningFiles": "📊 Scanning {fileCount} files...",
-    "foundTexts": "📝 Found {textCount} texts requiring translation",
-    "generatingReport": "📊 Generating detailed report...",
-    "reportSaved": "💾 Scan report saved to: {reportPath}",
-    "noTextsFound": "✅ No hardcoded English texts found",
-    "scanComplete": "🎉 Scan completed successfully!",
-    "analysisTitle": "🔍 TRANSLATION SCAN ANALYSIS",
-    "fileSummary": "📄 {file}: {count} texts found",
-    "textLocation": "📍 Line {line}: {text}",
-    "context": "📝 Context: {context}",
-    "severity": "⚠️  Severity: {severity}",
-    "recommendation": "💡 Recommendation: {recommendation}",
-    "welcome": {
-      "title": "🎯 Welcome to the Text Scanner!",
-      "description": "This tool scans your source code for hardcoded English text that may need translation."
-    },
-    "frameworkPrompt": {
-      "title": "🎯 Select Framework",
-      "available": "Available frameworks: react, vue, angular, vanilla",
-      "description": "Enter the framework type (or press Enter for auto-detection):",
-      "input": "Framework:"
-    },
-    "directoryPrompt": {
-      "title": "📁 Select Source Directory",
-      "current": "Current directory: {dir}",
-      "description": "Enter the directory to scan (or press Enter for current):",
-      "input": "Directory:"
-    }
   },
   "checkUsage": {
     "usage_analysis_failed": "Usage analysis failed."

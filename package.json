@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "🚀 The fastest i18n toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -220,20 +220,20 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.0.0",
-    "releaseDate": "01/01/2026",
+    "version": "2.1.0",
+    "releaseDate": "11/04/2026",
     "lastUpdated": "11/04/2026",
     "maintainer": "Vladimir Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "BREAKING: Unified v2 command surface and release metadata",
-      "SECURITY: Zero runtime dependencies and hardened config IO",
-      "I18N: Added missing translation keys used by init/fixer/sizing/summary/usage/settings flows",
-      "RELIABILITY: Initialization detection now honors .i18ntk-config setup state",
-      "RELIABILITY: Added async safeReadFile/safeWriteFile + safeParseJSON compatibility helpers",
-      "INIT: Auto-bootstrap source locale file when source language directory is empty"
+      "UX: Interactive menu command flow now returns reliably to Main Menu after command completion",
+      "I18N: UI locale keysets synchronized and normalized across resources/ui-locales and ui-locales",
+      "ANALYZE: Fixed progress counter and removed duplicate report-save output lines",
+      "RELIABILITY: Backup/report directories are excluded from language discovery in analyze/complete flows",
+      "FRAMEWORK: Setup-complete projects are recognized as internal i18ntk framework to avoid repeated detection prompts",
+      "SECURITY: Reduced false-positive config sanitization warnings for valid date/time report settings"
     ],
     "breakingChanges": [],
     "deprecations": [
@@ -263,7 +263,7 @@
       "1.10.2",
       "1.10.3"
     ],
-    "nextVersion": "2.1.0",
+    "nextVersion": "2.2.0",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",

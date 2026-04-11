@@ -15,7 +15,7 @@ class UIi18n {
     constructor() {
         this.currentLanguage = 'en';
 this.translations = {};
-        this.uiLocalesDir = path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales');
+        this.uiLocalesDir = this.resolveUiLocalesDir();
         this.availableLanguages = [];
         this.configFile = path.resolve(configManager.configFile);
         
@@ -30,7 +30,7 @@ this.translations = {};
             const config = configManager.loadSettings ? configManager.loadSettings() : configManager.getConfig ? configManager.getConfig() : {};
             
             // Use safe defaults if config is not available
-            this.uiLocalesDir = path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales');
+            this.uiLocalesDir = this.resolveUiLocalesDir();
             this.availableLanguages = this.detectAvailableLanguages();
             
 
@@ -44,10 +44,29 @@ this.translations = {};
             }
         } catch (error) {
             console.warn('UIi18n: Failed to initialize with config, using defaults:', error.message);
-            this.uiLocalesDir = path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales');
+            this.uiLocalesDir = this.resolveUiLocalesDir();
             this.availableLanguages = this.detectAvailableLanguages();
             this.loadLanguage('en');
         }
+    }
+
+    resolveUiLocalesDir() {
+        const candidates = [
+            path.resolve(__dirname, '..', 'ui-locales'),
+            path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales')
+        ];
+
+        for (const candidate of candidates) {
+            try {
+                if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
+                    return candidate;
+                }
+            } catch (_) {
+                // Try next candidate.
+            }
+        }
+
+        return candidates[0];
     }
     /**
     /**
@@ -58,7 +77,7 @@ this.translations = {};
         const all = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
         return all.filter(lang => {
             const filePath = path.join(this.uiLocalesDir, `${lang}.json`);
-            return SecurityUtils.safeExistsSync(filePath);
+            return fs.existsSync(filePath);
         });
     }
 
@@ -94,7 +113,7 @@ this.translations = {};
             // Primary: Use monolith JSON file (en.json, de.json, etc.)
             const monolithTranslationFile = path.join(this.uiLocalesDir, `${language}.json`);
             
-            if (SecurityUtils.safeExistsSync(monolithTranslationFile)) {
+            if (fs.existsSync(monolithTranslationFile)) {
                 try {
                     const content = SecurityUtils.safeReadFileSync(monolithTranslationFile, path.dirname(monolithTranslationFile), 'utf8');
                     const fullTranslations = JSON.parse(content);
@@ -114,7 +133,7 @@ this.translations = {};
                 // Fallback: Use folder-based structure if monolith file doesn't exist
                 const langDir = path.join(this.uiLocalesDir, language);
                 
-                if (SecurityUtils.safeExistsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+                if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
                     const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
                     if (debugEnabled) {
                         console.log(`UI: Found files in ${langDir}: ${files.join(', ')}`);

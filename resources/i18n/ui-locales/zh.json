@@ -54,14 +54,14 @@
       "errors": "错误：",
       "genericError": "❌ 错误: {error}",
       "initializationFailed": "❌ 初始化失败: {error}",
+      "initializationCancelled": "❌ Initialization cancelled by user.",
       "translationKeyNotFound": "翻译键未找到: {key}",
       "sourceDirectoryNotFound": "源目录未找到: {directory}",
       "configLoadingFailed": "配置加载失败",
       "invalidSourceDirectory": "无效源目录: {directory}",
       "securityViolation": "安全违规检测到",
       "authenticationFailed": "身份验证失败",
-      "sourceEqualsI18nWarn": "⚠️ 源目录等于国际化目录 ({sourceDir})。回退到 {fallback} 进行源扫描。",
-      "initializationCancelled": "❌ Initialization cancelled by user."
+      "sourceEqualsI18nWarn": "⚠️ 源目录等于国际化目录 ({sourceDir})。回退到 {fallback} 进行源扫描。"
     },
     "errorGeneratingStatusSummary": "生成状态摘要时出错: {error}",
     "errorRunningDebugTool": "运行调试工具'{displayName}'时出错: {error}",
@@ -69,6 +69,12 @@
     "errorAnalyzingLogFile": "分析日志文件时出错: {error}",
     "errorAnalyzingTranslationKeys": "分析翻译键时出错: {error}",
     "errorAnalyzingTranslationCompleteness": "分析翻译完整性时出错: {error}",
+    "analyzingTranslationCompleteness": "正在分析翻译完整性...",
+    "i18nDirectoryNotFound": "⚠️  i18n 目录未找到: {i18nDir}",
+    "translationCompletenessAnalysisFailed": "⚠️  翻译完整性分析失败: {error}",
+    "failedToAnalyzeLanguage": "❌  分析语言 {language} 失败: {error}",
+    "errorReadingI18nDirectory": "❌  读取 i18n 目录时出错: {error}",
+    "languageCompletenessTitle": "📈 翻译完整性按语言",
     "errorAnalyzingTranslationFormat": "分析翻译格式时出错: {error}",
     "errorAnalyzingTranslationType": "分析翻译类型时出错: {error}",
     "errorAnalyzingTranslationStructure": "分析翻译结构时出错: {error}",
@@ -93,15 +99,8 @@
     "partialKeys": "部分键：",
     "home": "首页",
     "settings": "设置",
-    "confirm": "确认",
-    "analyzingTranslationCompleteness": "正在分析翻译完整性...",
-    "i18nDirectoryNotFound": "⚠️  i18n 目录未找到: {i18nDir}",
-    "translationCompletenessAnalysisFailed": "⚠️  翻译完整性分析失败: {error}",
-    "failedToAnalyzeLanguage": "❌  分析语言 {language} 失败: {error}",
-    "errorReadingI18nDirectory": "❌  读取 i18n 目录时出错: {error}",
-    "initializationCancelled": "🚫 初始化被用户取消。",
-    "languageCompletenessTitle": "📈 翻译完整性按语言",
     "startingSettings": "🎛️  开始设置 CLI...",
+    "confirm": "确认",
     "errorExiting": "Error while exiting."
   },
   "errors": {
@@ -111,6 +110,58 @@
     "noI18nDir": "未在项目根目录找到 i18n 目录。",
     "noI18nConfig": "未在项目根目录找到 i18n 配置文件。",
     "errorReadingDebugLogs": "Error reading debug logs: {error}"
+  },
+  "scanner": {
+    "help_message": "i18n文本扫描器  使用方法: node i18ntk-scanner.js [选项]  选项:   --source-dir <目录>     要扫描的源目录 (默认: ./src)   --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)   --framework <名称>     目标框架 (react, vue, angular, vanilla)   --patterns <模式>      自定义正则表达式模式 (逗号分隔)   --include-tests        在扫描中包含测试文件   --exclude-dirs <目录>  要排除的目录 (逗号分隔)   --help                 显示此帮助信息  示例:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./扫描结果.json",
+    "help_options": {
+      "source_dir": "要扫描的源目录",
+      "output_dir": "结果输出文件",
+      "framework": "目标框架 (react, vue, angular, vanilla)",
+      "patterns": "自定义正则表达式模式 (逗号分隔)",
+      "exclude": "要排除的目录 (逗号分隔)",
+      "output_report": "报告输出文件",
+      "min_length": "包含文本的最小长度",
+      "max_length": "包含文本的最大长度",
+      "include_tests": "在扫描中包含测试文件"
+    },
+    "starting": "🔍 正在为框架启动文本扫描器: {framework}",
+    "sourceDirectory": "📁 正在扫描目录: {sourceDir}",
+    "frameworkDetected": "🎯 检测到框架: {framework}",
+    "scanningFiles": "📊 正在扫描 {fileCount} 个文件...",
+    "foundTexts": "📝 找到 {count} 个需要翻译的文本",
+    "generatingReport": "📊 正在生成详细报告...",
+    "reportSaved": "💾 扫描报告已保存到: {reportPath}",
+    "noTextsFound": "✅ 未找到硬编码的英文文本",
+    "scanComplete": "🎉 扫描成功完成!",
+    "analysisTitle": "🔍 翻译扫描器分析",
+    "fileSummary": "📄 {file}: 找到 {count} 个文本",
+    "textLocation": "📍 第 {line} 行: {text}",
+    "foundText": "找到 {count} 个潜在的硬编码文本实例",
+    "context": "📝 上下文: {context}",
+    "severity": "⚠️  严重程度: {severity}",
+    "recommendation": "💡 建议: {recommendation}",
+    "welcome": {
+      "title": "🎯 欢迎使用文本扫描器!",
+      "description": "此工具扫描您的源代码以查找可能需要翻译的硬编码英文文本。"
+    },
+    "frameworkPrompt": {
+      "title": "🎯 选择框架",
+      "available": "可用框架: react, vue, angular, vanilla",
+      "description": "输入框架类型 (或按回车键自动检测):",
+      "input": "框架:"
+    },
+    "directoryPrompt": {
+      "title": "📁 选择源目录",
+      "current": "当前目录: {dir}",
+      "description": "输入要扫描的目录 (或按回车键使用当前目录):",
+      "input": "目录:"
+    },
+    "options": {
+      "includeTests": "包含测试文件?",
+      "excludeDirs": "要排除的目录 (逗号分隔):",
+      "customPatterns": "要扫描的自定义模式 (正则表达式):"
+    },
+    "reportGenerated": "Scan report generated: {path}"
   },
   "fixer": {
     "help_message": "I18n 翻译修复工具  用法: node i18ntk-fixer.js [选项]  选项:   --source-dir <dir>     要扫描的源目录（默认: ./locales）   --languages <langs>    要修复的语言列表，用逗号分隔   --markers <markers>    视为未翻译的标记列表，用逗号分隔   --no-backup           跳过自动备份创建   --help                显示此帮助信息  示例:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -437,14 +488,14 @@
     "no_translation_files_found": "未找到翻译文件",
     "analysis_completed": "分析在${duration}毫秒内完成",
     "analysis_failed": "分析失败: {errorMessage}",
+    "starting_analysis": "正在开始分析...",
+    "found_files": "找到 {count} 个文件",
     "failed_to_parse_language_error": "无法解析${language}翻译: {errorMessage}",
     "recommendations": {
       "keys_have_significant_size_variations": "键有显著的大小变化",
       "consider_reviewing_translations": "考虑检查 ${lang} 翻译 - 它们比基准 ${comparison} ${percentageDifference}%",
       "long_translations_detected": "${lang} 有 ${data.longKeys} 个翻译超过 ${data.threshold} 个字符 - 考虑拆分它们"
     },
-    "starting_analysis": "正在开始分析...",
-    "found_files": "找到 {count} 个文件",
     "detailed_key_analysis_title": "Detailed Key Analysis",
     "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
     "key_analysis_header": "Key: {key}",
@@ -456,7 +507,6 @@
     "help_message": "国际化使用分析器  用法: node i18ntk-usage.js [选项]  选项:   --source-dir <dir>     要扫描的源目录 (默认: ./src)   --i18n-dir <dir>       I18n 目录 (默认: ./src/locales)   --output-report        生成详细报告   --output-dir <dir>     报告输出目录 (默认: ./reports)   --help                 显示此帮助  示例:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
     "source_directory_thissourcedir": "📁 源目录: {sourceDir}",
     "translationCompletenessTitle": "🌍 翻译完整性:",
-    "failedToExtractKeys": "提取键时出错：{error}",
     "i18n_directory_thisi18ndir": "🌐 I18n 目录: {i18nDir}",
     "failed_to_parse_filename_error": "⚠️  解析失败 {fileName}: {errorMessage}",
     "analyzing_source_files": "🔍 正在分析源文件...",
@@ -466,6 +516,7 @@
     "loading_available_translation_": "📋 正在加载可用翻译键...",
     "found_thisavailablekeyssize_av": "✅ 找到 {availableKeysSize} 个可用键",
     "foundTranslationFiles": "✅ 找到 {count} 个翻译文件",
+    "errorReadingI18nDirectory": "⚠️  读取 i18n 目录时出错: {error}",
     "pressEnterToReturnToMenu": "📝 按 Enter 键返回主菜单...",
     "notTranslatedKeysTotal": "⚠️  未翻译键: {total}",
     "noSourceFilesFound": "⚠️  未找到源文件目录中的源文件。",
@@ -476,6 +527,8 @@
     "fileInfo": "📄 {namespace}: {keys} 个键",
     "failedToAnalyzeUsage": "❌ 使用分析失败: {error}",
     "failedToAnalyzeFile": "❌ 文件分析失败: {error}",
+    "failedToExtractKeys": "提取键时出错：{error}",
+    "analysisFailedError": "❌  分析失败: {error}",
     "analyzerInitialized": "分析器已初始化",
     "analyzerInitFailed": "分析器初始化失败: {error}",
     "argsParsed": "参数已解析",
@@ -483,9 +536,9 @@
     "argsParseFailed": "参数解析失败: {error}",
     "translationDiscoveryError": "翻译发现错误: {error}",
     "fileTraversalError": "文件遍历错误: {error}",
-    "usageAnalysisFailed": "使用分析失败: {error}",
     "sourceEqualsI18nWarn": "⚠️  源目录和 i18n 目录相同。这可能会导致分析问题。",
     "i18nEqualsSourceWarn": "⚠️  I18n 目录和源目录相同。这可能会导致分析问题。",
+    "usageAnalysisFailed": "使用分析失败: {error}",
     "translationFileParseError": "⚠️  翻译文件解析错误: {error}",
     "translationKeysLoadError": "⚠️  翻译键加载错误: {error}",
     "languageCompletenessStats": "🌍 {language}: {translated}/{total} ({completeness}% 已翻译)",
@@ -499,28 +552,18 @@
     "sourceDirectoryNotFound": "⚠️  未找到源目录：{dir}",
     "checkUsage": {
       "title": "🔍 国际化使用分析",
-      "message": "正在分析项目中国际化键的使用情况。",
-      "help_message": "国际化使用分析器  用法: node i18ntk-usage.js [选项]  选项:   --source-dir <dir>     要扫描的源目录 (默认: ./src)   --i18n-dir <dir>       I18n 目录 (默认: ./src/locales)   --output-report        生成详细报告   --output-dir <dir>     报告输出目录 (默认: ./reports)   --help                 显示此帮助  示例:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
+      "analyzing_source_files": "🔍 正在分析源文件...",
       "source_directory_thissourcedir": "📁 源目录: {sourceDir}",
       "i18n_directory_thisi18ndir": "🌐 I18n 目录: {i18nDir}",
-      "loading_available_translation_": "📋 正在加载可用翻译键...",
-      "found_thisavailablekeyssize_av": "✅ 找到 {availableKeysSize} 个可用键",
-      "analyzing_source_files": "🔍 正在分析源文件...",
       "found_files_in_source": "📂 在源目录中找到 {numFiles} 个文件",
+      "no_source_files_found": "⚠️  未找到源文件",
+      "processedFiles": "已处理 {processedFiles} / {totalFiles} 个文件。",
+      "failedToProcessFile": "❌  处理文件 {filePath} 失败: {error}",
       "found_thisusedkeyssize_unique_": "🎯 找到 {usedKeysSize} 个唯一使用键",
       "total_key_usages_totalkeysfoun": "📊 总键使用数: {totalKeysFound}",
-      "translation_completeness_title": "📊 翻译完整性",
-      "language_completeness_stats": "{language}: {translated}/{total} ({completeness}% 已翻译)",
-      "n_sample_unused_keys": "示例未使用键:",
-      "key": "- {key}",
-      "and_unusedkeyslength_5_more": "...还有 {count} 个。",
-      "n_recommendations": "📋 建议",
-      "consider_removing_unused_trans": "💡 考虑移除未使用的翻译以保持项目整洁。",
-      "n_next_steps": "📋 下一步",
-      "1_review_the_analysis_results": "1. 在控制台或生成的报告中查看分析结果。",
-      "2_run_with_outputreport_for_de": "2. 使用 --output-report 运行以获取详细报告。",
-      "3_remove_unused_keys_or_add_mi": "3. 移除未使用的键或在源代码中添加缺失的键。",
-      "4_rerun_analysis_to_verify_imp": "4. 重新运行分析以验证改进。",
+      "loading_available_translation_": "📋 正在加载可用翻译键...",
+      "found_thisavailablekeyssize_av": "✅ 找到 {availableKeysSize} 个可用键",
+      "message": "正在分析项目中国际化键的使用情况。",
       "usage_analysis_results": "📊 使用分析结果",
       "source_files_scanned_thisfileu": "已扫描源文件: {fileUsageSize}",
       "available_translation_keys_thi": "可用翻译键: {availableKeysSize}",
@@ -528,24 +571,34 @@
       "dynamic_keys_detected_dynamick": "检测到动态键: {dynamicKeysLength}",
       "unused_keys_unusedkeyslength": "未使用键: {unusedKeysLength}",
       "missing_keys_missingkeyslength": "缺失键: {missingKeysLength}",
+      "translation_completeness_title": "📊 翻译完整性",
+      "language_completeness_stats": "{language}: {translated}/{total} ({completeness}% 已翻译)",
+      "n_sample_unused_keys": "示例未使用键:",
+      "key": "- {key}",
+      "and_unusedkeyslength_5_more": "...还有 {count} 个。",
+      "n_sample_missing_keys": "❌  示例缺失键 (前 5 个):",
+      "and_missingkeyslength_5_more": "...以及 {count} 个更多缺失键",
+      "n_generating_detailed_report": "📊 正在生成详细报告...",
+      "report_saved_reportpath": "📄 报告已保存: {reportPath}",
+      "n_recommendations": "📋 建议",
+      "consider_removing_unused_trans": "💡 考虑移除未使用的翻译以保持项目整洁。",
+      "add_missing_translation_keys_t": "➕ 向翻译文件添加缺失键以保持一致性",
+      "review_dynamic_keys_manually_t": "🔍 手动检查动态键 (可能有效)",
+      "all_translation_keys_are_prope": "✅ 所有翻译键都已正确使用！",
+      "n_next_steps": "📋 下一步",
+      "2_check_the_detailed_report_fo": "2. 检查详细报告以获取特定问题",
+      "help_message": "国际化使用分析器  用法: node i18ntk-usage.js [选项]  选项:   --source-dir <dir>     要扫描的源目录 (默认: ./src)   --i18n-dir <dir>       I18n 目录 (默认: ./src/locales)   --output-report        生成详细报告   --output-dir <dir>     报告输出目录 (默认: ./reports)   --help                 显示此帮助  示例:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
+      "1_review_the_analysis_results": "1. 在控制台或生成的报告中查看分析结果。",
+      "2_run_with_outputreport_for_de": "2. 使用 --output-report 运行以获取详细报告。",
+      "3_remove_unused_keys_or_add_mi": "3. 移除未使用的键或在源代码中添加缺失的键。",
+      "4_rerun_analysis_to_verify_imp": "4. 重新运行分析以验证改进。",
       "noSourceFilesFound": "未找到要分析的源文件。",
-      "processedFiles": "已处理 {processedFiles} / {totalFiles} 个文件。",
       "i18nDirectoryNotFound": "未找到 I18n 目录: {i18nDir}",
       "noTranslationLanguagesFound": "未找到翻译语言。",
       "failedToAnalyzeFile": "分析文件 {filePath} 失败: {error}",
       "failedToAnalyzeLanguage": "分析语言 {language} 失败: {error}",
       "translationCompletenessAnalysisFailed": "翻译完整性分析失败: {error}",
-      "n": "",
-      "no_source_files_found": "⚠️  未找到源文件",
-      "failedToProcessFile": "❌  处理文件 {filePath} 失败: {error}",
-      "n_sample_missing_keys": "❌  示例缺失键 (前 5 个):",
-      "and_missingkeyslength_5_more": "...以及 {count} 个更多缺失键",
-      "n_generating_detailed_report": "📊 正在生成详细报告...",
-      "report_saved_reportpath": "📄 报告已保存: {reportPath}",
-      "add_missing_translation_keys_t": "➕ 向翻译文件添加缺失键以保持一致性",
-      "review_dynamic_keys_manually_t": "🔍 手动检查动态键 (可能有效)",
-      "all_translation_keys_are_prope": "✅ 所有翻译键都已正确使用！",
-      "2_check_the_detailed_report_fo": "2. 检查详细报告以获取特定问题"
+      "n": "\n"
     },
     "complete": {
       "configLoadedSuccessfully": "配置加载成功",
@@ -585,8 +638,6 @@
     "noTranslationLanguagesFound": "未找到翻译语言。",
     "failedToAnalyzeLanguage": "分析语言 {language} 失败: {error}",
     "translationCompletenessAnalysisFailed": "翻译完整性分析失败: {error}",
-    "errorReadingI18nDirectory": "⚠️  读取 i18n 目录时出错: {error}",
-    "analysisFailedError": "❌  分析失败: {error}",
     "failedToProcessFile": "Failed to process file:",
     "failedToSaveReport": "Failed to save usage report: {error}",
     "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
@@ -939,18 +990,17 @@
     "initializationTitle": "🚀 i18n 管理工具 - 项目初始化",
     "initializationCancelled": "🚫 初始化已被用户取消。",
     "sourceDirectoryLabel": "📁 源目录：{dir}",
-    "createdSourceLanguageDirectory": "✅ 创建源语言目录：{dir}",
     "requiredTitle": "需要初始化",
     "requiredBody": "在运行此命令之前，必须先初始化项目。",
     "promptRunNow": "现在要运行初始化吗？(y/N):",
     "sourceLanguageLabel": "🌍 源语言：{language}",
     "detectedI18nFrameworks": "🔍 检测到的 i18n 框架：{frameworks}",
+    "pinMustBe4Digits": "🔐 PIN 必须是 4 位数字。",
     "existingDirectoriesFound": "📁 发现已有翻译目录：",
     "useExistingDirectoryPrompt": "要使用已有目录吗？(y/n)",
     "selectDirectoryPrompt": "选择目录（输入数字或选择 '创建新目录'）:",
     "enterNewDirectoryName": "输入新目录名称：",
     "createdNewDirectory": "✅ 已创建新目录: {dir}",
-    "pinMustBe4Digits": "🔐 PIN 必须是 4 位数字。",
     "directoryAlreadyExists": "⚠️ 目录已存在：{dir}",
     "invalidDirectoryName": "❌ 无效目录名称：{name}",
     "usingExistingDirectory": "使用现有目录: {dir}",
@@ -1045,6 +1095,7 @@
     "updatedFile": "已更新文件：{file}",
     "skippingExcludedFile": "已跳过 {language} 的 {file}，因其在排除列表中。",
     "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "createdSourceLanguageDirectory": "✅ 创建源语言目录：{dir}",
     "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
     "noTargetLanguagesSpecified": "No target languages specified.",
     "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
@@ -1093,6 +1144,7 @@
       "complete": "🎯 完成翻译（100% 覆盖）",
       "sizing": "📏 分析大小差异",
       "fix": "🛠️  修复占位翻译",
+      "scanner": "🔍 扫描i18n问题",
       "workflow": "🔄 运行完整工作流",
       "status": "📋 显示项目状态",
       "delete": "🗑️  删除全部报告",
@@ -1100,7 +1152,6 @@
       "settings": "⚙️  设置",
       "help": "❓ 帮助",
       "debug": "🔧 调试工具",
-      "scanner": "🔍 扫描i18n问题",
       "exit": "🚪 退出"
     },
     "update": "📦 更新软件包",
@@ -1341,6 +1392,7 @@
     "goodbyeMessage": "感谢使用 i18ntk 设置管理器！",
     "relativePathHint": "请使用相对路径（例如：./src/i18n/locales）",
     "currentDirectory": "当前项目目录",
+    "startingSettings": "开始设置...",
     "pin": "PIN：",
     "reportBug": {
       "title": "报告错误",
@@ -1475,10 +1527,10 @@
     "resetConfirm": "确定要继续吗？(y/N)：",
     "resetSuccess": "设置已成功重置为默认值。",
     "resetFailed": "重置设置失败：{error}",
-    "saveSuccess": "设置已成功保存。",
-    "saveFailed": "保存设置失败。",
     "resetDone": "设置已成功重置为默认值。",
     "resetScriptDirsDone": "脚本目录已成功重置为系统默认值。",
+    "saveSuccess": "设置已成功保存。",
+    "saveFailed": "保存设置失败。",
     "saveError": "保存设置时出错：{error}",
     "pressEnter": "按 Enter 继续…",
     "initFailed": "初始化设置失败：{error}",
@@ -1833,13 +1885,13 @@
         "description": "将所有 PIN 保护设置重置为默认值",
         "help": "将各脚本的 PIN 保护设置恢复为默认值"
       },
-      "${helperKey}": {
-        "help": "帮助"
-      },
       "removeUiLanguages": {
         "label": "删除 UI 语言",
         "description": "删除未安装的 UI 语言",
         "help": "删除未安装在系统上的 UI 语言"
+      },
+      "${helperKey}": {
+        "help": "帮助"
       }
     },
     "actions": {
@@ -1918,7 +1970,6 @@
       "confirmYes": "是",
       "confirmNo": "否"
     },
-    "startingSettings": "开始设置...",
     "validation": {
       "valid": "Valid",
       "validatingPaths": "Validating configured paths...",
@@ -2058,8 +2109,8 @@
       "sizingCommand": "sizing    - 分析大小差异",
       "completeCommand": "complete  - 完成翻译（100% 覆盖）",
       "summaryCommand": "summary   - 显示项目状态",
-      "debugCommand": "debug     - 调试翻译问题",
-      "scannerCommand": "scanner   - 🔍 扫描i18n问题"
+      "scannerCommand": "scanner   - 🔍 扫描i18n问题",
+      "debugCommand": "debug     - 调试翻译问题"
     },
     "test_complete_system": {
       "starting_test": "🧪 正在启动完整系统测试",
@@ -2320,9 +2371,6 @@
     "found_hardcoded_messages": "找到硬编码消息",
     "all_console_messages_use_translation": "所有控制台消息都使用翻译"
   },
-  "\\nSelect directory to clean (0-${availableDirs": {
-    "length + 1}): ": "选择要清理的目录（0-${availableDirs.length}）："
-  },
   "exportTranslations": {
     "createdDirectory": "创建目录",
     "foundFiles": "找到文件",
@@ -2338,9 +2386,6 @@
     "location": "位置",
     "nextSteps": "后续步骤"
   },
-  ")) {\n          console": {
-    "log(": "日志("
-  },
   "dashboard": {
     "title": "标题",
     "overview": "概览"
@@ -2352,58 +2397,6 @@
     "signIn": "登录",
     "forgotPassword": "忘记密码",
     "signUp": "注册"
-  },
-  "scanner": {
-    "help_message": "i18n文本扫描器  使用方法: node i18ntk-scanner.js [选项]  选项:   --source-dir <目录>     要扫描的源目录 (默认: ./src)   --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)   --framework <名称>     目标框架 (react, vue, angular, vanilla)   --patterns <模式>      自定义正则表达式模式 (逗号分隔)   --include-tests        在扫描中包含测试文件   --exclude-dirs <目录>  要排除的目录 (逗号分隔)   --help                 显示此帮助信息  示例:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./扫描结果.json",
-    "help_options": {
-      "source_dir": "要扫描的源目录",
-      "output_dir": "结果输出文件",
-      "framework": "目标框架 (react, vue, angular, vanilla)",
-      "patterns": "自定义正则表达式模式 (逗号分隔)",
-      "exclude": "要排除的目录 (逗号分隔)",
-      "output_report": "报告输出文件",
-      "min_length": "包含文本的最小长度",
-      "max_length": "包含文本的最大长度",
-      "include_tests": "在扫描中包含测试文件"
-    },
-    "starting": "🔍 正在为框架启动文本扫描器: {framework}",
-    "sourceDirectory": "📁 正在扫描目录: {sourceDir}",
-    "frameworkDetected": "🎯 检测到框架: {framework}",
-    "scanningFiles": "📊 正在扫描 {fileCount} 个文件...",
-    "foundTexts": "📝 找到 {count} 个需要翻译的文本",
-    "foundText": "找到 {count} 个潜在的硬编码文本实例",
-    "generatingReport": "📊 正在生成详细报告...",
-    "reportSaved": "💾 扫描报告已保存到: {reportPath}",
-    "noTextsFound": "✅ 未找到硬编码的英文文本",
-    "scanComplete": "🎉 扫描成功完成!",
-    "analysisTitle": "🔍 翻译扫描器分析",
-    "fileSummary": "📄 {file}: 找到 {count} 个文本",
-    "textLocation": "📍 第 {line} 行: {text}",
-    "context": "📝 上下文: {context}",
-    "severity": "⚠️  严重程度: {severity}",
-    "recommendation": "💡 建议: {recommendation}",
-    "welcome": {
-      "title": "🎯 欢迎使用文本扫描器!",
-      "description": "此工具扫描您的源代码以查找可能需要翻译的硬编码英文文本。"
-    },
-    "frameworkPrompt": {
-      "title": "🎯 选择框架",
-      "available": "可用框架: react, vue, angular, vanilla",
-      "description": "输入框架类型 (或按回车键自动检测):",
-      "input": "框架:"
-    },
-    "directoryPrompt": {
-      "title": "📁 选择源目录",
-      "current": "当前目录: {dir}",
-      "description": "输入要扫描的目录 (或按回车键使用当前目录):",
-      "input": "目录:"
-    },
-    "options": {
-      "includeTests": "包含测试文件?",
-      "excludeDirs": "要排除的目录 (逗号分隔):",
-      "customPatterns": "要扫描的自定义模式 (正则表达式):"
-    },
-    "reportGenerated": "Scan report generated: {path}"
   },
   "checkUsage": {
     "usage_analysis_failed": "Usage analysis failed."
