@@ -1,4 +1,4 @@
-# i18ntk Documentation (v2.1.0)
+# i18ntk Documentation (v2.1.1)
 
 This documentation set is for **i18ntk 2.x**.
 
@@ -9,7 +9,7 @@ This documentation set is for **i18ntk 2.x**.
 - [Runtime API Guide](./runtime.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
-- [Migration Guide v2.1.0](./migration-guide-v2.1.0.md)
+- [Migration Guide v2.1.1](./migration-guide-v2.1.1.md)
 
 ## Command Model
 
@@ -43,8 +43,3 @@ i18ntk-backup
 i18ntk reads project settings from:
 
 - `.i18ntk-config`
-
-## Notes
-
-- The docs intentionally avoid internal implementation details.
-- For release/update workflow, see `DEVUPDATE.md` in the repository root.

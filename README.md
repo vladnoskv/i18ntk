@@ -1,4 +1,4 @@
-# i18ntk v2.1.0
+# i18ntk v2.1.1
 
 Zero-dependency i18n toolkit for initialization, scanning, analysis, validation, usage tracking, and translation completion.
 
@@ -9,7 +9,7 @@ Zero-dependency i18n toolkit for initialization, scanning, analysis, validation,
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.1.0)](https://socket.dev/npm/package/i18ntk/overview/2.1.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.1.1)](https://socket.dev/npm/package/i18ntk/overview/2.1.1)
 
 ## Why i18ntk
 
@@ -100,7 +100,7 @@ Example:
 
 ```json
 {
-  "version": "2.1.0",
+  "version": "2.1.1",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -137,8 +137,7 @@ console.log(getLanguage());
 - [Runtime API Guide](docs/runtime.md)
 - [Scanner Guide](docs/scanner-guide.md)
 - [Environment Variables](docs/environment-variables.md)
-- [Migration Guide v2.1.0](docs/migration-guide-v2.1.0.md)
-- [Release Runbook](DEVUPDATE.md)
+- [Migration Guide v2.1.1](docs/migration-guide-v2.1.1.md)
 
 ## License
 

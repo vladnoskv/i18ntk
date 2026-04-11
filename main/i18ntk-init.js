@@ -1122,7 +1122,7 @@ class I18nInitializer {
       
       try {
         // Import locale optimizer directly
-        const LocaleOptimizer = require('../scripts/locale-optimizer');
+        const LocaleOptimizer = require('../utils/locale-optimizer');
         
         // First run dry run to show current state
         console.log('\n🔍 Running locale optimization preview...');
@@ -1139,12 +1139,12 @@ class I18nInitializer {
           console.log('\n✅ Package optimization completed!');
         } else {
           console.log('\n💡 You can run locale optimization later with:');
-          console.log('   node scripts/locale-optimizer.js --interactive');
+          console.log('   node utils/locale-optimizer.js --interactive');
         }
       } catch (error) {
         console.log('\n⚠️ Could not offer locale optimization:', error.message);
         console.log('\n💡 You can run locale optimization later with:');
-        console.log('   node scripts/locale-optimizer.js --interactive');
+        console.log('   node utils/locale-optimizer.js --interactive');
       }
     } catch (error) {
       console.log('\n⚠️ Could not offer locale optimization:', error.message);

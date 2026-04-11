@@ -610,7 +610,7 @@ class SettingsCLI {
         }
                if (key === 'removeUiLanguages') {
             if (this.rl && this.rl.pause) this.rl.pause();
-            const LocaleOptimizer = require('../scripts/locale-optimizer.js');
+            const LocaleOptimizer = require('../utils/locale-optimizer.js');
             const optimizer = new LocaleOptimizer();
             await optimizer.interactiveSelect();
             // Re-initialize readline if it was closed by locale optimizer
