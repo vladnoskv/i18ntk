@@ -130,9 +130,9 @@ class UsageService {
         this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi'];
       }
 
-      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
+      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitialized'), 'info', { component: 'i18ntk-usage' });
     } catch (error) {
-      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitFailed'), { component: 'i18ntk-usage', error: error.message });
+      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitFailed'), 'error', { component: 'i18ntk-usage', error: error.message });
       throw error;
     }
   }
@@ -237,7 +237,7 @@ class UsageService {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent(t('usage.translationDiscoveryError'), {
+        await SecurityUtils.logSecurityEvent(t('usage.translationDiscoveryError'), 'error', {
           component: 'i18ntk-usage',
           directory: currentDir,
           error: error.message
@@ -311,7 +311,7 @@ class UsageService {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent(t('usage.fileTraversalError'), {
+        await SecurityUtils.logSecurityEvent(t('usage.fileTraversalError'), 'error', {
           component: 'i18ntk-usage',
           directory: currentDir,
           error: error.message
@@ -466,7 +466,7 @@ class UsageService {
           if (isDebug) {
             console.error(error.stack);
           }
-          await SecurityUtils.logSecurityEvent(t('usage.translationFileParseError'), {
+          await SecurityUtils.logSecurityEvent(t('usage.translationFileParseError'), 'error', {
             component: 'i18ntk-usage',
             file: fileInfo.filePath,
             error: error.message
@@ -474,7 +474,7 @@ class UsageService {
         }
       }
     } catch (error) {
-      await SecurityUtils.logSecurityEvent(t('usage.translationKeysLoadError'), {
+      await SecurityUtils.logSecurityEvent(t('usage.translationKeysLoadError'), 'error', {
         component: 'i18ntk-usage',
         error: error.message
       });
@@ -1447,7 +1447,7 @@ class UsageService {
     } catch (error) {
       console.error(t('usage.analysisFailedError'), error.message);
       this.closeReadline();
-      SecurityUtils.logSecurityEvent(t('usage.usageAnalysisFailed'), {
+      SecurityUtils.logSecurityEvent(t('usage.usageAnalysisFailed'), 'error', {
         component: 'i18ntk-usage',
         error: error.message
       });

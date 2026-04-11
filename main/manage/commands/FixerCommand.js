@@ -64,7 +64,7 @@ class FixerCommand {
             this.config = { ...baseConfig, ...(this.config || {}) };
 
             const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-            loadTranslations(uiLanguage, path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
+            loadTranslations(uiLanguage, path.resolve(__dirname, '../../../ui-locales'));
 
             this.sourceDir = this.config.sourceDir;
             this.outputDir = this.config.outputDir;
@@ -567,7 +567,7 @@ class FixerCommand {
                 this.config = { ...baseConfig, ...this.config };
 
                 const uiLanguage = this.config.uiLanguage || 'en';
-                loadTranslations(uiLanguage, path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
+                loadTranslations(uiLanguage, path.resolve(__dirname, '../../../ui-locales'));
 
                 this.sourceDir = this.config.sourceDir;
                 this.outputDir = this.config.outputDir;

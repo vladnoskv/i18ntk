@@ -55,7 +55,7 @@ const SetupEnforcer = require('../utils/setup-enforcer');
   }
 })();
 
-loadTranslations( 'en', path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
+loadTranslations('en', path.resolve(__dirname, '..', 'ui-locales'));
 
 async function getConfig() {
   return await getUnifiedConfig('usage');
@@ -120,7 +120,7 @@ class I18nUsageAnalyzer {
       
       // Load translations for UI
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       const projectRoot = path.resolve(this.config.projectRoot || '.');
             const detected = detectFramework(projectRoot);
       if (detected) {
@@ -169,9 +169,9 @@ class I18nUsageAnalyzer {
         this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi'];
       }
       
-      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitialized'), { component: 'i18ntk-usage' });
+      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitialized'), 'info', { component: 'i18ntk-usage' });
     } catch (error) {
-      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitFailed'), { component: 'i18ntk-usage', error: error.message });
+      await SecurityUtils.logSecurityEvent(t('usage.analyzerInitFailed'), 'error', { component: 'i18ntk-usage', error: error.message });
       throw error;
     }
   }
@@ -276,7 +276,7 @@ class I18nUsageAnalyzer {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent(t('usage.translationDiscoveryError'), { 
+        await SecurityUtils.logSecurityEvent(t('usage.translationDiscoveryError'), 'error', {
           component: 'i18ntk-usage', 
           directory: currentDir, 
           error: error.message 
@@ -350,7 +350,7 @@ class I18nUsageAnalyzer {
           }
         }
       } catch (error) {
-        await SecurityUtils.logSecurityEvent(t('usage.fileTraversalError'), { 
+        await SecurityUtils.logSecurityEvent(t('usage.fileTraversalError'), 'error', {
           component: 'i18ntk-usage', 
           directory: currentDir, 
           error: error.message 
@@ -393,7 +393,7 @@ class I18nUsageAnalyzer {
         this.config = { ...baseConfig, ...(this.config || {}) };
         
         const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
+        loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         if (!Array.isArray(this.config.translationPatterns)) {
           this.config.translationPatterns = [
             /t\(['"`]([^'"`]+)['"`]/g,
@@ -614,7 +614,7 @@ class I18nUsageAnalyzer {
     } catch (error) {
       console.error(t('usage.analysisFailedError'), error.message);
       this.closeReadline();
-      SecurityUtils.logSecurityEvent(t('usage.usageAnalysisFailed'), { 
+      SecurityUtils.logSecurityEvent(t('usage.usageAnalysisFailed'), 'error', {
         component: 'i18ntk-usage', 
         error: error.message 
       });
@@ -740,7 +740,7 @@ Analysis Features (v1.8.3):
           if (isDebug) {
             console.error(error.stack);
           }
-          await SecurityUtils.logSecurityEvent(t('usage.translationFileParseError'), {
+          await SecurityUtils.logSecurityEvent(t('usage.translationFileParseError'), 'error', {
             component: 'i18ntk-usage',
             file: fileInfo.filePath,
             error: error.message
@@ -748,7 +748,7 @@ Analysis Features (v1.8.3):
         }
       }
     } catch (error) {
-      await SecurityUtils.logSecurityEvent(t('usage.translationKeysLoadError'), {
+      await SecurityUtils.logSecurityEvent(t('usage.translationKeysLoadError'), 'error', {
         component: 'i18ntk-usage',
         error: error.message
       });
@@ -1543,7 +1543,7 @@ Analysis Features (v1.8.3):
         await this.initialize();
       }
       
-      await SecurityUtils.logSecurityEvent('analysis_started', { component: 'i18ntk-usage' });
+      await SecurityUtils.logSecurityEvent('analysis_started', 'info', { component: 'i18ntk-usage' });
       
       console.log(t('usage.checkUsage.title'));
       console.log(t("usage.checkUsage.message"));
@@ -1708,7 +1708,7 @@ Analysis Features (v1.8.3):
         outputLines.forEach(line => console.log(line));
       }
       
-      await SecurityUtils.logSecurityEvent('analysis_completed', {
+      await SecurityUtils.logSecurityEvent('analysis_completed', 'info', {
         component: 'i18ntk-usage',
         stats: {
           availableKeys: this.availableKeys.size,
@@ -1749,7 +1749,7 @@ Analysis Features (v1.8.3):
       console.error(t("checkUsage.usage_analysis_failed"));
       console.error(error.message);
       
-      await SecurityUtils.logSecurityEvent('analysis_failed', {
+      await SecurityUtils.logSecurityEvent('analysis_failed', 'error', {
         component: 'i18ntk-usage',
         error: error.message
       });

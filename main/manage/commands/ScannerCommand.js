@@ -41,8 +41,8 @@ class ScannerCommand {
     }
 
     loadLocale() {
-        const uiLocalesDir = path.join(__dirname, '../../../resources', 'i18n', 'ui-locales');
-        const localeFile = path.join(uiLocalesDir, 'en.json');
+      const uiLocalesDir = path.join(__dirname, '../../../ui-locales');
+      const localeFile = path.join(uiLocalesDir, 'en.json');
 
         try {
             const localeContent = SecurityUtils.safeReadFileSync(localeFile, uiLocalesDir, 'utf8');

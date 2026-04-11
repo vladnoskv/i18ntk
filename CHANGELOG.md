@@ -9,9 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Version bump to 2.1.1 for release.
+- Added `SecurityUtils.debugLog` function for consistent debugging.
+
+### Fixed
+- Fixed `SecurityUtils.logSecurityEvent` calls missing `level` parameter in `i18ntk-usage` and `UsageService`.
+- Fixed `level.toLowerCase is not a function` error in usage analysis.
+- Fixed `SecurityUtils.debugLog is not a function` error in sizing analysis.
 
 ### Changed
 - Updated package and release metadata to `2.1.1`.
+- Removed legacy `resources/i18n/ui-locales` path references (use `ui-locales/` instead).
+- Updated all UI locale loading to use `ui-locales/` directory.
 
 ## [2.1.0] - 2026-04-11
 

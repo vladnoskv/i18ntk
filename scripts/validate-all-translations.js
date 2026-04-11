@@ -23,7 +23,7 @@ const argv = Object.fromEntries(
   })
 );
 
-const I18N_DIR = path.resolve(argv['i18n-dir'] || './resources/i18n/ui-locales');
+const I18N_DIR = path.resolve(argv['i18n-dir'] || './ui-locales');
 const LANGS = (argv.languages || 'en,de,es,fr,ru,ja,zh').split(',').map((s) => s.trim());
 const MARKER = argv.marker || 'TRANSLATION NEEDED';
 const SHARED_TERMS = new Set(['error', 'errors', 'no', 'yes', 'navigation', 'system', 'modular', 'long']);

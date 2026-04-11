@@ -78,8 +78,7 @@ this.translations = {};
 
     resolveUiLocalesDir() {
         const candidates = [
-            path.resolve(__dirname, '..', 'ui-locales'),
-            path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales')
+          path.resolve(__dirname, '..', 'ui-locales')
         ];
 
         for (const candidate of candidates) {

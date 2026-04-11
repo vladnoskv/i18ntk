@@ -1104,17 +1104,18 @@
     "warningProceedingWithoutFramework": "Fortfahren ohne erkanntes i18n-Framework."
   },
   "language": {
-    "title": "🌍 Sprache ändern",
-    "separator": "============================================================",
-    "current": "Aktuelle Sprache: {language}",
-    "available": "Verfügbare Sprachen:",
-    "languageOption": "{index}. {displayName}{current}",
-    "backToMainMenu": "Zurück zum Hauptmenü",
-    "prompt": "Wähle eine Sprache (0–8):",
-    "cancelled": "Sprachwechsel abgebrochen.",
-    "invalid": "Ungültige Auswahl. Bitte erneut versuchen.",
-    "changed": "Sprache geändert zu: {language}",
-    "pressEnterToContinue": "Drücke Enter, um fortzufahren..."
+      "title": "🌍 Sprache ändern",
+      "separator": "============================================================",
+      "current": "Aktuelle Sprache: {language}",
+      "available": "Verfügbare Sprachen:",
+      "languageOption": "{index}. {displayName}{current}",
+      "backToMainMenu": "Zurück zum Hauptmenü",
+      "prompt": "Wähle eine Sprache (0–8):",
+      "cancelled": "Sprachwechsel abgebrochen.",
+      "invalid": "Ungültige Auswahl. Bitte erneut versuchen.",
+      "changed": "Sprache geändert zu: {language}",
+      "changeFailed": "Sprachwechsel fehlgeschlagen: {error}",
+      "pressEnterToContinue": "Drücke Enter, um fortzufahren..."
   },
   "maintainLanguagePurity": {
     "workflow_title": "🚀 Workflow zur Wahrung der Sprachreinheit",

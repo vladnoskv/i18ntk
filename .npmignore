@@ -103,7 +103,6 @@ secrets.json
 !settings/settings-cli.js
 !settings/settings-manager.js
 !ui-locales/
-!resources/i18n/ui-locales/
 !locales/
 !LICENSE
 !README.md

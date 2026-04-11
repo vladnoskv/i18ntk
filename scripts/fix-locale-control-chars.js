@@ -8,8 +8,7 @@ const path = require('path');
 const SecurityUtils = require('../utils/security');
 
 const uiLocalesDirs = [
-  path.join(__dirname, '..', 'ui-locales'),
-  path.join(__dirname, '..', 'resources', 'i18n', 'ui-locales')
+  path.join(__dirname, '..', 'ui-locales')
 ];
 
 function sanitizeValue(value) {

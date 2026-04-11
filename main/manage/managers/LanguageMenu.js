@@ -36,8 +36,13 @@ module.exports = class LanguageMenu {
       return;
     } else if (choiceNum >= 1 && choiceNum <= this.ui.availableLanguages.length) {
       const selectedLang = this.ui.availableLanguages[choiceNum - 1];
-      await this.ui.changeLanguage(selectedLang);
-      console.log(t('language.changed', { language: this.ui.getLanguageDisplayName(selectedLang) }));
+      try {
+        await this.ui.changeLanguage(selectedLang);
+        console.log(t('language.changed', { language: this.ui.getLanguageDisplayName(selectedLang) }));
+      } catch (error) {
+        console.error(t('language.changeFailed', { error: error.message }));
+        SecurityUtils.logSecurityEvent('Language change failed', 'error', { error: error.message, language: selectedLang });
+      }
 
       // Force reload translations for the entire system
       const { loadTranslations } = require('../../../utils/i18n-helper');

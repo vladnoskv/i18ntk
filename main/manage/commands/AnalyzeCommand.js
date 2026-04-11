@@ -16,7 +16,7 @@ const AdminCLI = require('../../../utils/admin-cli');
 const watchLocales = require('../../../utils/watch-locales');
 const JsonOutput = require('../../../utils/json-output');
 
-loadTranslations('en', path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
+loadTranslations('en', path.resolve(__dirname, '../../../ui-locales'));
 
 const PROJECT_ROOT = process.cwd();
 
@@ -74,7 +74,7 @@ class AnalyzeCommand {
             this.config = { ...baseConfig, ...(this.config || {}) };
 
             const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-            loadTranslations(uiLanguage, path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
+            loadTranslations(uiLanguage, path.resolve(__dirname, '../../../ui-locales'));
 
             this.sourceDir = this.config.sourceDir;
             this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
@@ -896,7 +896,7 @@ class AnalyzeCommand {
                 this.config = { ...baseConfig, ...this.config };
 
                 const uiLanguage = this.config.uiLanguage || 'en';
-                loadTranslations(uiLanguage, path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
+                loadTranslations(uiLanguage, path.resolve(__dirname, '../../../ui-locales'));
 
                 this.sourceDir = this.config.sourceDir;
                 this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);

@@ -27,7 +27,7 @@ const SetupEnforcer = require('../utils/setup-enforcer');
   }
 })();
 
-loadTranslations('en', path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
+loadTranslations('en', path.resolve(__dirname, '..', 'ui-locales'));
 
 class I18nFixer {
   constructor(config = {}) {
@@ -51,7 +51,7 @@ class I18nFixer {
       this.config = { ...baseConfig, ...(this.config || {}) };
 
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales'));
+      loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
 
       this.sourceDir = this.config.sourceDir;
       this.outputDir = this.config.outputDir;

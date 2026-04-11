@@ -1104,17 +1104,18 @@
     "warningProceedingWithoutFramework": "未检测到 i18n 框架即可继续。"
   },
   "language": {
-    "title": "🌍 切换语言",
-    "separator": "============================================================",
-    "current": "当前语言：{language}",
-    "available": "可用语言：",
-    "languageOption": "{index}。 {displayName}{current}",
-    "backToMainMenu": "返回主菜单",
-    "prompt": "请选择语言（0-8）：",
-    "cancelled": "已取消语言切换。",
-    "invalid": "无效选择，请重试。",
-    "changed": "语言已切换为：{language}",
-    "pressEnterToContinue": "按 Enter 继续..."
+      "title": "🌍 切换语言",
+      "separator": "============================================================",
+      "current": "当前语言：{language}",
+      "available": "可用语言：",
+      "languageOption": "{index}。 {displayName}{current}",
+      "backToMainMenu": "返回主菜单",
+      "prompt": "请选择语言（0-8）：",
+      "cancelled": "已取消语言切换。",
+      "invalid": "无效选择，请重试。",
+      "changed": "语言已切换为：{language}",
+      "changeFailed": "切换语言失败：{error}",
+      "pressEnterToContinue": "按 Enter 继续..."
   },
   "maintainLanguagePurity": {
     "workflow_title": "🚀 语言纯洁度维护工作流",

@@ -1104,17 +1104,18 @@
     "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
   },
   "language": {
-    "title": "🌍 Change Language",
-    "separator": "============================================================",
-    "current": "Current language: {language}",
-    "available": "Available Languages:",
-    "languageOption": "{index}. {displayName}{current}",
-    "backToMainMenu": "Back to Main Menu",
-    "prompt": "Select a language (0-8):",
-    "cancelled": "Language change cancelled.",
-    "invalid": "Invalid choice. Please try again.",
-    "changed": "Language changed to: {language}",
-    "pressEnterToContinue": "Press Enter to continue..."
+      "title": "🌍 Change Language",
+      "separator": "============================================================",
+      "current": "Current language: {language}",
+      "available": "Available Languages:",
+      "languageOption": "{index}. {displayName}{current}",
+      "backToMainMenu": "Back to Main Menu",
+      "prompt": "Select a language (0-8):",
+      "cancelled": "Language change cancelled.",
+      "invalid": "Invalid choice. Please try again.",
+      "changed": "Language changed to: {language}",
+      "changeFailed": "Failed to change language: {error}",
+      "pressEnterToContinue": "Press Enter to continue..."
   },
   "maintainLanguagePurity": {
     "workflow_title": "🚀 Language Purity Maintenance Workflow",

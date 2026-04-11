@@ -114,9 +114,7 @@ function pkgUiLocalesDirViaResolve() {
         }
     }
 
-function legacyResourcesUiLocalesDir() {
-  return path.resolve(__dirname, '..', 'resources', 'i18n', 'ui-locales');
-}
+// Removed legacyResourcesUiLocalesDir as resources/i18n/ui-locales is deprecated
 
 function resolveLocalesDirs(preferredDir) {
   const SecurityUtils = getSecurityUtils();
@@ -145,10 +143,7 @@ function resolveLocalesDirs(preferredDir) {
     addDir(pkgB);
   }
 
-  const legacyDir = legacyResourcesUiLocalesDir();
-  if (legacyDir !== pkgA && legacyDir !== pkgB) {
-    addDir(legacyDir);
-  }
+  // Removed legacy directory fallback
 
   // Deduplicate while preserving order
   const seen = new Set();

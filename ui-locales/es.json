@@ -1104,17 +1104,18 @@
     "warningProceedingWithoutFramework": "Procediendo sin marco i18n detectado."
   },
   "language": {
-    "title": "🌍 Cambiar Idioma",
-    "separator": "============================================================",
-    "current": "Idioma actual: {language}",
-    "available": "Idiomas Disponibles:",
-    "languageOption": "{index}. {displayName}{current}",
-    "backToMainMenu": "Volver al Menú Principal",
-    "prompt": "Selecciona un idioma (0-8):",
-    "cancelled": "Cambio de idioma cancelado.",
-    "invalid": "Opción inválida. Por favor intenta de nuevo.",
-    "changed": "Idioma cambiado a: {language}",
-    "pressEnterToContinue": "Presiona Enter para continuar..."
+      "title": "🌍 Cambiar Idioma",
+      "separator": "============================================================",
+      "current": "Idioma actual: {language}",
+      "available": "Idiomas Disponibles:",
+      "languageOption": "{index}. {displayName}{current}",
+      "backToMainMenu": "Volver al Menú Principal",
+      "prompt": "Selecciona un idioma (0-8):",
+      "cancelled": "Cambio de idioma cancelado.",
+      "invalid": "Opción inválida. Por favor intenta de nuevo.",
+      "changed": "Idioma cambiado a: {language}",
+      "changeFailed": "Error al cambiar el idioma: {error}",
+      "pressEnterToContinue": "Presiona Enter para continuar..."
   },
   "maintainLanguagePurity": {
     "workflow_title": "🚀 Flujo de Trabajo de Mantenimiento de Pureza de Idioma",

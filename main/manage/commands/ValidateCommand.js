@@ -20,7 +20,7 @@ const I18nInitializer = require('../../i18ntk-init');
 const JsonOutput = require('../../../utils/json-output');
 const ExitCodes = require('../../../utils/exit-codes');
 
-loadTranslations('en', path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
+loadTranslations('en', path.resolve(__dirname, '../../../ui-locales'));
 
 class ValidateCommand {
     constructor(config = {}, ui = null) {
@@ -68,7 +68,7 @@ class ValidateCommand {
             this.config = { ...baseConfig, ...(this.config || {}) };
 
             const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-            loadTranslations(uiLanguage, path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));
+            loadTranslations(uiLanguage, path.resolve(__dirname, '../../../ui-locales'));
 
             SecurityUtils.logSecurityEvent(
                 'I18n validator initializing',

@@ -65,7 +65,7 @@ class LiteBuild {
       'main',
       'utils',
       'settings',
-      'resources/i18n/ui-locales/en',
+      'ui-locales/en',
       'scripts'
     ];
 
