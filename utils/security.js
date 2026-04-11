@@ -281,8 +281,16 @@ class SecurityUtils {
     }
 
     try {
+      // Validate content is a string or Buffer
+      if (typeof content !== 'string' && !Buffer.isBuffer(content)) {
+        const i18n = getI18n();
+        console.warn(i18n.t('security.file_write_error', { errorMessage: 'Content must be a string or Buffer' }));
+        return false;
+      }
+
       // Validate content size (10MB max)
-      if (typeof content === 'string' && content.length > 10 * 1024 * 1024) {
+      const contentSize = typeof content === 'string' ? content.length : content.length;
+      if (contentSize > 10 * 1024 * 1024) {
         const i18n = getI18n();
         console.warn(i18n.t('security.content_too_large_for_file', { filePath: validatedPath }));
         return false;

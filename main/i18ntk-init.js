@@ -890,6 +890,9 @@ class I18nInitializer {
   async initialize(hasI18n = true, args = {}) {
     console.log(t('init.initializingProject'));
     
+    // Preserve noPrompt setting in config
+    this.config.noPrompt = args.noPrompt || this.config.noPrompt;
+    
     if (!hasI18n) {
       console.log(t('init.warningProceedingWithoutFramework'));
       console.log(t('init.translationFilesCreatedWarning'));
@@ -1153,8 +1156,9 @@ class I18nInitializer {
     const fromMenu = options.fromMenu || false;
     
     try {
-      // Parse command line arguments
-      const args = this.parseArgs();
+      // Parse command line arguments and merge with options
+      const cliArgs = this.parseArgs();
+      const args = { ...cliArgs, ...options };  // options override cliArgs
 
       // On first run, prompt user for preferred UI language
       if (!SecurityUtils.safeExistsSync(configManager.CONFIG_PATH)) {

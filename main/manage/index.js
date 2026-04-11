@@ -357,7 +357,7 @@ class I18nManager {
             }
 
             if (commandToExecute) {
-                await this.executeCommand(commandToExecute);
+                await this.executeCommand(commandToExecute, args);
                 this.safeClose();
                 return;
             }
