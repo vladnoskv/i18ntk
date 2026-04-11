@@ -54,7 +54,7 @@
       "errors": "错误：",
       "genericError": "❌ 错误: {error}",
       "initializationFailed": "❌ 初始化失败: {error}",
-      "initializationCancelled": "❌ Initialization cancelled by user.",
+      "initializationCancelled": "❌ 初始化被用户取消。",
       "translationKeyNotFound": "翻译键未找到: {key}",
       "sourceDirectoryNotFound": "源目录未找到: {directory}",
       "configLoadingFailed": "配置加载失败",
@@ -101,7 +101,7 @@
     "settings": "设置",
     "startingSettings": "🎛️  开始设置 CLI...",
     "confirm": "确认",
-    "errorExiting": "Error while exiting."
+    "errorExiting": "退出时出错。"
   },
   "errors": {
     "invalidOption": "❌ 无效的选项：{option}。请重试。",
@@ -109,7 +109,7 @@
     "noPackageJson": "未找到 package.json 文件。无法自动检测 i18n 框架。",
     "noI18nDir": "未在项目根目录找到 i18n 目录。",
     "noI18nConfig": "未在项目根目录找到 i18n 配置文件。",
-    "errorReadingDebugLogs": "Error reading debug logs: {error}"
+    "errorReadingDebugLogs": "读取调试日志时出错：{error}"
   },
   "scanner": {
     "help_message": "i18n文本扫描器  使用方法: node i18ntk-scanner.js [选项]  选项:   --source-dir <目录>     要扫描的源目录 (默认: ./src)   --output <文件>        结果输出文件 (默认: ./i18ntk-scanner-report.json)   --framework <名称>     目标框架 (react, vue, angular, vanilla)   --patterns <模式>      自定义正则表达式模式 (逗号分隔)   --include-tests        在扫描中包含测试文件   --exclude-dirs <目录>  要排除的目录 (逗号分隔)   --help                 显示此帮助信息  示例:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./扫描结果.json",
@@ -161,7 +161,7 @@
       "excludeDirs": "要排除的目录 (逗号分隔):",
       "customPatterns": "要扫描的自定义模式 (正则表达式):"
     },
-    "reportGenerated": "Scan report generated: {path}"
+    "reportGenerated": "生成的扫描报告：{path}"
   },
   "fixer": {
     "help_message": "I18n 翻译修复工具  用法: node i18ntk-fixer.js [选项]  选项:   --source-dir <dir>     要扫描的源目录（默认: ./locales）   --languages <langs>    要修复的语言列表，用逗号分隔   --markers <markers>    视为未翻译的标记列表，用逗号分隔   --no-backup           跳过自动备份创建   --help                显示此帮助信息  示例:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -198,7 +198,7 @@
     "choicePrompt": "请选择 (y/n/s):",
     "nonInteractiveMode": "⚡ 检测到非交互模式 - 自动应用修复...",
     "reportGenerated": "📊 修复报告已生成: {path}",
-    "summary": "Fixer summary:",
+    "summary": "固定器总结：",
     "welcome": {
       "title": "🎯 欢迎使用翻译修复工具！",
       "description": "此工具将帮助您修复语言文件中损坏的翻译和占位符标记。"
@@ -222,16 +222,16 @@
       "description": "输入包含语言文件的目录（或按Enter使用当前目录）：",
       "input": "目录："
     },
-    "backupLocation": "Backup location: {dir}",
-    "completed": "Fixing completed.",
-    "creatingBackup": "Creating backup in {dir}...",
-    "dryRunMode": "Dry run mode: {mode}",
-    "error": "Fixer failed: {error}",
-    "fixing": "Fixing {language}...",
-    "foundLanguages": "Found {count} languages: {languages}",
-    "languageFixed": "{language}: fixed {fixed} key(s), skipped {skipped}.",
-    "running": "Running translation fixer...",
-    "totalFixed": "Total fixed: {count}"
+    "backupLocation": "备份位置：{dir}",
+    "completed": "修复完成。",
+    "creatingBackup": "在 {dir} 中创建备份...",
+    "dryRunMode": "试运行模式：{mode}",
+    "error": "修复程序失败：{error}",
+    "fixing": "正在修复 {language}...",
+    "foundLanguages": "找到 {count} 种语言：{languages}",
+    "languageFixed": "{language}：修复了 {fixed} 键，跳过了 {skipped}。",
+    "running": "运行翻译修复程序...",
+    "totalFixed": "固定总数：{count}"
   },
   "autorun": {
     "stepAnalyzeTranslations": "分析翻译",
@@ -496,12 +496,12 @@
       "consider_reviewing_translations": "考虑检查 ${lang} 翻译 - 它们比基准 ${comparison} ${percentageDifference}%",
       "long_translations_detected": "${lang} 有 ${data.longKeys} 个翻译超过 ${data.threshold} 个字符 - 考虑拆分它们"
     },
-    "detailed_key_analysis_title": "Detailed Key Analysis",
-    "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
-    "key_analysis_header": "Key: {key}",
-    "status_empty": "empty",
-    "status_long": "long",
-    "status_ok": "ok"
+    "detailed_key_analysis_title": "详细的关键分析",
+    "key_analysis_detail": "{lang}：{length} 个字符 ({status}) - {translation}",
+    "key_analysis_header": "密钥：{key}",
+    "status_empty": "空的",
+    "status_long": "长的",
+    "status_ok": "好的"
   },
   "usage": {
     "help_message": "国际化使用分析器  用法: node i18ntk-usage.js [选项]  选项:   --source-dir <dir>     要扫描的源目录 (默认: ./src)   --i18n-dir <dir>       I18n 目录 (默认: ./src/locales)   --output-report        生成详细报告   --output-dir <dir>     报告输出目录 (默认: ./reports)   --help                 显示此帮助  示例:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
@@ -598,7 +598,7 @@
       "failedToAnalyzeFile": "分析文件 {filePath} 失败: {error}",
       "failedToAnalyzeLanguage": "分析语言 {language} 失败: {error}",
       "translationCompletenessAnalysisFailed": "翻译完整性分析失败: {error}",
-      "n": "\n"
+      "n": "\\n"
     },
     "complete": {
       "configLoadedSuccessfully": "配置加载成功",
@@ -638,11 +638,11 @@
     "noTranslationLanguagesFound": "未找到翻译语言。",
     "failedToAnalyzeLanguage": "分析语言 {language} 失败: {error}",
     "translationCompletenessAnalysisFailed": "翻译完整性分析失败: {error}",
-    "failedToProcessFile": "Failed to process file:",
-    "failedToSaveReport": "Failed to save usage report: {error}",
-    "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
-    "reportSavedTo": "Usage report saved to: {reportPath}",
-    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}"
+    "failedToProcessFile": "处理文件失败：",
+    "failedToSaveReport": "无法保存使用报告：{error}",
+    "i18nDirectoryDoesNotExist": "国际化目录不存在：{dir}",
+    "reportSavedTo": "使用情况报告保存至：{reportPath}",
+    "sourceDirectoryDoesNotExist": "源目录不存在：{dir}"
   },
   "validate": {
     "help_message": "I18n翻译验证器  用法: node i18ntk-validate.js [选项]  选项:   --source-dir <dir>     要扫描的源目录 (默认: ./src)   --i18n-dir <dir>       I18n目录 (默认: ./src/locales)   --output-report        生成详细报告   --output-dir <dir>     报告输出目录 (默认: ./reports)   --help                 显示此帮助  示例:   node i18ntk-validate.js --output-report   node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales   node i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -740,8 +740,8 @@
     "failedToCreateSampleTranslationFile": "创建示例翻译文件失败",
     "invalidFilePathDetected": "检测到无效的文件路径",
     "failedToWriteFile": "写入文件失败: {filePath}",
-    "invalidSourceDirectory": "Invalid source directory: {sourceDir}",
-    "invalidSourceLanguageDirectory": "Invalid source language directory: {sourceDir}"
+    "invalidSourceDirectory": "无效的源目录：{sourceDir}",
+    "invalidSourceLanguageDirectory": "无效的源语言目录：{sourceDir}"
   },
   "adminCli": {
     "setupPinProtectionTitle": "🔐 设置管理员PIN保护",
@@ -1067,15 +1067,15 @@
       "installFramework": "要安装框架，请运行：npm install <包名>"
     },
     "frameworks": {
-      "react": "- React i18next (react-i18next)",
-      "vue": "- Vue i18n (vue-i18n)",
+      "react": "- 反应 i18next (react-i18next)",
+      "vue": "-Vue i18n (vue-i18n)",
       "i18next": "- i18next (i18next)",
-      "nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
+      "nuxt": "- Nuxt ??? (@nuxtjs/i18n)",
       "svelte": "- Svelte i18n (svelte-i18n)"
     },
     "continueWithoutI18nPrompt": "未检测到 i18n 框架。是否继续？(y/N)：",
     "detectedI18nFramework": "检测到 i18n 框架：{frameworks}",
-    "existingDirectoryItem": "{index}. {location}",
+    "existingDirectoryItem": "{index}。 {location}",
     "usingExistingStructure": "使用已有结构：{dir}",
     "creatingSourceDirectory": "创建源目录：{dir}",
     "creatingSourceLanguageDirectory": "创建源语言目录：{dir}",
@@ -1086,29 +1086,29 @@
       "noJsonFilesInSourceDirectory": "源目录中未找到 JSON 文件：{dir}",
       "invalidFilePathDetected": "检测到无效的文件路径",
       "initializationFailed": "初始化失败：{error}",
-      "noFramework": "No i18n framework detected. Continue with generic mode.",
-      "packageJsonRead": "Error reading package.json."
+      "noFramework": "未检测到 i18n 框架。继续通用模式。",
+      "packageJsonRead": "读取 package.json 时出错。"
     },
     "processingFile": "正在为 {language} 处理文件 {file}...",
     "fileAlreadyExistsMerging": "文件 {file} 已存在。正在合并新键。",
     "createdNewFile": "已创建新文件：{file}",
     "updatedFile": "已更新文件：{file}",
     "skippingExcludedFile": "已跳过 {language} 的 {file}，因其在排除列表中。",
-    "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "continuingWithoutAdminPin": "无需设置管理员 PIN 码即可继续。",
     "createdSourceLanguageDirectory": "✅ 创建源语言目录：{dir}",
-    "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
-    "noTargetLanguagesSpecified": "No target languages specified.",
-    "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
-    "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
-    "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
-    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
+    "errorSettingUpAdminPin": "设置管理员 PIN 码时出错：{error}",
+    "noTargetLanguagesSpecified": "未指定目标语言。",
+    "translationFilesCreatedWarning": "翻译文件是使用占位符创建的；生产使用前进行审查。",
+    "warningCannotReadSourceDir": "警告：无法读取源目录 {dir}：{error}",
+    "warningInvalidLanguageCodes": "警告：忽略无效的语言代码：{languages}",
+    "warningProceedingWithoutFramework": "未检测到 i18n 框架即可继续。"
   },
   "language": {
     "title": "🌍 切换语言",
     "separator": "============================================================",
     "current": "当前语言：{language}",
     "available": "可用语言：",
-    "languageOption": "{index}. {displayName}{current}",
+    "languageOption": "{index}。 {displayName}{current}",
     "backToMainMenu": "返回主菜单",
     "prompt": "请选择语言（0-8）：",
     "cancelled": "已取消语言切换。",
@@ -1170,7 +1170,7 @@
     "autoDetectedI18nDirectory": "📂 自动检测到的 i18n 目录：{directory}",
     "executingCommand": "正在执行命令：{command}",
     "unknownCommand": "未知命令：{command}",
-    "languageOption": "{index}. {displayName}{current}",
+    "languageOption": "{index}。 {displayName}{current}",
     "debugTools": {
       "1": "日志文件分析",
       "2": "翻译键使用分析",
@@ -1456,8 +1456,8 @@
       "promptDesc": "注意：这会将 i18ntk 包更新到最新版本。",
       "confirm": "y",
       "cancelled": "更新已取消。",
-      "error": "Failed to update package",
-      "updating": "Updating package..."
+      "error": "更新包失败",
+      "updating": "正在更新包..."
     },
     "admin": {
       "selectOption": "选择操作：",
@@ -1514,11 +1514,11 @@
       "importFailed": "导入设置失败：${error}",
       "backupSuccess": "已创建备份：${file}",
       "backupFailed": "创建备份失败：${error}",
-      "exportFilenamePrompt": "Enter export filename:",
-      "importConfirm": "Import this settings file? (y/N):",
-      "importFilenamePrompt": "Enter import filename:",
-      "manageBackups": "Manage backups",
-      "restore": "Restore settings"
+      "exportFilenamePrompt": "输入导出文件名：",
+      "importConfirm": "导入此设置文件？ （是/否）：",
+      "importFilenamePrompt": "输入导入文件名：",
+      "manageBackups": "管理备份",
+      "restore": "恢复设置"
     },
     "selectOption": "请选择操作：",
     "resetToDefaultsTitle": "重置为默认值",
@@ -1971,9 +1971,9 @@
       "confirmNo": "否"
     },
     "validation": {
-      "valid": "Valid",
-      "validatingPaths": "Validating configured paths...",
-      "validationComplete": "Path validation complete: {valid}/{total} valid."
+      "valid": "有效的",
+      "validatingPaths": "正在验证配置的路径...",
+      "validationComplete": "路径验证完成：{valid}/{total} 有效。"
     }
   },
   "summary": {
@@ -2133,9 +2133,9 @@
       "error_message": "- {error}",
       "overall_status": "📊 总体状态：{status}",
       "success_message": "✅ {message}",
-      "failure_message": "❌ {message}",
+      "failure_message": "❌{message}",
       "failure_error_message": "{errorMessage}",
-      "warning_message": "⚠️  {message}",
+      "warning_message": "⚠️{message}",
       "test_runner_failed": "❌ 测试运行器失败：",
       "recommendations": {
         "add_missing_translation_keys": "添加缺失的翻译键以保持一致性",
@@ -2208,14 +2208,14 @@
       "error_general": "❌ 错误：",
       "use_help": "使用 --help 查看用法信息"
     },
-    "cleaningUpReportFiles": "Cleaning up old report files...",
-    "couldNotDelete": "Could not delete {file}: {error}",
-    "deletedOldReportFiles": "Deleted {count} old report file(s).",
-    "errorCleaningUpReports": "Error cleaning up reports: {error}",
-    "noOldReportFilesToDelete": "No old report files to delete.",
-    "reportFilesPreserved": "Report files preserved.",
-    "reportSaveFailed": "Failed to save report to: {reportPath}",
-    "reportSaved": "Report saved to: {reportPath}"
+    "cleaningUpReportFiles": "清理旧报告文件...",
+    "couldNotDelete": "无法删除 {file}：{error}",
+    "deletedOldReportFiles": "已删除 {count} 旧报告文件。",
+    "errorCleaningUpReports": "清理报告时出错：{error}",
+    "noOldReportFilesToDelete": "没有要删除的旧报告文件。",
+    "reportFilesPreserved": "报告文件已保存。",
+    "reportSaveFailed": "无法将报告保存到：{reportPath}",
+    "reportSaved": "报告保存至：{reportPath}"
   },
   "ui": {
     "autoDetectedI18nDirectory": "自动检测到i18n目录：${path}",
@@ -2316,7 +2316,7 @@
       "totalFixes": "🔧 应用的总修复数: {count}",
       "improvement": "📈 改进: {percentage}%",
       "stepResults": "📝 步骤结果:",
-      "stepDetail": "{number}. {status} {stepName}",
+      "stepDetail": "{number}。 {status} {stepName}",
       "violations": "违规: {count}",
       "fixesApplied": "应用的修复: {count}",
       "nextSteps": "💡 后续步骤:",
@@ -2399,13 +2399,13 @@
     "signUp": "注册"
   },
   "checkUsage": {
-    "usage_analysis_failed": "Usage analysis failed."
+    "usage_analysis_failed": "使用情况分析失败。"
   },
   "completeTranslations": {
-    "warning_could_not_parse_filepa": "Warning: could not parse file path: {filePath}"
+    "warning_could_not_parse_filepa": "警告：无法解析文件路径：{filePath}"
   },
-  "pressEnterToContinue": "Press Enter to continue...",
+  "pressEnterToContinue": "按 Enter 键继续...",
   "status": {
-    "exitingCompleted": "Workflow completed. Exiting..."
+    "exitingCompleted": "工作流程完成。正在退出..."
   }
 }

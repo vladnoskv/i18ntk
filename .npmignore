@@ -83,6 +83,11 @@ secrets.json
 *.orig
 *.rej
 
+# Generated i18n analysis artifacts
+**/validation-purity-report.json
+**/fix-all-report.json
+**/fix-and-purify-report.json
+
 # Test files
 **/test-*.js
 **/*-test.js

@@ -102,3 +102,9 @@ i18ntk-config.json
 settings/.i18n-admin-config.json
 settings/admin-config.json
 settings/backups/
+DEVUPDATE.md
+
+# Generated i18n analysis artifacts
+**/validation-purity-report.json
+**/fix-all-report.json
+**/fix-and-purify-report.json

@@ -598,7 +598,7 @@
       "failedToAnalyzeFile": "Failed to analyze file {filePath}: {error}",
       "failedToAnalyzeLanguage": "Failed to analyze language {language}: {error}",
       "translationCompletenessAnalysisFailed": "Translation completeness analysis failed: {error}",
-      "n": "\n"
+      "n": "\\n"
     },
     "complete": {
       "configLoadedSuccessfully": "Configuration loaded successfully",

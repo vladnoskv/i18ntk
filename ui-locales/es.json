@@ -27,7 +27,7 @@
     "debug": "Depuración",
     "progress": "Progreso:",
     "remaining": "Restante:",
-    "total": "Total:",
+    "total": "Total general:",
     "completed": "7. Completado con éxito!",
     "missing": "Faltante",
     "partial": "Parcial",
@@ -49,10 +49,10 @@
     "workflowCompleted": "Flujo de trabajo completado.",
     "checkReports": "Revisa los informes para más detalles.",
     "errorExecutingCommand": "Error al ejecutar el comando: {error}",
-    "genericError": "❌ Error: {error}",
+    "genericError": "? Se produjo un error: {error}",
     "errors": {
       "errors": "Errores:",
-      "genericError": "❌ Error: {error}",
+      "genericError": "? Se produjo un error: {error}",
       "initializationFailed": "❌ Inicialización fallida: {error}",
       "initializationCancelled": "🚫 Inicialización cancelada por el usuario.",
       "translationKeyNotFound": "Traducción no encontrada: {key}",
@@ -101,7 +101,7 @@
     "settings": "Configuración",
     "startingSettings": "🎛️ Iniciando CLI de Configuración...",
     "confirm": "Confirmar",
-    "errorExiting": "Error while exiting."
+    "errorExiting": "Error al salir."
   },
   "errors": {
     "invalidOption": "❌ Opción inválida: {option}. Por favor, inténtelo de nuevo.",
@@ -109,7 +109,7 @@
     "noPackageJson": "No se encontró package.json. No se puede autodetectar el framework i18n.",
     "noI18nDir": "No se encontró directorio i18n en la raíz del proyecto.",
     "noI18nConfig": "No se encontró archivo de configuración i18n en la raíz del proyecto.",
-    "errorReadingDebugLogs": "Error reading debug logs: {error}"
+    "errorReadingDebugLogs": "Error al leer los registros de depuración: {error}"
   },
   "scanner": {
     "help_message": "Escáner de Texto i18n  Uso: node i18ntk-scanner.js [opciones]  Opciones:   --source-dir <dir>     Directorio fuente para escanear (por defecto: ./src)   --output <file>        Archivo de salida para resultados (por defecto: ./i18ntk-scanner-report.json)   --framework <nombre>   Framework a analizar (react, vue, angular, vanilla)   --patterns <patrones>  Patrones regex personalizados (separados por comas)   --include-tests        Incluir archivos de prueba en el escaneo   --exclude-dirs <dirs>  Directorios a excluir (separados por comas)   --help                 Mostrar esta ayuda  Ejemplos:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./resultados-escaneo.json",
@@ -148,7 +148,7 @@
       "title": "🎯 Seleccionar Framework",
       "available": "Frameworks disponibles: react, vue, angular, vanilla",
       "description": "Ingrese el tipo de framework (o presione Enter para detección automática):",
-      "input": "Framework:"
+      "input": "Estructura:"
     },
     "directoryPrompt": {
       "title": "📁 Seleccionar Directorio Fuente",
@@ -161,7 +161,7 @@
       "excludeDirs": "Directorios a excluir (separados por comas):",
       "customPatterns": "Patrones personalizados a escanear (regex):"
     },
-    "reportGenerated": "Scan report generated: {path}"
+    "reportGenerated": "Informe de escaneo generado: {path}"
   },
   "fixer": {
     "help_message": "Corrector de Traducciones I18n  Uso: node i18ntk-fixer.js [opciones]  Opciones:   --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./locales)   --languages <langs>    Lista de idiomas a corregir separados por comas   --markers <markers>    Marcadores separados por comas para tratar como no traducido   --no-backup           Omitir creación automática de respaldo   --help                Mostrar esta ayuda  Ejemplos:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -198,7 +198,7 @@
     "choicePrompt": "Tu elección (y/n/s):",
     "nonInteractiveMode": "⚡ Modo no interactivo detectado - aplicando correcciones automáticamente...",
     "reportGenerated": "📊 Informe del corrector generado: {path}",
-    "summary": "Fixer summary:",
+    "summary": "Resumen del reparador:",
     "welcome": {
       "title": "🎯 ¡Bienvenido al Corrector de Traducciones!",
       "description": "Esta herramienta te ayudará a corregir traducciones rotas y marcadores provisionales en tus archivos de localización."
@@ -222,16 +222,16 @@
       "description": "Ingresa el directorio que contiene tus archivos de localización (o presiona Enter para el actual):",
       "input": "Directorio:"
     },
-    "backupLocation": "Backup location: {dir}",
-    "completed": "Fixing completed.",
-    "creatingBackup": "Creating backup in {dir}...",
-    "dryRunMode": "Dry run mode: {mode}",
-    "error": "Fixer failed: {error}",
-    "fixing": "Fixing {language}...",
-    "foundLanguages": "Found {count} languages: {languages}",
-    "languageFixed": "{language}: fixed {fixed} key(s), skipped {skipped}.",
-    "running": "Running translation fixer...",
-    "totalFixed": "Total fixed: {count}"
+    "backupLocation": "Ubicación de la copia de seguridad: {dir}",
+    "completed": "Reparación completada.",
+    "creatingBackup": "Creando copia de seguridad en {dir}...",
+    "dryRunMode": "Modo de funcionamiento en seco: {mode}",
+    "error": "El reparador falló: {error}",
+    "fixing": "Arreglando {language}...",
+    "foundLanguages": "Encontrados {count} idiomas: {languages}",
+    "languageFixed": "{language}: clave(s) {fixed} fija, omitida {skipped}.",
+    "running": "Ejecutando el reparador de traducción...",
+    "totalFixed": "Total fijo: {count}"
   },
   "autorun": {
     "stepAnalyzeTranslations": "Analizar traducciones",
@@ -244,9 +244,9 @@
     "autoRunScriptTitle": "🧪 Flujo de Ejecución Automática",
     "usageTitle": "Uso",
     "runAllSteps": "Ejecutar: node i18ntk-autorun.js",
-    "configureSettingsFirst": "Config: i18ntk-config.json or CLI flags",
-    "runSpecificSteps": "Use --steps=1,3 or --list to show steps",
-    "showHelp": "--help for more info",
+    "configureSettingsFirst": "Configuración: i18ntk-config.json o indicadores CLI",
+    "runSpecificSteps": "Utilice --steps=1,3 o --list para mostrar los pasos",
+    "showHelp": "--ayuda para más información",
     "examplesTitle": "Ejemplos",
     "configExample": "node i18ntk-autorun.js --ui-language=zh",
     "stepsExample1": "node i18ntk-autorun.js --steps=analyze,validate",
@@ -282,8 +282,8 @@
     "requiredFailedSteps": "Pasos requeridos fallidos: {count}",
     "stepDetails": "Detalles del paso:",
     "reportSavedTo": "Informe guardado en: {path}",
-    "overallStatusSuccess": "SUCCESS",
-    "overallStatusFailed": "FAILED",
+    "overallStatusSuccess": "ÉXITO",
+    "overallStatusFailed": "FALLIDO",
     "overallStatus": "Estado general: {status}",
     "pressEnterForDefaults": "Presiona Enter para usar configuraciones predeterminadas para cualquier prompt.",
     "sourceDirPrompt": "Ingresa directorio fuente (predeterminado: {default}):",
@@ -455,14 +455,14 @@
     "sizing_analysis_results": "Resultados del análisis de tamaño i18n",
     "file_sizes_title": "Tamaños de archivo",
     "file_sizes_header": "Idioma    Tamaño(KB)  Líneas  Caracteres",
-    "file_size_row": "{lang}      {sizeKB}      {lines}      {characters}",
+    "file_size_row": "{lang} {sizeKB} {lines} {characters}",
     "language_statistics_title": "Estadísticas de idioma",
     "language_stats_header": "Idioma    Claves  Caracteres  Longitud Promedio  Longitud Máxima  Vacías  Largas",
-    "language_stats_row": "{lang}      {totalKeys}    {totalCharacters}    {averageKeyLength}    {maxKeyLength}    {emptyKeys}    {longKeys}",
+    "language_stats_row": "{lang} {totalKeys} {totalCharacters} {averageKeyLength} {maxKeyLength} {emptyKeys} {longKeys}",
     "size_variations_title": "Variaciones de tamaño",
     "size_variations_header": "Idioma    Char Diff  % Diff  Problematic",
-    "size_variation_row": "{lang}      {characterDifference}    {percentageDifference}%    {problematic}",
-    "problematic_yes": "Yes",
+    "size_variation_row": "{lang} {characterDifference} {percentageDifference}% {problematic}",
+    "problematic_yes": "Sí",
     "problematic_no": "No",
     "recommendations_title": "Recommendaciones",
     "recommendation_item": "{index}. {recommendation}",
@@ -479,7 +479,7 @@
     "human_report_saved": "Informe legible guardado en: {reportPath}",
     "folder_summary_title": "Resumen de Carpeta",
     "folder_summary_table_header": "Idioma    Tamaño(KB)    Claves    Long. Promedio    Caracteres Totales",
-    "folder_summary_row": "{lang}      {sizeKB}      {totalKeys}    {avgLength}    {totalChars}",
+    "folder_summary_row": "{lang} {sizeKB} {totalKeys} {avgLength} {totalChars}",
     "language_comparison_title": "Comparación de Idiomas",
     "language_comparison_row": "{lang}: {diff} caracteres ({percent}%) {status}",
     "summary_stats": "📊 Resumen: {totalLanguages} idiomas, {totalKeys} claves - Informes guardados en {reportPath}",
@@ -496,12 +496,12 @@
       "consider_reviewing_translations": "Considere revisar las traducciones de {lang} - son {percentageDifference}% {comparison} que la línea base",
       "long_translations_detected": "{lang} tiene {longKeys} traducciones más largas que {threshold} caracteres - considere dividirlas"
     },
-    "detailed_key_analysis_title": "Detailed Key Analysis",
-    "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
-    "key_analysis_header": "Key: {key}",
-    "status_empty": "empty",
-    "status_long": "long",
-    "status_ok": "ok"
+    "detailed_key_analysis_title": "Análisis clave detallado",
+    "key_analysis_detail": "{lang}: {length} caracteres ({status}) - {translation}",
+    "key_analysis_header": "Clave: {key}",
+    "status_empty": "vacío",
+    "status_long": "largo",
+    "status_ok": "OK"
   },
   "usage": {
     "help_message": "Analizador de Uso I18n  Uso: node i18ntk-usage.js [opciones]  Opciones:   --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./src)   --i18n-dir <dir>       Directorio i18n (predeterminado: ./src/locales)   --output-report        Generar informe detallado   --output-dir <dir>     Directorio de salida para informes (predeterminado: ./reports)   --help                 Mostrar esta ayuda  Ejemplos:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
@@ -551,7 +551,7 @@
     "i18nDirectoryNotFound": "⚠️ Directorio i18n no encontrado. Por favor verifica la ruta.",
     "sourceDirectoryNotFound": "⚠️ Directorio fuente no encontrado: {dir}",
     "checkUsage": {
-      "title": "🔍 I18NTK USAGE ANALYSIS",
+      "title": "?? AN?LISIS DE USO DE I18NTK",
       "analyzing_source_files": "🔍 Analizando archivos fuente...",
       "source_directory_thissourcedir": "📁 Directorio fuente: {sourceDir}",
       "i18n_directory_thisi18ndir": "📁 Directorio i18n: {i18nDir}",
@@ -598,7 +598,7 @@
       "failedToAnalyzeFile": "Error al analizar archivo {filePath}: {error}",
       "failedToAnalyzeLanguage": "Error al analizar el idioma {language}: {error}",
       "translationCompletenessAnalysisFailed": "El análisis de completitud de traducción falló: {error}",
-      "n": "\n"
+      "n": "\\n"
     },
     "complete": {
       "configLoadedSuccessfully": "Configuración cargada correctamente",
@@ -620,11 +620,11 @@
       "languagesProcessed": "🌍 Idiomas procesados: {languagesProcessed}",
       "missingKeysAdded": "➕ Claves faltantes agregadas: {missingKeysAdded}",
       "nextStepsTitle": "📋 SIGUIENTES PASOS",
-      "nextStep1": "1. Run usage analysis:",
+      "nextStep1": "1. Ejecute el análisis de uso:",
       "nextStep2": "node i18ntk-usage.js --output-report",
-      "nextStep3": "2. Validate translations:",
+      "nextStep3": "2. Validar traducciones:",
       "nextStep4": "node i18ntk-validate.js",
-      "nextStep5": "3. Analyze patterns:",
+      "nextStep5": "3. Analizar patrones:",
       "nextStep6": "node i18ntk-analyze.js",
       "allKeysAvailable": "🎉 ¡Todas las claves de traducción están disponibles!",
       "runWithoutDryRun": "💡 Ejecute sin --dry-run para aplicar cambios",
@@ -638,11 +638,11 @@
     "noTranslationLanguagesFound": "No se encontraron idiomas de traducción.",
     "failedToAnalyzeLanguage": "Error al analizar el idioma {language}: {error}",
     "translationCompletenessAnalysisFailed": "El análisis de completitud de traducción falló: {error}",
-    "failedToProcessFile": "Failed to process file:",
-    "failedToSaveReport": "Failed to save usage report: {error}",
-    "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
-    "reportSavedTo": "Usage report saved to: {reportPath}",
-    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}"
+    "failedToProcessFile": "No se pudo procesar el archivo:",
+    "failedToSaveReport": "No se pudo guardar el informe de uso: {error}",
+    "i18nDirectoryDoesNotExist": "El directorio I18n no existe: {dir}",
+    "reportSavedTo": "Informe de uso guardado en: {reportPath}",
+    "sourceDirectoryDoesNotExist": "El directorio de origen no existe: {dir}"
   },
   "validate": {
     "help_message": "Validador de Traducciones I18n  Uso: node i18ntk-validate.js [opciones]  Opciones:   --source-dir <dir>     Directorio fuente a escanear (predeterminado: ./src)   --i18n-dir <dir>       Directorio i18n (predeterminado: ./src/locales)   --output-report        Generar informe detallado   --output-dir <dir>     Directorio de salida para informes (predeterminado: ./reports)   --help                 Mostrar esta ayuda  Ejemplos:   node i18ntk-validate.js --output-report   node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales   node i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -725,7 +725,7 @@
     "summaryHeader": "📋 RESUMEN GENERAL",
     "progressIndicator": "⏳ Procesando...",
     "completedIndicator": "✅ Completado",
-    "errorIndicator": "❌ Error",
+    "errorIndicator": "❌Error",
     "warningIndicator": "⚠️  Advertencia",
     "infoIndicator": "ℹ️  Información",
     "sourceDirNotConfigured": "Directorio fuente no configurado",
@@ -740,8 +740,8 @@
     "failedToCreateSampleTranslationFile": "Falló al crear archivo de traducción de ejemplo",
     "invalidFilePathDetected": "Ruta de archivo inválida detectada",
     "failedToWriteFile": "Falló al escribir archivo: {filePath}",
-    "invalidSourceDirectory": "Invalid source directory: {sourceDir}",
-    "invalidSourceLanguageDirectory": "Invalid source language directory: {sourceDir}"
+    "invalidSourceDirectory": "Directorio de origen no válido: {sourceDir}",
+    "invalidSourceLanguageDirectory": "Directorio de idioma de origen no válido: {sourceDir}"
   },
   "adminCli": {
     "setupPinProtectionTitle": "🔐 Configurando Protección PIN de Administrador",
@@ -888,7 +888,7 @@
     "fix_details": "{file}: {key}      Anterior: \"{old}\"      Nuevo: \"{new}\"",
     "more_fixes": "... y {count} correcciones más",
     "run_with_apply_fixes": "💡 Ejecutar con --apply para aplicar estas correcciones",
-    "error_general": "❌ Error:",
+    "error_general": "❌Error:",
     "mainDebuggerSystemDiagnostics": "Diagnóstico Principal del Sistema / Depurador",
     "exportMissingKeys": "Exportar Claves Faltantes",
     "replaceHardcodedConsole": "Reemplazar Consola Codificada",
@@ -988,7 +988,7 @@
   },
   "init": {
     "initializationTitle": "🚀 Kit de Gestión i18n - Inicialización del Proyecto",
-    "initializationCancelled": "🚫 Initialization cancelled by user.",
+    "initializationCancelled": "🚫 Inicialización cancelada por el usuario.",
     "sourceDirectoryLabel": "📁 Directorio Fuente: {dir}",
     "requiredTitle": "Inicialización Requerida",
     "requiredBody": "Este proyecto debe ser inicializado antes de ejecutar este comando.",
@@ -1044,8 +1044,8 @@
     "nextStep3": "3. Ejecuta 'npm run i18ntk' nuevamente para validar traducciones",
     "detectedFrameworks": "✅ Framework(s) i18n detectado(s): {frameworks}",
     "setup": {
-      "title": "Setup",
-      "question": "Setup question",
+      "title": "Configuración",
+      "question": "Pregunta de configuración",
       "opt_single": "Archivo único",
       "opt_modular": "Modular",
       "opt_existing": "Existente",
@@ -1067,11 +1067,11 @@
       "installFramework": "Para instalar un framework, ejecuta: npm install <package-name>"
     },
     "frameworks": {
-      "react": "- React i18next (react-i18next)",
+      "react": "- Reaccionar i18next (reaccionar-i18next)",
       "vue": "- Vue i18n (vue-i18n)",
-      "i18next": "- i18next (i18next)",
-      "nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
-      "svelte": "- Svelte i18n (svelte-i18n)"
+      "i18next": "- i18siguiente (i18siguiente)",
+      "nuxt": "-Nuxt i18n (@nuxtjs/i18n)",
+      "svelte": "- Esbelto i18n (esbelto-i18n)"
     },
     "continueWithoutI18nPrompt": "No se detectó framework i18n. ¿Deseas continuar sin uno? (s/N):",
     "detectedI18nFramework": "Framework i18n detectado: {frameworks}",
@@ -1086,22 +1086,22 @@
       "noJsonFilesInSourceDirectory": "No se encontraron archivos JSON en el directorio fuente: {dir}",
       "invalidFilePathDetected": "Ruta de archivo inválida detectada",
       "initializationFailed": "Falló la inicialización: {error}",
-      "noFramework": "No i18n framework detected. Continue with generic mode.",
-      "packageJsonRead": "Error reading package.json."
+      "noFramework": "No se detectó ningún marco i18n. Continúe con el modo genérico.",
+      "packageJsonRead": "Error al leer el paquete.json."
     },
     "processingFile": "Procesando {file} para {language}...",
     "fileAlreadyExistsMerging": "El archivo {file} ya existe. Fusionando nuevas claves.",
     "createdNewFile": "Archivo nuevo creado: {file}",
     "updatedFile": "Archivo actualizado: {file}",
     "skippingExcludedFile": "Omitiendo {file} para {language} ya que está excluido.",
-    "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "continuingWithoutAdminPin": "Continuar sin configurar el PIN de administrador.",
     "createdSourceLanguageDirectory": "✅  Directorio de idioma fuente creado: {dir}",
-    "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
-    "noTargetLanguagesSpecified": "No target languages specified.",
-    "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
-    "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
-    "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
-    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
+    "errorSettingUpAdminPin": "Error al configurar el PIN de administrador: {error}",
+    "noTargetLanguagesSpecified": "No se han especificado idiomas de destino.",
+    "translationFilesCreatedWarning": "Los archivos de traducción se crearon con marcadores de posición; revisión antes del uso en producción.",
+    "warningCannotReadSourceDir": "Advertencia: no se puede leer el directorio fuente {dir}: {error}",
+    "warningInvalidLanguageCodes": "Advertencia: se ignoran códigos de idioma no válidos: {languages}",
+    "warningProceedingWithoutFramework": "Procediendo sin marco i18n detectado."
   },
   "language": {
     "title": "🌍 Cambiar Idioma",
@@ -1393,7 +1393,7 @@
     "relativePathHint": "Usa rutas relativas desde este directorio (ej., ./src/i18n/locales)",
     "currentDirectory": "Directorio actual del proyecto",
     "startingSettings": "Iniciando Configuración:",
-    "pin": "PIN:",
+    "pin": "ALFILER:",
     "reportBug": {
       "title": "Reportar Error",
       "description": "Reporta cualquier problema o error que encuentres",
@@ -1456,8 +1456,8 @@
       "promptDesc": "Nota: Esto actualizará el paquete i18ntk a la última versión.",
       "confirm": "s",
       "cancelled": "Actualización cancelada.",
-      "error": "Failed to update package",
-      "updating": "Updating package..."
+      "error": "No se pudo actualizar el paquete",
+      "updating": "Actualizando paquete..."
     },
     "admin": {
       "selectOption": "Selecciona opción:",
@@ -1514,11 +1514,11 @@
       "importFailed": "Error al importar configuración: {error}",
       "backupSuccess": "Respaldo creado: {file}",
       "backupFailed": "Error al crear respaldo: {error}",
-      "exportFilenamePrompt": "Enter export filename:",
-      "importConfirm": "Import this settings file? (y/N):",
-      "importFilenamePrompt": "Enter import filename:",
-      "manageBackups": "Manage backups",
-      "restore": "Restore settings"
+      "exportFilenamePrompt": "Ingrese el nombre del archivo de exportación:",
+      "importConfirm": "¿Importar este archivo de configuración? (sí/no):",
+      "importFilenamePrompt": "Ingrese el nombre del archivo de importación:",
+      "manageBackups": "Administrar copias de seguridad",
+      "restore": "Restaurar configuración"
     },
     "selectOption": "Selecciona opción:",
     "resetToDefaultsTitle": "Restablecer Configuraciones a Valores Predeterminados",
@@ -1530,11 +1530,11 @@
     "resetDone": "Configuraciones restablecidas a valores predeterminados exitosamente.",
     "resetScriptDirsDone": "Directorios de scripts restablecidos a valores predeterminados exitosamente.",
     "saveSuccess": "Configuraciones guardadas exitosamente.",
-    "saveFailed": "Failed to save settings.",
-    "saveError": "Invalid settings provided",
-    "pressEnter": "Press Enter to continue...",
-    "initFailed": "Failed to initialize settings: {error}",
-    "invalidValueFormat": "Invalid value format.",
+    "saveFailed": "No se pudo guardar la configuración.",
+    "saveError": "Se proporcionaron configuraciones no válidas",
+    "pressEnter": "Presione Entrar para continuar...",
+    "initFailed": "No se pudo inicializar la configuración: {error}",
+    "invalidValueFormat": "Formato de valor no válido.",
     "help": {
       "title": "Ayuda de Configuración",
       "navigationTitle": "Navegación",
@@ -1548,13 +1548,13 @@
       "categoryProcessing": "• Configuración de Procesamiento: Procesamiento por lotes, límites de archivos y ajuste de rendimiento",
       "categoryAdvanced": "• Configuración Avanzada: Modo de depuración, registro de auditoría y opciones de seguridad",
       "envVarsTitle": "Variables de Entorno",
-      "envVar1": "• I18N_SOURCE_DIR: Override default source directory path",
-      "envVar2": "• I18N_OUTPUT_DIR: Override default output directory path",
-      "envVar3": "• I18N_DEBUG: Enable debug mode (true/false)",
+      "envVar1": "• I18N_SOURCE_DIR: anula la ruta del directorio de origen predeterminado",
+      "envVar2": "• I18N_OUTPUT_DIR: anula la ruta del directorio de salida predeterminada",
+      "envVar3": "• I18N_DEBUG: Habilitar el modo de depuración (verdadero/falso)",
       "cliUsageTitle": "Ejemplos de Uso de la CLI",
-      "cliUsage1": "• npx i18ntk --settings: Open interactive settings menu",
-      "cliUsage2": "• npx i18ntk --settings --lang de: Open settings in German",
-      "cliUsage3": "• npx i18ntk --reset-settings: Reset all settings to defaults",
+      "cliUsage1": "? npx i18ntk --settings: Abrir el men? interactivo de configuraci?n",
+      "cliUsage2": "? npx i18ntk --settings --lang de: Abrir la configuraci?n en alem?n",
+      "cliUsage3": "? npx i18ntk --reset-settings: Restablecer toda la configuraci?n a valores predeterminados",
       "navigation": "Usa números para seleccionar opciones, 'b' para regresar",
       "editing": "Ingresa nuevos valores cuando se te solicite, o presiona Enter para mantener el actual",
       "saving": "Usa 's' para guardar cambios antes de salir",
@@ -1891,7 +1891,7 @@
         "help": "Eliminar idiomas de la interfaz no instalados en el sistema"
       },
       "${helperKey}": {
-        "help": "Help"
+        "help": "Ayuda"
       }
     },
     "actions": {
@@ -1964,16 +1964,16 @@
       "singleBackupFileHelp": "Ruta al archivo de respaldo único",
       "retentionDays": "Días de Retención",
       "retentionDaysHelp": "Número de días para retener archivos de respaldo antiguos",
-      "maxBackups": "Max Backups",
+      "maxBackups": "Copias de seguridad máximas",
       "maxBackupsHelp": "mero máximo de archivos de respaldo a mantener",
       "confirmHelp": "Confirmar operación de respaldo",
       "confirmYes": "Sí",
       "confirmNo": "No"
     },
     "validation": {
-      "valid": "Valid",
-      "validatingPaths": "Validating configured paths...",
-      "validationComplete": "Path validation complete: {valid}/{total} valid."
+      "valid": "Válido",
+      "validatingPaths": "Validando rutas configuradas...",
+      "validationComplete": "Validación de ruta completa: {valid}/{total} válida."
     }
   },
   "summary": {
@@ -2135,7 +2135,7 @@
       "success_message": "✅ {message}",
       "failure_message": "❌ {message}",
       "failure_error_message": "{errorMessage}",
-      "warning_message": "⚠️  {message}",
+      "warning_message": "⚠️ {message}",
       "test_runner_failed": "❌ Ejecutor de pruebas falló:",
       "recommendations": {
         "add_missing_translation_keys": "Agregar claves de traducción faltantes para mantener consistencia",
@@ -2205,17 +2205,17 @@
       "untranslated_markers": "Marcadores sin traducir: {untranslated}",
       "contains_english": "Contiene inglés: {hasEnglish}",
       "coverage_percentage": "Cobertura: {coverage}%",
-      "error_general": "❌ Error:",
+      "error_general": "❌Error:",
       "use_help": "Use --help para ver información de uso"
     },
-    "cleaningUpReportFiles": "Cleaning up old report files...",
-    "couldNotDelete": "Could not delete {file}: {error}",
-    "deletedOldReportFiles": "Deleted {count} old report file(s).",
-    "errorCleaningUpReports": "Error cleaning up reports: {error}",
-    "noOldReportFilesToDelete": "No old report files to delete.",
-    "reportFilesPreserved": "Report files preserved.",
-    "reportSaveFailed": "Failed to save report to: {reportPath}",
-    "reportSaved": "Report saved to: {reportPath}"
+    "cleaningUpReportFiles": "Limpiando archivos de informes antiguos...",
+    "couldNotDelete": "No se pudo eliminar {file}: {error}",
+    "deletedOldReportFiles": "Se eliminaron {count} archivos de informes antiguos.",
+    "errorCleaningUpReports": "Error al limpiar informes: {error}",
+    "noOldReportFilesToDelete": "No hay archivos de informes antiguos que eliminar.",
+    "reportFilesPreserved": "Archivos de informes conservados.",
+    "reportSaveFailed": "No se pudo guardar el informe en: {reportPath}",
+    "reportSaved": "Informe guardado en: {reportPath}"
   },
   "ui": {
     "autoDetectedI18nDirectory": "Directorio i18n autodetectado: {path}",
@@ -2241,7 +2241,7 @@
     "documentation": "📚 Documentación: {url}",
     "issues": "🐛 Problemas: {url}",
     "versionInfoUnavailable": "Información de versión de i18ntk no disponible",
-    "versionInfoError": "Error: {error}"
+    "versionInfoError": "Se produjo un error: {error}"
   },
   "validateLanguagePurity": {
     "phrase_debug_tools": "herramientas de depuración",
@@ -2399,13 +2399,13 @@
     "signUp": "Registrarse"
   },
   "checkUsage": {
-    "usage_analysis_failed": "Usage analysis failed."
+    "usage_analysis_failed": "El análisis de uso falló."
   },
   "completeTranslations": {
-    "warning_could_not_parse_filepa": "Warning: could not parse file path: {filePath}"
+    "warning_could_not_parse_filepa": "Advertencia: no se pudo analizar la ruta del archivo: {filePath}"
   },
-  "pressEnterToContinue": "Press Enter to continue...",
+  "pressEnterToContinue": "Presione Entrar para continuar...",
   "status": {
-    "exitingCompleted": "Workflow completed. Exiting..."
+    "exitingCompleted": "Flujo de trabajo completado. Saliendo..."
   }
 }

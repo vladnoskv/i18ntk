@@ -101,15 +101,15 @@
     "settings": "Einstellungen",
     "startingSettings": "🎛️  Einstellungs-CLI wird gestartet...",
     "confirm": "Bestätigen",
-    "errorExiting": "Error while exiting."
+    "errorExiting": "Fehler beim Beenden."
   },
   "errors": {
-    "invalidOption": "❌ Invalid option: {option}. Please try again.",
+    "invalidOption": "❌ Ungültige Option: {option}. Bitte versuchen Sie es erneut.",
     "readlineClosed": "Eingabestrom ist geschlossen; läuft im nicht-interaktiven Modus.",
     "noPackageJson": "Keine package.json gefunden. Kann i18n-Framework nicht automatisch erkennen.",
     "noI18nDir": "Kein i18n-Verzeichnis im Projekt-Root gefunden.",
     "noI18nConfig": "Keine i18n-Konfigurationsdatei im Projekt-Root gefunden.",
-    "errorReadingDebugLogs": "Error reading debug logs: {error}"
+    "errorReadingDebugLogs": "Fehler beim Lesen der Debug-Protokolle: {error}"
   },
   "scanner": {
     "help_message": "I18n Text-Scanner  Verwendung: node i18ntk-scanner.js [optionen]  Optionen:   --source-dir <dir>     Quellverzeichnis zu scannen (Standard: ./src)   --output <file>        Ausgabedatei für Ergebnisse (Standard: ./i18ntk-scanner-report.json)   --framework <name>     Ziel-Framework (react, vue, angular, vanilla)   --patterns <patterns>  Benutzerdefinierte Regex-Muster (durch Kommas getrennt)   --include-tests        Testdateien in den Scan einbeziehen   --exclude-dirs <dirs>  Auszuschließende Verzeichnisse (durch Kommas getrennt)   --help                 Diese Hilfe anzeigen  Beispiele:   node i18ntk-scanner.js --source-dir=./src --framework=react   node i18ntk-scanner.js --patterns 'console\\.log\\((.*?)\\)' --include-tests   node i18ntk-scanner.js --output=./scan-ergebnisse.json",
@@ -136,7 +136,7 @@
     "analysisTitle": "🔍 ÜBERSETZUNGSSCANNER-ANALYSE",
     "fileSummary": "📄 {file}: {count} Texte gefunden",
     "textLocation": "📍 Zeile {line}: {text}",
-    "foundText": "Found {count} potential hardcoded text instances",
+    "foundText": "{count} potenzielle hartcodierte Textinstanzen gefunden",
     "context": "📝 Kontext: {context}",
     "severity": "⚠️  Schweregrad: {severity}",
     "recommendation": "💡 Empfehlung: {recommendation}",
@@ -148,7 +148,7 @@
       "title": "🎯 Framework auswählen",
       "available": "Verfügbare Frameworks: react, vue, angular, vanilla",
       "description": "Framework-Typ eingeben (oder Enter für automatische Erkennung):",
-      "input": "Framework:"
+      "input": "Rahmen:"
     },
     "directoryPrompt": {
       "title": "📁 Quellverzeichnis auswählen",
@@ -161,7 +161,7 @@
       "excludeDirs": "Auszuschließende Verzeichnisse (durch Kommas getrennt):",
       "customPatterns": "Benutzerdefinierte Muster zu scannen (Regex):"
     },
-    "reportGenerated": "Scan report generated: {path}"
+    "reportGenerated": "Scanbericht generiert: {path}"
   },
   "fixer": {
     "help_message": "I18n Übersetzungs-Fixer  Verwendung: node i18ntk-fixer.js [optionen]  Optionen:   --source-dir <dir>     Quellverzeichnis zu analysieren (Standard: ./locales)   --languages <langs>    Komma-getrennte Liste der zu korrigierenden Sprachen   --markers <markers>    Komma-getrennte Liste der als nicht übersetzt zu behandelnden Markierungen   --no-backup           Automatische Backup-Erstellung überspringen   --help                Diese Hilfe anzeigen  Beispiele:   node i18ntk-fixer.js --languages de,fr   node i18ntk-fixer.js --source-dir=./locales --markers NOT_TRANSLATED   node i18ntk-fixer.js --no-backup",
@@ -198,7 +198,7 @@
     "choicePrompt": "Ihre Wahl (j/n/d):",
     "nonInteractiveMode": "⚡ Nicht-interaktiver Modus erkannt - wende Korrekturen automatisch an...",
     "reportGenerated": "📊 Korrekturbericht generiert: {path}",
-    "summary": "Fixer summary:",
+    "summary": "Fixer-Zusammenfassung:",
     "welcome": {
       "title": "🎯 Willkommen beim Übersetzungs-Fixer!",
       "description": "Dieses Tool hilft Ihnen, beschädigte Übersetzungen und Markierungen in Ihren Sprachdateien zu reparieren."
@@ -222,16 +222,16 @@
       "description": "Geben Sie das Verzeichnis mit Ihren Sprachdateien ein (oder Enter für aktuelles Verzeichnis, 0 zum Abbrechen):",
       "input": "Verzeichnis:"
     },
-    "backupLocation": "Backup location: {dir}",
-    "completed": "Fixing completed.",
-    "creatingBackup": "Creating backup in {dir}...",
-    "dryRunMode": "Dry run mode: {mode}",
-    "error": "Fixer failed: {error}",
-    "fixing": "Fixing {language}...",
-    "foundLanguages": "Found {count} languages: {languages}",
-    "languageFixed": "{language}: fixed {fixed} key(s), skipped {skipped}.",
-    "running": "Running translation fixer...",
-    "totalFixed": "Total fixed: {count}"
+    "backupLocation": "Backup-Speicherort: {dir}",
+    "completed": "Reparatur abgeschlossen.",
+    "creatingBackup": "Backup wird in {dir} erstellt...",
+    "dryRunMode": "Trockenlaufmodus: {mode}",
+    "error": "Fixer fehlgeschlagen: {error}",
+    "fixing": "{language} wird behoben...",
+    "foundLanguages": "{count} Sprachen gefunden: {languages}",
+    "languageFixed": "{language}: {fixed} Schlüssel korrigiert, {skipped} übersprungen.",
+    "running": "Übersetzungsfixer wird ausgeführt...",
+    "totalFixed": "Insgesamt behoben: {count}"
   },
   "autorun": {
     "stepAnalyzeTranslations": "Übersetzungen analysieren",
@@ -273,7 +273,7 @@
     "requiredStepFailed": "Erforderlicher Schritt fehlgeschlagen. Workflow wird gestoppt.",
     "optionalStepFailed": "Optionaler Schritt fehlgeschlagen. Workflow wird fortgesetzt.",
     "stepRequired": "(Erforderlich)",
-    "stepOptional": "(Optional)",
+    "stepOptional": "(Optionaler Schritt)",
     "startingExecution": "Starte Ausführung...",
     "pressEnterToContinue": "Drücken Sie Enter, um fortzufahren...",
     "runningSelectedSteps": "Ausgewählte Schritte werden ausgeführt...",
@@ -455,13 +455,13 @@
     "sizing_analysis_results": "I18n Größenanalyse Ergebnisse",
     "file_sizes_title": "Dateigrößen",
     "file_sizes_header": "Sprache    Größe(KB)  Zeilen  Zeichen",
-    "file_size_row": "{lang}      {sizeKB}      {lines}      {characters}",
+    "file_size_row": "{lang} {sizeKB} {lines} {characters}",
     "language_statistics_title": "Sprachstatistiken",
     "language_stats_header": "Sprache    Schlüssel  Zeichen  Ø Länge  Max Länge  Leer  Lang",
-    "language_stats_row": "{lang}      {totalKeys}    {totalCharacters}    {averageKeyLength}    {maxKeyLength}    {emptyKeys}    {longKeys}",
+    "language_stats_row": "{lang} {totalKeys} {totalCharacters} {averageKeyLength} {maxKeyLength} {emptyKeys} {longKeys}",
     "size_variations_title": "Größenvariationen",
     "size_variations_header": "Sprache    Zeichen Diff  % Diff  Problematisch",
-    "size_variation_row": "{lang}      {characterDifference}    {percentageDifference}%    {problematic}",
+    "size_variation_row": "{lang} {characterDifference} {percentageDifference}% {problematic}",
     "problematic_yes": "Ja",
     "problematic_no": "Nein",
     "recommendations_title": "Empfehlungen",
@@ -479,7 +479,7 @@
     "human_report_saved": "Menschenlesbarer Bericht gespeichert: {reportPath}",
     "folder_summary_title": "Ordner-Zusammenfassung",
     "folder_summary_table_header": "Sprache    Größe(KB)    Schlüssel    Ø Länge    Gesamtzeichen",
-    "folder_summary_row": "{lang}      {sizeKB}      {totalKeys}    {avgLength}    {totalChars}",
+    "folder_summary_row": "{lang} {sizeKB} {totalKeys} {avgLength} {totalChars}",
     "language_comparison_title": "Sprachvergleich",
     "language_comparison_row": "{lang}: {diff} Zeichen ({percent}%) {status}",
     "summary_stats": "📊 Zusammenfassung: {totalLanguages} Sprachen, {totalKeys} Schlüssel - Berichte gespeichert unter {reportPath}",
@@ -496,12 +496,12 @@
       "consider_reviewing_translations": "Überprüfung der {lang} Übersetzungen in Betracht ziehen - sie sind {percentageDifference}% {comparison} als die Grundlage",
       "long_translations_detected": "{lang} hat {longKeys} Übersetzungen länger als {threshold} Zeichen - in Betracht ziehen, sie aufzuteilen"
     },
-    "detailed_key_analysis_title": "Detailed Key Analysis",
-    "key_analysis_detail": "{lang}: {length} chars ({status}) - {translation}",
-    "key_analysis_header": "Key: {key}",
-    "status_empty": "empty",
-    "status_long": "long",
-    "status_ok": "ok"
+    "detailed_key_analysis_title": "Detaillierte Schlüsselanalyse",
+    "key_analysis_detail": "{lang}: {length} Zeichen ({status}) - {translation}",
+    "key_analysis_header": "Schlüssel: {key}",
+    "status_empty": "leer",
+    "status_long": "lang",
+    "status_ok": "OK"
   },
   "usage": {
     "help_message": "I18n-Nutzungsanalysator  Verwendung: node i18ntk-usage.js [Optionen]  Optionen:   --source-dir <dir>     Quellverzeichnis zum Scannen (Standard: ./locales)   --i18n-dir <dir>       I18n-Verzeichnis (Standard: ./locales)   --output-report        Detaillierten Bericht erstellen   --output-dir <dir>     Ausgabeverzeichnis für Berichte (Standard: ./i18ntk-reports)   --help                 Diese Hilfe anzeigen  Beispiele:   node i18ntk-usage.js --output-report   node i18ntk-usage.js --source-dir=./app --i18n-dir=./locales   node i18ntk-usage.js --output-dir=./analysis --output-report",
@@ -598,7 +598,7 @@
       "failedToAnalyzeFile": "Analyse der Datei {filePath} fehlgeschlagen: {error}",
       "failedToAnalyzeLanguage": "Analyse der Sprache {language} fehlgeschlagen: {error}",
       "translationCompletenessAnalysisFailed": "Analyse der Übersetzungsvollständigkeit fehlgeschlagen: {error}",
-      "n": "\n"
+      "n": "\\n"
     },
     "complete": {
       "configLoadedSuccessfully": "Konfiguration erfolgreich geladen",
@@ -638,11 +638,11 @@
     "noTranslationLanguagesFound": "Keine Übersetzungssprachen gefunden.",
     "failedToAnalyzeLanguage": "Analyse der Sprache {language} fehlgeschlagen: {error}",
     "translationCompletenessAnalysisFailed": "Analyse der Übersetzungsvollständigkeit fehlgeschlagen: {error}",
-    "failedToProcessFile": "Failed to process file:",
-    "failedToSaveReport": "Failed to save usage report: {error}",
-    "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
-    "reportSavedTo": "Usage report saved to: {reportPath}",
-    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}"
+    "failedToProcessFile": "Datei konnte nicht verarbeitet werden:",
+    "failedToSaveReport": "Nutzungsbericht konnte nicht gespeichert werden: {error}",
+    "i18nDirectoryDoesNotExist": "I18n-Verzeichnis existiert nicht: {dir}",
+    "reportSavedTo": "Nutzungsbericht gespeichert unter: {reportPath}",
+    "sourceDirectoryDoesNotExist": "Quellverzeichnis existiert nicht: {dir}"
   },
   "validate": {
     "help_message": "I18n-Übersetzungs-Validator  Verwendung: node i18ntk-validate.js [Optionen]  Optionen:   --source-dir <dir>     Quellverzeichnis zum Scannen (Standard: ./locales)   --i18n-dir <dir>       I18n-Verzeichnis (Standard: ./locales)   --output-report        Detaillierten Bericht erzeugen   --output-dir <dir>     Ausgabeordner für Berichte (Standard: ./i18ntk-reports)   --help                 Diese Hilfe anzeigen  Beispiele:   node i18ntk-validate.js --output-report   node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales   node i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -727,7 +727,7 @@
     "completedIndicator": "✅ Abgeschlossen",
     "errorIndicator": "❌ Fehler",
     "warningIndicator": "⚠️  Warnung",
-    "infoIndicator": "ℹ️  Info",
+    "infoIndicator": "ℹ️ Infos",
     "sourceDirNotConfigured": "Quellverzeichnis nicht konfiguriert",
     "sourceLanguageNotConfigured": "Quellsprache nicht konfiguriert",
     "translationFunctionNotInitialized": "Übersetzungsfunktion nicht richtig initialisiert",
@@ -740,8 +740,8 @@
     "failedToCreateSampleTranslationFile": "Erstellen der Beispieldatei fehlgeschlagen",
     "invalidFilePathDetected": "Ungültiger Dateipfad erkannt",
     "failedToWriteFile": "Schreiben der Datei fehlgeschlagen: {filePath}",
-    "invalidSourceDirectory": "Invalid source directory: {sourceDir}",
-    "invalidSourceLanguageDirectory": "Invalid source language directory: {sourceDir}"
+    "invalidSourceDirectory": "Ungültiges Quellverzeichnis: {sourceDir}",
+    "invalidSourceLanguageDirectory": "Ungültiges Quellsprachenverzeichnis: {sourceDir}"
   },
   "adminCli": {
     "setupPinProtectionTitle": "🔐 Einrichtung des Admin-PIN-Schutzes",
@@ -988,7 +988,7 @@
   },
   "init": {
     "initializationTitle": "🚀 i18n-Management-Toolkit – Projektinitialisierung",
-    "initializationCancelled": "🚫 Initialization cancelled by user.",
+    "initializationCancelled": "🚫 Initialisierung vom Benutzer abgebrochen.",
     "sourceDirectoryLabel": "📁 Quellverzeichnis: {dir}",
     "requiredTitle": "Initialisierung erforderlich",
     "requiredBody": "Dieses Projekt muss vor dem Ausführen dieses Befehls initialisiert werden.",
@@ -1067,10 +1067,10 @@
       "installFramework": "Um ein Framework zu installieren, führen Sie aus: npm install <package-name>"
     },
     "frameworks": {
-      "react": "- React i18next (react-i18next)",
+      "react": "- Reagiere auf i18next (react-i18next)",
       "vue": "- Vue i18n (vue-i18n)",
       "i18next": "- i18next (i18next)",
-      "nuxt": "- Nuxt i18n (@nuxtjs/i18n)",
+      "nuxt": "- Nuxt-Internationalisierung (@nuxtjs/i18n)",
       "svelte": "- Svelte i18n (svelte-i18n)"
     },
     "continueWithoutI18nPrompt": "Kein i18n-Framework erkannt. Möchten Sie trotzdem fortfahren? (j/N):",
@@ -1086,22 +1086,22 @@
       "noJsonFilesInSourceDirectory": "Keine JSON-Dateien im Quellverzeichnis gefunden: {dir}",
       "invalidFilePathDetected": "Ungültiger Dateipfad erkannt",
       "initializationFailed": "Initialisierung fehlgeschlagen: {error}",
-      "noFramework": "No i18n framework detected. Continue with generic mode.",
-      "packageJsonRead": "Error reading package.json."
+      "noFramework": "Kein i18n-Framework erkannt. Fahren Sie mit dem generischen Modus fort.",
+      "packageJsonRead": "Fehler beim Lesen von package.json."
     },
     "processingFile": "Verarbeite {file} für {language}...",
     "fileAlreadyExistsMerging": "Datei {file} existiert bereits. Neue Schlüssel werden zusammengeführt.",
     "createdNewFile": "Neue Datei erstellt: {file}",
     "updatedFile": "Datei aktualisiert: {file}",
     "skippingExcludedFile": "Überspringe {file} für {language}, da ausgeschlossen.",
-    "continuingWithoutAdminPin": "Continuing without admin PIN setup.",
+    "continuingWithoutAdminPin": "Fortsetzung ohne Einrichtung der Admin-PIN.",
     "createdSourceLanguageDirectory": "✅ Quellverzeichnis für Sprache erstellt: {dir}",
-    "errorSettingUpAdminPin": "Error setting up admin PIN: {error}",
-    "noTargetLanguagesSpecified": "No target languages specified.",
-    "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
-    "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
-    "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
-    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
+    "errorSettingUpAdminPin": "Fehler beim Einrichten der Administrator-PIN: {error}",
+    "noTargetLanguagesSpecified": "Keine Zielsprachen angegeben.",
+    "translationFilesCreatedWarning": "Übersetzungsdateien wurden mit Platzhaltern erstellt; Überprüfung vor dem Produktionseinsatz.",
+    "warningCannotReadSourceDir": "Warnung: Quellverzeichnis {dir}: {error} kann nicht gelesen werden.",
+    "warningInvalidLanguageCodes": "Warnung: Ungültige Sprachcodes werden ignoriert: {languages}",
+    "warningProceedingWithoutFramework": "Fortfahren ohne erkanntes i18n-Framework."
   },
   "language": {
     "title": "🌍 Sprache ändern",
@@ -1337,7 +1337,7 @@
         "advancedSettingsDesc": "Validierung, Protokollierung und Expertenoptionen",
         "viewAllSettings": "Alle Einstellungen anzeigen",
         "viewAllSettingsDesc": "Aktuelle Konfiguration anzeigen",
-        "importExport": "Import/Export",
+        "importExport": "Importieren/Exportieren",
         "importExportDesc": "Einstellungen sichern und wiederherstellen",
         "resetToDefaults": "Zurücksetzen auf Standardwerte",
         "resetToDefaultsDesc": "Werkseinstellungen wiederherstellen",
@@ -1393,7 +1393,7 @@
     "relativePathHint": "Verwende relative Pfade ab diesem Verzeichnis (z. B. ./locales)",
     "currentDirectory": "Aktuelles Projektverzeichnis",
     "startingSettings": "Einstellungen werden gestartet:",
-    "pin": "PIN:",
+    "pin": "STIFT:",
     "reportBug": {
       "title": "Fehler melden",
       "description": "Melden Sie alle auftretenden Probleme oder Fehler",
@@ -1416,7 +1416,7 @@
       "advancedSettingsDesc": "Validierung, Protokollierung und Expertenoptionen",
       "viewAllSettings": "Alle Einstellungen anzeigen",
       "viewAllSettingsDesc": "Aktuelle Konfiguration anzeigen",
-      "importExport": "Import/Export",
+      "importExport": "Importieren/Exportieren",
       "updatePackage": "Paket aktualisieren",
       "updatePackageDesc": "i18n-toolkit-Paket über npm aktualisieren",
       "importExportDesc": "Einstellungen sichern und wiederherstellen",
@@ -1456,8 +1456,8 @@
       "promptDesc": "Hinweis: Das Paket wird auf die neueste Version aktualisiert.",
       "confirm": "j",
       "cancelled": "Aktualisierung abgebrochen.",
-      "error": "Failed to update package",
-      "updating": "Updating package..."
+      "error": "Paket konnte nicht aktualisiert werden",
+      "updating": "Paket wird aktualisiert..."
     },
     "admin": {
       "selectOption": "Option auswählen:",
@@ -1514,11 +1514,11 @@
       "importFailed": "Import der Einstellungen fehlgeschlagen: {error}",
       "backupSuccess": "Sicherung erstellt: {file}",
       "backupFailed": "Sicherung fehlgeschlagen: {error}",
-      "exportFilenamePrompt": "Enter export filename:",
-      "importConfirm": "Import this settings file? (y/N):",
-      "importFilenamePrompt": "Enter import filename:",
-      "manageBackups": "Manage backups",
-      "restore": "Restore settings"
+      "exportFilenamePrompt": "Geben Sie den Namen der Exportdatei ein:",
+      "importConfirm": "Diese Einstellungsdatei importieren? (J/N):",
+      "importFilenamePrompt": "Geben Sie den Namen der Importdatei ein:",
+      "manageBackups": "Backups verwalten",
+      "restore": "Einstellungen wiederherstellen"
     },
     "selectOption": "Option auswählen:",
     "resetToDefaultsTitle": "🔄 Zurücksetzen auf Standardwerte",
@@ -1601,34 +1601,34 @@
     "fields": {
       "backup": {
         "enabled": {
-          "label": "Enable Backup",
-          "description": "Enable automatic backup of settings",
-          "help": "Enable/disable backup feature"
+          "label": "Aktivieren Sie die Sicherung",
+          "description": "Aktivieren Sie die automatische Sicherung der Einstellungen",
+          "help": "Backup-Funktion aktivieren/deaktivieren"
         },
         "singleFileMode": {
-          "label": "Single File Mode",
-          "description": "Use single file for backups",
-          "help": "Backup settings in a single file"
+          "label": "Einzeldateimodus",
+          "description": "Verwenden Sie eine einzelne Datei für Backups",
+          "help": "Sicherungseinstellungen in einer einzigen Datei"
         },
         "singleBackupFile": {
-          "label": "Backup File Path",
-          "description": "Path to the backup file",
-          "help": "Path to the single backup file"
+          "label": "Pfad der Sicherungsdatei",
+          "description": "Pfad zur Sicherungsdatei",
+          "help": "Pfad zur einzelnen Sicherungsdatei"
         },
         "retentionDays": {
-          "label": "Retention Period",
-          "description": "Days to keep backup files",
-          "help": "Number of days to retain old backup files"
+          "label": "Aufbewahrungsfrist",
+          "description": "Tage, um Sicherungsdateien aufzubewahren",
+          "help": "Anzahl der Tage, die alte Sicherungsdateien aufbewahrt werden sollen"
         },
         "maxBackups": {
-          "label": "Maximum Backups",
-          "description": "Maximum backup files to keep",
-          "help": "Maximum number of backup files to keep"
+          "label": "Maximale Backups",
+          "description": "Maximal aufzubewahrende Sicherungsdateien",
+          "help": "Maximale Anzahl der aufzubewahrenden Sicherungsdateien"
         },
         "confirm": {
-          "label": "Confirm Backup",
-          "description": "Require confirmation for backup operations",
-          "help": "Confirm backup operation"
+          "label": "Bestätigen Sie die Sicherung",
+          "description": "Für Sicherungsvorgänge ist eine Bestätigung erforderlich",
+          "help": "Bestätigen Sie den Sicherungsvorgang"
         }
       },
       "i18nDir": {
@@ -1886,9 +1886,9 @@
         "help": "Alle individuellen Skript-PIN-Schutz-Einstellungen auf Standardwerte zurücksetzen"
       },
       "removeUiLanguages": {
-        "label": "Remove UI Languages",
-        "description": "Remove UI languages that are not installed",
-        "help": "Remove UI languages that are not installed on the system"
+        "label": "Entfernen Sie UI-Sprachen",
+        "description": "Entfernen Sie nicht installierte UI-Sprachen",
+        "help": "Entfernen Sie UI-Sprachen, die nicht auf dem System installiert sind"
       },
       "${helperKey}": {
         "help": "Hilfe"
@@ -1949,7 +1949,7 @@
     "resetScriptDirectoriesTitle": "Skriptverzeichnisse auf Standard zurücksetzen",
     "resetScriptDirectoriesWarning1": "Dies setzt alle Skriptverzeichnis-Konfigurationen auf die Systemstandards zurück.",
     "resetScriptDirectoriesWarning2": "Alle benutzerdefinierten Verzeichnispfade werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
-    "resetScriptDirectoriesConfirm": "Are you sure you want to reset all script directories to defaults? (y/N):",
+    "resetScriptDirectoriesConfirm": "Sind Sie sicher, dass Sie alle Skriptverzeichnisse auf die Standardeinstellungen zurücksetzen möchten? (J/N):",
     "backup": {
       "title": "Sicherungseinstellungen",
       "description": "Aktuelle Einstellungen in eine Datei sichern",
@@ -1971,9 +1971,9 @@
       "confirmNo": "Nein"
     },
     "validation": {
-      "valid": "Valid",
-      "validatingPaths": "Validating configured paths...",
-      "validationComplete": "Path validation complete: {valid}/{total} valid."
+      "valid": "Gültig",
+      "validatingPaths": "Konfigurierte Pfade werden validiert...",
+      "validationComplete": "Pfadvalidierung abgeschlossen: {valid}/{total} gültig."
     }
   },
   "summary": {
@@ -2208,14 +2208,14 @@
       "error_general": "⚠️  Allgemeiner Fehler: {error}",
       "use_help": "ℹ️  Verwenden Sie --help für weitere Informationen"
     },
-    "cleaningUpReportFiles": "Cleaning up old report files...",
-    "couldNotDelete": "Could not delete {file}: {error}",
-    "deletedOldReportFiles": "Deleted {count} old report file(s).",
-    "errorCleaningUpReports": "Error cleaning up reports: {error}",
-    "noOldReportFilesToDelete": "No old report files to delete.",
-    "reportFilesPreserved": "Report files preserved.",
-    "reportSaveFailed": "Failed to save report to: {reportPath}",
-    "reportSaved": "Report saved to: {reportPath}"
+    "cleaningUpReportFiles": "Alte Berichtsdateien bereinigen...",
+    "couldNotDelete": "{file} konnte nicht gelöscht werden: {error}",
+    "deletedOldReportFiles": "{count} alte Berichtsdatei(en) gelöscht.",
+    "errorCleaningUpReports": "Fehler beim Bereinigen der Berichte: {error}",
+    "noOldReportFilesToDelete": "Keine alten Berichtsdateien zum Löschen.",
+    "reportFilesPreserved": "Berichtsdateien bleiben erhalten.",
+    "reportSaveFailed": "Der Bericht konnte nicht gespeichert werden unter: {reportPath}",
+    "reportSaved": "Bericht gespeichert unter: {reportPath}"
   },
   "ui": {
     "autoDetectedI18nDirectory": "Automatisch erkanntes i18n-Verzeichnis: {path}",
@@ -2399,13 +2399,13 @@
     "signUp": "Registrieren"
   },
   "checkUsage": {
-    "usage_analysis_failed": "Usage analysis failed."
+    "usage_analysis_failed": "Die Nutzungsanalyse ist fehlgeschlagen."
   },
   "completeTranslations": {
-    "warning_could_not_parse_filepa": "Warning: could not parse file path: {filePath}"
+    "warning_could_not_parse_filepa": "Warnung: Dateipfad konnte nicht analysiert werden: {filePath}"
   },
-  "pressEnterToContinue": "Press Enter to continue...",
+  "pressEnterToContinue": "Drücken Sie die Eingabetaste, um fortzufahren...",
   "status": {
-    "exitingCompleted": "Workflow completed. Exiting..."
+    "exitingCompleted": "Workflow abgeschlossen. Verlassen..."
   }
 }

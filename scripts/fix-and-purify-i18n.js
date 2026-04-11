@@ -50,7 +50,7 @@ function readUTF8(p) {
 }
 function writeJSON(p, obj) {
   fs.mkdirSync(path.dirname(p), { recursive: true });
-  SecurityUtils.safeWriteFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  SecurityUtils.safeWriteFileSync(p, JSON.stringify(obj, null, 2) + '\n', path.dirname(p), 'utf8');
 }
 function isDir(p) { try { return fs.statSync(p).isDirectory(); } catch { return false; } }
 function isFile(p) { try { return fs.statSync(p).isFile(); } catch { return false; } }
@@ -71,6 +71,23 @@ function listFilesRecursive(dir, exts = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '
   return out;
 }
 
+function normalizeKeyCandidate(rawKey) {
+  if (rawKey === null || rawKey === undefined) return null;
+  let key = String(rawKey).trim();
+  if (!key) return null;
+
+  key = key.replace(/\$\{[^}]+\}/g, '*');
+
+  if (/[\r\n\t]/.test(key)) return null;
+  if (/\s/.test(key)) return null;
+  if (/(=>|\|\||&&|function\b|return\b|includes\()/i.test(key)) return null;
+  if (!/^[A-Za-z0-9_.:*-]+$/.test(key)) return null;
+  if (key.startsWith('.') || key.endsWith('.') || key.includes('..')) return null;
+  if (key === '*' || key.includes('*')) return null;
+
+  return key;
+}
+
 function extractKeysFromSource(file, patterns = KEY_PATTERNS) {
   const content = readUTF8(file);
   if (!content) return [];
@@ -79,7 +96,10 @@ function extractKeysFromSource(file, patterns = KEY_PATTERNS) {
     re.lastIndex = 0;
     let m; let guard = 0;
     while ((m = re.exec(content)) && guard++ < 10000) {
-      if (m[1]) keys.push(m[1]);
+      if (m[1]) {
+        const normalized = normalizeKeyCandidate(m[1]);
+        if (normalized) keys.push(normalized);
+      }
     }
   }
   return keys;

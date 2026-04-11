@@ -50,6 +50,32 @@ this.translations = {};
         }
     }
 
+    getValidationBase(targetPath) {
+        const fallbackBase = path.resolve(__dirname, '..');
+        if (!targetPath || typeof targetPath !== 'string') {
+            return fallbackBase;
+        }
+
+        let current = path.resolve(path.dirname(targetPath));
+        while (true) {
+            try {
+                if (fs.statSync(current).isDirectory()) {
+                    return current;
+                }
+            } catch (_) {
+                // Continue walking up until an existing directory is found.
+            }
+
+            const parent = path.dirname(current);
+            if (parent === current) {
+                break;
+            }
+            current = parent;
+        }
+
+        return fallbackBase;
+    }
+
     resolveUiLocalesDir() {
         const candidates = [
             path.resolve(__dirname, '..', 'ui-locales'),
@@ -58,7 +84,8 @@ this.translations = {};
 
         for (const candidate of candidates) {
             try {
-                if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
+                const stats = SecurityUtils.safeStatSync(candidate, this.getValidationBase(candidate));
+                if (stats && stats.isDirectory()) {
                     return candidate;
                 }
             } catch (_) {
@@ -77,7 +104,7 @@ this.translations = {};
         const all = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
         return all.filter(lang => {
             const filePath = path.join(this.uiLocalesDir, `${lang}.json`);
-            return fs.existsSync(filePath);
+            return SecurityUtils.safeExistsSync(filePath, this.getValidationBase(filePath));
         });
     }
 
@@ -113,7 +140,7 @@ this.translations = {};
             // Primary: Use monolith JSON file (en.json, de.json, etc.)
             const monolithTranslationFile = path.join(this.uiLocalesDir, `${language}.json`);
             
-            if (fs.existsSync(monolithTranslationFile)) {
+            if (SecurityUtils.safeExistsSync(monolithTranslationFile, this.getValidationBase(monolithTranslationFile))) {
                 try {
                     const content = SecurityUtils.safeReadFileSync(monolithTranslationFile, path.dirname(monolithTranslationFile), 'utf8');
                     const fullTranslations = JSON.parse(content);
@@ -133,7 +160,8 @@ this.translations = {};
                 // Fallback: Use folder-based structure if monolith file doesn't exist
                 const langDir = path.join(this.uiLocalesDir, language);
                 
-                if (fs.existsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+                const langDirStats = SecurityUtils.safeStatSync(langDir, this.getValidationBase(langDir));
+                if (langDirStats && langDirStats.isDirectory()) {
                     const files = fs.readdirSync(langDir).filter(file => file.endsWith('.json'));
                     if (debugEnabled) {
                         console.log(`UI: Found files in ${langDir}: ${files.join(', ')}`);
@@ -403,7 +431,7 @@ this.translations = {};
     getEnglishFallback(keyPath, replacements = {}) {
         try {
             const englishFile = path.join(this.uiLocalesDir, 'en.json');
-            if (SecurityUtils.safeExistsSync(englishFile)) {
+            if (SecurityUtils.safeExistsSync(englishFile, this.getValidationBase(englishFile))) {
                 const englishContent = SecurityUtils.safeReadFileSync(englishFile, path.dirname(englishFile), 'utf8');
                 const englishTranslations = JSON.parse(englishContent);
                 

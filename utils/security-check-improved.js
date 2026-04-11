@@ -125,11 +125,9 @@ class SecurityChecker {
       }
     }
 
-    // Check for dangerous patterns (excluding the overly broad require pattern)
+    // Check for dangerous code execution patterns in SecurityUtils itself.
+    // Direct fs usage is expected here because this module provides vetted wrappers.
     const dangerousPatterns = [
-      /fs\.readFileSync\s*\(/g,
-      /fs\.writeFileSync\s*\(/g,
-      /fs\.existsSync\s*\(/g,
       /eval\s*\(/g,
       /Function\s*\(/g
     ];
@@ -253,6 +251,11 @@ class SecurityChecker {
 
   async checkFilePermissions() {
     this.log('Checking file permissions...');
+
+    // POSIX permission checks are noisy/non-actionable on Windows.
+    if (process.platform === 'win32') {
+      return;
+    }
 
     const criticalFiles = [
       'utils/security.js',
