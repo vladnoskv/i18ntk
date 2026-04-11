@@ -191,7 +191,7 @@ utils/
 4. Maintain technical terminology consistency across all 8 supported languages
 5. Consider cultural appropriateness and formality levels
 6. Preserve formatting, variables, and special characters
-7. Use `node scripts/locale-optimizer.js --interactive` when adjusting included locales
+7. Use `node utils/locale-optimizer.js --interactive` when adjusting included locales
 
 ### Step 3: Advanced Validation & Quality Assurance
 1. Remove `[NOT_TRANSLATED]` markers after translation

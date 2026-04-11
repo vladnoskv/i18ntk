@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "2.1.1",
+  "version": "2.2.0",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",

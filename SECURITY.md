@@ -4,6 +4,12 @@
 
 The i18n Management Toolkit (i18ntk) implements comprehensive security measures to protect user data, prevent unauthorized access, and ensure secure operations. This document outlines our security practices, vulnerability reporting procedures, and implementation details.
 
+## Supported Versions
+
+- Current supported line: `2.2.x`
+- Versions below `2.2.0` may contain known security or stability issues and should be upgraded.
+- We provide guidance to update older versions, but we do not rely on npm deprecation notices for this policy.
+
 ## 🛡️ Security Features
 
 ### 1. Path Traversal Protection

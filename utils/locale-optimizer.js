@@ -7,10 +7,10 @@
  * during package initialization. Integrates with i18ntk init process.
  * 
  * Usage:
- *   node scripts/locale-optimizer.js --interactive
- *   node scripts/locale-optimizer.js --list
- *   node scripts/locale-optimizer.js --keep en,es,de
- *   node scripts/locale-optimizer.js --restore
+ *   node utils/locale-optimizer.js --interactive
+ *   node utils/locale-optimizer.js --list
+ *   node utils/locale-optimizer.js --keep en,es,de
+ *   node utils/locale-optimizer.js --restore
  */
 
 const fs = require('fs');
@@ -169,12 +169,12 @@ class LocaleOptimizer {
     
     if (removedCount > 0) {
       console.log(`\nâš ï¸  WARNING: Removing locales may break UI functionality`);
-      console.log(`   If issues occur, restore with: node scripts/locale-optimizer.js --restore`);
+      console.log(`   If issues occur, restore with: node utils/locale-optimizer.js --restore`);
       console.log(`   Or reinstall the package: npm install -g i18ntk`);
       
       // Create warning file
       const warningPath = path.join(this.backupDir, 'REMOVED_LOCALES.txt');
-      SecurityUtils.safeWriteFileSync(warningPath, `Removed locales: ${removedLocales.join(',')}\nRestore with: node scripts/locale-optimizer.js --restore`);
+      SecurityUtils.safeWriteFileSync(warningPath, `Removed locales: ${removedLocales.join(',')}\nRestore with: node utils/locale-optimizer.js --restore`);
     }
     
     const savedKB = (savedSpace / 1024).toFixed(1);
@@ -261,7 +261,7 @@ class LocaleOptimizer {
     console.log(`   - Savings: ${(totalSize - enEsFrSize).toFixed(1)}KB (${(((totalSize - enEsFrSize) / totalSize) * 100).toFixed(1)}%)`);
 
     console.log('\nðŸ’¡ To run actual optimization:');
-    console.log('   node scripts/locale-optimizer.js --interactive');
+    console.log('   node utils/locale-optimizer.js --interactive');
     console.log('\nâœ… Dry run complete - no files were modified');
   }
 
@@ -558,15 +558,15 @@ async function main() {
     console.log('Interactive package size optimization for UI locales');
     console.log('');
     console.log('Usage:');
-    console.log('  node scripts/locale-optimizer.js --interactive  ðŸŽ¯ Interactive selection');
-    console.log('  node scripts/locale-optimizer.js --list        ðŸ“Š List all locales');
-    console.log('  node scripts/locale-optimizer.js --keep en,es,de  âš¡ Quick keep');
-    console.log('  node scripts/locale-optimizer.js --restore     ðŸ”„ Restore all locales');
-    console.log('  node scripts/locale-optimizer.js --init       ðŸš€ Called during init');
-    console.log('  node scripts/locale-optimizer.js --dry-run    ðŸ” Simulation mode');
+    console.log('  node utils/locale-optimizer.js --interactive  ðŸŽ¯ Interactive selection');
+    console.log('  node utils/locale-optimizer.js --list        ðŸ“Š List all locales');
+    console.log('  node utils/locale-optimizer.js --keep en,es,de  âš¡ Quick keep');
+    console.log('  node utils/locale-optimizer.js --restore     ðŸ”„ Restore all locales');
+    console.log('  node utils/locale-optimizer.js --init       ðŸš€ Called during init');
+    console.log('  node utils/locale-optimizer.js --dry-run    ðŸ” Simulation mode');
     console.log('');
     console.log('ðŸ’¡ Example: Keep only English and Spanish');
-    console.log('   node scripts/locale-optimizer.js --keep en,es');
+    console.log('   node utils/locale-optimizer.js --keep en,es');
     return;
   }
   

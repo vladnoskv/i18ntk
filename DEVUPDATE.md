@@ -39,7 +39,7 @@ Then update:
 - `CHANGELOG.md`
 - `README.md`
 - `docs/README.md`
-- `docs/migration-guide-v2.1.1.md` (or new migration file for the target release)
+- `docs/migration-guide-v2.2.0.md` (or new migration file for the target release)
 
 ## 3. README v2 Badge/Icon Refresh
 

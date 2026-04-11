@@ -1506,6 +1506,9 @@ if (require.main === module) {
             console.log(`Maintainer: ${versionInfo.maintainer || packageJson.author}`);
             console.log(`Node.js: ${versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0'}`);
             console.log(`License: ${packageJson.license}`);
+            if (versionInfo.supportPolicy) {
+                console.log(`\n⚠️ Support: ${versionInfo.supportPolicy}`);
+            }
 
             if (versionInfo.majorChanges && versionInfo.majorChanges.length > 0) {
                 console.log(`\n✨ What's New in ${packageJson.version}:`);
