@@ -7,6 +7,8 @@
 .trae
 /fpts/
 DEVUPDATE.md
+scripts/prepublish.js
+scripts/prepublish-dev.js
 
 # Security and configuration files
 settings/.i18n-admin-config.json

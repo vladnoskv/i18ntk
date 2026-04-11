@@ -5,6 +5,8 @@ scripts/smoke-pack.js
 **/test-backup*
 **/*test*
 **/*.test.*
+scripts/prepublish.js
+scripts/prepublish-dev.js
 
 # Exclude development and build artifacts
 .vscode/

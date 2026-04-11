@@ -67,11 +67,18 @@ function pkgUiLocalesDirViaThisFile() {
 }
 
 function pkgUiLocalesDirViaResolve() {
-  try {
-    const enJson = require.resolve('i18ntk/ui-locales/en.json');
-    return path.dirname(enJson);
-  } catch { return null; }
-}
+    try {
+        // Try the new correct path first (ui-locales/en.json)
+        const enJson = require.resolve('i18ntk/ui-locales/en.json');
+        return path.dirname(enJson);
+    } catch {
+        try {
+            // Fallback to the old incorrect path for backward compatibility
+            const enJson = require.resolve('i18ntk/resources/i18n/ui-locales/en.json');
+            return path.dirname(enJson);
+        } catch { return null; }
+        }
+    }
 
 function resolveLocalesDirs() {
   const dirs = [];

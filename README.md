@@ -59,7 +59,6 @@ i18ntk fixer --interactive
 # 5. Validate everything
 i18ntk validate
 
-# 6. Mangage Mre
 ```
 
 That's it! Your i18n infrastructure is ready. 🎉

@@ -4,10 +4,12 @@
  * Prepublish Script
  * Cleans up development artifacts before npm publish
  * Ensures fresh config and settings for public package
+ * version 2.0.5
  */
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 class PrepublishCleaner {
     constructor() {
@@ -95,83 +97,102 @@ class PrepublishCleaner {
     }
 
     async cleanDirectory(dirPath) {
-        if (!SecurityUtils.safeExistsSync(dirPath)) {
-            return;
-        }
-
-        try {
-            const files = fs.readdirSync(dirPath);
-            let deletedCount = 0;
-
-            for (const file of files) {
-                const filePath = path.join(dirPath, file);
-                const stat = fs.statSync(filePath);
-
-                if (stat.isFile()) {
-                    fs.unlinkSync(filePath);
-                    deletedCount++;
-                } else if (stat.isDirectory()) {
-                    // Recursively clean subdirectories
-                    await this.cleanDirectory(filePath);
-                    // Remove empty directories
-                    try {
-                        fs.rmdirSync(filePath);
-                    } catch (e) {
-                        // Directory not empty, skip
-                    }
-                }
-            }
-
-            if (deletedCount > 0) {
-                this.log(`Cleaned ${deletedCount} files from ${path.relative(this.projectRoot, dirPath)}`);
-            }
-        } catch (error) {
-            this.log(`Warning: Could not clean ${dirPath}: ${error.message}`);
-        }
+    const validatedPath = SecurityUtils.validatePath(dirPath, this.projectRoot);
+    if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
+    return;
+    }
+    
+    try {
+    const files = SecurityUtils.safeReaddirSync(validatedPath, this.projectRoot);
+    let deletedCount = 0;
+    
+    for (const file of files) {
+    const filePath = path.join(validatedPath, file);
+    const validatedFilePath = SecurityUtils.validatePath(filePath, this.projectRoot);
+    if (!validatedFilePath) continue;
+    
+    const stat = SecurityUtils.safeStatSync(validatedFilePath, this.projectRoot);
+    if (!stat) continue;
+    
+    if (stat.isFile()) {
+    if (SecurityUtils.safeExistsSync(validatedFilePath)) {
+    fs.unlinkSync(validatedFilePath);
+    deletedCount++;
+    }
+    } else if (stat.isDirectory()) {
+    // Recursively clean subdirectories
+    await this.cleanDirectory(validatedFilePath);
+    // Remove empty directories
+    try {
+    fs.rmdirSync(validatedFilePath);
+    } catch (e) {
+    // Directory not empty, skip
+    }
+    }
+    }
+    
+    if (deletedCount > 0) {
+    this.log(`Cleaned ${deletedCount} files from ${path.relative(this.projectRoot, validatedPath)}`);
+    }
+    } catch (error) {
+    this.log(`Warning: Could not clean ${dirPath}: ${error.message}`);
+    }
     }
 
     async cleanFile(pattern) {
-        const searchPath = path.join(this.projectRoot, pattern);
-        
-        if (pattern.includes('*')) {
-            // Handle glob patterns
-            const dir = path.dirname(searchPath);
-            const filenamePattern = path.basename(searchPath);
-            
-            if (SecurityUtils.safeExistsSync(dir)) {
-                const files = fs.readdirSync(dir);
-                const regex = new RegExp(filenamePattern.replace('*', '.*'));
-                
-                for (const file of files) {
-                    if (regex.test(file)) {
-                        const filePath = path.join(dir, file);
-                        fs.unlinkSync(filePath);
-                        this.log(`Deleted ${path.relative(this.projectRoot, filePath)}`);
-                    }
-                }
-            }
-        } else {
-            // Handle exact files
-            if (SecurityUtils.safeExistsSync(searchPath)) {
-                fs.unlinkSync(searchPath);
-                this.log(`Deleted ${path.relative(this.projectRoot, searchPath)}`);
-            }
-        }
+    const searchPath = path.join(this.projectRoot, pattern);
+    const validatedSearchPath = SecurityUtils.validatePath(searchPath, this.projectRoot);
+    if (!validatedSearchPath) return;
+    
+    if (pattern.includes('*')) {
+    // Handle glob patterns
+    const dir = path.dirname(validatedSearchPath);
+    const filenamePattern = path.basename(validatedSearchPath);
+    const validatedDir = SecurityUtils.validatePath(dir, this.projectRoot);
+    if (!validatedDir) return;
+    
+    if (SecurityUtils.safeExistsSync(validatedDir)) {
+    const files = SecurityUtils.safeReaddirSync(validatedDir, this.projectRoot);
+    const regex = new RegExp(filenamePattern.replace('*', '.*'));
+    
+    for (const file of files) {
+    if (regex.test(file)) {
+    const filePath = path.join(validatedDir, file);
+    const validatedFilePath = SecurityUtils.validatePath(filePath, this.projectRoot);
+    if (validatedFilePath && SecurityUtils.safeExistsSync(validatedFilePath)) {
+    fs.unlinkSync(validatedFilePath);
+    this.log(`Deleted ${path.relative(this.projectRoot, validatedFilePath)}`);
+    }
+    }
+    }
+    }
+    } else {
+    // Handle exact files
+    const validatedFilePath = SecurityUtils.validatePath(searchPath, this.projectRoot);
+    if (validatedFilePath && SecurityUtils.safeExistsSync(validatedFilePath)) {
+    fs.unlinkSync(validatedFilePath);
+    this.log(`Deleted ${path.relative(this.projectRoot, validatedFilePath)}`);
+    }
+    }
     }
 
     async validateEssentialFiles() {
-        this.log('Validating essential files...');
-        
-        let missingFiles = [];
-        for (const file of this.essentialFiles) {
-            const filePath = path.join(this.projectRoot, file);
-            if (!SecurityUtils.safeExistsSync(filePath)) {
-                missingFiles.push(file);
-            } else if (!fs.statSync(filePath).isFile()) {
-                this.log(`❌ ${file} is not a file`);
-                process.exit(1);
-            }
-        }
+    this.log('Validating essential files...');
+    
+    let missingFiles = [];
+    for (const file of this.essentialFiles) {
+    const filePath = path.join(this.projectRoot, file);
+    const validatedPath = SecurityUtils.validatePath(filePath, this.projectRoot);
+    if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
+    missingFiles.push(file);
+    } else {
+    const stat = SecurityUtils.safeStatSync(validatedPath, this.projectRoot);
+    if (!stat || !stat.isFile()) {
+    this.log(`❌ ${file} is not a file`);
+    process.exit(1);
+    }
+    }
+    }
         
         if (missingFiles.length > 0) {
             this.log(`❌ Missing essential files: ${missingFiles.join(', ')}`);
@@ -182,19 +203,19 @@ class PrepublishCleaner {
     }
     
     async validateLocaleFiles() {
-        this.log('Validating locale files...');
-        
-        let invalidFiles = [];
-        for (const localeFile of this.essentialLocales) {
-            const filePath = path.join(this.projectRoot, localeFile);
-            if (!SecurityUtils.safeExistsSync(filePath)) {
-                invalidFiles.push(localeFile);
-                continue;
-            }
-            
-            try {
-                const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
-                const parsed = JSON.parse(content);
+    this.log('Validating locale files...');
+    
+    let invalidFiles = [];
+    for (const localeFile of this.essentialLocales) {
+    const filePath = path.join(this.projectRoot, localeFile);
+    const validatedPath = SecurityUtils.validatePath(filePath, this.projectRoot);
+    if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
+    invalidFiles.push(localeFile);
+    continue;
+    }
+    
+    try {
+    const content = SecurityUtils.safeReadFileSync(validatedPath, this.projectRoot, 'utf8');
                 
                 // Validate structure
                 if (typeof parsed !== 'object' || parsed === null) {
@@ -220,11 +241,16 @@ class PrepublishCleaner {
     }
     
     async validatePackageJson() {
-        this.log('Validating package.json...');
-        
-        const packagePath = path.join(this.projectRoot, 'package.json');
-        try {
-            const pkg = JSON.parse(SecurityUtils.safeReadFileSync(packagePath, path.dirname(packagePath), 'utf8'));
+    this.log('Validating package.json...');
+    
+    const packagePath = path.join(this.projectRoot, 'package.json');
+    const validatedPath = SecurityUtils.validatePath(packagePath, this.projectRoot);
+    if (!validatedPath) {
+    this.log('❌ package.json not found or invalid path');
+    process.exit(1);
+    }
+    try {
+    const pkg = JSON.parse(SecurityUtils.safeReadFileSync(validatedPath, this.projectRoot, 'utf8'));
             
             // Validate required fields
             const requiredFields = ['name', 'version', 'description', 'main', 'bin', 'files'];
@@ -269,70 +295,58 @@ class PrepublishCleaner {
     }
     
     async finalValidation() {
-        this.log('Running final validation checks...');
-        
-        // Check for development artifacts
-        const devArtifacts = [
-            'dev/debug',
-            'benchmarks',
-            '.github',
-            'test-usage-fix.html',
-            '.i18ntk'
-        ];
-        
-        for (const artifact of devArtifacts) {
-            const artifactPath = path.join(this.projectRoot, artifact);
-            if (SecurityUtils.safeExistsSync(artifactPath)) {
-                this.log(`⚠️ Development artifact found: ${artifact}`);
-            }
-        }
+    this.log('Running final validation checks...');
+    
+    // Check for development artifacts
+    const devArtifacts = [
+    'dev/debug',
+    'benchmarks',
+    '.github',
+    'test-usage-fix.html',
+    '.i18ntk'
+    ];
+    
+    for (const artifact of devArtifacts) {
+    const artifactPath = path.join(this.projectRoot, artifact);
+    const validatedPath = SecurityUtils.validatePath(artifactPath, this.projectRoot);
+    if (validatedPath && SecurityUtils.safeExistsSync(validatedPath)) {
+    this.log(`⚠️ Development artifact found: ${artifact}`);
+    }
+    }
         
         // Validate file permissions for executable scripts
         const scripts = [
-            'main/manage/index.js',
-            'main/i18ntk-init.js',
-            'main/i18ntk-analyze.js',
-            'main/i18ntk-validate.js',
-            'main/i18ntk-usage.js',
-            'main/i18ntk-summary.js',
-            'main/i18ntk-sizing.js',
-            'main/i18ntk-complete.js',
-            'main/i18ntk-ui.js',
-            'main/i18ntk-autorun.js'
+        'main/manage/index.js',
+        'main/i18ntk-init.js',
+        'main/i18ntk-analyze.js',
+        'main/i18ntk-validate.js',
+        'main/i18ntk-usage.js',
+        'main/i18ntk-summary.js',
+        'main/i18ntk-sizing.js',
+        'main/i18ntk-complete.js',
+        'main/i18ntk-ui.js',
+        'main/i18ntk-autorun.js'
         ];
         
         for (const script of scripts) {
-            const scriptPath = path.join(this.projectRoot, script);
-            if (SecurityUtils.safeExistsSync(scriptPath)) {
-                try {
-                    fs.accessSync(scriptPath, fs.constants.X_OK);
-                } catch (e) {
-                    this.log(`⚠️ Script not executable: ${script}`);
-                }
-            }
+        const scriptPath = path.join(this.projectRoot, script);
+        const validatedPath = SecurityUtils.validatePath(scriptPath, this.projectRoot);
+        if (validatedPath && SecurityUtils.safeExistsSync(validatedPath)) {
+        try {
+        fs.accessSync(validatedPath, fs.constants.X_OK);
+        } catch (e) {
+        this.log(`⚠️ Script not executable: ${script}`);
+        }
+        }
         }
         
         this.log('✅ Final validation complete');
     }
     
     async resetSecuritySettings() {
-        const configPath = path.join(require('../settings/settings-manager').configDir, '.i18n-admin-config.json');
-        
-        if (SecurityUtils.safeExistsSync(configPath)) {
-            const defaultConfig = {
-                enabled: false,
-                pinHash: null,
-                sessionTimeout: 30,
-                maxFailedAttempts: 3,
-                lockoutDuration: 15,
-                lastActivity: null,
-                failedAttempts: 0,
-                lockedUntil: null
-            };
-            
-            SecurityUtils.safeWriteFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
-            this.log('Reset security settings to defaults');
-        }
+    // Remove security settings reset to prevent disabling security during publish
+    // This script should not modify security configurations
+    this.log('Skipping security settings reset to maintain security posture');
     }
 }
 
