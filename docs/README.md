@@ -1,4 +1,4 @@
-# i18ntk Documentation (v2.3.1)
+# i18ntk Documentation (v2.3.2)
 
 This documentation set is for **i18ntk 2.x**.
 
@@ -10,7 +10,7 @@ This documentation set is for **i18ntk 2.x**.
 - [Runtime API Guide](./runtime.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
-- [Migration Guide v2.3.1](./migration-guide-v2.3.1.md)
+- [Migration Guide v2.3.2](./migration-guide-v2.3.2.md)
 - [Package Optimization Prompt](./development/package-optimization-prompt.md)
 
 ## Command Model

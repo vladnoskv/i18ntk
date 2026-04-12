@@ -24,6 +24,7 @@ const { showFrameworkWarningOnce } = require('../../utils/cli-helper');
 const { createPrompt, isInteractive } = require('../../utils/prompt-helper');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../../utils/i18n-helper');
 const cliHelper = require('../../utils/cli-helper');
+const { printUpgradeWarningIfOutdated } = require('../../utils/npm-version-warning');
 const { blue } = require('../../utils/colors-new');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../../utils/config');
 const SettingsCLI = require('../../settings/settings-cli');
@@ -316,6 +317,16 @@ class I18nManager {
         if (args.help) {
             this.showHelp();
             return;
+        }
+
+        // Warn users when their installed CLI version is behind npm latest.
+        try {
+            await printUpgradeWarningIfOutdated({
+                packageName: pkg.name,
+                currentVersion: pkg.version
+            });
+        } catch {
+            // Keep startup resilient if registry access is unavailable.
         }
 
         let startupTimeout = setTimeout(() => {

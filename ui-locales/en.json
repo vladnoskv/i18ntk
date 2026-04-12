@@ -476,7 +476,7 @@
     "report_saved_to": "Report saved to: {reportPath}",
     "considerReviewingTranslations": "Consider reviewing ${lang} translations - they are ${data.percentageDifference}% longer than baseline",
     "csv_report_saved_to": "CSV report saved to: {csvPath}",
-    "human_report_saved": "Human-readable report saved: {reportPath}",
+    "human_report_saved": "Readable report saved: {reportPath}",
     "folder_summary_title": "Folder Summary",
     "folder_summary_table_header": "Language    Size(KB)    Keys    Avg Length    Total Chars",
     "folder_summary_row": "{lang}      {sizeKB}      {totalKeys}    {avgLength}    {totalChars}",

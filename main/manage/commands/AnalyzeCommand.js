@@ -7,10 +7,11 @@
  * Contains embedded business logic from I18nAnalyzer.
  */
 
+const fs = require('fs');
 const path = require('path');
 const cliHelper = require('../../../utils/cli-helper');
 const { loadTranslations, t } = require('../../../utils/i18n-helper');
-const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../../../utils/config-helper');
+const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir } = require('../../../utils/config-helper');
 const SecurityUtils = require('../../../utils/security');
 const AdminCLI = require('../../../utils/admin-cli');
 const AdminAuth = require('../../../utils/admin-auth');
@@ -81,12 +82,57 @@ class AnalyzeCommand {
             this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
             this.outputDir = this.config.outputDir;
 
-            // Validate source directory exists
-            validateSourceDir(this.sourceDir, 'i18ntk-analyze');
+            // Validate source directory exists and is readable/writable
+            this.validateSourceDirWithFallback(this.sourceDir);
 
         } catch (error) {
+            SecurityUtils.logSecurityEvent('Analyze command initialization failed', 'error', {
+                component: 'AnalyzeCommand',
+                error: error.message
+            });
             console.error(`Fatal analysis error: ${error.message}`);
             throw error;
+        }
+    }
+
+    /**
+     * Validate source directory with fallback logic if the shared helper is unavailable.
+     * This prevents runtime crashes from missing imports or module regressions.
+     * @param {string} sourceDir
+     */
+    validateSourceDirWithFallback(sourceDir) {
+        if (!sourceDir || typeof sourceDir !== 'string') {
+            throw new Error('Source directory is missing or invalid');
+        }
+
+        if (typeof validateSourceDir === 'function') {
+            validateSourceDir(sourceDir, 'i18ntk-analyze');
+        } else {
+            // Graceful fallback: create directory if needed.
+            const created = SecurityUtils.safeMkdirSync(sourceDir, process.cwd(), { recursive: true });
+            if (created) {
+                SecurityUtils.logSecurityEvent('Fallback source directory creation executed', 'warn', {
+                    component: 'AnalyzeCommand',
+                    sourceDir,
+                    reason: 'validateSourceDir helper unavailable'
+                });
+            }
+        }
+
+        const safePath = SecurityUtils.validatePath(sourceDir, process.cwd());
+        if (!safePath) {
+            throw new Error(`Source directory path is unsafe: ${sourceDir}`);
+        }
+
+        const stat = SecurityUtils.safeStatSync(safePath, process.cwd());
+        if (!stat || !stat.isDirectory()) {
+            throw new Error(`Source directory does not exist or is not a directory: ${safePath}`);
+        }
+
+        try {
+            fs.accessSync(safePath, fs.constants.R_OK | fs.constants.W_OK);
+        } catch {
+            throw new Error(`Insufficient permissions for source directory: ${safePath}`);
         }
     }
 
