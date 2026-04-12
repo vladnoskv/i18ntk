@@ -130,6 +130,14 @@ static _logging = false;
   
   SecurityUtils._logging = true;
   try {
+  const emitSecurityLogs =
+    process.env.I18NTK_ENABLE_SECURITY_LOGS === 'true' ||
+    process.env.I18N_DEBUG === 'true' ||
+    process.env.DEBUG === 'true';
+  if (!emitSecurityLogs) {
+    return;
+  }
+
   const cfg = getConfigManager()?.getConfig?.() || {};
   const envLevel = (process.env.SECURITY_LOG_LEVEL || process.env.I18NTK_SECURITY_LOG_LEVEL || '').toLowerCase();
   const configLevel = (cfg.security?.logLevel || cfg.security?.audit?.logLevel || '').toLowerCase();
@@ -195,8 +203,25 @@ static _logging = false;
         return null;
       }
 
-      // Check for obvious dangerous patterns first
-      if (!SecurityUtils.isSafePath(filePath)) {
+      const isWindowsAbsolute = /^[A-Z]:[\/\\]/i.test(filePath);
+      const isUnixAbsolute = filePath.startsWith('/') || filePath.startsWith('\\');
+      const isAbsolutePath = isWindowsAbsolute || isUnixAbsolute;
+
+      // For absolute paths, defer trust decision to base-path containment checks below,
+      // but still reject obvious shell/injection markers.
+      if (isAbsolutePath && (/(\.\.)|(~)|(\$\{)|(`)|(\|)|(;)|(&)|(>)|(<)/.test(filePath))) {
+        const message = useI18n
+          ? i18n.t('security.pathTraversalAttempt')
+          : 'Path traversal attempt';
+        SecurityUtils.logSecurityEvent(message, 'warning', {
+          inputPath: filePath,
+          reason: 'Contains dangerous patterns'
+        });
+        return null;
+      }
+
+      // Check for obvious dangerous patterns first for relative paths
+      if (!isAbsolutePath && !SecurityUtils.isSafePath(filePath)) {
         const message = useI18n
           ? i18n.t('security.pathTraversalAttempt')
           : 'Path traversal attempt';
@@ -552,7 +577,8 @@ static _logging = false;
 
     // Allow absolute paths that are within the project structure
     if (filePath.startsWith('/') || filePath.startsWith('\\')) {
-      // Allow absolute paths but check for dangerous patterns
+      // Treat raw Unix-style absolute input as dangerous by default in this helper.
+      // `validatePath` can still permit absolute paths if they resolve within basePath.
       const hasDangerousPatterns = dangerousPatterns.slice(1).some(pattern => pattern.test(filePath));
       return !hasDangerousPatterns;
     }

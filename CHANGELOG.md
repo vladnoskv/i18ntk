@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.7] - 2026-04-12
+
+### Fixed
+- Removed false-positive path traversal warnings for safe absolute project paths during framework builds.
+- Reduced repeated default-configuration console noise in multi-worker build environments.
+
+### Changed
+- Security event console logging is now fully opt-in via `I18NTK_ENABLE_SECURITY_LOGS=true` (or debug envs).
+- Config-manager diagnostic console logging is now fully opt-in via `I18NTK_ENABLE_LOGS=true` (or debug envs).
+- Updated docs to reflect new default-silent logging behavior and troubleshooting toggles.
+
 ## [2.3.6] - 2026-04-12
 
 ### Security

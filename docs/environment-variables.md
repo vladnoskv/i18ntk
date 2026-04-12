@@ -21,6 +21,8 @@ i18ntk uses a fixed allowlist of environment variables.
 | `I18NTK_DISABLE_AUTOSAVE` | `0` | Disable config disk writes (keep in-memory only) |
 | `I18NTK_ENABLE_UPDATE_CHECK` | `false` | Opt-in npm latest-version network check |
 | `I18NTK_DISABLE_UPDATE_CHECK` | `false` | Force-disable npm update checks |
+| `I18NTK_ENABLE_LOGS` | `false` | Opt-in config-manager informational/warning/error console output |
+| `I18NTK_ENABLE_SECURITY_LOGS` | `false` | Opt-in security event console logging (`[SECURITY ...]`) |
 
 ## Usage Examples
 
@@ -33,6 +35,9 @@ I18NTK_FRAMEWORK_PREFERENCE=react i18ntk-scanner --source-dir=./src
 
 # Runtime override
 I18NTK_RUNTIME_DIR=./locales node app.js
+
+# Opt-in troubleshooting logs
+I18NTK_ENABLE_LOGS=true I18NTK_ENABLE_SECURITY_LOGS=true i18ntk --command=validate
 ```
 
 PowerShell:
@@ -57,3 +62,4 @@ Configuration order (highest to lowest):
 - Only allowlisted `I18NTK_*` variables are used.
 - Secret-like variable names are blocked by policy.
 - Keep secrets out of i18ntk config and environment settings.
+- Security and config diagnostics are silent by default; opt in with `I18NTK_ENABLE_LOGS=true` and/or `I18NTK_ENABLE_SECURITY_LOGS=true`.

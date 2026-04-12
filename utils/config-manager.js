@@ -21,6 +21,22 @@ const CONFIG_LOCK_STALE_MS = 15000;
 const CONFIG_LOCK_RETRY_MS = 50;
 let autosaveDisabledWarned = false;
 
+function shouldEmitLogs() {
+  return process.env.I18NTK_ENABLE_LOGS === 'true' || process.env.I18N_DEBUG === 'true' || process.env.DEBUG === 'true';
+}
+
+function logInfo(...args) {
+  if (shouldEmitLogs()) console.log(...args);
+}
+
+function logWarn(...args) {
+  if (shouldEmitLogs()) console.warn(...args);
+}
+
+function logError(...args) {
+  if (shouldEmitLogs()) console.error(...args);
+}
+
 // Setup tracking file
 const SETUP_COMPLETED_FILE = path.join(PROJECT_SETTINGS_DIR, 'setup.json');
 
@@ -381,7 +397,7 @@ function tryReadJson(filePath) {
 
     const data = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
     if (!data || data.trim() === '') {
-      console.warn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
+      logWarn(`[i18ntk] Warning: Empty or invalid JSON file at ${filePath}`);
       return null;
     }
 
@@ -390,18 +406,18 @@ function tryReadJson(filePath) {
       return parsed;
     }
 
-    console.error(`[i18ntk] Error parsing JSON from ${filePath}: Invalid JSON content`);
+    logError(`[i18ntk] Error parsing JSON from ${filePath}: Invalid JSON content`);
     // Create a backup of the corrupted file
     const backupPath = `${filePath}.corrupted-${Date.now()}.bak`;
     try {
       SecurityUtils.safeWriteFileSync(backupPath, data, path.dirname(backupPath), 'utf8');
-      console.warn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
+      logWarn(`[i18ntk] Created backup of corrupted config at ${backupPath}`);
     } catch (backupError) {
-      console.error(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
+      logError(`[i18ntk] Failed to create backup of corrupted config: ${backupError.message}`);
     }
     return null;
   } catch (error) {
-    console.error(`[i18ntk] Error reading config file at ${filePath}: ${error.message}`);
+    logError(`[i18ntk] Error reading config file at ${filePath}: ${error.message}`);
     return null;
   }
 }
@@ -420,11 +436,11 @@ async function migrateLegacyIfNeeded(baseCfg) {
         // Best-effort removal of legacy file to prevent future use
         try { fs.unlinkSync(LEGACY_CONFIG_PATH); } catch (_) {}
         // Deprecation notice
-        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Configuration was migrated to project .i18ntk-config.');
+        logWarn('[i18ntk] Deprecated config location detected (~/.i18ntk). Configuration was migrated to project .i18ntk-config.');
         return merged;
       } catch (_) {
         // If write fails, fall back to in-memory config without deleting legacy
-        console.warn('[i18ntk] Deprecated config location detected (~/.i18ntk). Using migrated settings in memory; failed to persist to .i18ntk-config.');
+        logWarn('[i18ntk] Deprecated config location detected (~/.i18ntk). Using migrated settings in memory; failed to persist to .i18ntk-config.');
         return merged;
       }
     }
@@ -445,7 +461,7 @@ function loadConfig() {
 
     // Prevent concurrent loading
     if (configLoadInProgress) {
-      console.warn('[i18ntk] Configuration loading already in progress, returning defaults');
+      logWarn('[i18ntk] Configuration loading already in progress, returning defaults');
       resetRecursionGuard();
       return clone(DEFAULT_CONFIG);
     }
@@ -472,7 +488,7 @@ function loadConfig() {
          // Attempt to migrate to project settings
          // Ignore migration errors; we still return merged cfg in memory
          // eslint-disable-next-line no-unused-vars
-         console.warn('[i18ntk] Detected legacy config at ~/.i18ntk. Migrating to project settings directory...');
+         logWarn('[i18ntk] Detected legacy config at ~/.i18ntk. Migrating to project settings directory...');
          const _ = (async () => { await migrateLegacyIfNeeded(DEFAULT_CONFIG); })();
        }
      }
@@ -481,7 +497,7 @@ function loadConfig() {
      currentConfig = cfg;
      return currentConfig;
    } catch (error) {
-     console.error('[i18ntk] Error in loadConfig:', error.message);
+     logError('[i18ntk] Error in loadConfig:', error.message);
      currentConfig = clone(DEFAULT_CONFIG);
      return currentConfig;
    } finally {
@@ -498,7 +514,7 @@ async function saveConfig(cfg = currentConfig) {
     currentConfig = cfg;
     if (!autosaveDisabledWarned) {
       autosaveDisabledWarned = true;
-      console.warn('[i18ntk] Autosave disabled by I18NTK_DISABLE_AUTOSAVE. Keeping configuration in memory only.');
+      logWarn('[i18ntk] Autosave disabled by I18NTK_DISABLE_AUTOSAVE. Keeping configuration in memory only.');
     }
     return false;
   }
@@ -540,7 +556,7 @@ async function saveConfig(cfg = currentConfig) {
       currentConfig = cfg;
       return true;
     } catch (error) {
-      console.error('[i18ntk] Error saving configuration:', error.message);
+      logError('[i18ntk] Error saving configuration:', error.message);
       return false;
     } finally {
       if (releaseLock) {
@@ -593,7 +609,7 @@ function getConfig() {
 
      // Check for legacy config for migration
      if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
-       console.log('📦 Migrating legacy configuration...');
+       logInfo('📦 Migrating legacy configuration...');
        const legacyRaw = SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, path.dirname(LEGACY_CONFIG_PATH), 'utf8');
        const legacyConfig = SecurityUtils.safeParseJSON(legacyRaw);
        if (!legacyConfig || typeof legacyConfig !== 'object') {
@@ -601,7 +617,7 @@ function getConfig() {
        }
        const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
        saveConfig(migratedConfig).catch((err) => {
-         console.warn('[i18ntk] Warning: failed to persist migrated configuration:', err.message);
+         logWarn('[i18ntk] Warning: failed to persist migrated configuration:', err.message);
        });
        currentConfig = migratedConfig;
 
@@ -619,15 +635,17 @@ function getConfig() {
      }
 
      // Use package defaults for new installation
-     console.log('📦 Initializing with default configuration...');
+     if (shouldEmitLogs()) {
+       logInfo('[i18ntk] Initializing with default configuration...');
+     }
      saveConfig(DEFAULT_CONFIG).catch((err) => {
-       console.warn('[i18ntk] Warning: failed to persist default configuration:', err.message);
+       logWarn('[i18ntk] Warning: failed to persist default configuration:', err.message);
      });
      currentConfig = DEFAULT_CONFIG;
      return resolvePaths(DEFAULT_CONFIG);
 
    } catch (error) {
-     console.warn('⚠️  Error loading configuration, using defaults:', error.message);
+     logWarn('[i18ntk] Error loading configuration, using defaults:', error.message);
      currentConfig = DEFAULT_CONFIG;
      return resolvePaths(DEFAULT_CONFIG);
    }
@@ -693,3 +711,7 @@ module.exports = {
   toRelative,
   normalizePathValue,
 }
+
+
+
+

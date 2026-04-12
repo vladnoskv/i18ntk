@@ -48,6 +48,13 @@ describe('Security Tests', () => {
       });
     });
 
+    test('should allow absolute paths when they remain inside base path', () => {
+      const basePath = process.cwd();
+      const absolutePathInsideBase = path.join(basePath, 'locales', 'en.json');
+      const result = SecurityUtils.validatePath(absolutePathInsideBase, basePath);
+      assert.ok(result !== null, `Path ${absolutePathInsideBase} should be accepted`);
+    });
+
     test('should handle null and invalid inputs', () => {
       const invalidInputs = [null, undefined, '', 123, {}, []];
 

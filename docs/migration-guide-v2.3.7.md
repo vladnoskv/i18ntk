@@ -12,8 +12,8 @@ This release focuses on **security improvements** and **reduced console noise** 
 - **Improved path validation** throughout the codebase
 
 #### 2. Logging Improvements
-- **Silent by default**: Info-level security messages are now suppressed
-- **Debug mode**: Enable verbose logging with `I18N_DEBUG=true`
+- **Silent by default**: security/config diagnostics do not print to console in normal runs
+- **Opt-in diagnostics**: enable logs with `I18NTK_ENABLE_SECURITY_LOGS=true` and/or `I18NTK_ENABLE_LOGS=true`
 - **Centralized security logging**: All security events use `SecurityUtils.logSecurityEvent()`
 
 #### 3. Other Improvements
@@ -24,7 +24,7 @@ This release focuses on **security improvements** and **reduced console noise** 
 
 **No breaking changes** - this release is fully backward compatible. However:
 
-1. **If you were relying on security info messages**, set `I18N_DEBUG=true` to see them
+1. **If you were relying on security info messages**, set `I18NTK_ENABLE_SECURITY_LOGS=true` (or `I18N_DEBUG=true`) to see them
 2. **If you see any path-related warnings**, review your configuration for potential path traversal issues
 
 ### Updated Configuration Example
@@ -34,14 +34,14 @@ This release focuses on **security improvements** and **reduced console noise** 
   "version": "2.3.7",
   "sourceDir": "./locales",
   "security": {
-    "logLevel": "warn" // Default - silent for info, shows warnings/errors
+    "logLevel": "warn" // Only used when security logging is explicitly enabled
   }
 }
 ```
 
 ### Security Notes
 
-- Path traversal attempts are now **blocked and logged**
+- Path traversal attempts are now **blocked** (logging is opt-in)
 - Temporary files are created **safely within project directories**
 - All file paths are **validated before use**
 
