@@ -1,4 +1,4 @@
-# i18ntk v2.3.6
+# i18ntk v2.3.7
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, and translation completion.
 
@@ -9,12 +9,12 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.3.6)](https://socket.dev/npm/package/i18ntk/overview/2.3.6)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.3.7)](https://socket.dev/npm/package/i18ntk/overview/2.3.7)
 
 ## Upgrade Notice
 
-Versions earlier than `2.3.6` may contain known stability and security issues.
-They are considered unsupported for production use. Upgrade to `2.3.6` or newer.
+Versions earlier than `2.3.7` may contain known stability and security issues.
+They are considered unsupported for production use. Upgrade to `2.3.7` or newer.
 
 ## What i18ntk Does
 

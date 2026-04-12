@@ -1,4 +1,4 @@
-# i18ntk Runtime API (v2.3.5)
+# i18ntk Runtime API (v2.3.7)
 
 Use the runtime API when your application needs to read translation JSON files directly at runtime.
 
