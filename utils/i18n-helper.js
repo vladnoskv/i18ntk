@@ -101,18 +101,14 @@ function pkgUiLocalesDirViaThisFile() {
 }
 
 function pkgUiLocalesDirViaResolve() {
-    try {
-        // Try the new correct path first (ui-locales/en.json)
-        const enJson = require.resolve('i18ntk/ui-locales/en.json');
-        return path.dirname(enJson);
-    } catch {
-        try {
-            // Fallback to the old incorrect path for backward compatibility
-            const enJson = require.resolve('i18ntk/resources/i18n/ui-locales/en.json');
-            return path.dirname(enJson);
-        } catch { return null; }
-        }
-    }
+  try {
+    // Resolve using the current exported package path.
+    const enJson = require.resolve('i18ntk/ui-locales/en.json');
+    return path.dirname(enJson);
+  } catch {
+    return null;
+  }
+}
 
 // Removed legacyResourcesUiLocalesDir as resources/i18n/ui-locales is deprecated
 

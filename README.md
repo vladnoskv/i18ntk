@@ -1,4 +1,4 @@
-# i18ntk v2.3.0
+# i18ntk v2.3.1
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, and translation completion.
 
@@ -9,12 +9,12 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.3.0)](https://socket.dev/npm/package/i18ntk/overview/2.3.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.3.1)](https://socket.dev/npm/package/i18ntk/overview/2.3.1)
 
 ## Upgrade Notice
 
-Versions earlier than `2.3.0` may contain known stability and security issues.
-They are considered unsupported for production use. Upgrade to `2.3.0` or newer.
+Versions earlier than `2.3.1` may contain known stability and security issues.
+They are considered unsupported for production use. Upgrade to `2.3.1` or newer.
 
 ## What i18ntk Does
 
@@ -151,7 +151,7 @@ Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "2.3.0",
+  "version": "2.3.1",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -174,7 +174,7 @@ See [docs/api/CONFIGURATION.md](docs/api/CONFIGURATION.md) for the full configur
 - [Runtime API Guide](docs/runtime.md)
 - [Scanner Guide](docs/scanner-guide.md)
 - [Environment Variables](docs/environment-variables.md)
-- [Migration Guide v2.3.0](docs/migration-guide-v2.3.0.md)
+- [Migration Guide v2.3.1](docs/migration-guide-v2.3.1.md)
 - [Optimization Prompt](docs/development/package-optimization-prompt.md)
 
 ## License
