@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.3.5",
+  "version": "2.3.6",
   "description": "🚀 The fastest internationalization toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -112,7 +112,7 @@
   },
   "license": "MIT",
   "author": {
-    "name": "Vladimir Noskov",
+    "name": "Vlad Noskov",
     "url": "https://github.com/vladnoskv"
   },
   "type": "commonjs",
@@ -213,10 +213,7 @@
     "languages:select": "node settings/settings-cli.js",
     "languages:list": "node settings/settings-cli.js --list-languages",
     "languages:status": "node settings/settings-cli.js --language-status",
-    "lint:locales": "node scripts/lint-locales.js",
-    "deprecate:versions": "node scripts/deprecate-versions.js",
-    "deprecate:dry-run": "node scripts/deprecate-versions.js --dry-run",
-    "deprecate:verify": "node scripts/verify-deprecations.js"
+    "lint:locales": "node scripts/lint-locales.js" 
   },
   "engines": {
     "node": ">=16.0.0",
@@ -268,7 +265,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.3.5 may be unstable or insecure. Upgrade to 2.3.5 or newer."
+    "supportPolicy": "Versions earlier than 2.3.6 may be unstable or insecure. Upgrade to 2.3.6 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

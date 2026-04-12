@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.5] - 2026-04-12
+## [2.3.6] - 2026-04-12
+
+### Security
+- **Fixed path traversal vulnerability** in temporary file creation
+- **Added `safeJoin` function** for secure path construction
+- **Improved path validation** throughout the codebase
 
 ### Fixed
 - Hardened settings reset and backup cleanup paths to reduce risk of broad/deep unintended file deletion.
@@ -13,9 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed backup-class async file operations to consistently use `fs.promises` APIs.
 
 ### Changed
+- **Silent security logging by default**: Info-level messages suppressed, warnings/errors shown
+- **Debug mode**: Enable verbose logging with `I18N_DEBUG=true`
+- **Centralized security logging**: All security events use `SecurityUtils.logSecurityEvent()`
 - Made npm registry update checks explicit opt-in via `I18NTK_ENABLE_UPDATE_CHECK`.
-- Updated package/docs/version metadata to `2.3.5`.
-- Updated support policy guidance to recommend upgrading from versions below `2.3.5`.
+- Updated package/docs/version metadata to `2.3.6`.
 
 ## [2.3.4] - 2026-04-12
 

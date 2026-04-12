@@ -14,7 +14,7 @@ class SettingsManager {
         this.saveTimeout = null;
         
         this.defaultConfig = {
-            "version": "1.10.1",
+            "version": "2.3.6",
             "language": "en",
             "uiLanguage": "en",
             "theme": "dark",
