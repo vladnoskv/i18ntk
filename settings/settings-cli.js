@@ -567,7 +567,7 @@ class SettingsCLI {
             'backupRetention': { min: 1, max: 30, type: 'int', unit: 'days' },
             'logRetention': { min: 1, max: 90, type: 'int', unit: 'days' },
             'retentionDays': { min: 1, max: 365, type: 'int', unit: 'days' },
-            'maxBackups': { min: 1, max: 1000, type: 'int' }
+            'maxBackups': { min: 1, max: 3, type: 'int' }
         };
         
         for (const [field, rules] of Object.entries(validations)) {

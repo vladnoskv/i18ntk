@@ -32,6 +32,17 @@ class FixerCommand {
         this.force = false;
     }
 
+    isExcludedLanguageDirectory(name) {
+        if (!name || typeof name !== 'string') return true;
+        const lowered = name.toLowerCase();
+        return lowered.startsWith('backup-') ||
+               lowered === 'backup' ||
+               lowered === 'backups' ||
+               lowered === 'i18ntk-backups' ||
+               lowered === 'reports' ||
+               lowered === 'i18ntk-reports';
+    }
+
     /**
      * Set runtime dependencies for interactive operations
      */
@@ -68,7 +79,7 @@ class FixerCommand {
 
             this.sourceDir = this.config.sourceDir;
             this.outputDir = this.config.outputDir;
-            this.backupDir = path.join(this.sourceDir, 'backup');
+            this.backupDir = path.resolve(this.config.backup?.location || './i18ntk-backups', 'fixer');
 
             // Validate source directory exists
             const { validateSourceDir } = require('../../../utils/config-helper');
@@ -130,7 +141,12 @@ class FixerCommand {
             const directories = items
                 .filter(item => item.isDirectory())
                 .map(item => item.name)
-                .filter(name => name !== 'node_modules' && !name.startsWith('.') && name !== this.config.sourceLanguage);
+                .filter(name =>
+                    name !== 'node_modules' &&
+                    !name.startsWith('.') &&
+                    name !== this.config.sourceLanguage &&
+                    !this.isExcludedLanguageDirectory(name)
+                );
 
             // Check for monolith files (language.json files)
             const files = items
@@ -143,7 +159,11 @@ class FixerCommand {
             // Add monolith files as languages (without .json extension)
             const monolithLanguages = files
                 .map(file => file.replace('.json', ''))
-                .filter(lang => !languages.includes(lang) && lang !== this.config.sourceLanguage);
+                .filter(lang =>
+                    !languages.includes(lang) &&
+                    lang !== this.config.sourceLanguage &&
+                    !this.isExcludedLanguageDirectory(lang)
+                );
             languages.push(...monolithLanguages);
 
             return [...new Set(languages)].sort();
@@ -283,8 +303,15 @@ class FixerCommand {
         if (this.dryRun) return;
 
         try {
+            const backupEnabled = this.config?.backup?.enabled === true;
+            if (!backupEnabled) {
+                this.backupDir = null;
+                return;
+            }
+
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            this.backupDir = path.join(this.sourceDir, `backup-${timestamp}`);
+            const backupRoot = path.resolve(this.config?.backup?.location || './i18ntk-backups');
+            this.backupDir = path.join(backupRoot, 'fixer', `backup-${timestamp}`);
 
             console.log(t('fixer.creatingBackup', { dir: this.backupDir }));
 
@@ -318,9 +345,38 @@ class FixerCommand {
                 }
             }
 
+            this.cleanupOldBackups();
+
             console.log(t('fixer.backupCreated'));
         } catch (error) {
             console.warn(`Failed to create backup: ${error.message}`);
+        }
+    }
+
+    cleanupOldBackups() {
+        try {
+            const fixerBackupRoot = path.resolve(this.config?.backup?.location || './i18ntk-backups', 'fixer');
+            if (!SecurityUtils.safeExistsSync(fixerBackupRoot, process.cwd())) return;
+
+            const configuredKeep = parseInt(this.config?.backup?.maxBackups, 10);
+            const keepCount = Number.isInteger(configuredKeep) ? Math.min(Math.max(configuredKeep, 1), 3) : 1;
+
+            const backupDirs = SecurityUtils.safeReaddirSync(fixerBackupRoot, process.cwd(), { withFileTypes: true })
+                .filter(entry => entry.isDirectory() && entry.name.startsWith('backup-'))
+                .map(entry => {
+                    const dirPath = path.join(fixerBackupRoot, entry.name);
+                    const stat = SecurityUtils.safeStatSync(dirPath, process.cwd());
+                    return { name: entry.name, path: dirPath, mtimeMs: stat ? stat.mtimeMs : 0 };
+                })
+                .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+            if (backupDirs.length <= keepCount) return;
+
+            for (const staleDir of backupDirs.slice(keepCount)) {
+                fs.rmSync(staleDir.path, { recursive: true, force: true });
+            }
+        } catch (error) {
+            console.warn(`Failed to clean old backups: ${error.message}`);
         }
     }
 
@@ -471,7 +527,7 @@ class FixerCommand {
             }
 
             // Create backup unless disabled
-            if (!args.noBackup && !this.dryRun) {
+            if (!args.noBackup && !this.dryRun && this.config?.backup?.enabled === true) {
                 await this.createBackup();
             }
 
@@ -535,7 +591,7 @@ class FixerCommand {
             console.log(t('fixer.totalIssues', { count: totalIssues }));
             console.log(t('fixer.totalFixed', { count: totalFixed }));
 
-            if (this.backupDir && !args.noBackup) {
+            if (this.backupDir && !args.noBackup && this.config?.backup?.enabled === true) {
                 console.log(t('fixer.backupLocation', { dir: this.backupDir }));
             }
 

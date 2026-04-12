@@ -13,6 +13,7 @@ const { loadTranslations, t } = require('../../../utils/i18n-helper');
 const configManager = require('../../../utils/config-manager');
 const SecurityUtils = require('../../../utils/security');
 const AdminCLI = require('../../../utils/admin-cli');
+const AdminAuth = require('../../../utils/admin-auth');
 const watchLocales = require('../../../utils/watch-locales');
 const { getGlobalReadline, closeGlobalReadline } = require('../../../utils/cli');
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../../../utils/config-helper');
@@ -167,6 +168,17 @@ class ValidateCommand {
     }
 
     // Get all available languages
+    isExcludedLanguageDirectory(name) {
+        if (!name || typeof name !== 'string') return true;
+        const lowered = name.toLowerCase();
+        return lowered.startsWith('backup-') ||
+               lowered === 'backup' ||
+               lowered === 'backups' ||
+               lowered === 'i18ntk-backups' ||
+               lowered === 'reports' ||
+               lowered === 'i18ntk-reports';
+    }
+
     getAvailableLanguages() {
         try {
             if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
@@ -176,7 +188,9 @@ class ValidateCommand {
             const languages = fs.readdirSync(this.sourceDir)
                 .filter(item => {
                     const itemPath = path.join(this.sourceDir, item);
-                    return fs.statSync(itemPath).isDirectory() && item !== this.config.sourceLanguage;
+                    return fs.statSync(itemPath).isDirectory() &&
+                           item !== this.config.sourceLanguage &&
+                           !this.isExcludedLanguageDirectory(item);
                 });
 
             return languages;
@@ -603,6 +617,40 @@ class ValidateCommand {
         console.log(t('validate.help_message'));
     }
 
+    saveValidationSummaryReport(results = {}, success = true) {
+        try {
+            const outputDir = path.resolve(this.config.outputDir || './i18ntk-reports');
+            SecurityUtils.safeMkdirSync(outputDir, process.cwd(), { recursive: true });
+
+            const timestamp = new Date().toISOString();
+            const safeTimestamp = timestamp.replace(/[:.]/g, '-');
+            const reportPath = path.join(outputDir, `validation-summary-${safeTimestamp}.txt`);
+
+            const lines = [];
+            lines.push('I18NTK Validation Summary');
+            lines.push('========================');
+            lines.push(`Generated: ${timestamp}`);
+            lines.push(`Result: ${success ? 'PASS' : 'FAIL'}`);
+            lines.push(`Errors: ${this.errors.length}`);
+            lines.push(`Warnings: ${this.warnings.length}`);
+            lines.push('');
+            lines.push('Language Results');
+            lines.push('----------------');
+
+            Object.entries(results).forEach(([language, validation]) => {
+                const summary = validation?.summary || {};
+                lines.push(
+                    `${language}: ${summary.percentage || 0}% (${summary.translatedKeys || 0}/${summary.totalKeys || 0})`
+                );
+            });
+
+            SecurityUtils.safeWriteFileSync(reportPath, lines.join('\n') + '\n', process.cwd(), 'utf8');
+            return reportPath;
+        } catch (error) {
+            return null;
+        }
+    }
+
     // Main validation process
     async validate() {
         try {
@@ -834,6 +882,11 @@ class ValidateCommand {
 
             // Exit with appropriate code
             const success = !hasErrors && (!hasWarnings || !this.config.strictMode);
+            const summaryReportPath = this.saveValidationSummaryReport(results, success);
+            if (summaryReportPath) {
+                console.log('');
+                console.log(`📄 Validation summary report saved: ${summaryReportPath}`);
+            }
 
             return {
                 success,
@@ -879,7 +932,6 @@ class ValidateCommand {
         // Skip admin authentication when called from menu
         if (!fromMenu) {
             // Check admin authentication for sensitive operations (only when called directly and not in no-prompt mode)
-            const AdminAuth = require('../../../utils/admin-auth');
             const adminAuth = new AdminAuth();
             await adminAuth.initialize();
 
@@ -888,7 +940,6 @@ class ValidateCommand {
             if (isRequired && isCalledDirectly && !args.noPrompt) {
                 console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'validate translations' }));
 
-                const cliHelper = require('../../../utils/cli-helper');
                 const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
 
                 const isValid = await adminAuth.verifyPin(pin);

@@ -6,6 +6,7 @@
 const path = require('path');
 const fs = require('fs');
 const { t } = require('../../../utils/i18n-helper');
+const cliHelper = require('../../../utils/cli-helper');
 
 module.exports = class DebugMenu {
   constructor(manager) {
@@ -21,7 +22,6 @@ module.exports = class DebugMenu {
     const authRequired = await this.adminAuth.isAuthRequiredForScript('debugMenu');
     if (authRequired) {
       console.log(`\n${t('adminPin.protectedAccess')}`);
-      const cliHelper = require('../../../utils/cli-helper');
       const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
       const isValid = await this.adminAuth.verifyPin(pin);
 

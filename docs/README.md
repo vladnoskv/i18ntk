@@ -1,15 +1,17 @@
-# i18ntk Documentation (v2.2.0)
+# i18ntk Documentation (v2.3.0)
 
 This documentation set is for **i18ntk 2.x**.
 
 ## Start Here
 
+- [Getting Started](./getting-started.md)
 - [API Reference](./api/API_REFERENCE.md)
 - [Configuration Guide](./api/CONFIGURATION.md)
 - [Runtime API Guide](./runtime.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
-- [Migration Guide v2.2.0](./migration-guide-v2.2.0.md)
+- [Migration Guide v2.3.0](./migration-guide-v2.3.0.md)
+- [Package Optimization Prompt](./development/package-optimization-prompt.md)
 
 ## Command Model
 
@@ -43,3 +45,9 @@ i18ntk-backup
 i18ntk reads project settings from:
 
 - `.i18ntk-config`
+
+## Setup Notes
+
+- Run `i18ntk` or `i18ntk --command=init` to initialize a project.
+- Use `--no-prompt` for CI or automated workflows.
+- Backup behavior is optional and disabled by default during setup.

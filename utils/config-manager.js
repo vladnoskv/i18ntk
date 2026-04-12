@@ -171,10 +171,11 @@ const DEFAULT_CONFIG = {
   },
   "backup": {
     "enabled": false,
+    "location": "./i18ntk-backups",
     "singleFileMode": false,
     "singleBackupFile": "i18ntk-central-backup.json",
     "retentionDays": 30,
-    "maxBackups": 100
+    "maxBackups": 1
   },
   "security": {
     "adminPinEnabled": false,

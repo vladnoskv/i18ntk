@@ -33,7 +33,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { performance } = require('perf_hooks');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const configManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
@@ -675,7 +674,7 @@ Generated: ${new Date().toISOString()}
 
   // Main analysis method
   async analyze() {
-    const startTime = performance.now();
+    const startTime = Date.now();
     
     try {
         logger.info(t("sizing.starting_i18n_sizing_analysis"));
@@ -702,8 +701,8 @@ Generated: ${new Date().toISOString()}
       
       await this.generateHumanReadableReport();
       
-      const endTime = performance.now();
-      logger.info(t("sizing.analysis_completed", { duration: (endTime - startTime).toFixed(2) }));
+      const endTime = Date.now();
+      logger.info(t("sizing.analysis_completed", { duration: ((endTime - startTime) / 1000).toFixed(2) }));
       
     } catch (error) {
         logger.error(t("sizing.analysis_failed", { errorMessage: error.message }));
@@ -910,7 +909,7 @@ Options:
         logger.info(t("sizing.starting_analysis"));
         logger.info(t("sizing.source_directory", { sourceDir: this.sourceDir }));
       
-      const startTime = performance.now();
+      const startTime = Date.now();
       
       // Get language files
       const files = this.getLanguageFiles();
@@ -936,7 +935,7 @@ Options:
       // Generate reports if requested
       await this.generateHumanReadableReport();
       
-      const endTime = performance.now();
+      const endTime = Date.now();
       const duration = ((endTime - startTime) / 1000).toFixed(2);
       
       logger.info(t("sizing.analysis_completed", { duration }));

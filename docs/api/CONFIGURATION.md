@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",
@@ -42,6 +42,9 @@ Example:
 - `defaultLanguages`: target languages used by init/completion flows
 - `uiLanguage`: CLI message language
 - `setup.completed`: setup marker used by startup checks
+- `backup.enabled`: enable or disable backup creation
+- `backup.location`: separate backup root directory
+- `backup.maxBackups`: how many backups to keep before auto-cleanup
 
 ## Path and Value Resolution
 
@@ -85,6 +88,28 @@ i18ntk-validate --source-language=en
 ## Legacy Config Compatibility
 
 v2 keeps compatibility with older config locations during migration, but `.i18ntk-config` is the source of truth for current projects.
+
+## Setup Behavior
+
+When `setup.completed` is `true`, i18ntk treats the project as initialized and does not prompt for setup again.
+
+Backup settings are optional:
+
+- backups are disabled by default
+- backup location is stored separately from locale source files
+- backup retention is bounded so it does not recurse into backup output
+
+## Runtime Setup Example
+
+```js
+const runtime = require('i18ntk/runtime');
+
+runtime.initRuntime({
+  baseDir: './locales',
+  language: 'en',
+  fallbackLanguage: 'en'
+});
+```
 
 ## Security Notes
 

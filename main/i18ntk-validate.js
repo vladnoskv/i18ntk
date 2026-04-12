@@ -187,6 +187,17 @@ class I18nValidator {
   }
 
   // Get all available languages
+  isExcludedLanguageDirectory(name) {
+    if (!name || typeof name !== 'string') return true;
+    const lowered = name.toLowerCase();
+    return lowered.startsWith('backup-') ||
+           lowered === 'backup' ||
+           lowered === 'backups' ||
+           lowered === 'i18ntk-backups' ||
+           lowered === 'reports' ||
+           lowered === 'i18ntk-reports';
+  }
+
   getAvailableLanguages() {
     try {
       if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
@@ -196,7 +207,9 @@ class I18nValidator {
       const languages = fs.readdirSync(this.sourceDir)
         .filter(item => {
           const itemPath = path.join(this.sourceDir, item);
-          return fs.statSync(itemPath).isDirectory() && item !== this.config.sourceLanguage;
+          return fs.statSync(itemPath).isDirectory() &&
+                 item !== this.config.sourceLanguage &&
+                 !this.isExcludedLanguageDirectory(item);
         });
       
       return languages;
@@ -625,6 +638,38 @@ class I18nValidator {
     console.log(t('validate.help_message'));
   }
 
+  saveValidationSummaryReport(results = {}, success = true) {
+    try {
+      const outputDir = path.resolve(this.config.outputDir || './i18ntk-reports');
+      SecurityUtils.safeMkdirSync(outputDir, process.cwd(), { recursive: true });
+
+      const timestamp = new Date().toISOString();
+      const safeTimestamp = timestamp.replace(/[:.]/g, '-');
+      const reportPath = path.join(outputDir, `validation-summary-${safeTimestamp}.txt`);
+
+      const lines = [];
+      lines.push('I18NTK Validation Summary');
+      lines.push('========================');
+      lines.push(`Generated: ${timestamp}`);
+      lines.push(`Result: ${success ? 'PASS' : 'FAIL'}`);
+      lines.push(`Errors: ${this.errors.length}`);
+      lines.push(`Warnings: ${this.warnings.length}`);
+      lines.push('');
+      lines.push('Language Results');
+      lines.push('----------------');
+
+      Object.entries(results).forEach(([language, validation]) => {
+        const summary = validation?.summary || {};
+        lines.push(`${language}: ${summary.percentage || 0}% (${summary.translatedKeys || 0}/${summary.totalKeys || 0})`);
+      });
+
+      SecurityUtils.safeWriteFileSync(reportPath, lines.join('\n') + '\n', process.cwd(), 'utf8');
+      return reportPath;
+    } catch (error) {
+      return null;
+    }
+  }
+
   // Main validation process
   async validate() {
     try {
@@ -856,6 +901,11 @@ class I18nValidator {
       
       // Exit with appropriate code
       const success = !hasErrors && (!hasWarnings || !this.config.strictMode);
+      const summaryReportPath = this.saveValidationSummaryReport(results, success);
+      if (summaryReportPath) {
+        console.log('');
+        console.log(`📄 Validation summary report saved: ${summaryReportPath}`);
+      }
       
       return {
         success,

@@ -1,7 +1,7 @@
 {
   "name": "i18ntk",
-  "version": "2.2.0",
-  "description": "🚀 The fastest i18n toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
+  "version": "2.3.0",
+  "description": "🚀 The fastest internationalization toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
     "internationalization",
@@ -227,7 +227,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.2.0",
+    "version": "2.3.0",
     "releaseDate": "12/04/2026",
     "lastUpdated": "12/04/2026",
     "maintainer": "Vladimir Noskov",
@@ -237,11 +237,11 @@
     "majorChanges": [
       "CRITICAL FIX: Resolved sizing and usage-analysis regressions in v2 command flow.",
       "PACKAGING: Reduced publish footprint by removing internal development scripts and legacy fixed-file artifacts.",
-      "SECURITY: Hardened release checks and added explicit support guidance to update from pre-2.2.0 versions.",
+      "SECURITY: Hardened release checks and added explicit support guidance to update from pre-2.3.0 versions.",
       "I18N: Completed internal UI locale parity and actionable untranslated-key cleanup across supported languages."
     ],
     "breakingChanges": [],
-    "nextVersion": "2.3.0",
+    "nextVersion": "2.4.0",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -263,7 +263,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.2.0 may be unstable or insecure. Upgrade to 2.2.0 or newer."
+    "supportPolicy": "Versions earlier than 2.3.0 may be unstable or insecure. Upgrade to 2.3.0 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

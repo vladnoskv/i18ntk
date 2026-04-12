@@ -11,9 +11,11 @@ const { loadTranslations, t, refreshLanguageFromSettings } = require('../../../u
 const { createPrompt, isInteractive } = require('../../../utils/prompt-helper');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../../../utils/config');
 const { getUnifiedConfig, ensureInitialized, validateSourceDir } = require('../../../utils/config-helper');
+const { checkInitialized } = require('../../../utils/init-helper');
 const cliHelper = require('../../../utils/cli-helper');
 const pkg = require('../../../package.json');
 const SetupEnforcer = require('../../../utils/setup-enforcer');
+const FrameworkDetectionService = require('./FrameworkDetectionService');
 
 module.exports = class ConfigurationService {
   constructor(config = {}) {
@@ -54,7 +56,6 @@ module.exports = class ConfigurationService {
       loadTranslations(uiLanguage);
 
       // Validate source directory exists
-      const { validateSourceDir, displayPaths } = require('../../../utils/config-helper');
       try {
         validateSourceDir(this.config.sourceDir, 'i18ntk-manage');
       } catch (err) {
@@ -102,18 +103,13 @@ module.exports = class ConfigurationService {
       // Ensure setup is complete before running any operations
       await SetupEnforcer.checkSetupCompleteAsync();
 
-      prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
-      const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
+      prompt = createPrompt({ noPrompt: args.noPrompt });
+      const interactive = isInteractive({ noPrompt: args.noPrompt });
 
       // Load settings and UI language
       const settings = this.settings || (this.configManager.loadSettings ? this.configManager.loadSettings() : (this.configManager.getConfig ? this.configManager.getConfig() : {}));
       const uiLanguage = args.uiLanguage || settings.uiLanguage || settings.language || this.config.uiLanguage || 'en';
       loadTranslations(uiLanguage);
-
-      if (args.adminPin) {
-        // Handle admin PIN mode
-        this.prompt = async () => '';
-      }
 
       if (args.help) {
         this.showHelp();
@@ -155,10 +151,6 @@ module.exports = class ConfigurationService {
    * @returns {Promise<Object>} Configuration object if initialized
    */
   async ensureInitializedOrExit(prompt) {
-    const { checkInitialized } = require('../../../utils/init-helper');
-    const cliHelper = require('../../../utils/cli-helper');
-    const pkg = require('../../../package.json');
-
     const { initialized, config } = await checkInitialized();
 
     if (!initialized) {
@@ -224,7 +216,6 @@ module.exports = class ConfigurationService {
         console.log('Framework detection prompt will be suppressed for this version.');
       } else if (action === 'detect') {
         // Run framework detection
-        const FrameworkDetectionService = require('./FrameworkDetectionService');
         const frameworkService = new FrameworkDetectionService();
         frameworkService.initialize(this.configManager);
 
@@ -260,7 +251,6 @@ module.exports = class ConfigurationService {
    * @returns {Promise<boolean>} True if frameworks detected, false otherwise
    */
   async checkI18nDependencies() {
-    const FrameworkDetectionService = require('./FrameworkDetectionService');
     const frameworkService = new FrameworkDetectionService();
     frameworkService.initialize(this.configManager);
     return await frameworkService.checkI18nDependencies(null);
@@ -274,7 +264,6 @@ module.exports = class ConfigurationService {
    * @returns {Promise<Object>} Updated configuration
    */
   async maybePromptFramework(prompt, cfg, currentVersion) {
-    const FrameworkDetectionService = require('./FrameworkDetectionService');
     const frameworkService = new FrameworkDetectionService();
     frameworkService.initialize(this.configManager);
     return await frameworkService.maybePromptFramework(prompt, cfg, currentVersion);
@@ -392,7 +381,6 @@ module.exports = class ConfigurationService {
    * @returns {Promise<string>} User input or empty string
    */
   prompt(question) {
-    const cliHelper = require('../../../utils/cli-helper');
     // If interactive not available, return empty string to avoid hangs
     if (!process.stdin.isTTY || process.stdin.destroyed) {
       console.log('\n⚠️ Interactive input not available, using default response.');

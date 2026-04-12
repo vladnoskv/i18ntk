@@ -736,6 +736,29 @@ class InitService {
     }
   }
 
+  async promptBackupConfiguration(skipPrompt = false) {
+    const defaultBackupConfig = { enabled: false, maxBackups: 1, location: './i18ntk-backups' };
+    if (skipPrompt || !process.stdin.isTTY) {
+      return null;
+    }
+
+    const { ask } = require('../../../utils/cli');
+    console.log('\nBackup Settings');
+    console.log('Backups are disabled by default to avoid backup recursion and repo pollution.');
+    const enableAnswer = await ask('Enable automatic backups? (y/N): ');
+    const enabled = ['y', 'yes'].includes(String(enableAnswer || '').trim().toLowerCase());
+
+    if (!enabled) {
+      return defaultBackupConfig;
+    }
+
+    const keepAnswer = await ask('How many backups should be kept automatically (1-3, default 1): ');
+    const parsedKeep = parseInt(String(keepAnswer || '').trim(), 10);
+    const maxBackups = Number.isInteger(parsedKeep) ? Math.min(Math.max(parsedKeep, 1), 3) : 1;
+
+    return { enabled: true, maxBackups, location: './i18ntk-backups' };
+  }
+
   // Interactive language selection
   async selectLanguages(skipPrompt = false) {
     if (skipPrompt || !process.stdin.isTTY) {
@@ -849,6 +872,19 @@ class InitService {
       const { flushStdout } = require('../../../utils/cli');
       await flushStdout();
       await this.promptAdminPinSetup();
+    }
+
+    const backupSettings = await this.promptBackupConfiguration(args.noPrompt);
+    if (backupSettings) {
+      await configManager.updateConfig({
+        backup: {
+          ...(this.config.backup || {}),
+          ...backupSettings
+        }
+      });
+      this.config.backup = { ...(this.config.backup || {}), ...backupSettings };
+    } else if (!this.config.backup) {
+      this.config.backup = { enabled: false, maxBackups: 1, location: './i18ntk-backups' };
     }
 
     // Get target languages - use args.languages if provided

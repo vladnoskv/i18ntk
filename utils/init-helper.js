@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const configManager = require('./config-manager');
 const SecurityUtils = require('./security');
+const packageJson = require('../package.json');
 
 function ensureDirectory(dirPath) {
   if (!dirPath || typeof dirPath !== 'string') return;
@@ -46,7 +47,7 @@ function hasSourceLanguageFiles(sourceDir, sourceLanguage) {
  */
 async function checkInitialized(options = {}) {
   const settings = configManager.getConfig ? configManager.getConfig() : {};
-  const currentVersion = require('../package.json').version;
+  const currentVersion = packageJson.version;
   const projectConfigPath = configManager.CONFIG_PATH || path.join(process.cwd(), '.i18ntk-config');
   const configDir = path.dirname(projectConfigPath);
   
@@ -135,7 +136,7 @@ async function markAsInitialized(config) {
   const projectConfigPath = configManager.CONFIG_PATH || path.join(process.cwd(), '.i18ntk-config');
   const configDir = path.dirname(projectConfigPath);
   const initFilePath = path.join(configDir, 'initialization.json');
-  const currentVersion = require('../package.json').version;
+  const currentVersion = packageJson.version;
   const now = new Date().toISOString();
   const sourceDir = config?.sourceDir || settings.sourceDir || './locales';
   const sourceLanguage = config?.sourceLanguage || settings.sourceLanguage || 'en';

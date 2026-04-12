@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-04-12
+
+### Added
+- Added validation summary report output after validation runs.
+- Added init-time backup configuration prompt (default disabled, optional enable).
+
+### Fixed
+- Fixed backup recursion/pollution risk by moving automated fixer backups to a dedicated backup root.
+- Fixed backup retention behavior to keep 1 by default with enforced bounds up to 3.
+- Fixed language discovery in validate/fixer flows to ignore backup/report directories.
+
+### Changed
+- Updated package/docs/version metadata to `2.3.0`.
+- Updated support policy guidance to recommend upgrading from versions below `2.3.0`.
+
 ## [2.2.0] - 2026-04-12
 
 ### Added

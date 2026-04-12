@@ -1,3 +1,5 @@
+const packageJson = require('../package.json');
+
 /**
  * JSON Output Utility for i18ntk commands
  * Provides consistent machine-readable output format for CI/CD integration
@@ -23,7 +25,6 @@ class JsonOutput {
 
   getPackageVersion() {
     try {
-      const packageJson = require('../package.json');
       return packageJson.version;
     } catch (error) {
       return '1.8.3';

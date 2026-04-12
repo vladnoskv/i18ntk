@@ -7,6 +7,7 @@
 const path = require('path');
 const fs = require('fs');
 const SecurityUtils = require('../../../utils/security');
+const cliHelper = require('../../../utils/cli-helper');
 
 module.exports = class FileManagementService {
   constructor(config = {}) {
@@ -108,7 +109,6 @@ module.exports = class FileManagementService {
     const authRequired = await this.isAuthRequiredForScript('deleteReports');
     if (authRequired) {
       console.log(`\n${ui ? ui.t('adminPin.protectedAccess') : 'Protected Access'}`);
-      const cliHelper = require('../../../utils/cli-helper');
       const pin = await cliHelper.promptPin((ui ? ui.t('adminPin.enterPin') : 'Enter PIN: ') + ': ');
       const isValid = await this.verifyPin(pin);
       if (!isValid) {

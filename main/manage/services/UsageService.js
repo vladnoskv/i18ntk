@@ -514,7 +514,19 @@ class UsageService {
 
   collectPlaceholderKeys(obj, prefix = '', language) {
     const patterns = this.placeholderStyles[language] || [];
-    const regexes = patterns.map(p => new RegExp(p));
+    const regexes = patterns.reduce((compiled, pattern) => {
+      try {
+        compiled.push(new RegExp(pattern));
+      } catch (error) {
+        SecurityUtils.logSecurityEvent('Invalid placeholder regex pattern skipped', 'warn', {
+          component: 'i18ntk-usage',
+          language,
+          pattern,
+          error: error.message
+        });
+      }
+      return compiled;
+    }, []);
     if (typeof obj !== 'object' || obj === null) return;
 
     for (const [key, value] of Object.entries(obj)) {

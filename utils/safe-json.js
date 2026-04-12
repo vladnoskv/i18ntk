@@ -1,5 +1,5 @@
 // utils/safe-json.js
-const { readFile } = require('fs/promises');
+const fs = require('fs');
 
 function stripBOM(s) {
   if (typeof s === 'string' && s.charCodeAt(0) === 0xFEFF) return s.slice(1);
@@ -13,7 +13,7 @@ function stripBOM(s) {
  * - Single, typed error (no loops)
  */
 async function readJsonSafe(filePath, { maxBytes = 1_000_000 } = {}) {
-  const buf = await readFile(filePath);
+  const buf = await fs.promises.readFile(filePath);
   if (buf.length === 0) {
     const err = new Error('Empty JSON file');
     err.code = 'EJSONEMPTY';

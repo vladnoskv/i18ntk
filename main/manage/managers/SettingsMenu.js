@@ -4,6 +4,8 @@
  */
 
 const { t } = require('../../../utils/i18n-helper');
+const cliHelper = require('../../../utils/cli-helper');
+const SettingsCLI = require('../../../settings/settings-cli');
 
 module.exports = class SettingsMenu {
   constructor(manager) {
@@ -20,7 +22,6 @@ module.exports = class SettingsMenu {
       const authRequired = await this.adminAuth.isAuthRequiredForScript('settingsMenu');
       if (authRequired) {
         console.log(`\n${t('adminPin.protectedAccess')}`);
-        const cliHelper = require('../../../utils/cli-helper');
         const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
         const isValid = await this.adminAuth.verifyPin(pin);
 
@@ -34,7 +35,6 @@ module.exports = class SettingsMenu {
         console.log(t('adminPin.accessGranted'));
       }
 
-      const SettingsCLI = require('../../../settings/settings-cli');
       const settingsCLI = new SettingsCLI();
       await settingsCLI.run();
     } catch (error) {

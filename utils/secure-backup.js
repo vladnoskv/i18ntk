@@ -1,5 +1,6 @@
 const crypto = require('crypto');
-const fs = require('fs/promises');
+const fs = require('fs');
+const fsp = fs.promises;
 const path = require('path');
 const zlib = require('zlib');
 const { promisify } = require('util');
@@ -180,7 +181,7 @@ class SecureBackupManager {
       const backupPath = path.join(this.config.backupDir, backupName);
       
       // Write the backup file
-      await fs.writeFile(backupPath, JSON.stringify(backupData, null, 2), 'utf8');
+      await fsp.writeFile(backupPath, JSON.stringify(backupData, null, 2), 'utf8');
       
       // Clean up old backups if we've exceeded the limit
       await this.cleanupOldBackups();
@@ -203,7 +204,7 @@ class SecureBackupManager {
   async restoreBackup(backupPath, password) {
     try {
       // Read the backup file
-      const backupData = JSON.parse(await fs.readFile(backupPath, 'utf8'));
+      const backupData = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
       
       // Validate the backup
       if (backupData.header !== BACKUP_HEADER) {
@@ -236,7 +237,7 @@ class SecureBackupManager {
   async listBackups() {
     try {
       // Read the backup directory
-      const files = (await fs.readdir(this.config.backupDir, { withFileTypes: true }))
+      const files = (await fsp.readdir(this.config.backupDir, { withFileTypes: true }))
       .filter(dirent => dirent.isFile())
       .map(dirent => dirent.name);
       
@@ -247,7 +248,7 @@ class SecureBackupManager {
       const backups = await Promise.all(
         backupFiles.map(async (file) => {
           const filePath = path.join(this.config.backupDir, file);
-          const stat = await fs.stat(filePath);
+          const stat = await fsp.stat(filePath);
           if (stat.isDirectory()) {
             throw new Error('Backup path is a directory');
           }
@@ -290,7 +291,7 @@ class SecureBackupManager {
       const deleted = [];
       for (const backup of toDelete) {
         try {
-          await fs.unlink(backup.path);
+          await fsp.unlink(backup.path);
           deleted.push(backup.name);
         } catch (error) {
           console.error(`Failed to delete backup ${backup.name}:`, error);
@@ -310,7 +311,7 @@ class SecureBackupManager {
   async verifyBackup(backupPath, password) {
     try {
       // Read the backup file
-      const backupData = JSON.parse(await fs.readFile(backupPath, 'utf8'));
+      const backupData = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
       
       // Try to decrypt a small part to verify the password
       const testData = await this.decryptData(backupData, password);

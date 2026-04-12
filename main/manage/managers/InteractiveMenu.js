@@ -4,6 +4,8 @@
  */
 
 const { t } = require('../../../utils/i18n-helper');
+const cliHelper = require('../../../utils/cli-helper');
+const summaryTool = require('../../i18ntk-summary');
 
 module.exports = class InteractiveMenu {
   constructor(manager) {
@@ -89,7 +91,6 @@ module.exports = class InteractiveMenu {
         const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
         if (authRequired) {
           console.log(`\n${t('adminCli.protectedAccess')}`);
-          const cliHelper = require('../../../utils/cli-helper');
           const pin = await cliHelper.promptPin(t('adminCli.enterPin') + ': ');
           const isValid = await this.adminAuth.verifyPin(pin);
 
@@ -105,7 +106,6 @@ module.exports = class InteractiveMenu {
 
         console.log(t('summary.status.generating'));
         try {
-          const summaryTool = require('../../i18ntk-summary');
           const summary = new summaryTool();
           await summary.run({ fromMenu: true });
           console.log(t('summary.status.completed'));

@@ -2,7 +2,8 @@
 
 'use strict';
 
-const fs = require('fs/promises');
+const fs = require('fs');
+const fsp = fs.promises;
 const path = require('path');
 
 // Simple CLI argument parser
@@ -36,7 +37,6 @@ function parseArgs(args) {
 
   return result;
 }
-const { existsSync } = require('fs');
 const configManager = require('../utils/config-manager');
 const { logger } = require('../utils/logger');
 const { colors } = require('../utils/logger');
@@ -44,8 +44,8 @@ const prompt = require('../utils/prompt');
 
 // Backup configuration
 const config = configManager.getConfig();
-const backupDir = path.join(process.cwd(), 'i18n-backups');
-const maxBackups = config.backup?.maxBackups || 10;
+const backupDir = path.join(process.cwd(), 'i18ntk-backups');
+const maxBackups = Math.min(Math.max(parseInt(config.backup?.maxBackups, 10) || 1, 1), 3);
 
 // Main function to handle commands
 async function main() {
@@ -121,7 +121,7 @@ async function handleCreate(args) {
 
   // Create backup directory if it doesn't exist
   try {
-    await fs.mkdir(outputDir, { recursive: true });
+    await fsp.mkdir(outputDir, { recursive: true });
     logger.debug(`Created backup directory: ${outputDir}`);
   } catch (err) {
     if (err.code !== 'EEXIST') {
@@ -134,7 +134,7 @@ async function handleCreate(args) {
   // Validate directory
   const sourceDir = path.resolve(dir);
   try {
-    const stats = await fs.stat(sourceDir);
+    const stats = await fsp.stat(sourceDir);
     if (!stats.isDirectory()) {
       throw new Error(`Path exists but is not a directory: ${sourceDir}`);
     }
@@ -149,7 +149,7 @@ async function handleCreate(args) {
   logger.info('\nCreating backup...');
   
   // Read all files in the directory
-  const files = (await fs.readdir(sourceDir, { withFileTypes: true }))
+  const files = (await fsp.readdir(sourceDir, { withFileTypes: true }))
     .filter(dirent => dirent.isFile() && dirent.name.endsWith('.json'))
     .map(dirent => dirent.name);
     
@@ -163,7 +163,7 @@ async function handleCreate(args) {
   for (const file of files) {
     const filePath = path.join(sourceDir, file);
     try {
-      const content = JSON.parse(await fs.readFile(filePath, 'utf8'));
+      const content = JSON.parse(await fsp.readFile(filePath, 'utf8'));
       translations[file] = content;
     } catch (error) {
       logger.error(`Could not read file ${file}: ${error.message}`);
@@ -171,8 +171,8 @@ async function handleCreate(args) {
   }
   
   // Create the backup
-  await fs.writeFile(backupPath, JSON.stringify(translations, null, 2));
-  const stats = await fs.stat(backupPath);
+  await fsp.writeFile(backupPath, JSON.stringify(translations, null, 2));
+  const stats = await fsp.stat(backupPath);
   
   logger.success('Backup created successfully');
   logger.info(`  Location: ${backupPath}`);
@@ -203,12 +203,12 @@ async function handleRestore(args) {
   
   try {
     // Read the backup file
-    const backupData = await fs.readFile(backupPath, 'utf8');
+    const backupData = await fsp.readFile(backupPath, 'utf8');
     const translations = JSON.parse(backupData);
     
     // Create output directory if it doesn't exist
     try {
-      await fs.mkdir(outputDir, { recursive: true });
+      await fsp.mkdir(outputDir, { recursive: true });
     } catch (err) {
       if (err.code !== 'EEXIST') throw err;
     }
@@ -216,7 +216,7 @@ async function handleRestore(args) {
     // Write the restored files
     for (const [file, content] of Object.entries(translations)) {
       const filePath = path.join(outputDir, file);
-      await fs.writeFile(filePath, JSON.stringify(content, null, 2));
+      await fsp.writeFile(filePath, JSON.stringify(content, null, 2));
     }
     
     logger.success('Backup restored successfully');
@@ -230,7 +230,7 @@ async function handleList() {
   try {
     // Ensure backup directory exists
     try {
-      await fs.access(backupDir);
+      await fsp.access(backupDir);
     } catch (err) {
       if (err.code === 'ENOENT') {
         logger.warn('No backups found. The backup directory does not exist yet.');
@@ -240,14 +240,14 @@ async function handleList() {
       return;
     }
 
-    const files = await fs.readdir(backupDir);
+    const files = await fsp.readdir(backupDir);
     const backups = [];
     
     for (const file of files) {
       if (file.startsWith('backup-') && file.endsWith('.json')) {
         try {
           const filePath = path.join(backupDir, file);
-          const stats = await fs.stat(filePath);
+        const stats = await fsp.stat(filePath);
           backups.push({
             name: file,
             path: filePath,
@@ -307,14 +307,14 @@ async function handleVerify(args) {
   logger.info('\nVerifying backup...');
   
   try {
-    const data = await fs.readFile(backupPath, 'utf8');
+    const data = await fsp.readFile(backupPath, 'utf8');
     const content = JSON.parse(data);
     
     if (typeof content === 'object' && content !== null) {
       const fileCount = Object.keys(content).length;
       logger.success('Backup is valid');
       logger.info(`  Contains ${fileCount} translation files`);
-      logger.info(`  Last modified: ${(await fs.stat(backupPath)).mtime.toLocaleString()}`);
+      logger.info(`  Last modified: ${(await fsp.stat(backupPath)).mtime.toLocaleString()}`);
     } else {
       throw new Error('Invalid backup format');
     }
@@ -331,7 +331,7 @@ async function handleCleanup(args) {
   logger.info('\nCleaning up old backups...');
   
   try {
-    const files = await fs.readdir(backupDir);
+    const files = await fsp.readdir(backupDir);
     const backupFiles = files
       .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
       .map(file => ({
@@ -352,7 +352,7 @@ async function handleCleanup(args) {
     // Delete old backups
     for (const file of toDelete) {
       try {
-        await fs.unlink(file.path);
+        await fsp.unlink(file.path);
         logger.info(`  - Deleted: ${file.name}`);
       } catch (err) {
         logger.error(`  - Failed to delete ${file.name}: ${err.message}`);
@@ -365,9 +365,7 @@ async function handleCleanup(args) {
   } catch (error) {
     logger.error('Error cleaning up backups:');
     logger.error(`  ${error.message}`);
-    if (process.env.DEBUG) {
-      console.error(error);
-    }
+    logger.debug(error.stack || error.message);
     process.exit(1);
   }
 }

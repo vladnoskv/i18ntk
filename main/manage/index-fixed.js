@@ -286,8 +286,8 @@ class I18nManager {
             // Ensure setup is complete before running any operations
             await SetupEnforcer.checkSetupCompleteAsync();
 
-            prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
-            const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
+            prompt = createPrompt({ noPrompt: args.noPrompt });
+            const interactive = isInteractive({ noPrompt: args.noPrompt });
 
             // Load settings and UI language
             const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
@@ -296,11 +296,6 @@ class I18nManager {
 
             // Initialize CommandRouter
             this.commandRouter = new CommandRouter(this.config, this.ui, this.adminAuth);
-
-            if (args.adminPin) {
-                this.adminAuth.verifyPin = async () => true;
-                this.prompt = async () => '';
-            }
 
             if (args.help) {
                 this.showHelp();

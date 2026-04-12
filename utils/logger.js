@@ -48,7 +48,7 @@ const logger = {
   // Debug logging (only when DEBUG env var is set or log level is debug)
   debug: (message) => {
     const logLevel = envManager.get('I18NTK_LOG_LEVEL');
-    const debugEnabled = process.env.DEBUG || logLevel === 'debug';
+    const debugEnabled = logLevel === 'debug';
     
     if (debugEnabled) {
       const output = `[DEBUG] ${message}`;

@@ -11,6 +11,8 @@ const SecurityUtils = require('./security');
 const {loadTranslations} = require('./i18n-helper');
 const SettingsManager = require('../settings/settings-manager');
 const { envManager } = require('./env-manager');
+const { checkInitialized } = require('./init-helper');
+const { closeGlobalReadline } = require('./cli');
 const settingsManager = new SettingsManager();
 
 const { ask } = require('./cli');
@@ -133,6 +135,11 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       cfg.processing?.notTranslatedMarker ||
       'NOT_TRANSLATED';
     const markerList = Array.isArray(rawMarkers) ? rawMarkers : [rawMarkers];
+    const configuredBackupKeep = parseInt(cfg.backup?.maxBackups, 10);
+    const normalizedBackupMaxBackups = Number.isInteger(configuredBackupKeep)
+      ? Math.min(Math.max(configuredBackupKeep, 1), 3)
+      : 1;
+    const normalizedBackupLocation = cfg.backup?.location || './i18ntk-backups';
 
     const config = {
       ...cfg,
@@ -144,10 +151,16 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       excludeFiles: cfg.excludeFiles || cfg.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
       excludeDirs: cfg.excludeDirs || cfg.processing?.excludeDirs || ['node_modules', '.next', '.git', 'dist', 'build'],
       strictMode: cliArgs.strictMode || cfg.strictMode || false,
-      backupDir: path.join(settingsDir, 'backups'),
+      backupDir: path.resolve(projectRoot, normalizedBackupLocation),
       tempDir: path.join(settingsDir, 'temp'),
       cacheDir: path.join(settingsDir, '.cache'),
       configDir: settingsDir,
+      backup: {
+        ...(cfg.backup || {}),
+        enabled: cfg.backup?.enabled === true,
+        location: normalizedBackupLocation,
+        maxBackups: normalizedBackupMaxBackups
+      },
       settings: {
         defaultLanguages: cfg.defaultLanguages || ['de', 'es', 'fr', 'ru'],
         processing: { ...cfg.processing },
@@ -170,7 +183,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
  * @returns {object} Environment configuration
  */
 function getEnvironmentConfig() {
-  const settings = require('../settings/settings-manager').getAllSettings();
+  const settings = settingsManager.getAllSettings();
   return {
     nodeEnv: settings.nodeEnv || 'production',
     isProduction: (settings.nodeEnv || 'production') === 'production',
@@ -425,7 +438,6 @@ function displayPaths(cfg = {}) {
 // Ensure project has been initialized with source language files
 async function ensureInitialized(cfg) {
   try {
-    const { checkInitialized } = require('./init-helper');
     const sourceDir = cfg?.sourceDir || './locales';
     const sourceLanguage = cfg?.sourceLanguage || 'en';
 
@@ -445,7 +457,6 @@ async function ensureInitialized(cfg) {
 
     const langDir = path.join(sourceDir, sourceLanguage);
     const answer = await ask(`Source language files not found in ${langDir}. Run initialization now? (y/N) `);
-    const { closeGlobalReadline } = require('./cli');
     closeGlobalReadline();
 
     if (answer.trim().toLowerCase().startsWith('y')) {

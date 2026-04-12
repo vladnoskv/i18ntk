@@ -5,6 +5,7 @@
  */
 
 const AdminAuth = require('../../../utils/admin-auth');
+const cliHelper = require('../../../utils/cli-helper');
 
 module.exports = class AuthenticationService {
   constructor(config = {}) {
@@ -74,7 +75,6 @@ module.exports = class AuthenticationService {
     }
 
     console.log(ui ? ui.t('adminCli.authRequired') : 'Admin authentication required');
-    const cliHelper = require('../../../utils/cli-helper');
     const pin = await cliHelper.promptPin(ui ? ui.t('adminCli.enterPin') : 'Enter PIN: ');
     const isValid = await this.verifyPin(pin);
 
@@ -131,7 +131,6 @@ module.exports = class AuthenticationService {
    * @returns {Promise<string>} User input or empty string
    */
   async prompt(question) {
-    const cliHelper = require('../../../utils/cli-helper');
     // If interactive not available, return empty string to avoid hangs
     if (!process.stdin.isTTY || process.stdin.destroyed) {
       console.log('\n⚠️ Interactive input not available, using default response.');

@@ -9,7 +9,7 @@ class SettingsManager {
         // Use centralized .i18ntk-settings file as single source of truth
         this.configDir = path.resolve(__dirname, '..');
         this.configFile = path.join(process.cwd(), '.i18ntk-settings');
-        this.backupDir = path.join(process.cwd(), 'backups');
+        this.backupDir = path.join(process.cwd(), 'i18ntk-backups');
         this.saveTimeout = null;
         
         this.defaultConfig = {
@@ -77,9 +77,9 @@ class SettingsManager {
             },
             "behavior": {
                 "autoSave": true,
-                "autoBackup": true,
+                "autoBackup": false,
                 "backupFrequency": "weekly",
-                "maxBackups": 10,
+                "maxBackups": 1,
                 "confirmDestructive": true,
                 "validateOnSave": true,
                 "formatOnSave": true,
@@ -123,10 +123,11 @@ class SettingsManager {
                 "customFormatters": []
             },
             "backup": {
-                "enabled": true,
-                "location": "./backups",
+                "enabled": false,
+                "location": "./i18ntk-backups",
                 "frequency": "daily",
                 "retention": 7,
+                "maxBackups": 1,
                 "compression": true,
                 "encryption": true,
                 "autoCleanup": true,
@@ -186,8 +187,8 @@ class SettingsManager {
                     "\\\\{\\\\w+\\\\}",
                     "\\\\[\\\\[\\\\w+\\\\]\\\\]",
                     "\\\\{\\\\{t\\\\s+['\"][^'\"]*['\"]\\\\}\\\\}",
-                    "t\\\\(['\"][^'\"]*['\"]",
-                    "i18n\\\\.t\\\\(['\"][^'\"]*['\"]"
+                    "t\\\\(['\"][^'\"]*['\"]\\\\)",
+                    "i18n\\\\.t\\\\(['\"][^'\"]*['\"]\\\\)"
                 ],
                 "de": [
                     "%\\\\{[^}]+\\\\}",
@@ -456,17 +457,25 @@ class SettingsManager {
      */
     createBackup() {
         try {
-            if (!SecurityUtils.safeExistsSync(this.backupDir)) {
-                fs.mkdirSync(this.backupDir, { recursive: true });
+            const configuredBackupLocation = this.settings?.backup?.location || './i18ntk-backups';
+            const resolvedBackupDir = path.resolve(process.cwd(), configuredBackupLocation);
+            const validatedBackupDir = SecurityUtils.validatePath(resolvedBackupDir, process.cwd());
+            if (!validatedBackupDir) {
+                console.error('Error creating backup: Invalid backup directory');
+                return;
+            }
+
+            if (!SecurityUtils.safeExistsSync(validatedBackupDir, process.cwd())) {
+                fs.mkdirSync(validatedBackupDir, { recursive: true });
             }
             
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const backupFile = path.join(this.backupDir, `config-${timestamp}.json`);
+            const backupFile = path.join(validatedBackupDir, `config-${timestamp}.json`);
             
             fs.copyFileSync(this.configFile, backupFile);
             
             // Clean old backups
-            this.cleanupOldBackups();
+            this.cleanupOldBackups(validatedBackupDir);
         } catch (error) {
             console.error('Error creating backup:', error.message);
         }
@@ -475,18 +484,26 @@ class SettingsManager {
     /**
      * Clean old backup files
      */
-    cleanupOldBackups() {
+    cleanupOldBackups(backupDirectory = null) {
         try {
-            const files = fs.readdirSync(this.backupDir)
+            const activeBackupDir = backupDirectory || this.backupDir;
+            if (!SecurityUtils.safeExistsSync(activeBackupDir, process.cwd())) {
+                return;
+            }
+
+            const files = fs.readdirSync(activeBackupDir)
                 .filter(file => file.startsWith('config-') && file.endsWith('.json'))
                 .map(file => ({
                     name: file,
-                    path: path.join(this.backupDir, file),
-                    mtime: fs.statSync(path.join(this.backupDir, file)).mtime
+                    path: path.join(activeBackupDir, file),
+                    mtime: fs.statSync(path.join(activeBackupDir, file)).mtime
                 }))
                 .sort((a, b) => b.mtime - a.mtime);
             
-            const maxBackups = this.settings.backup?.maxBackups || 10;
+            const configuredKeep = parseInt(this.settings?.backup?.maxBackups, 10);
+            const maxBackups = Number.isInteger(configuredKeep)
+                ? Math.min(Math.max(configuredKeep, 1), 3)
+                : 1;
             if (files.length > maxBackups) {
                 files.slice(maxBackups).forEach(file => {
                     fs.unlinkSync(file.path);
@@ -519,8 +536,6 @@ class SettingsManager {
      * Complete reset - removes all configuration files and resets to fresh install state
      */
     async completeReset() {
-        const fs = require('fs');
-        const path = require('path');
         
         try {
             console.log('🧹 Performing complete reset...');
@@ -967,3 +982,4 @@ class SettingsManager {
 }
 
 module.exports = SettingsManager;
+

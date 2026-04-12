@@ -13,6 +13,7 @@ const { loadTranslations, t } = require('../../../utils/i18n-helper');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../../../utils/config-helper');
 const SecurityUtils = require('../../../utils/security');
 const AdminCLI = require('../../../utils/admin-cli');
+const AdminAuth = require('../../../utils/admin-auth');
 const watchLocales = require('../../../utils/watch-locales');
 const JsonOutput = require('../../../utils/json-output');
 
@@ -81,7 +82,6 @@ class AnalyzeCommand {
             this.outputDir = this.config.outputDir;
 
             // Validate source directory exists
-            const { validateSourceDir } = require('../../../utils/config-helper');
             validateSourceDir(this.sourceDir, 'i18ntk-analyze');
 
         } catch (error) {
@@ -908,14 +908,12 @@ class AnalyzeCommand {
             const isCalledDirectly = require.main === module;
             if (isCalledDirectly && !args.noPrompt && !fromMenu) {
                 // Only check admin authentication when running directly and not in no-prompt mode
-                const AdminAuth = require('../../../utils/admin-auth');
                 const adminAuth = new AdminAuth();
                 await adminAuth.initialize();
 
                 const isRequired = await adminAuth.isAuthRequired();
                 if (isRequired) {
                     console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'analyze translations' }));
-                    const cliHelper = require('../../../utils/cli-helper');
                     const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
                     const isValid = await this.adminAuth.verifyPin(pin);
 

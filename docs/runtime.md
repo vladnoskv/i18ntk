@@ -1,4 +1,6 @@
-# i18ntk Runtime API (v2)
+# i18ntk Runtime API (v2.3.0)
+
+Use the runtime API when your application needs to read translation JSON files directly at runtime.
 
 ## Install
 
@@ -8,36 +10,26 @@ npm install i18ntk
 
 ## Import
 
-```ts
-import {
-  initRuntime,
-  t,
-  translate,
-  setLanguage,
-  getLanguage,
-  getAvailableLanguages,
-  refresh
-} from 'i18ntk/runtime';
-```
-
 CommonJS:
 
 ```js
-const {
-  initRuntime,
-  t,
-  translate,
-  setLanguage,
-  getLanguage,
-  getAvailableLanguages,
-  refresh
-} = require('i18ntk/runtime');
+const runtime = require('i18ntk/runtime');
 ```
+
+## Exported API
+
+- `initRuntime(options)`
+- `t(key, params?)`
+- `translate(key, params?)`
+- `setLanguage(language)`
+- `getLanguage()`
+- `getAvailableLanguages()`
+- `refresh(language?)`
 
 ## Initialization
 
-```ts
-initRuntime({
+```js
+runtime.initRuntime({
   baseDir: './locales',
   language: 'en',
   fallbackLanguage: 'en',
@@ -48,37 +40,43 @@ initRuntime({
 
 Supported options:
 
-- `baseDir`: locales directory
+- `baseDir`: explicit locale base directory
 - `language`: active language
-- `fallbackLanguage`: fallback language when key is missing
-- `keySeparator`: nested key separator (default `.`)
-- `preload`: preload active and fallback language data
+- `fallbackLanguage`: fallback language for missing keys
+- `keySeparator`: nested key separator, defaults to `.`
+- `preload`: pre-cache active and fallback language files
 
-## Translation Usage
+## Example Usage
 
-```ts
-const a = t('common.hello');
-const b = t('common.greeting', { name: 'Ada' });
-const c = translate('menu.home');
+```js
+const runtime = require('i18ntk/runtime');
 
-setLanguage('fr');
-const current = getLanguage();
+runtime.initRuntime({
+  baseDir: './locales',
+  language: 'en',
+  fallbackLanguage: 'en',
+  preload: true
+});
 
-const languages = getAvailableLanguages();
-refresh('fr');
+console.log(runtime.t('common.hello'));
+console.log(runtime.translate('menu.home'));
+
+runtime.setLanguage('fr');
+console.log(runtime.getLanguage());
+console.log(runtime.getAvailableLanguages());
+runtime.refresh('fr');
 ```
 
-Behavior:
+## Behavior
 
-- Missing key in active language falls back to `fallbackLanguage`
-- If still missing, the key string is returned
-- Interpolation supports `{{name}}` and `{name}`
+- The runtime reads JSON files only.
+- Missing keys fall back to the fallback language when available.
+- If a key is still missing, the key string is returned.
+- Interpolation supports `{{name}}` and `{name}`.
 
-## Locale Structure
+## Directory Layout
 
-Runtime supports both:
-
-1. Directory-per-language
+Both locale layouts are supported:
 
 ```text
 locales/
@@ -86,7 +84,7 @@ locales/
   fr/common.json
 ```
 
-2. Single-file-per-language
+and:
 
 ```text
 locales/
@@ -94,18 +92,18 @@ locales/
   fr.json
 ```
 
-## Base Directory Resolution Order
+## Base Directory Resolution
 
-When `baseDir` is not provided, runtime resolves locales in this order:
+If `baseDir` is not provided, runtime uses:
 
 1. `I18NTK_RUNTIME_DIR`
 2. `I18NTK_I18N_DIR`
 3. `I18NTK_SOURCE_DIR`
 4. `.i18ntk-config` (`i18nDir` or `sourceDir`)
-5. `./locales` relative to project root
+5. `./locales` relative to the project root
 
 ## Notes
 
-- Runtime API is zero dependency.
-- Runtime API is framework agnostic.
-- Runtime API reads JSON locale files only.
+- Runtime is zero dependency.
+- Runtime is framework agnostic.
+- Use the CLI for analysis, validation, and completion workflows.

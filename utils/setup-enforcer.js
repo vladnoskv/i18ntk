@@ -12,6 +12,22 @@ const fs = require('fs');
 const path = require('path');
 const { blue, yellow, gray, cyan, green, red } = require('./colors-new');
 const SecurityUtils = require('./security');
+const I18nSetupModule = require('../main/i18ntk-setup');
+
+async function runSetupModule() {
+    if (I18nSetupModule && typeof I18nSetupModule.run === 'function') {
+        return await I18nSetupModule.run();
+    }
+
+    if (typeof I18nSetupModule === 'function') {
+        const setupManager = new I18nSetupModule();
+        if (typeof setupManager.setup === 'function') {
+            return await setupManager.setup();
+        }
+    }
+
+    throw new Error('Setup module does not expose a runnable entrypoint');
+}
 
 class SetupEnforcer {
     static _setupCheckInProgress = false;
@@ -110,33 +126,16 @@ class SetupEnforcer {
                 console.log(green(`${getIcon('rocket')} Running setup...`));
 
                 try {
-                    // Import and run setup directly
+                    // Import once at module scope and execute the stable entrypoint.
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (SecurityUtils.safeExistsSync(setupPath)) {
-                        try {
-                            const setup = require(setupPath);
-                            // Use the run function which properly instantiates the class
-                            if (setup && typeof setup.run === 'function') {
-                                await setup.run();
-                            } else {
-                                // Fallback: instantiate the class directly
-                                const I18nSetupManager = require(setupPath);
-                                const setupManager = new I18nSetupManager();
-                                await setupManager.setup();
-                            }
-                            console.log(gray('You can now run your original command.'));
-                            resolve(true);
-                        } catch (error) {
-                            console.error(red(`${getIcon('cross')} Setup failed:`), error.message);
-                            console.error(cyan('   Please try running setup manually:'));
-                            console.error(cyan('   npm run i18ntk-setup'));
-                            process.exit(1);
-                        }
-                    } else {
+                    if (!SecurityUtils.safeExistsSync(setupPath)) {
                         console.error(red(`${getIcon('cross')} Setup script not found. Please run:`));
                         console.error(cyan('   npm run i18ntk-setup'));
                         process.exit(1);
                     }
+                    await runSetupModule();
+                    console.log(gray('You can now run your original command.'));
+                    resolve(true);
                 } catch (error) {
                     console.error(red(`${getIcon('cross')} Error running setup:`), error.message);
                     console.error(cyan('   npm run i18ntk-setup'));
@@ -189,30 +188,13 @@ static async handleIncompleteSetup() {
 
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (SecurityUtils.safeExistsSync(setupPath)) {
-                        try {
-                            const setup = require(setupPath);
-                            // Use the run function which properly instantiates the class
-                            if (setup && typeof setup.run === 'function') {
-                                await setup.run();
-                            } else {
-                                // Fallback: instantiate the class directly
-                                const I18nSetupManager = require(setupPath);
-                                const setupManager = new I18nSetupManager();
-                                await setupManager.setup();
-                            }
-                            resolve(true);
-                        } catch (error) {
-                            console.error(red(`${getIcon('cross')} Setup failed:`), error.message);
-                            console.error(cyan('   Please try running setup manually:'));
-                            console.error(cyan('   npm run i18ntk-setup'));
-                            process.exit(1);
-                        }
-                    } else {
+                    if (!SecurityUtils.safeExistsSync(setupPath)) {
                         console.error(red(`${getIcon('cross')} Setup script not found. Please run:`));
                         console.error(cyan('   npm run i18ntk-setup'));
                         process.exit(1);
                     }
+                    await runSetupModule();
+                    resolve(true);
                 } catch (error) {
                     console.error(red(`${getIcon('cross')} Error running setup:`), error.message);
                     process.exit(1);
@@ -264,30 +246,13 @@ static async handleInvalidConfig() {
 
                 try {
                     const setupPath = path.join(__dirname, '..', 'main', 'i18ntk-setup.js');
-                    if (SecurityUtils.safeExistsSync(setupPath)) {
-                        try {
-                            const setup = require(setupPath);
-                            // Use the run function which properly instantiates the class
-                            if (setup && typeof setup.run === 'function') {
-                                await setup.run();
-                            } else {
-                                // Fallback: instantiate the class directly
-                                const I18nSetupManager = require(setupPath);
-                                const setupManager = new I18nSetupManager();
-                                await setupManager.setup();
-                            }
-                            resolve(true);
-                        } catch (error) {
-                            console.error(red(`${getIcon('cross')} Setup failed:`), error.message);
-                            console.error(cyan('   Please try running setup manually:'));
-                            console.error(cyan('   npm run i18ntk-setup'));
-                            process.exit(1);
-                        }
-                    } else {
+                    if (!SecurityUtils.safeExistsSync(setupPath)) {
                         console.error(red(`${getIcon('cross')} Setup script not found. Please run:`));
                         console.error(cyan('   npm run i18ntk-setup'));
                         process.exit(1);
                     }
+                    await runSetupModule();
+                    resolve(true);
                 } catch (error) {
                     console.error(red(`${getIcon('cross')} Error running setup:`), error.message);
                     process.exit(1);

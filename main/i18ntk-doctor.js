@@ -2,6 +2,7 @@
 const SecurityUtils = require('../utils/security');
 const fs = require('fs');
 const path = require('path');
+const packageJson = require('../package.json');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SetupEnforcer = require('../utils/setup-enforcer');
 
@@ -97,7 +98,7 @@ class I18nDoctor {
       }
     }
 
-    const pkgVersion = require('../package.json').version;
+    const pkgVersion = packageJson.version;
     if (config.version && config.version !== pkgVersion) {
       issues.push(`Config version mismatch: ${config.version} != ${pkgVersion}`);
       exitCode = Math.max(exitCode, ExitCodes.CONFIG_ERROR);

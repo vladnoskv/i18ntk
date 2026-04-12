@@ -14,14 +14,19 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 const AdminAuth = require('../../utils/admin-auth');
 const SecurityUtils = require('../../utils/security');
 const configManager = require('../../settings/settings-manager');
+const { validateSourceDir } = require('../../utils/config-helper');
+const { checkInitialized } = require('../../utils/init-helper');
 const { showFrameworkWarningOnce } = require('../../utils/cli-helper');
 const { createPrompt, isInteractive } = require('../../utils/prompt-helper');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../../utils/i18n-helper');
 const cliHelper = require('../../utils/cli-helper');
+const { blue } = require('../../utils/colors-new');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../../utils/config');
+const SettingsCLI = require('../../settings/settings-cli');
 const pkg = require('../../package.json');
 const SetupEnforcer = require('../../utils/setup-enforcer');
 const CommandRouter = require('./commands/CommandRouter');
@@ -73,7 +78,6 @@ class I18nManager {
             loadTranslations(uiLanguage);
 
             // Validate source directory exists
-            const {validateSourceDir, displayPaths} = require('../../utils/config-helper');
             try {
                 validateSourceDir(this.config.sourceDir, 'i18ntk-manage');
             } catch (err) {
@@ -132,10 +136,10 @@ class I18nManager {
             if (SecurityUtils.safeExistsSync(resolvedPath)) {
                 // Check if it contains language directories
                 try {
-                    const items = require('fs').readdirSync(resolvedPath);
+                    const items = fs.readdirSync(resolvedPath);
                     const hasLanguageDirs = items.some(item => {
                         const itemPath = path.join(resolvedPath, item);
-                        return require('fs').statSync(itemPath).isDirectory() &&
+                        return fs.statSync(itemPath).isDirectory() &&
                                ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
                     });
 
@@ -170,7 +174,6 @@ class I18nManager {
         };
 
         try {
-            const { checkInitialized } = require('../../utils/init-helper');
             const initStatus = await checkInitialized();
             if (initStatus?.initialized || initStatus?.config?.setup?.completed) {
                 markInternalFrameworkDetected();
@@ -335,8 +338,8 @@ class I18nManager {
             }
             clearStartupTimeout();
 
-            prompt = createPrompt({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
-            const interactive = isInteractive({ noPrompt: args.noPrompt || Boolean(args.adminPin) });
+            prompt = createPrompt({ noPrompt: args.noPrompt });
+            const interactive = isInteractive({ noPrompt: args.noPrompt });
 
             // Load settings and UI language
             const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
@@ -345,11 +348,6 @@ class I18nManager {
 
             // Initialize CommandRouter
             this.commandRouter = new CommandRouter(this.config, this.ui, this.adminAuth);
-
-            if (args.adminPin) {
-                this.adminAuth.verifyPin = async () => true;
-                this.prompt = async () => '';
-            }
 
             if (args.help) {
                 this.showHelp();
@@ -366,7 +364,7 @@ class I18nManager {
             }
 
             this.config = { ...this.config, ...cfgAfterInitCheck };
-            await this.initialize({ interactive, noPrompt: args.noPrompt || Boolean(args.adminPin) });
+            await this.initialize({ interactive, noPrompt: args.noPrompt });
             clearStartupTimeout();
             let commandToExecute = requestedCommand;
 
@@ -380,7 +378,6 @@ class I18nManager {
             // Handle debug flag
             if (args.debug) {
                 // Enable debug mode for this session
-                const { blue } = require('../../utils/colors-new');
                 console.log(blue('Debug mode enabled'));
             }
 
@@ -489,10 +486,6 @@ class I18nManager {
     // ... existing code for ensureInitializedOrExit, maybePromptFramework, showInteractiveMenu, etc. ...
 
     async ensureInitializedOrExit(prompt) {
-        const { checkInitialized } = require('../../utils/init-helper');
-        const cliHelper = require('../../utils/cli-helper');
-        const pkg = require('../../package.json');
-
         const { initialized, config } = await checkInitialized();
 
         if (!initialized) {
@@ -608,9 +601,6 @@ class I18nManager {
         if (!SecurityUtils) {
             throw new Error('SecurityUtils is not available. This may indicate a module loading issue.');
         }
-        const fs = require('fs');
-        const path = require('path');
-
         const packageJsonPath = path.join(process.cwd(), 'package.json');
         const pyprojectPath = path.join(process.cwd(), 'pyproject.toml');
         const requirementsPath = path.join(process.cwd(), 'requirements.txt');
@@ -622,7 +612,6 @@ class I18nManager {
         let detectedFramework = 'generic';
 
         try {
-            const { checkInitialized } = require('../../utils/init-helper');
             const initStatus = await checkInitialized();
             if (initStatus?.initialized || initStatus?.config?.setup?.completed) {
                 return { detectedLanguage: 'javascript', detectedFramework: 'i18ntk' };
@@ -738,8 +727,6 @@ class I18nManager {
     }
 
     async customGlob(patterns, options = {}) {
-        const fs = require('fs');
-        const path = require('path');
         const cwd = options.cwd || process.cwd();
         const ignorePatterns = options.ignore || [];
 
@@ -944,7 +931,6 @@ class I18nManager {
                 const authRequired = await this.adminAuth.isAuthRequiredForScript('summaryReports');
                 if (authRequired) {
                     console.log(`\n${t('adminCli.protectedAccess')}`);
-                    const cliHelper = require('../../utils/cli-helper');
                     const pin = await cliHelper.promptPin(t('adminCli.enterPin') + ': ');
                     const isValid = await this.adminAuth.verifyPin(pin);
 
@@ -1061,7 +1047,6 @@ class I18nManager {
             console.log(t('language.changed', { language: selectedLang.name }));
 
             // Force reload translations for the entire system
-            const { loadTranslations } = require('../../utils/i18n-helper');
             loadTranslations(selectedLang.code);
 
             // Return to main menu with new language
@@ -1079,7 +1064,6 @@ class I18nManager {
         const authRequired = await this.adminAuth.isAuthRequiredForScript('debugMenu');
         if (authRequired) {
             console.log(`\n${t('adminPin.protectedAccess')}`);
-            const cliHelper = require('../../utils/cli-helper');
             const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
             const isValid = await this.adminAuth.verifyPin(pin);
 
@@ -1142,20 +1126,25 @@ class I18nManager {
 
         try {
             const logsDir = path.join(__dirname, '..', '..', 'scripts', 'debug', 'logs');
-            if (SecurityUtils.safeExistsSync(logsDir)) {
-                const files = require('fs').readdirSync(logsDir)
+            const validatedLogsDir = SecurityUtils.validatePath(logsDir, process.cwd());
+            if (validatedLogsDir && SecurityUtils.safeExistsSync(validatedLogsDir, process.cwd())) {
+                const files = fs.readdirSync(validatedLogsDir)
                     .filter(file => file.endsWith('.log') || file.endsWith('.txt'))
                     .sort((a, b) => {
-                        const statA = require('fs').statSync(path.join(logsDir, a));
-                        const statB = require('fs').statSync(path.join(logsDir, b));
+                        const statA = fs.statSync(path.join(validatedLogsDir, a));
+                        const statB = fs.statSync(path.join(validatedLogsDir, b));
                         return statB.mtime - statA.mtime;
                     })
                     .slice(0, 5);
 
                 if (files.length > 0) {
                     files.forEach((file, index) => {
-                        const filePath = path.join(logsDir, file);
-                        const stats = require('fs').statSync(filePath);
+                        const filePath = path.join(validatedLogsDir, file);
+                        const validatedFilePath = SecurityUtils.validatePath(filePath, validatedLogsDir);
+                        if (!validatedFilePath) {
+                            return;
+                        }
+                        const stats = fs.statSync(validatedFilePath);
                         console.log(`${index + 1}. ${file} (${stats.mtime.toLocaleString()})`);
                     });
 
@@ -1163,10 +1152,16 @@ class I18nManager {
                     const fileIndex = parseInt(choice) - 1;
 
                     if (fileIndex >= 0 && fileIndex < files.length) {
-                        const logContent = SecurityUtils.safeReadFileSync(path.join(logsDir, files[fileIndex]), logsDir, 'utf8');
+                        const logPath = SecurityUtils.validatePath(path.join(validatedLogsDir, files[fileIndex]), validatedLogsDir);
+                        if (!logPath) {
+                            console.log(t('debug.debugLogsDirectoryNotFound'));
+                            return;
+                        }
+                        const logContent = SecurityUtils.safeReadFileSync(logPath, validatedLogsDir, 'utf8');
                         console.log(`\n${t('debug.contentOf', { filename: files[fileIndex] })}:`);
                         console.log('============================================================');
-                        console.log(logContent.slice(-2000)); // Show last 2000 characters
+                        const tailLines = String(logContent || '').split(/\r?\n/).slice(-40).join('\n');
+                        console.log(tailLines);
                         console.log('============================================================');
                     }
                 } else {
@@ -1188,7 +1183,6 @@ class I18nManager {
         const authRequired = await this.adminAuth.isAuthRequiredForScript('deleteReports');
         if (authRequired) {
             console.log(`\n${t('adminPin.protectedAccess')}`);
-            const cliHelper = require('../../utils/cli-helper');
             const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
             const isValid = await this.adminAuth.verifyPin(pin);
 
@@ -1219,15 +1213,18 @@ class I18nManager {
             console.log(t('operations.scanningForFiles'));
 
             let availableDirs = [];
+            const projectRoot = process.cwd();
 
             // Check which directories exist and have files
             for (const dir of targetDirs) {
-                if (SecurityUtils.safeExistsSync(dir.path)) {
-                    const files = this.getAllReportFiles(dir.path);
+                const validatedDirPath = SecurityUtils.validatePath(dir.path, projectRoot);
+                if (validatedDirPath && SecurityUtils.safeExistsSync(validatedDirPath, projectRoot)) {
+                    const files = this.getAllReportFiles(validatedDirPath, validatedDirPath);
                     if (files.length > 0) {
                         availableDirs.push({
                             ...dir,
-                            files: files.map(file => ({ path: file, dir: dir.path })),
+                            path: validatedDirPath,
+                            files: files.map(file => ({ path: file, dir: validatedDirPath })),
                             count: files.length
                         });
                     }
@@ -1331,8 +1328,13 @@ class I18nManager {
 
                 for (const fileInfo of filesToDelete) {
                     try {
-                        require('fs').unlinkSync(fileInfo.path);
-                        console.log(t('operations.deletedFile', { filename: path.basename(fileInfo.path) }));
+                        const validatedDeletePath = SecurityUtils.validatePath(fileInfo.path, process.cwd());
+                        if (!validatedDeletePath) {
+                            console.log(t('operations.failedToDeleteFile', { filename: path.basename(fileInfo.path), error: 'Invalid path' }));
+                            continue;
+                        }
+                        fs.unlinkSync(validatedDeletePath);
+                        console.log(t('operations.deletedFile', { filename: path.basename(validatedDeletePath) }));
                         deletedCount++;
                     } catch (error) {
                         console.log(t('operations.failedToDeleteFile', { filename: path.basename(fileInfo.path), error: error.message }));
@@ -1352,7 +1354,7 @@ class I18nManager {
         await this.showInteractiveMenu();
     }
 
-    getAllReportFiles(dir) {
+    getAllReportFiles(dir, rootDir = dir) {
         if (!dir || typeof dir !== 'string') {
             return [];
         }
@@ -1360,19 +1362,30 @@ class I18nManager {
         let files = [];
 
         try {
-            if (!SecurityUtils.safeExistsSync(dir)) {
+            const validatedDir = SecurityUtils.validatePath(dir, rootDir);
+            if (!validatedDir || !SecurityUtils.safeExistsSync(validatedDir, rootDir)) {
                 return [];
             }
 
-            const items = require('fs').readdirSync(dir);
+            const items = fs.readdirSync(validatedDir);
             for (const item of items) {
-                const fullPath = path.join(dir, item);
+                const fullPath = path.join(validatedDir, item);
 
                 try {
-                    const stat = require('fs').statSync(fullPath);
+                    const linkStat = fs.lstatSync(fullPath);
+                    if (linkStat.isSymbolicLink()) {
+                        continue;
+                    }
+
+                    const safeFullPath = SecurityUtils.validatePath(fullPath, rootDir);
+                    if (!safeFullPath) {
+                        continue;
+                    }
+
+                    const stat = fs.statSync(safeFullPath);
 
                     if (stat.isDirectory()) {
-                        files.push(...this.getAllReportFiles(fullPath));
+                        files.push(...this.getAllReportFiles(safeFullPath, rootDir));
                     } else if (
                         // Common report file extensions
                         item.endsWith('.json') ||
@@ -1389,7 +1402,7 @@ class I18nManager {
                         item.includes('analysis-') ||
                         item.includes('validation-')
                     ) {
-                        files.push(fullPath);
+                        files.push(safeFullPath);
                     }
                 } catch (error) {
                     // Skip individual files that can't be accessed
@@ -1406,10 +1419,10 @@ class I18nManager {
 
     getFilesToDeleteKeepLast(allFiles, keepCount = 3) {
         // Sort files by modification time (newest first)
-        const sortedFiles = allFiles.sort((a, b) => {
+        const sortedFiles = [...allFiles].sort((a, b) => {
             try {
-                const statA = require('fs').statSync(a.path || a);
-                const statB = require('fs').statSync(b.path || b);
+                const statA = fs.statSync(a.path || a);
+                const statB = fs.statSync(b.path || b);
                 return statB.mtime.getTime() - statA.mtime.getTime();
             } catch (error) {
                 // If stat fails, sort by filename as fallback
@@ -1429,7 +1442,6 @@ class I18nManager {
             const authRequired = await this.adminAuth.isAuthRequiredForScript('settingsMenu');
             if (authRequired) {
                 console.log(`\n${t('adminPin.protectedAccess')}`);
-                const cliHelper = require('../../utils/cli-helper');
                 const pin = await cliHelper.promptPin(t('adminPin.enterPin') + ': ');
                 const isValid = await this.adminAuth.verifyPin(pin);
 
@@ -1443,7 +1455,6 @@ class I18nManager {
                 console.log(t('adminPin.accessGranted'));
             }
 
-            const SettingsCLI = require('../../settings/settings-cli');
             const settingsCLI = new SettingsCLI();
             await settingsCLI.run();
         } catch (error) {
@@ -1454,7 +1465,6 @@ class I18nManager {
     }
 
     prompt(question) {
-        const cliHelper = require('../../utils/cli-helper');
         // If interactive not available, return empty string to avoid hangs
         if (!process.stdin.isTTY || process.stdin.destroyed) {
             console.log('\n⚠️ Interactive input not available, using default response.');

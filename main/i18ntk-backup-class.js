@@ -2,9 +2,9 @@
 
 'use strict';
 
-const fs = require('fs/promises');
+const fs = require('fs');
+const fsp = fs.promises;
 const path = require('path');
-const { existsSync } = require('fs');
 const configManager = require('../utils/config-manager');
 const { logger } = require('../utils/logger');
 const { colors } = require('../utils/logger');
@@ -18,8 +18,8 @@ const SecurityUtils = require('../utils/security');
 class I18nBackup {
     constructor(config = {}) {
         this.config = config;
-        this.backupDir = path.join(process.cwd(), 'i18n-backups');
-        this.maxBackups = config.backup?.maxBackups || 10;
+        this.backupDir = path.join(process.cwd(), 'i18ntk-backups');
+        this.maxBackups = Math.min(Math.max(parseInt(config.backup?.maxBackups, 10) || 1, 1), 3);
     }
 
     /**
@@ -93,7 +93,7 @@ Options:
 
         // Create backup directory if it doesn't exist
         try {
-            await fs.mkdir(outputDir, { recursive: true });
+            await fsp.mkdir(outputDir, { recursive: true });
             logger.debug(`Created backup directory: ${outputDir}`);
         } catch (err) {
             if (err.code !== 'EEXIST') {
@@ -106,7 +106,7 @@ Options:
         // Validate directory
         const sourceDir = path.resolve(dir);
         try {
-            const stats = await fs.stat(sourceDir);
+            const stats = await fsp.stat(sourceDir);
             if (!stats.isDirectory()) {
                 throw new Error(`Path exists but is not a directory: ${sourceDir}`);
             }
@@ -121,7 +121,7 @@ Options:
         logger.info('\nCreating backup...');
 
         // Read all files in the directory
-        const files = (await fs.readdir(sourceDir, { withFileTypes: true }))
+        const files = (await fsp.readdir(sourceDir, { withFileTypes: true }))
             .filter(dirent => dirent.isFile() && dirent.name.endsWith('.json'))
             .map(dirent => dirent.name);
 
@@ -135,7 +135,7 @@ Options:
         for (const file of files) {
             const filePath = path.join(sourceDir, file);
             try {
-                const content = JSON.parse(await fs.readFile(filePath, 'utf8'));
+                const content = JSON.parse(await fsp.readFile(filePath, 'utf8'));
                 translations[file] = content;
             } catch (error) {
                 logger.error(`Could not read file ${file}: ${error.message}`);
@@ -143,8 +143,8 @@ Options:
         }
 
         // Create the backup
-        await fs.writeFile(backupPath, JSON.stringify(translations, null, 2));
-        const stats = await fs.stat(backupPath);
+        await fsp.writeFile(backupPath, JSON.stringify(translations, null, 2));
+        const stats = await fsp.stat(backupPath);
 
         logger.success('Backup created successfully');
         logger.info(`  Location: ${backupPath}`);
@@ -218,7 +218,7 @@ Options:
         try {
             // Ensure backup directory exists
             try {
-                await fs.access(this.backupDir);
+                await fsp.access(this.backupDir);
             } catch (err) {
                 if (err.code === 'ENOENT') {
                     logger.warn('No backups found. The backup directory does not exist yet.');
@@ -228,14 +228,14 @@ Options:
                 return { success: true, backups: [] };
             }
 
-            const files = await fs.readdir(this.backupDir);
+            const files = await fsp.readdir(this.backupDir);
             const backups = [];
 
             for (const file of files) {
                 if (file.startsWith('backup-') && file.endsWith('.json')) {
                     try {
                         const filePath = path.join(this.backupDir, file);
-                        const stats = await fs.stat(filePath);
+                        const stats = await fsp.stat(filePath);
                         backups.push({
                             name: file,
                             path: filePath,
@@ -298,14 +298,14 @@ Options:
         logger.info('\nVerifying backup...');
 
         try {
-            const data = await fs.readFile(backupPath, 'utf8');
+            const data = await fsp.readFile(backupPath, 'utf8');
             const content = JSON.parse(data);
 
             if (typeof content === 'object' && content !== null) {
                 const fileCount = Object.keys(content).length;
                 logger.success('Backup is valid');
                 logger.info(`  Contains ${fileCount} translation files`);
-                logger.info(`  Last modified: ${(await fs.stat(backupPath)).mtime.toLocaleString()}`);
+                logger.info(`  Last modified: ${(await fsp.stat(backupPath)).mtime.toLocaleString()}`);
 
                 return {
                     success: true,
@@ -334,7 +334,7 @@ Options:
         logger.info('\nCleaning up old backups...');
 
         try {
-            const files = await fs.readdir(this.backupDir);
+            const files = await fsp.readdir(this.backupDir);
             const backupFiles = files
                 .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
                 .map(file => ({
@@ -355,7 +355,7 @@ Options:
             // Delete old backups
             for (const file of toDelete) {
                 try {
-                    await fs.unlink(file.path);
+                    await fsp.unlink(file.path);
                     logger.info(`  - Deleted: ${file.name}`);
                 } catch (err) {
                     logger.error(`  - Failed to delete ${file.name}: ${err.message}`);
@@ -374,9 +374,7 @@ Options:
         } catch (error) {
             logger.error('Error cleaning up backups:');
             logger.error(`  ${error.message}`);
-            if (process.env.DEBUG) {
-                console.error(error);
-            }
+            logger.debug(error.stack || error.message);
             throw error;
         }
     }
@@ -411,9 +409,7 @@ Options:
     handleError(error) {
         logger.error('Backup operation failed:');
         logger.error(`  ${error.message}`);
-        if (process.env.DEBUG) {
-            console.error(error);
-        }
+        logger.debug(error.stack || error.message);
     }
 }
 

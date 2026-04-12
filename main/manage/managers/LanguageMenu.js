@@ -4,6 +4,8 @@
  */
 
 const { t } = require('../../../utils/i18n-helper');
+const { loadTranslations } = require('../../../utils/i18n-helper');
+const SecurityUtils = require('../../../utils/security');
 
 module.exports = class LanguageMenu {
   constructor(manager) {
@@ -45,7 +47,6 @@ module.exports = class LanguageMenu {
       }
 
       // Force reload translations for the entire system
-      const { loadTranslations } = require('../../../utils/i18n-helper');
       loadTranslations(selectedLang);
 
       // Return to main menu with new language

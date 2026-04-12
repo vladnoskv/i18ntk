@@ -9,6 +9,7 @@
 
 const path = require('path');
 const { t } = require('../../../utils/i18n-helper');
+const cliHelper = require('../../../utils/cli-helper');
 
 // Import command handlers
 const InitCommand = require('./InitCommand');
@@ -90,7 +91,7 @@ class CommandRouter {
     /**
      * Check admin authentication for protected commands
      */
-    async checkAdminAuth() {
+    async checkAdminAuth(adminPin = null) {
         if (!this.adminAuth) {
             return true; // No auth service available, allow execution
         }
@@ -100,9 +101,11 @@ class CommandRouter {
             return true;
         }
 
-        console.log(t('adminCli.authRequired'));
-        const cliHelper = require('../../../utils/cli-helper');
-        const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
+        let pin = adminPin;
+        if (!pin) {
+            console.log(t('adminCli.authRequired'));
+            pin = await cliHelper.promptPin(t('adminCli.enterPin'));
+        }
         const isValid = await this.adminAuth.verifyPin(pin);
 
         if (!isValid) {
@@ -141,7 +144,7 @@ class CommandRouter {
         ];
 
         if (authRequiredCommands.includes(command)) {
-            const authPassed = await this.checkAdminAuth();
+            const authPassed = await this.checkAdminAuth(options.adminPin || null);
             if (!authPassed) {
                 if (!this.isNonInteractiveMode && !isDirectCommand && this.prompt) {
                     await this.prompt(t('menu.pressEnterToContinue'));
