@@ -312,6 +312,18 @@ class SettingsManager {
         this.settings = this.loadSettings();
     }
 
+    resolveSafePath(targetPath, basePath = process.cwd()) {
+        return SecurityUtils.validatePath(path.resolve(targetPath), basePath);
+    }
+
+    safeDeleteFile(targetPath, basePath = process.cwd()) {
+        const validated = this.resolveSafePath(targetPath, basePath);
+        if (!validated) return false;
+        if (!SecurityUtils.safeExistsSync(validated, basePath)) return false;
+        fs.unlinkSync(validated);
+        return true;
+    }
+
     /**
      * Load settings from file or return default settings
      * @returns {object} Settings object
@@ -432,12 +444,18 @@ class SettingsManager {
      */
     _saveImmediately() {
         try {
-            if (!SecurityUtils.safeExistsSync(this.configDir)) {
-                fs.mkdirSync(this.configDir, { recursive: true });
+            const configDir = path.dirname(this.configFile);
+            const validatedConfigDir = this.resolveSafePath(configDir, process.cwd());
+            if (!validatedConfigDir) {
+                throw new Error('Invalid configuration directory');
+            }
+
+            if (!SecurityUtils.safeExistsSync(validatedConfigDir, process.cwd())) {
+                SecurityUtils.safeMkdirSync(validatedConfigDir, process.cwd(), { recursive: true });
             }
             
             const content = JSON.stringify(this.settings, null, 4);
-            SecurityUtils.safeWriteFileSync(this.configFile, content, path.dirname(this.configFile), 'utf8');
+            SecurityUtils.safeWriteFileSync(this.configFile, content, validatedConfigDir, 'utf8');
             
             // Create backup if enabled
             if (this.settings.backup?.enabled) {
@@ -466,13 +484,19 @@ class SettingsManager {
             }
 
             if (!SecurityUtils.safeExistsSync(validatedBackupDir, process.cwd())) {
-                fs.mkdirSync(validatedBackupDir, { recursive: true });
+                SecurityUtils.safeMkdirSync(validatedBackupDir, process.cwd(), { recursive: true });
             }
             
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupFile = path.join(validatedBackupDir, `config-${timestamp}.json`);
+            const validatedConfigFile = this.resolveSafePath(this.configFile, process.cwd());
+            const validatedBackupFile = this.resolveSafePath(backupFile, process.cwd());
+            if (!validatedConfigFile || !validatedBackupFile) {
+                console.error('Error creating backup: Invalid source or destination path');
+                return;
+            }
             
-            fs.copyFileSync(this.configFile, backupFile);
+            fs.copyFileSync(validatedConfigFile, validatedBackupFile);
             
             // Clean old backups
             this.cleanupOldBackups(validatedBackupDir);
@@ -486,17 +510,20 @@ class SettingsManager {
      */
     cleanupOldBackups(backupDirectory = null) {
         try {
-            const activeBackupDir = backupDirectory || this.backupDir;
+            const activeBackupDir = this.resolveSafePath(backupDirectory || this.backupDir, process.cwd());
+            if (!activeBackupDir) {
+                return;
+            }
             if (!SecurityUtils.safeExistsSync(activeBackupDir, process.cwd())) {
                 return;
             }
 
-            const files = fs.readdirSync(activeBackupDir)
+            const files = (SecurityUtils.safeReaddirSync(activeBackupDir, process.cwd()) || [])
                 .filter(file => file.startsWith('config-') && file.endsWith('.json'))
                 .map(file => ({
                     name: file,
                     path: path.join(activeBackupDir, file),
-                    mtime: fs.statSync(path.join(activeBackupDir, file)).mtime
+                    mtime: (SecurityUtils.safeStatSync(path.join(activeBackupDir, file), process.cwd()) || { mtime: new Date(0) }).mtime
                 }))
                 .sort((a, b) => b.mtime - a.mtime);
             
@@ -506,7 +533,7 @@ class SettingsManager {
                 : 1;
             if (files.length > maxBackups) {
                 files.slice(maxBackups).forEach(file => {
-                    fs.unlinkSync(file.path);
+                    this.safeDeleteFile(file.path, process.cwd());
                 });
             }
         } catch (error) {
@@ -546,52 +573,49 @@ class SettingsManager {
             
             // 2. Remove actual configuration files used by the system
             const packageDir = path.resolve(__dirname, '..');
+            const projectRoot = process.cwd();
             const settingsDir = path.join(packageDir, 'settings');
             
             // Main configuration file
             const mainConfigPath = path.join(settingsDir, 'i18ntk-config.json');
-            if (SecurityUtils.safeExistsSync(mainConfigPath)) {
-                fs.unlinkSync(mainConfigPath);
+            if (this.safeDeleteFile(mainConfigPath, packageDir)) {
                 console.log('✅ Main configuration file removed');
             }
             
             // Project configuration file
             const projectConfigPath = path.join(settingsDir, 'project-config.json');
-            if (SecurityUtils.safeExistsSync(projectConfigPath)) {
-                fs.unlinkSync(projectConfigPath);
+            if (this.safeDeleteFile(projectConfigPath, packageDir)) {
                 console.log('✅ Project configuration removed');
             }
             
             // Setup tracking file
             const setupFile = path.join(settingsDir, 'setup.json');
-            if (SecurityUtils.safeExistsSync(setupFile)) {
-                fs.unlinkSync(setupFile);
+            if (this.safeDeleteFile(setupFile, packageDir)) {
                 console.log('✅ Setup tracking cleared');
             }
             
             // 3. Clear all backup files from backups directory
             const backupsDir = path.join(packageDir, 'backups');
-            if (SecurityUtils.safeExistsSync(backupsDir)) {
-                const backupFiles = fs.readdirSync(backupsDir);
+            if (SecurityUtils.safeExistsSync(backupsDir, packageDir)) {
+                const backupFiles = SecurityUtils.safeReaddirSync(backupsDir, packageDir) || [];
                 for (const file of backupFiles) {
                     if (file.endsWith('.json') || file.endsWith('.bak')) {
-                        fs.unlinkSync(path.join(backupsDir, file));
+                        this.safeDeleteFile(path.join(backupsDir, file), packageDir);
                     }
                 }
                 console.log('✅ All backup files cleared');
             }
             
-            // 4. Clear admin PIN configuration (multiple possible locations including root)
+            // 4. Clear admin PIN configuration (package/project scope only)
             const adminConfigPaths = [
                 path.join(packageDir, '.i18n-admin-config.json'),
                 path.join(settingsDir, '.i18n-admin-config.json'),
                 path.join(settingsDir, 'admin-config.json'),
-                path.join(packageDir, '..', '.i18n-admin-config.json') // Root level
+                path.join(projectRoot, '.i18n-admin-config.json')
             ];
             
             for (const adminConfigPath of adminConfigPaths) {
-                if (SecurityUtils.safeExistsSync(adminConfigPath)) {
-                    fs.unlinkSync(adminConfigPath);
+                if (this.safeDeleteFile(adminConfigPath, projectRoot)) {
                     console.log('✅ Admin PIN configuration cleared');
                 }
             }
@@ -603,8 +627,7 @@ class SettingsManager {
             ];
             
             for (const initFile of initFiles) {
-                if (SecurityUtils.safeExistsSync(initFile)) {
-                    fs.unlinkSync(initFile);
+                if (this.safeDeleteFile(initFile, packageDir)) {
                     console.log('✅ Initialization tracking cleared');
                 }
             }
@@ -616,10 +639,10 @@ class SettingsManager {
             ];
             
             for (const cacheDir of cacheDirs) {
-                if (SecurityUtils.safeExistsSync(cacheDir)) {
-                    const cacheFiles = fs.readdirSync(cacheDir);
+                if (SecurityUtils.safeExistsSync(cacheDir, packageDir)) {
+                    const cacheFiles = SecurityUtils.safeReaddirSync(cacheDir, packageDir) || [];
                     for (const file of cacheFiles) {
-                        fs.unlinkSync(path.join(cacheDir, file));
+                        this.safeDeleteFile(path.join(cacheDir, file), packageDir);
                     }
                     console.log('✅ Cache cleared');
                 }
@@ -639,9 +662,7 @@ class SettingsManager {
             ];
             
             for (const tempFile of tempFiles) {
-                if (SecurityUtils.safeExistsSync(tempFile)) {
-                    fs.unlinkSync(tempFile);
-                }
+                this.safeDeleteFile(tempFile, packageDir);
             }
             console.log('✅ Temporary files cleared');
             
@@ -656,8 +677,7 @@ class SettingsManager {
             ];
             
             for (const file of additionalFiles) {
-                if (SecurityUtils.safeExistsSync(file)) {
-                    fs.unlinkSync(file);
+                if (this.safeDeleteFile(file, packageDir)) {
                     console.log(`✅ Removed ${path.basename(file)}`);
                 }
             }

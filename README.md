@@ -1,4 +1,4 @@
-# i18ntk v2.3.4
+# i18ntk v2.3.5
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, and translation completion.
 
@@ -9,14 +9,15 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.3.4)](https://socket.dev/npm/package/i18ntk/overview/2.3.4)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.3.5)](https://socket.dev/npm/package/i18ntk/overview/2.3.5)
 
 ## Upgrade Notice
 
-Versions earlier than `2.3.4` may contain known stability and security issues.
-They are considered unsupported for production use. Upgrade to `2.3.4` or newer.
-The CLI now checks npm registry metadata at startup and warns when your installed version is out of date.
-Set `I18NTK_DISABLE_UPDATE_CHECK=true` to disable this warning in restricted/offline environments.
+Versions earlier than `2.3.5` may contain known stability and security issues.
+They are considered unsupported for production use. Upgrade to `2.3.5` or newer.
+The CLI can check npm registry metadata and warn when your installed version is out of date.
+Set `I18NTK_ENABLE_UPDATE_CHECK=true` to enable this behavior.
+Set `I18NTK_DISABLE_UPDATE_CHECK=true` to force-disable it in restricted/offline environments.
 Set `I18NTK_DISABLE_AUTOSAVE=1` in server/runtime environments to keep config in memory and skip disk writes.
 
 ## What i18ntk Does
@@ -154,7 +155,7 @@ Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "2.3.4",
+  "version": "2.3.5",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -177,7 +178,7 @@ See [docs/api/CONFIGURATION.md](docs/api/CONFIGURATION.md) for the full configur
 - [Runtime API Guide](docs/runtime.md)
 - [Scanner Guide](docs/scanner-guide.md)
 - [Environment Variables](docs/environment-variables.md)
-- [Migration Guide v2.3.4](docs/migration-guide-v2.3.4.md)
+- [Migration Guide v2.3.5](docs/migration-guide-v2.3.5.md)
 - [Optimization Prompt](docs/development/package-optimization-prompt.md)
 
 ## License

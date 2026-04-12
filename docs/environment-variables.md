@@ -18,6 +18,9 @@ i18ntk uses a fixed allowlist of environment variables.
 | `I18NTK_FRAMEWORK_PREFERENCE` | `auto` | framework preference |
 | `I18NTK_FRAMEWORK_FALLBACK` | `vanilla` | framework fallback |
 | `I18NTK_FRAMEWORK_DETECT` | `true` | enable/disable framework detection |
+| `I18NTK_DISABLE_AUTOSAVE` | `0` | Disable config disk writes (keep in-memory only) |
+| `I18NTK_ENABLE_UPDATE_CHECK` | `false` | Opt-in npm latest-version network check |
+| `I18NTK_DISABLE_UPDATE_CHECK` | `false` | Force-disable npm update checks |
 
 ## Usage Examples
 

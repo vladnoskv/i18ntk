@@ -22,6 +22,14 @@ class I18nBackup {
         this.maxBackups = Math.min(Math.max(parseInt(config.backup?.maxBackups, 10) || 1, 1), 3);
     }
 
+    validateInProject(targetPath, label = 'path') {
+        const validated = SecurityUtils.validatePath(targetPath, process.cwd());
+        if (!validated) {
+            throw new Error(`Invalid ${label}: ${targetPath}`);
+        }
+        return validated;
+    }
+
     /**
      * Main run method for the backup command
      */
@@ -81,11 +89,13 @@ Options:
     // Command handlers
     async handleCreate(options = {}) {
         // Use absolute path for the locales directory
-        const dir = (options._ && options._[1]) || options.dir || path.join(__dirname, '..', 'locales');
-        const outputDir = options.output || this.backupDir;
+        const requestedDir = (options._ && options._[1]) || options.dir || path.join(process.cwd(), 'locales');
+        const requestedOutputDir = options.output || this.backupDir;
+        const dir = this.validateInProject(path.resolve(process.cwd(), requestedDir), 'source directory');
+        const outputDir = this.validateInProject(path.resolve(process.cwd(), requestedOutputDir), 'backup directory');
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const backupName = `backup-${timestamp}.json`;
-        const backupPath = path.join(outputDir, backupName);
+        const backupPath = this.validateInProject(path.join(outputDir, backupName), 'backup file');
 
         // Log the paths for debugging
         logger.debug(`Source directory: ${dir}`);
@@ -104,7 +114,7 @@ Options:
         }
 
         // Validate directory
-        const sourceDir = path.resolve(dir);
+        const sourceDir = dir;
         try {
             const stats = await fsp.stat(sourceDir);
             if (!stats.isDirectory()) {
@@ -169,10 +179,11 @@ Options:
             throw new Error('Backup file path is required');
         }
 
-        const backupPath = path.resolve(process.cwd(), backupFile);
-        const outputDir = options.output
-            ? path.resolve(process.cwd(), options.output)
-            : path.join(process.cwd(), 'restored');
+        const backupPath = this.validateInProject(path.resolve(process.cwd(), backupFile), 'backup file');
+        const outputDir = this.validateInProject(
+            options.output ? path.resolve(process.cwd(), options.output) : path.join(process.cwd(), 'restored'),
+            'restore output directory'
+        );
 
         // Validate backup file
         if (!SecurityUtils.safeExistsSync(backupPath, process.cwd())) {
@@ -183,20 +194,20 @@ Options:
 
         try {
             // Read the backup file
-            const backupData = await fs.readFile(backupPath, 'utf8');
+            const backupData = await fsp.readFile(backupPath, 'utf8');
             const translations = JSON.parse(backupData);
 
             // Create output directory if it doesn't exist
             try {
-                await fs.mkdir(outputDir, { recursive: true });
+                await fsp.mkdir(outputDir, { recursive: true });
             } catch (err) {
                 if (err.code !== 'EEXIST') throw err;
             }
 
             // Write the restored files
             for (const [file, content] of Object.entries(translations)) {
-                const filePath = path.join(outputDir, file);
-                await fs.writeFile(filePath, JSON.stringify(content, null, 2));
+                const filePath = this.validateInProject(path.join(outputDir, file), 'restore file');
+                await fsp.writeFile(filePath, JSON.stringify(content, null, 2), 'utf8');
             }
 
             logger.success('Backup restored successfully');
@@ -215,10 +226,11 @@ Options:
     }
 
     async handleList() {
+        const backupDir = this.validateInProject(this.backupDir, 'backup directory');
         try {
             // Ensure backup directory exists
             try {
-                await fsp.access(this.backupDir);
+                await fsp.access(backupDir);
             } catch (err) {
                 if (err.code === 'ENOENT') {
                     logger.warn('No backups found. The backup directory does not exist yet.');
@@ -228,13 +240,13 @@ Options:
                 return { success: true, backups: [] };
             }
 
-            const files = await fsp.readdir(this.backupDir);
+            const files = await fsp.readdir(backupDir);
             const backups = [];
 
             for (const file of files) {
                 if (file.startsWith('backup-') && file.endsWith('.json')) {
                     try {
-                        const filePath = path.join(this.backupDir, file);
+                        const filePath = this.validateInProject(path.join(backupDir, file), 'backup file');
                         const stats = await fsp.stat(filePath);
                         backups.push({
                             name: file,
@@ -288,7 +300,7 @@ Options:
             throw new Error('Backup file path is required');
         }
 
-        const backupPath = path.resolve(process.cwd(), backupFile);
+        const backupPath = this.validateInProject(path.resolve(process.cwd(), backupFile), 'backup file');
 
         // Validate backup file
         if (!SecurityUtils.safeExistsSync(backupPath, process.cwd())) {
@@ -330,17 +342,18 @@ Options:
 
     async handleCleanup(options = {}) {
         const keep = options.keep ? parseInt(options.keep, 10) : this.maxBackups;
+        const backupDir = this.validateInProject(this.backupDir, 'backup directory');
 
         logger.info('\nCleaning up old backups...');
 
         try {
-            const files = await fsp.readdir(this.backupDir);
+            const files = await fsp.readdir(backupDir);
             const backupFiles = files
                 .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
                 .map(file => ({
                     name: file,
-                    path: path.join(this.backupDir, file),
-                    time: fs.statSync(path.join(this.backupDir, file)).mtime.getTime()
+                    path: this.validateInProject(path.join(backupDir, file), 'backup file'),
+                    time: (SecurityUtils.safeStatSync(path.join(backupDir, file), process.cwd()) || { mtime: new Date(0) }).mtime.getTime()
                 }))
                 .sort((a, b) => b.time - a.time);
 
@@ -381,13 +394,14 @@ Options:
 
     async cleanupOldBackups(outputDir) {
         try {
-            const files = await fs.readdir(outputDir);
+            const safeOutputDir = this.validateInProject(outputDir, 'backup output directory');
+            const files = await fsp.readdir(safeOutputDir);
             const backupFiles = files
                 .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
                 .map(file => ({
                     name: file,
-                    path: path.join(outputDir, file),
-                    time: fs.statSync(path.join(outputDir, file)).mtime.getTime()
+                    path: this.validateInProject(path.join(safeOutputDir, file), 'backup file'),
+                    time: (SecurityUtils.safeStatSync(path.join(safeOutputDir, file), process.cwd()) || { mtime: new Date(0) }).mtime.getTime()
                 }))
                 .sort((a, b) => b.time - a.time);
 
@@ -396,7 +410,7 @@ Options:
 
             for (const file of toDelete) {
                 try {
-                    await fs.unlink(file.path);
+                    await fsp.unlink(file.path);
                 } catch (err) {
                     // Ignore cleanup errors
                 }

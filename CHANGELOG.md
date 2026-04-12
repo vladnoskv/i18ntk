@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.5] - 2026-04-12
+
+### Fixed
+- Hardened settings reset and backup cleanup paths to reduce risk of broad/deep unintended file deletion.
+- Hardened backup command path handling to keep source/output/restore operations inside project boundaries by default.
+- Fixed backup-class async file operations to consistently use `fs.promises` APIs.
+
+### Changed
+- Made npm registry update checks explicit opt-in via `I18NTK_ENABLE_UPDATE_CHECK`.
+- Updated package/docs/version metadata to `2.3.5`.
+- Updated support policy guidance to recommend upgrading from versions below `2.3.5`.
+
 ## [2.3.4] - 2026-04-12
 
 ### Fixed

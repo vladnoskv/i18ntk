@@ -108,6 +108,11 @@ async function printUpgradeWarningIfOutdated({
   currentVersion,
   timeoutMs = DEFAULT_TIMEOUT_MS
 }) {
+  const enabled = String(process.env.I18NTK_ENABLE_UPDATE_CHECK || '').toLowerCase();
+  if (!(enabled === '1' || enabled === 'true' || enabled === 'yes')) {
+    return;
+  }
+
   if (process.env.I18NTK_DISABLE_UPDATE_CHECK === 'true') {
     return;
   }

@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "🚀 The fastest internationalization toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -227,7 +227,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.3.4",
+    "version": "2.3.5",
     "releaseDate": "12/04/2026",
     "lastUpdated": "12/04/2026",
     "maintainer": "Vlad Noskov",
@@ -238,9 +238,10 @@
       "HOTFIX: Removed deprecated package-path fallback that caused production build warnings for non-exported subpaths.",
       "CRITICAL FIX: Resolved sizing and usage-analysis regressions in v2 command flow.",
       "PACKAGING: Reduced publish footprint by removing internal development scripts and legacy fixed-file artifacts.",
-      "SECURITY: Hardened release checks and added explicit support guidance to update from pre-2.3.4 versions.",
+      "SECURITY: Hardened release checks and added explicit support guidance to update from pre-2.3.5 versions.",
       "CONFIG: Added cross-process file locking for .i18ntk-config writes to prevent production rename races.",
       "CONFIG: Made autosave runtime-safe with non-throwing save failures and I18NTK_DISABLE_AUTOSAVE support.",
+      "SECURITY: Hardened reset/backup path handling and made npm update checks explicit opt-in.",
       "CLI: Added npm registry version check with upgrade warning for out-of-date installs.",
       "I18N: Completed internal UI locale parity and actionable untranslated-key cleanup across supported languages."
     ],
@@ -267,7 +268,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.3.4 may be unstable or insecure. Upgrade to 2.3.4 or newer."
+    "supportPolicy": "Versions earlier than 2.3.5 may be unstable or insecure. Upgrade to 2.3.5 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }
