@@ -654,11 +654,11 @@ class SettingsManager {
                 path.join(settingsDir, '.temp-config.json'),
                 path.join(settingsDir, '.last-config.json'),
                 path.join(settingsDir, '.lock'),
-                path.join(settingsDir, 'i18ntk-config.json.tmp'),
+                path.join(settingsDir, '.i18ntk-config.temp-*'),
                 path.join(settingsDir, 'settings.lock'),
                 path.join(packageDir, '.env-config.json'),
                 path.join(packageDir, '.temp-config.json'),
-                path.join(packageDir, 'config.tmp'),
+                path.join(packageDir, 'config.temp-*'),
                 path.join(packageDir, '.lock')
             ];
             

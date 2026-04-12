@@ -177,6 +177,10 @@ See [docs/api/CONFIGURATION.md](docs/api/CONFIGURATION.md) for the full configur
 - [Migration Guide v2.3.5](docs/migration-guide-v2.3.6.md)
 - [Optimization Prompt](docs/development/package-optimization-prompt.md)
 
+## Code of Conduct
+
+We are committed to providing a friendly, safe and welcoming environment for all. Please read and respect our [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

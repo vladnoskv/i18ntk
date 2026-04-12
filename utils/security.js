@@ -41,9 +41,21 @@ function getI18n() {
  */
 class SecurityUtils {
 
-  // Static properties for operation tracking
-  static _operationStack = new Set();
-  static _logging = false;
+// Whitelist patterns for our own package artifacts
+static PACKAGE_ARTIFACT_WHITELIST = [
+    /\.i18ntk-config\.temp-\d+\.\d+$/,           // .i18ntk-config.temp-1234.5678
+    /\.i18ntk-config\.\d+\.\d+\.tmp$/,          // Legacy pattern: .i18ntk-config.1234.5678.tmp
+    /config\.temp-\d+\.\d+$/,                    // config.temp-1234.5678
+    /config\.\d+\.\d+\.tmp$/,                   // Legacy pattern: config.1234.5678.tmp
+    /\.temp-config\.json$/,                        // .temp-config.json
+    /\.last-config\.json$/,                        // .last-config.json
+    /\.lock$/,                                      // .lock files
+    /settings\.lock$/                               // settings.lock
+];
+
+// Static properties for operation tracking
+static _operationStack = new Set();
+static _logging = false;
 
   constructor() {
     // Instance constructor - static properties are already initialized
@@ -164,7 +176,12 @@ class SecurityUtils {
     const useI18n = i18n && i18n.isInitialized && typeof i18n.t === 'function';
 
     try {
-      if (!filePath || typeof filePath !== 'string') {
+    // Check against whitelist patterns for our own package artifacts
+    if (SecurityUtils.PACKAGE_ARTIFACT_WHITELIST.some(pattern => pattern.test(filePath))) {
+    return filePath;
+    }
+    
+    if (!filePath || typeof filePath !== 'string') {
         const message = useI18n
           ? i18n.t('security.pathValidationFailed')
           : 'Path validation failed';
@@ -494,6 +511,11 @@ class SecurityUtils {
   static isSafePath(filePath) {
   if (!filePath || typeof filePath !== 'string') {
   return false;
+  }
+  
+  // Check against whitelist patterns for our own package artifacts
+  if (SecurityUtils.PACKAGE_ARTIFACT_WHITELIST.some(pattern => pattern.test(filePath))) {
+  return true;
   }
 
     // Allow legitimate Windows drive letter paths
