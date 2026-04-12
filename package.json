@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.3.6",
+  "version": "2.3.7",
   "description": "🚀 The fastest internationalization toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -224,7 +224,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.3.5",
+    "version": "2.3.7",
     "releaseDate": "12/04/2026",
     "lastUpdated": "12/04/2026",
     "maintainer": "Vlad Noskov",
@@ -265,7 +265,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.3.6 may be unstable or insecure. Upgrade to 2.3.6 or newer."
+    "supportPolicy": "Versions earlier than 2.3.7 may be unstable or insecure. Upgrade to 2.3.6 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }
