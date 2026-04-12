@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] - 2026-04-12
+
+### Fixed
+- Fixed runtime autosave behavior so configuration write failures no longer hard-throw through request/render paths.
+- Fixed config save race resilience by combining queued writes, cross-process lock files, and unique temp filenames per write.
+
+### Added
+- Added `I18NTK_DISABLE_AUTOSAVE` support to skip disk persistence and keep in-memory config in server/runtime environments.
+- Added config-manager concurrency regression test covering parallel `saveConfig` calls.
+
+### Changed
+- Updated package/docs/version metadata to `2.3.4`.
+- Updated support policy guidance to recommend upgrading from versions below `2.3.4`.
+
+## [2.3.3] - 2026-04-12
+
+### Fixed
+- Fixed production config persistence race across multiple Node processes by adding cross-process file locking for `.i18ntk-config` writes.
+- Fixed intermittent `ENOENT` during atomic config rename operations under concurrent production traffic.
+
+### Changed
+- Updated package/docs/version metadata to `2.3.3`.
+- Updated support policy guidance to recommend upgrading from versions below `2.3.3`.
+
 ## [2.3.2] - 2026-04-12
 
 ### Added

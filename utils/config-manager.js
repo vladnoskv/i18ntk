@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
 const SecurityUtils = require('./security');
 
 // Determine package directory and user project root
@@ -11,6 +12,11 @@ const userProjectRoot = process.cwd();
 // This ensures config works correctly when tests change the working directory
 const PROJECT_CONFIG_PATH = path.join(process.cwd(), '.i18ntk-config');
 const PROJECT_SETTINGS_DIR = path.dirname(PROJECT_CONFIG_PATH);
+const CONFIG_LOCK_PATH = `${PROJECT_CONFIG_PATH}.lock`;
+const CONFIG_LOCK_TIMEOUT_MS = 5000;
+const CONFIG_LOCK_STALE_MS = 15000;
+const CONFIG_LOCK_RETRY_MS = 50;
+let autosaveDisabledWarned = false;
 
 // Setup tracking file
 const SETUP_COMPLETED_FILE = path.join(PROJECT_SETTINGS_DIR, 'setup.json');
@@ -248,6 +254,65 @@ let currentConfig = null;
 let configLoadInProgress = false;
 let recursionDepth = 0;
 const MAX_RECURSION_DEPTH = 15; // Increased to handle legitimate sequential calls
+let configSaveQueue = Promise.resolve();
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function acquireConfigLock(timeoutMs = CONFIG_LOCK_TIMEOUT_MS) {
+  const start = Date.now();
+  let lockHandle = null;
+
+  while (!lockHandle) {
+    try {
+      lockHandle = await fs.promises.open(CONFIG_LOCK_PATH, 'wx');
+      await lockHandle.writeFile(String(process.pid), 'utf8');
+      break;
+    } catch (error) {
+      if (!error || error.code !== 'EEXIST') {
+        throw error;
+      }
+
+      // Recover from stale lock files left by crashed processes.
+      try {
+        const stats = await fs.promises.stat(CONFIG_LOCK_PATH);
+        if (Date.now() - stats.mtimeMs > CONFIG_LOCK_STALE_MS) {
+          await fs.promises.unlink(CONFIG_LOCK_PATH);
+          continue;
+        }
+      } catch (_) {
+        // Lock may have been released between exists check and stat/unlink.
+      }
+
+      if (Date.now() - start >= timeoutMs) {
+        throw new Error(`Timed out waiting for config lock after ${timeoutMs}ms`);
+      }
+
+      await sleep(CONFIG_LOCK_RETRY_MS);
+    }
+  }
+
+  return async function releaseConfigLock() {
+    try {
+      if (lockHandle) {
+        await lockHandle.close();
+      }
+    } catch (_) {
+      // Best-effort close only.
+    }
+    try {
+      await fs.promises.unlink(CONFIG_LOCK_PATH);
+    } catch (_) {
+      // Best-effort cleanup only.
+    }
+  };
+}
+
+function isAutosaveDisabled() {
+  const flag = String(process.env.I18NTK_DISABLE_AUTOSAVE || '').trim().toLowerCase();
+  return flag === '1' || flag === 'true' || flag === 'yes';
+}
 
 function clone(obj) {
    return JSON.parse(JSON.stringify(obj));
@@ -425,26 +490,69 @@ function loadConfig() {
 async function saveConfig(cfg = currentConfig) {
   if (!cfg || typeof cfg !== 'object') return;
 
-  try {
-    // Ensure settings directory exists
-    if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
-      fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
-    }
-
-    const serialized = JSON.stringify(cfg, null, 2);
-    if (typeof serialized !== 'string' || serialized.length === 0) {
-      throw new Error('Cannot save empty configuration payload');
-    }
-
-    // Atomic write prevents partially-written/empty config files.
-    const tempPath = `${PROJECT_CONFIG_PATH}.tmp`;
-    await fs.promises.writeFile(tempPath, serialized, 'utf8');
-    await fs.promises.rename(tempPath, PROJECT_CONFIG_PATH);
+  // Runtime/server safety valve: allow disabling disk writes entirely.
+  if (isAutosaveDisabled()) {
     currentConfig = cfg;
-  } catch (error) {
-    console.error('[i18ntk] Error saving configuration:', error.message);
-    throw error;
+    if (!autosaveDisabledWarned) {
+      autosaveDisabledWarned = true;
+      console.warn('[i18ntk] Autosave disabled by I18NTK_DISABLE_AUTOSAVE. Keeping configuration in memory only.');
+    }
+    return false;
   }
+
+  configSaveQueue = configSaveQueue.then(async () => {
+    let tempPath = null;
+    let releaseLock = null;
+    try {
+      // Ensure settings directory exists before any lock/file operations.
+      await fs.promises.mkdir(PROJECT_SETTINGS_DIR, { recursive: true });
+
+      releaseLock = await acquireConfigLock();
+
+      const serialized = JSON.stringify(cfg, null, 2);
+      if (typeof serialized !== 'string' || serialized.length === 0) {
+        throw new Error('Cannot save empty configuration payload');
+      }
+
+      // Use a unique temp file to avoid concurrent writer races.
+      const nonce = `${process.pid}.${Date.now()}.${crypto.randomUUID()}`;
+      tempPath = `${PROJECT_CONFIG_PATH}.${nonce}.tmp`;
+      await fs.promises.writeFile(tempPath, serialized, 'utf8');
+
+      try {
+        await fs.promises.rename(tempPath, PROJECT_CONFIG_PATH);
+      } catch (renameError) {
+        // If destination dir disappeared between checks, recreate and retry once.
+        if (renameError && renameError.code === 'ENOENT') {
+          await fs.promises.mkdir(PROJECT_SETTINGS_DIR, { recursive: true });
+          await fs.promises.rename(tempPath, PROJECT_CONFIG_PATH);
+        } else {
+          throw renameError;
+        }
+      }
+
+      currentConfig = cfg;
+      return true;
+    } catch (error) {
+      console.error('[i18ntk] Error saving configuration:', error.message);
+      return false;
+    } finally {
+      if (releaseLock) {
+        await releaseLock();
+      }
+      if (tempPath) {
+        try {
+          if (SecurityUtils.safeExistsSync(tempPath, path.dirname(tempPath))) {
+            fs.unlinkSync(tempPath);
+          }
+        } catch (_) {
+          // Best-effort temp cleanup only.
+        }
+      }
+    }
+  });
+
+  return configSaveQueue;
 }
 
 function getConfig() {
@@ -486,7 +594,9 @@ function getConfig() {
          throw new Error('Invalid legacy configuration JSON');
        }
        const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
-       saveConfig(migratedConfig);
+       saveConfig(migratedConfig).catch((err) => {
+         console.warn('[i18ntk] Warning: failed to persist migrated configuration:', err.message);
+       });
        currentConfig = migratedConfig;
 
        // Clean up legacy config
@@ -504,7 +614,9 @@ function getConfig() {
 
      // Use package defaults for new installation
      console.log('📦 Initializing with default configuration...');
-     saveConfig(DEFAULT_CONFIG);
+     saveConfig(DEFAULT_CONFIG).catch((err) => {
+       console.warn('[i18ntk] Warning: failed to persist default configuration:', err.message);
+     });
      currentConfig = DEFAULT_CONFIG;
      return resolvePaths(DEFAULT_CONFIG);
 
