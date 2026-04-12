@@ -6,11 +6,14 @@ const SecurityUtils = require('./security');
 
 // Determine package directory and user project root
 const packageDir = path.resolve(__dirname, '..');
-const userProjectRoot = process.cwd();
+const userProjectRoot = path.resolve(process.cwd());
 
 // Always use current working directory for settings to support test environments
 // This ensures config works correctly when tests change the working directory
-const PROJECT_CONFIG_PATH = path.join(process.cwd(), '.i18ntk-config');
+const PROJECT_CONFIG_PATH = SecurityUtils.safeJoin(userProjectRoot, '.i18ntk-config');
+if (!PROJECT_CONFIG_PATH) {
+throw new Error('Invalid project config path - potential path traversal attempt');
+}
 const PROJECT_SETTINGS_DIR = path.dirname(PROJECT_CONFIG_PATH);
 const CONFIG_LOCK_PATH = `${PROJECT_CONFIG_PATH}.lock`;
 const CONFIG_LOCK_TIMEOUT_MS = 5000;
@@ -515,8 +518,10 @@ async function saveConfig(cfg = currentConfig) {
       }
 
       // Use a unique temp file to avoid concurrent writer races.
+      // Create temp files in the same directory as the config file to ensure they're safe
       const nonce = `${process.pid}.${Date.now()}.${crypto.randomUUID()}`;
-      tempPath = `${PROJECT_CONFIG_PATH}.${nonce}.tmp`;
+      const tempFileName = `.i18ntk-config.${nonce}.tmp`;
+      tempPath = path.join(PROJECT_SETTINGS_DIR, tempFileName);
       await fs.promises.writeFile(tempPath, serialized, 'utf8');
 
       try {

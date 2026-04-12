@@ -27,7 +27,7 @@ function getI18n() {
       i18n = require('./i18n-helper');
     } catch (error) {
       // Fallback to simple identity function if i18n fails to load
-      console.warn('i18n-helper not available, using fallback messages');
+      SecurityUtils.logSecurityEvent('i18n-helper not available, using fallback messages', 'warn');
       return { t: (key, params = {}) => key };
     }
   }
@@ -93,9 +93,12 @@ class SecurityUtils {
 
       return result;
     } catch (error) {
-      const i18n = getI18n();
-      console.warn(i18n.t('security.operation_error', { operation: operationName, error: error.message }));
-      return null;
+    const i18n = getI18n();
+    SecurityUtils.logSecurityEvent('Operation error', 'error', {
+    operation: operationName,
+    error: error.message
+    });
+    return null;
     } finally {
       SecurityUtils._operationStack.delete(operationName);
     }
@@ -108,17 +111,20 @@ class SecurityUtils {
    * @param {object} details - Additional details
    */
   static logSecurityEvent(event, level = 'info', details = {}) {
-    // Prevent recursive logging which can occur during configuration loading
-    if (SecurityUtils._logging) {
-      return;
-    }
-
-    SecurityUtils._logging = true;
-    try {
-      const cfg = getConfigManager()?.getConfig?.() || {};
-      const envLevel = (process.env.SECURITY_LOG_LEVEL || process.env.I18NTK_SECURITY_LOG_LEVEL || '').toLowerCase();
-      const configLevel = (cfg.security?.logLevel || cfg.security?.audit?.logLevel || '').toLowerCase();
-      const currentLevel = envLevel || configLevel || 'warn';
+  // Prevent recursive logging which can occur during configuration loading
+  if (SecurityUtils._logging) {
+  return;
+  }
+  
+  SecurityUtils._logging = true;
+  try {
+  const cfg = getConfigManager()?.getConfig?.() || {};
+  const envLevel = (process.env.SECURITY_LOG_LEVEL || process.env.I18NTK_SECURITY_LOG_LEVEL || '').toLowerCase();
+  const configLevel = (cfg.security?.logLevel || cfg.security?.audit?.logLevel || '').toLowerCase();
+  
+  // Check for debug mode
+  const debugMode = process.env.I18N_DEBUG === 'true' || process.env.DEBUG === 'true';
+  const currentLevel = debugMode ? 'info' : (envLevel || configLevel || 'warn');
 
       const levels = { error: 0, warn: 1, warning: 1, info: 2 };
       const messageLevel = levels[level.toLowerCase()] ?? 2;
@@ -263,14 +269,14 @@ class SecurityUtils {
       // Read file with size limit (10MB max)
       const stats = fs.statSync(validatedPath);
       if (stats.size > 10 * 1024 * 1024) {
-        console.warn(i18n.t('security.file_too_large', { filePath: validatedPath }));
-        return null;
+      SecurityUtils.logSecurityEvent('File too large', 'warn', { filePath: validatedPath });
+      return null;
       }
 
       return fs.readFileSync(validatedPath, encoding);
     } catch (error) {
-      console.warn(i18n.t('security.file_read_error', { errorMessage: error.message }));
-      return null;
+    SecurityUtils.logSecurityEvent('File read error', 'error', { errorMessage: error.message });
+    return null;
     }
   }
 
@@ -284,7 +290,7 @@ class SecurityUtils {
       // Validate content is a string or Buffer
       if (typeof content !== 'string' && !Buffer.isBuffer(content)) {
         const i18n = getI18n();
-        console.warn(i18n.t('security.file_write_error', { errorMessage: 'Content must be a string or Buffer' }));
+        SecurityUtils.logSecurityEvent('File write error: Content must be a string or Buffer', 'error');
         return false;
       }
 
@@ -292,7 +298,7 @@ class SecurityUtils {
       const contentSize = typeof content === 'string' ? content.length : content.length;
       if (contentSize > 10 * 1024 * 1024) {
         const i18n = getI18n();
-        console.warn(i18n.t('security.content_too_large_for_file', { filePath: validatedPath }));
+        SecurityUtils.logSecurityEvent('Content too large for file', 'warn', { filePath: validatedPath });
         return false;
       }
 
@@ -305,7 +311,7 @@ class SecurityUtils {
       return true;
     } catch (error) {
       const i18n = getI18n();
-      console.warn(i18n.t('security.file_write_error', { errorMessage: error.message }));
+      SecurityUtils.logSecurityEvent('File write error', 'error', { errorMessage: error.message });
       return false;
     }
   }
@@ -399,8 +405,8 @@ class SecurityUtils {
       const normalized = trimmed.charCodeAt(0) === 0xFEFF ? trimmed.slice(1) : trimmed;
       return JSON.parse(normalized);
     } catch (error) {
-      console.warn(`Invalid JSON content: ${error.message}`);
-      return fallback;
+    SecurityUtils.logSecurityEvent('Invalid JSON content', 'error', { error: error.message });
+    return fallback;
     }
   }
 
@@ -443,7 +449,7 @@ class SecurityUtils {
       const isCommonContent = sanitized.length < 1000 && !sanitized.includes('<script');
       if (!isFilePath && !isCommonContent) {
         const i18n = getI18n();
-        console.warn(i18n.t('security.inputDisallowedCharacters'));
+        SecurityUtils.logSecurityEvent('Input contains disallowed characters', 'warn');
       }
       // Allow more characters for file paths and content
       sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:\;"'\/\\]/g, '');
@@ -456,10 +462,39 @@ class SecurityUtils {
     return crypto.createHash('sha256').update(content).digest('hex');
   }
 
+  static safeJoin(basePath, ...paths) {
+  if (!basePath || typeof basePath !== 'string') {
+  return false;
+  }
+  try {
+  const resolvedBase = path.resolve(basePath);
+  const joinedPath = path.join(resolvedBase, ...paths);
+  const resolvedPath = path.resolve(joinedPath);
+  
+  // Ensure the final path is within the base directory
+  if (!resolvedPath.startsWith(resolvedBase)) {
+  SecurityUtils.logSecurityEvent('Path traversal attempt detected in safeJoin', 'error', {
+  basePath,
+  paths,
+  resolvedPath
+  });
+  return false;
+  }
+  return resolvedPath;
+  } catch (error) {
+  SecurityUtils.logSecurityEvent('Error in safeJoin', 'error', {
+  basePath,
+  paths,
+  error: error.message
+  });
+  return false;
+  }
+  }
+  
   static isSafePath(filePath) {
-    if (!filePath || typeof filePath !== 'string') {
-      return false;
-    }
+  if (!filePath || typeof filePath !== 'string') {
+  return false;
+  }
 
     // Allow legitimate Windows drive letter paths
     if (filePath.match(/^[A-Z]:[\/\\]/)) {

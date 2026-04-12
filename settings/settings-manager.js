@@ -6,10 +6,11 @@ const SecurityUtils = require('../utils/security');
 
 class SettingsManager {
     constructor() {
-        // Use centralized .i18ntk-settings file as single source of truth
-        this.configDir = path.resolve(__dirname, '..');
-        this.configFile = path.join(process.cwd(), '.i18ntk-settings');
-        this.backupDir = path.join(process.cwd(), 'i18ntk-backups');
+    // Use centralized .i18ntk-settings file as single source of truth
+    this.configDir = path.resolve(__dirname, '..');
+    const projectRoot = path.resolve(process.cwd());
+    this.configFile = SecurityUtils.safeJoin(projectRoot, '.i18ntk-settings') || path.join(projectRoot, '.i18ntk-settings');
+    this.backupDir = SecurityUtils.safeJoin(projectRoot, 'i18ntk-backups') || path.join(projectRoot, 'i18ntk-backups');
         this.saveTimeout = null;
         
         this.defaultConfig = {
@@ -573,8 +574,8 @@ class SettingsManager {
             
             // 2. Remove actual configuration files used by the system
             const packageDir = path.resolve(__dirname, '..');
-            const projectRoot = process.cwd();
-            const settingsDir = path.join(packageDir, 'settings');
+            const projectRoot = path.resolve(process.cwd());
+            const settingsDir = SecurityUtils.safeJoin(packageDir, 'settings');
             
             // Main configuration file
             const mainConfigPath = path.join(settingsDir, 'i18ntk-config.json');
@@ -611,7 +612,7 @@ class SettingsManager {
                 path.join(packageDir, '.i18n-admin-config.json'),
                 path.join(settingsDir, '.i18n-admin-config.json'),
                 path.join(settingsDir, 'admin-config.json'),
-                path.join(projectRoot, '.i18n-admin-config.json')
+                SecurityUtils.safeJoin(projectRoot, '.i18n-admin-config.json') || path.join(projectRoot, '.i18n-admin-config.json')
             ];
             
             for (const adminConfigPath of adminConfigPaths) {
