@@ -1,23 +1,90 @@
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { logger } = require('./logger');
 
+const INTERNAL_MANIFEST_CACHE = {
+  initialized: false,
+  roots: new Set()
+};
 
-// Lazy load configManager to avoid circular dependency
-let configManager;
-let configManagerLoadAttempted = false;
-function getConfigManager() {
-  if (!configManager && !configManagerLoadAttempted) {
-    configManagerLoadAttempted = true;
-    try {
-      configManager = require('./config-manager');
-    } catch (error) {
-      // Return null if config-manager can't be loaded
+function findPackageRoot(startDir) {
+  let current = path.resolve(startDir || process.cwd());
+  while (true) {
+    const manifest = path.join(current, 'package.json');
+    if (fs.existsSync(manifest)) {
+      return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) {
       return null;
     }
+    current = parent;
   }
-  return configManager;
 }
+
+function initializeInternalRoots() {
+  if (INTERNAL_MANIFEST_CACHE.initialized) {
+    return INTERNAL_MANIFEST_CACHE.roots;
+  }
+
+  INTERNAL_MANIFEST_CACHE.initialized = true;
+  const roots = INTERNAL_MANIFEST_CACHE.roots;
+  const candidates = [
+    process.cwd(),
+    path.resolve(__dirname, '..'),
+    findPackageRoot(process.cwd()),
+    findPackageRoot(path.resolve(__dirname, '..'))
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    roots.add(path.resolve(candidate));
+  }
+
+  const custom = String(process.env.I18NTK_INTERNAL_PATH_PREFIXES || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  for (const prefix of custom) {
+    roots.add(path.resolve(prefix));
+  }
+
+  return roots;
+}
+
+function normalizeForCompare(value) {
+  return String(value || '').replace(/\\/g, '/').toLowerCase();
+}
+
+function isPathInside(root, target) {
+  const normalizedRoot = normalizeForCompare(path.resolve(root));
+  const normalizedTarget = normalizeForCompare(path.resolve(target));
+  return normalizedTarget === normalizedRoot || normalizedTarget.startsWith(`${normalizedRoot}/`);
+}
+
+function isInternalPath(inputPath) {
+  if (!inputPath || typeof inputPath !== 'string') {
+    return false;
+  }
+  const roots = initializeInternalRoots();
+  const absolute = path.resolve(inputPath);
+  for (const root of roots) {
+    if (isPathInside(root, absolute)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function detectDangerReason(filePath) {
+  if (/\.\.(\/|\\|$)/.test(filePath)) return 'Contains parent directory traversal segments';
+  if (/(^|[\/\\])~([\/\\]|$)/.test(filePath)) return 'Contains home-directory shorthand';
+  if (/\$\{/.test(filePath)) return 'Contains variable expansion token';
+  if (/`/.test(filePath)) return 'Contains command substitution token';
+  if (/[|;&<>]/.test(filePath)) return 'Contains shell metacharacters';
+  return null;
+}
+
 
 // Lazy load i18n to prevent initialization race conditions
 let i18n;
@@ -75,8 +142,10 @@ static _logging = false;
     }
 
     if (SecurityUtils._operationStack.has(operationName)) {
-      const i18n = getI18n();
-      SecurityUtils.logSecurityEvent(i18n.t('security.recursion_detected', { operation: operationName }), 'error');
+      SecurityUtils.logSecurityEvent('Recursion detected while performing secure operation', 'warn', {
+        operation: operationName,
+        source: 'internal'
+      });
       return null;
     }
 
@@ -90,8 +159,11 @@ static _logging = false;
 
       timeoutId = setTimeout(() => {
         if (!hasResult) {
-          const i18n = getI18n();
-          SecurityUtils.logSecurityEvent(i18n.t('security.operation_timeout', { operation: operationName }), 'warning');
+          SecurityUtils.logSecurityEvent('Secure operation timeout', 'warn', {
+            operation: operationName,
+            timeoutMs,
+            source: 'internal'
+          });
         }
       }, timeoutMs);
 
@@ -105,12 +177,12 @@ static _logging = false;
 
       return result;
     } catch (error) {
-    const i18n = getI18n();
-    SecurityUtils.logSecurityEvent('Operation error', 'error', {
-    operation: operationName,
-    error: error.message
-    });
-    return null;
+      SecurityUtils.logSecurityEvent('Secure operation error', 'error', {
+        operation: operationName,
+        error: error.message,
+        source: 'internal'
+      });
+      return null;
     } finally {
       SecurityUtils._operationStack.delete(operationName);
     }
@@ -123,56 +195,28 @@ static _logging = false;
    * @param {object} details - Additional details
    */
   static logSecurityEvent(event, level = 'info', details = {}) {
-  // Prevent recursive logging which can occur during configuration loading
-  if (SecurityUtils._logging) {
-  return;
-  }
-  
-  SecurityUtils._logging = true;
-  try {
-  const emitSecurityLogs =
-    process.env.I18NTK_ENABLE_SECURITY_LOGS === 'true' ||
-    process.env.I18N_DEBUG === 'true' ||
-    process.env.DEBUG === 'true';
-  if (!emitSecurityLogs) {
-    return;
-  }
+    if (SecurityUtils._logging) {
+      return;
+    }
 
-  const cfg = getConfigManager()?.getConfig?.() || {};
-  const envLevel = (process.env.SECURITY_LOG_LEVEL || process.env.I18NTK_SECURITY_LOG_LEVEL || '').toLowerCase();
-  const configLevel = (cfg.security?.logLevel || cfg.security?.audit?.logLevel || '').toLowerCase();
-  
-  // Check for debug mode
-  const debugMode = process.env.I18N_DEBUG === 'true' || process.env.DEBUG === 'true';
-  const currentLevel = debugMode ? 'info' : (envLevel || configLevel || 'warn');
+    SecurityUtils._logging = true;
+    try {
+      const debugMode = logger.isDebugMode();
+      const explicitSecurityLogs = process.env.I18NTK_ENABLE_SECURITY_LOGS === 'true';
+      const source = details && details.source ? String(details.source).toLowerCase() : 'internal';
+      const levelName = String(level || 'info').toLowerCase();
+      const normalizedLevel = levelName === 'warning' ? 'warn' : levelName;
 
-      const levels = { error: 0, warn: 1, warning: 1, info: 2 };
-      const messageLevel = levels[level.toLowerCase()] ?? 2;
-      const allowedLevel = levels[currentLevel] ?? 1;
-      if (messageLevel > allowedLevel) {
+      // Security warnings from internal paths are noise during builds.
+      if (!debugMode && !explicitSecurityLogs && source !== 'user') {
         return;
       }
 
-      const timestamp = new Date().toISOString();
-      const logEntry = {
-        timestamp,
-        level,
-        event,
-        details: {
-          ...details,
-          pid: process.pid,
-          nodeVersion: process.version
-        }
-      };
-
-      const message = `[SECURITY ${level.toUpperCase()}] ${timestamp}: ${event}`;
-      if (level === 'error') {
-        console.error(message, details);
-      } else if (level === 'warn' || level === 'warning') {
-        console.warn(message, details);
-      } else {
-        console.log(message, details);
-      }
+      logger.security(normalizedLevel, event, {
+        ...details,
+        pid: process.pid,
+        nodeVersion: process.version
+      });
     } finally {
       SecurityUtils._logging = false;
     }
@@ -206,16 +250,23 @@ static _logging = false;
       const isWindowsAbsolute = /^[A-Z]:[\/\\]/i.test(filePath);
       const isUnixAbsolute = filePath.startsWith('/') || filePath.startsWith('\\');
       const isAbsolutePath = isWindowsAbsolute || isUnixAbsolute;
+      const dangerousReason = detectDangerReason(filePath);
+      const source = isInternalPath(filePath) ? 'internal' : 'user';
+
+      if (isAbsolutePath && isInternalPath(filePath)) {
+        return path.resolve(filePath);
+      }
 
       // For absolute paths, defer trust decision to base-path containment checks below,
       // but still reject obvious shell/injection markers.
-      if (isAbsolutePath && (/(\.\.)|(~)|(\$\{)|(`)|(\|)|(;)|(&)|(>)|(<)/.test(filePath))) {
+      if (isAbsolutePath && dangerousReason) {
         const message = useI18n
           ? i18n.t('security.pathTraversalAttempt')
           : 'Path traversal attempt';
         SecurityUtils.logSecurityEvent(message, 'warning', {
           inputPath: filePath,
-          reason: 'Contains dangerous patterns'
+          reason: dangerousReason,
+          source
         });
         return null;
       }
@@ -227,7 +278,8 @@ static _logging = false;
           : 'Path traversal attempt';
         SecurityUtils.logSecurityEvent(message, 'warning', {
           inputPath: filePath,
-          reason: 'Contains dangerous patterns'
+          reason: dangerousReason || 'Contains unsafe path segments',
+          source
         });
         return null;
       }
@@ -254,7 +306,8 @@ static _logging = false;
           inputPath: filePath,
           resolvedPath: finalPath,
           basePath: base,
-          relativePath: relativePath
+          relativePath: relativePath,
+          source
         });
         return null;
       }
@@ -268,7 +321,8 @@ static _logging = false;
           : 'Path validated';
         SecurityUtils.logSecurityEvent(successMsg, 'info', {
           inputPath: filePath,
-          resolvedPath: finalPath
+          resolvedPath: finalPath,
+          source
         });
       }
       return finalPath;
@@ -278,7 +332,8 @@ static _logging = false;
         : 'Path validation error';
       SecurityUtils.logSecurityEvent(message, 'error', {
         inputPath: filePath,
-        error: error.message
+        error: error.message,
+        source: isInternalPath(filePath) ? 'internal' : 'user'
       });
       return null;
     }
@@ -518,7 +573,8 @@ static _logging = false;
   SecurityUtils.logSecurityEvent('Path traversal attempt detected in safeJoin', 'error', {
   basePath,
   paths,
-  resolvedPath
+  resolvedPath,
+  source: 'internal'
   });
   return false;
   }
@@ -527,7 +583,8 @@ static _logging = false;
   SecurityUtils.logSecurityEvent('Error in safeJoin', 'error', {
   basePath,
   paths,
-  error: error.message
+  error: error.message,
+  source: 'internal'
   });
   return false;
   }

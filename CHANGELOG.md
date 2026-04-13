@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.8] - 2026-04-13
+
+### Added
+- Added centralized structured logger with standardized prefixes and configurable levels (`error`, `warn`, `info`, `debug`).
+- Added opt-in JSON log output for CI/build pipelines via `JSON_LOG=true`.
+- Added missing-translation-key cache TTL (5 minutes) to prevent repeated key-miss spam.
+- Added build/worker logging utilities for percentage progress and pooled worker activity summaries.
+- Added test coverage for logger timing/progress/worker aggregation behavior.
+
+### Fixed
+- Fixed repeated default-configuration fallback output by emitting a single fallback notice per process.
+- Fixed recursive security/i18n logging interactions that could trigger repeated warning cascades.
+- Fixed false-positive security warnings for internal package/project absolute paths through internal root whitelisting.
+
+### Changed
+- Logging is now silent by default for non-critical output in production-like builds unless `DEBUG_MODE=true`.
+- Security warning reasons now use specific detection details instead of generic "dangerous patterns".
+- Updated package/docs/version metadata to `2.3.8`.
+
 ## [2.3.7] - 2026-04-12
 
 ### Fixed

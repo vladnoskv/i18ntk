@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "description": "🚀 The fastest internationalization toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -213,7 +213,7 @@
     "languages:select": "node settings/settings-cli.js",
     "languages:list": "node settings/settings-cli.js --list-languages",
     "languages:status": "node settings/settings-cli.js --language-status",
-    "lint:locales": "node scripts/lint-locales.js" 
+    "lint:locales": "node scripts/lint-locales.js"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -224,14 +224,17 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.3.7",
-    "releaseDate": "12/04/2026",
-    "lastUpdated": "12/04/2026",
+    "version": "2.3.8",
+    "releaseDate": "13/04/2026",
+    "lastUpdated": "13/04/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "LOGGING: Introduced centralized structured logger with silent-by-default production behavior and DEBUG_MODE/JSON_LOG toggles.",
+      "SECURITY: Added internal path whitelist detection to prevent false-positive traversal warnings for package/project internals.",
+      "I18N: Added missing-key warning TTL cache to eliminate repeated translation-key spam during builds.",
       "HOTFIX: Removed deprecated package-path fallback that caused production build warnings for non-exported subpaths.",
       "CRITICAL FIX: Resolved sizing and usage-analysis regressions in v2 command flow.",
       "PACKAGING: Reduced publish footprint by removing internal development scripts and legacy fixed-file artifacts.",
@@ -265,7 +268,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.3.7 may be unstable or insecure. Upgrade to 2.3.6 or newer."
+    "supportPolicy": "Versions earlier than 2.3.8 may be unstable or insecure. Upgrade to 2.3.8 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

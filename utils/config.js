@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const SecurityUtils = require('./security');
+const { logger } = require('./logger');
 
 const settingsManager = require('../settings/settings-manager');
 const CONFIG_FILE = 'i18ntk-config.json';
@@ -67,7 +68,7 @@ function loadConfig(cwd = settingsManager.configDir) {
     
     throw new Error('Invalid configuration format');
   } catch (error) {
-    console.error(`Error loading config: ${error.message}`);
+    logger.debug(`Error loading config: ${error.message}`, { stack: error.stack });
     return null;
   }
 }
@@ -97,7 +98,7 @@ function saveConfig(config, cwd = settingsManager.configDir) {
     
     return true;
   } catch (error) {
-    console.error(`Error saving config: ${error.message}`);
+    logger.error(`Error saving config: ${error.message}`);
     return false;
   }
 }

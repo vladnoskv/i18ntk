@@ -1,6 +1,7 @@
 // utils/i18n-helper.js
 const path = require('path');
 const fs = require('fs');
+const { logger } = require('./logger');
 
 // Lazy load SecurityUtils to prevent circular dependencies
 let securityUtils;
@@ -203,7 +204,18 @@ function findLocaleFilesAllDirs(lang, preferredDir) {
 let translations = {};
 let currentLanguage = 'en';
 let isInitialized = false;
-const missingWarned = new Set();
+const missingKeyCache = new Map();
+const missingKeyTtlMs = 5 * 60 * 1000;
+
+function shouldReportMissingKey(key) {
+  const now = Date.now();
+  const expiresAt = missingKeyCache.get(key) || 0;
+  if (expiresAt > now) {
+    return false;
+  }
+  missingKeyCache.set(key, now + missingKeyTtlMs);
+  return true;
+}
 
 function loadTranslations(language) {
   const cfg = safeRequireConfig();
@@ -287,7 +299,9 @@ function loadTranslations(language) {
   isInitialized = true;
 
   if (loadErrors.length > 0) {
-    console.warn(`⚠️ No valid UI locale files found. Using built-in English strings.`);
+    logger.warn('No valid UI locale files found. Using built-in English strings.', {
+      errorCount: loadErrors.length
+    });
   }
 
   return translations;
@@ -338,9 +352,8 @@ function t(key, params = {}) {
   }
 
   if (typeof value === 'undefined') {
-    if (!missingWarned.has(key)) {
-      missingWarned.add(key);
-      console.warn(`Translation key not found: ${key}`);
+    if (shouldReportMissingKey(key)) {
+      logger.logMissingTranslationKey(key, 'Configuration error');
     }
     return key;
   }
@@ -351,7 +364,9 @@ function t(key, params = {}) {
   }
 
   // Return the key if the final value is not a string
-  console.warn(`Translation key does not resolve to a string: ${key}`);
+  if (shouldReportMissingKey(`${key}:non-string`)) {
+    logger.warn(`Translation key does not resolve to a string: ${key}`);
+  }
   return key;
 }
 

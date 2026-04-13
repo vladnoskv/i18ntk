@@ -55,6 +55,12 @@ describe('Security Tests', () => {
       assert.ok(result !== null, `Path ${absolutePathInsideBase} should be accepted`);
     });
 
+    test('should whitelist internal absolute paths based on package roots', () => {
+      const internalPath = path.join(process.cwd(), 'locales', 'en');
+      const result = SecurityUtils.validatePath(internalPath, path.join(process.cwd(), 'tmp'));
+      assert.ok(result !== null, `Internal path ${internalPath} should be accepted`);
+    });
+
     test('should handle null and invalid inputs', () => {
       const invalidInputs = [null, undefined, '', 123, {}, []];
 

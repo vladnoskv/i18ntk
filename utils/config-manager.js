@@ -3,6 +3,7 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 const SecurityUtils = require('./security');
+const { logger } = require('./logger');
 
 // Determine package directory and user project root
 const packageDir = path.resolve(__dirname, '..');
@@ -20,21 +21,53 @@ const CONFIG_LOCK_TIMEOUT_MS = 5000;
 const CONFIG_LOCK_STALE_MS = 15000;
 const CONFIG_LOCK_RETRY_MS = 50;
 let autosaveDisabledWarned = false;
+let defaultConfigNoticeShown = false;
+let configFallbackNoticeShown = false;
 
-function shouldEmitLogs() {
-  return process.env.I18NTK_ENABLE_LOGS === 'true' || process.env.I18N_DEBUG === 'true' || process.env.DEBUG === 'true';
+function logInfo(message, details) {
+  logger.info(message, details);
 }
 
-function logInfo(...args) {
-  if (shouldEmitLogs()) console.log(...args);
+function logWarn(message, details) {
+  logger.warn(message, details);
 }
 
-function logWarn(...args) {
-  if (shouldEmitLogs()) console.warn(...args);
+function logError(message, details) {
+  logger.error(message, details);
 }
 
-function logError(...args) {
-  if (shouldEmitLogs()) console.error(...args);
+function notifyDefaultConfig(reason, error) {
+  if (defaultConfigNoticeShown) {
+    return;
+  }
+  defaultConfigNoticeShown = true;
+
+  logger.info('Using default configuration (reason: configuration error)', { reason });
+  if (logger.isDebugMode() && error) {
+    logger.debug(`Default configuration reason details: ${error.message}`, {
+      stack: error.stack
+    });
+  }
+}
+
+function notifyConfigFallback(error) {
+  if (!configFallbackNoticeShown) {
+    configFallbackNoticeShown = true;
+    logger.info('Using default configuration (reason: configuration error)', {
+      reason: 'configuration error'
+    });
+  }
+
+  logger.recordFirstError('config:load-fallback', {
+    message: error && error.message ? error.message : 'Unknown configuration error',
+    stack: error && error.stack ? error.stack : null
+  });
+
+  if (logger.isDebugMode() && error) {
+    logger.debug(`Configuration load fallback details: ${error.message}`, {
+      stack: error.stack
+    });
+  }
 }
 
 // Setup tracking file
@@ -497,7 +530,8 @@ function loadConfig() {
      currentConfig = cfg;
      return currentConfig;
    } catch (error) {
-     logError('[i18ntk] Error in loadConfig:', error.message);
+     logError('[i18ntk] Error in loadConfig', { error: error.message });
+     notifyConfigFallback(error);
      currentConfig = clone(DEFAULT_CONFIG);
      return currentConfig;
    } finally {
@@ -556,7 +590,7 @@ async function saveConfig(cfg = currentConfig) {
       currentConfig = cfg;
       return true;
     } catch (error) {
-      logError('[i18ntk] Error saving configuration:', error.message);
+      logError('[i18ntk] Error saving configuration', { error: error.message });
       return false;
     } finally {
       if (releaseLock) {
@@ -609,7 +643,7 @@ function getConfig() {
 
      // Check for legacy config for migration
      if (SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
-       logInfo('📦 Migrating legacy configuration...');
+       logInfo('Migrating legacy configuration');
        const legacyRaw = SecurityUtils.safeReadFileSync(LEGACY_CONFIG_PATH, path.dirname(LEGACY_CONFIG_PATH), 'utf8');
        const legacyConfig = SecurityUtils.safeParseJSON(legacyRaw);
        if (!legacyConfig || typeof legacyConfig !== 'object') {
@@ -617,7 +651,7 @@ function getConfig() {
        }
        const migratedConfig = { ...DEFAULT_CONFIG, ...legacyConfig };
        saveConfig(migratedConfig).catch((err) => {
-         logWarn('[i18ntk] Warning: failed to persist migrated configuration:', err.message);
+         logWarn('[i18ntk] Warning: failed to persist migrated configuration', { error: err.message });
        });
        currentConfig = migratedConfig;
 
@@ -635,17 +669,15 @@ function getConfig() {
      }
 
      // Use package defaults for new installation
-     if (shouldEmitLogs()) {
-       logInfo('[i18ntk] Initializing with default configuration...');
-     }
+     notifyDefaultConfig('default initialization');
      saveConfig(DEFAULT_CONFIG).catch((err) => {
-       logWarn('[i18ntk] Warning: failed to persist default configuration:', err.message);
+       logWarn('[i18ntk] Warning: failed to persist default configuration', { error: err.message });
      });
      currentConfig = DEFAULT_CONFIG;
      return resolvePaths(DEFAULT_CONFIG);
 
    } catch (error) {
-     logWarn('[i18ntk] Error loading configuration, using defaults:', error.message);
+     notifyConfigFallback(error);
      currentConfig = DEFAULT_CONFIG;
      return resolvePaths(DEFAULT_CONFIG);
    }
