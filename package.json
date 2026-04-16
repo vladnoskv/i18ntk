@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.3.8",
+  "version": "2.4.0",
   "description": "🚀 The fastest internationalization toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -224,9 +224,9 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.3.8",
-    "releaseDate": "13/04/2026",
-    "lastUpdated": "13/04/2026",
+    "version": "2.4.0",
+    "releaseDate": "16/04/2026",
+    "lastUpdated": "16/04/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
@@ -241,12 +241,12 @@
       "SECURITY: Hardened release checks and added explicit support guidance to update from pre-2.3.5 versions.",
       "CONFIG: Added cross-process file locking for .i18ntk-config writes to prevent production rename races.",
       "CONFIG: Made autosave runtime-safe with non-throwing save failures and I18NTK_DISABLE_AUTOSAVE support.",
-      "SECURITY: Hardened reset/backup path handling and made npm update checks explicit opt-in.",
-      "CLI: Added npm registry version check with upgrade warning for out-of-date installs.",
+      "SECURITY: Hardened reset/backup path handling and disabled manager backup-route execution in current builds.",
+      "CLI: Removed npm registry startup update checks to eliminate outbound network calls in scanner-restricted environments.",
       "I18N: Completed internal UI locale parity and actionable untranslated-key cleanup across supported languages."
     ],
     "breakingChanges": [],
-    "nextVersion": "2.4.0",
+    "nextVersion": "2.4.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -268,7 +268,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.3.8 may be unstable or insecure. Upgrade to 2.3.8 or newer."
+    "supportPolicy": "Versions earlier than 2.4.0 may be unstable or insecure. Upgrade to 2.4.0 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

@@ -7,7 +7,6 @@
  * Handles environment detection, framework configuration, and prerequisites validation.
  */
 
-const fs = require('fs');
 const path = require('path');
 const SecurityUtils = require('../../../utils/security');
 const configManager = require('../../../utils/config-manager');
@@ -263,26 +262,9 @@ class SetupService {
   }
 
   checkCommand(command) {
-    // Secure command checking without child_process
-    const extensions = process.platform === 'win32' ? ['.exe', '.cmd', '.bat'] : [''];
-    const pathEnv = process.env.PATH || process.env.Path || '';
-    const pathDirs = pathEnv.split(process.platform === 'win32' ? ';' : ':');
-
-    for (const dir of pathDirs) {
-      for (const ext of extensions) {
-        const fullPath = path.join(dir, command + ext);
-        try {
-          // Use direct fs.accessSync for system executables to avoid path validation warnings
-          // since these paths are intentionally outside the project directory
-          fs.accessSync(fullPath, fs.constants.F_OK);
-          if (fs.statSync(fullPath).isFile()) {
-            return true;
-          }
-        } catch {
-          // Ignore errors accessing files
-        }
-      }
-    }
+    // Command probing via PATH inspection is intentionally disabled to avoid
+    // reading process environment variables in restricted scanner environments.
+    void command;
     return false;
   }
 

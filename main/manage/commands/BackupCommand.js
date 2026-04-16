@@ -32,8 +32,8 @@ class BackupCommand {
     async execute(options = {}) {
         try {
             const backup = new I18nBackup();
-            await backup.run(options);
-            return { success: true, command: 'backup' };
+            const result = await backup.run(options);
+            return result || { success: false, command: 'backup', error: 'Backup command failed' };
         } catch (error) {
             console.error(`Backup command failed: ${error.message}`);
             throw error;

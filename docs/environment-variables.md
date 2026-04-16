@@ -2,6 +2,9 @@
 
 i18ntk uses a fixed allowlist of environment variables.
 
+Update-check environment flags were removed. i18ntk no longer performs npm registry
+update checks during CLI startup.
+
 ## Supported Variables
 
 | Variable | Default | Purpose |
@@ -19,8 +22,6 @@ i18ntk uses a fixed allowlist of environment variables.
 | `I18NTK_FRAMEWORK_FALLBACK` | `vanilla` | framework fallback |
 | `I18NTK_FRAMEWORK_DETECT` | `true` | enable/disable framework detection |
 | `I18NTK_DISABLE_AUTOSAVE` | `0` | Disable config disk writes (keep in-memory only) |
-| `I18NTK_ENABLE_UPDATE_CHECK` | `false` | Opt-in npm latest-version network check |
-| `I18NTK_DISABLE_UPDATE_CHECK` | `false` | Force-disable npm update checks |
 | `DEBUG_MODE` | `false` | Enable verbose build/runtime diagnostics (`info`, `warn`, `debug`) |
 | `JSON_LOG` | `false` | Emit structured JSON log lines for CI/build systems |
 | `I18NTK_ENABLE_SECURITY_LOGS` | `false` | Opt-in security event console logging (`[SECURITY ...]`) |

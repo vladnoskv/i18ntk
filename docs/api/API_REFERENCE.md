@@ -70,6 +70,9 @@ i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
 
 ## Backup Command
 
+Backup operations are available via the standalone executable.
+Manager route `i18ntk --command=backup` is disabled in current builds.
+
 ```bash
 i18ntk-backup --help
 i18ntk-backup create ./locales

@@ -1,4 +1,4 @@
-# i18ntk Documentation (v2.3.8)
+# i18ntk Documentation (v2.4.0)
 
 This documentation set is for **i18ntk 2.x**.
 
@@ -10,7 +10,7 @@ This documentation set is for **i18ntk 2.x**.
 - [Runtime API Guide](./runtime.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
-- [Migration Guide v2.3.8](./migration-guide-v2.3.8.md)
+- [Migration Guide v2.4.0](./migration-guide-v2.4.0.md)
 - [Package Optimization Prompt](./development/package-optimization-prompt.md)
 
 ## Command Model
@@ -39,6 +39,9 @@ i18ntk-doctor
 i18ntk-fixer
 i18ntk-backup
 ```
+
+Note: backup operations are exposed through `i18ntk-backup` (standalone CLI).
+The manager-command route `i18ntk --command=backup` is disabled in current builds.
 
 ## Configuration Source
 

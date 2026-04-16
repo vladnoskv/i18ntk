@@ -30,14 +30,18 @@ This release focuses on **production-safe logging**, **false-positive reduction*
 - Missing translation key warnings now use a **5-minute TTL cache** per key
 - Prevents repeated warning spam in worker-heavy build environments
 
-### Migration Steps
+#### 5. Scanner-Oriented Hardening (Current Build Behavior)
+- npm registry update checks are disabled in CLI startup paths.
+- Setup prerequisite command probing no longer inspects `PATH`.
+- Backup in manager-command routing is disabled; use standalone `i18ntk-backup`.
 
-No breaking changes were introduced.
+### Migration Steps
 
 1. Remove any reliance on always-on config/security console output in CI logs
 2. If verbose diagnostics are needed, set `DEBUG_MODE=true`
 3. For machine-readable logs, set `JSON_LOG=true`
 4. Keep `I18NTK_ENABLE_SECURITY_LOGS=true` only for targeted security troubleshooting
+5. If you previously depended on manager backup routing, switch scripts to `i18ntk-backup`.
 
 ### Updated Environment Examples
 

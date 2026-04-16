@@ -13,7 +13,7 @@
 - `main/i18ntk-summary.js`: summary report
 - `main/i18ntk-doctor.js`: diagnostics
 - `main/i18ntk-fixer.js`: placeholder/missing marker cleanup
-- `main/i18ntk-backup.js`: backup lifecycle operations
+- `main/i18ntk-backup.js`: standalone backup lifecycle operations (`i18ntk-backup`)
 
 ## Shared Utilities
 
@@ -42,3 +42,4 @@ Exports:
 - v2 is zero dependency at runtime.
 - `.i18ntk-config` is the project source of truth.
 - Prefer documented CLI entry points over internal modules.
+- Manager-route backup execution (`i18ntk --command=backup`) is disabled in current builds.

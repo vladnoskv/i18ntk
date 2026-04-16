@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [2.4.0] - 2026-04-16
+
+### Changed
+- Disabled npm registry update-check behavior in CLI startup paths.
+- Disabled manager-route backup execution (`i18ntk --command=backup`); standalone `i18ntk-backup` remains available.
+- Disabled setup prerequisite command probing via `PATH` inspection.
+- Updated README/docs/migration guides/environment variable documentation to reflect the above behavior.
+
 ## [2.3.8] - 2026-04-13
 
 ### Added

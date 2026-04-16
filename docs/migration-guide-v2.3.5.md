@@ -6,7 +6,7 @@ v2.3.5 focuses on security hardening for filesystem and network-related behavior
 
 - Hardened settings backup/reset path handling to reduce risky file operations.
 - Hardened backup command path validation to project scope by default.
-- npm update checks are now opt-in: set `I18NTK_ENABLE_UPDATE_CHECK=true`.
+- At the time of v2.3.5, npm update checks were opt-in via `I18NTK_ENABLE_UPDATE_CHECK=true`.
 
 ## Upgrade Steps
 
@@ -24,11 +24,8 @@ For server/runtime environments:
 I18NTK_DISABLE_AUTOSAVE=1
 ```
 
-For controlled environments where update checks are desired:
-
-```bash
-I18NTK_ENABLE_UPDATE_CHECK=true
-```
+Historical note: `I18NTK_ENABLE_UPDATE_CHECK` was removed in later builds when
+startup registry checks were fully disabled.
 
 ## Verify
 
