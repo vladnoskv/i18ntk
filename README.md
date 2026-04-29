@@ -32,30 +32,6 @@ They are considered unsupported for production use. Upgrade to `2.5.1` or newer.
 - Replaced the expanded `SECURITY.md` policy with a shorter reporting-oriented policy and added community docs links.
 - Updated docs and release reset automation to use `npm run package:public` instead of `npm pack --dry-run`.
 
-### Files Changed
-
-- `utils/admin-auth.js`: fixed fail-open PIN verification and session expiry consistency.
-- `tests/security.test.js`: added admin-auth fail-closed and session cleanup coverage.
-- `package.json`: set development-only metadata, adjusted included files, and added public packaging/publish scripts.
-- `package.public.json`: introduced the stripped public npm manifest.
-- `scripts/build-public-package.js`: added the public package staging, pack, and publish workflow.
-- `scripts/prevent-root-publish.js`: added a guard against publishing the root development manifest.
-- `scripts/reset-release-state.js`: switched release validation to the public package build flow.
-- `README.md`, `docs/README.md`, `docs/development/AGENTS.md`, `docs/migration-guide-v2.5.1.md`, `docs/migration-guide-v2.5.0.md`: documented the security fix, packaging, and community file layout.
-- `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `FUNDING.md`: updated or added community and security-facing docs.
-- `.gitignore`, `.npmignore`: excluded release staging output and public-package metadata.
-
-### Audit Trail
-
-- Risk addressed: AI-based analysis flagged `verifyPin()` as fail-open when admin config was missing or disabled.
-- Behavior change: direct `verifyPin()` calls now return `false` unless a usable enabled PIN config exists.
-- Behavior change: when settings require PIN auth but admin config is broken, protected auth checks now require authentication and verification fails closed.
-- Risk: the root manifest is intentionally non-publishable, so publishing flows must use the public-package scripts.
-- Behavior change: `npm pack` and `npm publish` at the repo root are blocked by guard scripts.
-- Behavior change: the public npm payload is staged from `package.public.json` rather than the development manifest.
-- Validation note: release-state reset now exercises `npm run package:public` as part of its checks.
-- Validation note: this documentation update describes the working tree changes used for the packaging split.
-
 ## What i18ntk Does
 
 - Zero runtime dependencies
