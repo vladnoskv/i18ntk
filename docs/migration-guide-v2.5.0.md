@@ -12,6 +12,13 @@ v2.5.0 is a hardening and correctness release focused on package-audit signals, 
 - Expired admin sessions are cleaned up correctly, and the cleanup timer no longer keeps CLI processes alive.
 - The release security checker now scans nested production source files.
 
+## Packaging Hardening
+
+- The repository root manifest is development-only and blocks direct root publishing.
+- The public npm manifest lives in `package.public.json` and contains no dev scripts or dependencies.
+- Public packages are staged through `npm run package:public`, `npm run pack:public`, and `npm run publish:public`.
+- Community files are now part of the package metadata set: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `FUNDING.md`, and `SECURITY.md`.
+
 ## Fixer Reliability
 
 The fixer now applies changes to the same target object that is serialized back to disk. It also validates writes against the configured source directory, so absolute `sourceDir` paths outside the current working directory work correctly.

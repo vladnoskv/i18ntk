@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-04-29
+
+### Security
+- Fixed `AdminAuth.verifyPin()` to fail closed when admin config is missing, disabled, or malformed instead of returning success.
+- Fixed auth-required checks to fail closed when settings require admin PIN protection but the admin config is unusable.
+- Normalized admin session expiry handling by storing both `expires` and `expiresAt` and cleaning up both formats consistently.
+
+### Added
+- Added regression tests for admin PIN fail-closed behavior and session expiry cleanup.
+
+### Changed
+- Documented the public npm package staging flow introduced after `2.5.0`.
+
 ## [2.5.0] - 2026-04-29
 
 ### Security

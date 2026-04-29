@@ -1,10 +1,8 @@
 # i18ntk - Internationalization Toolkit NPM Package Exclusions
 
-# Development scripts and tools
+# Development tools
 deprecate-versions.js
 verify-deprecations.js
-prepublish.js
-prepublish-dev.js
 smoke-pack.js
 build-lite.js
 
@@ -18,6 +16,7 @@ docs/development/
 /src
 /dist
 /build
+/.release
 /backups
 /i18ntk-backups
 /i18ntk-reports
@@ -26,6 +25,8 @@ docs/development/
 .trae
 /fpts/
 DEVUPDATE.md
+package.dev.json
+package.public.json
 *.tmp
 *.temp
 *.swp

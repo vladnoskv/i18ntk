@@ -1,4 +1,4 @@
-# Getting Started with i18ntk (v2.5.0)
+# Getting Started with i18ntk (v2.5.1)
 
 This guide covers the shortest path from install to first successful run.
 

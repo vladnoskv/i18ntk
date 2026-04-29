@@ -188,14 +188,60 @@ class AdminAuth {
     return crypto.timingSafeEqual(left, right);
   }
 
+  hasUsablePinConfig(config) {
+    return Boolean(
+      config &&
+      config.enabled === true &&
+      typeof config.pinHash === 'string' &&
+      config.pinHash.length > 0 &&
+      typeof config.salt === 'string' &&
+      config.salt.length > 0
+    );
+  }
+
+  logMissingPinConfig(context) {
+    SecurityUtils.logSecurityEvent(
+      'admin_auth_config_invalid',
+      'warning',
+      { message: `Admin PIN is required but not usable during ${context}` }
+    );
+  }
+
+  getSessionExpiryTime(session) {
+    if (!session || typeof session !== 'object') {
+      return NaN;
+    }
+
+    if (Number.isFinite(session.expiresAt)) {
+      return session.expiresAt;
+    }
+
+    if (typeof session.expiresAt === 'string') {
+      const parsedExpiresAt = Date.parse(session.expiresAt);
+      if (Number.isFinite(parsedExpiresAt)) {
+        return parsedExpiresAt;
+      }
+    }
+
+    if (typeof session.expires === 'string') {
+      const parsedExpires = Date.parse(session.expires);
+      if (Number.isFinite(parsedExpires)) {
+        return parsedExpires;
+      }
+    }
+
+    return NaN;
+  }
+
   /**
    * Verify PIN
    */
   async verifyPin(pin) {
     try {
       const config = await this.loadConfig();
-      if (!config || !config.enabled) {
-        return true; // No authentication required if not enabled
+      if (!this.hasUsablePinConfig(config)) {
+        this.logMissingPinConfig('PIN verification');
+        return false;
       }
 
       // Check for lockout
@@ -256,7 +302,7 @@ class AdminAuth {
    */
   async isPinConfigured() {
     const config = await this.loadConfig();
-    return config && config.enabled && config.pinHash;
+    return this.hasUsablePinConfig(config);
   }
 
   /**
@@ -270,7 +316,10 @@ class AdminAuth {
     }
     
     const config = await this.loadConfig();
-    return config && config.enabled;
+    if (!this.hasUsablePinConfig(config)) {
+      this.logMissingPinConfig('auth-required check');
+    }
+    return true;
   }
 
   /**
@@ -283,12 +332,6 @@ class AdminAuth {
       return false;
     }
 
-    // Check if admin PIN is actually configured
-    const config = await this.loadConfig();
-    if (!config || !config.enabled || !config.pinHash) {
-      return false; // Don't require PIN if admin PIN is not configured
-    }
-
     // Check if PIN protection is enabled
     const pinProtection = globalSettings.security?.pinProtection;
     if (!pinProtection || !pinProtection.enabled) {
@@ -297,7 +340,16 @@ class AdminAuth {
 
     // Check if this specific script requires protection
     const protectedScripts = pinProtection.protectedScripts || {};
-    return protectedScripts[scriptName] !== false; // Default to true if not explicitly set
+    if (protectedScripts[scriptName] === false) {
+      return false;
+    }
+
+    const config = await this.loadConfig();
+    if (!this.hasUsablePinConfig(config)) {
+      this.logMissingPinConfig(`script auth-required check for ${scriptName}`);
+    }
+
+    return true; // Default to true if not explicitly set
   }
 
   /**
@@ -336,11 +388,14 @@ class AdminAuth {
       sessionId = this.generateSessionId();
     }
     
+    const now = Date.now();
+    const expiresAt = now + this.sessionTimeout;
     const session = {
       id: sessionId,
-      created: new Date().toISOString(),
-      lastActivity: new Date().toISOString(),
-      expires: new Date(Date.now() + this.sessionTimeout).toISOString()
+      created: new Date(now).toISOString(),
+      lastActivity: new Date(now).toISOString(),
+      expires: new Date(expiresAt).toISOString(),
+      expiresAt
     };
     
     this.activeSessions.set(sessionId, session);
@@ -373,10 +428,10 @@ class AdminAuth {
       return false;
     }
     
-    const now = new Date();
-    const expires = new Date(session.expires);
+    const now = Date.now();
+    const expiresAt = this.getSessionExpiryTime(session);
     
-    if (now > expires) {
+    if (!Number.isFinite(expiresAt) || now > expiresAt) {
       this.activeSessions.delete(sessionId);
       this.clearCurrentSession();
       SecurityUtils.logSecurityEvent(
@@ -388,8 +443,10 @@ class AdminAuth {
     }
     
     // Update last activity
-    session.lastActivity = now.toISOString();
-    session.expires = new Date(now.getTime() + this.sessionTimeout).toISOString();
+    const nextExpiresAt = now + this.sessionTimeout;
+    session.lastActivity = new Date(now).toISOString();
+    session.expires = new Date(nextExpiresAt).toISOString();
+    session.expiresAt = nextExpiresAt;
     this.activeSessions.set(sessionId, session);
     
     return true;
@@ -571,9 +628,13 @@ class AdminAuth {
     let cleaned = 0;
     
     for (const [sessionId, session] of this.activeSessions.entries()) {
-      const expiresAt = session.expiresAt || new Date(session.expires).getTime();
+      const expiresAt = this.getSessionExpiryTime(session);
       if (!Number.isFinite(expiresAt) || now > expiresAt) {
         this.activeSessions.delete(sessionId);
+        if (this.currentSession && this.currentSession.id === sessionId) {
+          this.currentSession = null;
+          this.sessionStartTime = null;
+        }
         cleaned++;
       }
     }

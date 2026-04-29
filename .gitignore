@@ -9,6 +9,7 @@
 /src
 /dist
 /build
+/.release
 /backups
 /i18ntk-backups
 /i18ntk-reports
@@ -83,7 +84,7 @@ secrets.json
 *.vault
 .vault_pass
 
-# Development scripts (should not be exposed)
+# Local legacy publish helpers
 scripts/prepublish.js
 scripts/prepublish-dev.js
 

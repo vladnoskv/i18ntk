@@ -1,10 +1,10 @@
-# AI Agent Guidelines for i18ntk v2.5.0
+# AI Agent Guidelines for i18ntk v2.5.1
 
 ## Current Project State
 
 i18ntk is a zero-dependency CommonJS npm package for internationalization setup, scanning, analysis, validation, fixing, reporting, and lightweight runtime translation loading.
 
-Current release baseline: `2.5.0`.
+Current release baseline: `2.5.1`.
 
 Core release priorities:
 
@@ -32,8 +32,10 @@ npm run release:reset
 npm run test:all
 npm run lint:locales
 npm audit --omit=dev
-npm pack --dry-run
+npm run package:public
 ```
+
+The root `package.json` is the development manifest and contains maintainer scripts. It is marked private and must not be published directly. The public npm manifest is `package.public.json`; `npm run package:public`, `npm run pack:public`, and `npm run publish:public` stage that manifest as `.release/i18ntk-public/package.json`.
 
 The package must not include:
 
@@ -57,8 +59,11 @@ The package should include only:
 - required settings UI files under `settings/`
 - `ui-locales/`
 - `LICENSE`, `README.md`, and `package.json`
+- top-level community/security files: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `FUNDING.md`, and `SECURITY.md`
 
 Do not re-add broad package exports such as `./utils/*`, `./main/*`, or `./settings/*` unless there is a deliberate public API decision and the shipped files match that API.
+
+Do not pack or publish the repository root with `npm pack` or `npm publish`. Use `npm run package:public`, `npm run pack:public`, or `npm run publish:public` so the public manifest has no dev scripts, no dependencies, and no local release tooling.
 
 ## First-Install State
 
@@ -98,7 +103,7 @@ After any package metadata change, verify:
 
 ```bash
 npm audit --omit=dev
-npm pack --dry-run
+npm run package:public
 ```
 
 ## Translation Rules
@@ -144,16 +149,20 @@ npm run security:test
 npm run test:all
 npm run lint:locales
 npm audit --omit=dev
-npm pack --dry-run
+npm run package:public
 ```
 
 Use `npm run release:reset` before release packaging.
 
-## Known v2.5.0 Hardening Decisions
+## Known v2.5.1 Hardening Decisions
 
+- `AdminAuth.verifyPin()` must fail closed when admin PIN config is missing, disabled, or malformed.
+- If settings require admin PIN protection but admin config is unusable, auth-required checks must require auth and verification must fail closed.
+- Admin sessions store both `expires` and `expiresAt`; cleanup must support both formats.
 - Environment access is intentionally centralized in `utils/env-manager.js`.
 - Filesystem access is expected because this is a local-file CLI, but all user-controlled paths should be validated.
 - The npm package intentionally excludes docs, tests, scripts, benchmarks, local state, backup artifacts, and dev-only security tooling.
+- The npm package is staged from `package.public.json`; root `package.json` is development-only.
 - `README.md` remains packaged because npm uses it for the package page.
 - `settings/i18ntk-config.json` is not shipped; it previously contained stale completed setup state and must stay out of the npm payload.
 

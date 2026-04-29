@@ -70,7 +70,7 @@ for (const entry of fs.readdirSync(root)) {
 run('npm', ['run', 'test:all']);
 run('npm', ['run', 'lint:locales']);
 run('npm', ['audit', '--omit=dev']);
-run('npm', ['pack', '--dry-run']);
+run('npm', ['run', 'package:public']);
 
 console.log('');
 console.log('Release state reset complete.');

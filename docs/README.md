@@ -1,4 +1,4 @@
-# i18ntk Documentation (v2.5.0)
+# i18ntk Documentation (v2.5.1)
 
 This documentation set is for **i18ntk 2.x**.
 
@@ -10,9 +10,17 @@ This documentation set is for **i18ntk 2.x**.
 - [Runtime API Guide](./runtime.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
+- [Migration Guide v2.5.1](./migration-guide-v2.5.1.md)
 - [Migration Guide v2.5.0](./migration-guide-v2.5.0.md)
 - [Migration Guide v2.4.0](./migration-guide-v2.4.0.md)
 - [Package Optimization Prompt](./development/package-optimization-prompt.md)
+
+## Community Files
+
+- [Contributing](../CONTRIBUTING.md)
+- [Code of Conduct](../CODE_OF_CONDUCT.md)
+- [Security Policy](../SECURITY.md)
+- [Funding](../FUNDING.md)
 
 ## Command Model
 
@@ -55,3 +63,11 @@ i18ntk reads project settings from:
 - Run `i18ntk` or `i18ntk --command=init` to initialize a project.
 - Use `--no-prompt` for CI or automated workflows.
 - Backup behavior is optional and disabled by default during setup.
+
+## Maintainer Packaging Notes
+
+- The root `package.json` is development-only.
+- The public npm metadata lives in `package.public.json`.
+- `npm run package:public` stages the public package and runs a dry-run pack.
+- `npm run pack:public` creates the public tarball from the staged package.
+- `npm run publish:public` publishes the staged package after `npm whoami` succeeds.

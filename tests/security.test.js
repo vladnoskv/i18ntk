@@ -16,6 +16,7 @@ const fs = require('fs');
 const os = require('os');
 const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
+const configManager = require('../utils/config-manager');
 const FixerCommand = require('../main/manage/commands/FixerCommand');
 
 describe('Security Tests', () => {
@@ -291,6 +292,67 @@ describe('Security Tests', () => {
   });
 
   describe('Admin Authentication', () => {
+    test('verifyPin should fail closed when admin config is missing', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-admin-missing-'));
+      const auth = new AdminAuth();
+
+      try {
+        auth.configPath = path.join(dir, '.i18n-admin-config.json');
+        const result = await auth.verifyPin('1234');
+        assert.strictEqual(result, false, 'Missing admin config must not authenticate');
+      } finally {
+        await auth.cleanup();
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('verifyPin should fail closed when admin config is disabled', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-admin-disabled-'));
+      const auth = new AdminAuth();
+
+      try {
+        auth.configPath = path.join(dir, '.i18n-admin-config.json');
+        fs.writeFileSync(auth.configPath, JSON.stringify({
+          enabled: false,
+          pinHash: null,
+          salt: null
+        }));
+
+        const result = await auth.verifyPin('1234');
+        assert.strictEqual(result, false, 'Disabled admin config must not authenticate through verifyPin');
+      } finally {
+        await auth.cleanup();
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('auth-required checks should fail closed when PIN auth is enabled but config is missing', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-admin-required-'));
+      const auth = new AdminAuth();
+      const originalLoadSettings = configManager.loadSettings;
+
+      try {
+        auth.configPath = path.join(dir, '.i18n-admin-config.json');
+        configManager.loadSettings = () => ({
+          security: {
+            adminPinEnabled: true,
+            pinProtection: {
+              enabled: true,
+              protectedScripts: {}
+            }
+          }
+        });
+
+        assert.strictEqual(await auth.isAuthRequired(), true, 'Global PIN setting should require auth even if config is broken');
+        assert.strictEqual(await auth.isAuthRequiredForScript('settingsMenu'), true, 'Protected script should require auth even if config is broken');
+        assert.strictEqual(await auth.verifyPin('1234'), false, 'Broken config should still fail verification');
+      } finally {
+        configManager.loadSettings = originalLoadSettings;
+        await auth.cleanup();
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
     test('should clean up expired sessions using the stored expires field', async () => {
       const auth = new AdminAuth();
       try {
@@ -303,6 +365,38 @@ describe('Security Tests', () => {
 
         auth.cleanupExpiredSessions();
         assert.strictEqual(auth.activeSessions.has('expired'), false, 'Expired session should be removed');
+      } finally {
+        await auth.cleanup();
+      }
+    });
+
+    test('should clean up expired sessions using the stored expiresAt field', async () => {
+      const auth = new AdminAuth();
+      try {
+        auth.activeSessions.set('expired-at', {
+          id: 'expired-at',
+          created: new Date(Date.now() - 10000).toISOString(),
+          lastActivity: new Date(Date.now() - 10000).toISOString(),
+          expiresAt: Date.now() - 1000
+        });
+
+        auth.cleanupExpiredSessions();
+        assert.strictEqual(auth.activeSessions.has('expired-at'), false, 'Expired expiresAt session should be removed');
+      } finally {
+        await auth.cleanup();
+      }
+    });
+
+    test('created sessions should store expires and expiresAt consistently', async () => {
+      const auth = new AdminAuth();
+      try {
+        const sessionId = await auth.createSession('session-with-expiry');
+        const session = auth.activeSessions.get(sessionId);
+
+        assert.strictEqual(typeof session.expires, 'string');
+        assert.strictEqual(typeof session.expiresAt, 'number');
+        assert.ok(Number.isFinite(Date.parse(session.expires)));
+        assert.ok(session.expiresAt > Date.now());
       } finally {
         await auth.cleanup();
       }
