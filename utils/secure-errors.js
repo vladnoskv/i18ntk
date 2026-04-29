@@ -2,6 +2,8 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
+const { envManager } = require('./env-manager');
 
 class SecureError extends Error {
   constructor(message, code = 'SECURE_ERROR', details = {}) {
@@ -67,7 +69,7 @@ class EncryptionError extends SecureError {
 // Secure error handler middleware
 function secureErrorHandler(options = {}) {
   const defaults = {
-    logErrors: process.env.NODE_ENV !== 'production',
+    logErrors: envManager.get('NODE_ENV') !== 'production',
     logFunction: console.error,
     logFilePath: null,
     sanitizeStack: true

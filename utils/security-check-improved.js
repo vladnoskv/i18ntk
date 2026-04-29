@@ -151,11 +151,9 @@ class SecurityChecker {
       if (!(await this.checkFileExists(dirPath))) continue;
 
       try {
-        const files = await fs.promises.readdir(dirPath);
-        for (const file of files) {
-          if (!file.endsWith('.js') || excludeFiles.includes(file)) continue;
-
-          const filePath = path.join(dirPath, file);
+        const files = await this.collectJavaScriptFiles(dirPath);
+        for (const filePath of files) {
+          if (excludeFiles.includes(path.basename(filePath))) continue;
           const content = await this.readFile(filePath);
           if (!content) continue;
 
@@ -165,6 +163,25 @@ class SecurityChecker {
         this.addIssue(`Cannot read directory: ${dirPath}`, dirPath);
       }
     }
+  }
+
+  async collectJavaScriptFiles(dirPath) {
+    const results = [];
+    const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === 'node_modules' || entry.name.startsWith('.')) {
+          continue;
+        }
+        results.push(...await this.collectJavaScriptFiles(fullPath));
+      } else if (entry.isFile() && entry.name.endsWith('.js')) {
+        results.push(fullPath);
+      }
+    }
+
+    return results;
   }
 
   async analyzeFileSecurity(filePath, content) {
@@ -183,7 +200,7 @@ class SecurityChecker {
       }
 
       // Check for dangerous patterns
-      if (line.includes('eval(') || line.includes('Function(')) {
+      if (/\beval\s*\(/.test(line) || /\bFunction\s*\(/.test(line)) {
         this.addIssue('Dangerous code execution pattern detected', filePath, index + 1);
       }
 
@@ -210,12 +227,11 @@ class SecurityChecker {
 
     // Skip safe relative requires within project structure
     if (requirePath.startsWith('../') || requirePath.startsWith('./')) {
-      // Check if it's going too far up (more than 2 levels)
-      const upLevels = (requirePath.match(/\.\.\//g) || []).length;
-      if (upLevels > 2) {
-        this.addWarning('Deep relative require (more than 2 levels up)', filePath, lineNumber);
+      const resolvedRequire = path.resolve(path.dirname(filePath), requirePath);
+      const relativeToProject = path.relative(this.projectRoot, resolvedRequire);
+      if (relativeToProject === '..' || relativeToProject.startsWith(`..${path.sep}`) || path.isAbsolute(relativeToProject)) {
+        this.addIssue('Relative require escapes project root', filePath, lineNumber);
       }
-      // Otherwise, relative requires within project are generally safe
       return;
     }
 

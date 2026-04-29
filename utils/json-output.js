@@ -1,4 +1,5 @@
 const packageJson = require('../package.json');
+const { envManager } = require('./env-manager');
 
 /**
  * JSON Output Utility for i18ntk commands
@@ -75,7 +76,7 @@ class JsonOutput {
   output() {
     this.data.metadata.duration = Date.now() - this.startTime;
     
-    if (process.env.NODE_ENV !== 'test') {
+    if (envManager.get('NODE_ENV') !== 'test') {
       console.log(JSON.stringify(this.data, null, 2));
     }
     

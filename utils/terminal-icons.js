@@ -6,6 +6,7 @@
  */
 
 const os = require('os');
+const { envManager } = require('./env-manager');
 
 
 // Detect if terminal supports Unicode/emoji
@@ -22,7 +23,7 @@ function supportsUnicode() {
 
     try {
         // Try to detect Windows Terminal, VS Code terminal, or other modern terminals
-        const terminal = process.env.TERM_PROGRAM || process.env.WT_SESSION || '';
+        const terminal = envManager.get('TERM_PROGRAM') || envManager.get('WT_SESSION') || '';
 
         // Modern terminals that support Unicode
         const unicodeTerminals = [
@@ -39,12 +40,12 @@ function supportsUnicode() {
         }
 
         // Check for Windows Terminal environment variable
-        if (process.env.WT_SESSION) {
+        if (envManager.get('WT_SESSION')) {
             return true;
         }
 
         // Check for modern PowerShell or pwsh
-        if (process.env.PSModulePath || process.env.POWERSHELL_EDITION) {
+        if (envManager.get('PSModulePath') || envManager.get('POWERSHELL_EDITION')) {
             return true;
         }
 

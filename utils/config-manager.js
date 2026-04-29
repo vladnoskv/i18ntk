@@ -4,6 +4,7 @@ const os = require('os');
 const crypto = require('crypto');
 const SecurityUtils = require('./security');
 const { logger } = require('./logger');
+const { envManager } = require('./env-manager');
 
 // Determine package directory and user project root
 const packageDir = path.resolve(__dirname, '..');
@@ -362,8 +363,7 @@ async function acquireConfigLock(timeoutMs = CONFIG_LOCK_TIMEOUT_MS) {
 }
 
 function isAutosaveDisabled() {
-  const flag = String(process.env.I18NTK_DISABLE_AUTOSAVE || '').trim().toLowerCase();
-  return flag === '1' || flag === 'true' || flag === 'yes';
+  return envManager.getBoolean('I18NTK_DISABLE_AUTOSAVE');
 }
 
 function clone(obj) {

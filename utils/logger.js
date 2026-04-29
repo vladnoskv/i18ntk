@@ -1,4 +1,5 @@
 const colors = require('./colors-new');
+const { envManager } = require('./env-manager');
 
 const LEVELS = { error: 0, warn: 1, info: 2, debug: 3 };
 const DEFAULT_INTERNAL_PREFIXES = ['[BUILD]', '[WORKERS]', '[I18N]', '[SECURITY]', '[SUCCESS]', '[WARN]', '[ERROR]', '[INFO]', '[DEBUG]'];
@@ -9,8 +10,8 @@ function asBoolean(value) {
 }
 
 function resolveLevel() {
-  const debugMode = asBoolean(process.env.DEBUG_MODE);
-  const configured = String(process.env.I18NTK_LOG_LEVEL || '').trim().toLowerCase();
+  const debugMode = envManager.getBoolean('DEBUG_MODE');
+  const configured = String(envManager.get('I18NTK_LOG_LEVEL') || '').trim().toLowerCase();
   if (configured && Object.prototype.hasOwnProperty.call(LEVELS, configured)) {
     return configured;
   }
@@ -20,7 +21,7 @@ function resolveLevel() {
   }
 
   // Silent-by-default in production-like builds.
-  if (process.env.NODE_ENV === 'production' || asBoolean(process.env.CI)) {
+  if (envManager.get('NODE_ENV') === 'production' || envManager.getBoolean('CI')) {
     return 'error';
   }
 
@@ -43,7 +44,7 @@ function normalizePrefix(prefix, fallback) {
 function write(level, message, options = {}) {
   if (!shouldLog(level)) return;
 
-  const jsonMode = asBoolean(process.env.JSON_LOG);
+  const jsonMode = envManager.getBoolean('JSON_LOG');
   const prefix = normalizePrefix(options.prefix, `[${level.toUpperCase()}]`);
   const details = options.details && typeof options.details === 'object' ? options.details : undefined;
   const text = String(message || '').trim();
@@ -116,7 +117,7 @@ function flushErrorContexts() {
 function emitErrorContextSummary({ force = false } = {}) {
   const contexts = Array.from(FIRST_ERROR_CONTEXT.entries());
   if (!contexts.length) return;
-  if (!force && !asBoolean(process.env.DEBUG_MODE)) return;
+  if (!force && !envManager.getBoolean('DEBUG_MODE')) return;
 
   for (const [key, context] of contexts) {
     write('debug', `First error context (${key})`, { prefix: '[ERROR]', details: context });
@@ -204,7 +205,7 @@ const logger = {
     write('info', String(message), { prefix: '[BUILD]', details });
   },
   isDebugMode() {
-    return asBoolean(process.env.DEBUG_MODE) || resolveLevel() === 'debug';
+    return envManager.getBoolean('DEBUG_MODE') || resolveLevel() === 'debug';
   },
   shouldLog,
   formatDuration,

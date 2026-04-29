@@ -13,6 +13,54 @@ const ALLOWED_ENV_VARS = {
     validate: (value) => ['error', 'warn', 'info', 'debug', 'silent'].includes(value.toLowerCase()),
     transform: (value) => value.toLowerCase()
   },
+
+  'DEBUG_MODE': {
+    default: 'false',
+    validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
+    transform: normalizeBooleanString
+  },
+
+  'JSON_LOG': {
+    default: 'false',
+    validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
+    transform: normalizeBooleanString
+  },
+
+  'NODE_ENV': {
+    default: 'development',
+    validate: (value) => ['development', 'production', 'test'].includes(value.toLowerCase()),
+    transform: (value) => value.toLowerCase()
+  },
+
+  'CI': {
+    default: 'false',
+    validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
+    transform: normalizeBooleanString
+  },
+
+  'CONTINUOUS_INTEGRATION': {
+    default: 'false',
+    validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
+    transform: normalizeBooleanString
+  },
+
+  'NO_INTERACTIVE': {
+    default: 'false',
+    validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
+    transform: normalizeBooleanString
+  },
+
+  'npm_lifecycle_event': {
+    default: '',
+    validate: (value) => typeof value === 'string',
+    transform: (value) => value.trim()
+  },
+
+  'npm_config_loglevel': {
+    default: '',
+    validate: (value) => typeof value === 'string',
+    transform: (value) => value.trim().toLowerCase()
+  },
   
   'I18NTK_OUTDIR': {
     default: './i18ntk-reports',
@@ -30,20 +78,14 @@ const ALLOWED_ENV_VARS = {
   'I18NTK_SILENT': {
     default: 'false',
     validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
-    transform: (value) => {
-      const lower = value.toLowerCase();
-      return lower === 'true' || lower === '1' || lower === 'yes' ? 'true' : 'false';
-    }
+    transform: normalizeBooleanString
   },
   
   // Debug and development
   'I18NTK_DEBUG_LOCALES': {
-    default: '0',
+    default: 'false',
     validate: (value) => ['0', '1', 'true', 'false'].includes(value.toLowerCase()),
-    transform: (value) => {
-      const lower = value.toLowerCase();
-      return lower === '1' || lower === 'true' ? '1' : '0';
-    }
+    transform: normalizeBooleanString
   },
   
   // Runtime configuration
@@ -54,19 +96,19 @@ const ALLOWED_ENV_VARS = {
   },
   
   'I18NTK_I18N_DIR': {
-    default: './locales',
+    default: null,
     validate: (value) => typeof value === 'string' && value.length > 0,
     transform: (value) => value.trim()
   },
   
   'I18NTK_SOURCE_DIR': {
-    default: './locales',
+    default: null,
     validate: (value) => typeof value === 'string' && value.length > 0,
     transform: (value) => value.trim()
   },
   
   'I18NTK_PROJECT_ROOT': {
-    default: '.',
+    default: null,
     validate: (value) => typeof value === 'string' && value.length > 0,
     transform: (value) => value.trim()
   },
@@ -87,12 +129,56 @@ const ALLOWED_ENV_VARS = {
   'I18NTK_FRAMEWORK_DETECT': {
     default: 'true',
     validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
-    transform: (value) => {
-      const lower = value.toLowerCase();
-      return lower === 'true' || lower === '1' || lower === 'yes' ? 'true' : 'false';
-    }
+    transform: normalizeBooleanString
+  },
+
+  'I18NTK_DISABLE_AUTOSAVE': {
+    default: 'false',
+    validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
+    transform: normalizeBooleanString
+  },
+
+  'I18NTK_INTERNAL_PATH_PREFIXES': {
+    default: '',
+    validate: (value) => typeof value === 'string',
+    transform: (value) => value.trim()
+  },
+
+  'I18NTK_ENABLE_SECURITY_LOGS': {
+    default: 'false',
+    validate: (value) => ['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase()),
+    transform: normalizeBooleanString
+  },
+
+  'TERM_PROGRAM': {
+    default: '',
+    validate: (value) => typeof value === 'string',
+    transform: (value) => value.trim()
+  },
+
+  'WT_SESSION': {
+    default: '',
+    validate: (value) => typeof value === 'string',
+    transform: (value) => value.trim()
+  },
+
+  'PSModulePath': {
+    default: '',
+    validate: (value) => typeof value === 'string',
+    transform: (value) => value.trim()
+  },
+
+  'POWERSHELL_EDITION': {
+    default: '',
+    validate: (value) => typeof value === 'string',
+    transform: (value) => value.trim()
   }
 };
+
+function normalizeBooleanString(value) {
+  const lower = String(value || '').toLowerCase();
+  return lower === 'true' || lower === '1' || lower === 'yes' ? 'true' : 'false';
+}
 
 // Security: Block access to sensitive environment variables
 const BLOCKED_PATTERNS = [
@@ -168,6 +254,11 @@ class EnvironmentManager {
       this._cache.set(name, definition.default);
       return definition.default;
     }
+  }
+
+  getBoolean(name) {
+    const value = this.get(name);
+    return value === true || value === 'true' || value === '1';
   }
 
   /**

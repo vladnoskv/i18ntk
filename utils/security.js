@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { logger } = require('./logger');
+const { envManager } = require('./env-manager');
 
 const INTERNAL_MANIFEST_CACHE = {
   initialized: false,
@@ -41,7 +42,7 @@ function initializeInternalRoots() {
     roots.add(path.resolve(candidate));
   }
 
-  const custom = String(process.env.I18NTK_INTERNAL_PATH_PREFIXES || '')
+  const custom = String(envManager.get('I18NTK_INTERNAL_PATH_PREFIXES') || '')
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean);
@@ -202,7 +203,7 @@ static _logging = false;
     SecurityUtils._logging = true;
     try {
       const debugMode = logger.isDebugMode();
-      const explicitSecurityLogs = process.env.I18NTK_ENABLE_SECURITY_LOGS === 'true';
+      const explicitSecurityLogs = envManager.getBoolean('I18NTK_ENABLE_SECURITY_LOGS');
       const source = details && details.source ? String(details.source).toLowerCase() : 'internal';
       const levelName = String(level || 'info').toLowerCase();
       const normalizedLevel = levelName === 'warning' ? 'warn' : levelName;
@@ -298,7 +299,7 @@ static _logging = false;
 
       // Check for actual path traversal (going outside the base directory)
       const relativePath = path.relative(base, finalPath);
-      if (relativePath.startsWith('..')) {
+      if (relativePath === '..' || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
         const message = useI18n
           ? i18n.t('security.pathTraversalAttempt')
           : 'Path traversal attempt';
@@ -567,9 +568,10 @@ static _logging = false;
   const resolvedBase = path.resolve(basePath);
   const joinedPath = path.join(resolvedBase, ...paths);
   const resolvedPath = path.resolve(joinedPath);
+  const relativePath = path.relative(resolvedBase, resolvedPath);
   
   // Ensure the final path is within the base directory
-  if (!resolvedPath.startsWith(resolvedBase)) {
+  if (relativePath === '..' || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
   SecurityUtils.logSecurityEvent('Path traversal attempt detected in safeJoin', 'error', {
   basePath,
   paths,

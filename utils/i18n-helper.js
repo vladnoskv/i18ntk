@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const { logger } = require('./logger');
+const { envManager } = require('./env-manager');
 
 // Lazy load SecurityUtils to prevent circular dependencies
 let securityUtils;
@@ -162,7 +163,7 @@ function findLocaleFilesAllDirs(lang, preferredDir) {
   const SecurityUtils = getSecurityUtils();
   const dirs = resolveLocalesDirs(preferredDir);
 
-  if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+  if (envManager.getBoolean('I18NTK_DEBUG_LOCALES')) {
     console.log('🔎 i18ntk locale search dirs:', dirs);
   }
 
@@ -194,7 +195,7 @@ function findLocaleFilesAllDirs(lang, preferredDir) {
     }
   }
 
-  if (process.env.I18NTK_DEBUG_LOCALES === '1' && errors.length > 0) {
+  if (envManager.getBoolean('I18NTK_DEBUG_LOCALES') && errors.length > 0) {
     console.warn(`⚠️ Locale resolution errors for ${lang}:`, errors);
   }
 
@@ -243,7 +244,7 @@ function loadTranslations(language) {
         currentLanguage = lang;
         isInitialized = true;
 
-        if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+        if (envManager.getBoolean('I18NTK_DEBUG_LOCALES')) {
           console.log(`🗂 Loaded UI locale → ${file} (${lang})`);
         }
 
@@ -255,7 +256,7 @@ function loadTranslations(language) {
         }
       } catch (e) {
         loadErrors.push({ file, error: e.message });
-        if (process.env.I18NTK_DEBUG_LOCALES === '1') {
+        if (envManager.getBoolean('I18NTK_DEBUG_LOCALES')) {
           console.warn(`⚠️ Failed to parse ${file}: ${e.message}`);
         }
       }
@@ -263,7 +264,7 @@ function loadTranslations(language) {
   }
 
   // Log comprehensive error summary if debugging
-  if (process.env.I18NTK_DEBUG_LOCALES === '1' && loadErrors.length > 0) {
+  if (envManager.getBoolean('I18NTK_DEBUG_LOCALES') && loadErrors.length > 0) {
     console.warn(`📊 Locale loading errors summary:`, {
       requested: requested,
       triedLanguages: tryOrder,

@@ -13,7 +13,10 @@ const path = require('path');
 const assert = require('assert');
 const { describe, test } = require('node:test');
 const fs = require('fs');
+const os = require('os');
 const SecurityUtils = require('../utils/security');
+const AdminAuth = require('../utils/admin-auth');
+const FixerCommand = require('../main/manage/commands/FixerCommand');
 
 describe('Security Tests', () => {
   describe('Path Validation', () => {
@@ -267,6 +270,80 @@ describe('Security Tests', () => {
         const result = SecurityUtils.isSafePath(dangerousPath);
         assert.strictEqual(result, false, `Path ${dangerousPath} should be dangerous`);
       });
+    });
+
+    test('safeJoin should reject sibling paths with shared prefixes', () => {
+      const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-safejoin-'));
+      const base = path.join(parent, 'base');
+      fs.mkdirSync(base);
+
+      try {
+        const siblingName = `${path.basename(base)}-sibling`;
+        const result = SecurityUtils.safeJoin(base, '..', siblingName, 'file.json');
+        assert.strictEqual(result, false, 'Sibling path with shared prefix should be rejected');
+
+        const inside = SecurityUtils.safeJoin(base, 'nested', 'file.json');
+        assert.ok(inside && inside.startsWith(base), 'Nested path should be accepted');
+      } finally {
+        fs.rmSync(parent, { recursive: true, force: true });
+      }
+    });
+  });
+
+  describe('Admin Authentication', () => {
+    test('should clean up expired sessions using the stored expires field', async () => {
+      const auth = new AdminAuth();
+      try {
+        auth.activeSessions.set('expired', {
+          id: 'expired',
+          created: new Date(Date.now() - 10000).toISOString(),
+          lastActivity: new Date(Date.now() - 10000).toISOString(),
+          expires: new Date(Date.now() - 1000).toISOString()
+        });
+
+        auth.cleanupExpiredSessions();
+        assert.strictEqual(auth.activeSessions.has('expired'), false, 'Expired session should be removed');
+      } finally {
+        await auth.cleanup();
+      }
+    });
+  });
+
+  describe('Fixer Command', () => {
+    test('should write applied fixes to the target translation file', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-fixer-'));
+      fs.mkdirSync(path.join(dir, 'en'), { recursive: true });
+      fs.mkdirSync(path.join(dir, 'de'), { recursive: true });
+
+      const targetFile = path.join(dir, 'de', 'common.json');
+      fs.writeFileSync(path.join(dir, 'en', 'common.json'), JSON.stringify({
+        hello: 'Hello',
+        nested: { value: 'Value' }
+      }, null, 2));
+      fs.writeFileSync(targetFile, JSON.stringify({
+        hello: '',
+        nested: {}
+      }, null, 2));
+
+      try {
+        const command = new FixerCommand({
+          sourceDir: dir,
+          sourceLanguage: 'en',
+          backup: { enabled: false },
+          notTranslatedMarker: 'NOT_TRANSLATED'
+        });
+        command.sourceDir = dir;
+        command.dryRun = false;
+
+        const result = await command.fixLanguage('de');
+        const updated = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+
+        assert.strictEqual(result.fixedIssues, 2);
+        assert.strictEqual(updated.hello, 'Hello');
+        assert.strictEqual(updated.nested.value, 'Value');
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
     });
   });
 });

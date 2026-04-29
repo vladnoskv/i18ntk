@@ -29,6 +29,9 @@ class AdminAuth {
     
     // Clean up expired sessions every 5 minutes
     this.cleanupInterval = setInterval(this.cleanupExpiredSessions.bind(this), 5 * 60 * 1000);
+    if (typeof this.cleanupInterval.unref === 'function') {
+      this.cleanupInterval.unref();
+    }
     
     // Handle process exit to ensure session cleanup
     this.setupProcessHandlers();
@@ -171,6 +174,20 @@ class AdminAuth {
     return crypto.pbkdf2Sync(pin, salt, 100000, 64, 'sha512').toString('hex');
   }
 
+  timingSafeHexEqual(leftHex, rightHex) {
+    if (typeof leftHex !== 'string' || typeof rightHex !== 'string') {
+      return false;
+    }
+
+    const left = Buffer.from(leftHex, 'hex');
+    const right = Buffer.from(rightHex, 'hex');
+    if (left.length === 0 || left.length !== right.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(left, right);
+  }
+
   /**
    * Verify PIN
    */
@@ -205,7 +222,7 @@ class AdminAuth {
 
       // Verify PIN
       const pinHash = this.hashPin(pin, config.salt);
-      const isValid = pinHash === config.pinHash;
+      const isValid = this.timingSafeHexEqual(pinHash, config.pinHash);
 
       if (isValid) {
         this.clearFailedAttempts(clientId);
@@ -554,7 +571,8 @@ class AdminAuth {
     let cleaned = 0;
     
     for (const [sessionId, session] of this.activeSessions.entries()) {
-      if (now > session.expiresAt) {
+      const expiresAt = session.expiresAt || new Date(session.expires).getTime();
+      if (!Number.isFinite(expiresAt) || now > expiresAt) {
         this.activeSessions.delete(sessionId);
         cleaned++;
       }

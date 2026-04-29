@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-04-29
+
+### Security
+- Centralized environment-variable access behind the `utils/env-manager.js` allowlist.
+- Hardened `SecurityUtils.safeJoin()` and path validation against sibling-prefix containment bypasses.
+- Switched admin PIN hash verification to timing-safe comparison.
+- Fixed expired admin session cleanup and unref'd the cleanup timer so it does not keep CLI processes alive.
+- Expanded the release security scanner to inspect nested production source files.
+
+### Fixed
+- Fixed the manager fixer command so applied fixes are written to the same parsed object that is saved.
+- Fixed fixer writes for absolute source directories outside the current working directory.
+- Fixed debug-menu file reads to use `SecurityUtils` wrappers.
+- Fixed `secure-errors` to import its `SecurityUtils` dependency explicitly.
+
+### Changed
+- Updated package and documentation metadata to `2.5.0`.
+
 ## [2.4.0] - 2026-04-16
 
 ### Changed

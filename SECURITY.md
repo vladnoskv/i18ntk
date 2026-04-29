@@ -6,8 +6,8 @@ The i18n Management Toolkit (i18ntk) implements comprehensive security measures 
 
 ## Supported Versions
 
-- Current supported line: `2.3.x`
-- Versions below `2.3.5` may contain known security or stability issues and should be upgraded.
+- Current supported line: `2.5.x`
+- Versions below `2.5.x` may contain known security or stability issues and should be upgraded.
 - We provide guidance to update older versions, but we do not rely on npm deprecation notices for this policy.
 
 ## 🛡️ Security Features
@@ -265,7 +265,7 @@ I18NTK_SECURITY_STRICT=true
 
 ```json
 {
-  "version": "1.10.2",
+  "version": "2.5.0",
   "security": {
     "strictConfig": true,
     "adminPinEnabled": false,
@@ -459,5 +459,5 @@ The toolkit follows these security practices:
 
 *This security policy is maintained and updated regularly to ensure the i18n Management Toolkit remains secure and trustworthy.*
 
-**Last Updated**: August 24, 2024
-**Version**: 1.10.2
+**Last Updated**: April 29, 2026
+**Version**: 2.5.0

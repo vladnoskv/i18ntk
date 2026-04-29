@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const SecurityUtils = require('../utils/security');
+const { envManager } = require('../utils/env-manager');
 
 let configManager = null;
 try { configManager = require('../utils/config-manager'); } catch (_) { /* optional */ }
@@ -54,15 +55,18 @@ function resolveBaseDir(explicitBaseDir) {
   // 1) Highest priority: explicit option
   if (explicitBaseDir) return path.resolve(explicitBaseDir);
   // 2) Environment override for CI/explicit control
-  if (process.env.I18NTK_RUNTIME_DIR) {
-    return path.resolve(process.env.I18NTK_RUNTIME_DIR);
+  const runtimeDir = envManager.get('I18NTK_RUNTIME_DIR');
+  if (runtimeDir) {
+    return path.resolve(runtimeDir);
   }
   // 2b) Respect config-style env overrides, even without config-manager
-  if (process.env.I18NTK_I18N_DIR) {
-    return path.resolve(process.env.I18NTK_I18N_DIR);
+  const envI18nDir = envManager.get('I18NTK_I18N_DIR');
+  if (envI18nDir) {
+    return path.resolve(envI18nDir);
   }
-  if (process.env.I18NTK_SOURCE_DIR) {
-    return path.resolve(process.env.I18NTK_SOURCE_DIR);
+  const envSourceDir = envManager.get('I18NTK_SOURCE_DIR');
+  if (envSourceDir) {
+    return path.resolve(envSourceDir);
   }
   // 3) Use config-manager if available (single source of truth: i18ntk-config.json)
   try {
@@ -72,11 +76,13 @@ function resolveBaseDir(explicitBaseDir) {
     // If config-manager resolved absolute paths, use as-is; otherwise resolve from project cwd
     const isAbs = typeof base === 'string' && path.isAbsolute(base);
     if (isAbs) return base;
-    const root = process.env.I18NTK_PROJECT_ROOT ? path.resolve(process.env.I18NTK_PROJECT_ROOT) : process.cwd();
+    const envProjectRoot = envManager.get('I18NTK_PROJECT_ROOT');
+    const root = envProjectRoot ? path.resolve(envProjectRoot) : process.cwd();
     return path.resolve(root, base);
   } catch (_) {
     // 4) Fallback to conventional './locales' from project CWD
-    const root = process.env.I18NTK_PROJECT_ROOT ? path.resolve(process.env.I18NTK_PROJECT_ROOT) : process.cwd();
+    const envProjectRoot = envManager.get('I18NTK_PROJECT_ROOT');
+    const root = envProjectRoot ? path.resolve(envProjectRoot) : process.cwd();
     return path.resolve(root, './locales');
   }
 }

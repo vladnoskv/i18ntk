@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const { t } = require('../../../utils/i18n-helper');
 const cliHelper = require('../../../utils/cli-helper');
+const SecurityUtils = require('../../../utils/security');
 
 module.exports = class DebugMenu {
   constructor(manager) {
@@ -66,7 +67,7 @@ module.exports = class DebugMenu {
     console.log(t('debug.runningDebugTool', { displayName }));
     try {
       const toolPath = path.join(__dirname, '..', '..', 'scripts', 'debug', toolName);
-      if (fs.existsSync(toolPath)) {
+      if (SecurityUtils.safeExistsSync(toolPath, path.dirname(toolPath))) {
         console.log(`Debug tool available: ${toolName}`);
         console.log(`To run this tool manually: node "${toolPath}"`);
         console.log(`Working directory: ${path.join(__dirname, '..', '..')}`);
@@ -90,7 +91,7 @@ module.exports = class DebugMenu {
 
     try {
       const logsDir = path.join(__dirname, '..', '..', 'scripts', 'debug', 'logs');
-      if (fs.existsSync(logsDir)) {
+      if (SecurityUtils.safeExistsSync(logsDir, path.dirname(logsDir))) {
         const files = fs.readdirSync(logsDir)
           .filter(file => file.endsWith('.log') || file.endsWith('.txt'))
           .sort((a, b) => {
@@ -111,7 +112,7 @@ module.exports = class DebugMenu {
           const fileIndex = parseInt(choice) - 1;
 
           if (fileIndex >= 0 && fileIndex < files.length) {
-            const logContent = fs.readFileSync(path.join(logsDir, files[fileIndex]), 'utf8');
+            const logContent = SecurityUtils.safeReadFileSync(path.join(logsDir, files[fileIndex]), logsDir, 'utf8');
             console.log(`\n${t('debug.contentOf', { filename: files[fileIndex] })}:`);
             console.log('============================================================');
             console.log(logContent.slice(-2000)); // Show last 2000 characters

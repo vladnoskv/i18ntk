@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "🚀 The fastest internationalization toolkit with 97% performance boost! Zero-dependency, enterprise-grade internationalization for React, Vue, Angular, Python, Java, PHP & more. Features PIN protection, auto framework detection, 7+ UI languages, and comprehensive translation management. Perfect for startups to enterprises.",
   "keywords": [
     "i18n",
@@ -224,29 +224,23 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.4.0",
-    "releaseDate": "16/04/2026",
-    "lastUpdated": "16/04/2026",
+    "version": "2.5.0",
+    "releaseDate": "29/04/2026",
+    "lastUpdated": "29/04/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "LOGGING: Introduced centralized structured logger with silent-by-default production behavior and DEBUG_MODE/JSON_LOG toggles.",
-      "SECURITY: Added internal path whitelist detection to prevent false-positive traversal warnings for package/project internals.",
-      "I18N: Added missing-key warning TTL cache to eliminate repeated translation-key spam during builds.",
-      "HOTFIX: Removed deprecated package-path fallback that caused production build warnings for non-exported subpaths.",
-      "CRITICAL FIX: Resolved sizing and usage-analysis regressions in v2 command flow.",
-      "PACKAGING: Reduced publish footprint by removing internal development scripts and legacy fixed-file artifacts.",
-      "SECURITY: Hardened release checks and added explicit support guidance to update from pre-2.3.5 versions.",
-      "CONFIG: Added cross-process file locking for .i18ntk-config writes to prevent production rename races.",
-      "CONFIG: Made autosave runtime-safe with non-throwing save failures and I18NTK_DISABLE_AUTOSAVE support.",
-      "SECURITY: Hardened reset/backup path handling and disabled manager backup-route execution in current builds.",
-      "CLI: Removed npm registry startup update checks to eliminate outbound network calls in scanner-restricted environments.",
-      "I18N: Completed internal UI locale parity and actionable untranslated-key cleanup across supported languages."
+      "SECURITY: Centralized environment-variable access behind an explicit allowlist.",
+      "SECURITY: Hardened path containment checks to reject sibling-prefix traversal cases.",
+      "SECURITY: Added timing-safe admin PIN hash comparison and fixed expired-session cleanup.",
+      "SECURITY: Expanded release security scanning to nested production source files.",
+      "FIXER: Fixed translation fixer writes for absolute source directories and confirmed applied fixes persist.",
+      "PACKAGING: Updated package and documentation metadata for the 2.5.0 release."
     ],
     "breakingChanges": [],
-    "nextVersion": "2.4.1",
+    "nextVersion": "2.5.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -268,7 +262,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.4.0 may be unstable or insecure. Upgrade to 2.4.0 or newer."
+    "supportPolicy": "Versions earlier than 2.5.0 may be unstable or insecure. Upgrade to 2.5.0 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

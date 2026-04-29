@@ -13,6 +13,7 @@ const path = require('path');
 const { blue, yellow, gray, cyan, green, red } = require('./colors-new');
 const SecurityUtils = require('./security');
 const I18nSetupModule = require('../main/i18ntk-setup');
+const { envManager } = require('./env-manager');
 
 async function runSetupModule() {
     if (I18nSetupModule && typeof I18nSetupModule.run === 'function') {
@@ -40,11 +41,11 @@ class SetupEnforcer {
     static isNonInteractive() {
         return !process.stdout.isTTY ||
                !process.stdin.isTTY ||
-               process.env.CI === 'true' ||
-               process.env.CONTINUOUS_INTEGRATION === 'true' ||
-               process.env.NODE_ENV === 'test' ||
-               process.env.npm_lifecycle_event === 'test' ||
-               Boolean(process.env.NO_INTERACTIVE);
+               envManager.getBoolean('CI') ||
+               envManager.getBoolean('CONTINUOUS_INTEGRATION') ||
+               envManager.get('NODE_ENV') === 'test' ||
+               envManager.get('npm_lifecycle_event') === 'test' ||
+               envManager.getBoolean('NO_INTERACTIVE');
     }
 
     static checkSetupComplete() {

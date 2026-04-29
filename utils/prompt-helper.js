@@ -1,7 +1,10 @@
 const { getGlobalReadline, closeGlobalReadline, ask } = require('./cli');
+const { envManager } = require('./env-manager');
 
 function isInteractive(opts={}) {
-  const envSilent = process.env.CI === 'true' || process.env.I18NTK_SILENT === '1' || (process.env.npm_config_loglevel||'').toLowerCase()==='silent';
+  const envSilent = envManager.getBoolean('CI') ||
+    envManager.getBoolean('I18NTK_SILENT') ||
+    envManager.get('npm_config_loglevel') === 'silent';
   if (opts.noPrompt) return false;
   if (envSilent) return false;
   return process.stdin.isTTY === true;

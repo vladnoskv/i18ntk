@@ -420,7 +420,7 @@ class FixerCommand {
                         type: 'missing_key',
                         key,
                         sourceValue,
-                        fix: () => this.setValueByPath(targetObj, key, sourceValue)
+                        fix: (obj) => this.setValueByPath(obj, key, sourceValue)
                     });
                 } else if (targetValue === '') {
                     // Empty value
@@ -428,7 +428,7 @@ class FixerCommand {
                         type: 'empty_value',
                         key,
                         sourceValue,
-                        fix: () => this.setValueByPath(targetObj, key, sourceValue)
+                        fix: (obj) => this.setValueByPath(obj, key, sourceValue)
                     });
                 } else {
                     const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
@@ -438,7 +438,7 @@ class FixerCommand {
                             type: 'untranslated_marker',
                             key,
                             sourceValue,
-                            fix: () => this.setValueByPath(targetObj, key, sourceValue)
+                            fix: (obj) => this.setValueByPath(obj, key, sourceValue)
                         });
                     }
                 }
@@ -486,7 +486,7 @@ class FixerCommand {
 
                         for (const issue of issues) {
                             if (typeof issue.fix === 'function') {
-                                issue.fix();
+                                issue.fix(targetObj);
                                 fixes.files[fileName].fixed++;
                                 fixes.fixedIssues++;
                             }
@@ -494,7 +494,7 @@ class FixerCommand {
 
                         // Write back the fixed content
                         const fixedContent = JSON.stringify(targetObj, null, 2);
-                        SecurityUtils.safeWriteFileSync(targetFilePath, fixedContent, process.cwd(), 'utf8');
+                        SecurityUtils.safeWriteFileSync(targetFilePath, fixedContent, this.sourceDir, 'utf8');
 
                     } catch (error) {
                         console.warn(`Error fixing ${language}/${fileName}: ${error.message}`);
