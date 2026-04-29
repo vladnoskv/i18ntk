@@ -3,12 +3,16 @@
 # Environment files
 .env
 .env.*
+.npmrc
 
 # Development and build artifacts
 /src
 /dist
 /build
 /backups
+/i18ntk-backups
+/i18ntk-reports
+/reports
 /test-i18ntk*
 .trae
 /fpts/
@@ -63,7 +67,13 @@ pids/
 .node_repl_history
 
 # Security sensitive files
+*.i18ntk
 admin-pin.json
+settings/admin-pin.json
+.i18n-admin-config.json
+settings/.i18n-admin-config.json
+security-config.json
+settings/security-config.json
 *.key
 *.pem
 *.p12
@@ -97,8 +107,14 @@ security-scan-*.json
 
 # Development configuration
 .i18ntk-config
+.i18ntk-config.lock
+.i18ntk-config.temp-*
+.i18ntk-config.*.tmp
+.last-config.json
+.temp-config.json
 .i18ntk-settings
 i18ntk-config.json
+i18ntk-setup-report.json
 settings/.i18n-admin-config.json
 settings/admin-config.json
 settings/backups/

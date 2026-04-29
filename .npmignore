@@ -18,6 +18,10 @@ docs/development/
 /src
 /dist
 /build
+/backups
+/i18ntk-backups
+/i18ntk-reports
+/reports
 /test-i18ntk*
 .trae
 /fpts/
@@ -59,6 +63,11 @@ pids/
 
 # Development configuration
 .i18ntk-config
+.i18ntk-config.lock
+.i18ntk-config.temp-*
+.i18ntk-config.*.tmp
+.last-config.json
+.temp-config.json
 .i18ntk-settings
 i18ntk-config.json
 settings/.i18n-admin-config.json
@@ -66,7 +75,12 @@ settings/admin-config.json
 settings/backups/
 
 # Security sensitive files
+*.i18ntk
 admin-pin.json
+settings/admin-pin.json
+.i18n-admin-config.json
+security-config.json
+settings/security-config.json
 *.key
 *.pem
 *.p12
@@ -98,14 +112,10 @@ secrets.json
 !main/
 !runtime/
 !utils/
-!settings/i18ntk-config.json
 !settings/language-config.json
 !settings/settings-cli.js
 !settings/settings-manager.js
 !ui-locales/
-!locales/
 !LICENSE
 !README.md
 !package.json
-!CHANGELOG.md
-!SECURITY.md
