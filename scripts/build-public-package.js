@@ -18,11 +18,27 @@ function readJson(filePath) {
 }
 
 function run(command, args, cwd = root) {
-  const executable = command === 'npm' && process.env.npm_execpath ? process.execPath : command;
-  const commandArgs = command === 'npm' && process.env.npm_execpath ? [process.env.npm_execpath, ...args] : args;
+  let executable;
+  let commandArgs;
+  
+  if (command === 'npm') {
+    const npmPath = process.env.npm_execpath || null;
+    if (npmPath && SecurityUtils.safeExistsSync(npmPath, root)) {
+      executable = process.execPath;
+      commandArgs = [npmPath, ...args];
+    } else {
+      executable = /^win/.test(process.platform) ? 'npm.cmd' : 'npm';
+      commandArgs = args;
+    }
+  } else {
+    executable = command;
+    commandArgs = args;
+  }
+  
   const result = spawnSync(executable, commandArgs, {
     cwd,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    shell: typeof executable === 'string' && /\.cmd$/i.test(executable)
   });
 
   if (result.status !== 0) {
@@ -44,10 +60,15 @@ function copyEntry(entry) {
   }
 
   const destination = path.join(stageDir, entry);
-  const stats = fs.statSync(source);
-  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  const destDir = path.dirname(destination);
+  SecurityUtils.safeMkdirSync(destDir, stageDir, { recursive: true });
 
-  if (stats.isDirectory()) {
+  const stat = SecurityUtils.safeStatSync(source, root);
+  if (!stat) {
+    throw new Error(`Unable to stat: ${entry}`);
+  }
+
+  if (stat.isDirectory()) {
     fs.cpSync(source, destination, {
       recursive: true,
       filter: (src) => !src.includes(`${path.sep}node_modules${path.sep}`)
@@ -60,15 +81,30 @@ function copyEntry(entry) {
 function removeIfExists(relativePath) {
   const target = path.join(stageDir, relativePath);
   if (SecurityUtils.safeExistsSync(target, stageDir)) {
-    fs.rmSync(target, { recursive: true, force: true });
+    try {
+      SecurityUtils.safeUnlinkSync(target, stageDir);
+    } catch (_) {
+      // If it's a directory, use recursive removal
+      try {
+        fs.rmSync(target, { recursive: true, force: true });
+      } catch (_) {
+        // Best-effort removal
+      }
+    }
   }
 }
 
 function prepareStage() {
   const manifest = readJson(publicManifestPath);
 
-  fs.rmSync(stageDir, { recursive: true, force: true });
-  fs.mkdirSync(stageDir, { recursive: true });
+  try {
+    if (SecurityUtils.safeExistsSync(stageDir, root)) {
+      fs.rmSync(stageDir, { recursive: true, force: true });
+    }
+  } catch (_) {
+    // Best-effort cleanup of staging directory
+  }
+  SecurityUtils.safeMkdirSync(stageDir, root, { recursive: true });
 
   for (const entry of manifest.files || []) {
     copyEntry(entry);
@@ -106,16 +142,20 @@ function assertPublicManifest(manifest) {
 }
 
 function walkFiles(dirPath) {
-  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
   const results = [];
+  try {
+    const items = fs.readdirSync(dirPath, { withFileTypes: true });
 
-  for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...walkFiles(fullPath));
-    } else if (entry.isFile()) {
-      results.push(path.relative(stageDir, fullPath).replace(/\\/g, '/'));
+    for (const entry of items) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        results.push(...walkFiles(fullPath));
+      } else if (entry.isFile()) {
+        results.push(path.relative(stageDir, fullPath).replace(/\\/g, '/'));
+      }
     }
+  } catch (_) {
+    // Directory not accessible
   }
 
   return results;
@@ -128,16 +168,21 @@ function assertStageContents() {
     /^benchmarks\//,
     /^docs\//,
     /^\.release\//,
+    /^\.kilo\//,
     /^node_modules\//,
     /^package\.dev\.json$/,
     /^package\.public\.json$/,
+    /^package-lock\.json$/,
+    /^AGENTS\.md$/,
     /^\.npmignore$/,
     /^\.gitignore$/,
     /^\.i18ntk-config/,
+    /^debug-security-utils\.js$/,
     /^i18ntk-\d+\.\d+\.\d+\.tgz$/,
     /(^|\/)admin-pin\.json$/,
     /(^|\/)\.i18n-admin-config\.json$/,
     /^settings\/i18ntk-config\.json$/,
+    /^settings\/security-config\.json$/,
     /\.(key|pem|p12|pfx|private)$/
   ];
 

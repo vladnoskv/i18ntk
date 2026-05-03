@@ -85,16 +85,25 @@ function saveConfig(config, cwd = settingsManager.configDir) {
     const dir = path.dirname(configPath);
     
     // Ensure directory exists
-    if (!SecurityUtils.safeExistsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    if (!SecurityUtils.safeExistsSync(dir, settingsManager.configDir)) {
+      SecurityUtils.safeMkdirSync(dir, settingsManager.configDir, { recursive: true, mode: 0o700 });
     }
     
     // Write file with secure permissions (read/write for owner only)
-    SecurityUtils.safeWriteFileSync(
+    const written = SecurityUtils.safeWriteFileSync(
       configPath,
       JSON.stringify(config, null, 2),
-      { mode: 0o600, encoding: 'utf8' }
+      dir,
+      'utf8'
     );
+    if (!written) {
+      throw new Error('Failed to write configuration file');
+    }
+    try {
+      fs.chmodSync(configPath, 0o600);
+    } catch (_) {
+      // Best-effort: permissions are a hardening measure, not required
+    }
     
     return true;
   } catch (error) {

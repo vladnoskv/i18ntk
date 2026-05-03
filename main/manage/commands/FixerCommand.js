@@ -373,7 +373,17 @@ class FixerCommand {
             if (backupDirs.length <= keepCount) return;
 
             for (const staleDir of backupDirs.slice(keepCount)) {
-                fs.rmSync(staleDir.path, { recursive: true, force: true });
+              try {
+                SecurityUtils.safeUnlinkSync(staleDir.path, process.cwd());
+              } catch (_) {
+                // Directory not empty, use recursive removal
+                try {
+                  const { rmSync } = require('fs');
+                  rmSync(staleDir.path, { recursive: true, force: true });
+                } catch (_) {
+                  // Best-effort cleanup
+                }
+              }
             }
         } catch (error) {
             console.warn(`Failed to clean old backups: ${error.message}`);

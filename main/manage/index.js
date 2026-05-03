@@ -765,10 +765,11 @@ class I18nManager {
 
         function findFiles(dir, results = []) {
             try {
-                const items = fs.readdirSync(dir);
+                const items = SecurityUtils.safeReaddirSync(dir, cwd, { withFileTypes: true });
+                if (!items) return results;
 
                 for (const item of items) {
-                    const fullPath = path.join(dir, item);
+                    const fullPath = path.join(dir, item.name);
                     const relativePath = path.relative(cwd, fullPath);
 
                     if (shouldIgnore(relativePath)) {
@@ -776,14 +777,12 @@ class I18nManager {
                     }
 
                     try {
-                        const stat = fs.statSync(fullPath);
-
-                        if (stat.isDirectory()) {
+                        if (item.isDirectory()) {
                             findFiles(fullPath, results);
-                        } else if (stat.isFile()) {
+                        } else if (item.isFile()) {
                             // Check if file matches any of our patterns
                             for (const pattern of patterns) {
-                                if (matchesPattern(item, pattern)) {
+                                if (matchesPattern(item.name, pattern)) {
                                     results.push(relativePath);
                                     break;
                                 }

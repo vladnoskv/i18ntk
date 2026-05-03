@@ -258,7 +258,9 @@ class EnvironmentManager {
 
   getBoolean(name) {
     const value = this.get(name);
-    return value === true || value === 'true' || value === '1';
+    if (typeof value === 'boolean') return value;
+    if (value === 'true' || value === '1' || value === 'yes') return true;
+    return false;
   }
 
   /**

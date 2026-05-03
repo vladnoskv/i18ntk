@@ -5,12 +5,13 @@ deprecate-versions.js
 verify-deprecations.js
 smoke-pack.js
 build-lite.js
+debug-security-utils.js
 
 # Development directories
 scripts/
 tests/
 benchmarks/
-docs/development/
+docs/
 
 # Development and build artifacts
 /src
@@ -24,9 +25,14 @@ docs/development/
 /test-i18ntk*
 .trae
 /fpts/
+/tests/
 DEVUPDATE.md
 package.dev.json
 package.public.json
+package-lock.json
+AGENTS.md
+.kilo/
+.vscode-test/
 *.tmp
 *.temp
 *.swp
@@ -119,4 +125,5 @@ secrets.json
 !ui-locales/
 !LICENSE
 !README.md
+!CHANGELOG.md
 !package.json

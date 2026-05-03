@@ -3,7 +3,7 @@ const path = require('path');
 const SecurityUtils = require('./security');
 
 function watchDirectory(dir, callback, watchers) {
-  if (!SecurityUtils.safeExistsSync(dir)) return;
+  if (!SecurityUtils.safeExistsSync(dir, path.dirname(dir))) return;
   const watcher = fs.watch(dir, (event, filename) => {
     if (filename && filename.endsWith('.json')) {
       callback(path.join(dir, filename));
@@ -11,11 +11,18 @@ function watchDirectory(dir, callback, watchers) {
   });
   watchers.push(watcher);
 
-  fs.readdirSync(dir, { withFileTypes: true }).forEach(entry => {
-    if (entry.isDirectory()) {
-      watchDirectory(path.join(dir, entry.name), callback, watchers);
+  try {
+    const items = SecurityUtils.safeReaddirSync(dir, path.dirname(dir), { withFileTypes: true });
+    if (items) {
+      items.forEach(entry => {
+        if (entry.isDirectory()) {
+          watchDirectory(path.join(dir, entry.name), callback, watchers);
+        }
+      });
     }
-  });
+  } catch (_) {
+    // Cannot read directory contents
+  }
 }
 
 function watchLocales(dirs, onChange) {

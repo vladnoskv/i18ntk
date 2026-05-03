@@ -374,7 +374,10 @@ class AdminAuth {
       process.exit(0);
     });
     process.on('uncaughtException', (error) => {
-      SecurityUtils.logSecurityEvent('uncaught_exception', 'error', error.message);
+      SecurityUtils.logSecurityEvent('uncaught_exception', 'error', {
+        message: error && error.message ? error.message : 'Unknown uncaught exception',
+        stack: error && error.stack ? String(error.stack).split('\n').slice(0, 3).join('\n') : undefined
+      });
       cleanup();
       process.exit(1);
     });

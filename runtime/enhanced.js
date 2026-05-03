@@ -24,6 +24,33 @@ const IV_LENGTH = 16;
 const AUTH_TAG_LENGTH = 16;
 const SALT_LENGTH = 32;
 
+// Track active instances to ensure cleanup is registered only once
+let activeInstances = new Set();
+let processHandlersRegistered = false;
+
+function registerProcessHandlers() {
+  if (processHandlersRegistered) return;
+  processHandlersRegistered = true;
+
+  process.on('exit', () => {
+    for (const instance of activeInstances) {
+      try { instance.cleanup(); } catch (_) { /* best-effort */ }
+    }
+  });
+  process.on('SIGINT', () => {
+    for (const instance of activeInstances) {
+      try { instance.cleanup(); } catch (_) { /* best-effort */ }
+    }
+    process.exit(0);
+  });
+  process.on('uncaughtException', () => {
+    for (const instance of activeInstances) {
+      try { instance.cleanup(); } catch (_) { /* best-effort */ }
+    }
+    process.exit(1);
+  });
+}
+
 class I18nEnhancedRuntime extends EventEmitter {
   constructor() {
     super();
@@ -84,13 +111,13 @@ class I18nEnhancedRuntime extends EventEmitter {
       () => this.checkMemoryUsage(), 
       30000 // Check every 30 seconds
     );
-    
-    // Ensure cleanup on process exit
-    if (process && process.on) {
-      process.on('exit', () => this.cleanup());
-      process.on('SIGINT', () => this.cleanup());
-      process.on('uncaughtException', () => this.cleanup());
+    if (typeof this.memoryCheckInterval.unref === 'function') {
+      this.memoryCheckInterval.unref();
     }
+    
+    // Register this instance for process-wide cleanup
+    activeInstances.add(this);
+    registerProcessHandlers();
     
     // Add default translations namespace
     this.addNamespace('default', {
@@ -178,12 +205,32 @@ class I18nEnhancedRuntime extends EventEmitter {
   }
 
   async decryptData(encryptedData, key = this.encryptionKey) {
-    if (!key) throw new Error('Encryption key not set');
+    if (!key) {
+      throw new EncryptionError('Encryption key not set', {
+        operation: 'decrypt',
+        keyType: typeof key
+      });
+    }
     
     try {
-      const data = JSON.parse(encryptedData);
-      const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(key, 'hex'), Buffer.from(data.iv, 'hex'));
+      let data;
+      try {
+        data = JSON.parse(encryptedData);
+      } catch (parseError) {
+        throw new EncryptionError('Failed to parse encrypted data', {
+          operation: 'decrypt',
+          error: parseError.message
+        });
+      }
       
+      if (!data || !data.iv || !data.authTag || !data.encrypted) {
+        throw new EncryptionError('Invalid encrypted data format', {
+          operation: 'decrypt',
+          missingFields: ['iv', 'authTag', 'encrypted'].filter(f => !(f in (data || {})))
+        });
+      }
+      
+      const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(key, 'hex'), Buffer.from(data.iv, 'hex'));
       decipher.setAuthTag(Buffer.from(data.authTag, 'hex'));
       
       let decrypted = decipher.update(data.encrypted, 'hex', 'utf8');
@@ -191,7 +238,12 @@ class I18nEnhancedRuntime extends EventEmitter {
       
       return decrypted;
     } catch (error) {
-      throw new Error(`Decryption failed: ${error.message}`);
+      if (error instanceof SecureError) throw error;
+      
+      throw new EncryptionError('Decryption failed', {
+        operation: 'decrypt',
+        errorId: crypto.randomBytes(4).toString('hex')
+      });
     }
   }
 
@@ -619,6 +671,8 @@ class I18nEnhancedRuntime extends EventEmitter {
     if (this.config.encryption) {
       this.config.encryption.salt = null;
     }
+    
+    activeInstances.delete(this);
   }
   
   // Add or update a cache entry

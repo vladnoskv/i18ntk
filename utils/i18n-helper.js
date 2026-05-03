@@ -11,26 +11,53 @@ function getSecurityUtils() {
     try {
       securityUtils = require('./security');
     } catch (error) {
-      // Fallback: use basic fs operations if SecurityUtils is not available
+      // Fallback: use basic fs operations with path containment
+      const path = require('path');
+      const fallbackBase = path.resolve(__dirname, '..');
       return {
-        safeExistsSync: (targetPath) => {
+        safeExistsSync: (targetPath, basePath) => {
           try {
-            require('fs').accessSync(targetPath);
+            const resolved = path.resolve(basePath || fallbackBase, targetPath);
+            if (!resolved.startsWith(path.resolve(basePath || fallbackBase))) {
+              return false;
+            }
+            require('fs').accessSync(resolved);
             return true;
           } catch {
             return false;
           }
         },
-        safeWriteFileSync: (targetPath, data, _basePath, encoding = 'utf8') => {
+        safeWriteFileSync: (targetPath, data, basePath, encoding = 'utf8') => {
           try {
-            return require('fs').writeFileSync(targetPath, data, encoding);
+            const resolved = path.resolve(basePath || fallbackBase, targetPath);
+            if (!resolved.startsWith(path.resolve(basePath || fallbackBase))) {
+              return null;
+            }
+            require('fs').mkdirSync(path.dirname(resolved), { recursive: true });
+            require('fs').writeFileSync(resolved, data, encoding);
+            return true;
           } catch {
             return null;
           }
         },
-        safeReadFileSync: (targetPath, _basePath, encoding = 'utf8') => {
+        safeReadFileSync: (targetPath, basePath, encoding = 'utf8') => {
           try {
-            return require('fs').readFileSync(targetPath, encoding);
+            const resolved = path.resolve(basePath || fallbackBase, targetPath);
+            if (!resolved.startsWith(path.resolve(basePath || fallbackBase))) {
+              return null;
+            }
+            return require('fs').readFileSync(resolved, encoding);
+          } catch {
+            return null;
+          }
+        },
+        safeStatSync: (targetPath, basePath) => {
+          try {
+            const resolved = path.resolve(basePath || fallbackBase, targetPath);
+            if (!resolved.startsWith(path.resolve(basePath || fallbackBase))) {
+              return null;
+            }
+            return require('fs').statSync(resolved);
           } catch {
             return null;
           }
@@ -68,7 +95,8 @@ function getValidationBase(targetPath) {
   let current = path.resolve(path.dirname(targetPath));
   while (true) {
     try {
-      if (fs.statSync(current).isDirectory()) {
+      const stat = getSecurityUtils().safeStatSync(current, current);
+      if (stat && stat.isDirectory()) {
         return current;
       }
     } catch {
@@ -175,8 +203,6 @@ function findLocaleFilesAllDirs(lang, preferredDir) {
       try {
         const stats = SecurityUtils.safeStatSync(candidate, getValidationBase(candidate));
         if (stats && stats.isFile() && stats.size > 0) {
-            // Validate file is readable and parseable
-            fs.accessSync(candidate, fs.constants.R_OK);
             // Quick JSON validation
             const content = safeReadFile(candidate, 'utf8');
             if (content) {
@@ -413,10 +439,12 @@ function getAvailableLanguages() {
     try {
       const SecurityUtils = getSecurityUtils();
       if (!SecurityUtils.safeExistsSync(d, getValidationBase(d))) continue;
-      for (const f of fs.readdirSync(d)) {
-        if (f.endsWith('.json')) langs.add(path.basename(f, '.json'));
+      const files = SecurityUtils.safeReaddirSync(d, getValidationBase(d), { withFileTypes: true });
+      if (!files) continue;
+      for (const f of files) {
+        if (f.isFile() && f.name.endsWith('.json')) langs.add(path.basename(f.name, '.json'));
       }
-      for (const f of fs.readdirSync(d, { withFileTypes: true })) {
+      for (const f of files) {
         const nestedPath = path.join(d, f.name, `${f.name}.json`);
         if (f.isDirectory() && SecurityUtils.safeExistsSync(nestedPath, getValidationBase(nestedPath))) {
           langs.add(f.name);

@@ -447,12 +447,12 @@ export interface I18nRuntime {
  */
 export interface BasicI18nRuntime {
   /**
-   * Translate a key with parameters
+   * Translate a key with parameters (synchronous)
    */
   translate(key: string, params?: TranslationParams): string;
   
   /**
-   * Alias for translate function
+   * Alias for translate function (synchronous)
    */
   t(key: string, params?: TranslationParams): string;
   
@@ -467,7 +467,7 @@ export interface BasicI18nRuntime {
   getLanguage(): string;
   
   /**
-   * Get available languages
+   * Get available languages (synchronous)
    */
   getAvailableLanguages(): string[];
   
@@ -478,16 +478,20 @@ export interface BasicI18nRuntime {
 }
 
 /**
- * Main initialization function
+ * Initialize the enhanced i18ntk runtime (async, returns full I18nRuntime)
  */
 export declare function initI18nRuntime(config: I18nConfig): Promise<I18nRuntime>;
 
 /**
- * Basic initialization function (backward compatibility)
+ * Initialize the basic lightweight runtime (synchronous)
+ * This is the default export from 'i18ntk/runtime'
  */
-export declare function initRuntime(config: {
+export declare function initRuntime(options: {
   baseDir: string;
   language?: string;
+  fallbackLanguage?: string;
+  keySeparator?: string;
+  preload?: boolean;
 }): BasicI18nRuntime;
 
 /**

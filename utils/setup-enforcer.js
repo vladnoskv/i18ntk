@@ -271,84 +271,73 @@ static async handleInvalidConfig() {
 
         // Create new promise and store it
         SetupEnforcer._setupCheckInProgress = true;
-        SetupEnforcer._setupCheckPromise = new Promise(async (resolve, reject) => {
-             try {
-                 // Avoid circular dependency - use direct path resolution
-                 const path = require('path');
-                 const configPath = path.join(process.cwd(), '.i18ntk-config');
+        SetupEnforcer._setupCheckPromise = (async () => {
+            try {
+                // Avoid circular dependency - use direct path resolution
+                const pathModule = require('path');
+                const configPath = pathModule.join(process.cwd(), '.i18ntk-config');
                 const exists = SecurityUtils.safeExistsSync(configPath);
                 if (!exists) {
                     await SetupEnforcer.handleMissingSetup();
-                    // After setup is done, re-check the config
                     const existsAfter = SecurityUtils.safeExistsSync(configPath);
                     if (existsAfter) {
-                        resolve(true);
-                    } else {
-                        process.exit(0);
+                        return true;
                     }
-                    return;
+                    process.exit(0);
                 }
 
                 try {
-                    const configRaw = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
+                    const configRaw = SecurityUtils.safeReadFileSync(configPath, pathModule.dirname(configPath), 'utf8');
                     const config = SecurityUtils.safeParseJSON(configRaw);
                     if (!config || typeof config !== 'object') {
                         await SetupEnforcer.handleInvalidConfig();
                         process.exit(0);
                     }
-                    
-                    // Check if setup has been explicitly marked as completed
+
                     if (config.setup && config.setup.completed === true) {
-                        resolve(true);
-                        return;
-                    }
-                    
-                    // Fallback: check if config has required fields (for backward compatibility)
-                    if (!config.version || !config.sourceDir || (!config.detectedFramework && !(config.framework && config.framework.detected !== false))) {
-                        await SetupEnforcer.handleIncompleteSetup();
-                        // After setup is done, re-check the config
-                        const newConfigRaw = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
-                        const newConfig = SecurityUtils.safeParseJSON(newConfigRaw);
-                        if (!newConfig || typeof newConfig !== 'object') {
-                            process.exit(0);
-                        }
-                        if (newConfig.setup && newConfig.setup.completed === true) {
-                            resolve(true);
-                        } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {
-                            resolve(true);
-                        } else {
-                            process.exit(0);
-                        }
-                        return;
+                        return true;
                     }
 
-                    resolve(true);
-                } catch (error) {
-                    await SetupEnforcer.handleInvalidConfig();
-                    // After setup is done, re-check the config
-                    try {
-                        const newConfigRaw = SecurityUtils.safeReadFileSync(configPath, path.dirname(configPath), 'utf8');
+                    if (!config.version || !config.sourceDir || (!config.detectedFramework && !(config.framework && config.framework.detected !== false))) {
+                        await SetupEnforcer.handleIncompleteSetup();
+                        const newConfigRaw = SecurityUtils.safeReadFileSync(configPath, pathModule.dirname(configPath), 'utf8');
                         const newConfig = SecurityUtils.safeParseJSON(newConfigRaw);
                         if (!newConfig || typeof newConfig !== 'object') {
                             process.exit(0);
                         }
                         if (newConfig.setup && newConfig.setup.completed === true) {
-                            resolve(true);
+                            return true;
                         } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {
-                            resolve(true);
-                        } else {
+                            return true;
+                        }
+                        process.exit(0);
+                    }
+
+                    return true;
+                } catch (error) {
+                    await SetupEnforcer.handleInvalidConfig();
+                    try {
+                        const newConfigRaw = SecurityUtils.safeReadFileSync(configPath, pathModule.dirname(configPath), 'utf8');
+                        const newConfig = SecurityUtils.safeParseJSON(newConfigRaw);
+                        if (!newConfig || typeof newConfig !== 'object') {
                             process.exit(0);
                         }
+                        if (newConfig.setup && newConfig.setup.completed === true) {
+                            return true;
+                        } else if (newConfig.version && newConfig.sourceDir && (newConfig.detectedFramework || (newConfig.framework && newConfig.framework.detected !== false))) {
+                            return true;
+                        }
+                        process.exit(0);
                     } catch (e) {
                         process.exit(0);
                     }
                 }
             } catch (error) {
-                reject(error);
+                throw error;
             } finally {
                 SetupEnforcer._setupCheckInProgress = false;
             }
-        });
+        })();
 
         return SetupEnforcer._setupCheckPromise;
     }

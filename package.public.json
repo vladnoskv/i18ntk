@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18n",
@@ -132,6 +132,7 @@
     "utils/watch-locales.js",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
     "FUNDING.md",

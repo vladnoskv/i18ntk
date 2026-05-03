@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 class MissingKeyValidator {
   constructor(supportedLanguages = ['en', 'es', 'fr', 'de', 'ja', 'ru', 'zh']) {
@@ -776,13 +777,21 @@ class MissingKeyValidator {
 
   async validateLanguageKeys(language) {
     const localePath = path.join(this.projectRoot, 'resources', 'i18n', 'ui-locales', `${language}.json`);
+    const localeDir = path.dirname(localePath);
     
-    if (!SecurityUtils.safeExistsSync(localePath)) {
+    if (!SecurityUtils.safeExistsSync(localePath, localeDir)) {
       return this.requiredKeys; // All keys missing if file doesn't exist
     }
     
     try {
-      const localeData = JSON.parse(SecurityUtils.safeReadFileSync(localePath, 'utf8'));
+      const raw = SecurityUtils.safeReadFileSync(localePath, localeDir, 'utf8');
+      if (!raw) {
+        return this.requiredKeys;
+      }
+      const localeData = SecurityUtils.safeParseJSON(raw);
+      if (!localeData || typeof localeData !== 'object') {
+        return this.requiredKeys;
+      }
       const existingKeys = Object.keys(localeData);
       
       return this.requiredKeys.filter(key => !existingKeys.includes(key));
@@ -807,7 +816,7 @@ class MissingKeyValidator {
     };
 
     const reportPath = path.join(__dirname, 'missing-keys-report.json');
-    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2));
+    SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2), path.dirname(reportPath), 'utf8');
     
     console.log('\n📊 Missing Keys Report:');
     console.log(`Total Languages: ${report.summary.totalLanguages}`);
@@ -837,7 +846,7 @@ class MissingKeyValidator {
     });
 
     const templatePath = path.join(__dirname, 'translation-template.json');
-    SecurityUtils.safeWriteFileSync(templatePath, JSON.stringify(template, null, 2));
+    SecurityUtils.safeWriteFileSync(templatePath, JSON.stringify(template, null, 2), path.dirname(templatePath), 'utf8');
     
     console.log(`Translation template saved to: ${templatePath}`);
     return template;

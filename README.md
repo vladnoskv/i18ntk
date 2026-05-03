@@ -1,4 +1,4 @@
-# i18ntk v2.5.1
+# i18ntk v2.6.0
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, and translation completion.
 
@@ -9,28 +9,27 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.5.1)](https://socket.dev/npm/package/i18ntk/overview/2.5.1)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.6.0)](https://socket.dev/npm/package/i18ntk/overview/2.6.0)
 
 ## Upgrade Notice
 
-Versions earlier than `2.5.1` may contain known stability and security issues.
-They are considered unsupported for production use. Upgrade to `2.5.1` or newer.
+Versions earlier than `2.6.0` may contain known stability and security issues.
+They are considered unsupported for production use. Upgrade to `2.6.0` or newer.
 
-## v2.5.1 Security Update
+## v2.6.0 — Deep-Code Audit Release
 
-`v2.5.1` is a security and packaging-process update for the `2.5.x` release line.
+v2.6.0 is a comprehensive hardening release from a two-pass code audit fixing 35+ bugs and security issues across 18 files. Highlights:
 
-### Change Summary
+- **Critical**: Fixed silent-write failures where `safeWriteFileSync` was called incorrectly across 4 modules.
+- **Security**: Replaced all remaining raw `fs` calls with validated `SecurityUtils` wrappers.
+- **Security**: Fixed path traversal bypass in the fallback `SecurityUtils` implementation.
+- **Security**: Fixed Windows path traversal false negatives (fragile `path.sep` comparison).
+- **Security**: Added `safeUnlinkSync` and `safeRmdirSync` for validated file/directory deletion.
+- **Runtime**: Fixed process event handler leak, missing `setInterval.unref()`, and JSON parse error handling.
+- **TypeScript**: Fixed `BasicI18nRuntime.translate/t` return type from `Promise<string>` to `string`.
+- **Scripts**: Fixed `npm_execpath` fallback in build/release scripts.
 
-- Hardened `utils/admin-auth.js` so `verifyPin()` fails closed when admin config is missing, disabled, or malformed.
-- Hardened auth-required checks so enabled PIN protection does not silently bypass authentication when admin config is unusable.
-- Normalized admin session expiry handling by storing both `expires` and `expiresAt` and cleaning up either format consistently.
-- Marked the root `package.json` as development-only and added a separate public manifest flow.
-- Added package scripts to stage, pack, and publish the public npm package from `package.public.json`.
-- Added a root publish guard via `prepack` and `prepublishOnly` to block accidental publishing of the development manifest.
-- Updated ignore rules to exclude release staging artifacts and public package metadata from the repo/package payload.
-- Replaced the expanded `SECURITY.md` policy with a shorter reporting-oriented policy and added community docs links.
-- Updated docs and release reset automation to use `npm run package:public` instead of `npm pack --dry-run`.
+For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migration notes, see [docs/migration-guide-v2.6.0.md](./docs/migration-guide-v2.6.0.md).
 
 ## What i18ntk Does
 
@@ -170,7 +169,7 @@ Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "2.5.1",
+  "version": "2.6.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -193,6 +192,7 @@ See [docs/api/CONFIGURATION.md](docs/api/CONFIGURATION.md) for the full configur
 - [Runtime API Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/runtime.md)
 - [Scanner Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/scanner-guide.md)
 - [Environment Variables](https://github.com/vladnoskv/i18ntk/blob/main/docs/environment-variables.md)
+- [Migration Guide v2.6.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.6.0.md)
 - [Migration Guide v2.5.1](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.5.1.md)
 - [Migration Guide v2.5.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.5.0.md)
 

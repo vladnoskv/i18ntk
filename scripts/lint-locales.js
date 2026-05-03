@@ -48,7 +48,13 @@ function lintFile(filePath) {
   if (!raw) {
     return [`${path.basename(filePath, '.json')}: unable to read locale file`];
   }
-  const data = JSON.parse(raw);
+  let data;
+  try {
+    const normalized = raw.charCodeAt(0) === 0xFEFF ? raw.slice(1) : raw;
+    data = JSON.parse(normalized);
+  } catch (error) {
+    return [`${path.basename(filePath, '.json')}: invalid JSON - ${error.message}`];
+  }
   const locale = path.basename(filePath, '.json');
   const issues = [];
 
@@ -65,7 +71,14 @@ function lintFile(filePath) {
 }
 
 function main() {
-  const files = fs.readdirSync(uiLocalesDir).filter(f => f.endsWith('.json'));
+  let files;
+  try {
+    files = fs.readdirSync(uiLocalesDir).filter(f => f.endsWith('.json'));
+  } catch (error) {
+    console.error(`Locale lint failed: unable to read locales directory: ${error.message}`);
+    process.exit(1);
+  }
+
   const allIssues = files.flatMap(f => lintFile(path.join(uiLocalesDir, f)));
 
   if (allIssues.length) {

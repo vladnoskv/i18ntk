@@ -6,8 +6,8 @@ const packageJson = require('../package.json');
 
 function ensureDirectory(dirPath) {
   if (!dirPath || typeof dirPath !== 'string') return;
-  if (!SecurityUtils.safeExistsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+  if (!SecurityUtils.safeExistsSync(dirPath, process.cwd())) {
+    SecurityUtils.safeMkdirSync(dirPath, process.cwd(), { recursive: true });
   }
 }
 
@@ -27,17 +27,19 @@ function hasSourceLanguageFiles(sourceDir, sourceLanguage) {
   const modularLanguageDir = path.join(baseSourceDir, sourceLanguage);
   const singleLanguageFile = path.join(baseSourceDir, `${sourceLanguage}.json`);
 
-  if (SecurityUtils.safeExistsSync(modularLanguageDir)) {
+  if (SecurityUtils.safeExistsSync(modularLanguageDir, process.cwd())) {
     try {
-      if (fs.statSync(modularLanguageDir).isDirectory()) {
-        return fs.readdirSync(modularLanguageDir).some(file => file.endsWith('.json'));
+      const stat = SecurityUtils.safeStatSync(modularLanguageDir, process.cwd());
+      if (stat && stat.isDirectory()) {
+        const items = SecurityUtils.safeReaddirSync(modularLanguageDir, process.cwd(), { withFileTypes: true });
+        return items ? items.some(item => item.isFile() && item.name.endsWith('.json')) : false;
       }
     } catch {
       // Continue with single-file fallback.
     }
   }
 
-  return SecurityUtils.safeExistsSync(singleLanguageFile);
+  return SecurityUtils.safeExistsSync(singleLanguageFile, process.cwd());
 }
 
 /**

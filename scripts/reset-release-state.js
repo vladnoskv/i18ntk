@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const SecurityUtils = require('../utils/security');
 
 const root = path.resolve(__dirname, '..');
 
@@ -32,21 +33,44 @@ const removeGlobs = [
 
 function rm(target) {
   const absolute = path.join(root, target);
-  try {
-    fs.accessSync(absolute);
-  } catch {
+  if (!SecurityUtils.safeExistsSync(absolute, root)) {
     return false;
   }
-  fs.rmSync(absolute, { recursive: true, force: true });
+  try {
+    SecurityUtils.safeUnlinkSync(absolute, root);
+  } catch (_) {
+    // Directory or inaccessible, use recursive removal
+    try {
+      fs.rmSync(absolute, { recursive: true, force: true });
+    } catch (_) {
+      return false;
+    }
+  }
   return true;
 }
 
 function run(command, args) {
-  const executable = command === 'npm' && process.env.npm_execpath ? process.execPath : command;
-  const commandArgs = command === 'npm' && process.env.npm_execpath ? [process.env.npm_execpath, ...args] : args;
+  let executable;
+  let commandArgs;
+  
+  if (command === 'npm') {
+    const npmPath = process.env.npm_execpath || null;
+    if (npmPath && SecurityUtils.safeExistsSync(npmPath, root)) {
+      executable = process.execPath;
+      commandArgs = [npmPath, ...args];
+    } else {
+      executable = /^win/.test(process.platform) ? 'npm.cmd' : 'npm';
+      commandArgs = args;
+    }
+  } else {
+    executable = command;
+    commandArgs = args;
+  }
+  
   const result = spawnSync(executable, commandArgs, {
     cwd: root,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    shell: typeof executable === 'string' && /\.cmd$/i.test(executable)
   });
   if (result.status !== 0) {
     if (result.error) {
@@ -61,10 +85,14 @@ for (const target of removePaths) {
   if (rm(target)) removed.push(target);
 }
 
-for (const entry of fs.readdirSync(root)) {
-  if (removeGlobs.some((pattern) => pattern.test(entry))) {
-    if (rm(entry)) removed.push(entry);
+try {
+  for (const entry of fs.readdirSync(root)) {
+    if (removeGlobs.some((pattern) => pattern.test(entry))) {
+      if (rm(entry)) removed.push(entry);
+    }
   }
+} catch (_) {
+  // Root directory not accessible
 }
 
 run('npm', ['run', 'test:all']);

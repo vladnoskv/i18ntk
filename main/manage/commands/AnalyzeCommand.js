@@ -130,8 +130,11 @@ class AnalyzeCommand {
         }
 
         try {
-            fs.accessSync(safePath, fs.constants.R_OK | fs.constants.W_OK);
-        } catch {
+            const stat = SecurityUtils.safeStatSync(safePath, process.cwd());
+            if (!stat || !stat.isDirectory()) {
+                throw new Error(`Source directory is not accessible: ${safePath}`);
+            }
+        } catch (error) {
             throw new Error(`Insufficient permissions for source directory: ${safePath}`);
         }
     }

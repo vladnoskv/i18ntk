@@ -175,9 +175,9 @@ class ScannerCommand {
                 if (pyproject.includes('Flask')) return 'flask';
             }
 
-            // Check for Python files
-            const hasPythonFiles = fs.readdirSync(projectRoot, { recursive: true })
-                .some(file => file.endsWith && file.endsWith('.py'));
+            // Check for Python files using safeReaddirSync
+            const pythonItems = SecurityUtils.safeReaddirSync(projectRoot, projectRoot, { withFileTypes: true }) || [];
+            const hasPythonFiles = pythonItems.some(item => item.isFile && item.name && item.name.endsWith('.py'));
             if (hasPythonFiles) return 'python';
         } catch (error) {
             // Continue to JS frameworks
@@ -414,20 +414,22 @@ class ScannerCommand {
         const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.html', '.svelte', '.py', '.pyx', '.pyi'];
 
         const scanRecursive = (currentDir) => {
-            const items = fs.readdirSync(currentDir);
+            const items = SecurityUtils.safeReaddirSync(currentDir, path.dirname(currentDir), { withFileTypes: true });
+            if (!items) return;
 
             for (const item of items) {
-                const fullPath = path.join(currentDir, item);
-                const stat = fs.statSync(fullPath);
+                const fullPath = path.join(currentDir, item.name);
+                const stat = SecurityUtils.safeStatSync(fullPath, currentDir);
+                if (!stat) continue;
 
                 if (stat.isDirectory()) {
-                    if (!item.startsWith('.') && !this.shouldExcludeFile(fullPath, exclusions)) {
+                    if (!item.name.startsWith('.') && !this.shouldExcludeFile(fullPath, exclusions)) {
                         scanRecursive(fullPath);
                     }
                 } else if (stat.isFile()) {
-                    const ext = path.extname(item);
+                    const ext = path.extname(item.name);
                     if (extensions.includes(ext) && !this.shouldExcludeFile(fullPath, exclusions)) {
-                        if (!includeTests && (item.includes('.test.') || item.includes('.spec.'))) {
+                        if (!includeTests && (item.name.includes('.test.') || item.name.includes('.spec.'))) {
                             continue;
                         }
 
@@ -449,7 +451,7 @@ class ScannerCommand {
 
     async generateReport(results, outputDir) {
         if (!SecurityUtils.safeExistsSync(outputDir, path.dirname(outputDir))) {
-            fs.mkdirSync(outputDir, { recursive: true });
+            SecurityUtils.safeMkdirSync(outputDir, process.cwd(), { recursive: true });
         }
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

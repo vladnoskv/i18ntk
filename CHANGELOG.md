@@ -5,7 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.6.0] - 2026-05-03
+
+### Security
+- **CRITICAL**: Fixed 8+ silent-write failures where `safeWriteFileSync` was called without basePath parameter across `utils/config.js`, `utils/config-helper.js`, `utils/secure-errors.js`, and `main/i18ntk-scanner.js`.
+- Replaced all raw `fs` calls (`readdirSync`, `statSync`, `mkdirSync`, `unlinkSync`, `rmSync`) with `SecurityUtils` wrappers in `main/i18ntk-validate.js`, `main/i18ntk-scanner.js`, `main/manage/commands/FixerCommand.js`, and `utils/secure-errors.js`.
+- Fixed path traversal checks in `security.js` and `config-manager.js` — replaced fragile `path.sep`-based comparison with robust `startsWith('..')` prefix check.
+- Hardened `utils/i18n-helper.js` fallback `SecurityUtils` implementation with path containment checks.
+- Fixed `SecurityUtils.safeParseJSON` reference leak — deep-clones objects instead of returning caller's reference.
+
+### Fixed
+- Fixed `main/i18ntk-analyze.js` `this.adminAuth` reference error (local variable was not assigned to instance property).
+- Fixed `main/i18ntk-validate.js` `ExitCodes.CONFIG_ERROR` referenced before declaration.
+- Fixed `main/i18ntk-scanner.js` `fs.readdirSync(projectRoot, { recursive: true })` removed (unsupported in older Node.js).
+- Fixed `main/i18ntk-scanner.js` raw `fs.readdirSync`/`fs.statSync`/`fs.mkdirSync` in `scanDirectory` and `generateReport`.
+- Fixed `main/i18ntk-validate.js` raw `fs.readdirSync`/`fs.mkdirSync`/`fs.unlinkSync` in `getAvailableLanguages`, `getLanguageFiles`, and validation report cleanup.
+- Fixed `utils/secure-errors.js` `safeWriteFileSync` missing basePath and raw `fs.mkdirSync`.
+- Fixed `main/manage/commands/FixerCommand.js` `cleanupOldBackups` using raw `fs.rmSync` without path validation.
+- Fixed `runtime/enhanced.js` process event handler leak (multiple instances) and missing `setInterval.unref()`.
+- Fixed `utils/setup-enforcer.js` async Promise executor anti-pattern.
+- Fixed `utils/config-manager.js` stale `process.cwd()` capture at module load time.
+- Fixed `utils/config-manager.js` `ensureProjectSettingsDir` being a no-op.
+- Fixed `utils/config-helper.js` 7 `safeWriteFileSync` calls missing basePath in `initializeSourceFiles`.
+- Fixed `utils/env-manager.js` `getBoolean` comparison against non-boolean values.
+- Fixed `utils/admin-auth.js` `uncaughtException` handler wrong parameter format.
+
+### Added
+- `SecurityUtils.safeUnlinkSync(filePath, basePath)` — safely delete a file.
+- `SecurityUtils.safeRmdirSync(dirPath, basePath)` — safely remove a directory.
+
+### Changed
+- `configManager.resolvePaths`, `configManager.toRelative`, and config lock path now dynamically resolve via `getUserProjectRoot()`/`getProjectConfigPath()`.
+- `configManager.CONFIG_PATH` is now a getter that dynamically returns the project config path.
+- `configManager.migrateLegacyIfNeeded` exported for testability.
+
+### TypeScript
+- Fixed `runtime/i18ntk.d.ts` `BasicI18nRuntime.translate` and `t` return types from `Promise<string>` to `string`.
+
+### Scripts
+- Fixed `scripts/build-public-package.js` and `scripts/reset-release-state.js` `npm_execpath` fallback for missing env var.
+- Fixed `scripts/lint-locales.js` BOM handling and try-catch for `fs.readdirSync`.
 
 ## [2.5.1] - 2026-04-29
 

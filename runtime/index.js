@@ -30,7 +30,18 @@ function stripBOMAndComments(s) {
 
 function readJsonSafe(file) {
   const raw = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8');
-  return JSON.parse(stripBOMAndComments(raw));
+  if (raw === null || raw === undefined) {
+    throw new Error(`Unable to read JSON file: ${file}`);
+  }
+  const cleaned = stripBOMAndComments(raw);
+  if (!cleaned) {
+    throw new Error(`Empty JSON file: ${file}`);
+  }
+  try {
+    return JSON.parse(cleaned);
+  } catch (parseError) {
+    throw new Error(`Invalid JSON in file ${file}: ${parseError.message}`);
+  }
 }
 
 function deepMerge(target, source) {
@@ -93,13 +104,17 @@ function listJsonFilesRecursively(dir) {
   while (stack.length) {
     const d = stack.pop();
     if (!SecurityUtils.safeExistsSync(d)) continue;
-    for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
-      const full = path.join(d, entry.name);
-      if (entry.isDirectory()) {
-        stack.push(full);
-      } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
-        results.push(full);
+    try {
+      for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
+        const full = path.join(d, entry.name);
+        if (entry.isDirectory()) {
+          stack.push(full);
+        } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
+          results.push(full);
+        }
       }
+    } catch (_) {
+      // Skip directories we cannot read
     }
   }
   return results;
@@ -111,7 +126,8 @@ function readLanguageFromBase(baseDir, lang) {
   const langDir = path.join(baseDir, lang);
 
   // Prefer folder if exists, otherwise single file
-  if (SecurityUtils.safeExistsSync(langDir) && fs.statSync(langDir).isDirectory()) {
+  const langDirStat = SecurityUtils.safeStatSync(langDir, path.dirname(langDir));
+  if (langDirStat && langDirStat.isDirectory()) {
     const files = listJsonFilesRecursively(langDir);
     for (const file of files) {
       try {
@@ -121,11 +137,14 @@ function readLanguageFromBase(baseDir, lang) {
         // Skip unreadable/invalid files
       }
     }
-  } else if (SecurityUtils.safeExistsSync(langFile) && fs.statSync(langFile).isFile()) {
-    try {
-      const data = readJsonSafe(langFile);
-      if (data && typeof data === 'object') deepMerge(merged, data);
-    } catch (_) { /* ignore */ }
+  } else {
+    const langFileStat = SecurityUtils.safeStatSync(langFile, path.dirname(langFile));
+    if (langFileStat && langFileStat.isFile()) {
+      try {
+        const data = readJsonSafe(langFile);
+        if (data && typeof data === 'object') deepMerge(merged, data);
+      } catch (_) { /* ignore */ }
+    }
   }
 
   return merged;
@@ -211,16 +230,20 @@ function getAvailableLanguages() {
   const langs = new Set();
   if (!state.baseDir) state.baseDir = resolveBaseDir();
   if (!SecurityUtils.safeExistsSync(state.baseDir)) return ['en'];
-  for (const entry of fs.readdirSync(state.baseDir, { withFileTypes: true })) {
-    if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
-      langs.add(entry.name.replace(/\.json$/i, ''));
-    } else if (entry.isDirectory()) {
-      // language folder convention
-      const lang = entry.name;
-      const idx = path.join(state.baseDir, lang, `${lang}.json`);
-      if (SecurityUtils.safeExistsSync(idx)) langs.add(lang);
-      else langs.add(lang); // be permissive
+  try {
+    for (const entry of fs.readdirSync(state.baseDir, { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
+        langs.add(entry.name.replace(/\.json$/i, ''));
+      } else if (entry.isDirectory()) {
+        const lang = entry.name;
+        const idx = path.join(state.baseDir, lang, `${lang}.json`);
+        if (SecurityUtils.safeExistsSync(idx)) langs.add(lang);
+        else langs.add(lang); // be permissive
+      }
     }
+  } catch (_) {
+    // Unreadable directory
+    return ['en'];
   }
   return Array.from(langs.size ? langs : new Set(['en']));
 }

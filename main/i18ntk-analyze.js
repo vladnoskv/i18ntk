@@ -252,7 +252,7 @@ class I18nAnalyzer {
               const relativePath = path.relative(this.sourceDir, fullPath);
               const shouldExclude = (this.config.excludeFiles || []).some(pattern => {
                 if (typeof pattern === 'string') {
-                  return relativePath === pattern || relativePath.endsWith(path.sep + pattern);
+                  return relativePath === pattern || relativePath.endsWith('/' + pattern) || relativePath.endsWith('\\' + pattern);
                 }
                 if (pattern instanceof RegExp) {
                   return pattern.test(relativePath);
@@ -908,9 +908,9 @@ try {
         const isRequired = await adminAuth.isAuthRequired();
         if (isRequired) {
           console.log('\n' + t('adminCli.authRequiredForOperation', { operation: 'analyze translations' }));
-          const cliHelper = require('../utils/cli-helper');
-        const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
-        const isValid = await this.adminAuth.verifyPin(pin);
+          const cli = require('../utils/cli-helper');
+        const pin = await cli.promptPin(t('adminCli.enterPin'));
+        const isValid = await adminAuth.verifyPin(pin);
           
           if (!isValid) {
             console.log(t('adminCli.invalidPin'));

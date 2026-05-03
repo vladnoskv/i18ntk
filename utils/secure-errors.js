@@ -78,11 +78,14 @@ function secureErrorHandler(options = {}) {
   const config = { ...defaults, ...options };
   
   // Ensure log directory exists
-  if (config.logFilePath && !SecurityUtils.safeExistsSync(path.dirname(config.logFilePath))) {
-    try {
-      fs.mkdirSync(path.dirname(config.logFilePath), { recursive: true });
-    } catch (e) {
-      console.error('Failed to create log directory:', e);
+  if (config.logFilePath) {
+    const logDir = path.dirname(config.logFilePath);
+    if (!SecurityUtils.safeExistsSync(logDir, process.cwd())) {
+      try {
+        SecurityUtils.safeMkdirSync(logDir, process.cwd(), { recursive: true });
+      } catch (e) {
+        console.error('Failed to create log directory:', e);
+      }
     }
   }
 
@@ -128,7 +131,7 @@ function secureErrorHandler(options = {}) {
 
       // Log to console
       if (typeof config.logFunction === 'function') {
-        SecurityUtils.safeWriteFileSync(config.logFilePath, JSON.stringify(logEntry, null, 2));
+        config.logFunction(logEntry);
       }
 
       // Log to file if configured
@@ -136,6 +139,7 @@ function secureErrorHandler(options = {}) {
         SecurityUtils.safeWriteFileSync(
           config.logFilePath,
           JSON.stringify(logEntry) + '\n',
+          path.dirname(config.logFilePath),
           'utf8'
         );
       }

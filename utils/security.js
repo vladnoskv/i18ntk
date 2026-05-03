@@ -299,7 +299,7 @@ static _logging = false;
 
       // Check for actual path traversal (going outside the base directory)
       const relativePath = path.relative(base, finalPath);
-      if (relativePath === '..' || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
+      if (relativePath.startsWith('..')) {
         const message = useI18n
           ? i18n.t('security.pathTraversalAttempt')
           : 'Path traversal attempt';
@@ -474,6 +474,32 @@ static _logging = false;
     }
   }
 
+  static safeUnlinkSync(filePath, basePath) {
+    const validatedPath = this.validatePath(filePath, basePath);
+    if (!validatedPath) {
+      return false;
+    }
+    try {
+      fs.unlinkSync(validatedPath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  static safeRmdirSync(dirPath, basePath) {
+    const validatedPath = this.validatePath(dirPath, basePath);
+    if (!validatedPath) {
+      return false;
+    }
+    try {
+      fs.rmdirSync(validatedPath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Safely parse JSON content.
    * Accepts both raw JSON strings and already-parsed objects.
@@ -486,8 +512,8 @@ static _logging = false;
       return fallback;
     }
 
-    if (typeof input === 'object') {
-      return input;
+    if (typeof input === 'object' && !Array.isArray(input)) {
+      return JSON.parse(JSON.stringify(input));
     }
 
     if (typeof input !== 'string') {
@@ -571,7 +597,7 @@ static _logging = false;
   const relativePath = path.relative(resolvedBase, resolvedPath);
   
   // Ensure the final path is within the base directory
-  if (relativePath === '..' || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
+  if (relativePath.startsWith('..')) {
   SecurityUtils.logSecurityEvent('Path traversal attempt detected in safeJoin', 'error', {
   basePath,
   paths,

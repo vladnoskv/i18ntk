@@ -94,8 +94,8 @@ class ValidateCommand {
                 } else {
                     console.warn(t('config.dirFallbackWarning', { dir: this.sourceDir, fallback: this.sourceLanguageDir }) ||
                         `Warning: Directory ${this.sourceDir} not found. Using ${this.sourceLanguageDir}.`);
-                    if (!SecurityUtils.safeExistsSync(this.sourceLanguageDir)) {
-                        fs.mkdirSync(this.sourceLanguageDir, { recursive: true });
+                    if (!SecurityUtils.safeExistsSync(this.sourceLanguageDir, process.cwd())) {
+                        SecurityUtils.safeMkdirSync(this.sourceLanguageDir, process.cwd(), { recursive: true });
                     }
                 }
             }
@@ -185,13 +185,15 @@ class ValidateCommand {
                 throw new Error(`Source directory not found: ${this.sourceDir}`);
             }
 
-            const languages = fs.readdirSync(this.sourceDir)
-                .filter(item => {
-                    const itemPath = path.join(this.sourceDir, item);
-                    return fs.statSync(itemPath).isDirectory() &&
-                           item !== this.config.sourceLanguage &&
-                           !this.isExcludedLanguageDirectory(item);
-                });
+            const items = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd(), { withFileTypes: true });
+            if (!items) {
+                throw new Error(`Source directory not found: ${this.sourceDir}`);
+            }
+
+            const languages = items
+                .filter(item => item.isDirectory())
+                .filter(item => item.name !== this.config.sourceLanguage && !this.isExcludedLanguageDirectory(item.name))
+                .map(item => item.name);
 
             return languages;
         } catch (error) {
@@ -209,11 +211,13 @@ class ValidateCommand {
                 return [];
             }
 
-            const files = fs.readdirSync(languageDir)
-                .filter(file => {
-                    return file.endsWith('.json') &&
-                          !this.config.excludeFiles.includes(file);
-                });
+            const items = SecurityUtils.safeReaddirSync(languageDir, process.cwd(), { withFileTypes: true });
+            if (!items) return [];
+
+            const files = items
+                .filter(item => item.isFile() && item.name.endsWith('.json') &&
+                    !this.config.excludeFiles.includes(item.name))
+                .map(item => item.name);
 
             return files;
         } catch (error) {
@@ -663,10 +667,10 @@ class ValidateCommand {
 
                 // Delete old validation report if it exists
                 const reportPath = path.join(process.cwd(), 'validation-report.txt');
-                SecurityUtils.validatePath(reportPath);
+                const validatedPath = SecurityUtils.validatePath(reportPath, process.cwd());
 
-                if (SecurityUtils.safeExistsSync(reportPath)) {
-                    fs.unlinkSync(reportPath);
+                if (validatedPath && SecurityUtils.safeExistsSync(validatedPath, process.cwd())) {
+                    SecurityUtils.safeUnlinkSync(validatedPath, process.cwd());
                     console.log(t('validate.deletedOldReport'));
 
                     SecurityUtils.logSecurityEvent(t('validate.fileDeleted'), 'info', {

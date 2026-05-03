@@ -8,16 +8,20 @@ const { envManager } = require('./env-manager');
 
 // Determine package directory and user project root
 const packageDir = path.resolve(__dirname, '..');
-const userProjectRoot = path.resolve(process.cwd());
 
-// Always use current working directory for settings to support test environments
-// This ensures config works correctly when tests change the working directory
-const PROJECT_CONFIG_PATH = SecurityUtils.safeJoin(userProjectRoot, '.i18ntk-config');
-if (!PROJECT_CONFIG_PATH) {
-throw new Error('Invalid project config path - potential path traversal attempt');
+function getUserProjectRoot() {
+  return path.resolve(process.cwd());
 }
-const PROJECT_SETTINGS_DIR = path.dirname(PROJECT_CONFIG_PATH);
-const CONFIG_LOCK_PATH = `${PROJECT_CONFIG_PATH}.lock`;
+
+function getProjectConfigPath() {
+  const root = getUserProjectRoot();
+  const configPath = SecurityUtils.safeJoin(root, '.i18ntk-config');
+  if (!configPath) {
+    throw new Error('Invalid project config path - potential path traversal attempt');
+  }
+  return configPath;
+}
+
 const CONFIG_LOCK_TIMEOUT_MS = 5000;
 const CONFIG_LOCK_STALE_MS = 15000;
 const CONFIG_LOCK_RETRY_MS = 50;
@@ -72,7 +76,7 @@ function notifyConfigFallback(error) {
 }
 
 // Setup tracking file
-const SETUP_COMPLETED_FILE = path.join(PROJECT_SETTINGS_DIR, 'setup.json');
+const getSetupCompletedFile = () => path.join(path.dirname(getProjectConfigPath()), 'setup.json');
 
 // Legacy home directory config (for migration only)
 const LEGACY_CONFIG_DIR = path.join(os.homedir(), '.i18ntk');
@@ -82,12 +86,9 @@ const LEGACY_CONFIG_PATH = path.join(LEGACY_CONFIG_DIR, 'i18ntk-config.json');
 const PACKAGE_SETTINGS_DIR = path.join(packageDir, 'settings');
 const PACKAGE_CONFIG_PATH = path.join(PACKAGE_SETTINGS_DIR, 'i18ntk-config.json');
 
-// Keep projectRoot for path resolution functions
-const projectRoot = userProjectRoot;
-
 // Back-compat: expose CONFIG_DIR/CONFIG_PATH but point to project settings
-const CONFIG_DIR = PROJECT_SETTINGS_DIR;
-const CONFIG_PATH = PROJECT_CONFIG_PATH;
+const getConfigDir = () => path.dirname(getProjectConfigPath());
+const getConfigPath = getProjectConfigPath;
 
 // Default configuration values - comprehensive configuration
 const DEFAULT_CONFIG = {
@@ -314,12 +315,13 @@ function sleep(ms) {
 }
 
 async function acquireConfigLock(timeoutMs = CONFIG_LOCK_TIMEOUT_MS) {
+  const lockPath = `${getProjectConfigPath()}.lock`;
   const start = Date.now();
   let lockHandle = null;
 
   while (!lockHandle) {
     try {
-      lockHandle = await fs.promises.open(CONFIG_LOCK_PATH, 'wx');
+      lockHandle = await fs.promises.open(lockPath, 'wx');
       await lockHandle.writeFile(String(process.pid), 'utf8');
       break;
     } catch (error) {
@@ -329,9 +331,9 @@ async function acquireConfigLock(timeoutMs = CONFIG_LOCK_TIMEOUT_MS) {
 
       // Recover from stale lock files left by crashed processes.
       try {
-        const stats = await fs.promises.stat(CONFIG_LOCK_PATH);
+        const stats = await fs.promises.stat(lockPath);
         if (Date.now() - stats.mtimeMs > CONFIG_LOCK_STALE_MS) {
-          await fs.promises.unlink(CONFIG_LOCK_PATH);
+          await fs.promises.unlink(lockPath);
           continue;
         }
       } catch (_) {
@@ -355,7 +357,7 @@ async function acquireConfigLock(timeoutMs = CONFIG_LOCK_TIMEOUT_MS) {
       // Best-effort close only.
     }
     try {
-      await fs.promises.unlink(CONFIG_LOCK_PATH);
+      await fs.promises.unlink(lockPath);
     } catch (_) {
       // Best-effort cleanup only.
     }
@@ -382,9 +384,12 @@ function resetRecursionGuard() {
 }
 
 function ensureProjectSettingsDir() {
-  // Only create settings directory within the package, not in user projects
-  // Since PROJECT_SETTINGS_DIR is now set to package internals, no action needed
-  // if directory doesn't exist, we'll use package defaults
+  const settingsDir = path.dirname(getProjectConfigPath());
+  try {
+    fs.mkdirSync(settingsDir, { recursive: true });
+  } catch (_) {
+    // Directory may already exist or be unwritable
+  }
 }
 
 function normalizePathValue(keyPath, value) {
@@ -457,7 +462,8 @@ function tryReadJson(filePath) {
 
 async function migrateLegacyIfNeeded(baseCfg) {
   // If project config does not exist but legacy exists, migrate once
-  if (!SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH) && SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
+  const configPath = getProjectConfigPath();
+  if (!SecurityUtils.safeExistsSync(configPath) && SecurityUtils.safeExistsSync(LEGACY_CONFIG_PATH)) {
     const legacy = tryReadJson(LEGACY_CONFIG_PATH);
     if (legacy && typeof legacy === 'object') {
       const merged = deepMerge(clone(baseCfg), legacy);
@@ -465,9 +471,9 @@ async function migrateLegacyIfNeeded(baseCfg) {
       try { merged.migrationComplete = true; } catch (_) {}
       ensureProjectSettingsDir();
       try {
-        await fs.promises.writeFile(PROJECT_CONFIG_PATH, JSON.stringify(merged, null, 2), 'utf8');
+        await fs.promises.writeFile(configPath, JSON.stringify(merged, null, 2), 'utf8');
         // Best-effort removal of legacy file to prevent future use
-        try { fs.unlinkSync(LEGACY_CONFIG_PATH); } catch (_) {}
+        try { SecurityUtils.safeUnlinkSync(LEGACY_CONFIG_PATH, path.dirname(LEGACY_CONFIG_PATH)); } catch (_) {}
         // Deprecation notice
         logWarn('[i18ntk] Deprecated config location detected (~/.i18ntk). Configuration was migrated to project .i18ntk-config.');
         return merged;
@@ -503,8 +509,9 @@ function loadConfig() {
 
     try {
       let cfg = clone(DEFAULT_CONFIG);
+   const configPath = getProjectConfigPath();
    // 1) Project config (primary)
-   const projectCfg = tryReadJson(PROJECT_CONFIG_PATH);
+   const projectCfg = tryReadJson(configPath);
    if (projectCfg) {
      cfg = deepMerge(clone(DEFAULT_CONFIG), projectCfg);
    } else {
@@ -557,8 +564,10 @@ async function saveConfig(cfg = currentConfig) {
     let tempPath = null;
     let releaseLock = null;
     try {
+      const settingsDir = path.dirname(getProjectConfigPath());
+      const configFilePath = getProjectConfigPath();
       // Ensure settings directory exists before any lock/file operations.
-      await fs.promises.mkdir(PROJECT_SETTINGS_DIR, { recursive: true });
+      await fs.promises.mkdir(settingsDir, { recursive: true });
 
       releaseLock = await acquireConfigLock();
 
@@ -572,16 +581,16 @@ async function saveConfig(cfg = currentConfig) {
       // Use a simpler naming pattern to avoid triggering security warnings
       const nonce = `${process.pid}.${Date.now()}`;
       const tempFileName = `.i18ntk-config.temp-${nonce}`;
-      tempPath = path.join(PROJECT_SETTINGS_DIR, tempFileName);
+      tempPath = path.join(settingsDir, tempFileName);
       await fs.promises.writeFile(tempPath, serialized, 'utf8');
 
       try {
-        await fs.promises.rename(tempPath, PROJECT_CONFIG_PATH);
+        await fs.promises.rename(tempPath, configFilePath);
       } catch (renameError) {
         // If destination dir disappeared between checks, recreate and retry once.
         if (renameError && renameError.code === 'ENOENT') {
-          await fs.promises.mkdir(PROJECT_SETTINGS_DIR, { recursive: true });
-          await fs.promises.rename(tempPath, PROJECT_CONFIG_PATH);
+          await fs.promises.mkdir(settingsDir, { recursive: true });
+          await fs.promises.rename(tempPath, configFilePath);
         } else {
           throw renameError;
         }
@@ -598,9 +607,7 @@ async function saveConfig(cfg = currentConfig) {
       }
       if (tempPath) {
         try {
-          if (SecurityUtils.safeExistsSync(tempPath, path.dirname(tempPath))) {
-            fs.unlinkSync(tempPath);
-          }
+          SecurityUtils.safeUnlinkSync(tempPath, path.dirname(tempPath));
         } catch (_) {
           // Best-effort temp cleanup only.
         }
@@ -622,17 +629,19 @@ function getConfig() {
     }
 
    try {
+     const configPath = getProjectConfigPath();
+     const settingsDir = path.dirname(configPath);
      // Ensure settings directory exists
-     if (!SecurityUtils.safeExistsSync(PROJECT_SETTINGS_DIR)) {
-       fs.mkdirSync(PROJECT_SETTINGS_DIR, { recursive: true });
+     if (!SecurityUtils.safeExistsSync(settingsDir)) {
+       fs.mkdirSync(settingsDir, { recursive: true });
      }
 
      // Setup is now handled automatically by the unified config system
      // No need to check here - handled by getUnifiedConfig
 
      // Check if config file exists
-     if (SecurityUtils.safeExistsSync(PROJECT_CONFIG_PATH)) {
-       const rawConfig = SecurityUtils.safeReadFileSync(PROJECT_CONFIG_PATH, path.dirname(PROJECT_CONFIG_PATH), 'utf8');
+     if (SecurityUtils.safeExistsSync(configPath)) {
+       const rawConfig = SecurityUtils.safeReadFileSync(configPath, settingsDir, 'utf8');
        const config = SecurityUtils.safeParseJSON(rawConfig);
        if (config && typeof config === 'object') {
          currentConfig = config;
@@ -655,15 +664,15 @@ function getConfig() {
        });
        currentConfig = migratedConfig;
 
-       // Clean up legacy config
-       try {
-         fs.unlinkSync(LEGACY_CONFIG_PATH);
-         if (fs.readdirSync(LEGACY_CONFIG_DIR).length === 0) {
-           fs.rmdirSync(LEGACY_CONFIG_DIR);
-         }
-       } catch (cleanupError) {
-         // Ignore cleanup errors
-       }
+        // Clean up legacy config
+        try {
+          SecurityUtils.safeUnlinkSync(LEGACY_CONFIG_PATH, path.dirname(LEGACY_CONFIG_PATH));
+          if (SecurityUtils.safeReaddirSync(LEGACY_CONFIG_DIR, path.dirname(LEGACY_CONFIG_DIR)).length === 0) {
+            SecurityUtils.safeRmdirSync(LEGACY_CONFIG_DIR, path.dirname(LEGACY_CONFIG_DIR));
+          }
+        } catch (cleanupError) {
+          // Ignore cleanup errors
+        }
 
        return resolvePaths(migratedConfig);
      }
@@ -706,7 +715,7 @@ function resolvePaths(cfg) {
     if (!cfg) {
       cfg = clone(DEFAULT_CONFIG);
     }
-   const root = path.resolve(projectRoot, cfg.projectRoot || '.');
+   const root = path.resolve(getUserProjectRoot(), cfg.projectRoot || '.');
    const resolved = clone(cfg);
    resolved.projectRoot = root;
    ['sourceDir', 'i18nDir', 'outputDir'].forEach(key => {
@@ -723,7 +732,7 @@ function resolvePaths(cfg) {
 
 function toRelative(absPath) {
    if (!absPath) return absPath;
-   const rel = path.relative(projectRoot, absPath);
+   const rel = path.relative(getUserProjectRoot(), absPath);
    const normalized = rel ? `./${rel.replace(/\\/g, '/')}` : '.';
    return normalized;
 }
@@ -731,7 +740,7 @@ function toRelative(absPath) {
 
 
 module.exports = {
-  CONFIG_PATH,
+  get CONFIG_PATH() { return getProjectConfigPath(); },
   DEFAULT_CONFIG,
   loadConfig,
   saveConfig,
@@ -742,6 +751,7 @@ module.exports = {
   resolvePaths,
   toRelative,
   normalizePathValue,
+  migrateLegacyIfNeeded,
 }
 
 

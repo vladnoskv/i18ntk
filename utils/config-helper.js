@@ -51,7 +51,9 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
       settingsDir = safeConfigDir;
       const configFile = path.join(settingsDir, 'i18ntk-config.json');
-      cfg = SecurityUtils.safeExistsSync(configFile) ? JSON.parse(SecurityUtils.safeReadFileSync(configFile, settingsDir, 'utf8')) : {};
+      const rawConfig = SecurityUtils.safeReadFileSync(configFile, settingsDir, 'utf8');
+      cfg = rawConfig ? SecurityUtils.safeParseJSON(rawConfig) : {};
+      if (!cfg || typeof cfg !== 'object') cfg = {};
       projectRoot = settingsDir;
       cfg.projectRoot = projectRoot;
       cfg.sourceDir = path.resolve(projectRoot, toStr(cfg.sourceDir) || './locales');
@@ -60,11 +62,15 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
     } else {
       cfg = configManager.getConfig();
       // Use current working directory instead of hardcoded path
-      const isHardcodedPath = cfg.projectRoot && cfg.projectRoot.includes('i18n-management-toolkit-main');
-      projectRoot = isHardcodedPath ? process.cwd() : path.resolve(cfg.projectRoot || '.');
+      const isSuspiciousPath = cfg.projectRoot && (
+        cfg.projectRoot.includes('i18n-management-toolkit-main') ||
+        cfg.projectRoot.includes('i18ntk-') ||
+        !SecurityUtils.safeExistsSync(cfg.projectRoot, path.dirname(cfg.projectRoot || '.'))
+      );
+      projectRoot = isSuspiciousPath ? process.cwd() : path.resolve(cfg.projectRoot || '.');
       
       // Update config with dynamic project root
-      if (isHardcodedPath) {
+      if (isSuspiciousPath) {
         cfg.projectRoot = '.';
       }
 
@@ -110,7 +116,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       }
 
       // Auto-fix i18nDir if missing but sourceDir exists
-      if (!SecurityUtils.safeExistsSync(cfg.i18nDir) && SecurityUtils.safeExistsSync(cfg.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(cfg.i18nDir, projectRoot) && SecurityUtils.safeExistsSync(cfg.sourceDir, projectRoot)) {
         await configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
         cfg.i18nDir = cfg.sourceDir;
       }
@@ -414,8 +420,8 @@ function ensureDirectory(dirPath) {
     // Silently handle undefined or invalid paths to prevent security errors
     return;
   }
-  if (!SecurityUtils.safeExistsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
+  if (!SecurityUtils.safeExistsSync(dirPath, process.cwd())) {
+    SecurityUtils.safeMkdirSync(dirPath, process.cwd(), { recursive: true });
   }
 }
 
@@ -499,27 +505,27 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
   ensureDirectory(sourceDir);
   
   // Write the default source language file
-  SecurityUtils.safeWriteFileSync(sourceFile, JSON.stringify(defaultContent, null, 2));
+  SecurityUtils.safeWriteFileSync(sourceFile, JSON.stringify(defaultContent, null, 2), sourceDir, 'utf8');
   
   // Create directories for supported languages
   const supportedLanguages = ['es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'];
   
   supportedLanguages.forEach(lang => {
     const langFile = path.join(sourceDir, `${lang}.json`);
-    if (!SecurityUtils.safeExistsSync(langFile)) {
+    if (!SecurityUtils.safeExistsSync(langFile, sourceDir)) {
       // Create empty object structure for each language
       const emptyStructure = {
         app: {},
         common: {},
         navigation: {}
       };
-      SecurityUtils.safeWriteFileSync(langFile, JSON.stringify(emptyStructure, null, 2));
+      SecurityUtils.safeWriteFileSync(langFile, JSON.stringify(emptyStructure, null, 2), sourceDir, 'utf8');
     }
   });
   
   // Create v2 project config if it doesn't exist
   const configFile = '.i18ntk-config';
-  if (!SecurityUtils.safeExistsSync(configFile)) {
+  if (!SecurityUtils.safeExistsSync(configFile, process.cwd())) {
     const version = (() => {
       try {
         return require('../package.json').version;
@@ -550,7 +556,7 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
         batchSize: 1000
       }
     };
-    SecurityUtils.safeWriteFileSync(configFile, JSON.stringify(defaultConfig, null, 2));
+    SecurityUtils.safeWriteFileSync(configFile, JSON.stringify(defaultConfig, null, 2), process.cwd(), 'utf8');
   }
 }
 
