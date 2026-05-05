@@ -1,4 +1,4 @@
-# Getting Started with i18ntk (v2.5.1)
+# Getting Started with i18ntk (v3.0.0)
 
 This guide covers the shortest path from install to first successful run.
 
@@ -62,7 +62,24 @@ When analysis shows gaps:
 i18ntk --command=complete
 ```
 
-## 5. Use the runtime API in your application
+## 5. Auto-translate locale files
+
+Use the management menu:
+
+```bash
+i18ntk
+# choose "Auto Translate (Beta)"
+```
+
+Or run the standalone translator directly:
+
+```bash
+i18ntk-translate locales/en/common.json de --report-stdout
+```
+
+The manager flow runs a dry-run preview first, then writes translated target files after confirmation.
+
+## 6. Use the runtime API in your application
 
 ```js
 const runtime = require('i18ntk/runtime');
@@ -77,7 +94,7 @@ runtime.initRuntime({
 console.log(runtime.t('common.hello'));
 ```
 
-## 6. Keep configuration in sync
+## 7. Keep configuration in sync
 
 The project-local `.i18ntk-config` file is the source of truth for setup and command defaults.
 
@@ -88,10 +105,12 @@ i18ntk
 i18ntk --command=analyze
 i18ntk --command=validate
 i18ntk --command=usage
+i18ntk --command=translate
 ```
 
 ## Next Steps
 
 - Read [docs/runtime.md](./runtime.md) for full runtime API details.
+- Read [docs/auto-translate.md](./auto-translate.md) for Auto Translate usage.
 - Read [docs/api/CONFIGURATION.md](./api/CONFIGURATION.md) for config fields and precedence.
 - Read [docs/scanner-guide.md](./scanner-guide.md) for scan and key discovery workflows.

@@ -1,8 +1,8 @@
-# i18ntk Configuration Guide (v2)
+# i18ntk Configuration Guide (v3)
 
 ## Overview
 
-i18ntk v2 uses a project-local config file named `.i18ntk-config`.
+i18ntk v3 uses a project-local config file named `.i18ntk-config`.
 
 - Location: project root
 - Format: JSON
@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "2.5.1",
+  "version": "3.0.0",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",
@@ -87,7 +87,7 @@ i18ntk-validate --source-language=en
 
 ## Legacy Config Compatibility
 
-v2 keeps compatibility with older config locations during migration, but `.i18ntk-config` is the source of truth for current projects.
+v3 keeps compatibility with older config locations during migration, but `.i18ntk-config` is the source of truth for current projects.
 
 ## Setup Behavior
 
@@ -114,5 +114,5 @@ runtime.initRuntime({
 ## Security Notes
 
 - Do not store secrets in `.i18ntk-config`.
-- i18ntk does not require API keys for core workflows.
+- i18ntk does not require API keys for core workflows or the default Auto Translate flow.
 - Keep config scoped to project paths, not user-home global paths.

@@ -1,4 +1,4 @@
-# i18ntk Components (v2)
+# i18ntk Components (v3)
 
 ## Core Entry Points
 
@@ -14,6 +14,7 @@
 - `main/i18ntk-doctor.js`: diagnostics
 - `main/i18ntk-fixer.js`: placeholder/missing marker cleanup
 - `main/i18ntk-backup.js`: standalone backup lifecycle operations (`i18ntk-backup`)
+- `main/i18ntk-translate.js`: standalone Auto Translate CLI (`i18ntk-translate`)
 
 ## Shared Utilities
 
@@ -23,6 +24,7 @@
 - `utils/i18n-helper.js`: UI translation loading and lookup
 - `utils/security.js`: file/path safety helpers
 - `utils/setup-enforcer.js`: setup-completion gate checks
+- `utils/translate/`: Auto Translate placeholder handling, API calls, traversal, reports, and prompts
 
 ## Runtime Package
 
@@ -39,7 +41,7 @@ Exports:
 
 ## Notes
 
-- v2 is zero dependency at runtime.
+- v3 is zero dependency at runtime.
 - `.i18ntk-config` is the project source of truth.
 - Prefer documented CLI entry points over internal modules.
 - Manager-route backup execution (`i18ntk --command=backup`) is disabled in current builds.

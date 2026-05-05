@@ -922,6 +922,7 @@
     "summaryCommand": "summary   - Projektstatus anzeigen",
     "debugCommand": "debug     - Übersetzungsfehler debuggen",
     "scannerCommand": "scanner   - Projekt für i18n-Schlüssel scannen",
+    "translateCommand": "translate - Auto-Übersetzung (Beta)",
     "menu": {
       "pressEnterToContinue": "Drücken Sie die Eingabetaste, um fortzufahren...",
       "title": "🌐 I18NTK VERWALTUNGSMENÜ",
@@ -1146,6 +1147,7 @@
       "sizing": "📏 Größenanalyse",
       "fix": "🛠️  Platzhalterübersetzungen reparieren",
       "scanner": "🔍 i18n-Probleme scannen",
+      "translate": "🌐 Auto-Übersetzung (Beta)",
       "workflow": "🔄 Gesamten Workflow ausführen",
       "status": "📋 Projektstatus anzeigen",
       "delete": "🗑️  Alle Berichte löschen",
@@ -2111,6 +2113,7 @@
       "completeCommand": "complete  - Übersetzungen vervollständigen (100% Abdeckung)",
       "summaryCommand": "summary   - Projektstatus anzeigen",
       "scannerCommand": "scanner   - i18n-Probleme scannen",
+      "translateCommand": "translate - Auto-Übersetzung (Beta)",
       "debugCommand": "debug     - Übersetzungsprobleme debuggen"
     },
     "test_complete_system": {

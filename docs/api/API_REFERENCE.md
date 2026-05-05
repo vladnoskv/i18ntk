@@ -1,4 +1,4 @@
-# i18ntk API Reference (v2)
+# i18ntk API Reference (v3)
 
 ## Primary CLI
 
@@ -17,6 +17,7 @@ i18ntk --command=usage
 i18ntk --command=scanner
 i18ntk --command=sizing
 i18ntk --command=complete
+i18ntk --command=translate
 i18ntk --command=summary
 i18ntk --command=debug
 ```
@@ -35,6 +36,7 @@ i18ntk-summary
 i18ntk-doctor
 i18ntk-fixer
 i18ntk-backup
+i18ntk-translate
 ```
 
 ## Common Options
@@ -60,6 +62,39 @@ Most commands support:
 - `--min-length <n>`
 - `--max-length <n>`
 - `--include-tests`
+
+## Auto Translate
+
+`i18ntk --command=translate` opens the interactive manager flow for Auto Translate.
+
+`i18ntk-translate` supports direct translation:
+
+```bash
+i18ntk-translate <source-file> <target-lang> [options]
+i18ntk-translate locales/en/common.json de
+i18ntk-translate locales/en/common.json fr --dry-run --report-stdout
+i18ntk-translate locales/en es --source-dir locales/en --files "*.json" --no-confirm --skip-placeholders
+```
+
+Translate-specific options:
+
+- `--source-dir <dir>`
+- `--output-dir <dir>`
+- `--source-lang <code>`
+- `--files <pattern>`
+- `--custom-regex <regex>`
+- `--no-confirm`
+- `--skip-placeholders`
+- `--send-placeholders`
+- `--concurrency <n>`
+- `--dry-run`
+- `--report-file <path>`
+- `--report-stdout`
+- `--bom`
+- `--translate-fn <module>`
+- `--retry-count <n>`
+- `--retry-delay <ms>`
+- `--timeout <ms>`
 
 ## Sizing Command
 

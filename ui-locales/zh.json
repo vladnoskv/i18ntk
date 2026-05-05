@@ -922,6 +922,7 @@
     "summaryCommand": "summary   - 显示项目状态",
     "debugCommand": "debug     - 调试翻译问题",
     "scannerCommand": "scanner   - 扫描项目中的 i18n 键",
+    "translateCommand": "translate - 自动翻译 (测试版)",
     "menu": {
       "pressEnterToContinue": "按 Enter 继续...",
       "title": "🌐 国际化管理菜单",
@@ -1146,6 +1147,7 @@
       "sizing": "📏 分析大小差异",
       "fix": "🛠️  修复占位翻译",
       "scanner": "🔍 扫描i18n问题",
+      "translate": "🌐 自动翻译 (测试版)",
       "workflow": "🔄 运行完整工作流",
       "status": "📋 显示项目状态",
       "delete": "🗑️  删除全部报告",
@@ -2111,6 +2113,7 @@
       "completeCommand": "complete  - 完成翻译（100% 覆盖）",
       "summaryCommand": "summary   - 显示项目状态",
       "scannerCommand": "scanner   - 🔍 扫描i18n问题",
+      "translateCommand": "translate - 自动翻译 (测试版)",
       "debugCommand": "debug     - 调试翻译问题"
     },
     "test_complete_system": {

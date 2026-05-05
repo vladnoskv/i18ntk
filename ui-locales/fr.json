@@ -922,6 +922,7 @@
     "summaryCommand": "summary   - Afficher le statut du projet",
     "debugCommand": "debug     - Déboguer les problèmes de traduction",
     "scannerCommand": "scanner - Rechercher des clés",
+    "translateCommand": "translate - Traduction automatique (Bêta)",
     "menu": {
       "pressEnterToContinue": "Appuyez sur Entrée pour continuer...",
       "title": "🌐 MENU DE GESTION I18NTK",
@@ -1146,6 +1147,7 @@
       "sizing": "📏 Analyser le dimensionnement",
       "fix": "🛠️  Corriger les traductions de remplacement",
       "scanner": "🔍 Analyser les problèmes i18n",
+      "translate": "🌐 Traduction Automatique (Bêta)",
       "workflow": "🔄 Exécuter le flux complet",
       "status": "📋 Afficher le statut du projet",
       "delete": "🗑️ Supprimer tous les rapports",
@@ -2111,6 +2113,7 @@
       "completeCommand": "complete  - Compléter les traductions (couverture 100%)",
       "summaryCommand": "summary   - Afficher l'état du projet",
       "scannerCommand": "scanner   - Scanner le projet pour les clés i18n",
+      "translateCommand": "translate - Traduction automatique (Bêta)",
       "debugCommand": "debug     - Déboguer les problèmes de traduction"
     },
     "test_complete_system": {

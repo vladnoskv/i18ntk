@@ -1,6 +1,6 @@
-# i18ntk v2.6.0
+# i18ntk v3.0.0
 
-Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, and translation completion.
+Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic locale translation, and runtime translation loading.
 
 ![i18ntk Logo](https://raw.githubusercontent.com/vladnoskv/i18ntk/main/docs/screenshots/i18ntk-logo-public.PNG)
 
@@ -9,27 +9,25 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/2.6.0)](https://socket.dev/npm/package/i18ntk/overview/2.6.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.0.0)](https://socket.dev/npm/package/i18ntk/overview/3.0.0)
 
 ## Upgrade Notice
 
-Versions earlier than `2.6.0` may contain known stability and security issues.
-They are considered unsupported for production use. Upgrade to `2.6.0` or newer.
+Versions earlier than `3.0.0` may contain known stability and security issues.
+They are considered unsupported for production use. Upgrade to `3.0.0` or newer.
 
-## v2.6.0 — Deep-Code Audit Release
+## v3.0.0 - Auto Translate Release
 
-v2.6.0 is a comprehensive hardening release from a two-pass code audit fixing 35+ bugs and security issues across 18 files. Highlights:
+v3.0.0 adds automatic JSON locale translation through the management menu and the standalone `i18ntk-translate` command. Highlights:
 
-- **Critical**: Fixed silent-write failures where `safeWriteFileSync` was called incorrectly across 4 modules.
-- **Security**: Replaced all remaining raw `fs` calls with validated `SecurityUtils` wrappers.
-- **Security**: Fixed path traversal bypass in the fallback `SecurityUtils` implementation.
-- **Security**: Fixed Windows path traversal false negatives (fragile `path.sep` comparison).
-- **Security**: Added `safeUnlinkSync` and `safeRmdirSync` for validated file/directory deletion.
-- **Runtime**: Fixed process event handler leak, missing `setInterval.unref()`, and JSON parse error handling.
-- **TypeScript**: Fixed `BasicI18nRuntime.translate/t` return type from `Promise<string>` to `string`.
-- **Scripts**: Fixed `npm_execpath` fallback in build/release scripts.
+- **Auto Translate (Beta)**: Translate one or more source JSON files into one or more target languages from menu option 14.
+- **Standalone CLI**: Use `i18ntk-translate <source-file> <target-lang>` for direct automation and batch translation.
+- **Dry-run preview**: Review translated/skipped counts before writing target files.
+- **Placeholder protection**: Detect and preserve placeholders such as `{name}`, `{{count}}`, `%s`, `%d`, `:id`, `%{name}`, and `${value}`.
+- **Post-translation report**: Print or write translated and skipped key counts.
+- **Zero dependencies**: Translation support uses built-in Node.js modules and the free Google Translate endpoint.
 
-For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migration notes, see [docs/migration-guide-v2.6.0.md](./docs/migration-guide-v2.6.0.md).
+For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migration notes, see [docs/migration-guide-v3.0.0.md](./docs/migration-guide-v3.0.0.md).
 
 ## What i18ntk Does
 
@@ -38,6 +36,7 @@ For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migrati
 - Translation completeness analysis and usage tracking
 - Validation, sizing, and summary reporting
 - Missing-key completion and fixer workflows
+- Automatic translation of JSON locale files
 - Runtime translation helpers for application code
 - Support for JS/TS, React, Vue, Angular, and generic projects
 
@@ -48,6 +47,7 @@ For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migrati
 3. Confirm the source language and locale directories.
 4. Run `i18ntk --command=analyze` or `i18ntk --command=validate` to inspect translation coverage.
 5. Use `i18ntk --command=complete` to fill missing keys when needed.
+6. Use `i18ntk --command=translate` or menu option 14 to auto-translate source JSON files.
 
 The full onboarding flow is documented in [docs/getting-started.md](docs/getting-started.md).
 
@@ -100,6 +100,7 @@ i18ntk --command=usage
 i18ntk --command=scanner
 i18ntk --command=sizing
 i18ntk --command=complete
+i18ntk --command=translate
 i18ntk --command=summary
 ```
 
@@ -117,6 +118,7 @@ i18ntk-summary
 i18ntk-doctor
 i18ntk-fixer
 i18ntk-backup
+i18ntk-translate
 ```
 
 Note: `i18ntk --command=backup` in the manager flow is disabled in current builds.
@@ -133,11 +135,41 @@ Use the standalone `i18ntk-backup` executable when backup operations are require
 - `--dry-run`
 - `--help`
 
+Auto Translate also supports:
+
+- `--source-lang <code>`
+- `--files <pattern>`
+- `--skip-placeholders`
+- `--send-placeholders`
+- `--report-file <path>`
+- `--report-stdout`
+
 Example:
 
 ```bash
 i18ntk --command=analyze --source-dir=./src --i18n-dir=./locales --output-dir=./i18ntk-reports
 ```
+
+## Auto Translate
+
+Interactive menu flow:
+
+```bash
+i18ntk
+# choose "Auto Translate (Beta)"
+```
+
+Direct CLI examples:
+
+```bash
+i18ntk-translate locales/en/common.json de
+i18ntk-translate locales/en/common.json fr --dry-run --report-stdout
+i18ntk-translate locales/en es --files "*.json" --no-confirm --skip-placeholders
+```
+
+The manager flow accepts comma- or space-separated target language codes, previews the first target language with a dry run, asks for confirmation, then writes translated files under matching target-language directories such as `locales/de/common.json`.
+
+See [docs/auto-translate.md](docs/auto-translate.md) for full usage details.
 
 ## Runtime API
 
@@ -169,7 +201,7 @@ Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "2.6.0",
+  "version": "3.0.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -190,11 +222,12 @@ See [docs/api/CONFIGURATION.md](docs/api/CONFIGURATION.md) for the full configur
 - [API Reference](https://github.com/vladnoskv/i18ntk/blob/main/docs/api/API_REFERENCE.md)
 - [Configuration Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/api/CONFIGURATION.md)
 - [Runtime API Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/runtime.md)
+- [Auto Translate Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/auto-translate.md)
 - [Scanner Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/scanner-guide.md)
 - [Environment Variables](https://github.com/vladnoskv/i18ntk/blob/main/docs/environment-variables.md)
+- [Migration Guide v3.0.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v3.0.0.md)
 - [Migration Guide v2.6.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.6.0.md)
 - [Migration Guide v2.5.1](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.5.1.md)
-- [Migration Guide v2.5.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.5.0.md)
 
 ## Community
 

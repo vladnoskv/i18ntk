@@ -114,6 +114,10 @@ secrets.json
 **/*-test.js
 **/*.test.*
 **/tests/
+test_env/
+test_env_*/
+*.bat
+*/docs/development/AGENTS.md
 
 # Keep production files
 !main/

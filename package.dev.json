@@ -1,14 +1,16 @@
 {
   "name": "i18ntk",
-  "version": "2.5.1",
+  "version": "3.0.0",
   "private": true,
   "manifestRole": "development",
-  "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, fixing, reporting, and runtime translation loading.",
+  "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18n",
     "internationalization",
     "localization",
     "translation",
+    "auto-translation",
+    "google-translate",
     "l10n",
     "multilingual",
     "globalization",
@@ -150,7 +152,8 @@
     "i18ntk-doctor": "main/i18ntk-doctor.js",
     "i18ntk-fixer": "main/i18ntk-fixer.js",
     "i18ntk-scanner": "main/i18ntk-scanner.js",
-    "i18ntk-backup": "main/i18ntk-backup.js"
+    "i18ntk-backup": "main/i18ntk-backup.js",
+    "i18ntk-translate": "main/i18ntk-translate.js"
   },
   "directories": {
     "doc": "docs",
@@ -160,6 +163,7 @@
     "main/i18ntk-analyze.js",
     "main/i18ntk-backup-class.js",
     "main/i18ntk-backup.js",
+    "main/i18ntk-translate.js",
     "main/i18ntk-complete.js",
     "main/i18ntk-doctor.js",
     "main/i18ntk-fixer.js",
@@ -192,6 +196,11 @@
     "utils/extractors/regex.js",
     "utils/format-manager.js",
     "utils/formats/json.js",
+    "utils/translate/placeholder.js",
+    "utils/translate/api.js",
+    "utils/translate/traverse.js",
+    "utils/translate/report.js",
+    "utils/translate/cli.js",
     "utils/framework-detector.js",
     "utils/i18n-helper.js",
     "utils/init-helper.js",
@@ -231,6 +240,7 @@
     "i18ntk-fixer": "node main/i18ntk-fixer.js",
     "i18ntk-scanner": "node main/i18ntk-scanner.js",
     "i18ntk-backup": "node main/i18ntk-backup.js",
+    "i18ntk-translate": "node main/i18ntk-translate.js",
     "i18ntk-py": "node main/i18ntk-py.js",
     "i18ntk-js": "node main/i18ntk-js.js",
     "i18ntk-java": "node main/i18ntk-java.js",
@@ -268,26 +278,22 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "2.5.1",
-    "releaseDate": "29/04/2026",
-    "lastUpdated": "29/04/2026",
+    "version": "3.0.0",
+    "releaseDate": "05/05/2026",
+    "lastUpdated": "05/05/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "SECURITY: verifyPin now fails closed when admin PIN config is missing, disabled, or malformed.",
-      "SECURITY: Auth-required checks now fail closed when settings require PIN protection but admin config is unusable.",
-      "SECURITY: Admin sessions now carry both expires and expiresAt and cleanup handles both formats consistently.",
-      "SECURITY: Centralized environment-variable access behind an explicit allowlist.",
-      "SECURITY: Hardened path containment checks to reject sibling-prefix traversal cases.",
-      "SECURITY: Added timing-safe admin PIN hash comparison and fixed expired-session cleanup.",
-      "SECURITY: Expanded release security scanning to nested production source files.",
-      "FIXER: Fixed translation fixer writes for absolute source directories and confirmed applied fixes persist.",
-      "PACKAGING: Split public npm packaging from the development manifest and block accidental root publishes."
+      "NEW: Zero-dependency Google Translate API integration for automatic translation of locale JSON files.",
+      "NEW: Manager menu Auto Translate flow with dry-run preview before writing target locale files.",
+      "NEW: Standalone i18ntk-translate CLI for direct file and batch translation.",
+      "NEW: Placeholder token detection, masking, and preservation during translation.",
+      "NEW: Post-translation reports listing translated and skipped keys."
     ],
     "breakingChanges": [],
-    "nextVersion": "2.5.2",
+    "nextVersion": "3.0.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -309,7 +315,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 2.5.1 may be unstable or insecure. Upgrade to 2.5.1 or newer."
+    "supportPolicy": "Versions earlier than 3.0.0 may be unstable or insecure. Upgrade to 3.0.0 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

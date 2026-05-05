@@ -4,8 +4,11 @@
 .env
 .env.*
 .npmrc
-
+test_env/
+test_env_*/
+*/docs/development/AGENTS.md
 # Development and build artifacts
+*.bat
 /src
 /dist
 /build

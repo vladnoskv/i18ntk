@@ -1,6 +1,6 @@
-# i18ntk Documentation (v2.5.1)
+# i18ntk Documentation (v3.0.0)
 
-This documentation set is for **i18ntk 2.x**.
+This documentation set is for **i18ntk 3.x**.
 
 ## Start Here
 
@@ -8,8 +8,11 @@ This documentation set is for **i18ntk 2.x**.
 - [API Reference](./api/API_REFERENCE.md)
 - [Configuration Guide](./api/CONFIGURATION.md)
 - [Runtime API Guide](./runtime.md)
+- [Auto Translate Guide](./auto-translate.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
+- [Migration Guide v3.0.0](./migration-guide-v3.0.0.md)
+- [Migration Guide v2.6.0](./migration-guide-v2.6.0.md)
 - [Migration Guide v2.5.1](./migration-guide-v2.5.1.md)
 - [Migration Guide v2.5.0](./migration-guide-v2.5.0.md)
 - [Migration Guide v2.4.0](./migration-guide-v2.4.0.md)
@@ -31,6 +34,7 @@ i18ntk
 i18ntk --command=init
 i18ntk --command=analyze
 i18ntk --command=validate
+i18ntk --command=translate
 ```
 
 Standalone binaries also exist for script-specific flows:
@@ -47,6 +51,7 @@ i18ntk-summary
 i18ntk-doctor
 i18ntk-fixer
 i18ntk-backup
+i18ntk-translate
 ```
 
 Note: backup operations are exposed through `i18ntk-backup` (standalone CLI).

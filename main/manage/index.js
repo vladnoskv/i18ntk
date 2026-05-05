@@ -878,6 +878,7 @@ class I18nManager {
             console.log(`11. ${t('menu.options.help')}`);
             console.log(`12. ${t('menu.options.language')}`);
             console.log(`13. ${t('menu.options.scanner')}`);
+            console.log(`14. ${t('menu.options.translate')}`);
             console.log(`0. ${t('menu.options.exit')}`);
 
             console.log('\n' + t('menu.nonInteractiveModeWarning'));
@@ -903,6 +904,7 @@ class I18nManager {
         console.log(`11. ${t('menu.options.help')}`);
         console.log(`12. ${t('menu.options.language')}`);
         console.log(`13. ${t('menu.options.scanner')}`);
+        console.log(`14. ${t('menu.options.translate')}`);
         console.log(`0. ${t('menu.options.exit')}`);
 
         const choice = await this.prompt('\n' + t('menu.selectOptionPrompt'));
@@ -1009,6 +1011,10 @@ class I18nManager {
                 break;
             case '13':
                 await this.executeCommand('scanner', {fromMenu: true});
+                await this.showInteractiveMenu();
+                return;
+            case '14':
+                await this.executeCommand('translate', {fromMenu: true});
                 await this.showInteractiveMenu();
                 return;
             case '0':

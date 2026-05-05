@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-05-05
+
+### Added
+- **`i18ntk-translate`**: Zero-dependency CLI tool that converts English source JSON locale files into any target language via Google's free Translate API.
+- **Placeholder protection**: Intelligent detection, masking, and unmasking of dynamic placeholder tokens (`{name}`, `{{count}}`, `%d`, `%s`, `:param`, `{{variable}}`, `%{name}`, `${var}`, etc.) to prevent corruption during translation.
+- **Custom regex support**: `--custom-regex` flag to define additional placeholder patterns for detection and protection.
+- **Interactive control flow**: Two-level user controls — global choice (skip all / send all / ask per key) and per-key interactive mode where each affected key can be individually flagged.
+- **Fully automated CLI mode**: `--no-confirm --skip-placeholders` or `--no-confirm --send-placeholders` flags for unattended CI/CD use.
+- **Post-translation report**: Comprehensive report (stdout, file, or both) listing every skipped key with its original value and a reminder for manual translation.
+- **Multi-file batch processing**: `--source-dir` and `--files` flags support translating all JSON files in a directory at once.
+- **Dry-run mode**: `--dry-run` flag previews which keys would be skipped without making API calls.
+- **UTF-8 BOM output**: `--bom` flag for output files with UTF-8 byte order mark.
+- **Custom translation function**: `--translate-fn` flag to inject an alternative translation API while maintaining the placeholder safety workflow.
+- **Rate-limit handling**: Exponential backoff/retry logic for Google Translate API rate limits and network errors.
+- **Deep JSON traversal**: Full support for nested objects and arrays, preserving data types, null values, and non-string leaf values.
+
+### Changed
+- Version bumped to 3.0.0 (major release with new translation tool feature).
+
 ## [2.6.0] - 2026-05-03
 
 ### Security

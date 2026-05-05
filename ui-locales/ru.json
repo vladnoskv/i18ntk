@@ -1146,6 +1146,7 @@
       "sizing": "📏 Анализ размеров",
       "fix": "🛠️  Исправить переводы-заглушки",
       "scanner": "🔍 Сканировать проблемы i18n",
+      "translate": "🌐 Автоперевод (Бета)",
       "workflow": "🔄 Запустить полный рабочий процесс",
       "status": "📋 Показать статус проекта",
       "delete": "🗑️ Удалить все отчёты",
@@ -2110,7 +2111,8 @@
       "sizingCommand": "Оценка команды",
       "completeCommand": "Завершение команды",
       "summaryCommand": "Сводка команды",
-      "scannerCommand": "scanner   - 🔍 Сканирование проблем i18n",
+    "scannerCommand": "scanner   - 🔍 Сканирование проблем i18n",
+    "translateCommand": "translate - Автоперевод (Бета)",
       "debugCommand": "Отладка команды"
     },
     "test_complete_system": {

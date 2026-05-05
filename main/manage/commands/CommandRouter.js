@@ -23,6 +23,7 @@ const BackupCommand = require('./BackupCommand');
 const DoctorCommand = require('./DoctorCommand');
 const FixerCommand = require('./FixerCommand');
 const ScannerCommand = require('./ScannerCommand');
+const TranslateCommand = require('./TranslateCommand');
 
 class CommandRouter {
     constructor(config = {}, ui = null, adminAuth = null) {
@@ -45,7 +46,8 @@ class CommandRouter {
             'backup': new BackupCommand(config, ui),
             'doctor': new DoctorCommand(config, ui),
             'fix': new FixerCommand(config, ui),
-            'scanner': new ScannerCommand(config, ui)
+            'scanner': new ScannerCommand(config, ui),
+            'translate': new TranslateCommand(config, ui)
         };
     }
 
@@ -232,6 +234,9 @@ class CommandRouter {
             case 'scanner':
                 return await this.commandHandlers.scanner.execute(options);
 
+            case 'translate':
+                return await this.commandHandlers.translate.execute(options);
+
             case 'debug':
                 console.log('Debug functionality is not available in this version.');
                 return { success: false, message: 'Debug not available' };
@@ -278,6 +283,7 @@ class CommandRouter {
         console.log(t('help.summaryCommand'));
         console.log(t('help.debugCommand'));
         console.log(t('help.scannerCommand'));
+        console.log(t('help.translateCommand'));
     }
 
     /**

@@ -922,6 +922,7 @@
     "summaryCommand": "summary   - プロジェクトのステータスを表示",
     "debugCommand": "debug     - 翻訳の問題をデバッグ",
     "scannerCommand": "scanner   - プロジェクトをスキャン",
+    "translateCommand": "translate - 自動翻訳 (ベータ版)",
     "menu": {
       "pressEnterToContinue": "Enterキーを押して続行してください…",
       "title": "🌐 I18NTK 管理メニュー",
@@ -1146,6 +1147,7 @@
       "sizing": "📏 サイズを分析",
       "fix": "🛠️  プレースホルダー翻訳を修正",
       "scanner": "🔍 i18n問題をスキャン",
+      "translate": "🌐 自動翻訳 (ベータ版)",
       "workflow": "🔄 フルワークフローを実行",
       "status": "📋 プロジェクトステータスを表示",
       "delete": "🗑️  すべてのレポートを削除",
@@ -2111,6 +2113,7 @@
       "completeCommand": "complete  - 翻訳を完了 (100% カバレッジ)",
       "summaryCommand": "summary   - プロジェクトステータスを表示",
       "scannerCommand": "scanner   - 🔍 i18nの問題をスキャン",
+      "translateCommand": "translate - 自動翻訳 (ベータ版)",
       "debugCommand": "debug     - 翻訳の問題をデバッグ"
     },
     "test_complete_system": {
