@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "3.1.0",
+    "version": "3.1.1",
     "updated": "2026-05-07"
   },
   "common": {
@@ -1105,18 +1105,18 @@
     "warningProceedingWithoutFramework": "i18n フレームワークが検出されないまま続行します。"
   },
   "language": {
-      "title": "🌍 言語を変更",
-      "separator": "============================================================",
-      "current": "現在の言語: {language}",
-      "available": "利用可能な言語:",
-      "languageOption": "{index}。 {displayName}{current}",
-      "backToMainMenu": "メインメニューに戻る",
-      "prompt": "言語を選択してください (0-8):",
-      "cancelled": "言語変更がキャンセルされました。",
-      "invalid": "無効な選択です。もう一度お試しください。",
-      "changed": "言語が {language} に変更されました",
-      "changeFailed": "言語の変更に失敗しました: {error}",
-      "pressEnterToContinue": "続行するにはEnterキーを押してください…"
+    "title": "🌍 言語を変更",
+    "separator": "============================================================",
+    "current": "現在の言語: {language}",
+    "available": "利用可能な言語:",
+    "languageOption": "{index}。 {displayName}{current}",
+    "backToMainMenu": "メインメニューに戻る",
+    "prompt": "言語を選択してください (0-8):",
+    "cancelled": "言語変更がキャンセルされました。",
+    "invalid": "無効な選択です。もう一度お試しください。",
+    "changed": "言語が {language} に変更されました",
+    "changeFailed": "言語の変更に失敗しました: {error}",
+    "pressEnterToContinue": "続行するにはEnterキーを押してください…"
   },
   "maintainLanguagePurity": {
     "workflow_title": "🚀 言語純度維持ワークフロー",

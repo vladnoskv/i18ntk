@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "3.1.0",
+    "version": "3.1.1",
     "updated": "2026-05-07"
   },
   "common": {
@@ -1105,18 +1105,18 @@
     "warningProceedingWithoutFramework": "Poursuite sans framework i18n détecté."
   },
   "language": {
-      "title": "🌍 Changer la langue",
-      "separator": "============================================================",
-      "current": "Langue actuelle : {language}",
-      "available": "Langues disponibles :",
-      "languageOption": "{index}. {displayName}{current}",
-      "backToMainMenu": "Retour au menu principal",
-      "prompt": "Sélectionnez une langue (0-8) :",
-      "cancelled": "Changement de langue annulé.",
-      "invalid": "Choix invalide. Veuillez réessayer.",
-      "changed": "Langue changée en : {language}",
-      "changeFailed": "Échec du changement de langue : {error}",
-      "pressEnterToContinue": "Appuyez sur Entrée pour continuer…"
+    "title": "🌍 Changer la langue",
+    "separator": "============================================================",
+    "current": "Langue actuelle : {language}",
+    "available": "Langues disponibles :",
+    "languageOption": "{index}. {displayName}{current}",
+    "backToMainMenu": "Retour au menu principal",
+    "prompt": "Sélectionnez une langue (0-8) :",
+    "cancelled": "Changement de langue annulé.",
+    "invalid": "Choix invalide. Veuillez réessayer.",
+    "changed": "Langue changée en : {language}",
+    "changeFailed": "Échec du changement de langue : {error}",
+    "pressEnterToContinue": "Appuyez sur Entrée pour continuer…"
   },
   "maintainLanguagePurity": {
     "workflow_title": "🚀 Flux de maintenance de la pureté linguistique",

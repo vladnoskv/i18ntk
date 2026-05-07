@@ -1,8 +1,8 @@
-# DEVUPDATE.md - v3.1.0 Release and Publish Runbook
+# DEVUPDATE.md - v3.1.1 Release and Publish Runbook
 
 ## Purpose
 
-Use this checklist to ship the i18ntk v3.1.0 release to npm and keep docs/readme in sync.
+Use this checklist to ship the i18ntk v3.1.1 release to npm and keep docs/readme in sync.
 
 ## 1. Pre-Release Checks
 
@@ -39,7 +39,7 @@ Then update:
 - `CHANGELOG.md`
 - `README.md`
 - `docs/README.md`
-- `docs/migration-guide-v3.1.0.md` (or new migration file for the target release)
+- `docs/migration-guide-v3.1.1.md` (or new migration file for the target release)
 - `docs/api/CONFIGURATION.md`
 - `docs/api/API_REFERENCE.md`
 

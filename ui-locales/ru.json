@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "3.1.0",
+    "version": "3.1.1",
     "updated": "2026-05-07"
   },
   "common": {
@@ -1105,18 +1105,18 @@
     "warningProceedingWithoutFramework": "Продолжаем без обнаружения платформы i18n."
   },
   "language": {
-      "title": "🌍 Сменить язык",
-      "separator": "============================================================",
-      "current": "Текущий язык: {language}",
-      "available": "Доступные языки:",
-      "languageOption": "{index}. {displayName}{current}",
-      "backToMainMenu": "Вернуться в главное меню",
-      "prompt": "Выберите язык (0-8):",
-      "cancelled": "Смена языка отменена.",
-      "invalid": "Неверный выбор. Пожалуйста, попробуйте снова.",
-      "changed": "Язык изменён на: {language}",
-      "changeFailed": "Не удалось сменить язык: {error}",
-      "pressEnterToContinue": "Нажмите Enter для продолжения..."
+    "title": "🌍 Сменить язык",
+    "separator": "============================================================",
+    "current": "Текущий язык: {language}",
+    "available": "Доступные языки:",
+    "languageOption": "{index}. {displayName}{current}",
+    "backToMainMenu": "Вернуться в главное меню",
+    "prompt": "Выберите язык (0-8):",
+    "cancelled": "Смена языка отменена.",
+    "invalid": "Неверный выбор. Пожалуйста, попробуйте снова.",
+    "changed": "Язык изменён на: {language}",
+    "changeFailed": "Не удалось сменить язык: {error}",
+    "pressEnterToContinue": "Нажмите Enter для продолжения..."
   },
   "maintainLanguagePurity": {
     "workflow_title": "🚀 Рабочий процесс поддержания чистоты языков",
@@ -2112,8 +2112,8 @@
       "sizingCommand": "Оценка команды",
       "completeCommand": "Завершение команды",
       "summaryCommand": "Сводка команды",
-    "scannerCommand": "scanner   - 🔍 Сканирование проблем i18n",
-    "translateCommand": "translate - Автоперевод (Бета)",
+      "scannerCommand": "scanner   - 🔍 Сканирование проблем i18n",
+      "translateCommand": "translate - Автоперевод (Бета)",
       "debugCommand": "Отладка команды"
     },
     "test_complete_system": {

@@ -1,6 +1,6 @@
-# i18ntk v3.1.0
+# i18ntk v3.1.1
 
-Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic locale translation, and runtime translation loading.
+Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
 ![i18ntk Logo](https://raw.githubusercontent.com/vladnoskv/i18ntk/main/docs/screenshots/i18ntk-logo-public.PNG)
 
@@ -9,40 +9,7 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.1.0)](https://socket.dev/npm/package/i18ntk/overview/3.1.0)
-
-## Upgrade Notice
-
-Versions earlier than `3.1.0` may contain known stability and security issues.
-They are considered unsupported for production use. Upgrade to `3.1.0` or newer.
-
-## v3.1.0 - Auto Translate Hardening and Validation Warning Tuning
-
-v3.1.0 improves automatic JSON locale translation through the management menu and the standalone `i18ntk-translate` command. It also reduces noisy validation warnings and added a dedicated settings module for the auto translator.
-
-For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migration notes, see [docs/migration-guide-v3.1.0.md](./docs/migration-guide-v3.1.0.md).
-
-## What i18ntk Does
-
-- Zero runtime dependencies
-- Interactive and non-interactive project setup
-- Translation completeness analysis and usage tracking
-- Validation, sizing, and summary reporting
-- Missing-key completion and fixer workflows
-- Automatic translation of JSON locale files
-- Runtime translation helpers for application code
-- Support for JS/TS, React, Vue, Angular, and generic projects
-
-## Getting Started
-
-1. Install the package.
-2. Run `i18ntk` or `i18ntk --command=init` to initialize the project.
-3. Confirm the source language and locale directories.
-4. Run `i18ntk --command=analyze` or `i18ntk --command=validate` to inspect translation coverage.
-5. Use `i18ntk --command=complete` to fill missing keys when needed.
-6. Use `i18ntk --command=translate` or menu option 14 to auto-translate source JSON files.
-
-The full onboarding flow is documented in [docs/getting-started.md](docs/getting-started.md).
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.1.1)](https://socket.dev/npm/package/i18ntk/overview/3.1.1)
 
 ## Install
 
@@ -57,11 +24,29 @@ npm install --save-dev i18ntk
 npx i18ntk --help
 ```
 
-## Setup
+Requirements:
 
-The toolkit stores project configuration in `.i18ntk-config` at the project root.
+- Node.js `>=16.0.0`
+- npm `>=8.0.0`
+- No runtime dependencies
 
-Recommended setup flow:
+## What's New in 3.1.1
+
+- Auto Translate can translate strings that contain placeholders by translating text around the placeholders and reinserting the original tokens.
+- Auto Translate supports user-editable protection rules in `i18ntk-auto-translate.json` for brand names, product terms, exact values, key paths, and regex patterns.
+- The manager Auto Translate flow runs in-process, avoiding production `child_process` usage for that command.
+- The target-language prompt supports `all` to translate into every configured target language while excluding the source language.
+- Source-directory prompts are clearer and accept absolute paths or project-relative paths.
+- Validation warnings now distinguish URLs, email addresses, secret-like values, and likely untranslated English content.
+- Sizing reports now include per-language file counts, file-set mismatches, and per-file key/character statistics.
+- Internal UI locale coverage is enforced against the English UI locale.
+- Public package staging verifies `README.md` is present before publish.
+
+See [CHANGELOG.md](./CHANGELOG.md) and [docs/migration-guide-v3.1.1.md](./docs/migration-guide-v3.1.1.md) for release details.
+
+## Quick Start
+
+Initialize a project:
 
 ```bash
 i18ntk
@@ -69,24 +54,41 @@ i18ntk
 i18ntk --command=init
 ```
 
-During setup, you can define:
-
-- source directory
-- source language
-- UI language
-- framework preference
-- output directory
-- backup behavior
-
-If you run in CI or a non-interactive shell, use:
+Run common checks:
 
 ```bash
-i18ntk --command=init --no-prompt
+i18ntk --command=analyze
+i18ntk --command=validate
+i18ntk --command=usage
+i18ntk --command=sizing
+i18ntk --command=summary
 ```
 
-## Daily Use
+Complete or fix translation files:
 
 ```bash
+i18ntk --command=complete
+i18ntk-fixer --help
+```
+
+Auto-translate locale JSON:
+
+```bash
+i18ntk --command=translate
+# or
+i18ntk-translate locales/en/common.json de --report-stdout
+```
+
+The full onboarding guide is in [docs/getting-started.md](./docs/getting-started.md).
+
+## Main Commands
+
+Primary CLI:
+
+```bash
+i18ntk
+i18ntk --help
+i18ntk --command=init
 i18ntk --command=analyze
 i18ntk --command=validate
 i18ntk --command=usage
@@ -95,9 +97,10 @@ i18ntk --command=sizing
 i18ntk --command=complete
 i18ntk --command=translate
 i18ntk --command=summary
+i18ntk --command=debug
 ```
 
-Standalone commands are also available:
+Standalone executables:
 
 ```bash
 i18ntk-init
@@ -114,10 +117,11 @@ i18ntk-backup
 i18ntk-translate
 ```
 
-Note: `i18ntk --command=backup` in the manager flow is disabled in current builds.
-Use the standalone `i18ntk-backup` executable when backup operations are required.
+Note: manager route `i18ntk --command=backup` is disabled in current builds. Use `i18ntk-backup` directly for backup operations.
 
-## Common Flags
+## Common Options
+
+Most commands support:
 
 - `--source-dir <path>`
 - `--i18n-dir <path>`
@@ -128,18 +132,6 @@ Use the standalone `i18ntk-backup` executable when backup operations are require
 - `--dry-run`
 - `--help`
 
-Auto Translate also supports:
-
-- `--source-lang <code>`
-- `--files <pattern>`
-- `--preserve-placeholders`
-- `--skip-placeholders`
-- `--send-placeholders`
-- `--batch-size <n>`
-- `--progress-interval <n>`
-- `--report-file <path>`
-- `--report-stdout`
-
 Example:
 
 ```bash
@@ -148,7 +140,7 @@ i18ntk --command=analyze --source-dir=./src --i18n-dir=./locales --output-dir=./
 
 ## Auto Translate
 
-Interactive menu flow:
+Interactive manager flow:
 
 ```bash
 i18ntk
@@ -160,16 +152,117 @@ Direct CLI examples:
 ```bash
 i18ntk-translate locales/en/common.json de
 i18ntk-translate locales/en/common.json fr --dry-run --report-stdout
-i18ntk-translate locales/en es --files "*.json" --no-confirm --preserve-placeholders
+i18ntk-translate locales/en es --source-dir locales/en --files "*.json" --no-confirm --preserve-placeholders
 ```
 
-The manager flow accepts comma- or space-separated target language codes, or `all` for every configured target language. It previews the first target language with a dry run when enabled, asks for confirmation, then writes translated files under matching target-language directories such as `locales/de/common.json`. By default it preserves placeholders while translating the surrounding text.
+The manager flow asks for:
 
-See [docs/auto-translate.md](docs/auto-translate.md) for full usage details.
+- source locale directory
+- source language code
+- one or more target languages, or `all`
+- one JSON file or all JSON files in the source directory
+
+Before writing files, the manager can run a dry-run preview. After confirmation it writes translated files under sibling target-language folders, for example:
+
+```text
+locales/en/common.json
+locales/de/common.json
+locales/fr/common.json
+```
+
+### Placeholder Handling
+
+Auto Translate detects common placeholders such as:
+
+- `{name}`
+- `{{count}}`
+- `%s`
+- `%d`
+- `:id`
+- `%{name}`
+- `${value}`
+
+Useful flags:
+
+- `--preserve-placeholders`: translate text around placeholders and reinsert original tokens
+- `--skip-placeholders`: copy placeholder-bearing strings unchanged
+- `--send-placeholders`: send placeholder-bearing strings through translation after masking
+- `--custom-regex <regex>`: add project-specific placeholder detection
+
+### Protected Terms and Keys
+
+Auto Translate can create and use a project-local protection file:
+
+```bash
+i18ntk-translate locales/en/common.json de --create-protection-file --protection-file ./i18ntk-auto-translate.json
+```
+
+Example `i18ntk-auto-translate.json`:
+
+```json
+{
+  "version": 1,
+  "terms": ["BrandName", "PRODUCT_CODE", "API"],
+  "keys": ["app.brandName", "legal.companyName", "product.*.symbol"],
+  "values": ["BrandName Ltd", "support@example.com"],
+  "patterns": ["[A-Z]{2,}-\\d+"]
+}
+```
+
+- `terms` are masked before translation and restored exactly afterward.
+- `keys` are exact key paths or `*` wildcard paths copied unchanged.
+- `values` are exact source values copied unchanged.
+- `patterns` are JavaScript regex strings for advanced protected substrings.
+
+Useful flags:
+
+- `--protection-file <path>`
+- `--create-protection-file`
+- `--no-protection`
+
+Open Settings and choose `Auto Translate Beta` to edit defaults for placeholder mode, concurrency, batch size, retry settings, report output, BOM output, protection file path, first-run setup prompt, and update prompt.
+
+See [docs/auto-translate.md](./docs/auto-translate.md) for the full Auto Translate guide.
+
+## Validation
+
+Validation checks locale structure, completeness, placeholders, and content risks.
+
+In 3.1.1, warning types are more specific:
+
+- `Potential risky content`: URL, email address, or secret-like value
+- `Possible untranslated English content`: target-language value appears to contain too much English
+
+English-content warnings include:
+
+- detected English percentage
+- configured threshold
+- matched word count
+- sample matched words
+
+Tune warnings in `.i18ntk-config`:
+
+```json
+{
+  "englishContentThresholdPercent": 10,
+  "allowedEnglishTerms": ["BrandName", "PRODUCT_CODE"]
+}
+```
+
+## Sizing Analysis
+
+`i18ntk-sizing` reports translation file sizes, key counts, average value length, and file-set mismatches across language folders.
+
+```bash
+i18ntk-sizing --source-dir ./locales --format table
+i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
+```
+
+Use `--detailed` to print per-file rows in the terminal.
 
 ## Runtime API
 
-Use `i18ntk/runtime` when your application needs to read locale JSON files at runtime.
+Use `i18ntk/runtime` when an application needs to read locale JSON files at runtime.
 
 ```js
 const runtime = require('i18ntk/runtime');
@@ -189,15 +282,17 @@ console.log(runtime.getAvailableLanguages());
 runtime.refresh('fr');
 ```
 
-For a deeper walkthrough, see [docs/runtime.md](docs/runtime.md).
+See [docs/runtime.md](./docs/runtime.md) for runtime details.
 
 ## Configuration
 
-Example `.i18ntk-config`:
+i18ntk uses a project-local `.i18ntk-config` file.
+
+Example:
 
 ```json
 {
-  "version": "3.1.0",
+  "version": "3.1.1",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -206,8 +301,20 @@ Example `.i18ntk-config`:
   "englishContentThresholdPercent": 10,
   "allowedEnglishTerms": ["BrandName", "PRODUCT_CODE"],
   "autoTranslate": {
+    "placeholderMode": "preserve",
+    "concurrency": 6,
+    "batchSize": 100,
+    "progressInterval": 25,
+    "retryCount": 3,
+    "retryDelay": 1000,
+    "timeout": 15000,
+    "dryRunFirst": true,
+    "reportStdout": true,
+    "bom": false,
     "protectionEnabled": true,
-    "protectionFile": "./i18ntk-auto-translate.json"
+    "protectionFile": "./i18ntk-auto-translate.json",
+    "promptProtectionSetup": true,
+    "promptProtectionUpdate": true
   },
   "setup": {
     "completed": true
@@ -215,34 +322,52 @@ Example `.i18ntk-config`:
 }
 ```
 
-See [docs/api/CONFIGURATION.md](docs/api/CONFIGURATION.md) for the full configuration model.
+See [docs/api/CONFIGURATION.md](./docs/api/CONFIGURATION.md) for the full configuration model.
 
-## Docs
+## Public Package Contents
 
-- [Documentation Index](https://github.com/vladnoskv/i18ntk/blob/main/docs/README.md)
-- [Getting Started](https://github.com/vladnoskv/i18ntk/blob/main/docs/getting-started.md)
-- [API Reference](https://github.com/vladnoskv/i18ntk/blob/main/docs/api/API_REFERENCE.md)
-- [Configuration Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/api/CONFIGURATION.md)
-- [Runtime API Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/runtime.md)
-- [Auto Translate Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/auto-translate.md)
-- [Scanner Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/scanner-guide.md)
-- [Environment Variables](https://github.com/vladnoskv/i18ntk/blob/main/docs/environment-variables.md)
-- [Migration Guide v3.1.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v3.1.0.md)
-- [Migration Guide v3.0.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v3.0.0.md)
-- [Migration Guide v2.6.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.6.0.md)
-- [Migration Guide v2.5.1](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.5.1.md)
+The public package intentionally ships runtime and CLI files only. The publish staging script excludes development-only content such as tests, scripts, docs, release staging folders, local config files, and generated protection files.
+
+The package includes:
+
+- CLI entry points under `main/`
+- manager commands and services
+- runtime API files under `runtime/`
+- settings UI files required at runtime
+- bundled internal UI locales
+- shared utilities required by the shipped commands
+- `README.md`, `CHANGELOG.md`, `LICENSE`, and policy files
+
+The public package manifest includes `readmeFilename: "README.md"`, and the release staging script fails if `README.md` is missing or empty.
+
+## Documentation
+
+- [Documentation Index](./docs/README.md)
+- [Getting Started](./docs/getting-started.md)
+- [API Reference](./docs/api/API_REFERENCE.md)
+- [Configuration Guide](./docs/api/CONFIGURATION.md)
+- [Runtime API Guide](./docs/runtime.md)
+- [Auto Translate Guide](./docs/auto-translate.md)
+- [Scanner Guide](./docs/scanner-guide.md)
+- [Environment Variables](./docs/environment-variables.md)
+- [Migration Guide v3.1.1](./docs/migration-guide-v3.1.1.md)
+- [Migration Guide v3.0.0](./docs/migration-guide-v3.0.0.md)
+- [Migration Guide v2.6.0](./docs/migration-guide-v2.6.0.md)
+- [Migration Guide v2.5.1](./docs/migration-guide-v2.5.1.md)
+
+## Security
+
+- No API key is required for the default Auto Translate flow.
+- Do not store secrets in locale files, `.i18ntk-config`, or protection files.
+- Project-specific brand/product terms should be configured by the user, not hardcoded into the package.
+- Report security issues using [SECURITY.md](./SECURITY.md).
 
 ## Community
 
-- [Contributing](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Security Policy](SECURITY.md)
-- [Funding](FUNDING.md)
-
-## Code of Conduct
-
-We are committed to providing a friendly, safe and welcoming environment for all. Please read and respect our [Code of Conduct](CODE_OF_CONDUCT.md).
+- [Contributing](./CONTRIBUTING.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Funding](./FUNDING.md)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT. See [LICENSE](./LICENSE).

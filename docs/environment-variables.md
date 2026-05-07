@@ -1,4 +1,4 @@
-# Environment Variables (v3.1.0)
+# Environment Variables (v3.1.1)
 
 i18ntk uses a fixed allowlist of environment variables.
 

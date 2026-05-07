@@ -1,4 +1,4 @@
-# i18ntk Configuration Guide (v3.1.0)
+# i18ntk Configuration Guide (v3.1.1)
 
 ## Overview
 
@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "3.1.0",
+  "version": "3.1.1",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",

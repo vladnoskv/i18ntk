@@ -139,6 +139,10 @@ function assertPublicManifest(manifest) {
       throw new Error(`Public manifest must not contain ${field}`);
     }
   }
+
+  if (!Array.isArray(manifest.files) || !manifest.files.includes('README.md')) {
+    throw new Error('Public manifest must include README.md so npm can render the package readme');
+  }
 }
 
 function walkFiles(dirPath) {
@@ -162,6 +166,12 @@ function walkFiles(dirPath) {
 }
 
 function assertStageContents() {
+  const readmePath = path.join(stageDir, 'README.md');
+  const readme = SecurityUtils.safeReadFileSync(readmePath, stageDir, 'utf8');
+  if (!readme || readme.trim().length < 100) {
+    throw new Error('Public package staging is missing a non-empty README.md');
+  }
+
   const forbiddenPatterns = [
     /^scripts\//,
     /^tests\//,

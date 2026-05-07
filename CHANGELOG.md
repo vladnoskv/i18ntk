@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-05-07
+
+### Added
+- **Auto Translate protection file workflow**: Added user-editable `i18ntk-auto-translate.json` support for protected terms, key paths, exact values, and regex patterns.
+- **Public package README guard**: Public package staging now verifies `README.md` is included and non-empty before publish.
+
+### Changed
+- Updated README and release documentation for the current Auto Translate protection workflow and public package contents.
+- Removed project-specific hardcoded validation examples so users configure their own brand and domain terms.
+
+### Fixed
+- Removed provider-shaped fake secret fixtures from tests to avoid GitHub push protection false positives.
+- Ensured public package metadata includes `readmeFilename: "README.md"` so npm can render the package README.
+
 ## [3.1.0] - 2026-05-07
 
 ### Added
