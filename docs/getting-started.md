@@ -1,4 +1,4 @@
-# Getting Started with i18ntk (v3.1.1)
+# Getting Started with i18ntk (v3.1.2)
 
 This guide covers the shortest path from install to first successful run.
 

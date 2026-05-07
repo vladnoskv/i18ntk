@@ -18,6 +18,7 @@ const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
 const configManager = require('../utils/config-manager');
 const FixerCommand = require('../main/manage/commands/FixerCommand');
+const TranslateCommand = require('../main/manage/commands/TranslateCommand');
 const {
   analyzeEnglishContent,
   detectTranslationContentRisks,
@@ -116,6 +117,45 @@ describe('Security Tests', () => {
       const invalidJson = '{"test": invalid}';
       const invalidResult = SecurityUtils.safeParseJSON(invalidJson);
       assert.strictEqual(invalidResult, null, 'Invalid JSON should return null');
+    });
+  });
+
+  describe('Auto Translate source directory resolution', () => {
+    test('should resolve locale root to source language folder when root has no JSON files', () => {
+      const tempRoot = fs.mkdtempSync(path.join(process.cwd(), 'tmp-translate-root-'));
+      try {
+        const localeRoot = path.join(tempRoot, 'locales');
+        const englishDir = path.join(localeRoot, 'en');
+        fs.mkdirSync(englishDir, { recursive: true });
+        fs.writeFileSync(path.join(englishDir, 'home.json'), '{"title":"Home"}\n', 'utf8');
+
+        const command = new TranslateCommand();
+        const resolved = command.resolveSourceDirectoryForLanguage(localeRoot, 'en', { log: false });
+
+        assert.strictEqual(resolved.ok, true);
+        assert.strictEqual(resolved.sourceDir, englishDir);
+        assert.deepStrictEqual(resolved.jsonFiles, ['home.json']);
+      } finally {
+        fs.rmSync(tempRoot, { recursive: true, force: true });
+      }
+    });
+
+    test('should keep selected source directory when it contains JSON files directly', () => {
+      const tempRoot = fs.mkdtempSync(path.join(process.cwd(), 'tmp-translate-direct-'));
+      try {
+        fs.writeFileSync(path.join(tempRoot, 'common.json'), '{"title":"Common"}\n', 'utf8');
+        fs.mkdirSync(path.join(tempRoot, 'en'), { recursive: true });
+        fs.writeFileSync(path.join(tempRoot, 'en', 'home.json'), '{"title":"Home"}\n', 'utf8');
+
+        const command = new TranslateCommand();
+        const resolved = command.resolveSourceDirectoryForLanguage(tempRoot, 'en', { log: false });
+
+        assert.strictEqual(resolved.ok, true);
+        assert.strictEqual(resolved.sourceDir, tempRoot);
+        assert.deepStrictEqual(resolved.jsonFiles, ['common.json']);
+      } finally {
+        fs.rmSync(tempRoot, { recursive: true, force: true });
+      }
     });
   });
 

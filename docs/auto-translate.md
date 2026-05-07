@@ -1,4 +1,4 @@
-# Auto Translate Guide (v3.1.1)
+# Auto Translate Guide (v3.1.2)
 
 Auto Translate converts source JSON locale files into target-language JSON files.
 It is available from the management menu and as the standalone `i18ntk-translate` CLI.
@@ -19,10 +19,12 @@ Choose:
 
 The interactive flow asks for:
 
-- source directory, defaulting to the configured source/i18n directory; absolute paths and project-relative paths such as `./locales/en` are accepted
+- source directory, defaulting to the configured source/i18n directory; absolute paths and project-relative paths such as `./locales/en` or `./locales` are accepted
 - source language code, defaulting to `en`
 - one or more target language codes, separated by commas or spaces, or `all` to use every configured target language
 - one file or all JSON files in the source directory
+
+If the selected source directory contains JSON files directly, Auto Translate uses it as-is. If it contains no JSON files and the chosen source language is `en`, `fr`, `de`, or another locale code, Auto Translate checks for a matching child folder such as `./locales/en` and uses that automatically when JSON files are found there.
 
 Before writing files, the manager runs a dry-run preview for the first target language.
 After confirmation, it translates each requested target language and writes matching files under sibling target-language directories. By default, placeholder-bearing strings are translated in preserve mode: only the text around placeholders is sent for translation, then the original placeholders are reinserted.

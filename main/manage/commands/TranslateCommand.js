@@ -71,7 +71,14 @@ class TranslateCommand {
                 console.error(`Source locale directory not found: ${this.sourceDir}`);
                 return { success: false, error: 'Source directory not found' };
             }
-            const jsonFiles = SecurityUtils.safeReaddirSync(this.sourceDir, path.dirname(this.sourceDir)).filter(f => f.endsWith('.json')).sort();
+            const resolvedSource = this.resolveSourceDirectoryForLanguage(this.sourceDir, this.sourceLang);
+            if (!resolvedSource.ok) {
+                console.error(resolvedSource.message);
+                return { success: false, error: 'No source files found' };
+            }
+            this.sourceDir = resolvedSource.sourceDir;
+            this.configuredTargetLangs = this.getConfiguredTargetLanguages(unified, this.sourceDir);
+            const jsonFiles = resolvedSource.jsonFiles;
             return await this.nonInteractiveFlow(jsonFiles);
         }
 
@@ -84,18 +91,16 @@ class TranslateCommand {
         // Step 2: Choose source language
         this.sourceLang = await this.promptSourceLang(ask);
         if (!this.sourceLang) return { success: false, error: 'No source language selected' };
-        this.configuredTargetLangs = this.getConfiguredTargetLanguages(unified, this.sourceDir);
 
-        const jsonFiles = SecurityUtils.safeReaddirSync(this.sourceDir, path.dirname(this.sourceDir))
-            .filter(f => f.endsWith('.json'))
-            .sort();
-
-        if (jsonFiles.length === 0) {
-            console.error(`No JSON files found in: ${this.sourceDir}`);
+        const resolvedSource = this.resolveSourceDirectoryForLanguage(this.sourceDir, this.sourceLang);
+        if (!resolvedSource.ok) {
+            console.error(resolvedSource.message);
             return { success: false, error: 'No source files found' };
         }
+        this.sourceDir = resolvedSource.sourceDir;
+        this.configuredTargetLangs = this.getConfiguredTargetLanguages(unified, this.sourceDir);
 
-        return await this.interactiveFlow(jsonFiles, ask);
+        return await this.interactiveFlow(resolvedSource.jsonFiles, ask);
     }
 
     async promptSourceDir(ask, defaultDir) {
@@ -106,8 +111,9 @@ class TranslateCommand {
             console.log('  Accepted: an absolute path, or a path relative to the current project.');
             console.log('  Examples:');
             console.log('    ./locales/en');
+            console.log('    ./locales  (then choose source language: en)');
             console.log(`    ${defaultDir}`);
-            console.log('  The folder must contain the source JSON files to translate.');
+            console.log('  The folder can contain JSON files directly, or language folders such as ./locales/en.');
             console.log('  Press Enter to use the default.');
             const input = await ask('  > ');
 
@@ -249,6 +255,42 @@ class TranslateCommand {
         console.log('\n  Non-interactive mode. Use direct CLI instead:');
         console.log('    i18ntk-translate <source> <lang> [options]');
         return { success: false, error: 'Non-interactive mode not supported from menu' };
+    }
+
+    getJsonFiles(sourceDir) {
+        return SecurityUtils.safeReaddirSync(sourceDir, path.dirname(sourceDir))
+            .filter(f => f.endsWith('.json'))
+            .sort();
+    }
+
+    resolveSourceDirectoryForLanguage(selectedDir, sourceLang, options = {}) {
+        const shouldLog = options.log !== false;
+        const jsonFiles = this.getJsonFiles(selectedDir);
+        if (jsonFiles.length > 0) {
+            return { ok: true, sourceDir: selectedDir, jsonFiles };
+        }
+
+        const cleanLang = String(sourceLang || '').trim().toLowerCase();
+        if (cleanLang) {
+            const languageDir = path.join(selectedDir, cleanLang);
+            const languageStats = SecurityUtils.safeStatSync(languageDir, path.dirname(languageDir));
+            if (languageStats && languageStats.isDirectory()) {
+                const languageJsonFiles = this.getJsonFiles(languageDir);
+                if (languageJsonFiles.length > 0) {
+                    if (shouldLog) {
+                        console.log(`  No JSON files found directly in: ${selectedDir}`);
+                        console.log(`  Using source language folder: ${languageDir}`);
+                    }
+                    return { ok: true, sourceDir: languageDir, jsonFiles: languageJsonFiles };
+                }
+            }
+        }
+
+        const checkedLanguageDir = cleanLang ? path.join(selectedDir, cleanLang) : null;
+        const message = checkedLanguageDir
+            ? `No JSON files found in: ${selectedDir}\nAlso checked source language folder: ${checkedLanguageDir}`
+            : `No JSON files found in: ${selectedDir}`;
+        return { ok: false, sourceDir: selectedDir, jsonFiles: [], message };
     }
 
     getConfiguredTargetLanguages(config = {}, sourceDir = this.sourceDir) {

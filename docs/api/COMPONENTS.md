@@ -1,4 +1,4 @@
-# i18ntk Components (v3.1.1)
+# i18ntk Components (v3.1.2)
 
 ## Core Entry Points
 
@@ -42,7 +42,7 @@ Exports:
 
 ## Notes
 
-- v3.1.1 is zero dependency at runtime.
+- v3.1.2 is zero dependency at runtime.
 - `.i18ntk-config` is the project source of truth.
 - Prefer documented CLI entry points over internal modules.
 - Manager-route backup execution (`i18ntk --command=backup`) is disabled in current builds.

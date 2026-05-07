@@ -1,4 +1,4 @@
-# i18ntk v3.1.1
+# i18ntk v3.1.2
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.1.1)](https://socket.dev/npm/package/i18ntk/overview/3.1.1)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.1.2)](https://socket.dev/npm/package/i18ntk/overview/3.1.2)
 
 ## Install
 
@@ -30,7 +30,7 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
-## What's New in 3.1.1
+## What's New in 3.1.2
 
 - Auto Translate can translate strings that contain placeholders by translating text around the placeholders and reinserting the original tokens.
 - Auto Translate supports user-editable protection rules in `i18ntk-auto-translate.json` for brand names, product terms, exact values, key paths, and regex patterns.
@@ -41,8 +41,10 @@ Requirements:
 - Sizing reports now include per-language file counts, file-set mismatches, and per-file key/character statistics.
 - Internal UI locale coverage is enforced against the English UI locale.
 - Public package staging verifies `README.md` is present before publish.
+- Auto Translate now resolves locale roots such as `./locales` to the selected source-language folder such as `./locales/en` when needed.
+- Public package staging now fails when root `package.json` and `package.public.json` release metadata drift.
 
-See [CHANGELOG.md](./CHANGELOG.md) and [docs/migration-guide-v3.1.1.md](./docs/migration-guide-v3.1.1.md) for release details.
+See [CHANGELOG.md](./CHANGELOG.md) and [docs/migration-guide-v3.1.2.md](./docs/migration-guide-v3.1.2.md) for release details.
 
 ## Quick Start
 
@@ -157,10 +159,12 @@ i18ntk-translate locales/en es --source-dir locales/en --files "*.json" --no-con
 
 The manager flow asks for:
 
-- source locale directory
+- source locale directory, either the folder with JSON files or a locale root such as `./locales`
 - source language code
 - one or more target languages, or `all`
 - one JSON file or all JSON files in the source directory
+
+If you select a locale root such as `./locales` and choose source language `en`, the manager automatically uses `./locales/en` when that folder contains the source JSON files.
 
 Before writing files, the manager can run a dry-run preview. After confirmation it writes translated files under sibling target-language folders, for example:
 
@@ -228,7 +232,7 @@ See [docs/auto-translate.md](./docs/auto-translate.md) for the full Auto Transla
 
 Validation checks locale structure, completeness, placeholders, and content risks.
 
-In 3.1.1, warning types are more specific:
+In 3.1.2, warning types are more specific:
 
 - `Potential risky content`: URL, email address, or secret-like value
 - `Possible untranslated English content`: target-language value appears to contain too much English
@@ -292,7 +296,7 @@ Example:
 
 ```json
 {
-  "version": "3.1.1",
+  "version": "3.1.2",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -350,6 +354,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
+- [Migration Guide v3.1.2](./docs/migration-guide-v3.1.2.md)
 - [Migration Guide v3.1.1](./docs/migration-guide-v3.1.1.md)
 - [Migration Guide v3.0.0](./docs/migration-guide-v3.0.0.md)
 - [Migration Guide v2.6.0](./docs/migration-guide-v2.6.0.md)

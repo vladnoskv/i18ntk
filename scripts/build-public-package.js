@@ -6,6 +6,7 @@ const { spawnSync } = require('child_process');
 const SecurityUtils = require('../utils/security');
 
 const root = path.resolve(__dirname, '..');
+const rootManifestPath = path.join(root, 'package.json');
 const publicManifestPath = path.join(root, 'package.public.json');
 const stageDir = path.join(root, '.release', 'i18ntk-public');
 
@@ -15,6 +16,48 @@ function readJson(filePath) {
     throw new Error(`Unable to read JSON file: ${path.relative(root, filePath)}`);
   }
   return JSON.parse(raw);
+}
+
+function stableJson(value) {
+  return JSON.stringify(value);
+}
+
+function assertManifestSync(rootManifest, publicManifest) {
+  const syncedFields = [
+    'name',
+    'version',
+    'description',
+    'keywords',
+    'homepage',
+    'bugs',
+    'repository',
+    'funding',
+    'license',
+    'author',
+    'type',
+    'main',
+    'types',
+    'exports',
+    'bin',
+    'files',
+    'sideEffects',
+    'engines',
+    'publishConfig',
+    'preferGlobal'
+  ];
+
+  for (const field of syncedFields) {
+    if (stableJson(rootManifest[field]) !== stableJson(publicManifest[field])) {
+      throw new Error(`package.public.json is out of sync with package.json for field "${field}"`);
+    }
+  }
+
+  if (rootManifest.scripts?.prepublishOnly !== 'node scripts/prevent-root-publish.js') {
+    throw new Error('Root package.json must keep prepublishOnly wired to scripts/prevent-root-publish.js');
+  }
+  if (rootManifest.scripts?.prepack !== 'node scripts/prevent-root-publish.js') {
+    throw new Error('Root package.json must keep prepack wired to scripts/prevent-root-publish.js');
+  }
 }
 
 function run(command, args, cwd = root) {
@@ -95,7 +138,9 @@ function removeIfExists(relativePath) {
 }
 
 function prepareStage() {
+  const rootManifest = readJson(rootManifestPath);
   const manifest = readJson(publicManifestPath);
+  assertManifestSync(rootManifest, manifest);
 
   try {
     if (SecurityUtils.safeExistsSync(stageDir, root)) {
@@ -111,9 +156,20 @@ function prepareStage() {
   }
 
   removeIfExists('main/manage/index-fixed.js');
+  const readmePath = path.join(stageDir, 'README.md');
+  const readme = SecurityUtils.safeReadFileSync(readmePath, stageDir, 'utf8');
+  if (!readme || readme.trim().length < 100) {
+    throw new Error('Public package staging is missing a non-empty README.md');
+  }
+
+  const stagedManifest = {
+    ...manifest,
+    readme,
+    readmeFilename: 'README.md'
+  };
   const wroteManifest = SecurityUtils.safeWriteFileSync(
     path.join(stageDir, 'package.json'),
-    `${JSON.stringify(manifest, null, 2)}\n`,
+    `${JSON.stringify(stagedManifest, null, 2)}\n`,
     stageDir,
     'utf8'
   );
@@ -172,6 +228,15 @@ function assertStageContents() {
     throw new Error('Public package staging is missing a non-empty README.md');
   }
 
+  const manifestPath = path.join(stageDir, 'package.json');
+  const manifest = readJson(manifestPath);
+  if (manifest.readmeFilename !== 'README.md') {
+    throw new Error('Public package staging package.json must set readmeFilename to README.md');
+  }
+  if (typeof manifest.readme !== 'string' || manifest.readme.trim().length < 100) {
+    throw new Error('Public package staging package.json must include README content for npm metadata');
+  }
+
   const forbiddenPatterns = [
     /^scripts\//,
     /^tests\//,
@@ -208,14 +273,22 @@ function assertStageContents() {
 }
 
 function main() {
-  const mode = process.argv.includes('--publish') ? 'publish' : process.argv.includes('--pack') ? 'pack' : 'dry-run';
+  const wantsPublish = process.argv.includes('--publish');
+  const wantsPack = process.argv.includes('--pack');
+  const wantsDryRun = process.argv.includes('--dry-run') || process.env.npm_config_dry_run === 'true';
+  const mode = wantsPublish ? 'publish' : wantsPack ? 'pack' : 'dry-run';
   const manifest = prepareStage();
   assertPublicManifest(manifest);
   assertStageContents();
 
   if (mode === 'publish') {
+    if (wantsDryRun) {
+      run('npm', ['publish', '--access', 'public', '--dry-run'], stageDir);
+      return;
+    }
+
     run('npm', ['whoami']);
-    run('npm', ['publish', stageDir, '--access', 'public']);
+    run('npm', ['publish', '--access', 'public'], stageDir);
     return;
   }
 

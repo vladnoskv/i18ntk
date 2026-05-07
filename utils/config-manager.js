@@ -381,6 +381,10 @@ async function acquireConfigLock(timeoutMs = CONFIG_LOCK_TIMEOUT_MS) {
 }
 
 function isAutosaveDisabled() {
+  const raw = process.env.I18NTK_DISABLE_AUTOSAVE;
+  if (raw !== undefined && raw !== null && raw !== '') {
+    return ['true', '1', 'yes'].includes(String(raw).trim().toLowerCase());
+  }
   return envManager.getBoolean('I18NTK_DISABLE_AUTOSAVE');
 }
 

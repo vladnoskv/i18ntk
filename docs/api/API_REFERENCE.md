@@ -1,4 +1,4 @@
-# i18ntk API Reference (v3.1.1)
+# i18ntk API Reference (v3.1.2)
 
 ## Primary CLI
 
@@ -56,7 +56,7 @@ Most commands support:
 
 `i18ntk --command=validate` and `i18ntk-validate` check locale structure, completeness, placeholders, and content risks.
 
-Validation content warnings are specific in v3.1.1:
+Validation content warnings are specific in v3.1.2:
 
 - `Potential risky content`: URL, email, or secret-like value detected.
 - `Possible untranslated English content`: target-language string contains more than the configured English-content threshold.
@@ -120,7 +120,7 @@ i18ntk-sizing --source-dir ./locales --format table
 i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
 ```
 
-In v3.1.1, sizing table output includes aligned columns for language, file count, size, keys, average length, and total characters. The generated JSON/text reports also include:
+In v3.1.2, sizing table output includes aligned columns for language, file count, size, keys, average length, and total characters. The generated JSON/text reports also include:
 
 - file counts for each language folder
 - missing/extra file comparison across language folders

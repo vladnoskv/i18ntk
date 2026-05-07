@@ -91,13 +91,6 @@ secrets.json
 scripts/prepublish.js
 scripts/prepublish-dev.js
 
-# Test files
-tests/
-**/test-*.js
-**/*-test.js
-**/*.test.*
-**/tests/
-
 # Backup files
 *.backup
 *.bak
@@ -128,3 +121,9 @@ DEVUPDATE.md
 **/validation-purity-report.json
 **/fix-all-report.json
 **/fix-and-purify-report.json
+
+settings/i18ntk-config.json
+locales/backup-*/
+benchmarks/temp-datasets/
+debug-*.js
+main/manage/index-fixed.js
