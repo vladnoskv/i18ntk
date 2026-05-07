@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "homepage": "https://github.com/vladnoskv/i18ntk#readme",
   "bugs": {
     "url": "https://github.com/vladnoskv/i18ntk/issues"
@@ -100,6 +100,7 @@
     "utils/translate/traverse.js",
     "utils/translate/report.js",
     "utils/translate/cli.js",
+    "utils/translate/protection.js",
     "utils/framework-detector.js",
     "utils/i18n-helper.js",
     "utils/init-helper.js",
@@ -114,6 +115,7 @@
     "utils/security.js",
     "utils/setup-enforcer.js",
     "utils/terminal-icons.js",
+    "utils/validation-risk.js",
     "utils/version-utils.js",
     "utils/watch-locales.js",
     "LICENSE",
@@ -177,9 +179,9 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "3.0.0",
-    "releaseDate": "05/05/2026",
-    "lastUpdated": "05/05/2026",
+    "version": "3.1.0",
+    "releaseDate": "07/05/2026",
+    "lastUpdated": "07/05/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
@@ -190,10 +192,16 @@
       "NEW: Interactive and fully automated CLI modes with per-key skip/translate control.",
       "NEW: Post-translation report generation listing skipped keys with manual translation reminders.",
       "NEW: Multi-file batch processing, UTF-8 BOM output, dry-run preview, and custom translation function support.",
-      "NEW: Automatic rate-limit handling with exponential backoff/retry."
+      "NEW: Automatic rate-limit handling with exponential backoff/retry.",
+      "NEW: Placeholder-preserve translation mode translates text around dynamic tokens and reinserts placeholders safely.",
+      "NEW: Auto Translate beta settings for placeholder mode, concurrency, batch size, progress interval, retries, timeout, reports, protection files, and BOM output.",
+      "NEW: User-editable Auto Translate protection file for terms, key paths, exact values, and regex patterns.",
+      "NEW: Validation warnings now include specific issue types, reasons, and English-content percentage details.",
+      "NEW: Sizing analysis now reports per-language file counts, file-set mismatches, and per-file key/character statistics.",
+      "SECURITY: Manager Auto Translate now calls the translator in-process instead of spawning a child process."
     ],
     "breakingChanges": [],
-    "nextVersion": "3.0.1",
+    "nextVersion": "3.1.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",

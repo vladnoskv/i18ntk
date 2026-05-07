@@ -40,6 +40,7 @@ function detectPlaceholders(value, customPatterns) {
   const patterns = compilePatterns(customPatterns);
   const found = new Set();
   for (const pattern of patterns) {
+    pattern.lastIndex = 0;
     const matches = value.match(pattern);
     if (matches) {
       for (const m of matches) found.add(m);
@@ -52,9 +53,66 @@ function hasPlaceholders(value, customPatterns) {
   if (!value || typeof value !== 'string') return false;
   const patterns = compilePatterns(customPatterns);
   for (const pattern of patterns) {
+    pattern.lastIndex = 0;
     if (pattern.test(value)) return true;
   }
   return false;
+}
+
+function splitByPlaceholders(value, customPatterns) {
+  if (!value || typeof value !== 'string') {
+    return [{ type: 'text', value: value || '' }];
+  }
+
+  const patterns = compilePatterns(customPatterns);
+  const matches = [];
+
+  for (const pattern of patterns) {
+    pattern.lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(value)) !== null) {
+      if (!match[0]) {
+        pattern.lastIndex++;
+        continue;
+      }
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        value: match[0],
+      });
+    }
+  }
+
+  if (matches.length === 0) {
+    return [{ type: 'text', value }];
+  }
+
+  matches.sort((a, b) => {
+    if (a.start !== b.start) return a.start - b.start;
+    return (b.end - b.start) - (a.end - a.start);
+  });
+
+  const accepted = [];
+  for (const match of matches) {
+    const overlaps = accepted.some((item) => match.start < item.end && match.end > item.start);
+    if (!overlaps) accepted.push(match);
+  }
+  accepted.sort((a, b) => a.start - b.start);
+
+  const segments = [];
+  let cursor = 0;
+  for (const match of accepted) {
+    if (match.start > cursor) {
+      segments.push({ type: 'text', value: value.slice(cursor, match.start) });
+    }
+    segments.push({ type: 'placeholder', value: match.value });
+    cursor = match.end;
+  }
+  if (cursor < value.length) {
+    segments.push({ type: 'text', value: value.slice(cursor) });
+  }
+
+  return segments;
 }
 
 function maskPlaceholders(value, customPatterns) {
@@ -64,6 +122,7 @@ function maskPlaceholders(value, customPatterns) {
   let idx = 0;
   let masked = value;
   for (const pattern of patterns) {
+    pattern.lastIndex = 0;
     masked = masked.replace(pattern, (match) => {
       const ph = `\uE000${idx}\uE001`;
       map.set(ph, match);
@@ -88,6 +147,7 @@ module.exports = {
   compilePatterns,
   detectPlaceholders,
   hasPlaceholders,
+  splitByPlaceholders,
   maskPlaceholders,
   unmaskPlaceholders,
 };

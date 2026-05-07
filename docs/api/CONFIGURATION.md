@@ -1,4 +1,4 @@
-# i18ntk Configuration Guide (v3)
+# i18ntk Configuration Guide (v3.1.0)
 
 ## Overview
 
@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "3.0.0",
+  "version": "3.1.0",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",
@@ -23,6 +23,24 @@ Example:
   "outputDir": "./i18ntk-reports",
   "sourceLanguage": "en",
   "defaultLanguages": ["de", "es", "fr", "ru"],
+  "englishContentThresholdPercent": 10,
+  "allowedEnglishTerms": ["BrandName", "PRODUCT_CODE"],
+  "autoTranslate": {
+    "placeholderMode": "preserve",
+    "concurrency": 6,
+    "batchSize": 100,
+    "progressInterval": 25,
+    "retryCount": 3,
+    "retryDelay": 1000,
+    "timeout": 15000,
+    "dryRunFirst": true,
+    "reportStdout": true,
+    "bom": false,
+    "protectionEnabled": true,
+    "protectionFile": "./i18ntk-auto-translate.json",
+    "promptProtectionSetup": true,
+    "promptProtectionUpdate": true
+  },
   "framework": {
     "detected": false,
     "preference": "auto"
@@ -45,6 +63,74 @@ Example:
 - `backup.enabled`: enable or disable backup creation
 - `backup.location`: separate backup root directory
 - `backup.maxBackups`: how many backups to keep before auto-cleanup
+- `englishContentThresholdPercent`: percent of detected English words allowed in target-language values before validation warns. Default: `10`.
+- `allowedEnglishTerms`: additional brand, acronym, product, or domain terms to ignore during English-content validation.
+- `autoTranslate.placeholderMode`: how placeholder-bearing strings are handled by Auto Translate. Use `preserve`, `skip`, or `send`.
+- `autoTranslate.concurrency`: maximum concurrent translation requests.
+- `autoTranslate.batchSize`: number of text segments scheduled per translation batch.
+- `autoTranslate.progressInterval`: completed segment count between progress updates.
+- `autoTranslate.protectionEnabled`: enable or disable user-owned protection rules for Auto Translate.
+- `autoTranslate.protectionFile`: project JSON file containing protected terms, key paths, exact values, and patterns.
+- `autoTranslate.promptProtectionSetup`: ask to create the protection file on the first manager run.
+- `autoTranslate.promptProtectionUpdate`: ask whether to update protection rules before manager translations.
+
+## Validation Warning Tuning
+
+Validation checks URLs, email addresses, secret-like values, and likely untranslated English content.
+
+For non-English target languages, English-content warnings only trigger when the detected English percentage is above the configured threshold and at least three English words are found. Brand names, acronyms, placeholders, URLs, emails, and allowed terms are excluded from the percentage calculation.
+
+Example:
+
+```json
+{
+  "englishContentThresholdPercent": 15,
+  "allowedEnglishTerms": ["BrandName", "PRODUCT_CODE"]
+}
+```
+
+## Auto Translate Tuning
+
+Auto Translate reads defaults from `autoTranslate` when launched from the management menu. Direct `i18ntk-translate` flags still override command behavior for that run.
+
+Recommended defaults:
+
+```json
+{
+  "autoTranslate": {
+    "placeholderMode": "preserve",
+    "concurrency": 6,
+    "batchSize": 100,
+    "progressInterval": 25,
+    "retryCount": 3,
+    "retryDelay": 1000,
+    "timeout": 15000,
+    "dryRunFirst": true,
+    "reportStdout": true,
+    "bom": false,
+    "protectionEnabled": true,
+    "protectionFile": "./i18ntk-auto-translate.json",
+    "promptProtectionSetup": true,
+    "promptProtectionUpdate": true
+  }
+}
+```
+
+Use `preserve` for most projects. It translates text outside placeholders and reinserts tokens exactly. Use `skip` for strict manual-review workflows, and use `send` only when a custom translation provider is known to preserve masked tokens reliably.
+
+Protection file example:
+
+```json
+{
+  "version": 1,
+  "terms": ["BrandName", "PRODUCT_CODE", "API"],
+  "keys": ["app.brandName", "legal.companyName", "product.*.symbol"],
+  "values": ["BrandName Ltd", "support@example.com"],
+  "patterns": ["[A-Z]{2,}-\\d+"]
+}
+```
+
+`terms` are masked before translation and restored afterward. `keys` and `values` are copied unchanged from the source JSON. `patterns` are optional JavaScript regex strings for advanced protected substrings.
 
 ## Path and Value Resolution
 

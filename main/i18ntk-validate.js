@@ -49,6 +49,7 @@ const I18nInitializer = require('./i18ntk-init');
 const JsonOutput = require('../utils/json-output');
 const ExitCodes = require('../utils/exit-codes');
 const SetupEnforcer = require('../utils/setup-enforcer');
+const { detectTranslationContentRisks } = require('../utils/validation-risk');
 
 // Ensure setup is complete before running
 (async () => {
@@ -409,10 +410,21 @@ class I18nValidator {
     for (const [key, value] of Object.entries(obj || {})) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
       if (typeof value === 'string') {
-        if (/https?:\/\//.test(value) || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(value) || /(api[_-]?key|secret|token)/i.test(value)) {
+        const issues = detectTranslationContentRisks(value, {
+          keyPath: fullKey,
+          sourceLanguage: this.config.sourceLanguage,
+          targetLanguage: language,
+          allowedEnglishTerms: this.config.allowedEnglishTerms,
+          englishThresholdPercent: this.config.englishContentThresholdPercent
+        });
+
+        issues.forEach(issue => {
           const reporter = this.config.strictMode ? this.addError.bind(this) : this.addWarning.bind(this);
-          reporter(`Risky content in ${language}/${fileName}`, { key: fullKey, value });
-        }
+          const message = issue.type === 'english_content'
+            ? `Possible untranslated English content in ${language}/${fileName}`
+            : `Potential risky content in ${language}/${fileName}`;
+          reporter(message, { key: fullKey, value, ...issue });
+        });
       } else if (value && typeof value === 'object' && !Array.isArray(value)) {
         this.detectRiskyKeys(value, language, fileName, fullKey);
       }

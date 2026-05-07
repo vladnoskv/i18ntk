@@ -1,7 +1,7 @@
 {
   "meta": {
-    "version": "1.10.0",
-    "updated": "2025-08-16"
+    "version": "3.1.0",
+    "updated": "2026-05-07"
   },
   "common": {
     "welcome": "Добро пожаловать",
@@ -984,7 +984,8 @@
       "translation_not_found": "Перевод для ключа не найден: {key}",
       "translation_key_not_string": "Значение ключа перевода не является строкой: {key}",
       "error_reading_locales_directory": "Ошибка чтения директории локалей: {errorMessage}"
-    }
+    },
+    "translateCommand": "translate - Автоперевод файлов локалей (Бета)"
   },
   "init": {
     "initializationTitle": "🚀 Набор инструментов i18n — Инициализация проекта",

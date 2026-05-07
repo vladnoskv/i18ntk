@@ -1,4 +1,4 @@
-# i18ntk API Reference (v3)
+# i18ntk API Reference (v3.1.0)
 
 ## Primary CLI
 
@@ -52,6 +52,17 @@ Most commands support:
 - `--dry-run`
 - `--help`
 
+## Validation
+
+`i18ntk --command=validate` and `i18ntk-validate` check locale structure, completeness, placeholders, and content risks.
+
+Validation content warnings are specific in v3.1.0:
+
+- `Potential risky content`: URL, email, or secret-like value detected.
+- `Possible untranslated English content`: target-language string contains more than the configured English-content threshold.
+
+English-content warning details include the detected percentage, threshold, matched word count, and sample matched words. The default threshold is `10%`.
+
 ## Scanner-Specific Options
 
 `i18ntk-scanner` (or `i18ntk --command=scanner`) supports additional options:
@@ -73,7 +84,7 @@ Most commands support:
 i18ntk-translate <source-file> <target-lang> [options]
 i18ntk-translate locales/en/common.json de
 i18ntk-translate locales/en/common.json fr --dry-run --report-stdout
-i18ntk-translate locales/en es --source-dir locales/en --files "*.json" --no-confirm --skip-placeholders
+i18ntk-translate locales/en es --source-dir locales/en --files "*.json" --no-confirm --preserve-placeholders
 ```
 
 Translate-specific options:
@@ -84,8 +95,14 @@ Translate-specific options:
 - `--files <pattern>`
 - `--custom-regex <regex>`
 - `--no-confirm`
+- `--preserve-placeholders`
 - `--skip-placeholders`
 - `--send-placeholders`
+- `--protection-file <path>`
+- `--create-protection-file`
+- `--no-protection`
+- `--batch-size <n>`
+- `--progress-interval <n>`
 - `--concurrency <n>`
 - `--dry-run`
 - `--report-file <path>`
@@ -102,6 +119,14 @@ Translate-specific options:
 i18ntk-sizing --source-dir ./locales --format table
 i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
 ```
+
+In v3.1.0, sizing table output includes aligned columns for language, file count, size, keys, average length, and total characters. The generated JSON/text reports also include:
+
+- file counts for each language folder
+- missing/extra file comparison across language folders
+- per-file key counts, character counts, average length, and size
+
+Use `--detailed` to print the per-file table in the CLI output.
 
 ## Backup Command
 

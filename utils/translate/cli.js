@@ -6,18 +6,19 @@ const PLACEHOLDER_WARNING = [
   '  WARNING: DYNAMIC PLACEHOLDER TOKENS DETECTED',
   '============================================================',
   '',
-  '  Google Translate will attempt to translate the ENTIRE',
-  '  string value, including any placeholder tokens like:',
+  '  Auto Translate can preserve placeholders while translating',
+  '  only the text around tokens like:',
   '',
   '    {name}    {{count}}    %d    %s    :param    ${var}',
   '',
-  '  This WILL corrupt or alter your placeholders, which',
-  '  will break runtime substitution in your application.',
+  '  Sending placeholders to a translation provider can corrupt',
+  '  runtime substitution in your application.',
   '',
-  '  You have two choices for strings containing placeholders:',
+  '  You have three choices for strings containing placeholders:',
   '',
-  '    SKIP  - Copy verbatim (safe); manually translate later',
-  '    SEND  - Translate anyway (risky); may corrupt placeholders',
+  '    PRESERVE - Translate text segments and reinsert placeholders',
+  '    SKIP     - Copy verbatim; manually translate later',
+  '    SEND     - Translate anyway with masking',
   '',
   '============================================================',
 ].join('\n');
@@ -28,18 +29,20 @@ async function confirmGlobalChoice() {
   console.log('  What should we do with ALL strings that contain');
   console.log('  dynamic placeholder tokens?');
   console.log('');
-  console.log('  [s] SKIP all  - Copy verbatim, translate nothing with placeholders');
-  console.log('  [t] SEND all  - Translate everything, accept corruption risk');
-  console.log('  [i] ASK each  - Decide individually for each key');
+  console.log('  [p] PRESERVE all - Translate text around placeholders (recommended)');
+  console.log('  [s] SKIP all     - Copy verbatim, translate nothing with placeholders');
+  console.log('  [t] SEND all     - Translate everything with placeholder masking');
+  console.log('  [i] ASK each     - Decide individually for each key');
   console.log('');
 
   while (true) {
-    const answer = await ask('  Choice [s/t/i]: ');
+    const answer = await ask('  Choice [p/s/t/i]: ');
     const lower = answer.toLowerCase().trim();
+    if (lower === '' || lower === 'p' || lower === 'preserve') return { strategy: 'preserve', interactive: false };
     if (lower === 's' || lower === 'skip') return { strategy: 'skip', interactive: false };
     if (lower === 't' || lower === 'send') return { strategy: 'send', interactive: false };
-    if (lower === 'i' || lower === 'ask' || lower === 'interactive') return { strategy: 'skip', interactive: true };
-    console.log('  Please enter s, t, or i.');
+    if (lower === 'i' || lower === 'ask' || lower === 'interactive') return { strategy: 'preserve', interactive: true };
+    console.log('  Please enter p, s, t, or i.');
   }
 }
 
@@ -52,13 +55,14 @@ async function confirmPerKey(keyPath, value, placeholders) {
   console.log('');
 
   while (true) {
-    const answer = await ask('  [s]kip / [t]ranslate anyway / s[k]ip all remaining / [a]ll remaining? ');
+    const answer = await ask('  [p]reserve / [s]kip / [t]ranslate masked / s[k]ip all / [a]ll preserve? ');
     const lower = answer.toLowerCase().trim();
+    if (lower === '' || lower === 'p' || lower === 'preserve') return 'preserve';
     if (lower === 's' || lower === 'skip') return 'skip';
     if (lower === 't' || lower === 'translate') return 'send';
     if (lower === 'k' || lower === 'skipall') return 'skip-all';
-    if (lower === 'a' || lower === 'all') return 'send-all';
-    console.log('  Please enter s, t, k, or a.');
+    if (lower === 'a' || lower === 'all') return 'preserve-all';
+    console.log('  Please enter p, s, t, k, or a.');
   }
 }
 

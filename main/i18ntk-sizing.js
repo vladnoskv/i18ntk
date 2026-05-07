@@ -66,7 +66,8 @@ function getConfig() {
     i18nDir: settings.i18nDir || settings.sourceDir || './locales',
     outputDir: settings.outputDir || './i18ntk-reports',
     threshold: settings.processing?.sizingThreshold || 50,
-    uiLanguage: settings.language || 'en'
+    uiLanguage: settings.language || 'en',
+    sourceLanguage: settings.sourceLanguage || 'en'
   };
 }
 
@@ -80,6 +81,9 @@ class I18nSizingAnalyzer {
     this.threshold = options.threshold || config.threshold; // Size difference threshold in percentage
     this.format = options.format || 'table';
     this.outputReport = options.outputReport || false;
+    this.sourceLanguage = options.sourceLanguage || config.sourceLanguage || 'en';
+    this.detailed = options.detailed || false;
+    this.detailedKeys = options.detailedKeys || false;
     this.rl = null;
     
     // Initialize i18n with UI language from config
@@ -133,10 +137,7 @@ class I18nSizingAnalyzer {
       
       if (stat.isDirectory()) {
         // This is a language directory, combine all JSON files
-        const langFiles = SecurityUtils.safeReaddirSync(itemPath)
-          .filter(file => file.endsWith('.json'))
-          .map(file => SecurityUtils.validatePath(path.join(itemPath, file), process.cwd()))
-          .filter(file => file !== null);
+        const langFiles = this.collectJsonFiles(itemPath);
         
         if (langFiles.length > 0) {
           files.push({
@@ -152,34 +153,92 @@ class I18nSizingAnalyzer {
         files.push({
           language: lang,
           file: item,
-          path: itemPath
+          path: itemPath,
+          files: [itemPath],
+          isSingleFile: true
         });
       }
     }
 
     if (this.languages.length > 0) {
-      return files.filter(f => this.languages.includes(f.language));
+      return files
+        .filter(f => this.languages.includes(f.language))
+        .sort((a, b) => a.language.localeCompare(b.language));
     }
 
-    return files;
+    return files.sort((a, b) => a.language.localeCompare(b.language));
+  }
+
+  collectJsonFiles(dirPath) {
+    const jsonFiles = [];
+    const entries = SecurityUtils.safeReaddirSync(dirPath, process.cwd(), { withFileTypes: true });
+
+    entries.forEach(entry => {
+      const entryPath = SecurityUtils.validatePath(path.join(dirPath, entry.name), process.cwd());
+      if (!entryPath) return;
+
+      if (entry.isDirectory()) {
+        jsonFiles.push(...this.collectJsonFiles(entryPath));
+      } else if (entry.isFile() && entry.name.endsWith('.json')) {
+        jsonFiles.push(entryPath);
+      }
+    });
+
+    return jsonFiles.sort((a, b) => this.getFileSortName(dirPath, a).localeCompare(this.getFileSortName(dirPath, b)));
+  }
+
+  getLanguageFileName(languageEntry, filePath) {
+    if (languageEntry.isSingleFile) {
+      return path.basename(filePath);
+    }
+
+    return this.getFileSortName(languageEntry.path, filePath);
+  }
+
+  getFileSortName(basePath, filePath) {
+    return path.relative(basePath, filePath).replace(/\\/g, '/');
+  }
+
+  createTable(columns, rows) {
+    const widths = columns.map(column => {
+      return Math.max(
+        column.label.length,
+        ...rows.map(row => String(row[column.key] ?? '').length)
+      );
+    });
+
+    const formatCell = (value, width, align = 'left') => {
+      const text = String(value ?? '');
+      return align === 'right' ? text.padStart(width) : text.padEnd(width);
+    };
+
+    const header = columns.map((column, index) => formatCell(column.label, widths[index], column.align)).join('  ');
+    const separator = widths.map(width => '-'.repeat(width)).join('  ');
+    const body = rows.map(row => columns
+      .map((column, index) => formatCell(row[column.key], widths[index], column.align))
+      .join('  '));
+
+    return [header, separator, ...body].join('\n');
   }
 
   // Analyze file sizes
   analyzeFileSizes(files) {
       logger.info(t("sizing.analyzing_file_sizes"));
     
-    files.forEach(({ language, file, path: filePath, files: langFiles }) => {
+    files.forEach(languageEntry => {
+      const { language, file, path: filePath, files: langFiles } = languageEntry;
       if (langFiles) {
         // Handle nested directory structure
         let totalSize = 0;
         let totalLines = 0;
         let totalCharacters = 0;
         let lastModified = new Date(0);
-        
+        const perFiles = {};
+
         langFiles.forEach(langFile => {
           const stats = SecurityUtils.safeStatSync(langFile, process.cwd());
           if (!stats) return;
-          
+
           let content = SecurityUtils.safeReadFileSync(langFile, process.cwd(), 'utf8');
           if (typeof content !== "string") content = "";
           totalSize += stats.size;
@@ -188,8 +247,19 @@ class I18nSizingAnalyzer {
           if (stats.mtime > lastModified) {
             lastModified = stats.mtime;
           }
+
+          const relativeName = this.getLanguageFileName(languageEntry, langFile);
+          perFiles[relativeName] = {
+            file: relativeName,
+            path: langFile,
+            size: stats.size,
+            sizeKB: (stats.size / 1024).toFixed(2),
+            lines: content.split('\n').length,
+            characters: content.length,
+            lastModified: stats.mtime
+          };
         });
-        
+
         this.stats.files[language] = {
           file,
           size: totalSize,
@@ -197,7 +267,8 @@ class I18nSizingAnalyzer {
           lines: totalLines,
           characters: totalCharacters,
           lastModified: lastModified,
-          fileCount: langFiles.length
+          fileCount: Object.keys(perFiles).length,
+          perFiles
         };
       } else {
         // Handle single file structure
@@ -213,7 +284,18 @@ class I18nSizingAnalyzer {
           lines: content.split('\n').length,
           characters: content.length,
           lastModified: stats.mtime,
-          fileCount: 1
+          fileCount: 1,
+          perFiles: {
+            [file]: {
+              file,
+              path: filePath,
+              size: stats.size,
+              sizeKB: (stats.size / 1024).toFixed(2),
+              lines: content.split('\n').length,
+              characters: content.length,
+              lastModified: stats.mtime
+            }
+          }
         };
       }
     });
@@ -223,24 +305,48 @@ class I18nSizingAnalyzer {
   analyzeTranslationContent(files) {
       logger.info(t("sizing.analyzing_translation_content"));
     
-    files.forEach(({ language, path: filePath, files: langFiles }) => {
+    files.forEach(languageEntry => {
+      const { language, path: filePath, files: langFiles } = languageEntry;
       try {
         let combinedContent = {};
-        
-        if (langFiles) {
+        const fileAnalyses = {};
+
+        if (langFiles && !languageEntry.isSingleFile) {
           // Handle nested directory structure - combine all JSON files
           langFiles.forEach(langFile => {
             const rawContent = SecurityUtils.safeReadFileSync(langFile, process.cwd(), 'utf8');
             const fileContent = SecurityUtils.safeParseJSON(rawContent);
             if (fileContent) {
-              const fileName = path.basename(langFile, '.json');
-              combinedContent[fileName] = fileContent;
+              const fileName = this.getLanguageFileName(languageEntry, langFile);
+              const combinedKey = fileName.replace(/\.json$/i, '');
+              combinedContent[combinedKey] = fileContent;
+              const fileAnalysis = this.analyzeTranslationObject(fileContent, '');
+              fileAnalyses[fileName] = {
+                totalKeys: fileAnalysis.keyCount,
+                totalCharacters: fileAnalysis.charCount,
+                averageKeyLength: fileAnalysis.keyCount > 0 ? fileAnalysis.charCount / fileAnalysis.keyCount : 0,
+                maxKeyLength: fileAnalysis.maxLength,
+                minKeyLength: fileAnalysis.minLength,
+                emptyKeys: fileAnalysis.emptyKeys,
+                longKeys: fileAnalysis.longKeys
+              };
             }
           });
         } else {
           // Handle single file structure
-          const rawContent = SecurityUtils.safeReadFileSync(filePath, process.cwd(), 'utf8');
+          const singleFilePath = languageEntry.isSingleFile && langFiles ? langFiles[0] : filePath;
+          const rawContent = SecurityUtils.safeReadFileSync(singleFilePath, process.cwd(), 'utf8');
           combinedContent = SecurityUtils.safeParseJSON(rawContent) || {};
+          const fileAnalysis = this.analyzeTranslationObject(combinedContent, '');
+          fileAnalyses[path.basename(singleFilePath)] = {
+            totalKeys: fileAnalysis.keyCount,
+            totalCharacters: fileAnalysis.charCount,
+            averageKeyLength: fileAnalysis.keyCount > 0 ? fileAnalysis.charCount / fileAnalysis.keyCount : 0,
+            maxKeyLength: fileAnalysis.maxLength,
+            minKeyLength: fileAnalysis.minLength,
+            emptyKeys: fileAnalysis.emptyKeys,
+            longKeys: fileAnalysis.longKeys
+          };
         }
         
         const analysis = this.analyzeTranslationObject(combinedContent, '');
@@ -252,7 +358,8 @@ class I18nSizingAnalyzer {
           maxKeyLength: analysis.maxLength,
           minKeyLength: analysis.minLength,
           emptyKeys: analysis.emptyKeys,
-          longKeys: analysis.longKeys
+          longKeys: analysis.longKeys,
+          files: fileAnalyses
         };
         
         // Store individual key sizes for comparison
@@ -320,7 +427,7 @@ class I18nSizingAnalyzer {
       logger.info(t("sizing.generating_size_comparisons"));
     
     const languages = Object.keys(this.stats.languages);
-    const baseLanguage = languages[0]; // Use first language as baseline
+    const baseLanguage = languages.includes(this.sourceLanguage) ? this.sourceLanguage : languages[0];
     
     if (!baseLanguage) {
         logger.warn(t("sizing.no_languages_found_for_comparison"));
@@ -342,7 +449,9 @@ class I18nSizingAnalyzer {
       const baseStats = this.stats.languages[baseLanguage];
       const langStats = this.stats.languages[lang];
       
-      const sizeDiff = ((langStats.totalCharacters - baseStats.totalCharacters) / baseStats.totalCharacters) * 100;
+      const sizeDiff = baseStats.totalCharacters > 0
+        ? ((langStats.totalCharacters - baseStats.totalCharacters) / baseStats.totalCharacters) * 100
+        : 0;
       
       this.stats.summary.sizeVariations[lang] = {
         characterDifference: langStats.totalCharacters - baseStats.totalCharacters,
@@ -360,7 +469,7 @@ class I18nSizingAnalyzer {
       Object.entries(langData).forEach(([lang, data]) => {
         if (lang === baseLanguage) return;
         
-        const diff = ((data.length - baseLang.length) / baseLang.length) * 100;
+        const diff = baseLang.length > 0 ? ((data.length - baseLang.length) / baseLang.length) * 100 : 0;
         if (Math.abs(diff) > this.threshold) {
           variations.push({
             language: lang,
@@ -379,9 +488,44 @@ class I18nSizingAnalyzer {
         });
       }
     });
-    
+    this.generateFileComparison();
+
     // Generate recommendations
     this.generateRecommendations();
+  }
+
+  generateFileComparison() {
+    const languages = Object.keys(this.stats.files);
+    const baseLanguage = this.stats.summary.baseLanguage || languages[0];
+    const fileSets = {};
+    const allFiles = new Set();
+
+    languages.forEach(language => {
+      const files = Object.keys(this.stats.files[language]?.perFiles || {}).sort();
+      fileSets[language] = files;
+      files.forEach(file => allFiles.add(file));
+    });
+
+    const baseFiles = new Set(fileSets[baseLanguage] || []);
+    const commonFiles = [...allFiles].filter(file => languages.every(language => fileSets[language].includes(file))).sort();
+    const missingFilesByLanguage = {};
+    const extraFilesByLanguage = {};
+
+    languages.forEach(language => {
+      const currentFiles = new Set(fileSets[language]);
+      missingFilesByLanguage[language] = [...allFiles].filter(file => !currentFiles.has(file)).sort();
+      extraFilesByLanguage[language] = fileSets[language].filter(file => !baseFiles.has(file)).sort();
+    });
+
+    this.stats.summary.fileComparison = {
+      baseLanguage,
+      totalUniqueFiles: allFiles.size,
+      commonFiles,
+      fileSets,
+      missingFilesByLanguage,
+      extraFilesByLanguage,
+      hasMismatches: Object.values(missingFilesByLanguage).some(files => files.length > 0)
+    };
   }
 
   // Generate optimization recommendations
@@ -420,38 +564,51 @@ class I18nSizingAnalyzer {
     
     // Folder-level summary table
     console.log("\n" + t("sizing.folder_summary_title"));
-    console.log(t("sizing.folder_summary_table_header"));
-    console.log(t("sizing.lineSeparator"));
-    
-    Object.entries(this.stats.files).forEach(([lang, data]) => {
+    const folderRows = Object.entries(this.stats.files).map(([lang, data]) => {
       const langData = this.stats.languages[lang];
-      const totalChars = Math.round(langData.totalKeys * langData.averageKeyLength);
-      console.log(t("sizing.folder_summary_row", { 
-        lang, 
-        sizeKB: data.sizeKB, 
-        totalKeys: langData.totalKeys, 
+      return {
+        language: lang,
+        files: data.fileCount,
+        sizeKB: data.sizeKB,
+        totalKeys: langData.totalKeys,
         avgLength: langData.averageKeyLength.toFixed(1),
-        totalChars: totalChars
-      }));
+        totalChars: langData.totalCharacters
+      };
     });
+    console.log(this.createTable([
+      { key: 'language', label: 'Language' },
+      { key: 'files', label: 'Files', align: 'right' },
+      { key: 'sizeKB', label: 'Size(KB)', align: 'right' },
+      { key: 'totalKeys', label: 'Keys', align: 'right' },
+      { key: 'avgLength', label: 'Avg Len', align: 'right' },
+      { key: 'totalChars', label: 'Total Chars', align: 'right' }
+    ], folderRows));
     
     // Language comparison summary
     console.log("\n" + t("sizing.language_comparison_title"));
-    const baseLang = this.languages[0];
-    if (this.languages.length > 1 && this.stats.languages[baseLang]) {
-      const baseChars = Math.round(this.stats.languages[baseLang].totalKeys * this.stats.languages[baseLang].averageKeyLength);
-      
-      this.languages.slice(1).forEach(lang => {
-        if (this.stats.languages[lang]) {
-          const langChars = Math.round(this.stats.languages[lang].totalKeys * this.stats.languages[lang].averageKeyLength);
-          const diff = langChars - baseChars;
-          const percent = baseChars > 0 ? ((diff / baseChars) * 100).toFixed(1) : 0;
-          const status = Math.abs(diff) > this.threshold ? "⚠️" : "✅";
-          console.log(`${lang}: ${diff > 0 ? '+' : ''}${diff} chars (${percent}%) ${status}`);
-        }
-      });
+    const comparisonRows = Object.entries(this.stats.summary.sizeVariations || {}).map(([lang, data]) => ({
+      language: lang,
+      charDiff: `${data.characterDifference > 0 ? '+' : ''}${data.characterDifference}`,
+      percent: `${data.percentageDifference > 0 ? '+' : ''}${data.percentageDifference}%`,
+      status: data.isProblematic ? 'WARN' : 'OK'
+    }));
+
+    if (comparisonRows.length > 0) {
+      console.log(this.createTable([
+        { key: 'language', label: 'Language' },
+        { key: 'charDiff', label: 'Char Diff', align: 'right' },
+        { key: 'percent', label: 'Diff %', align: 'right' },
+        { key: 'status', label: 'Status' }
+      ], comparisonRows));
+    } else {
+      console.log("No language comparison available.");
     }
-    
+    this.displayFileComparison();
+
+    if (this.detailed) {
+      this.displayPerFileResults();
+    }
+
     // Summary stats
     console.log("\n" + t("sizing.summary_stats", { 
       totalLanguages: Object.keys(this.stats.languages).length,
@@ -462,6 +619,67 @@ class I18nSizingAnalyzer {
     if (this.detailedKeys) {
       this.displayDetailedKeys();
     }
+  }
+
+  displayFileComparison() {
+    const comparison = this.stats.summary.fileComparison;
+    if (!comparison) return;
+
+    console.log("\nFile Set Comparison");
+    const rows = Object.keys(this.stats.files).map(language => ({
+      language,
+      files: this.stats.files[language].fileCount,
+      missing: comparison.missingFilesByLanguage[language]?.length || 0,
+      extra: comparison.extraFilesByLanguage[language]?.length || 0
+    }));
+
+    console.log(this.createTable([
+      { key: 'language', label: 'Language' },
+      { key: 'files', label: 'Files', align: 'right' },
+      { key: 'missing', label: 'Missing', align: 'right' },
+      { key: 'extra', label: 'Extra vs Base', align: 'right' }
+    ], rows));
+
+    if (comparison.hasMismatches) {
+      Object.entries(comparison.missingFilesByLanguage).forEach(([language, files]) => {
+        if (files.length > 0) {
+          console.log(`${language} missing: ${files.join(', ')}`);
+        }
+      });
+    }
+  }
+
+  displayPerFileResults() {
+    console.log("\nPer-File Analysis");
+    const rows = [];
+
+    Object.entries(this.stats.languages).forEach(([language, languageData]) => {
+      Object.entries(languageData.files || {}).forEach(([fileName, fileData]) => {
+        const fileSizeData = this.stats.files[language]?.perFiles?.[fileName] || {};
+        rows.push({
+          language,
+          file: fileName,
+          sizeKB: fileSizeData.sizeKB || '0.00',
+          keys: fileData.totalKeys,
+          avgLength: fileData.averageKeyLength.toFixed(1),
+          totalChars: fileData.totalCharacters
+        });
+      });
+    });
+
+    if (rows.length === 0) {
+      console.log("No per-file analysis available.");
+      return;
+    }
+
+    console.log(this.createTable([
+      { key: 'language', label: 'Language' },
+      { key: 'file', label: 'File' },
+      { key: 'sizeKB', label: 'Size(KB)', align: 'right' },
+      { key: 'keys', label: 'Keys', align: 'right' },
+      { key: 'avgLength', label: 'Avg Len', align: 'right' },
+      { key: 'totalChars', label: 'Total Chars', align: 'right' }
+    ], rows));
   }
 
   // Display detailed key analysis (only when explicitly requested)
@@ -478,13 +696,13 @@ class I18nSizingAnalyzer {
       
       console.log(t("sizing.key_analysis_header", { key }));
       
-      Object.entries(data.translations).forEach(([lang, translation]) => {
-        const length = translation.length;
+      Object.entries(data).forEach(([lang, keyData]) => {
+        const length = keyData.length;
         const isEmpty = length === 0;
         const isLong = length > this.threshold;
         const status = isEmpty ? t("sizing.status_empty") : isLong ? t("sizing.status_long") : t("sizing.status_ok");
-        
-        console.log(t("sizing.key_analysis_detail", { lang, length, status, translation: translation.substring(0, 50) + (translation.length > 50 ? "..." : "") }));
+
+        console.log(t("sizing.key_analysis_detail", { lang, length, status, translation: `${length} chars` }));
       });
       
       console.log("");
@@ -505,7 +723,7 @@ class I18nSizingAnalyzer {
 
     // Ensure output directory exists
     if (!SecurityUtils.safeExistsSync(validatedOutputDir)) {
-      SecurityUtils.safeMkdirSync(validatedOutputDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(validatedOutputDir, process.cwd(), { recursive: true });
     }
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -537,7 +755,7 @@ class I18nSizingAnalyzer {
       },
       analysis: this.stats,
       metadata: {
-        totalFiles: Object.keys(this.stats.files).length,
+        totalFiles: Object.values(this.stats.files).reduce((total, data) => total + (data.fileCount || 0), 0),
         totalLanguages: Object.keys(this.stats.languages).length,
         totalKeys: Object.keys(this.stats.keys).length
       }
@@ -561,13 +779,13 @@ Generated: ${new Date().toISOString()}
 
 ## Configuration
 - Source Directory: ${this.sourceDir}
-- Languages: ${this.languages.join(', ')}
+- Languages: ${(this.languages.length > 0 ? this.languages : Object.keys(this.stats.languages)).join(', ')}
 - Threshold: ${this.threshold}%
 
 ## Summary Statistics
 - Total Languages: ${Object.keys(this.stats.languages).length}
 - Total Translation Keys: ${Object.keys(this.stats.keys).length}
-- Total Files: ${Object.keys(this.stats.files).length}
+- Total Files: ${Object.values(this.stats.files).reduce((total, data) => total + (data.fileCount || 0), 0)}
 
 ## Language Overview
 `;
@@ -576,6 +794,7 @@ Generated: ${new Date().toISOString()}
       const fileData = this.stats.files[lang] || { sizeKB: 0, lines: 0, characters: 0 };
       report += `
 ### ${lang.toUpperCase()}
+- Files: ${fileData.fileCount || 0}
 - File Size: ${fileData.sizeKB} KB
 - Lines: ${fileData.lines}
 - Total Characters: ${fileData.characters}
@@ -586,13 +805,39 @@ Generated: ${new Date().toISOString()}
 `;
     });
 
+    const fileComparison = this.stats.summary.fileComparison;
+    if (fileComparison) {
+      report += `
+## File Set Comparison
+- Base Language: ${fileComparison.baseLanguage}
+- Unique Files: ${fileComparison.totalUniqueFiles}
+- Common Files: ${fileComparison.commonFiles.length}
+- Mismatches: ${fileComparison.hasMismatches ? 'Yes' : 'No'}
+`;
+
+      Object.entries(fileComparison.missingFilesByLanguage).forEach(([lang, files]) => {
+        report += `- ${lang}: ${files.length} missing${files.length > 0 ? ` (${files.join(', ')})` : ''}\n`;
+      });
+    }
+
+    report += `
+## Per-File Analysis
+`;
+
+    Object.entries(this.stats.languages).forEach(([lang, data]) => {
+      Object.entries(data.files || {}).forEach(([fileName, fileData]) => {
+        const sizeData = this.stats.files[lang]?.perFiles?.[fileName] || {};
+        report += `- ${lang}/${fileName}: ${fileData.totalKeys} keys, ${fileData.totalCharacters} chars, ${fileData.averageKeyLength.toFixed(1)} avg chars, ${sizeData.sizeKB || '0.00'} KB\n`;
+      });
+    });
+
     // Size variations
     if (this.stats.summary.sizeVariations && Object.keys(this.stats.summary.sizeVariations).length > 0) {
       report += `
-## Size Variations (vs ${this.languages[0]})
+## Size Variations (vs ${this.stats.summary.baseLanguage})
 `;
       Object.entries(this.stats.summary.sizeVariations).forEach(([lang, data]) => {
-        report += `- ${lang}: ${data.characterDifference > 0 ? '+' : ''}${data.characterDifference} chars (${data.percentageDifference > 0 ? '+' : ''}${data.percentageDifference}%) ${data.isProblematic ? '⚠️ PROBLEMATIC' : '✅ OK'}\n`;
+        report += `- ${lang}: ${data.characterDifference > 0 ? '+' : ''}${data.characterDifference} chars (${data.percentageDifference > 0 ? '+' : ''}${data.percentageDifference}%) ${data.isProblematic ? 'PROBLEMATIC' : 'OK'}\n`;
       });
     }
 
@@ -629,12 +874,12 @@ Generated: ${new Date().toISOString()}
         report += `
 ### ${key}
 `;
-        Object.entries(data.translations).forEach(([lang, translation]) => {
-          const length = translation.length;
+        Object.entries(data).forEach(([lang, keyData]) => {
+          const length = keyData.length;
           const isEmpty = length === 0;
           const isLong = length > this.threshold;
           const status = isEmpty ? 'EMPTY' : isLong ? 'LONG' : 'OK';
-          report += `- ${lang}: ${length} chars [${status}] "${translation.substring(0, 100)}${translation.length > 100 ? '...' : ''}"\n`;
+          report += `- ${lang}: ${length} chars [${status}]\n`;
         });
       });
     }
@@ -654,13 +899,13 @@ Generated: ${new Date().toISOString()}
       throw new Error(t("sizing.invalidCsvFileError"));
     }
     
-    let csvContent = 'Language,File Size (KB),Lines,Characters,Total Keys,Avg Key Length,Max Key Length,Empty Keys,Long Keys\n';
+    let csvContent = 'Language,File Count,File Size (KB),Lines,Characters,Total Keys,Avg Key Length,Max Key Length,Empty Keys,Long Keys\n';
     
     Object.entries(this.stats.files).forEach(([lang]) => {
       const fileData = this.stats.files[lang];
       const langData = this.stats.languages[lang];
       
-      csvContent += `${lang},${fileData.sizeKB},${fileData.lines},${fileData.characters},${langData.totalKeys},${langData.averageKeyLength.toFixed(1)},${langData.maxKeyLength},${langData.emptyKeys},${langData.longKeys}\n`;
+      csvContent += `${lang},${fileData.fileCount},${fileData.sizeKB},${fileData.lines},${fileData.characters},${langData.totalKeys},${langData.averageKeyLength.toFixed(1)},${langData.maxKeyLength},${langData.emptyKeys},${langData.longKeys}\n`;
     });
     
     const success = await SecurityUtils.safeWriteFile(csvPath, csvContent, process.cwd());
@@ -719,6 +964,7 @@ Generated: ${new Date().toISOString()}
       'output-report': true,
       'format': 'table',
       'threshold': 50,
+      'source-language': '',
       'detailed': false,
       'detailed-keys': false,
       'output-dir': './i18ntk-reports',
@@ -765,6 +1011,8 @@ Generated: ${new Date().toISOString()}
             options.threshold = numValue;
             options.t = numValue;
           }
+        } else if (key === 'source-language') {
+          options['source-language'] = value;
         } else if (key === 'detailed' || key === 'd') {
           options.detailed = value.toLowerCase() !== 'false';
           options.d = options.detailed;
@@ -813,6 +1061,9 @@ Generated: ${new Date().toISOString()}
             options.t = value;
           }
           if (nextArg && !nextArg.startsWith('-') && !isNaN(parseInt(nextArg))) i++;
+        } else if (key === 'source-language') {
+          options['source-language'] = nextArg || options['source-language'];
+          if (nextArg && !nextArg.startsWith('-')) i++;
         } else if (key === 'detailed' || key === 'd') {
           if (nextArg && !nextArg.startsWith('-') && ['true', 'false'].includes(nextArg.toLowerCase())) {
             options.detailed = nextArg.toLowerCase() !== 'false';
@@ -848,6 +1099,7 @@ Options:
   -o, --output-report         Generate detailed sizing report (default: true)
   -f, --format <format>       Output format: json, csv, table (default: table)
   -t, --threshold <number>    Size difference threshold for warnings (%) (default: 50)
+  --source-language <code>    Source language baseline for comparisons (default: en)
   -d, --detailed              Generate detailed report with more information
   --detailed-keys             Show detailed key-level analysis
   --output-dir <dir>          Output directory for reports (default: ./i18ntk-reports)
@@ -874,6 +1126,7 @@ Options:
     this.format = args.format || 'table';
     this.detailed = args.detailed;
     this.detailedKeys = args['detailed-keys'];
+    this.sourceLanguage = args['source-language'] || config.sourceLanguage || this.sourceLanguage || 'en';
 
     if (!fromMenu) {
 

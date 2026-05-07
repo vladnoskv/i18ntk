@@ -454,10 +454,11 @@ class SecurityUtils {
       'sourceLanguage', 'uiLanguage', 'language', 'defaultLanguages', 'supportedLanguages',
       // Translation markers and content
       'notTranslatedMarker', 'notTranslatedMarkers', 'translatedMarker', 'translatedMarkers',
+      'allowedEnglishTerms', 'englishContentThresholdPercent',
       // File handling
       'supportedExtensions', 'excludeFiles', 'excludeDirs', 'includeFiles', 'includeDirs',
       // Operational settings
-      'strictMode', 'debug', 'displayPaths', 'version', 'scriptDirectories',
+      'strictMode', 'debug', 'displayPaths', 'version', 'scriptDirectories', 'autoTranslate',
       // Framework and processing
       'framework', 'processing', 'performance', 'advanced',
       // UI and theme settings

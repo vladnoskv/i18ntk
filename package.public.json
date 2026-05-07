@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18n",
@@ -123,6 +123,7 @@
     "utils/translate/traverse.js",
     "utils/translate/report.js",
     "utils/translate/cli.js",
+    "utils/translate/protection.js",
     "utils/framework-detector.js",
     "utils/i18n-helper.js",
     "utils/init-helper.js",
@@ -137,6 +138,7 @@
     "utils/security.js",
     "utils/setup-enforcer.js",
     "utils/terminal-icons.js",
+    "utils/validation-risk.js",
     "utils/version-utils.js",
     "utils/watch-locales.js",
     "LICENSE",

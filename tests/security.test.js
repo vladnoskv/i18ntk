@@ -18,6 +18,16 @@ const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
 const configManager = require('../utils/config-manager');
 const FixerCommand = require('../main/manage/commands/FixerCommand');
+const {
+  analyzeEnglishContent,
+  detectTranslationContentRisks,
+  hasSecretLikeValue
+} = require('../utils/validation-risk');
+const {
+  protectText,
+  restoreText,
+  shouldPreserveWholeValue
+} = require('../utils/translate/protection');
 
 describe('Security Tests', () => {
   describe('Path Validation', () => {
@@ -438,6 +448,106 @@ describe('Security Tests', () => {
       } finally {
         fs.rmSync(dir, { recursive: true, force: true });
       }
+    });
+  });
+
+  describe('Validation Risk Detection', () => {
+    test('should use configured allowed terms for project-specific copy', () => {
+      const value = 'ExampleTerm is intentionally left in translated copy.';
+      const issues = detectTranslationContentRisks(value, {
+        allowedEnglishTerms: ['ExampleTerm'],
+        keyPath: 'about.overview.body',
+        sourceLanguage: 'en',
+        targetLanguage: 'de'
+      });
+
+      assert.strictEqual(issues.length, 0);
+    });
+
+    test('should allow short acronym and configured term titles', () => {
+      const issues = detectTranslationContentRisks('ABC CustomTerm API', {
+        allowedEnglishTerms: ['CustomTerm'],
+        keyPath: 'product.hero.title',
+        sourceLanguage: 'en',
+        targetLanguage: 'tr'
+      });
+
+      assert.deepStrictEqual(issues, []);
+    });
+
+    test('should flag likely untranslated English content with percentage details', () => {
+      const issues = detectTranslationContentRisks('Predict outcomes, challenge other players, and build public history.', {
+        keyPath: 'about.hero.subtitle',
+        sourceLanguage: 'en',
+        targetLanguage: 'de'
+      });
+
+      assert.strictEqual(issues.length, 1);
+      assert.strictEqual(issues[0].type, 'english_content');
+      assert.strictEqual(issues[0].englishThresholdPercent, 10);
+      assert.ok(issues[0].englishPercentage > 10);
+      assert.ok(issues[0].englishWordCount >= 3);
+    });
+
+    test('should detect secret-like content without warning on explanatory secret words', () => {
+      assert.strictEqual(hasSecretLikeValue('Never share your secret recovery phrase.', 'settings.secretHelp'), false);
+      assert.strictEqual(hasSecretLikeValue('api_key=example_secret_value_1234567890abcdef', 'settings.apiKey'), true);
+    });
+
+    test('should report URLs and email addresses with specific issue types', () => {
+      const issues = detectTranslationContentRisks('Contact support@example.com or visit https://example.com/help', {
+        keyPath: 'support.contact',
+        sourceLanguage: 'en',
+        targetLanguage: 'fr'
+      });
+
+      assert.deepStrictEqual(issues.map(issue => issue.type), ['url', 'email']);
+    });
+
+    test('should ignore acronyms and configured allowed English terms', () => {
+      const analysis = analyzeEnglishContent('ABC API CustomTerm', {
+        allowedEnglishTerms: ['CustomTerm']
+      });
+
+      assert.strictEqual(analysis.englishPercentage, 0);
+      assert.strictEqual(analysis.totalWordCount, 0);
+    });
+  });
+
+  describe('Auto Translate Protection', () => {
+    test('should mask and restore configured protected terms', () => {
+      const protection = {
+        enabled: true,
+        terms: ['BrandName'],
+        keys: [],
+        values: [],
+        patterns: [],
+        compiledPatterns: []
+      };
+
+      const protectedText = protectText('Welcome to BrandName today', protection);
+      assert.notStrictEqual(protectedText.value, 'Welcome to BrandName today');
+      assert.ok(protectedText.value.includes('__I18NTK_KEEP_0__'));
+      const translatedAroundToken = protectedText.value
+        .replace('Welcome to ', 'Bienvenue a ')
+        .replace(' today', '');
+      assert.strictEqual(restoreText(translatedAroundToken, protectedText.map), 'Bienvenue a BrandName');
+    });
+
+    test('should preserve configured key and exact value rules', () => {
+      const protection = {
+        enabled: true,
+        terms: [],
+        keys: ['app.brand', 'legal.*'],
+        values: ['BrandName Ltd'],
+        patterns: [],
+        compiledPatterns: []
+      };
+
+      assert.strictEqual(shouldPreserveWholeValue('app.brand', 'Any value', protection), true);
+      assert.strictEqual(shouldPreserveWholeValue('legal.company', 'Any value', protection), true);
+      assert.strictEqual(shouldPreserveWholeValue('footer.company', 'BrandName Ltd', protection), true);
+      assert.strictEqual(shouldPreserveWholeValue('footer.copy', 'Translate this', protection), false);
     });
   });
 });

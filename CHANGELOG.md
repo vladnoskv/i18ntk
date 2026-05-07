@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-05-07
+
+### Added
+- **Placeholder-preserve translation mode**: Translates text segments around dynamic placeholders and reinserts the original tokens exactly.
+- **Auto Translate beta settings**: Added settings for placeholder mode, concurrency, batch size, progress interval, retry count, retry delay, timeout, dry-run preview, report output, and BOM output.
+- **Large-file tuning flags**: Added `--batch-size` and `--progress-interval` to `i18ntk-translate`.
+- **Short-lived placeholder manifest**: Mirrors placeholder maps to an OS temp file during processing and removes it after each file completes.
+- **Validation content-risk helper**: Added structured detection for URLs, email addresses, secret-like values, and likely untranslated English content.
+- **Sizing file-set analysis**: Added per-language file counts, per-file sizing statistics, and missing/extra file comparison across locale folders.
+
+### Changed
+- Automated and manager Auto Translate flows now default to placeholder `preserve` mode instead of skipping placeholder-bearing strings.
+- `i18ntk-translate` can now be imported and run in-process by other package modules.
+- Source JSON reads tolerate UTF-8 BOM-prefixed files.
+- Validation warnings now report specific issue types and reasons instead of the vague `Risky content` message.
+- English-content validation now reports an English percentage and only warns above a 10% threshold with at least three detected English words.
+- Sizing reports now include folder-level file counts and per-file key/character breakdowns for each language.
+
+### Fixed
+- Fixed false-positive validation warnings for normal product copy terms.
+- Fixed validator handling so ordinary explanatory uses of words like `token` or `secret` are not treated as leaked credentials.
+- Fixed distorted `i18ntk-sizing` table output by rendering aligned columns from measured values instead of fixed localized spacing.
+- Fixed sizing language comparison output so it uses analyzed languages and the configured source language baseline.
+
+### Security
+- Removed production `child_process` usage from `main/manage/commands/TranslateCommand.js` by replacing the spawned CLI process with an in-process translator call.
+
 ## [3.0.0] - 2026-05-05
 
 ### Added

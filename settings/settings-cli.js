@@ -137,6 +137,7 @@ class SettingsCLI {
             { key: '7', label: t('settings.mainMenu.advancedSettings'), description: t('settings.mainMenu.advancedSettingsDesc') },
             { key: '8', label: t('settings.mainMenu.viewAllSettings'), description: t('settings.mainMenu.viewAllSettingsDesc') },
             { key: '9', label: t('settings.mainMenu.importExport'), description: t('settings.mainMenu.importExportDesc') },
+            { key: 'a', label: 'Auto Translate Beta', description: 'Tune placeholder handling, concurrency, batching, and reports' },
             { key: '0', label: t('settings.mainMenu.reportBug'), description: t('settings.mainMenu.reportBugDesc') },
             { key: 'x', label: 'Reset Script Directory Overrides', description: 'Clear script directory overrides and use defaults' },
             { key: 'r', label: t('settings.mainMenu.resetToDefaults'), description: t('settings.mainMenu.resetToDefaultsDesc') },
@@ -190,6 +191,9 @@ class SettingsCLI {
                 break;
             case '9':
                 await this.showImportExport();
+                break;
+            case 'a':
+                await this.showAutoTranslateSettings();
                 break;
             case '0':
                 await this.reportBug();
@@ -319,6 +323,35 @@ class SettingsCLI {
         };
 
         await this.showSettingsCategory(processSettings);
+    }
+
+    async showAutoTranslateSettings() {
+        if (typeof uiI18n.refreshLanguageFromSettings === 'function') {
+            uiI18n.refreshLanguageFromSettings();
+        }
+
+        this.clearScreen();
+        this.showHeader();
+        console.log(`${colors.bright}Auto Translate Beta Settings${colors.reset}\n`);
+
+        const autoTranslateSettings = {
+            'autoTranslate.placeholderMode': 'Placeholder handling mode',
+            'autoTranslate.concurrency': 'Concurrent translation requests',
+            'autoTranslate.batchSize': 'Text segments per batch',
+            'autoTranslate.progressInterval': 'Progress update interval',
+            'autoTranslate.retryCount': 'Retry count',
+            'autoTranslate.retryDelay': 'Retry delay (ms)',
+            'autoTranslate.timeout': 'Request timeout (ms)',
+            'autoTranslate.dryRunFirst': 'Dry-run preview first',
+            'autoTranslate.reportStdout': 'Print report to terminal',
+            'autoTranslate.bom': 'Write UTF-8 BOM',
+            'autoTranslate.protectionEnabled': 'Protect brand terms, keys, values',
+            'autoTranslate.protectionFile': 'Protection JSON file',
+            'autoTranslate.promptProtectionSetup': 'Ask to create protection file',
+            'autoTranslate.promptProtectionUpdate': 'Ask to update protection rules'
+        };
+
+        await this.showSettingsCategory(autoTranslateSettings);
     }
 
     /**
@@ -532,7 +565,14 @@ class SettingsCLI {
             'security.pinProtection.enabled': ['true', 'false'],
             'advanced.backupBeforeChanges': ['true', 'false'],
             'backup.enabled': ['true', 'false'],
-            'backup.singleFileMode': ['true', 'false']
+            'backup.singleFileMode': ['true', 'false'],
+            'autoTranslate.placeholderMode': ['preserve', 'skip', 'send'],
+            'autoTranslate.dryRunFirst': ['true', 'false'],
+            'autoTranslate.reportStdout': ['true', 'false'],
+            'autoTranslate.bom': ['true', 'false'],
+            'autoTranslate.protectionEnabled': ['true', 'false'],
+            'autoTranslate.promptProtectionSetup': ['true', 'false'],
+            'autoTranslate.promptProtectionUpdate': ['true', 'false']
         };
         if (key === 'language') {
             return settingsManager.getAvailableLanguages().map(l => l.code);
@@ -567,7 +607,13 @@ class SettingsCLI {
             'backupRetention': { min: 1, max: 30, type: 'int', unit: 'days' },
             'logRetention': { min: 1, max: 90, type: 'int', unit: 'days' },
             'retentionDays': { min: 1, max: 365, type: 'int', unit: 'days' },
-            'maxBackups': { min: 1, max: 3, type: 'int' }
+            'maxBackups': { min: 1, max: 3, type: 'int' },
+            'autoTranslate.concurrency': { min: 1, max: 25, type: 'int' },
+            'autoTranslate.batchSize': { min: 1, max: 10000, type: 'int' },
+            'autoTranslate.progressInterval': { min: 1, max: 10000, type: 'int' },
+            'autoTranslate.retryCount': { min: 0, max: 10, type: 'int' },
+            'autoTranslate.retryDelay': { min: 0, max: 30000, type: 'int', unit: 'ms' },
+            'autoTranslate.timeout': { min: 1000, max: 120000, type: 'int', unit: 'ms' }
         };
         
         for (const [field, rules] of Object.entries(validations)) {
@@ -827,7 +873,7 @@ class SettingsCLI {
         let finalValue = convertedValue;
         if (typeof finalValue === 'string') {
             const lowerKey = key.toLowerCase();
-            if (lowerKey.includes('dir') || lowerKey.includes('path') || lowerKey.includes('root')) {
+            if (lowerKey.includes('dir') || lowerKey.includes('path') || lowerKey.includes('root') || key === 'autoTranslate.protectionFile') {
                 finalValue = finalValue.replace(/^([/\\])/, './');
                 finalValue = configManager.toRelative(path.resolve(finalValue));
             }
@@ -1934,7 +1980,7 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
             return `${colors.dim}(not set)${colors.reset}`;
         }
         const lowerKey = key.toLowerCase();
-        if (typeof value === 'string' && (lowerKey.includes('dir') || lowerKey.includes('path') || lowerKey.includes('root'))) {
+        if (typeof value === 'string' && (lowerKey.includes('dir') || lowerKey.includes('path') || lowerKey.includes('root') || key === 'autoTranslate.protectionFile')) {
             return configManager.toRelative(path.resolve(value));
         }
         if (typeof value === 'boolean') {
@@ -1960,7 +2006,7 @@ ${colors.dim}${t('settings.updatePackage.command')}: npm update i18ntk -g${color
             if (['false','no','n','0','off','disabled'].includes(lower)) return false;
 
             // Numbers for known numeric settings
-            const numericKeys = /(sessionTimeout|maxFailedAttempts|lockoutDuration|retentionDays|maxBackups|advanced\.|backup\.)/;
+            const numericKeys = /(sessionTimeout|maxFailedAttempts|lockoutDuration|retentionDays|maxBackups|advanced\.|backup\.|autoTranslate\.(concurrency|batchSize|progressInterval|retryCount|retryDelay|timeout))/;
             if (numericKeys.test(key)) {
                 const n = Number(raw);
                 if (!Number.isNaN(n)) return n;

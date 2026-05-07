@@ -1,8 +1,8 @@
-# DEVUPDATE.md - v2 Release and Publish Runbook
+# DEVUPDATE.md - v3.1.0 Release and Publish Runbook
 
 ## Purpose
 
-Use this checklist to ship a new i18ntk v2 release to npm and keep docs/readme in sync.
+Use this checklist to ship the i18ntk v3.1.0 release to npm and keep docs/readme in sync.
 
 ## 1. Pre-Release Checks
 
@@ -39,9 +39,11 @@ Then update:
 - `CHANGELOG.md`
 - `README.md`
 - `docs/README.md`
-- `docs/migration-guide-v2.3.0.md` (or new migration file for the target release)
+- `docs/migration-guide-v3.1.0.md` (or new migration file for the target release)
+- `docs/api/CONFIGURATION.md`
+- `docs/api/API_REFERENCE.md`
 
-## 3. README v2 Badge/Icon Refresh
+## 3. README v3 Badge/Icon Refresh
 
 Check these entries in `README.md` before publish:
 
@@ -58,7 +60,7 @@ If socket badge is version-pinned, update it to the new package version.
 
 ```bash
 npm whoami
-npm publish --access public
+npm run publish:public
 ```
 
 If publishing from CI, ensure `NPM_TOKEN` is configured in CI secrets.

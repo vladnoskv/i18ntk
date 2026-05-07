@@ -1,4 +1,4 @@
-# i18ntk Components (v3)
+# i18ntk Components (v3.1.0)
 
 ## Core Entry Points
 
@@ -24,7 +24,8 @@
 - `utils/i18n-helper.js`: UI translation loading and lookup
 - `utils/security.js`: file/path safety helpers
 - `utils/setup-enforcer.js`: setup-completion gate checks
-- `utils/translate/`: Auto Translate placeholder handling, API calls, traversal, reports, and prompts
+- `utils/translate/`: Auto Translate placeholder handling, protected term/key rules, API calls, traversal, reports, and prompts
+- `utils/validation-risk.js`: structured validation-risk detection for URLs, emails, secret-like values, and likely untranslated English text
 
 ## Runtime Package
 
@@ -41,7 +42,7 @@ Exports:
 
 ## Notes
 
-- v3 is zero dependency at runtime.
+- v3.1.0 is zero dependency at runtime.
 - `.i18ntk-config` is the project source of truth.
 - Prefer documented CLI entry points over internal modules.
 - Manager-route backup execution (`i18ntk --command=backup`) is disabled in current builds.

@@ -52,6 +52,22 @@ class SettingsManager {
                 "memoryOptimization": true,
                 "compression": true
             },
+            "autoTranslate": {
+                "placeholderMode": "preserve",
+                "concurrency": 6,
+                "batchSize": 100,
+                "progressInterval": 25,
+                "retryCount": 3,
+                "retryDelay": 1000,
+                "timeout": 15000,
+                "dryRunFirst": true,
+                "reportStdout": true,
+                "bom": false,
+                "protectionEnabled": true,
+                "protectionFile": "./i18ntk-auto-translate.json",
+                "promptProtectionSetup": true,
+                "promptProtectionUpdate": true
+            },
             "reports": {
                 "format": "json",
                 "includeSource": false,
@@ -367,6 +383,10 @@ class SettingsManager {
         
         if (loadedSettings.processing) {
             merged.processing = { ...this.defaultConfig.processing, ...loadedSettings.processing };
+        }
+
+        if (loadedSettings.autoTranslate) {
+            merged.autoTranslate = { ...this.defaultConfig.autoTranslate, ...loadedSettings.autoTranslate };
         }
         
         if (loadedSettings.advanced) {
@@ -875,6 +895,95 @@ class SettingsManager {
                         }
                     }
                 },
+                autoTranslate: {
+                    type: 'object',
+                    description: 'Auto Translate beta defaults',
+                    properties: {
+                        placeholderMode: {
+                            type: 'string',
+                            description: 'How placeholder-bearing strings are handled during auto translation',
+                            enum: ['preserve', 'skip', 'send'],
+                            default: 'preserve'
+                        },
+                        concurrency: {
+                            type: 'number',
+                            description: 'Maximum concurrent translation requests',
+                            minimum: 1,
+                            maximum: 25,
+                            default: 6
+                        },
+                        batchSize: {
+                            type: 'number',
+                            description: 'Number of text segments scheduled per translation batch',
+                            minimum: 1,
+                            maximum: 10000,
+                            default: 100
+                        },
+                        progressInterval: {
+                            type: 'number',
+                            description: 'Number of completed text segments between progress updates',
+                            minimum: 1,
+                            maximum: 10000,
+                            default: 25
+                        },
+                        retryCount: {
+                            type: 'number',
+                            description: 'Maximum retries per failed translation request',
+                            minimum: 0,
+                            maximum: 10,
+                            default: 3
+                        },
+                        retryDelay: {
+                            type: 'number',
+                            description: 'Base retry delay in milliseconds',
+                            minimum: 0,
+                            maximum: 30000,
+                            default: 1000
+                        },
+                        timeout: {
+                            type: 'number',
+                            description: 'HTTP request timeout in milliseconds',
+                            minimum: 1000,
+                            maximum: 120000,
+                            default: 15000
+                        },
+                        dryRunFirst: {
+                            type: 'boolean',
+                            description: 'Run a dry-run preview before interactive manager translation',
+                            default: true
+                        },
+                        reportStdout: {
+                            type: 'boolean',
+                            description: 'Print the post-translation report to stdout',
+                            default: true
+                        },
+                        bom: {
+                            type: 'boolean',
+                            description: 'Write translated JSON files with a UTF-8 BOM',
+                            default: false
+                        },
+                        protectionEnabled: {
+                            type: 'boolean',
+                            description: 'Enable user-editable protected terms, keys, values, and patterns',
+                            default: true
+                        },
+                        protectionFile: {
+                            type: 'string',
+                            description: 'Project JSON file containing Auto Translate protection rules',
+                            default: './i18ntk-auto-translate.json'
+                        },
+                        promptProtectionSetup: {
+                            type: 'boolean',
+                            description: 'Ask to create the protection file when Auto Translate first runs',
+                            default: true
+                        },
+                        promptProtectionUpdate: {
+                            type: 'boolean',
+                            description: 'Ask whether to update protection rules before manager translations',
+                            default: true
+                        }
+                    }
+                },
                 security: {
                     type: 'object',
                     properties: {
@@ -1003,4 +1112,3 @@ class SettingsManager {
 }
 
 module.exports = SettingsManager;
-

@@ -1,4 +1,4 @@
-# i18ntk v3.0.0
+# i18ntk v3.1.0
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic locale translation, and runtime translation loading.
 
@@ -9,25 +9,18 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.0.0)](https://socket.dev/npm/package/i18ntk/overview/3.0.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.1.0)](https://socket.dev/npm/package/i18ntk/overview/3.1.0)
 
 ## Upgrade Notice
 
-Versions earlier than `3.0.0` may contain known stability and security issues.
-They are considered unsupported for production use. Upgrade to `3.0.0` or newer.
+Versions earlier than `3.1.0` may contain known stability and security issues.
+They are considered unsupported for production use. Upgrade to `3.1.0` or newer.
 
-## v3.0.0 - Auto Translate Release
+## v3.1.0 - Auto Translate Hardening and Validation Warning Tuning
 
-v3.0.0 adds automatic JSON locale translation through the management menu and the standalone `i18ntk-translate` command. Highlights:
+v3.1.0 improves automatic JSON locale translation through the management menu and the standalone `i18ntk-translate` command. It also reduces noisy validation warnings and added a dedicated settings module for the auto translator.
 
-- **Auto Translate (Beta)**: Translate one or more source JSON files into one or more target languages from menu option 14.
-- **Standalone CLI**: Use `i18ntk-translate <source-file> <target-lang>` for direct automation and batch translation.
-- **Dry-run preview**: Review translated/skipped counts before writing target files.
-- **Placeholder protection**: Detect and preserve placeholders such as `{name}`, `{{count}}`, `%s`, `%d`, `:id`, `%{name}`, and `${value}`.
-- **Post-translation report**: Print or write translated and skipped key counts.
-- **Zero dependencies**: Translation support uses built-in Node.js modules and the free Google Translate endpoint.
-
-For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migration notes, see [docs/migration-guide-v3.0.0.md](./docs/migration-guide-v3.0.0.md).
+For the full detailed changelog, see [CHANGELOG.md](./CHANGELOG.md). For migration notes, see [docs/migration-guide-v3.1.0.md](./docs/migration-guide-v3.1.0.md).
 
 ## What i18ntk Does
 
@@ -139,8 +132,11 @@ Auto Translate also supports:
 
 - `--source-lang <code>`
 - `--files <pattern>`
+- `--preserve-placeholders`
 - `--skip-placeholders`
 - `--send-placeholders`
+- `--batch-size <n>`
+- `--progress-interval <n>`
 - `--report-file <path>`
 - `--report-stdout`
 
@@ -164,10 +160,10 @@ Direct CLI examples:
 ```bash
 i18ntk-translate locales/en/common.json de
 i18ntk-translate locales/en/common.json fr --dry-run --report-stdout
-i18ntk-translate locales/en es --files "*.json" --no-confirm --skip-placeholders
+i18ntk-translate locales/en es --files "*.json" --no-confirm --preserve-placeholders
 ```
 
-The manager flow accepts comma- or space-separated target language codes, previews the first target language with a dry run, asks for confirmation, then writes translated files under matching target-language directories such as `locales/de/common.json`.
+The manager flow accepts comma- or space-separated target language codes, or `all` for every configured target language. It previews the first target language with a dry run when enabled, asks for confirmation, then writes translated files under matching target-language directories such as `locales/de/common.json`. By default it preserves placeholders while translating the surrounding text.
 
 See [docs/auto-translate.md](docs/auto-translate.md) for full usage details.
 
@@ -201,12 +197,18 @@ Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "3.0.0",
+  "version": "3.1.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "sourceLanguage": "en",
   "defaultLanguages": ["de", "es", "fr", "ru"],
+  "englishContentThresholdPercent": 10,
+  "allowedEnglishTerms": ["BrandName", "PRODUCT_CODE"],
+  "autoTranslate": {
+    "protectionEnabled": true,
+    "protectionFile": "./i18ntk-auto-translate.json"
+  },
   "setup": {
     "completed": true
   }
@@ -225,6 +227,7 @@ See [docs/api/CONFIGURATION.md](docs/api/CONFIGURATION.md) for the full configur
 - [Auto Translate Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/auto-translate.md)
 - [Scanner Guide](https://github.com/vladnoskv/i18ntk/blob/main/docs/scanner-guide.md)
 - [Environment Variables](https://github.com/vladnoskv/i18ntk/blob/main/docs/environment-variables.md)
+- [Migration Guide v3.1.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v3.1.0.md)
 - [Migration Guide v3.0.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v3.0.0.md)
 - [Migration Guide v2.6.0](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.6.0.md)
 - [Migration Guide v2.5.1](https://github.com/vladnoskv/i18ntk/blob/main/docs/migration-guide-v2.5.1.md)

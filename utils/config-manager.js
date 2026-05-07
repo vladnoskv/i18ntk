@@ -152,6 +152,22 @@ const DEFAULT_CONFIG = {
     "parallelProcessing": true,
     "minimalLogging": true
   },
+  "autoTranslate": {
+    "placeholderMode": "preserve",
+    "concurrency": 6,
+    "batchSize": 100,
+    "progressInterval": 25,
+    "retryCount": 3,
+    "retryDelay": 1000,
+    "timeout": 15000,
+    "dryRunFirst": true,
+    "reportStdout": true,
+    "bom": false,
+    "protectionEnabled": true,
+    "protectionFile": "./i18ntk-auto-translate.json",
+    "promptProtectionSetup": true,
+    "promptProtectionUpdate": true
+  },
   "reports": {
     "format": "json",
     "includeStats": true,

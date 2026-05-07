@@ -43,6 +43,30 @@ function walk(value, pathParts, onString) {
   }
 }
 
+function flatten(value, pathParts = [], out = {}) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => flatten(item, pathParts.concat(index), out));
+    return out;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      flatten(child, pathParts.concat(key), out);
+    }
+    return out;
+  }
+  out[pathParts.join('.')] = value;
+  return out;
+}
+
+function readLocale(filePath) {
+  const raw = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
+  if (!raw) {
+    throw new Error('unable to read locale file');
+  }
+  const normalized = raw.charCodeAt(0) === 0xFEFF ? raw.slice(1) : raw;
+  return JSON.parse(normalized);
+}
+
 function lintFile(filePath) {
   const raw = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
   if (!raw) {
@@ -70,6 +94,46 @@ function lintFile(filePath) {
   return issues;
 }
 
+function collectCoverageIssues(files) {
+  const enFile = files.find(file => file === 'en.json');
+  if (!enFile) {
+    return ['ui-locales: missing en.json source locale'];
+  }
+
+  let sourceKeys;
+  try {
+    sourceKeys = new Set(Object.keys(flatten(readLocale(path.join(uiLocalesDir, enFile)))));
+  } catch (error) {
+    return [`en: unable to build source key set - ${error.message}`];
+  }
+
+  const issues = [];
+  for (const file of files) {
+    if (file === enFile) continue;
+
+    const locale = path.basename(file, '.json');
+    let targetKeys;
+    try {
+      targetKeys = new Set(Object.keys(flatten(readLocale(path.join(uiLocalesDir, file)))));
+    } catch (error) {
+      issues.push(`${locale}: unable to build key set - ${error.message}`);
+      continue;
+    }
+
+    const missing = [...sourceKeys].filter(key => !targetKeys.has(key));
+    const extra = [...targetKeys].filter(key => !sourceKeys.has(key));
+
+    if (missing.length) {
+      issues.push(`${locale}: missing ${missing.length} key(s): ${missing.slice(0, 10).join(', ')}${missing.length > 10 ? ', ...' : ''}`);
+    }
+    if (extra.length) {
+      issues.push(`${locale}: extra ${extra.length} key(s): ${extra.slice(0, 10).join(', ')}${extra.length > 10 ? ', ...' : ''}`);
+    }
+  }
+
+  return issues;
+}
+
 function main() {
   let files;
   try {
@@ -79,7 +143,8 @@ function main() {
     process.exit(1);
   }
 
-  const allIssues = files.flatMap(f => lintFile(path.join(uiLocalesDir, f)));
+  const allIssues = files.flatMap(f => lintFile(path.join(uiLocalesDir, f)))
+    .concat(collectCoverageIssues(files));
 
   if (allIssues.length) {
     console.error('Locale lint failed:');

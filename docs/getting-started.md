@@ -1,4 +1,4 @@
-# Getting Started with i18ntk (v3.0.0)
+# Getting Started with i18ntk (v3.1.0)
 
 This guide covers the shortest path from install to first successful run.
 
@@ -77,7 +77,7 @@ Or run the standalone translator directly:
 i18ntk-translate locales/en/common.json de --report-stdout
 ```
 
-The manager flow runs a dry-run preview first, then writes translated target files after confirmation.
+The manager flow runs a dry-run preview first when enabled, then writes translated target files after confirmation. Placeholder-bearing strings use preserve mode by default, so dynamic tokens stay intact while surrounding words are translated. On first use, Auto Translate can also create `i18ntk-auto-translate.json` so you can maintain protected brand terms, key paths, exact values, and regex patterns outside the package.
 
 ## 6. Use the runtime API in your application
 
