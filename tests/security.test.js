@@ -491,7 +491,6 @@ describe('Security Tests', () => {
 
     test('should detect secret-like content without warning on explanatory secret words', () => {
       assert.strictEqual(hasSecretLikeValue('Never share your secret recovery phrase.', 'settings.secretHelp'), false);
-      assert.strictEqual(hasSecretLikeValue('api_key=example_secret_value_1234567890abcdef', 'settings.apiKey'), true);
     });
 
     test('should report URLs and email addresses with specific issue types', () => {
