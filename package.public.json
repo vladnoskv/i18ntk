@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
