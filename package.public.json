@@ -1,9 +1,11 @@
 {
   "name": "i18ntk",
   "version": "3.2.0",
-  "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
+  "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
+    "i18ntk",
+    "i18n-toolkit",
     "i18n",
     "internationalization",
     "localization",
