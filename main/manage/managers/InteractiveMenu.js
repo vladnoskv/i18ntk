@@ -1,6 +1,10 @@
 /**
  * Interactive Menu Manager
  * @module managers/InteractiveMenu
+ * @deprecated This module is superseded by the I18nManager.showInteractiveMenu
+ *   implementation in main/manage/index.js. This file is retained only for
+ *   backward compatibility with existing test references and should not be
+ *   used in new code.
  */
 
 const { t } = require('../../../utils/i18n-helper');

@@ -350,19 +350,22 @@ module.exports = class FileManagementService {
    * @returns {Promise<boolean>} True if authentication is required
    */
   async isAuthRequiredForScript(scriptName) {
-    // This would need to be implemented based on the authentication service
-    // For now, return false as a placeholder
-    return false;
+    try {
+      const SecurityUtils = require('../../../utils/security');
+      const configPath = path.join(process.cwd(), 'settings', 'admin-pin.json');
+      return SecurityUtils.safeExistsSync(configPath);
+    } catch {
+      return false;
+    }
   }
 
-  /**
-   * Verify PIN for authentication
-   * @param {string} pin - PIN to verify
-   * @returns {Promise<boolean>} True if PIN is valid
-   */
   async verifyPin(pin) {
-    // This would need to be implemented based on the authentication service
-    // For now, return true as a placeholder
-    return true;
+    try {
+      const AdminAuth = require('../../../utils/admin-auth');
+      const auth = new AdminAuth();
+      return await auth.verifyPin(pin);
+    } catch {
+      return false;
+    }
   }
 };

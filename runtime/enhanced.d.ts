@@ -219,4 +219,4 @@ export interface MigrationResult {
 }
 
 // Export compatibility with existing runtime
-export * from './index.d.ts';
+export * from './i18ntk.d.ts';

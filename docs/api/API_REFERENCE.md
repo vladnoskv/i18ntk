@@ -1,4 +1,4 @@
-# i18ntk API Reference (v3.1.2)
+# i18ntk API Reference (v3.2.0)
 
 ## Primary CLI
 

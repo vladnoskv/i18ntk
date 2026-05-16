@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-05-16
+
+### Security
+- **CRITICAL**: Fixed invalid `crypto.createCipherGCM`/`createDecipherGCM` API calls in `admin-pin.js` — replaced with `crypto.createCipheriv`/`createDecipheriv`.
+- **CRITICAL**: Fixed missing `SecurityUtils` imports in `admin-pin.js`, `security-config.js`, and `scripts/security-check.js` causing `ReferenceError` at runtime.
+- **CRITICAL**: Removed encryption key stored alongside ciphertext in `admin-pin.js`. The AES key was stored in the same JSON file as the encrypted PIN, providing zero cryptographic protection. Encryption key is now derived via HKDF from the scrypt hash.
+- Enforced HTTPS-only for Google Translate API requests in `utils/translate/api.js`; dropped `http` protocol support.
+- Fixed `http.get` timeout for Node.js <16.14 compatibility by using `req.setTimeout()` instead of the options-based `{ timeout }` parameter.
+- Added `SecurityUtils.validatePath` checks to `secure-backup.js` `restoreBackup` and `verifyBackup` methods.
+- Added `backupDir` traversal validation in `secure-backup.js` constructor.
+- Fixed `FileManagementService` `isAuthRequiredForScript`/`verifyPin` stubs — previously returned hardcoded `false`/`true`, disabling PIN protection. Now delegates to proper `AdminAuth` module.
+- Fixed `admin-auth.js` `logSecurityEvent` signature mismatches — 6 calls passed raw strings instead of structured objects.
+- Fixed `admin-pin.js` `getPinDisplay` to use stored `pinLength` instead of decrypting the raw PIN into memory.
+
+### Fixed
+- `admin-pin.js` lockout now uses timestamp-based expiry (`lockedUntil`) instead of `setTimeout`, ensuring lockout state survives process restarts.
+- `translate/traverse.js` `setLeaf` now correctly creates `[]` for numeric array indices (was creating `{}`).
+- `translate/traverse.js` extracted shared `parseKeyPath` function — `setLeaf` and `getLeaf` had duplicate path-parsing logic.
+- `translate/traverse.js` `deepClone` now handles `null`, `undefined`, and circular references gracefully.
+- `translate/api.js` retry logic now retries `TimeoutError` and `NetworkError` with exponential backoff (previously only retried rate-limit errors).
+- `translate/api.js` added `User-Agent` header to Google Translate API requests.
+- `main/manage/index.js` `startupTimeout` no longer cleared before `createPrompt` and other blocking initialization steps.
+- `main/manage/index.js` removed silent no-op `t('init.autoDetectedI18nDirectory', ...)` whose return value was never used.
+- `ultra-performance-optimizer.js` removed dead `preallocateMemory` pools (`stringPool`, `objectPool`, `arrayPool`) — ~1MB wasted allocation.
+- `ultra-performance-optimizer.js` `getCacheKey` now uses async `fs.stat` instead of blocking `fs.statSync`.
+- `ultra-performance-optimizer.js` GC timer now enforces minimum 5-second interval and warns when `--expose-gc` is missing.
+- `ultra-performance-optimizer.js` `readFileUltra` now handles files >64KB with chunked reads.
+- `ultra-performance-optimizer.js` `createUltraCache` replaced per-entry `setTimeout` (timer leak) with unified cleanup interval.
+- `ultra-performance-optimizer.js` benchmark now uses real benchmark datasets instead of non-existent mock files.
+- `config-manager.js` now exports `loadSettings`/`saveSettings` aliases — resolves 20+ phantom API fallback calls across the codebase.
+- `config-manager.js` `updateConfig` now clones before deep-merging to prevent in-place cache corruption.
+- `admin-pin.js` scrypt→pbkdf2 fallback now emits a console warning instead of failing silently.
+
+### Changed
+- Updated all documentation to v3.2.0: README, CHANGELOG, docs/README, getting-started, runtime, auto-translate, environment-variables, scanner-guide, API_REFERENCE, COMPONENTS, and CONFIGURATION.
+- Updated `package.json` version, `versionInfo`, `majorChanges`, and `nextVersion` for v3.2.0.
+- Socket badge URL updated to v3.2.0.
+
 ## [3.1.2] - 2026-05-07
 
 ### Fixed

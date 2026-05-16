@@ -146,7 +146,6 @@ class I18nManager {
 
                     if (hasLanguageDirs) {
                         this.config.sourceDir = possiblePath;
-                        t('init.autoDetectedI18nDirectory', { path: possiblePath });
                         break;
                     }
                 } catch (error) {
@@ -347,7 +346,6 @@ class I18nManager {
             if (!shouldSkipInitCheck) {
                 await SetupEnforcer.checkSetupCompleteAsync();
             }
-            clearStartupTimeout();
 
             prompt = createPrompt({ noPrompt: args.noPrompt });
             const interactive = isInteractive({ noPrompt: args.noPrompt });

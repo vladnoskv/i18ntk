@@ -1,4 +1,4 @@
-# i18ntk Components (v3.1.2)
+# i18ntk Components (v3.2.0)
 
 ## Core Entry Points
 

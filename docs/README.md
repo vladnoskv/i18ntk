@@ -1,4 +1,4 @@
-# i18ntk Documentation (v3.1.2)
+# i18ntk Documentation (v3.2.0)
 
 This documentation set is for **i18ntk 3.x**.
 
@@ -11,6 +11,7 @@ This documentation set is for **i18ntk 3.x**.
 - [Auto Translate Guide](./auto-translate.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
+- [Migration Guide v3.2.0](./migration-guide-v3.2.0.md)
 - [Migration Guide v3.1.2](./migration-guide-v3.1.2.md)
 - [Migration Guide v3.1.1](./migration-guide-v3.1.1.md)
 - [Migration Guide v3.0.0](./migration-guide-v3.0.0.md)
@@ -18,7 +19,6 @@ This documentation set is for **i18ntk 3.x**.
 - [Migration Guide v2.5.1](./migration-guide-v2.5.1.md)
 - [Migration Guide v2.5.0](./migration-guide-v2.5.0.md)
 - [Migration Guide v2.4.0](./migration-guide-v2.4.0.md)
-- [Package Optimization Prompt](./development/package-optimization-prompt.md)
 
 ## Community Files
 

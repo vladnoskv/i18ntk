@@ -544,13 +544,13 @@ class AdminAuth {
         config.lastModified = new Date().toISOString();
         const success = await this.saveConfig(config);
         if (success) {
-          SecurityUtils.logSecurityEvent('pin_protection_disabled', 'info', 'PIN protection disabled (PIN retained)');
+          SecurityUtils.logSecurityEvent('pin_protection_disabled', 'info', { message: 'PIN protection disabled (PIN retained)' });
         }
         return success;
       }
       return true;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('pin_protection_disable_error', 'error', `Failed to disable PIN protection: ${error.message}`);
+      SecurityUtils.logSecurityEvent('pin_protection_disable_error', 'error', { message: `Failed to disable PIN protection: ${error.message}` });
       return false;
     }
   }
@@ -566,13 +566,13 @@ class AdminAuth {
         config.lastModified = new Date().toISOString();
         const success = await this.saveConfig(config);
         if (success) {
-          SecurityUtils.logSecurityEvent('pin_protection_enabled', 'info', 'PIN protection enabled');
+          SecurityUtils.logSecurityEvent('pin_protection_enabled', 'info', { message: 'PIN protection enabled' });
         }
         return success;
       }
       return false;
     } catch (error) {
-      SecurityUtils.logSecurityEvent('pin_protection_enable_error', 'error', `Failed to enable PIN protection: ${error.message}`);
+      SecurityUtils.logSecurityEvent('pin_protection_enable_error', 'error', { message: `Failed to enable PIN protection: ${error.message}` });
       return false;
     }
   }
@@ -618,7 +618,7 @@ class AdminAuth {
   destroySession(sessionId) {
     const deleted = this.activeSessions.delete(sessionId);
     if (deleted) {
-      SecurityUtils.logSecurityEvent('admin_session_destroyed', 'info', 'Admin session destroyed');
+      SecurityUtils.logSecurityEvent('admin_session_destroyed', 'info', { message: 'Admin session destroyed' });
     }
     return deleted;
   }
@@ -643,7 +643,7 @@ class AdminAuth {
     }
     
     if (cleaned > 0) {
-      SecurityUtils.logSecurityEvent('admin_sessions_cleaned', 'info', `Cleaned up ${cleaned} expired sessions`);
+      SecurityUtils.logSecurityEvent('admin_sessions_cleaned', 'info', { message: `Cleaned up ${cleaned} expired sessions` });
     }
   }
 

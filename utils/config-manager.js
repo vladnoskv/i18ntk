@@ -720,9 +720,10 @@ async function setConfig(cfg) {
 
 async function updateConfig(patch) {
   const cfg = loadConfig();
-  deepMerge(cfg, patch);
-  // Don't save to disk - use in-memory config only
-  return cfg;
+  const cloned = clone(cfg);
+  deepMerge(cloned, patch);
+  currentConfig = cloned;
+  return cloned;
 }
 
 async function resetToDefaults() {
@@ -764,6 +765,8 @@ module.exports = {
   DEFAULT_CONFIG,
   loadConfig,
   saveConfig,
+  loadSettings: loadConfig,
+  saveSettings: saveConfig,
   getConfig,
   updateConfig,
   setConfig,

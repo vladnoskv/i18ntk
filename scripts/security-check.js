@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 
 class SecurityCheck {
   constructor() {

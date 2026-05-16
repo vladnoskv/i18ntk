@@ -1,6 +1,9 @@
 /**
  * Ultra-Performance Optimizer
  * Advanced performance tuning utilities for i18n toolkit
+ * @deprecated This module is not imported by any production code and its class
+ *   name collides with utils/ultra-performance-optimizer.js. Retained for
+ *   potential future use only.
  * Targets sub-40ms processing for 200k keys with <10MB memory
  */
 

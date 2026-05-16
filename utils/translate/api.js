@@ -1,5 +1,4 @@
 const https = require('https');
-const http = require('http');
 const { URL } = require('url');
 
 const DEFAULT_CONCURRENCY = 3;
@@ -10,8 +9,11 @@ const MAX_BACKOFF_DELAY = 30000;
 function httpGet(urlString, timeout = 15000) {
   return new Promise((resolve) => {
     const url = new URL(urlString);
-    const client = url.protocol === 'https:' ? https : http;
-    const req = client.get(urlString, { timeout }, (res) => {
+    if (url.protocol !== 'https:') {
+      resolve({ ok: false, error: 'ProtocolError', message: 'Only HTTPS requests are supported' });
+      return;
+    }
+    const req = https.get(urlString, { headers: { 'User-Agent': 'i18ntk/3.2.0' } }, (res) => {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
@@ -23,12 +25,12 @@ function httpGet(urlString, timeout = 15000) {
         }
       });
     });
-    req.on('error', (e) => {
-      resolve({ ok: false, error: e.code || 'NetworkError', message: e.message });
-    });
-    req.on('timeout', () => {
+    req.setTimeout(timeout, () => {
       req.destroy();
       resolve({ ok: false, error: 'TimeoutError', message: 'Request timed out' });
+    });
+    req.on('error', (e) => {
+      resolve({ ok: false, error: e.code || 'NetworkError', message: e.message });
     });
   });
 }
@@ -98,7 +100,7 @@ async function translateText(text, targetLang, options = {}) {
       if (translated === text) {
         return { ok: true, translated: text };
       }
-      if (result.status === 429) {
+      if (result.status === 429 || (translated === null && result.status >= 400)) {
         lastError = { error: 'RateLimited', message: 'Google Translate rate limit hit' };
         continue;
       }
@@ -106,6 +108,11 @@ async function translateText(text, targetLang, options = {}) {
 
     if (detectRateLimitError(result)) {
       lastError = { error: 'RateLimited', message: 'Rate limit detected' };
+      continue;
+    }
+
+    if (result.error === 'TimeoutError' || result.error === 'NetworkError') {
+      lastError = { error: result.error, message: result.message || 'Network request failed, retrying' };
       continue;
     }
 
@@ -149,8 +156,9 @@ async function translateBatch(batch, targetLang, options = {}) {
     }
   }
 
-  const workerCount = Math.min(concurrency, batch.length);
+  const workerCount = Math.min(concurrency > 0 ? concurrency : DEFAULT_CONCURRENCY, batch.length);
   const workers = Array.from({ length: workerCount }, () => worker());
+
   await Promise.all(workers);
 
   return results;

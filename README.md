@@ -1,4 +1,4 @@
-# i18ntk v3.1.2
+# i18ntk v3.2.0
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ Zero-dependency internationalization toolkit for setup, scanning, analysis, vali
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.1.2)](https://socket.dev/npm/package/i18ntk/overview/3.1.2)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.2.0)](https://socket.dev/npm/package/i18ntk/overview/3.2.0)
 
 ## Install
 
@@ -30,21 +30,14 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
-## What's New in 3.1.2
+## What's New in 3.2.0
 
-- Auto Translate can translate strings that contain placeholders by translating text around the placeholders and reinserting the original tokens.
-- Auto Translate supports user-editable protection rules in `i18ntk-auto-translate.json` for brand names, product terms, exact values, key paths, and regex patterns.
-- The manager Auto Translate flow runs in-process, avoiding production `child_process` usage for that command.
-- The target-language prompt supports `all` to translate into every configured target language while excluding the source language.
-- Source-directory prompts are clearer and accept absolute paths or project-relative paths.
-- Validation warnings now distinguish URLs, email addresses, secret-like values, and likely untranslated English content.
-- Sizing reports now include per-language file counts, file-set mismatches, and per-file key/character statistics.
-- Internal UI locale coverage is enforced against the English UI locale.
-- Public package staging verifies `README.md` is present before publish.
-- Auto Translate now resolves locale roots such as `./locales` to the selected source-language folder such as `./locales/en` when needed.
-- Public package staging now fails when root `package.json` and `package.public.json` release metadata drift.
+- **SECURITY**: Fixed 4 critical runtime-crash bugs (invalid crypto APIs, missing imports) across admin-pin.js, security-config.js, and scripts/security-check.js.
+- **SECURITY**: Removed encryption key stored alongside ciphertext in admin-pin.js; encryption key is now derived via HKDF.
+- **SECURITY**: Enforced HTTPS-only for Google Translate API requests; fixed http.get timeout for Node.js <16.14 compatibility.
+- **SECURITY**: Added path validation to backup restore/verify operations; locked down FileManagementService PIN verification stubs.
 
-See [CHANGELOG.md](./CHANGELOG.md) and [docs/migration-guide-v3.1.2.md](./docs/migration-guide-v3.1.2.md) for release details.
+See [CHANGELOG.md](./CHANGELOG.md) and [docs/migration-guide-v3.2.0.md](./docs/migration-guide-v3.2.0.md) for release details.
 
 ## Quick Start
 
@@ -296,7 +289,7 @@ Example:
 
 ```json
 {
-  "version": "3.1.2",
+  "version": "3.2.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -354,7 +347,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
-- [Migration Guide v3.1.2](./docs/migration-guide-v3.1.2.md)
+- [Migration Guide v3.2.0](./docs/migration-guide-v3.2.0.md)
 - [Migration Guide v3.1.1](./docs/migration-guide-v3.1.1.md)
 - [Migration Guide v3.0.0](./docs/migration-guide-v3.0.0.md)
 - [Migration Guide v2.6.0](./docs/migration-guide-v2.6.0.md)

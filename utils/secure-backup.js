@@ -6,6 +6,7 @@ const zlib = require('zlib');
 const { promisify } = require('util');
 const { existsSync, mkdirSync } = require('fs');
 const { EncryptionError, ValidationError } = require('./secure-errors');
+const SecurityUtils = require('./security');
 
 // Promisify functions
 const gzip = promisify(zlib.gzip);
@@ -22,8 +23,14 @@ const BACKUP_VERSION = 1;
 
 class SecureBackupManager {
   constructor(config = {}) {
+    const cwd = process.cwd();
+    const resolvedBackupDir = path.resolve(cwd, config.backupDir || 'backups');
+    if (!SecurityUtils.validatePath(resolvedBackupDir, cwd)) {
+      throw new ValidationError('backupDir is outside the project root');
+    }
+
     this.config = {
-      backupDir: path.join(process.cwd(), 'backups'),
+      backupDir: resolvedBackupDir,
       maxBackups: 10,
       compress: true,
       ...config
@@ -203,8 +210,13 @@ class SecureBackupManager {
    */
   async restoreBackup(backupPath, password) {
     try {
+      const resolvedPath = path.resolve(backupPath);
+      if (!SecurityUtils.validatePath(resolvedPath, this.config.backupDir)) {
+        throw new ValidationError('Backup path is outside the backup directory');
+      }
+
       // Read the backup file
-      const backupData = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
+      const backupData = JSON.parse(await fsp.readFile(resolvedPath, 'utf8'));
       
       // Validate the backup
       if (backupData.header !== BACKUP_HEADER) {
@@ -310,8 +322,13 @@ class SecureBackupManager {
    */
   async verifyBackup(backupPath, password) {
     try {
+      const resolvedPath = path.resolve(backupPath);
+      if (!SecurityUtils.validatePath(resolvedPath, this.config.backupDir)) {
+        throw new ValidationError('Backup path is outside the backup directory');
+      }
+
       // Read the backup file
-      const backupData = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
+      const backupData = JSON.parse(await fsp.readFile(resolvedPath, 'utf8'));
       
       // Try to decrypt a small part to verify the password
       const testData = await this.decryptData(backupData, password);

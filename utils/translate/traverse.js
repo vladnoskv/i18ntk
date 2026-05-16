@@ -54,7 +54,7 @@ function collectLeaves(obj, prefix = '') {
   return entries;
 }
 
-function setLeaf(obj, keyPath, value) {
+function parseKeyPath(keyPath) {
   const parts = [];
   let current = '';
   for (let i = 0; i < keyPath.length; i++) {
@@ -77,13 +77,18 @@ function setLeaf(obj, keyPath, value) {
     }
   }
   if (current) parts.push(current);
+  return parts;
+}
+
+function setLeaf(obj, keyPath, value) {
+  const parts = parseKeyPath(keyPath);
 
   let target = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i];
     if (part.startsWith('[') && part.endsWith(']')) {
       const idx = parseInt(part.slice(1, -1), 10);
-      if (!(idx in target)) target[idx] = {};
+      if (!(idx in target)) target[idx] = [];
       target = target[idx];
     } else {
       if (!(part in target)) target[part] = {};
@@ -100,28 +105,7 @@ function setLeaf(obj, keyPath, value) {
 }
 
 function getLeaf(obj, keyPath) {
-  const parts = [];
-  let current = '';
-  for (let i = 0; i < keyPath.length; i++) {
-    const ch = keyPath[i];
-    if (ch === '.' && keyPath[i - 1] !== '\\') {
-      if (current) parts.push(current);
-      current = '';
-    } else if (ch === '[') {
-      if (current) parts.push(current);
-      current = '';
-      i++;
-      while (i < keyPath.length && keyPath[i] !== ']') {
-        current += keyPath[i];
-        i++;
-      }
-      parts.push(`[${current}]`);
-      current = '';
-    } else {
-      current += ch;
-    }
-  }
-  if (current) parts.push(current);
+  const parts = parseKeyPath(keyPath);
 
   let target = obj;
   for (const part of parts) {
@@ -136,7 +120,12 @@ function getLeaf(obj, keyPath) {
 }
 
 function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+  if (obj === null || obj === undefined) return obj;
+  try {
+    return JSON.parse(JSON.stringify(obj));
+  } catch (e) {
+    return obj;
+  }
 }
 
 module.exports = {

@@ -6,6 +6,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 class SecurityConfig {
     constructor() {

@@ -6,6 +6,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 const { getGlobalReadline, ask } = require('./cli');
 const { promptPin: rawPromptPin, promptPinConfirm } = require('./promptPin');
 
@@ -56,26 +57,27 @@ class AdminPinManager {
     }
 
     /**
-     * Generate secure random IV for AES-256-GCM
-     * GCM requires 96-bit (12-byte) IV for optimal security
+     * Derive an encryption key from the scrypt hash output
+     * Uses HKDF to derive a separate key from the hash material
      */
-    generateIV() {
-        return crypto.randomBytes(12);
+    derivePinEncryptionKey(hashBuffer, saltBuffer) {
+        const raw = crypto.hkdfSync('sha256', hashBuffer, saltBuffer, 'i18ntk-pin-encryption', 32);
+        return Buffer.from(raw);
     }
 
     /**
-     * Encrypt the PIN using AES-256-GCM with proper authentication
+     * Encrypt the PIN using AES-256-GCM
      */
     encryptPin(pin, key) {
-        const iv = this.generateIV();
-        const cipher = crypto.createCipherGCM('aes-256-gcm', key);
-        cipher.setAAD(Buffer.from('admin-pin-v1')); // Additional authenticated data
-        
+        const iv = crypto.randomBytes(12);
+        const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+        cipher.setAAD(Buffer.from('admin-pin-v1'));
+
         let encrypted = cipher.update(pin, 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        
+
         const authTag = cipher.getAuthTag();
-        
+
         return {
             encrypted,
             iv: iv.toString('hex'),
@@ -90,14 +92,14 @@ class AdminPinManager {
         try {
             const iv = Buffer.from(encryptedData.iv, 'hex');
             const authTag = Buffer.from(encryptedData.authTag || encryptedData.tag, 'hex');
-            
-            const decipher = crypto.createDecipherGCM('aes-256-gcm', key);
+
+            const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
             decipher.setAuthTag(authTag);
             decipher.setAAD(Buffer.from('admin-pin-v1'));
-            
+
             let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
             decrypted += decipher.final('utf8');
-            
+
             return decrypted;
         } catch (error) {
             return null;
@@ -128,7 +130,8 @@ class AdminPinManager {
                 algorithm: 'scrypt'
             };
         } catch (error) {
-            // Fallback to pbkdf2
+            // Fallback to pbkdf2 when scrypt is unavailable
+            console.warn('admin-pin: scrypt unavailable, falling back to pbkdf2');
             const hash = crypto.pbkdf2Sync(pin, salt, 100000, 32, 'sha256');
             return {
                 hash: hash.toString('hex'),
@@ -195,18 +198,19 @@ class AdminPinManager {
                 }
             }
             
-            // Generate encryption key and encrypt PIN
-            const key = this.generateKey();
-            const encryptedPin = this.encryptPin(pin, key);
             const hashedPin = await this.hashPin(pin);
-            
-            // Store encrypted data
+
+            const hashBuffer = Buffer.from(hashedPin.hash, 'hex');
+            const saltBuffer = Buffer.from(hashedPin.salt, 'hex');
+            const encKey = this.derivePinEncryptionKey(hashBuffer, saltBuffer);
+            const encryptedPin = this.encryptPin(pin, encKey);
+
             const pinData = {
                 hash: hashedPin.hash,
                 salt: hashedPin.salt,
                 algorithm: hashedPin.algorithm,
                 encrypted: encryptedPin,
-                key: key.toString('hex'),
+                pinLength: pin.length,
                 created: new Date().toISOString(),
                 lastChanged: new Date().toISOString(),
                 attempts: 0,
@@ -376,11 +380,18 @@ class AdminPinManager {
             const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, path.dirname(this.pinFile), 'utf8'));
             
             if (pinData.locked) {
-                const i18n = getI18n();
-                console.log(i18n.t('adminPin.locked_out'));
-                console.log(i18n.t('adminPin.wait_before_retry'));
-                if (shouldCloseRL) rl.close();
-                return false;
+                if (pinData.lockedUntil && Date.now() > pinData.lockedUntil) {
+                    pinData.locked = false;
+                    pinData.attempts = 0;
+                    delete pinData.lockedUntil;
+                    SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
+                } else {
+                    const i18n = getI18n();
+                    console.log(i18n.t('adminPin.locked_out'));
+                    console.log(i18n.t('adminPin.wait_before_retry'));
+                    if (shouldCloseRL) rl.close();
+                    return false;
+                }
             }
             
             const enteredPin = await this.promptPin(rl, getI18n().t('adminCli.enterPin'), true);
@@ -416,11 +427,7 @@ class AdminPinManager {
                 
                 if (pinData.attempts >= 3) {
                     pinData.locked = true;
-                    setTimeout(() => {
-                        pinData.locked = false;
-                        pinData.attempts = 0;
-                        SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
-                    }, 5 * 60 * 1000); // 5 minutes
+                    pinData.lockedUntil = Date.now() + 5 * 60 * 1000;
                 }
                 
                 SecurityUtils.safeWriteFileSync(this.pinFile, JSON.stringify(pinData, null, 2));
@@ -488,22 +495,19 @@ class AdminPinManager {
      */
     getPinDisplay() {
         if (!this.isPinSet()) {
-            return i18n.t('adminPin.not_set');
+            return getI18n().t('adminPin.not_set');
         }
-        
+
         try {
             const pinData = JSON.parse(SecurityUtils.safeReadFileSync(this.pinFile, path.dirname(this.pinFile), 'utf8'));
-            const key = Buffer.from(pinData.key, 'hex');
-            const decryptedPin = this.decryptPin(pinData.encrypted, key);
-            
-            if (decryptedPin) {
-                return '*'.repeat(decryptedPin.length);
+            if (pinData.pinLength && typeof pinData.pinLength === 'number') {
+                return '*'.repeat(pinData.pinLength);
             }
         } catch (error) {
             // Ignore errors, return default
         }
-        
-        return i18n.t('adminPin.pin_display_mask');
+
+        return getI18n().t('adminPin.pin_display_mask');
     }
 
     /**

@@ -46,41 +46,27 @@ class UltraPerformanceOptimizer {
   async initialize() {
     this.stats.startTime = perf.now();
     this.stats.memoryStart = process.memoryUsage();
-    
-    // Force garbage collection if available
+
     if (global.gc) {
       global.gc();
+    } else {
+      console.warn('ultra-performance-optimizer: --expose-gc flag not set; GC hints will be no-ops');
     }
-    
-    // Start aggressive GC timer
+
     this.startGCTimer();
-    
-    // Pre-allocate memory pools
-    this.preallocateMemory();
-    
+
     this.isOptimized = true;
     return this;
   }
 
   /**
-   * Pre-allocate memory for ultra-fast processing
-   */
-  preallocateMemory() {
-    // Pre-allocate string buffers
-    this.stringPool = new Array(1000).fill(null).map(() => Buffer.allocUnsafe(1024));
-    this.objectPool = new Array(500).fill(null).map(() => ({}));
-    this.arrayPool = new Array(500).fill(null).map(() => []);
-  }
-
-  /**
-   * Start aggressive GC timer
+   * Start GC timer (only fires if --expose-gc is active)
    */
   startGCTimer() {
+    if (!global.gc) return;
     this.gcTimer = setInterval(() => {
-      if (global.gc) {
-        global.gc();
-      }
-    }, this.config.gcInterval);
+      if (global.gc) global.gc();
+    }, Math.max(this.config.gcInterval, 5000));
   }
 
   /**
@@ -117,7 +103,7 @@ class UltraPerformanceOptimizer {
   async processFileUltra(filePath) {
     try {
       // Check cache first
-      const cacheKey = this.getCacheKey(filePath);
+      const cacheKey = await this.getCacheKey(filePath);
       if (this.config.cacheEnabled && this.cache.has(cacheKey)) {
         this.stats.cacheHits++;
         return this.cache.get(cacheKey);
@@ -149,12 +135,22 @@ class UltraPerformanceOptimizer {
    * Ultra-fast file reading with minimal overhead
    */
   async readFileUltra(filePath) {
-    const buffer = Buffer.allocUnsafe(64 * 1024); // 64KB buffer
+    const stat = await fs.stat(filePath);
+    const fileSize = stat.size;
+    if (fileSize === 0) return Buffer.alloc(0);
+
+    const buffer = Buffer.allocUnsafe(fileSize);
     const fd = await fs.open(filePath, 'r');
-    
+
     try {
-      const { bytesRead } = await fd.read(buffer, 0, buffer.length, 0);
-      return buffer.slice(0, bytesRead);
+      let offset = 0;
+      while (offset < fileSize) {
+        const chunkSize = Math.min(64 * 1024, fileSize - offset);
+        const { bytesRead } = await fd.read(buffer, offset, chunkSize, offset);
+        if (bytesRead === 0) break;
+        offset += bytesRead;
+      }
+      return buffer.slice(0, offset);
     } finally {
       await fd.close();
     }
@@ -210,11 +206,22 @@ class UltraPerformanceOptimizer {
     const cache = new Map();
     let hits = 0;
     let misses = 0;
-    
+    const ttlMap = new Map();
+
+    const cleanupTimer = setInterval(() => {
+      const now = Date.now();
+      for (const [key, expires] of ttlMap) {
+        if (now > expires) {
+          cache.delete(key);
+          ttlMap.delete(key);
+        }
+      }
+    }, 60000).unref();
+
     return {
       get: (key) => {
         const value = cache.get(key);
-        if (value) {
+        if (value !== undefined) {
           hits++;
           return value;
         }
@@ -223,7 +230,12 @@ class UltraPerformanceOptimizer {
       },
       set: (key, value, ttl) => {
         cache.set(key, value);
-        setTimeout(() => cache.delete(key), ttl);
+        ttlMap.set(key, Date.now() + ttl);
+      },
+      destroy: () => {
+        clearInterval(cleanupTimer);
+        cache.clear();
+        ttlMap.clear();
       },
       stats: () => ({ hits, misses, size: cache.size })
     };
@@ -233,14 +245,13 @@ class UltraPerformanceOptimizer {
    * Aggressive memory cleanup
    */
   cleanupMemory() {
-    // Clear unused variables
     if (global.gc) {
       global.gc();
     }
-    
-    // Clear cache if too large
+
     if (this.cache.size > 1000) {
-      const keys = Array.from(this.cache.keys()).slice(0, 500);
+      const deleteCount = this.cache.size - 500;
+      const keys = Array.from(this.cache.keys()).slice(0, deleteCount);
       keys.forEach(key => this.cache.delete(key));
     }
   }
@@ -259,8 +270,9 @@ class UltraPerformanceOptimizer {
   /**
    * Generate cache key
    */
-  getCacheKey(filePath) {
-    return `${filePath}:${fs.statSync(filePath).mtime.getTime()}`;
+  async getCacheKey(filePath) {
+    const stat = await fs.stat(filePath);
+    return `${filePath}:${stat.mtime.getTime()}`;
   }
 
   /**
@@ -336,17 +348,28 @@ module.exports = UltraPerformanceOptimizer;
 // CLI usage
 if (require.main === module) {
   const optimizer = new UltraPerformanceOptimizer();
-  
-  // Mock test data
-  const mockFiles = Array.from({ length: 1000 }, (_, i) => 
-    `mock-locale-${i}.json`
-  );
-  
+
+  const { existsSync } = require('fs');
+  const testDir = path.join(__dirname, '..', 'benchmarks', 'temp-datasets');
+  let mockFiles = [];
+
+  if (existsSync(testDir)) {
+    const { readdirSync } = require('fs');
+    mockFiles = readdirSync(testDir)
+      .filter(f => f.endsWith('.json'))
+      .map(f => path.join(testDir, f));
+  }
+
+  if (mockFiles.length === 0) {
+    console.log('No benchmark datasets found; skipping ultra benchmark.');
+    process.exit(0);
+  }
+
   optimizer.runUltraBenchmark(mockFiles).then(results => {
-    console.log('\n✅ Ultra-Extreme benchmark completed!');
+    console.log('\nUltra-Extreme benchmark completed!');
     process.exit(0);
   }).catch(error => {
-    console.error('❌ Benchmark failed:', error);
+    console.error('Benchmark failed:', error);
     process.exit(1);
   });
 }

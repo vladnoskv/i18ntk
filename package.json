@@ -1,8 +1,10 @@
 {
   "name": "i18ntk",
-  "version": "3.1.2",
-  "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
+  "version": "3.2.0",
+  "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
+    "i18ntk",
+    "i18n-toolkit",
     "i18n",
     "internationalization",
     "localization",
@@ -208,31 +210,34 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "3.1.2",
-    "releaseDate": "07/05/2026",
-    "lastUpdated": "07/05/2026",
+    "version": "3.2.0",
+    "releaseDate": "16/05/2026",
+    "lastUpdated": "16/05/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "NEW: Zero-dependency Google Translate API integration for automatic translation of locale JSON files.",
-      "NEW: Intelligent placeholder token detection, masking, and preservation during translation.",
-      "NEW: Interactive and fully automated CLI modes with per-key skip/translate control.",
-      "NEW: Post-translation report generation listing skipped keys with manual translation reminders.",
-      "NEW: Multi-file batch processing, UTF-8 BOM output, dry-run preview, and custom translation function support.",
-      "NEW: Automatic rate-limit handling with exponential backoff/retry.",
-      "NEW: Placeholder-preserve translation mode translates text around dynamic tokens and reinserts placeholders safely.",
-      "NEW: Auto Translate beta settings for placeholder mode, concurrency, batch size, progress interval, retries, timeout, reports, protection files, and BOM output.",
-      "NEW: User-editable Auto Translate protection file for terms, key paths, exact values, and regex patterns.",
-      "NEW: Validation warnings now include specific issue types, reasons, and English-content percentage details.",
-      "NEW: Sizing analysis now reports per-language file counts, file-set mismatches, and per-file key/character statistics.",
-      "FIX: Auto Translate resolves locale roots to the selected source-language folder when JSON files are stored under language folders.",
-      "FIX: Public package staging verifies root and public manifest metadata before packing or publishing.",
-      "SECURITY: Manager Auto Translate now calls the translator in-process instead of spawning a child process."
+      "SECURITY: Fixed invalid crypto.createCipherGCM/createDecipherGCM calls in admin-pin.js (replaced with createCipheriv/createDecipheriv).",
+      "SECURITY: Removed encryption key stored alongside ciphertext in admin-pin.js; key is now derived via HKDF.",
+      "SECURITY: Added missing SecurityUtils imports in security-config.js, scripts/security-check.js, and admin-pin.js.",
+      "SECURITY: Added path validation to secure-backup.js restoreBackup and verifyBackup methods.",
+      "SECURITY: Enforced HTTPS-only for Google Translate API requests; fixed http.get timeout for Node.js <16.14.",
+      "SECURITY: Fixed FileManagementService PIN verification stubs to delegate to proper AdminAuth.",
+      "SECURITY: Fixed admin-auth.js logSecurityEvent calls to pass structured objects instead of strings.",
+      "FIX: admin-pin.js lockout now uses timestamp-based expiry surviving process restarts.",
+      "FIX: translate/traverse.js setLeaf now correctly creates [] for array indices (was {}).",
+      "FIX: main/manage/index.js startupTimeout no longer cleared before blocking init completes.",
+      "FIX: Removed dead preallocateMemory pools from ultra-performance-optimizer.js (~1MB wasted alloc).",
+      "FIX: ultra-performance-optimizer.js getCacheKey now uses async fs.stat; GC timer min interval raised to 5s.",
+      "FIX: config-manager.js now exports loadSettings/saveSettings aliases; updateConfig clones before mutating.",
+      "FIX: translate/api.js retry logic now handles TimeoutError and NetworkError with proper retries.",
+      "DOCS: Full documentation updated to v3.2.0 across all 11 doc files, README, CHANGELOG, and migration guide.",
+      "TYPES: Fixed runtime/i18ntk.d.ts version header (was 1.10.1) and removed phantom utility export declarations.",
+      "TYPES: Fixed runtime/enhanced.d.ts broken export from non-existent ./index.d.ts → ./i18ntk.d.ts."
     ],
     "breakingChanges": [],
-    "nextVersion": "3.1.3",
+    "nextVersion": "3.2.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -254,7 +259,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 3.0.0 may be unstable or insecure. Upgrade to 3.0.0 or newer."
+    "supportPolicy": "Versions earlier than 3.2.0 may be unstable or insecure. Upgrade to 3.2.0 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

@@ -1,6 +1,6 @@
 // runtime/i18ntk.d.ts
 // Complete TypeScript definitions for i18ntk internationalization framework
-// Version 1.10.1 - Full TypeScript support with AES-256-GCM encryption
+// Version 3.2.0 - Full TypeScript support with AES-256-GCM encryption
 
 /**
  * Core translation parameters interface
@@ -495,19 +495,10 @@ export declare function initRuntime(options: {
 }): BasicI18nRuntime;
 
 /**
- * Type guards
+ * Type guards (runtime checks, not exported by actual code)
  */
 export declare function isI18nRuntime(obj: any): obj is I18nRuntime;
 export declare function isBasicI18nRuntime(obj: any): obj is BasicI18nRuntime;
-
-/**
- * Utility functions
- */
-export declare function validateConfig(config: any): boolean;
-export declare function sanitizeKey(key: string): string;
-export declare function formatNumber(value: number, locale?: string): string;
-export declare function formatDate(date: Date, locale?: string): string;
-export declare function formatCurrency(value: number, currency?: string, locale?: string): string;
 
 /**
  * Error types
