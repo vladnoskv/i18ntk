@@ -4,11 +4,11 @@
 
 The supported production line is `3.x`.
 
-Versions earlier than `3.3.0` are not recommended for production use because later releases include package rename, dynamic-require elimination, and path-validation hardening.
+Versions earlier than `3.3.0` are not recommended for production use because later releases include Auto Translate provider hardening, dynamic-require elimination, and path-validation hardening.
 
 ## Security Model
 
-i18ntoolkit (formerly i18ntk) is a local developer CLI and runtime helper. It is expected to read and write project files, but it must do so with conservative path validation and without external runtime dependencies.
+i18ntk is a local developer CLI and runtime helper. It is expected to read and write project files, but it must do so with conservative path validation and without external runtime dependencies.
 
 Security priorities:
 
@@ -33,11 +33,10 @@ Socket.dev scans the published npm package and may flag the following alerts. Th
 | **Network access** | Contacts configured translation providers via HTTPS only when user explicitly invokes auto-translate. No telemetry, no beaconing, no background network activity. | `utils/translate/safe-network.js` enforces HTTPS, host/path allowlists, response-size limits, private-network blocking, and redacted security logging for Google, DeepL, and LibreTranslate provider requests. |
 | **Environment variable access** | Reads env vars for logging level, output directory, UI language, and project paths. Required for CLI configuration. | `utils/env-manager.js` uses a fixed allowlist (28 vars). Blocks `SECRET`, `PASSWORD`, `KEY`, `TOKEN`, `AWS_*`, `GITHUB_*`, `NPM_*`, `NODE_*`, `PATH`, `HOME`, `USER`, `SHELL`, and 8 more patterns. |
 | **Filesystem access** | Reads/writes locale JSON files, config files, and reports within the user's project. Core function of the toolkit. | All FS operations are gated by `SecurityUtils.validatePath()` with path-traversal detection, symlink resolution, and base-path containment checks. |
-| **URL strings** | Contains hardcoded translation provider endpoint URLs for Google, DeepL, and LibreTranslate defaults. | Only used when user invokes `i18ntoolkit-translate`. Custom provider URLs remain HTTPS-only and are validated before use. |
+| **URL strings** | Contains hardcoded translation provider endpoint URLs for Google, DeepL, and LibreTranslate defaults. | Only used when user invokes `i18ntk-translate`. Custom provider URLs remain HTTPS-only and are validated before use. |
 
-The v3.3.0 release **resolved** the two previously actionable Socket.dev alerts:
+The v3.3.0 release **resolved** the previously actionable Socket.dev alert:
 - **Dynamic require** — all 21 instances eliminated (20 converted to static string literals, 1 gated with `SecurityUtils.validatePath`).
-- **AI-detected possible typosquat** — `i18ntk` renamed to `i18ntoolkit`. Legacy bin aliases retained for backward compatibility.
 
 ## Reporting Vulnerabilities
 
@@ -61,7 +60,7 @@ Security reports are reviewed privately first. Confirmed issues should receive:
 
 ## User Guidance
 
-- Keep i18ntoolkit updated to `3.3.0` or newer.
+- Keep i18ntk updated to `3.3.0` or newer.
 - Do not commit `.i18ntk-config`, admin PIN files, backup directories, generated reports, logs, npm credentials, or secret material.
-- Run i18ntoolkit only in project directories you trust.
+- Run i18ntk only in project directories you trust.
 - Review generated translation changes before committing them.

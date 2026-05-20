@@ -5,7 +5,7 @@ const { logger } = require('../logger');
 const MAX_RESPONSE_SIZE = 100 * 1024;
 const ALLOWED_HOSTS = ['translate.googleapis.com', 'api-free.deepl.com', 'api.deepl.com', 'libretranslate.com'];
 const ALLOWED_PATHS = ['/translate_a/single', '/v2/translate', '/translate'];
-const USER_AGENT = 'i18ntoolkit/3.3.0';
+const USER_AGENT = 'i18ntk/3.3.0';
 
 function isEnabled(value) {
   return ['1', 'true', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());

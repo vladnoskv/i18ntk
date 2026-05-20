@@ -8,9 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.3.0] - 2026-05-20
 
 ### Changed
-- **PACKAGE RENAME**: Package renamed from `i18ntk` to `i18ntoolkit` to improve marketability. All legacy `i18ntk` CLI commands (`i18ntk`, `i18ntk-init`, `i18ntk-analyze`, etc.) are retained as bin aliases for full backward compatibility.
-- Added 15 new `i18ntoolkit` bin entries and npm scripts alongside the existing 15 `i18ntk` entries.
-- New primary install command: `npm install i18ntoolkit`. `npm install i18ntk` redirects to the same package.
 - Auto Translate now supports `--provider google|deepl|libretranslate`; DeepL uses `DEEPL_API_KEY`, while LibreTranslate supports `LIBRETRANSLATE_URL` and optional `LIBRETRANSLATE_API_KEY`.
 - Auto Translate provider networking now keeps HTTPS, host allowlist, response-size, private-network, and redacted security logging protections in place for additional providers.
 
@@ -24,13 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced direct `https.get` call in `utils/translate/api.js` with `safeHttpGet` from the safe-network wrapper.
 
 ### Docs
-- README.md updated with `i18ntoolkit` naming, dual-command documentation, and install instructions for both names.
+- README.md updated for v3.3.0 Auto Translate providers and secure provider operations.
 - SECURITY.md updated with Socket.dev analysis disclaimer and guidance on expected alerts for a CLI/i18n toolkit.
 - CHANGELOG.md and `package.json` versionInfo updated for v3.3.0.
 
 ### Socket.dev Analysis Disclaimer
 
-This package is a developer CLI and runtime helper that performs file I/O, network access (Google Translate API on user request), and environment variable access. As such, Socket.dev will flag the following alerts that are **expected and by design**:
+This package is a developer CLI and runtime helper that performs file I/O, network access (translation provider APIs on user request), and environment variable access. As such, Socket.dev will flag the following alerts that are **expected and by design**:
 
 | Alert | Why it's expected |
 |---|---|
@@ -39,9 +36,7 @@ This package is a developer CLI and runtime helper that performs file I/O, netwo
 | Filesystem access | Reads/writes only project locale files and reports within validated paths. All FS operations gated by `SecurityUtils.validatePath`. |
 | URL strings | Hardcoded default provider URLs for Google, DeepL, and LibreTranslate used only for auto-translation. No external resource loading. |
 
-The v3.3.0 release resolves the two actionable alerts:
-- **Dynamic require** — all 21 instances eliminated
-- **AI-detected possible typosquat** — resolved by the `i18ntk` → `i18ntoolkit` rename
+The v3.3.0 release resolves the actionable dynamic-require alert by eliminating all 21 instances.
 
 ## [3.2.0] - 2026-05-16
 
