@@ -50,6 +50,21 @@ Translate one file:
 i18ntk-translate locales/en/common.json de
 ```
 
+Use DeepL instead of the default Google endpoint:
+
+```bash
+export DEEPL_API_KEY="your-deepl-api-key"
+i18ntk-translate locales/en/common.json de --provider deepl --no-confirm --preserve-placeholders
+```
+
+Use LibreTranslate:
+
+```bash
+export LIBRETRANSLATE_URL="https://libretranslate.com/translate"
+export LIBRETRANSLATE_API_KEY="optional-api-key"
+i18ntk-translate locales/en/common.json es --provider libretranslate --no-confirm --preserve-placeholders
+```
+
 Preview without API calls:
 
 ```bash
@@ -134,6 +149,7 @@ Dry-run reports show planned work without writing translated output.
 
 - `--source-dir <dir>`: source directory containing JSON locale files
 - `--output-dir <dir>`: output directory for translated files
+- `--provider <name>`: translation provider, one of `google`, `deepl`, or `libretranslate`
 - `--source-lang <code>`: source language code, default `en`
 - `--files <pattern>`: file pattern for batch translation, default `*.json`
 - `--dry-run`: preview without API calls or writes
@@ -152,6 +168,27 @@ Dry-run reports show planned work without writing translated output.
 - `--timeout <ms>`: HTTP request timeout, default `15000`
 - `--bom`: write output with UTF-8 BOM
 - `--translate-fn <module>`: use a custom translation function module
+
+## Translation Providers
+
+Default provider:
+
+- `google`: uses the existing dependency-free Google Translate endpoint.
+
+API-key providers:
+
+- `deepl`: requires `DEEPL_API_KEY`. Optional `DEEPL_API_URL` defaults to `https://api-free.deepl.com/v2/translate`; set it to `https://api.deepl.com/v2/translate` for DeepL Pro. DeepL requests are restricted to official DeepL hosts unless `I18NTK_ALLOW_CUSTOM_TRANSLATE_HOSTS=1` is set for a trusted DeepL-compatible proxy.
+- `libretranslate`: optional `LIBRETRANSLATE_URL` defaults to `https://libretranslate.com/translate`; set `LIBRETRANSLATE_API_KEY` when your LibreTranslate server requires one. Custom LibreTranslate URLs must use HTTPS and are blocked when they point at localhost or private IP ranges unless `I18NTK_ALLOW_PRIVATE_TRANSLATE_URLS=1` is set for trusted local testing.
+
+You can also set `I18NTK_TRANSLATE_PROVIDER=deepl` or `I18NTK_TRANSLATE_PROVIDER=libretranslate` instead of passing `--provider` on each command.
+
+Provider URL safety:
+
+- All built-in provider requests use HTTPS only.
+- Provider responses are size-limited before JSON parsing.
+- Security logs redact provider query strings and do not include response body previews.
+- `I18NTK_ALLOW_PRIVATE_TRANSLATE_URLS=1` should only be used for a translation server you control on a trusted local or private network.
+- API keys should be supplied through environment variables or a secret manager, not committed to locale files, reports, or shell history.
 
 ## Notes
 

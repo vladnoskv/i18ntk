@@ -1,26 +1,31 @@
-# i18ntk v3.2.0
+# i18ntoolkit (formerly i18ntk) v3.3.0
 
 Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
 ![i18ntk Logo](https://raw.githubusercontent.com/vladnoskv/i18ntk/main/docs/screenshots/i18ntk-logo-public.PNG)
 
-[![npm version](https://img.shields.io/npm/v/i18ntk.svg?color=brightgreen)](https://www.npmjs.com/package/i18ntk)
+[![npm version](https://img.shields.io/npm/v/i18ntoolkit.svg?color=brightgreen)](https://www.npmjs.com/package/i18ntoolkit)
 [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
-[![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
+[![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntoolkit)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.2.0)](https://socket.dev/npm/package/i18ntk/overview/3.2.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntoolkit/3.3.0)](https://socket.dev/npm/package/i18ntoolkit/overview/3.3.0)
 
 ## Install
 
 ```bash
-# global CLI use
+# global CLI use (new name)
+npm install -g i18ntoolkit
+
+# global CLI use (legacy name, still supported)
 npm install -g i18ntk
 
 # local project use
-npm install --save-dev i18ntk
+npm install --save-dev i18ntoolkit
 
 # one-off execution
+npx i18ntoolkit --help
+# legacy command also works
 npx i18ntk --help
 ```
 
@@ -30,48 +35,57 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
-## What's New in 3.2.0
+## What's New in 3.3.0
 
-- **SECURITY**: Fixed 4 critical runtime-crash bugs (invalid crypto APIs, missing imports) across admin-pin.js, security-config.js, and scripts/security-check.js.
-- **SECURITY**: Removed encryption key stored alongside ciphertext in admin-pin.js; encryption key is now derived via HKDF.
-- **SECURITY**: Enforced HTTPS-only for Google Translate API requests; fixed http.get timeout for Node.js <16.14 compatibility.
-- **SECURITY**: Added path validation to backup restore/verify operations; locked down FileManagementService PIN verification stubs.
+- **PACKAGE RENAME**: `i18ntk` → `i18ntoolkit` in the attempt to resolve a Socket.dev typosquat alert. All legacy commands retained as aliases.
+- **SECURITY**: Eliminated all 21 dynamic `require()` calls flagged by Socket.dev — 20 converted to static string literals, 1 gated with `SecurityUtils.validatePath`.
+- **COMPATIBILITY**: Both `i18ntoolkit` and `i18ntk` CLI commands work interchangeably. Install as `npm install i18ntoolkit`.
+- **DOCS**: SECURITY.md updated with Socket.dev analysis disclaimer explaining expected alerts for a CLI/i18n toolkit.
 
-See [CHANGELOG.md](./CHANGELOG.md) and [docs/migration-guide-v3.2.0.md](./docs/migration-guide-v3.2.0.md) for release details.
+See [CHANGELOG.md](./CHANGELOG.md) for more release details.
 
 ## Quick Start
 
 Initialize a project:
 
 ```bash
+# new command name
+i18ntoolkit
+# legacy command name (still works)
 i18ntk
-# or
-i18ntk --command=init
+# or with explicit command
+i18ntoolkit --command=init
 ```
 
 Run common checks:
 
 ```bash
-i18ntk --command=analyze
-i18ntk --command=validate
-i18ntk --command=usage
-i18ntk --command=sizing
-i18ntk --command=summary
+i18ntoolkit --command=analyze
+i18ntoolkit --command=validate
+i18ntoolkit --command=usage
+i18ntoolkit --command=sizing
+i18ntoolkit --command=summary
 ```
 
 Complete or fix translation files:
 
 ```bash
-i18ntk --command=complete
-i18ntk-fixer --help
+i18ntoolkit --command=complete
+i18ntoolkit-fixer --help
+# legacy commands also work:
+# i18ntk --command=complete
+# i18ntk-fixer --help
 ```
 
 Auto-translate locale JSON:
 
 ```bash
-i18ntk --command=translate
+i18ntoolkit --command=translate
 # or
-i18ntk-translate locales/en/common.json de --report-stdout
+i18ntoolkit-translate locales/en/common.json de --report-stdout
+# legacy commands also work:
+# i18ntk --command=translate
+# i18ntk-translate locales/en/common.json de --report-stdout
 ```
 
 The full onboarding guide is in [docs/getting-started.md](./docs/getting-started.md).
@@ -81,38 +95,40 @@ The full onboarding guide is in [docs/getting-started.md](./docs/getting-started
 Primary CLI:
 
 ```bash
-i18ntk
-i18ntk --help
-i18ntk --command=init
-i18ntk --command=analyze
-i18ntk --command=validate
-i18ntk --command=usage
-i18ntk --command=scanner
-i18ntk --command=sizing
-i18ntk --command=complete
-i18ntk --command=translate
-i18ntk --command=summary
-i18ntk --command=debug
+i18ntoolkit
+i18ntoolkit --help
+i18ntoolkit --command=init
+i18ntoolkit --command=analyze
+i18ntoolkit --command=validate
+i18ntoolkit --command=usage
+i18ntoolkit --command=scanner
+i18ntoolkit --command=sizing
+i18ntoolkit --command=complete
+i18ntoolkit --command=translate
+i18ntoolkit --command=summary
+i18ntoolkit --command=debug
 ```
 
 Standalone executables:
 
 ```bash
-i18ntk-init
-i18ntk-analyze
-i18ntk-validate
-i18ntk-usage
-i18ntk-scanner
-i18ntk-sizing
-i18ntk-complete
-i18ntk-summary
-i18ntk-doctor
-i18ntk-fixer
-i18ntk-backup
-i18ntk-translate
+i18ntoolkit-init
+i18ntoolkit-analyze
+i18ntoolkit-validate
+i18ntoolkit-usage
+i18ntoolkit-scanner
+i18ntoolkit-sizing
+i18ntoolkit-complete
+i18ntoolkit-summary
+i18ntoolkit-doctor
+i18ntoolkit-fixer
+i18ntoolkit-backup
+i18ntoolkit-translate
 ```
 
-Note: manager route `i18ntk --command=backup` is disabled in current builds. Use `i18ntk-backup` directly for backup operations.
+Legacy names (`i18ntk`, `i18ntk-init`, `i18ntk-analyze`, etc.) remain available as aliases for backward compatibility.
+
+Note: manager route `i18ntoolkit --command=backup` is disabled in current builds. Use `i18ntoolkit-backup` (or legacy `i18ntk-backup`) directly for backup operations.
 
 ## Common Options
 
@@ -130,7 +146,7 @@ Most commands support:
 Example:
 
 ```bash
-i18ntk --command=analyze --source-dir=./src --i18n-dir=./locales --output-dir=./i18ntk-reports
+i18ntoolkit --command=analyze --source-dir=./src --i18n-dir=./locales --output-dir=./i18ntk-reports
 ```
 
 ## Auto Translate
@@ -138,17 +154,32 @@ i18ntk --command=analyze --source-dir=./src --i18n-dir=./locales --output-dir=./
 Interactive manager flow:
 
 ```bash
-i18ntk
+i18ntoolkit
 # choose "Auto Translate (Beta)"
 ```
 
 Direct CLI examples:
 
 ```bash
-i18ntk-translate locales/en/common.json de
-i18ntk-translate locales/en/common.json fr --dry-run --report-stdout
-i18ntk-translate locales/en es --source-dir locales/en --files "*.json" --no-confirm --preserve-placeholders
+i18ntoolkit-translate locales/en/common.json de
+i18ntoolkit-translate locales/en/common.json fr --dry-run --report-stdout
+i18ntoolkit-translate locales/en es --source-dir locales/en --files "*.json" --no-confirm --preserve-placeholders
 ```
+
+Provider examples:
+
+```bash
+export DEEPL_API_KEY="your-deepl-api-key"
+i18ntoolkit-translate locales/en/common.json de --provider deepl --no-confirm --preserve-placeholders
+
+export LIBRETRANSLATE_URL="https://libretranslate.com/translate"
+export LIBRETRANSLATE_API_KEY="optional-api-key"
+i18ntoolkit-translate locales/en/common.json es --provider libretranslate --no-confirm --preserve-placeholders
+```
+
+`google` remains the default provider. You can also set `I18NTK_TRANSLATE_PROVIDER=deepl` or `I18NTK_TRANSLATE_PROVIDER=libretranslate`.
+
+Provider requests are HTTPS-only and response-size limited, and security logs redact provider query strings and response bodies. DeepL is pinned to official DeepL hosts by default; set `I18NTK_ALLOW_CUSTOM_TRANSLATE_HOSTS=1` only for a trusted DeepL-compatible proxy. Custom LibreTranslate URLs are blocked for localhost/private IP ranges unless `I18NTK_ALLOW_PRIVATE_TRANSLATE_URLS=1` is set for trusted local testing. Keep provider API keys in environment variables or a secret manager.
 
 The manager flow asks for:
 
@@ -191,7 +222,7 @@ Useful flags:
 Auto Translate can create and use a project-local protection file:
 
 ```bash
-i18ntk-translate locales/en/common.json de --create-protection-file --protection-file ./i18ntk-auto-translate.json
+i18ntoolkit-translate locales/en/common.json de --create-protection-file --protection-file ./i18ntk-auto-translate.json
 ```
 
 Example `i18ntk-auto-translate.json`:
@@ -248,21 +279,21 @@ Tune warnings in `.i18ntk-config`:
 
 ## Sizing Analysis
 
-`i18ntk-sizing` reports translation file sizes, key counts, average value length, and file-set mismatches across language folders.
+`i18ntoolkit-sizing` reports translation file sizes, key counts, average value length, and file-set mismatches across language folders.
 
 ```bash
-i18ntk-sizing --source-dir ./locales --format table
-i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
+i18ntoolkit-sizing --source-dir ./locales --format table
+i18ntoolkit-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
 ```
 
 Use `--detailed` to print per-file rows in the terminal.
 
 ## Runtime API
 
-Use `i18ntk/runtime` when an application needs to read locale JSON files at runtime.
+Use `i18ntoolkit/runtime` when an application needs to read locale JSON files at runtime (the legacy `i18ntk/runtime` require path also works).
 
 ```js
-const runtime = require('i18ntk/runtime');
+const runtime = require('i18ntoolkit/runtime');
 
 runtime.initRuntime({
   baseDir: './locales',
@@ -283,7 +314,7 @@ See [docs/runtime.md](./docs/runtime.md) for runtime details.
 
 ## Configuration
 
-i18ntk uses a project-local `.i18ntk-config` file.
+i18ntoolkit uses a project-local `.i18ntk-config` file (shared with the legacy `i18ntk` package).
 
 Example:
 

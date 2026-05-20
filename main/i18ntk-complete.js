@@ -163,6 +163,11 @@ class I18nCompletionTool {
 
   // Get all JSON files from a language directory
   getLanguageFiles(language) {
+    const monolithFile = path.join(this.sourceDir, `${language}.json`);
+    if (SecurityUtils.safeExistsSync(monolithFile, this.config.projectRoot)) {
+      return [`${language}.json`];
+    }
+
     const languageDir = path.join(this.sourceDir, language);
     
     if (!SecurityUtils.safeExistsSync(languageDir, this.config.projectRoot)) {
@@ -174,6 +179,18 @@ class I18nCompletionTool {
         return file.endsWith('.json') && 
                !this.config.excludeFiles.includes(file);
       });
+  }
+
+  getLanguageFilePath(language, fileName) {
+    if (fileName === `${language}.json`) {
+      return path.join(this.sourceDir, fileName);
+    }
+
+    return path.join(this.sourceDir, language, fileName);
+  }
+
+  usesMonolithFile(language) {
+    return SecurityUtils.safeExistsSync(path.join(this.sourceDir, `${language}.json`), this.config.projectRoot);
   }
 
   // Parse key path and determine which file it belongs to
@@ -241,12 +258,15 @@ class I18nCompletionTool {
   addMissingKeysToLanguage(language, missingKeys, dryRun = false) {
     const languageDir = path.join(this.sourceDir, language);
     const changes = [];
+    const usesMonolith = this.usesMonolithFile(language);
     
     // Group keys by file
     const keysByFile = {};
     
     missingKeys.forEach(keyPath => {
-      const { file, key } = this.parseKeyPath(keyPath);
+      const { file, key } = usesMonolith
+        ? { file: `${language}.json`, key: keyPath }
+        : this.parseKeyPath(keyPath);
       if (!keysByFile[file]) {
         keysByFile[file] = [];
       }
@@ -255,7 +275,9 @@ class I18nCompletionTool {
     
     // Process each file
     for (const [fileName, keys] of Object.entries(keysByFile)) {
-      const filePath = path.join(languageDir, fileName);
+      const filePath = usesMonolith
+        ? path.join(this.sourceDir, fileName)
+        : path.join(languageDir, fileName);
       let fileContent = {};
       
       // Load existing file or create new
@@ -268,7 +290,7 @@ class I18nCompletionTool {
         }
       } else {
         // Create directory if it doesn't exist
-        if (!SecurityUtils.safeExistsSync(languageDir, this.config.projectRoot)) {
+        if (!usesMonolith && !SecurityUtils.safeExistsSync(languageDir, this.config.projectRoot)) {
           if (!dryRun) {
             SecurityUtils.safeMkdirSync(languageDir, this.config.projectRoot, { recursive: true });
           }
@@ -305,16 +327,63 @@ class I18nCompletionTool {
 
   // Generate appropriate translation value based on key and language
   generateTranslationValue(keyPath, language) {
-    // Generate value from key path for source language
-    const baseValue = this.generateValueFromKey(keyPath);
+    const sourceValue = this.getSourceValueForKeyPath(keyPath);
+    const baseValue = typeof sourceValue === 'string' && sourceValue.trim() !== ''
+      ? sourceValue
+      : this.generateValueFromKey(keyPath);
     
     // For source language, use the generated value
     if (language === this.config.sourceLanguage) {
       return baseValue;
     }
     
-    // For other languages, use the not translated marker
-    return this.config.notTranslatedMarker || 'NOT_TRANSLATED';
+    return `[${language.toUpperCase()}] ${baseValue}`;
+  }
+
+  getNestedValue(obj, keyPath) {
+    const keys = String(keyPath || '').split('.');
+    let current = obj;
+
+    for (const key of keys) {
+      if (!current || typeof current !== 'object' || !(key in current)) {
+        return undefined;
+      }
+      current = current[key];
+    }
+
+    return current;
+  }
+
+  getSourceValueForKeyPath(keyPath) {
+    if (!this.sourceLanguageDir && !this.usesMonolithFile(this.config.sourceLanguage)) {
+      return undefined;
+    }
+
+    const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
+    const keyPathStr = String(keyPath || '');
+    const parsed = this.parseKeyPath(keyPathStr);
+
+    for (const fileName of sourceFiles) {
+      const sourceFilePath = this.getLanguageFilePath(this.config.sourceLanguage, fileName);
+      try {
+        const sourceContent = SecurityUtils.safeParseJSON(SecurityUtils.safeReadFileSync(sourceFilePath, this.config.projectRoot, 'utf8'));
+        if (!sourceContent || typeof sourceContent !== 'object') continue;
+
+        const candidates = [keyPathStr];
+        if (fileName === parsed.file) {
+          candidates.push(parsed.key);
+        }
+
+        for (const candidate of candidates) {
+          const value = this.getNestedValue(sourceContent, candidate);
+          if (value !== undefined) return value;
+        }
+      } catch (error) {
+        console.warn(t("complete.couldNotParseSource", { file: sourceFilePath }));
+      }
+    }
+
+    return undefined;
   }
 
   // Generate a readable value from a key path
@@ -355,14 +424,14 @@ class I18nCompletionTool {
     const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
     const missingKeys = [];
     
-    if (!SecurityUtils.safeExistsSync(this.sourceLanguageDir, this.config.projectRoot)) {
+    if (sourceFiles.length === 0) {
       console.log(t("complete.sourceLanguageNotFound", { sourceLanguage: this.config.sourceLanguage }));
       return [];
     }
     
     // Process each file in source language
     for (const fileName of sourceFiles) {
-      const sourceFilePath = path.join(this.sourceLanguageDir, fileName);
+      const sourceFilePath = this.getLanguageFilePath(this.config.sourceLanguage, fileName);
       
       try {
         const sourceContent = SecurityUtils.safeParseJSON(SecurityUtils.safeReadFileSync(sourceFilePath, this.config.projectRoot, 'utf8'));
@@ -373,7 +442,9 @@ class I18nCompletionTool {
         for (const language of languages) {
           if (language === this.config.sourceLanguage) continue;
           
-          const targetFilePath = path.join(this.sourceDir, language, fileName);
+          const targetFilePath = fileName === `${this.config.sourceLanguage}.json` || this.usesMonolithFile(language)
+            ? path.join(this.sourceDir, `${language}.json`)
+            : path.join(this.sourceDir, language, fileName);
           let targetKeys = [];
           
           if (SecurityUtils.safeExistsSync(targetFilePath, this.config.projectRoot)) {

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "description": "Auto Translate protection rules. Terms are masked before translation and restored after translation. Keys and values are copied from the source without translation.",
+  "terms": [],
+  "keys": [],
+  "values": [],
+  "patterns": []
+}

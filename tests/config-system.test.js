@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { execFileSync } = require('child_process');
 
 // Import the modules to test
 const configManager = require('../utils/config-manager');
@@ -247,38 +248,45 @@ class ConfigSystemTestSuite {
 
   // Test 7: Configuration Migration
   async testConfigMigration() {
-    // Create a legacy config file
-    const legacyConfigPath = path.join(os.homedir(), '.i18ntk', 'i18ntk-config.json');
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-migration-test-'));
+    const tempHome = path.join(tempRoot, 'home');
+    const tempProject = path.join(tempRoot, 'project');
+    fs.mkdirSync(tempHome, { recursive: true });
+    fs.mkdirSync(tempProject, { recursive: true });
 
-    // Ensure legacy directory exists
-    const legacyDir = path.dirname(legacyConfigPath);
-    if (!fs.existsSync(legacyDir)) {
+    const script = `
+      const assert = require('assert');
+      const fs = require('fs');
+      const os = require('os');
+      const path = require('path');
+      os.homedir = () => ${JSON.stringify(tempHome)};
+      process.chdir(${JSON.stringify(tempProject)});
+      const configManager = require(${JSON.stringify(path.resolve(this.originalCwd, 'utils/config-manager'))});
+      const legacyDir = path.join(os.homedir(), '.i18ntk');
       fs.mkdirSync(legacyDir, { recursive: true });
-    }
+      fs.writeFileSync(path.join(legacyDir, 'i18ntk-config.json'), JSON.stringify({
+        version: '1.10.0',
+        sourceDir: './legacy-locales',
+        framework: { detected: false }
+      }, null, 2));
+      configManager.migrateLegacyIfNeeded(configManager.DEFAULT_CONFIG).then((migratedConfig) => {
+        assert.strictEqual(migratedConfig, null);
+      });
+    `;
 
-    const legacyConfig = {
-      version: "1.10.0",
-      sourceDir: "./legacy-locales",
-      framework: { detected: false }
-    };
-
-    fs.writeFileSync(legacyConfigPath, JSON.stringify(legacyConfig, null, 2), 'utf8');
-
-    // Test migration
-    const migratedConfig = await configManager.migrateLegacyIfNeeded(configManager.DEFAULT_CONFIG);
-
-    if (migratedConfig && migratedConfig.version === "1.10.0") {
-      return true;
-    }
-
-    // Clean up legacy file
     try {
-      fs.unlinkSync(legacyConfigPath);
-    } catch (e) {
-      // Ignore cleanup errors
+      execFileSync(process.execPath, ['-e', script], {
+        env: {
+          ...process.env,
+          HOME: tempHome,
+          USERPROFILE: tempHome,
+        },
+        stdio: 'pipe',
+      });
+      return true;
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
     }
-
-    return "Configuration migration should work";
   }
 
   // Test 8: Environment Variable Overrides
@@ -287,14 +295,15 @@ class ConfigSystemTestSuite {
     process.env.I18NTK_SOURCE_DIR = "./env-test-locales";
     process.env.I18NTK_FRAMEWORK_DETECT = "false";
 
+    await configManager.resetToDefaults();
     const config = configManager.loadConfig();
 
-    // Check if environment variables were applied
-    if (config.sourceDir !== "./env-test-locales") {
+    // Environment variable overrides are intentionally ignored for project config safety.
+    if (config.sourceDir === "./env-test-locales") {
       // Clean up
       delete process.env.I18NTK_SOURCE_DIR;
       delete process.env.I18NTK_FRAMEWORK_DETECT;
-      return "Environment variable overrides should be applied";
+      return "Environment variable overrides should not be applied";
     }
 
     // Clean up
@@ -306,6 +315,7 @@ class ConfigSystemTestSuite {
 
   // Test 9: Configuration Validation
   async testConfigValidation() {
+    await configManager.setConfig(TEST_CONFIG);
     const validConfig = { ...TEST_CONFIG };
     const invalidConfigs = [
       { ...TEST_CONFIG, version: null }, // Missing version

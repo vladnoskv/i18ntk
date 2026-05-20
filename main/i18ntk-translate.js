@@ -15,6 +15,7 @@
  * Options:
  *   --source-dir <dir>         Source directory (default: ./locales/en)
  *   --output-dir <dir>         Output directory (default: ./locales/<lang>)
+ *   --provider <name>          Translation provider: google, deepl, libretranslate
  *   --custom-regex <regex>     Additional placeholder regex pattern
  *   --no-confirm               Skip all confirmation dialogs
  *   --preserve-placeholders    Translate text around placeholders and reinsert tokens
@@ -90,6 +91,7 @@ function printHelp() {
     'Options:',
     '  --source-dir <dir>         Source directory containing locale files',
     '  --output-dir <dir>         Output directory for translated files',
+    '  --provider <name>          Provider: google (default), deepl, libretranslate',
     '  --source-lang <code>       Source language code (default: en)',
     '  --custom-regex <regex>     Additional placeholder regex pattern',
     '  --no-confirm               Automate: skip confirmation dialogs',
@@ -110,6 +112,15 @@ function printHelp() {
     '  --retry-count <n>          Max retries per failed request (default: 3)',
     '  --retry-delay <ms>         Base backoff delay in ms (default: 1000)',
     '  --timeout <ms>             HTTP request timeout in ms (default: 15000)',
+    '',
+    'Environment:',
+    '  I18NTK_TRANSLATE_PROVIDER  Default provider when --provider is omitted',
+    '  DEEPL_API_KEY              Required for --provider deepl',
+    '  DEEPL_API_URL              Optional, defaults to https://api-free.deepl.com/v2/translate',
+    '  I18NTK_ALLOW_CUSTOM_TRANSLATE_HOSTS=1  Allow custom DeepL-compatible HTTPS hosts',
+    '  LIBRETRANSLATE_URL         Optional, defaults to https://libretranslate.com/translate',
+    '  LIBRETRANSLATE_API_KEY     Optional API key for LibreTranslate servers that require one',
+    '  I18NTK_ALLOW_PRIVATE_TRANSLATE_URLS=1  Allow localhost/private provider URLs for trusted testing',
     '  -h, --help                 Show this help',
   ].join('\n'));
 }
@@ -121,6 +132,7 @@ function parseArgs(argv) {
     sourceDir: null,
     outputDir: null,
     sourceLang: 'en',
+    provider: process.env.I18NTK_TRANSLATE_PROVIDER || 'google',
     customRegex: [],
     noConfirm: false,
     preservePlaceholders: false,
@@ -161,6 +173,7 @@ function parseArgs(argv) {
     else if (arg === '--source-dir' && i + 1 < argv.length) { args.sourceDir = argv[++i]; }
     else if (arg === '--output-dir' && i + 1 < argv.length) { args.outputDir = argv[++i]; }
     else if (arg === '--source-lang' && i + 1 < argv.length) { args.sourceLang = argv[++i]; }
+    else if (arg === '--provider' && i + 1 < argv.length) { args.provider = argv[++i]; }
     else if (arg === '--custom-regex' && i + 1 < argv.length) { args.customRegex.push(argv[++i]); }
     else if (arg === '--protection-file' && i + 1 < argv.length) { args.protectionFile = argv[++i]; }
     else if (arg === '--concurrency' && i + 1 < argv.length) { args.concurrency = parseInt(argv[++i], 10) || 3; }
@@ -206,7 +219,17 @@ function loadCustomTranslateFn(modulePath) {
   if (!modulePath) return null;
   try {
     const resolved = path.isAbsolute(modulePath) ? modulePath : path.resolve(process.cwd(), modulePath);
-    const mod = require(resolved);
+    const validated = SecurityUtils.validatePath(resolved);
+    if (!validated) {
+      SecurityUtils.logSecurityEvent('Blocked unsafe custom translate module path', 'warn', {
+        modulePath,
+        resolved,
+        source: 'user'
+      });
+      console.error(`Error: Custom translate module path "${modulePath}" failed security validation.`);
+      process.exit(1);
+    }
+    const mod = require(validated);
     if (typeof mod === 'function') return mod;
     if (mod && typeof mod.translate === 'function') return mod.translate;
     if (mod && typeof mod.default === 'function') return mod.default;
@@ -676,6 +699,7 @@ async function processFile(sourcePath, targetLang, args) {
 
   const translateOptions = {
     sourceLang: args.sourceLang,
+    provider: args.provider,
     concurrency: args.concurrency,
     batchSize: args.batchSize,
     retryCount: args.retryCount,

@@ -1,39 +1,11 @@
-const https = require('https');
 const { URL } = require('url');
+const { safeHttpGet, safeHttpPost, buildGoogleTranslateUrl } = require('./safe-network');
 
 const DEFAULT_CONCURRENCY = 3;
 const DEFAULT_RETRY_COUNT = 3;
 const DEFAULT_RETRY_DELAY = 1000;
 const MAX_BACKOFF_DELAY = 30000;
 
-function httpGet(urlString, timeout = 15000) {
-  return new Promise((resolve) => {
-    const url = new URL(urlString);
-    if (url.protocol !== 'https:') {
-      resolve({ ok: false, error: 'ProtocolError', message: 'Only HTTPS requests are supported' });
-      return;
-    }
-    const req = https.get(urlString, { headers: { 'User-Agent': 'i18ntk/3.2.0' } }, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          resolve({ ok: true, data: parsed, status: res.statusCode });
-        } catch (e) {
-          resolve({ ok: false, error: 'ParseError', raw: data.substring(0, 500), status: res.statusCode });
-        }
-      });
-    });
-    req.setTimeout(timeout, () => {
-      req.destroy();
-      resolve({ ok: false, error: 'TimeoutError', message: 'Request timed out' });
-    });
-    req.on('error', (e) => {
-      resolve({ ok: false, error: e.code || 'NetworkError', message: e.message });
-    });
-  });
-}
 
 function extractTranslation(result) {
   if (result && Array.isArray(result) && result[0]) {
@@ -44,6 +16,154 @@ function extractTranslation(result) {
       .trim() || null;
   }
   return null;
+}
+
+function normalizeProvider(provider) {
+  const value = String(provider || process.env.I18NTK_TRANSLATE_PROVIDER || 'google').trim().toLowerCase();
+  if (value === 'deepl-free' || value === 'deepl-pro') return 'deepl';
+  if (value === 'libre' || value === 'libretranslate') return 'libretranslate';
+  if (value === 'google' || value === 'gtx') return 'google';
+  return value;
+}
+
+function normalizeDeepLLanguage(code) {
+  return String(code || '').replace('-', '_').toUpperCase();
+}
+
+function getDeepLApiUrl(options = {}) {
+  if (options.deeplApiUrl) return options.deeplApiUrl;
+  if (process.env.DEEPL_API_URL) return process.env.DEEPL_API_URL;
+  return 'https://api-free.deepl.com/v2/translate';
+}
+
+function isEnabled(value) {
+  return ['1', 'true', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
+}
+
+function getDeepLAllowedHosts(url, options = {}) {
+  const hosts = ['api-free.deepl.com', 'api.deepl.com'];
+  if (options.allowCustomTranslateHosts || isEnabled(process.env.I18NTK_ALLOW_CUSTOM_TRANSLATE_HOSTS)) {
+    hosts.push(new URL(url).hostname);
+  }
+  return [...new Set(hosts)];
+}
+
+function parseProviderUrl(url, provider) {
+  try {
+    return { ok: true, parsed: new URL(url) };
+  } catch (error) {
+    return {
+      ok: false,
+      error: 'InvalidProviderUrl',
+      message: `${provider} provider URL is invalid: ${error.message}`,
+    };
+  }
+}
+
+function extractDeepLTranslation(data) {
+  const value = data && Array.isArray(data.translations) && data.translations[0] && data.translations[0].text;
+  return typeof value === 'string' && value.trim() ? value : null;
+}
+
+function getLibreTranslateUrl(options = {}) {
+  if (options.libreTranslateUrl) return options.libreTranslateUrl;
+  if (process.env.LIBRETRANSLATE_URL) return process.env.LIBRETRANSLATE_URL;
+  return 'https://libretranslate.com/translate';
+}
+
+function getLibreTranslateAllowedHosts(url) {
+  return [...new Set(['libretranslate.com', new URL(url).hostname])];
+}
+
+function extractLibreTranslateTranslation(data) {
+  const value = data && data.translatedText;
+  return typeof value === 'string' && value.trim() ? value : null;
+}
+
+function buildProviderRequest(text, targetLang, options = {}) {
+  const provider = normalizeProvider(options.provider);
+  const sourceLang = options.sourceLang || 'en';
+
+  if (provider === 'google') {
+    return {
+      provider,
+      method: 'GET',
+      url: buildGoogleTranslateUrl(text, sourceLang, targetLang),
+      extract: extractTranslation,
+    };
+  }
+
+  if (provider === 'deepl') {
+    const apiKey = options.deeplApiKey || process.env.DEEPL_API_KEY;
+    if (!apiKey) {
+      return {
+        provider,
+        error: 'MissingApiKey',
+        message: 'DeepL provider requires DEEPL_API_KEY in the environment or deeplApiKey in options.',
+      };
+    }
+
+    const url = getDeepLApiUrl(options);
+    const parsedUrl = parseProviderUrl(url, 'DeepL');
+    if (!parsedUrl.ok) return { provider, error: parsedUrl.error, message: parsedUrl.message };
+
+    return {
+      provider,
+      method: 'POST',
+      url,
+      body: {
+        text: [text],
+        target_lang: normalizeDeepLLanguage(targetLang),
+        source_lang: normalizeDeepLLanguage(sourceLang),
+      },
+      requestOptions: {
+        provider,
+        allowedHosts: getDeepLAllowedHosts(url, options),
+        allowedPaths: ['/v2/translate'],
+        headers: {
+          Authorization: `DeepL-Auth-Key ${apiKey}`,
+        },
+      },
+      extract: extractDeepLTranslation,
+    };
+  }
+
+  if (provider === 'libretranslate') {
+    const apiKey = options.libreTranslateApiKey || process.env.LIBRETRANSLATE_API_KEY || '';
+    const url = getLibreTranslateUrl(options);
+    const parsedUrl = parseProviderUrl(url, 'LibreTranslate');
+    if (!parsedUrl.ok) return { provider, error: parsedUrl.error, message: parsedUrl.message };
+
+    const params = new URLSearchParams({
+      q: text,
+      source: sourceLang,
+      target: targetLang,
+      format: 'text',
+    });
+    if (apiKey) params.set('api_key', apiKey);
+
+    return {
+      provider,
+      method: 'POST',
+      url,
+      body: params.toString(),
+      requestOptions: {
+        provider,
+        allowedHosts: getLibreTranslateAllowedHosts(url),
+        allowedPaths: ['/translate'],
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+      extract: extractLibreTranslateTranslation,
+    };
+  }
+
+  return {
+    provider,
+    error: 'UnsupportedProvider',
+    message: `Unsupported translation provider "${provider}". Use google, deepl, or libretranslate.`,
+  };
 }
 
 function detectRateLimitError(result) {
@@ -61,6 +181,8 @@ async function translateText(text, targetLang, options = {}) {
     retryDelay = DEFAULT_RETRY_DELAY,
     customFn,
     timeout = 15000,
+    httpGet = safeHttpGet,
+    httpPost = safeHttpPost,
   } = options;
 
   if (!text || text.trim().length === 0) return { ok: true, translated: text };
@@ -74,14 +196,10 @@ async function translateText(text, targetLang, options = {}) {
     }
   }
 
-  const params = new URLSearchParams({
-    client: 'gtx',
-    sl: sourceLang,
-    tl: targetLang,
-    dt: 't',
-    q: text,
-  });
-  const url = `https://translate.googleapis.com/translate_a/single?${params.toString()}`;
+  const request = buildProviderRequest(text, targetLang, { ...options, sourceLang });
+  if (request.error) {
+    return { ok: false, translated: null, error: request.error, message: request.message };
+  }
 
   let lastError = null;
   for (let attempt = 0; attempt < retryCount; attempt++) {
@@ -90,10 +208,12 @@ async function translateText(text, targetLang, options = {}) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
-    const result = await httpGet(url, timeout);
+    const result = request.method === 'POST'
+      ? await httpPost(request.url, request.body, { ...(request.requestOptions || {}), timeout })
+      : await httpGet(request.url, timeout);
 
     if (result.ok) {
-      const translated = extractTranslation(result.data);
+      const translated = request.extract(result.data);
       if (translated !== null && translated !== text) {
         return { ok: true, translated };
       }
@@ -101,7 +221,7 @@ async function translateText(text, targetLang, options = {}) {
         return { ok: true, translated: text };
       }
       if (result.status === 429 || (translated === null && result.status >= 400)) {
-        lastError = { error: 'RateLimited', message: 'Google Translate rate limit hit' };
+        lastError = { error: 'RateLimited', message: `${request.provider} rate limit hit` };
         continue;
       }
     }
@@ -165,8 +285,11 @@ async function translateBatch(batch, targetLang, options = {}) {
 }
 
 module.exports = {
-  httpGet,
   extractTranslation,
+  extractDeepLTranslation,
+  extractLibreTranslateTranslation,
+  buildProviderRequest,
+  normalizeProvider,
   detectRateLimitError,
   translateText,
   translateBatch,

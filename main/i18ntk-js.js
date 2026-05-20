@@ -9,10 +9,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const SecurityUtils = require(path.join(__dirname, '../utils/security.js'));
-const { getConfig, saveConfig } = require(path.join(__dirname, '../utils/config-helper.js'));
-const I18nHelper = require(path.join(__dirname, '../utils/i18n-helper.js'));
-const SetupEnforcer = require(path.join(__dirname, '../utils/setup-enforcer'));
+const SecurityUtils = require('../utils/security.js');
+const { getConfig, saveConfig } = require('../utils/config-helper.js');
+const I18nHelper = require('../utils/i18n-helper.js');
+const SetupEnforcer = require('../utils/setup-enforcer');
 const { program } = require('../utils/mini-commander');
 
 (async () => {
