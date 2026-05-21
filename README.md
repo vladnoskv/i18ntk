@@ -1,4 +1,4 @@
-# i18ntk v4.0.0
+# i18ntk v4.1.0
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.0.0)](https://socket.dev/npm/package/i18ntk/overview/4.0.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.1.0)](https://socket.dev/npm/package/i18ntk/overview/4.1.0)
 
 ## Install
 
@@ -30,6 +30,10 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
+## What's New in 4.1.0
+
+- **FIX**: Critical and high-impact bugs resolved across the v4.0.0 feature set — runtime staleness crashes, backup hash-chain verification, sizing adminAuth crash, scanner `--source-language` propagation, watch callback subscriptions, dead key detection performance, validator key style enforcement, and protection Unicode boundary handling. See [CHANGELOG.md](./CHANGELOG.md) for complete details.
+
 ## What's New in 4.0.0
 
 - **SIZING**: `--predict-expansion` flag computes per-key expansion ratios across languages with Safe/Warning/Critical risk tiers for UI layout planning.
@@ -40,7 +44,6 @@ Requirements:
 - **BACKUP**: `--incremental` flag creates differential backups with SHA-256 hashing and chained restores.
 - **RUNTIME**: `lazy: true` option defers locale file loading until first key access for lower memory usage.
 - **PROTECTION**: Context-aware rules (`after:word`, `before:word`, `standalone`, `surrounded:left,right`) for precise term masking.
-- **FIX**: `initRuntime()` now returns independent instances with isolated language and cache state.
 
 See [CHANGELOG.md](./CHANGELOG.md) for more release details.
 
@@ -446,7 +449,7 @@ Example:
 
 ```json
 {
-  "version": "4.0.0",
+  "version": "4.1.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",

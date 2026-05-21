@@ -100,6 +100,8 @@ function getParentHashes(parentData) {
 
 async function buildRestoreChain(startPath, startData) {
   const chain = [{ path: startPath, data: startData }];
+  const visited = new Set();
+  visited.add(path.basename(startPath));
   let current = startData;
   let currentPath = startPath;
 
@@ -108,6 +110,10 @@ async function buildRestoreChain(startPath, startData) {
       throw new Error('Chain broken: incremental backup chain exceeds the maximum depth of 10');
     }
     const parentName = current._meta.parent;
+    if (visited.has(parentName)) {
+      throw new Error('circular chain reference');
+    }
+    visited.add(parentName);
     const parentDir = path.dirname(currentPath);
     const parentPath = path.join(parentDir, parentName);
     if (!SecurityUtils.safeExistsSync(parentPath, parentDir)) {
@@ -124,6 +130,57 @@ async function buildRestoreChain(startPath, startData) {
 
   chain.reverse();
   return chain;
+}
+
+function readBackupData(backupPath, baseDir) {
+  const raw = SecurityUtils.safeReadFileSync(backupPath, baseDir, 'utf8');
+  if (raw === null) {
+    throw new Error(`Unable to read backup: ${path.basename(backupPath)}`);
+  }
+  return JSON.parse(raw);
+}
+
+function collectProtectedChainNames(backupDirPath, keptFiles) {
+  const protectedNames = new Set();
+  const byName = new Map();
+  for (const file of keptFiles) {
+    byName.set(file.name, file);
+  }
+
+  const queue = [];
+  for (const file of keptFiles) {
+    try {
+      const data = readBackupData(file.path, backupDirPath);
+      if (data._meta && data._meta.parent) {
+        queue.push(data._meta.parent);
+      }
+    } catch {}
+  }
+
+  while (queue.length > 0) {
+    const name = queue.shift();
+    if (protectedNames.has(name)) {
+      continue;
+    }
+    protectedNames.add(name);
+
+    const file = byName.get(name) || {
+      name,
+      path: path.join(backupDirPath, name)
+    };
+    if (!SecurityUtils.safeExistsSync(file.path, backupDirPath)) {
+      continue;
+    }
+
+    try {
+      const data = readBackupData(file.path, backupDirPath);
+      if (data._meta && data._meta.parent) {
+        queue.push(data._meta.parent);
+      }
+    } catch {}
+  }
+
+  return protectedNames;
 }
 
 const configManager = require('../utils/config-manager');
@@ -210,7 +267,15 @@ async function cleanupOldBackups(backupDirPath) {
       .sort((a, b) => b.time - a.time);
 
     const toDelete = backupFiles.slice(maxBackups);
+    const kept = backupFiles.slice(0, maxBackups);
+
+    const protectedChainNames = collectProtectedChainNames(backupDirPath, kept);
+
     for (const file of toDelete) {
+      if (protectedChainNames.has(file.name)) {
+        logger.info(`  Keeping ${file.name} (parent of a kept incremental backup)`);
+        continue;
+      }
       try {
         await fsp.unlink(file.path);
       } catch (err) {
@@ -230,7 +295,7 @@ async function handleCreate(args) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupName = `backup-${timestamp}.json`;
   const backupPath = path.join(outputDir, backupName);
-  const isIncremental = !!args.incremental;
+  const isIncremental = args.incremental !== 'false' && args.incremental !== false;
 
   logger.debug(`Source directory: ${dir}`);
   logger.debug(`Backup will be saved to: ${backupPath}`);
@@ -488,32 +553,11 @@ async function handleVerify(args) {
     if (data._meta && data._meta.hashes) {
       logger.info('  Performing hash chain verification...');
 
-      const chain = [{ path: backupPath, data: data }];
-      let current = data;
-      let currentPath = backupPath;
-      while (current._meta && current._meta.parent) {
-        if (chain.length >= 11) {
-          logger.warn('  Chain broken: maximum incremental depth of 10 exceeded');
-          break;
-        }
-        const parentName = current._meta.parent;
-        const parentDir = path.dirname(currentPath);
-        const parentPath = path.join(parentDir, parentName);
-        if (!SecurityUtils.safeExistsSync(parentPath, parentDir)) {
-          logger.warn(`  Chain broken: parent '${parentName}' not found`);
-          break;
-        }
-        const parentRaw = SecurityUtils.safeReadFileSync(parentPath, parentDir, 'utf8');
-        if (parentRaw === null) {
-          logger.warn(`  Chain broken: cannot read parent '${parentName}'`);
-          break;
-        }
-        current = JSON.parse(parentRaw);
-        currentPath = parentPath;
-        chain.push({ path: currentPath, data: current });
-      }
+      const chain = await buildRestoreChain(backupPath, data);
 
       let allValid = true;
+
+      // Rebuild full state oldest->newest and verify each manifest against it.
       const reconstructed = {};
       for (const entry of chain) {
         const entryMeta = entry.data._meta;
@@ -532,7 +576,7 @@ async function handleVerify(args) {
         let entryValid = true;
         for (const [file, expectedHash] of Object.entries(entryHashes)) {
           if (!Object.prototype.hasOwnProperty.call(reconstructed, file)) {
-            logger.warn(`    Missing file in manifest: ${file}`);
+            logger.warn(`    Missing file in reconstructed backup state: ${file}`);
             entryValid = false;
             continue;
           }
@@ -554,6 +598,7 @@ async function handleVerify(args) {
         logger.success('\nBackup chain verification passed');
       } else {
         logger.error('\nBackup chain verification FAILED');
+        process.exitCode = 1;
       }
     } else {
       const fileCount = Object.keys(data).filter(k => k !== '_meta').length;
@@ -586,23 +631,32 @@ async function handleCleanup(args) {
     
     // Keep only the most recent 'keep' files
     const toDelete = backupFiles.slice(keep);
+    const kept = backupFiles.slice(0, keep);
     
     if (toDelete.length === 0) {
       logger.info('No old backups to delete.');
       return;
     }
     
-    // Delete old backups
+    const protectedChainNames = collectProtectedChainNames(backupDir, kept);
+    let deletedCount = 0;
+    
+    // Delete old backups, skipping parents of kept backups
     for (const file of toDelete) {
+      if (protectedChainNames.has(file.name)) {
+        logger.info(`  Keeping ${file.name} (parent of a kept incremental backup)`);
+        continue;
+      }
       try {
         await fsp.unlink(file.path);
         logger.info(`  - Deleted: ${file.name}`);
+        deletedCount++;
       } catch (err) {
         logger.error(`  - Failed to delete ${file.name}: ${err.message}`);
       }
     }
     
-    logger.info(`\nRemoved ${toDelete.length} old backups`);
+    logger.info(`\nRemoved ${deletedCount} old backups`);
     logger.info(`Total backups kept: ${keep}`);
     
   } catch (error) {

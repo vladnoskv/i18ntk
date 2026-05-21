@@ -1,10 +1,12 @@
 {
   "name": "i18ntk",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18ntk",
     "i18n",
+    "i18n toolkit",
+    "i18n tool kit",
     "internationalization",
     "localization",
     "translation",
@@ -210,7 +212,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.0.0",
+    "version": "4.1.0",
     "releaseDate": "21/05/2026",
     "lastUpdated": "21/05/2026",
     "maintainer": "Vlad Noskov",
@@ -218,16 +220,16 @@
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "FIX: i18ntk/runtime initRuntime() now returns independent runtime instances with separate language, fallback language, base directory, and cache state.",
-      "FIX: Later initRuntime() calls no longer overwrite earlier returned runtimes or the module-level compatibility singleton.",
-      "TESTS: Added runtime regression coverage for multi-instance isolation and singleton stability.",
-      "DOCS: Runtime examples now prefer the returned initRuntime() instance."
+      "FIX: Runtime lazy loading now tolerates stale manifest entries, refreshes key manifests correctly, and guards null base directories.",
+      "FIX: Incremental backup verification, cleanup, boolean flag parsing, and circular parent detection are hardened.",
+      "FIX: Scanner, sizing, usage, validator, watcher, and protection edge cases from the 4.0.0 feature set are corrected.",
+      "FIX: Manager option 7 status output, Delete Reports cache cleanup, and public package version metadata are corrected."
     ],
     "breakingChanges": [
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js now returns a callable watcher object with EventEmitter methods and a stop() method; existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.0.1",
+    "nextVersion": "4.1.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -249,7 +251,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.0.0 may be unstable or insecure. Upgrade to 4.0.0 or newer."
+    "supportPolicy": "Versions earlier than 4.1.0 may be unstable or insecure. Upgrade to 4.1.0 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

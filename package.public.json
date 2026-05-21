@@ -1,11 +1,13 @@
 {
   "name": "i18ntk",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
     "i18ntk",
     "i18n",
+    "i18n toolkit",
+    "i18n tool kit",
     "internationalization",
     "localization",
     "translation",
@@ -160,5 +162,47 @@
   "publishConfig": {
     "access": "public"
   },
-  "preferGlobal": true
+  "preferGlobal": true,
+  "versionInfo": {
+    "version": "4.1.0",
+    "releaseDate": "21/05/2026",
+    "lastUpdated": "21/05/2026",
+    "maintainer": "Vlad Noskov",
+    "changelog": "./CHANGELOG.md",
+    "documentation": "./README.md",
+    "apiReference": "./docs/api/API_REFERENCE.md",
+    "majorChanges": [
+      "FIX: Runtime lazy loading now tolerates stale manifest entries, refreshes key manifests correctly, and guards null base directories.",
+      "FIX: Incremental backup verification, cleanup, boolean flag parsing, and circular parent detection are hardened.",
+      "FIX: Scanner, sizing, usage, validator, watcher, and protection edge cases from the 4.0.0 feature set are corrected.",
+      "FIX: Manager option 7 status output, Delete Reports cache cleanup, and public package version metadata are corrected."
+    ],
+    "breakingChanges": [
+      "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
+      "utils/watch-locales.js now returns a callable watcher object with EventEmitter methods and a stop() method; existing bare stop-function usage remains supported."
+    ],
+    "nextVersion": "4.1.1",
+    "supportedNodeVersions": ">=16.0.0",
+    "supportedFrameworks": {
+      "react-i18next": ">=11.0.0",
+      "vue-i18n": ">=9.0.0",
+      "angular-i18n": ">=12.0.0",
+      "next-i18next": ">=13.0.0",
+      "nuxt-i18n": ">=8.0.0",
+      "svelte-i18n": ">=3.0.0",
+      "sveltekit-i18n": ">=2.0.0",
+      "react-native-localize": ">=2.0.0",
+      "expo-localization": ">=14.0.0",
+      "ionic-angular": ">=6.0.0",
+      "ember-intl": ">=5.0.0",
+      "formatjs": ">=2.0.0",
+      "i18next": ">=21.0.0",
+      "django": ">=3.0.0",
+      "flask-babel": ">=2.0.0",
+      "fastapi": ">=0.70.0",
+      "spring-boot": ">=2.5.0",
+      "laravel": ">=8.0.0"
+    },
+    "supportPolicy": "Versions earlier than 4.1.0 may be unstable or insecure. Upgrade to 4.1.0 or newer."
+  }
 }

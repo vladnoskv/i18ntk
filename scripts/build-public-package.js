@@ -43,7 +43,8 @@ function assertManifestSync(rootManifest, publicManifest) {
     'sideEffects',
     'engines',
     'publishConfig',
-    'preferGlobal'
+    'preferGlobal',
+    'versionInfo'
   ];
 
   for (const field of syncedFields) {

@@ -4,7 +4,7 @@
 
 The supported production line is `4.x`.
 
-Versions earlier than `4.0.0` are not recommended for production use because later releases include Auto Translate provider hardening, dynamic-require elimination, path-validation hardening, lazy loading with manifest validation, and incremental backup hash-chain verification.
+Versions earlier than `4.1.0` are not recommended for production use because later releases include Auto Translate provider hardening, dynamic-require elimination, path-validation hardening, lazy loading with manifest validation, incremental backup hash-chain verification, and post-4.0.0 critical bug fixes for runtime staleness, backup verification, and CLI flag parsing.
 
 ## Security Model
 
@@ -41,8 +41,10 @@ The v3.3.0 release **resolved** the previously actionable Socket.dev alert:
 The v4.0.0 release adds the following security hardening:
 - **Watch module**: all watched directories validated against project root with containment checks; capped at 50 directories.
 - **Runtime lazy loading**: key-to-file manifest entries validated for path containment; manifest size capped at 100KB.
-- **Incremental backups**: hash-chain verification before restore; chain depth capped at 10 increments.
-- **Protection context rules**: DSL-parsed context rules — never raw user-controlled regex from config; bounded at 200 chars per rule, 100 rules total.
+- **Incremental backups**: hash-chain verification before restore; chain depth capped at 10 increments; circular parent references detected.
+- **Protection context rules**: DSL-parsed context rules — never raw user-controlled regex from config; bounded at 200 chars per rule, 100 rules total; Unicode-aware `\p{P}` word boundaries for non-ASCII language support.
+- **Scanner multi-language detection**: source-language propagation fixed; stopword-less language profiles now still enforce valid-character ratios.
+- **Usage dead key detection**: optimized O(n+m) comment scanning instead of O(n*m); all CLI boolean flags validated with strict `toBool()` conversion.
 
 ## Reporting Vulnerabilities
 
@@ -66,7 +68,7 @@ Security reports are reviewed privately first. Confirmed issues should receive:
 
 ## User Guidance
 
-- Keep i18ntk updated to `4.0.0` or newer.
+- Keep i18ntk updated to `4.1.0` or newer.
 - Do not commit `.i18ntk-config`, admin PIN files, backup directories, generated reports, logs, npm credentials, or secret material.
 - Run i18ntk only in project directories you trust.
 - Review generated translation changes before committing them.

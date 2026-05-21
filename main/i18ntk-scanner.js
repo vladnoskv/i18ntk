@@ -423,12 +423,11 @@ class I18nTextScanner {
       for (const word of words) {
         if (profile.stopwords.includes(word)) return true;
       }
-      const validChars = trimmed.match(/[\p{L}\p{N}\s\-,.!?':"()\[\]{}]/gu) || [];
-      const validRatio = validChars.length / trimmed.length;
-      return validRatio >= 0.5;
     }
 
-    return true;
+    const validChars = trimmed.match(/[\p{L}\p{N}\s\-,.!?':"()\[\]{}]/gu) || [];
+    const validRatio = validChars.length / trimmed.length;
+    return validRatio >= 0.5;
   }
 
   scanFile(filePath, patterns, minLength, maxLength) {
@@ -436,7 +435,7 @@ class I18nTextScanner {
       const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
       const lines = content.split('\n');
       const results = [];
-      const sourceLang = this.config.sourceLanguage || 'en';
+      const sourceLang = this.sourceLanguage || 'en';
 
       patterns.forEach(pattern => {
         let match;
@@ -475,7 +474,7 @@ class I18nTextScanner {
   }
 
   generateSuggestion(text) {
-    const sourceLang = this.config.sourceLanguage || 'en';
+    const sourceLang = this.sourceLanguage || 'en';
     const transliterations = {
       ja: { 'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o', 'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko', 'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so', 'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to', 'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no', 'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho', 'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo', 'や': 'ya', 'ゆ': 'yu', 'よ': 'yo', 'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro', 'わ': 'wa', 'を': 'wo', 'ん': 'n' },
       ru: { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya' },
@@ -533,6 +532,9 @@ class I18nTextScanner {
         gettext: `import gettext\ngettext.gettext('${text}')`,
         underscore: `from gettext import gettext as _\n_('${text}')`,
         lazy: `from gettext import gettext_lazy as _\n_('${text}')`
+      },
+      vanilla: {
+        generic: `t('ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}')`
       }
     };
 
@@ -696,7 +698,7 @@ class I18nTextScanner {
     this.sourceDir = this.config.sourceDir || './src';
 
     // Source language for multi-language detection
-    this.sourceLanguage = args['source-language'] || this.config.sourceLanguage || 'en';
+    this.sourceLanguage = args.sourceLanguage || this.config.sourceLanguage || 'en';
 
     // Resolve framework with precedence: CLI arg > config.framework.preference|string > auto-detect > fallback
     const cliFramework = args.framework;

@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-05-21
+
+### Fixed
+- Runtime: stale manifest entries (deleted files after manifest construction) no longer cause unhandled exceptions; loadedFiles set before load with try/catch guard.
+- Runtime: `refresh()` now correctly clears the key manifest for the refreshed language, preventing stale file references.
+- Runtime: null `baseDir` guard prevents cascading `validatePath(null)` errors in `loadKeyManifestFromDir`.
+- Backup: `handleVerify` hash-chain verification rewritten for incremental backups — rebuilds full state oldest→newest before per-entry hash comparison; no longer reports false "Missing file" errors for unchanged files.
+- Backup: `cleanupOldBackups` and `handleCleanup` now preserve parent backups of incremental chains by scanning kept backups for `_meta.parent` references before deletion.
+- Backup: `--incremental=false` is now correctly parsed as falsy (string-to-boolean conversion fixed).
+- Backup: `buildRestoreChain` detects circular parent references via visited-set traversal.
+- Sizing: `this.adminAuth` undefined crash in `run()` fixed — changed to correct `adminAuth` local variable.
+- Sizing: duplicate `analyze()` method removed; format-based display logic (`--format=json` vs table) restored to the surviving method.
+- Sizing: setup-check IIFE now guarded with `require.main === module`, preventing unexpected `process.exit()` on `require()`.
+- Scanner: `frameworks.vanilla` key added to `getFrameworkSpecific` — no longer returns `undefined` for vanilla projects.
+- Scanner: `--source-language` CLI flag now correctly propagates through config chain to `scanFile` and `generateSuggestion` (camelCase vs hyphen key mismatch fixed).
+- Scanner: `isTextInLanguage` now always validates character ratio unconditionally even for no-stopword language profiles.
+- Watch: `{ onChange: fn }` object-format callbacks are now properly subscribed to change/add/unlink events.
+- Watch: debounce `setTimeout` timers are now stored per-watcher and cleared on `emitter.stop()`, preventing memory leaks and spurious I/O after stop.
+- Watch: `'unlink'` events are now subscribed for backward-compatible plain-function callback users.
+- Usage: duplicate `require.main === module` block removed (caused `TypeError: Identifier 'main' has already been declared` at execution).
+- Usage: `_keyInSourceComments` optimized from O(n*m) to O(n+m) by pre-computing a `Set` of all comment strings once before the dead key loop.
+- Usage: `--cleanup=false` and `--dry-run-delete=false` now correctly parse as falsy via `toBool()` helper.
+- Usage: broken `detectFrameworkPatterns()` call with `undefined` arguments removed.
+- Usage: dead `return;` in `analyze()` removed so the result object is now actually returned.
+- Validator: missing `try` block in `run()` added so errors are caught by the existing `catch(error)` handler.
+- Validator: `--enforce-key-style=true/false` now correctly parsed (previously silently ignored due to `!includes('=')` guard).
+- Validator: `flat` style no longer produces false positives for nested keys — validates only the leaf segment (last `.`-delimited part).
+- Validator: `suggestKeyFix` for `flat` style now returns `segments.map(s => s.toLowerCase()).join('')` instead of camelCase.
+- Validator: `getLanguageFiles` no longer crashes when `excludeFiles` config property is undefined.
+- Validator: `enforceKeyStyle` now correctly propagated from CLI args to `this.config.enforceKeyStyle` in `run()`.
+- Protection: `standalone` mode boundary check now handles opening/closing punctuation (`(`, `[`, `{`, `"`, `'`, `-`, `–`, `—`) and CJK marks (`。`, `、`, `」`).
+- Protection: `\b` word-boundary assertions replaced with Unicode-aware `(^|[\s\p{P}])` / `([\s\p{P}]|$)` patterns with `u` flag for non-ASCII language support.
+- Protection: `surrounded` context rule parser now uses `indexOf(',')` split instead of greedy `(.+,.+)` regex to correctly parse multi-word right-side expressions.
+- Protection: `hasProtectionRules` no longer throws `TypeError` when `terms` property is undefined.
+- Protection: `shouldPreserveWholeValue` now respects context rules by only matching `type === 'global'` entries.
+- Manager option 7 ("Fix placeholder translations") now interpolates fixer status values correctly instead of printing raw `{languages}`, `{sourceDir}`, `{skipped}`, or `{totalIssues}` placeholders.
+- Delete Reports settings now include cache cleanup targets.
+- Public package metadata updated.
+
+### Security
+- Watch module: debounce timers properly cleaned up on stop and callback subscriptions corrected for object-format and unlink handlers.
+- Runtime: loadedFiles lock-before-load pattern prevents duplicate I/O and stale manifest crash.
+- Backup: circular parent reference detection; `--incremental=false` string truthy bypass closed.
+- Sizing: adminAuth variable reference corrected; require()-time `process.exit()` guarded.
+- Scanner: vanilla framework key prevents `undefined` return; stopword-less validRatio enforced.
+- Usage: O(n+m) comment scanning prevents DoS via large codebase with many dead keys; `toBool()` prevents flag injection.
+- Validator: try/catch pairing restored; `flat` leaf-segment prevents false-positive flood.
+- Protection: Unicode-aware punctuation boundaries for CJK/Cyrillic/Arabic; standalone boundaries include the expanded punctuation set.
+
 ## [4.0.0] - 2026-05-21
 
 ### Added
@@ -19,18 +68,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `i18ntk/runtime` `initRuntime()` now returns independent runtime instances with separate language, fallback language, base directory, and cache state. Later `initRuntime()` calls no longer overwrite earlier returned runtimes or the module-level compatibility singleton.
-- Manager option 7 ("Fix placeholder translations") now interpolates fixer status values correctly instead of printing raw `{languages}`, `{sourceDir}`, `{skipped}`, or `{totalIssues}` placeholders.
 
 ### Changed
 - `watchLocales()` now returns a callable watcher object with EventEmitter methods instead of only a bare `stop` function. Existing `const stop = watchLocales(...); stop();` usage remains supported. The returned object fires `change`, `add`, `unlink`, `error` events. If a callback function is passed as the second argument, it is auto-subscribed to `change` and `add` for backward compatibility.
 - **BREAKING**: `i18ntk-sizing` JSON reports now include `expansionPredictions` at the top level when `--predict-expansion` is used. This field is additive — existing report fields are preserved.
-
-### Security
-- All new features reuse existing `SecurityUtils.safe*` wrappers for file I/O, path validation, and input sanitization.
-- Watch module validates all directory paths against project root with containment checks and caps at 50 directories.
-- Runtime lazy-loading manifest entries validated for path containment and size-limited to 100KB.
-- Protection context rules parsed from constrained DSL — never accepts raw user-controlled regex from config.
-- Backup incremental chain depth capped at 10 to prevent resource exhaustion; hash chain verified before restore.
 
 ## [3.3.0] - 2026-05-20
 

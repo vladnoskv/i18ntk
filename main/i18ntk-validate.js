@@ -164,12 +164,13 @@ class I18nValidator {
       const args = process.argv.slice(2);
       args.forEach(arg => {
         const sanitizedArg = SecurityUtils.sanitizeInput(arg);
-        if (sanitizedArg.startsWith('--') && !sanitizedArg.includes('=')) {
+        if (sanitizedArg.startsWith('--enforce-key-style')) {
+          const val = arg.split('=')[1];
+          baseArgs.enforceKeyStyle = val === undefined ? true : val !== 'false';
+        } else if (sanitizedArg.startsWith('--') && !sanitizedArg.includes('=')) {
           const key = sanitizedArg.substring(2);
           if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(key)) {
             baseArgs.uiLanguage = key;
-          } else if (key === 'enforce-key-style') {
-            baseArgs.enforceKeyStyle = true;
           }
         }
       });
@@ -242,7 +243,7 @@ class I18nValidator {
       const files = items
         .filter(item => {
           return item.isFile() && item.name.endsWith('.json') && 
-                 !this.config.excludeFiles.includes(item.name);
+                 (!Array.isArray(this.config.excludeFiles) || !this.config.excludeFiles.includes(item.name));
         }).map(item => item.name);
       
       return files;
@@ -691,7 +692,8 @@ class I18nValidator {
     const violations = [];
     for (const key of allKeys) {
       const sanitizedKey = SecurityUtils.sanitizeInput(key);
-      if (!regex.test(sanitizedKey)) {
+      const testKey = keyStyle === 'flat' ? sanitizedKey.split('.').pop() : sanitizedKey;
+      if (!regex.test(testKey)) {
         violations.push({
           key: sanitizedKey,
           suggestedFix: this.suggestKeyFix(sanitizedKey, keyStyle),
@@ -729,7 +731,7 @@ class I18nValidator {
       case 'kebab-case':
         return segments.map(s => s.toLowerCase()).join('-');
       case 'flat':
-        return segments.map((s, i) => i === 0 ? s.toLowerCase() : s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join('');
+        return segments.map(s => s.toLowerCase()).join('');
       default:
         return sanitizedKey;
     }
@@ -1054,6 +1056,7 @@ class I18nValidator {
     
     const args = this.parseArgs();
     
+    try {
     // Ensure config is always initialized
     if (!this.config) {
       this.config = {};
@@ -1071,6 +1074,7 @@ class I18nValidator {
       } else {
         await this.initialize();
       }
+      this.config.enforceKeyStyle = args.enforceKeyStyle !== undefined ? args.enforceKeyStyle : this.config.enforceKeyStyle;
       
       // Skip admin authentication when called from menu
       if (!fromMenu) {
@@ -1145,6 +1149,7 @@ class I18nValidator {
       { message: `Validation run failed: ${error.message}` }
     );
     throw error;
+  }
   }
 }
 

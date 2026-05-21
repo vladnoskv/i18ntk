@@ -140,6 +140,7 @@ function listJsonFilesRecursively(dir, baseDir = dir) {
 }
 
 function loadKeyManifestFromDir(baseDir) {
+  if (!baseDir || typeof baseDir !== 'string') return new Map();
   const validatedBase = SecurityUtils.validatePath(baseDir, path.dirname(baseDir));
   const baseStat = SecurityUtils.safeStatSync(validatedBase, path.dirname(validatedBase));
   const baseRoot = baseStat && baseStat.isFile() ? path.dirname(validatedBase) : validatedBase;
@@ -289,8 +290,12 @@ function resolveKey(obj, key, sep = '.', runtimeState = null, lang = null) {
           const filePath = manifest.get(prefix);
           const loadedFileKey = `${lang}\0${filePath}`;
           if (filePath && !runtimeState.loadedFiles.has(loadedFileKey)) {
-            loadFileLazy(runtimeState, filePath, lang);
             runtimeState.loadedFiles.add(loadedFileKey);
+            try {
+              loadFileLazy(runtimeState, filePath, lang);
+            } catch (_) {
+              // stale manifest entry — already marked as loaded to prevent retry
+            }
             const langData = runtimeState.cache.get(lang);
             return resolveKey(langData, key, sep, runtimeState, lang);
           }
@@ -434,6 +439,7 @@ function refresh(lang) {
 function refreshForState(runtimeState, lang = runtimeState.language) {
   if (runtimeState.cache.has(lang)) runtimeState.cache.delete(lang);
   if (runtimeState.eagerLoadedLanguages) runtimeState.eagerLoadedLanguages.delete(lang);
+  if (runtimeState.keyManifest) runtimeState.keyManifest.delete(lang);
   if (runtimeState.loadedFiles) {
     for (const fileKey of Array.from(runtimeState.loadedFiles)) {
       if (fileKey.startsWith(`${lang}\0`)) runtimeState.loadedFiles.delete(fileKey);

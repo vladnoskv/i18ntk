@@ -41,15 +41,17 @@ const { logger } = require('../utils/logger');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 const SetupEnforcer = require('../utils/setup-enforcer');
 
-// Ensure setup is complete before running
-(async () => {
-  try {
-    await SetupEnforcer.checkSetupCompleteAsync();
-  } catch (error) {
-    console.error('Setup check failed:', error.message);
-    process.exit(1);
-  }
-})();
+// Ensure setup is complete before running (only when executed directly)
+if (require.main === module) {
+  (async () => {
+    try {
+      await SetupEnforcer.checkSetupCompleteAsync();
+    } catch (error) {
+      console.error('Setup check failed:', error.message);
+      process.exit(1);
+    }
+  })();
+}
 
 loadTranslations();
 
@@ -1100,44 +1102,6 @@ Generated: ${new Date().toISOString()}
     }
   }
 
-  // Main analysis method
-  async analyze() {
-    const startTime = Date.now();
-    
-    try {
-        logger.info(t("sizing.starting_i18n_sizing_analysis"));
-        logger.info(t("sizing.source_directory", { sourceDir: this.sourceDir }));
-      
-      const files = this.getLanguageFiles();
-      
-      if (files.length === 0) {
-          logger.warn(t("sizing.no_translation_files_found"));
-          return;
-      }
-      
-      logger.info(t("sizing.found_languages", { languages: files.map(f => f.language).join(', ') }));
-      
-      this.analyzeFileSizes(files);
-      this.analyzeTranslationContent(files);
-      this.generateSizeComparison();
-      
-      if (this.format === 'table') {
-        this.displayFolderResults();
-      } else if (this.format === 'json') {
-          logger.info(t("sizing.analysisStats", { stats: JSON.stringify(this.stats, null, 2) }));
-      }
-      
-      await this.generateHumanReadableReport();
-      
-      const endTime = Date.now();
-      logger.info(t("sizing.analysis_completed", { duration: ((endTime - startTime) / 1000).toFixed(2) }));
-      
-    } catch (error) {
-        logger.error(t("sizing.analysis_failed", { errorMessage: error.message }));
-        process.exit(1);
-    }
-  }
-
   // Parse command line arguments without yargs
   parseArgs() {
     const args = process.argv.slice(2);
@@ -1335,7 +1299,7 @@ Options:
         
         const cliHelper = require('../utils/cli-helper');
         const pin = await cliHelper.promptPin(t('adminCli.enterPin'));
-        const isValid = await this.adminAuth.verifyPin(pin);
+        const isValid = await adminAuth.verifyPin(pin);
         
         if (!isValid) {
           console.log(t('adminCli.invalidPin'));
@@ -1377,7 +1341,11 @@ Options:
       this.generateSizeComparison();
       
       // Display results
-      this.displayFolderResults();
+      if (this.format === 'table') {
+        this.displayFolderResults();
+      } else if (this.format === 'json') {
+          logger.info(t("sizing.analysisStats", { stats: JSON.stringify(this.stats, null, 2) }));
+      }
       
       // Generate reports if requested
       await this.generateHumanReadableReport();

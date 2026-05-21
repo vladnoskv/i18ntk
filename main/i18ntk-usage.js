@@ -61,6 +61,10 @@ async function getConfig() {
   return await getUnifiedConfig('usage');
 }
 
+function toBool(v) {
+  return v === true || v === 'true' || v === '1';
+}
+
 class I18nUsageAnalyzer {
   constructor(config = {}) {
     this.config = config;
@@ -88,6 +92,7 @@ class I18nUsageAnalyzer {
     this.deadKeys = new Map();
     this.cleanupMode = false;
     this.dryRunDelete = false;
+    this._sourceCommentsSet = null;
     
     // Use global translation function
     this.rl = null;
@@ -383,10 +388,10 @@ class I18nUsageAnalyzer {
       console.log('🔍 Debug mode enabled');
     }
     
-    if (args.cleanup) {
+    if (toBool(args.cleanup)) {
       this.cleanupMode = true;
     }
-    if (args.dryRunDelete) {
+    if (toBool(args.dryRunDelete)) {
       this.dryRunDelete = true;
     }
     
@@ -533,9 +538,6 @@ class I18nUsageAnalyzer {
       // Load available translation keys first
       await this.loadAvailableKeys();
       
-      // NEW: Detect framework patterns before analysis
-      await this.detectFrameworkPatterns();
-      
       // Perform usage analysis with enhanced features
       await this.analyzeUsage();
       
@@ -614,6 +616,7 @@ class I18nUsageAnalyzer {
       }
       
       if (this.cleanupMode) {
+        this._buildSourceCommentsSet();
         const deadKeys = this.findDeadKeys();
         console.log('\n' + t('usage.deadKeysDetectionTitle'));
         console.log(t('usage.deadKeysCount', { count: deadKeys.length }));
@@ -1242,11 +1245,13 @@ Analysis Features (v1.10.1):
     return false;
   }
 
-  _keyInSourceComments(key) {
+  _buildSourceCommentsSet() {
+    if (this._sourceCommentsSet !== null) return;
+    this._sourceCommentsSet = new Set();
+
     const commentPatterns = [
       /\/\/[^\n]*/g,
-      /\/\*[\s\S]*?\*\//g,
-      /\/\*\*[\s\S]*?\*\//g
+      /\/\*[\s\S]*?\*\//g
     ];
 
     try {
@@ -1262,12 +1267,21 @@ Analysis Features (v1.10.1):
           const comments = content.match(pattern);
           if (comments) {
             for (const comment of comments) {
-              if (comment.includes(key)) {
-                return true;
-              }
+              this._sourceCommentsSet.add(comment);
             }
           }
         }
+      }
+    } catch (e) {
+      this._sourceCommentsSet = new Set();
+    }
+  }
+
+  _keyInSourceComments(key) {
+    try {
+      if (!this._sourceCommentsSet || this._sourceCommentsSet.size === 0) return false;
+      for (const comment of this._sourceCommentsSet) {
+        if (comment.includes(key)) return true;
       }
     } catch (e) {
       // Silently fail - comment detection is best-effort
@@ -1936,9 +1950,6 @@ Analysis Features (v1.10.1):
       // Close readline interface to prevent hanging
       this.closeReadline();
       
-      // Return instead of force exit to allow proper cleanup
-      return;
-      
       return {
         success: true,
         stats: {
@@ -2014,39 +2025,3 @@ if (require.main === module) {
 }
 
 module.exports = I18nUsageAnalyzer;
-
-// Run if called directly
-if (require.main === module) {
-  async function main() {
-    try {
-      const cliArgs = parseCommonArgs(process.argv.slice(2));
-
-      if (cliArgs.help) {
-        displayHelp('usage');
-        process.exit(0);
-      }
-
-      // Let run() handle full initialization to avoid duplicate setup output
-      const analyzer = new I18nUsageAnalyzer();
-      await analyzer.run();
-    } catch (error) {
-      console.error('Error:', error.message);
-      process.exit(1);
-    }
-  }
-
-  // Check if we're being called from the menu system (stdin has data)
-  const hasStdinData = !process.stdin.isTTY;
-
-  if (hasStdinData) {
-    // When called from menu, consume stdin data and run with defaults
-    process.stdin.resume();
-    process.stdin.on('data', () => {});
-    process.stdin.on('end', () => {
-      main();
-    });
-  } else {
-    // Normal direct execution
-    main();
-  }
-}

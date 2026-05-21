@@ -99,7 +99,7 @@ function watchDirectory(dir, emitter, watchers, options = {}) {
     return;
   }
 
-  watchers.push({ watcher, path: dir });
+  watchers.push({ watcher, path: dir, debounceTimers });
   watchState.count++;
 
   try {
@@ -126,6 +126,11 @@ function watchLocales(dirs, onChange, options = {}) {
   if (typeof onChange === 'function') {
     emitter.on('change', onChange);
     emitter.on('add', onChange);
+    emitter.on('unlink', onChange);
+  } else if (typeof onChange === 'object' && onChange !== null && typeof onChange.onChange === 'function') {
+    emitter.on('change', onChange.onChange);
+    emitter.on('add', onChange.onChange);
+    emitter.on('unlink', onChange.onChange);
   }
 
   const {
@@ -160,6 +165,12 @@ function watchLocales(dirs, onChange, options = {}) {
 
   const stop = () => {
     for (const entry of watchers) {
+      if (entry.debounceTimers) {
+        for (const timer of entry.debounceTimers.values()) {
+          clearTimeout(timer);
+        }
+        entry.debounceTimers.clear();
+      }
       try { entry.watcher.close(); } catch (_) { /* ignore */ }
     }
     watchers.length = 0;

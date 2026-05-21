@@ -75,10 +75,15 @@ function parseContextString(context) {
     return { mode: 'before', words };
   }
 
-  const surroundedMatch = trimmed.match(/^surrounded:(.+),(.+)$/i);
-  if (surroundedMatch) {
-    const leftWords = surroundedMatch[1].split('|').map(w => w.trim()).filter(Boolean);
-    const rightWords = surroundedMatch[2].split('|').map(w => w.trim()).filter(Boolean);
+  const prefix = trimmed.substring(0, 'surrounded:'.length);
+  if (prefix.toLowerCase() === 'surrounded:') {
+    const rest = trimmed.substring('surrounded:'.length);
+    const idx = rest.indexOf(',');
+    if (idx === -1) return null;
+    const left = rest.slice(0, idx).trim();
+    const right = rest.slice(idx + 1).trim();
+    const leftWords = left.split('|').map(w => w.trim()).filter(Boolean);
+    const rightWords = right.split('|').map(w => w.trim()).filter(Boolean);
     if (leftWords.length === 0 || rightWords.length === 0) return null;
     return { mode: 'surrounded', left: leftWords, right: rightWords };
   }
@@ -243,7 +248,7 @@ function shouldPreserveWholeValue(keyPath, value, protection) {
   if (protection.keys.some(rule => keyMatchesRule(keyPath, rule))) return true;
   const valueText = String(value);
   return protection.values.includes(valueText) ||
-    (protection.normalizedTerms || []).some(rule => rule.value === valueText);
+    (protection.normalizedTerms || []).some(rule => rule.type === 'global' && rule.value === valueText);
 }
 
 function addReplacement(replacements, original) {
@@ -261,27 +266,27 @@ function shouldProtectInContext(value, rule, index, fullText) {
 
   if (context.mode === 'after') {
     const alternation = context.words.map(escapeRegExp).join('|');
-    const regex = new RegExp(`\\b(${alternation})\\s+$`, 'i');
+    const regex = new RegExp(`(^|[\\s\\p{P}])(${alternation})\\s+$`, 'iu');
     return regex.test(before);
   }
 
   if (context.mode === 'before') {
     const alternation = context.words.map(escapeRegExp).join('|');
-    const regex = new RegExp(`^\\s+(${alternation})\\b`, 'i');
+    const regex = new RegExp(`^\\s+(${alternation})([\\s\\p{P}]|$)`, 'iu');
     return regex.test(after);
   }
 
   if (context.mode === 'standalone') {
-    const isBoundaryBefore = before === '' || /\s$/.test(before);
-    const isBoundaryAfter = after === '' || /^[\s.,!?;:]/.test(after);
+    const isBoundaryBefore = before === '' || /(?:\s|\(|\[|\{|"|'|\-|–|—|。|、|」)$/.test(before);
+    const isBoundaryAfter = after === '' || /^[\s.,!?;:)\]}<>"'\-–—。、」]/.test(after);
     return isBoundaryBefore && isBoundaryAfter;
   }
 
   if (context.mode === 'surrounded') {
     const leftAlternation = context.left.map(escapeRegExp).join('|');
     const rightAlternation = context.right.map(escapeRegExp).join('|');
-    const leftRegex = new RegExp(`\\b(${leftAlternation})\\s+$`, 'i');
-    const rightRegex = new RegExp(`^\\s+(${rightAlternation})\\b`, 'i');
+    const leftRegex = new RegExp(`(^|[\\s\\p{P}])(${leftAlternation})\\s+$`, 'iu');
+    const rightRegex = new RegExp(`^\\s+(${rightAlternation})([\\s\\p{P}]|$)`, 'iu');
     return leftRegex.test(before) && rightRegex.test(after);
   }
 
@@ -361,7 +366,7 @@ function hasProtectionRules(protection) {
     protection &&
     (
       (protection.normalizedTerms && protection.normalizedTerms.length) ||
-      protection.terms.length ||
+      (protection.terms && protection.terms.length) ||
       protection.keys.length ||
       protection.values.length ||
       protection.patterns.length
