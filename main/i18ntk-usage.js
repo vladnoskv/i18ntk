@@ -84,6 +84,11 @@ class I18nUsageAnalyzer {
     this.startTime = Date.now(); // Track performance metrics
     this.version = '1.10.1'; // Version tracking
     
+    // Dead key detection properties
+    this.deadKeys = new Map();
+    this.cleanupMode = false;
+    this.dryRunDelete = false;
+    
     // Use global translation function
     this.rl = null;
   }
@@ -187,7 +192,9 @@ class I18nUsageAnalyzer {
       help: a.help || a.h,
       noPrompt: a.noPrompt ?? a['no-prompt'],
       strict: a.strict,
-      debug: a.debug
+      debug: a.debug,
+      cleanup: a.cleanup ?? a['cleanup'],
+      dryRunDelete: a.dryRunDelete ?? a['dry-run-delete']
     };
   }
 
@@ -374,6 +381,13 @@ class I18nUsageAnalyzer {
     
     if (cliOptions.debug) {
       console.log('🔍 Debug mode enabled');
+    }
+    
+    if (args.cleanup) {
+      this.cleanupMode = true;
+    }
+    if (args.dryRunDelete) {
+      this.dryRunDelete = true;
     }
     
     try {
@@ -599,6 +613,33 @@ class I18nUsageAnalyzer {
         }));
       }
       
+      if (this.cleanupMode) {
+        const deadKeys = this.findDeadKeys();
+        console.log('\n' + t('usage.deadKeysDetectionTitle'));
+        console.log(t('usage.deadKeysCount', { count: deadKeys.length }));
+        
+        const highConfidence = deadKeys.filter(dk => dk.confidence >= 0.8).length;
+        const mediumConfidence = deadKeys.filter(dk => dk.confidence >= 0.4 && dk.confidence < 0.8).length;
+        const lowConfidence = deadKeys.filter(dk => dk.confidence < 0.4).length;
+        
+        console.log(t('usage.deadKeysConfidenceBreakdown', { high: highConfidence, medium: mediumConfidence, low: lowConfidence }));
+        
+        if (deadKeys.length > 0) {
+          console.log('\n' + t('usage.deadKeysSample'));
+          deadKeys.slice(0, 10).forEach(dk => {
+            console.log(`  ${dk.key} [${(dk.confidence * 100).toFixed(0)}%] - ${dk.reason}`);
+          });
+          if (deadKeys.length > 10) {
+            console.log(t('usage.deadKeysMore', { count: deadKeys.length - 10 }));
+          }
+        }
+        
+        if (this.dryRunDelete) {
+          const reportPath = this.saveDeadKeysReport(deadKeys, args.outputDir || this.config.outputDir || './i18ntk-reports/usage');
+          console.log(t('usage.deadKeysReportSaved', { path: reportPath }));
+        }
+      }
+      
       if (args.outputReport) {
         const report = this.generateUsageReport();
         await this.saveReport(report, args.outputDir);
@@ -625,7 +666,7 @@ class I18nUsageAnalyzer {
   // Show help message
   showHelp() {
     console.log(`
-📊 i18ntk usage - Translation key usage analysis (v1.8.3)
+📊 i18ntk usage - Translation key usage analysis (v1.10.1)
 
 Usage:
   node i18ntk-usage.js [options]
@@ -642,14 +683,17 @@ Options:
   --validate-placeholders Enable placeholder key validation
   --framework-detect     Enable framework-specific pattern detection
   --performance-mode     Enable performance metrics tracking
+  --cleanup              Enable dead key detection for cleanup mode
+  --dry-run-delete       Save dead keys report without deleting (requires --cleanup)
   --help, -h             Show this help message
 
 Examples:
   node i18ntk-usage.js --source-dir=./src --i18n-dir=./translations --output-report
   npm run i18ntk:usage -- --strict --debug --validate-placeholders
   node i18ntk-usage.js --no-prompt --performance-mode --output-dir=./reports
+  node i18ntk-usage.js --cleanup --dry-run-delete
 
-Analysis Features (v1.8.3):
+Analysis Features (v1.10.1):
   • Detects unused translation keys
   • Identifies missing translation keys
   • Shows translation completeness by language
@@ -662,6 +706,7 @@ Analysis Features (v1.8.3):
   • Key complexity analysis
   • Security-enhanced path validation
   • Detailed reporting with validation errors
+  • Dead key detection with confidence scoring
 `);
   }
 
@@ -1131,6 +1176,161 @@ Analysis Features (v1.8.3):
     }
     
     return missing;
+  }
+
+  findDeadKeys() {
+    const unusedKeys = this.findUnusedKeys();
+    const deadKeys = [];
+
+    for (const key of unusedKeys) {
+      let confidence = 0.9;
+      let reason = 'Key not found in any source file';
+
+      if (this._matchesDynamicPattern(key)) {
+        confidence = 0.3;
+        reason = 'Key matches dynamic template pattern (likely used)';
+      } else if (this._keyInSourceComments(key)) {
+        confidence = 0.5;
+        reason = 'Key referenced in comments/JSDoc';
+      } else if (this._parentFileRecentlyModified(key)) {
+        confidence = 0.4;
+        reason = 'Translation file modified within last 30 days';
+      }
+
+      deadKeys.push({ key, confidence, reason });
+    }
+
+    deadKeys.sort((a, b) => b.confidence - a.confidence);
+    return deadKeys;
+  }
+
+  _matchesDynamicPattern(key) {
+    const keyParts = key.split('.');
+    if (keyParts.length < 2) return false;
+
+    const dynamicPatterns = [
+      /t\(`[^`]*\$\{[^}]*\}[^`]*`\)/g,
+      /i18n\.t\(`[^`]*\$\{[^}]*\}[^`]*`\)/g,
+      /useTranslation\(\)\.t\(`[^`]*\$\{[^}]*\}[^`]*`\)/g
+    ];
+
+    try {
+      const sourceFiles = Array.from(this.fileUsage.keys());
+      for (const filePath of sourceFiles) {
+        const fullPath = path.join(this.sourceDir, filePath);
+        if (!SecurityUtils.safeExistsSync(fullPath, this.sourceDir)) continue;
+
+        const content = SecurityUtils.safeReadFileSync(fullPath, this.sourceDir, 'utf8');
+        if (!content) continue;
+
+        for (const pattern of dynamicPatterns) {
+          const matches = content.match(pattern);
+          if (matches) {
+            for (const match of matches) {
+              const matchLower = match.toLowerCase();
+              if (keyParts.some(part => matchLower.includes(part.toLowerCase()))) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Silently fail - dynamic pattern detection is best-effort
+    }
+
+    return false;
+  }
+
+  _keyInSourceComments(key) {
+    const commentPatterns = [
+      /\/\/[^\n]*/g,
+      /\/\*[\s\S]*?\*\//g,
+      /\/\*\*[\s\S]*?\*\//g
+    ];
+
+    try {
+      const sourceFiles = Array.from(this.fileUsage.keys());
+      for (const filePath of sourceFiles) {
+        const fullPath = path.join(this.sourceDir, filePath);
+        if (!SecurityUtils.safeExistsSync(fullPath, this.sourceDir)) continue;
+
+        const content = SecurityUtils.safeReadFileSync(fullPath, this.sourceDir, 'utf8');
+        if (!content) continue;
+
+        for (const pattern of commentPatterns) {
+          const comments = content.match(pattern);
+          if (comments) {
+            for (const comment of comments) {
+              if (comment.includes(key)) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Silently fail - comment detection is best-effort
+    }
+
+    return false;
+  }
+
+  _parentFileRecentlyModified(key) {
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    try {
+      for (const [filePath] of this.translationFiles) {
+        if (!SecurityUtils.safeExistsSync(filePath, this.i18nDir)) continue;
+
+        const content = SecurityUtils.safeReadFileSync(filePath, this.i18nDir, 'utf8');
+        if (!content) continue;
+
+        if (content.includes(key)) {
+          const stats = SecurityUtils.safeStatSync(filePath, this.i18nDir);
+          if (stats && stats.mtime) {
+            const mtimeMs = new Date(stats.mtime).getTime();
+            if ((now - mtimeMs) <= thirtyDaysMs) {
+              return true;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Silently fail - file stat is best-effort
+    }
+
+    return false;
+  }
+
+  generateDeadKeysReport(deadKeys) {
+    const allCleanupReady = deadKeys.length === 0 || deadKeys.every(dk => dk.confidence >= 0.8);
+
+    return {
+      deadKeys,
+      totalAvailableKeys: this.availableKeys.size,
+      totalUsedKeys: this.usedKeys.size,
+      deadKeyCount: deadKeys.length,
+      cleanupReady: allCleanupReady,
+      generatedAt: new Date().toISOString(),
+      version: this.version
+    };
+  }
+
+  saveDeadKeysReport(deadKeys, outputDir) {
+    const report = this.generateDeadKeysReport(deadKeys);
+    const resolvedDir = path.resolve(outputDir || './i18ntk-reports/usage');
+
+    if (!SecurityUtils.safeExistsSync(resolvedDir, process.cwd())) {
+      SecurityUtils.safeMkdirSync(resolvedDir, process.cwd(), { recursive: true });
+    }
+
+    const filename = '.dead-keys.json';
+    const filepath = path.join(resolvedDir, filename);
+
+    SecurityUtils.safeWriteFileSync(filepath, JSON.stringify(report, null, 2), resolvedDir, 'utf8');
+    return filepath;
   }
 
   // Find files that use specific keys

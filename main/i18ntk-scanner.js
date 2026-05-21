@@ -109,32 +109,43 @@ class I18nTextScanner {
     const args = process.argv.slice(2);
     const parsed = {};
 
-    args.forEach(arg => {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
       if (arg.startsWith('--')) {
         const [key, ...valueParts] = arg.substring(2).split('=');
-        const value = valueParts.join('=');
+        let value = valueParts.join('=');
+        if (!value && args[i + 1] && !args[i + 1].startsWith('--')) {
+          value = args[i + 1];
+        }
 
         switch (key) {
           case 'source-dir':
             parsed.sourceDir = value || '';
+            if (value === args[i + 1]) i++;
             break;
           case 'framework':
             parsed.framework = value || '';
+            if (value === args[i + 1]) i++;
             break;
           case 'patterns':
             parsed.patterns = value ? value.split(',').map(p => p.trim()).filter(Boolean) : [];
+            if (value === args[i + 1]) i++;
             break;
           case 'exclude':
             parsed.exclude = value ? value.split(',').map(e => e.trim()).filter(Boolean) : [];
+            if (value === args[i + 1]) i++;
             break;
           case 'output-dir':
             parsed.outputDir = value || '';
+            if (value === args[i + 1]) i++;
             break;
           case 'min-length':
             parsed.minLength = parseInt(value) || 3;
+            if (value === args[i + 1]) i++;
             break;
           case 'max-length':
             parsed.maxLength = parseInt(value) || 100;
+            if (value === args[i + 1]) i++;
             break;
           case 'output-report':
             parsed.outputReport = true;
@@ -142,13 +153,17 @@ class I18nTextScanner {
           case 'include-tests':
             parsed.includeTests = true;
             break;
+          case 'source-language':
+            parsed.sourceLanguage = value || '';
+            if (value === args[i + 1]) i++;
+            break;
           case 'help':
           case 'h':
             parsed.help = true;
             break;
         }
       }
-    });
+    }
 
     return parsed;
   }
@@ -293,22 +308,127 @@ class I18nTextScanner {
   }
 
   isEnglishText(text) {
-    // Enhanced text detection for Unicode and multilingual support
     const trimmed = text.trim();
     if (trimmed.length < 3) return false;
 
-    // Skip if it's just numbers or special characters
     if (/^\d+$/.test(trimmed)) return false;
     if (/^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]+$/.test(trimmed)) return false;
 
-    // Allow Unicode characters including CJK, Cyrillic, etc.
     const validChars = trimmed.match(/[\p{L}\p{N}\s\-,.!?':"()\[\]{}]/gu) || [];
     const validRatio = validChars.length / trimmed.length;
 
-    // Must have at least 50% valid characters and some alphabetic characters
     const hasAlpha = /[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF\u4E00-\u9FFF\uAC00-\uD7AF]/u.test(trimmed);
 
     return validRatio >= 0.5 && hasAlpha;
+  }
+
+  getLanguageProfile(langCode) {
+    const profiles = {
+      en: {
+        name: 'English',
+        charRegex: /[a-zA-Z\u00C0-\u024F]/u,
+        stopwords: ['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'has', 'have', 'from', 'they', 'that', 'with', 'this', 'will', 'your', 'which', 'their', 'them', 'than', 'then', 'been', 'being', 'would', 'should', 'could', 'about', 'after'],
+        minLength: 3,
+        maxLength: 150
+      },
+      de: {
+        name: 'German',
+        charRegex: /[a-zA-Z\u00C0-\u00FF\u0100-\u017F\u00DF\u1E00-\u1EFF]/u,
+        stopwords: ['der', 'die', 'das', 'und', 'ist', 'von', 'mit', 'sich', 'des', 'auf', 'dem', 'nicht', 'ein', 'eine', 'auch', 'als', 'aus', 'bei', 'nach', 'wie', 'oder', 'war', 'hat', 'ich', 'sie', 'einem', 'um', 'am', 'im', 'es'],
+        minLength: 3,
+        maxLength: 180
+      },
+      fr: {
+        name: 'French',
+        charRegex: /[a-zA-Z\u00C0-\u00FF\u0152\u0153]/u,
+        stopwords: ['le', 'la', 'les', 'des', 'est', 'pas', 'que', 'une', 'dans', 'sur', 'plus', 'par', 'pour', 'avec', 'aux', 'ces', 'ses', 'mes', 'tes', 'notre', 'votre', 'leur', 'dont', 'sont', 'comme', 'mais', 'alors', 'peut', 'tout', 'tous', 'fait'],
+        minLength: 3,
+        maxLength: 170
+      },
+      es: {
+        name: 'Spanish',
+        charRegex: /[a-zA-Z\u00C0-\u00FF\u00F1\u00D1]/u,
+        stopwords: ['que', 'los', 'las', 'del', 'como', 'por', 'para', 'con', 'una', 'sus', 'muy', 'más', 'pero', 'este', 'esta', 'hay', 'son', 'eran', 'fue', 'han', 'será', 'está', 'todo', 'otro', 'otra'],
+        minLength: 3,
+        maxLength: 150
+      },
+      ja: {
+        name: 'Japanese',
+        charRegex: /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\uFF66-\uFF9F]/u,
+        stopwords: ['の', 'に', 'は', 'を', 'た', 'が', 'で', 'て', 'と', 'し', 'れ', 'さ', 'る', 'す', 'ん', 'な', 'い', 'か', 'ま', 'も', 'こ', 'り', 'ち', 'き', 'ょ', 'う'],
+        minLength: 2,
+        maxLength: 80
+      },
+      zh: {
+        name: 'Chinese',
+        charRegex: /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/u,
+        stopwords: ['的', '是', '在', '不', '了', '有', '和', '人', '这', '中', '大', '为', '上', '个', '国', '我', '以', '要', '他', '时', '来', '用', '们', '生', '到', '作', '地'],
+        minLength: 1,
+        maxLength: 50
+      },
+      ru: {
+        name: 'Russian',
+        charRegex: /[\u0400-\u04FF\u0500-\u052F]/u,
+        stopwords: ['и', 'в', 'не', 'на', 'что', 'как', 'по', 'к', 'от', 'это', 'за', 'то', 'для', 'все', 'его', 'она', 'так', 'же', 'но', 'был', 'быть', 'еще', 'уже', 'кто', 'мой', 'ее', 'их', 'из'],
+        minLength: 2,
+        maxLength: 200
+      },
+      ko: {
+        name: 'Korean',
+        charRegex: /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/u,
+        stopwords: ['이', '그', '저', '것', '수', '등', '들', '및', '년', '월', '일', '에서', '에게', '으로', '보다', '에게서', '의', '에', '는', '은', '가', '를', '과', '와', '도', '만', '까지', '부터'],
+        minLength: 1,
+        maxLength: 70
+      },
+      ar: {
+        name: 'Arabic',
+        charRegex: /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/u,
+        stopwords: ['في', 'من', 'على', 'عن', 'مع', 'هو', 'هي', 'كان', 'هذا', 'ذلك', 'بين', 'بعد', 'قبل', 'عند', 'حتى', 'الى', 'او', 'لا', 'ما', 'لم', 'لن', 'كل', 'بعض', 'أي'],
+        minLength: 2,
+        maxLength: 150
+      },
+      hi: {
+        name: 'Hindi',
+        charRegex: /[\u0900-\u097F]/u,
+        stopwords: ['का', 'की', 'के', 'है', 'हैं', 'था', 'थे', 'होगा', 'होगी', 'में', 'से', 'पर', 'को', 'तक', 'और', 'या', 'लेकिन', 'जब', 'तब', 'कि', 'यह', 'वह', 'एक', 'दो'],
+        minLength: 2,
+        maxLength: 160
+      },
+      vanilla: {
+        name: 'Generic Latin',
+        charRegex: /[a-zA-Z\u00C0-\u024F]/u,
+        stopwords: [],
+        minLength: 3,
+        maxLength: 150
+      }
+    };
+    return profiles[langCode] || profiles.en;
+  }
+
+  isTextInLanguage(text, langCode) {
+    const profile = this.getLanguageProfile(langCode);
+    const trimmed = text.trim();
+
+    if (trimmed.length < profile.minLength) return false;
+    if (trimmed.length > profile.maxLength) return false;
+
+    if (/^\d+$/.test(trimmed)) return false;
+    if (/^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]+$/.test(trimmed)) return false;
+
+    const hasScriptChar = profile.charRegex.test(trimmed);
+    if (!hasScriptChar) return false;
+
+    if (profile.stopwords.length > 0) {
+      const words = trimmed.toLowerCase().split(/\s+/);
+      for (const word of words) {
+        if (profile.stopwords.includes(word)) return true;
+      }
+      const validChars = trimmed.match(/[\p{L}\p{N}\s\-,.!?':"()\[\]{}]/gu) || [];
+      const validRatio = validChars.length / trimmed.length;
+      return validRatio >= 0.5;
+    }
+
+    return true;
   }
 
   scanFile(filePath, patterns, minLength, maxLength) {
@@ -316,20 +436,20 @@ class I18nTextScanner {
       const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
       const lines = content.split('\n');
       const results = [];
+      const sourceLang = this.config.sourceLanguage || 'en';
 
       patterns.forEach(pattern => {
         let match;
         while ((match = pattern.exec(content)) !== null) {
           const text = match[1] || match[0];
 
-          // Skip translation function calls
           const beforeMatch = content.substring(Math.max(0, match.index - 20), match.index);
           if (beforeMatch.includes('t(') || beforeMatch.includes('i18next.t(') ||
               beforeMatch.includes('$t(') || beforeMatch.includes('translate(')) {
             continue;
           }
 
-          if (text && this.isEnglishText(text) &&
+          if (text && this.isTextInLanguage(text, sourceLang) &&
               text.length >= minLength && text.length <= maxLength) {
 
             const lineNumber = content.substring(0, match.index).split('\n').length;
@@ -355,7 +475,23 @@ class I18nTextScanner {
   }
 
   generateSuggestion(text) {
-    const key = text.toLowerCase()
+    const sourceLang = this.config.sourceLanguage || 'en';
+    const transliterations = {
+      ja: { 'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o', 'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko', 'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so', 'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to', 'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no', 'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho', 'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo', 'や': 'ya', 'ゆ': 'yu', 'よ': 'yo', 'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro', 'わ': 'wa', 'を': 'wo', 'ん': 'n' },
+      ru: { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya' },
+      zh: { '的': 'de', '一': 'yi', '是': 'shi', '在': 'zai', '不': 'bu', '了': 'le', '有': 'you', '和': 'he', '人': 'ren', '这': 'zhe', '中': 'zhong', '大': 'da', '为': 'wei', '上': 'shang', '个': 'ge', '国': 'guo', '我': 'wo', '以': 'yi_t', '要': 'yao', '他': 'ta', '时': 'shi_t', '来': 'lai', '用': 'yong', '们': 'men', '生': 'sheng', '到': 'dao', '作': 'zuo', '地': 'di' }
+    };
+
+    let transliterated = text;
+    const table = transliterations[sourceLang];
+    if (table) {
+      transliterated = '';
+      for (const ch of text) {
+        transliterated += table[ch] || ch;
+      }
+    }
+
+    const key = transliterated.toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, '_')
       .substring(0, 50);
@@ -558,6 +694,9 @@ class I18nTextScanner {
     this.config = { ...baseConfig, ...(this.config || {}) };
 
     this.sourceDir = this.config.sourceDir || './src';
+
+    // Source language for multi-language detection
+    this.sourceLanguage = args['source-language'] || this.config.sourceLanguage || 'en';
 
     // Resolve framework with precedence: CLI arg > config.framework.preference|string > auto-detect > fallback
     const cliFramework = args.framework;

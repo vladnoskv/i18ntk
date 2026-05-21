@@ -68,6 +68,7 @@ class I18nValidator {
     this.config = config;
     this.errors = [];
     this.warnings = [];
+    this.keyNamingViolations = [];
     this.rl = null;
   }
   
@@ -167,6 +168,8 @@ class I18nValidator {
           const key = sanitizedArg.substring(2);
           if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(key)) {
             baseArgs.uiLanguage = key;
+          } else if (key === 'enforce-key-style') {
+            baseArgs.enforceKeyStyle = true;
           }
         }
       });
@@ -573,6 +576,25 @@ class I18nValidator {
       // Validate structure
       const structural = this.validateStructure(sourceContent, targetContent, language, fileName);
       
+      // Check key naming conventions
+      if (this.config.enforceKeyStyle) {
+        const keyNamingResult = this.validateKeyNaming(sourceContent);
+        keyNamingResult.violations.forEach(v => {
+          this.addWarning(
+            `Key naming violation in ${language}/${fileName}`,
+            { key: v.key, suggestedFix: v.suggestedFix, reason: v.reason, style: keyNamingResult.style }
+          );
+          this.keyNamingViolations.push({
+            language,
+            fileName,
+            key: v.key,
+            suggestedFix: v.suggestedFix,
+            reason: v.reason,
+            style: keyNamingResult.style
+          });
+        });
+      }
+      
      // Validate translations
       const translations = this.validateTranslation(targetContent, language, fileName);
       this.checkPlaceholders(sourceContent, targetContent, language, fileName);
@@ -650,6 +672,67 @@ class I18nValidator {
     // For detailed usage analysis, run: node i18ntk-usage.js
     
     return warnings;
+  }
+
+  validateKeyNaming(sourceObj, style) {
+    const keyStyle = style || this.config.keyStyle || 'dot.notation';
+    const allKeys = this.getAllKeys(sourceObj);
+    const validators = {
+      'dot.notation': /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$/,
+      'snake_case': /^[a-z][a-z0-9]*(_[a-z][a-z0-9]*)*$/,
+      'camelCase': /^[a-z][a-zA-Z0-9]*$/,
+      'kebab-case': /^[a-z][a-z0-9]*(-[a-z][a-z0-9]*)*$/,
+      'flat': /^[a-zA-Z][a-zA-Z0-9]*$/
+    };
+    const regex = validators[keyStyle];
+    if (!regex) {
+      return { violations: [], totalKeys: allKeys.size, violationCount: 0, style: keyStyle };
+    }
+    const violations = [];
+    for (const key of allKeys) {
+      const sanitizedKey = SecurityUtils.sanitizeInput(key);
+      if (!regex.test(sanitizedKey)) {
+        violations.push({
+          key: sanitizedKey,
+          suggestedFix: this.suggestKeyFix(sanitizedKey, keyStyle),
+          reason: `Key "${sanitizedKey}" does not match "${keyStyle}" naming convention`
+        });
+      }
+    }
+    return {
+      violations,
+      totalKeys: allKeys.size,
+      violationCount: violations.length,
+      style: keyStyle
+    };
+  }
+
+  suggestKeyFix(key, style) {
+    const sanitizedKey = SecurityUtils.sanitizeInput(key);
+    const segments = [];
+    const rawTokens = sanitizedKey.split(/[._\-]/);
+    for (const token of rawTokens) {
+      if (!token) continue;
+      const camelTokens = token.split(/(?=[A-Z])/).filter(Boolean);
+      segments.push(...camelTokens);
+    }
+    if (segments.length === 0) {
+      return sanitizedKey;
+    }
+    switch (style) {
+      case 'dot.notation':
+        return segments.map(s => s.toLowerCase()).join('.');
+      case 'snake_case':
+        return segments.map(s => s.toLowerCase()).join('_');
+      case 'camelCase':
+        return segments.map((s, i) => i === 0 ? s.toLowerCase() : s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join('');
+      case 'kebab-case':
+        return segments.map(s => s.toLowerCase()).join('-');
+      case 'flat':
+        return segments.map((s, i) => i === 0 ? s.toLowerCase() : s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join('');
+      default:
+        return sanitizedKey;
+    }
   }
 
   // Show help message
@@ -895,7 +978,28 @@ class I18nValidator {
           console.log('');
         });
       }
-      
+
+      // Key naming violations summary
+      if (this.keyNamingViolations.length > 0) {
+        console.log('');
+        console.log(t('validate.separator'));
+        console.log('🔑 Key Naming Convention Violations');
+        console.log('');
+        const displayStyle = this.config.keyStyle || 'dot.notation';
+        console.log(`  Expected style: ${displayStyle}`);
+        console.log(`  Violations found: ${this.keyNamingViolations.length}`);
+        console.log('');
+        console.log('  Suggested fixes:');
+        this.keyNamingViolations.slice(0, 10).forEach((v, i) => {
+          console.log(`  ${i + 1}. "${v.key}" → "${v.suggestedFix}" (${v.language}/${v.fileName})`);
+        });
+        if (this.keyNamingViolations.length > 10) {
+          console.log(`  ... and ${this.keyNamingViolations.length - 10} more`);
+        }
+        console.log('');
+        console.log('  💡 Tip: Use i18ntk:fix-keys to auto-fix or manually rename keys.');
+      }
+
       // Recommendations
       console.log('');
       console.log(t('validate.separator'));

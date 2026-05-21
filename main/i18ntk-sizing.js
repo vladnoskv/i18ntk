@@ -84,7 +84,9 @@ class I18nSizingAnalyzer {
     this.sourceLanguage = options.sourceLanguage || config.sourceLanguage || 'en';
     this.detailed = options.detailed || false;
     this.detailedKeys = options.detailedKeys || false;
+    this.predictExpansion = options.predictExpansion || false;
     this.rl = null;
+    this.expansionPredictions = null;
     
     // Initialize i18n with UI language from config
     const uiLanguage = options.uiLanguage || config.uiLanguage || 'en';
@@ -492,6 +494,11 @@ class I18nSizingAnalyzer {
 
     // Generate recommendations
     this.generateRecommendations();
+
+    // Generate expansion predictions if requested
+    if (this.predictExpansion) {
+      this.generateExpansionPredictions();
+    }
   }
 
   generateFileComparison() {
@@ -557,6 +564,145 @@ class I18nSizingAnalyzer {
     this.stats.summary.recommendations = recommendations;
   }
 
+  // Language pair expansion reference table (average % expansion from English)
+  // Values represent typical character count ratio (target/source) minus 1, as percentage
+  getExpansionReference() {
+    return {
+      de: 35, es: 25, fr: 20, it: 15, pt: 20, nl: 30, sv: 15,
+      ru: 50, uk: 45, pl: 30, cs: 25, sk: 25, bg: 40, sr: 40,
+      ja: -40, zh: -45, ko: -35, th: -30, vi: -20, km: -5,
+      ar: 15, he: 10, fa: 20, tr: 10, fi: 25, hu: 20, el: 15,
+      da: 10, nb: 10, ro: 15, id: 5, ms: 5, hi: 15, bn: 20,
+      ta: 10, te: 15, mr: 20, gu: 20, ml: 25, kn: 15
+    };
+  }
+
+  classifyExpansionRisk(ratio) {
+    const absRatio = Math.abs(ratio);
+    if (absRatio < 30) return { tier: 'safe', label: 'Safe', color: 'green' };
+    if (absRatio < 50) return { tier: 'warning', label: 'Warning', color: 'yellow' };
+    return { tier: 'critical', label: 'Critical', color: 'red' };
+  }
+
+  generateExpansionPredictions() {
+    const languages = Object.keys(this.stats.languages);
+    if (languages.length < 2) return;
+
+    const baseLanguage = this.stats.summary.baseLanguage || this.config.sourceLanguage || 'en';
+    const expansionRef = this.getExpansionReference();
+    const predictions = {
+      baseLanguage,
+      perLanguage: {},
+      perKey: {},
+      topExpandedKeys: [],
+      summary: { safe: 0, warning: 0, critical: 0, total: 0 }
+    };
+
+    for (const lang of languages) {
+      if (lang === baseLanguage) continue;
+
+      const baseStats = this.stats.languages[baseLanguage];
+      const langStats = this.stats.languages[lang];
+      if (!baseStats || !langStats) continue;
+
+      const actualRatio = baseStats.totalCharacters > 0
+        ? ((langStats.totalCharacters - baseStats.totalCharacters) / baseStats.totalCharacters) * 100
+        : 0;
+
+      const referenceRatio = expansionRef[lang] || 10;
+      const risk = this.classifyExpansionRisk(actualRatio);
+      predictions.perLanguage[lang] = {
+        actualExpansionPercent: Math.round(actualRatio * 100) / 100,
+        referenceExpansionPercent: referenceRatio,
+        riskTier: risk.tier,
+        riskLabel: risk.label,
+        totalKeys: langStats.totalKeys,
+        totalChars: langStats.totalCharacters
+      };
+    }
+
+    const keyEntries = [];
+    for (const [key, langData] of Object.entries(this.stats.keys)) {
+      const baseData = langData[baseLanguage];
+      if (!baseData || baseData.length === 0) continue;
+
+      const keyPredictions = {};
+      for (const [lang, data] of Object.entries(langData)) {
+        if (lang === baseLanguage) continue;
+        const ratio = ((data.length - baseData.length) / baseData.length) * 100;
+        const risk = this.classifyExpansionRisk(ratio);
+        keyPredictions[lang] = {
+          sourceLength: baseData.length,
+          targetLength: data.length,
+          expansionPercent: Math.round(ratio * 100) / 100,
+          riskTier: risk.tier
+        };
+        predictions.summary[risk.tier]++;
+        predictions.summary.total++;
+      }
+
+      const maxExpansion = Math.max(...Object.values(keyPredictions).map(p => Math.abs(p.expansionPercent)));
+      keyEntries.push({ key, maxExpansion, predictions: keyPredictions });
+    }
+
+    keyEntries.sort((a, b) => b.maxExpansion - a.maxExpansion);
+    predictions.topExpandedKeys = keyEntries.slice(0, 30);
+    predictions.perKey = Object.fromEntries(keyEntries.slice(0, 200).map(e => [e.key, e.predictions]));
+
+    this.expansionPredictions = predictions;
+    this.stats.expansionPredictions = predictions;
+  }
+
+  displayExpansionPredictions() {
+    if (!this.expansionPredictions) return;
+
+    const p = this.expansionPredictions;
+    console.log('\n' + '='.repeat(60));
+    console.log('  EXPANSION PREDICTION ANALYSIS');
+    console.log('='.repeat(60));
+    console.log(`  Base Language: ${p.baseLanguage}`);
+    console.log(`  Total Key-Language Pairs Analyzed: ${p.summary.total}`);
+    console.log(`  Safe (<30%): ${p.summary.safe} | Warning (30-50%): ${p.summary.warning} | Critical (>50%): ${p.summary.critical}`);
+
+    console.log('\n  PER-LANGUAGE EXPANSION RATIOS:');
+    const langRows = Object.entries(p.perLanguage).map(([lang, data]) => ({
+      language: lang,
+      actual: `${data.actualExpansionPercent > 0 ? '+' : ''}${data.actualExpansionPercent}%`,
+      reference: `${data.referenceExpansionPercent > 0 ? '+' : ''}${data.referenceExpansionPercent}%`,
+      risk: data.riskLabel
+    }));
+    console.log(this.createTable([
+      { key: 'language', label: 'Language' },
+      { key: 'actual', label: 'Actual', align: 'right' },
+      { key: 'reference', label: 'Reference', align: 'right' },
+      { key: 'risk', label: 'Risk Tier' }
+    ], langRows));
+
+    if (p.topExpandedKeys.length > 0) {
+      console.log('\n  TOP EXPANDED KEYS (highest risk of UI overflow):');
+      const keyRows = p.topExpandedKeys.slice(0, 15).map(entry => {
+        const langs = Object.entries(entry.predictions).map(([l, d]) =>
+          `${l}:${d.expansionPercent > 0 ? '+' : ''}${d.expansionPercent}%`
+        ).join(' ');
+        return { key: entry.key, maxExp: `${entry.maxExpansion > 0 ? '+' : ''}${Math.round(entry.maxExpansion)}%`, languages: langs };
+      });
+      console.log(this.createTable([
+        { key: 'key', label: 'Key' },
+        { key: 'maxExp', label: 'Max Exp', align: 'right' },
+        { key: 'languages', label: 'Per-Language' }
+      ], keyRows));
+    }
+
+    console.log('\n  RECOMMENDATIONS:');
+    if (p.summary.critical > 0) {
+      console.log(`  - ${p.summary.critical} key-language pairs have >50% expansion — review UI layouts for truncation risk`);
+    }
+    if (p.summary.warning > 0) {
+      console.log(`  - ${p.summary.warning} key-language pairs have 30-50% expansion — test on target languages`);
+    }
+    console.log('  - Use the reference expansion ratios to plan UI element sizing for unsupported languages');
+  }
+
   // Display concise folder-level results
   displayFolderResults() {
     console.log("\n" + t("sizing.sizing_analysis_results"));
@@ -618,6 +764,10 @@ class I18nSizingAnalyzer {
     
     if (this.detailedKeys) {
       this.displayDetailedKeys();
+    }
+
+    if (this.predictExpansion && this.expansionPredictions) {
+      this.displayExpansionPredictions();
     }
   }
 
@@ -884,6 +1034,39 @@ Generated: ${new Date().toISOString()}
       });
     }
 
+    // Expansion predictions
+    if (this.expansionPredictions) {
+      const ep = this.expansionPredictions;
+      report += `
+## Expansion Prediction Analysis
+
+### Summary
+- Base Language: ${ep.baseLanguage}
+- Safe (<30%): ${ep.summary.safe}
+- Warning (30-50%): ${ep.summary.warning}
+- Critical (>50%): ${ep.summary.critical}
+- Total Pairs: ${ep.summary.total}
+
+### Per-Language Ratios
+`;
+      Object.entries(ep.perLanguage).forEach(([lang, data]) => {
+        report += `- ${lang}: ${data.actualExpansionPercent > 0 ? '+' : ''}${data.actualExpansionPercent}% (ref: ${data.referenceExpansionPercent > 0 ? '+' : ''}${data.referenceExpansionPercent}%) [${data.riskLabel}]\n`;
+      });
+
+      if (ep.topExpandedKeys.length > 0) {
+        report += `
+### Top Expanded Keys
+`;
+        ep.topExpandedKeys.slice(0, 30).forEach((entry, idx) => {
+          report += `${idx + 1}. ${entry.key} (max: ${entry.maxExpansion > 0 ? '+' : ''}${Math.round(entry.maxExpansion)}%)\n`;
+          Object.entries(entry.predictions).forEach(([l, d]) => {
+            report += `   ${l}: ${d.sourceLength} → ${d.targetLength} chars (${d.expansionPercent > 0 ? '+' : ''}${d.expansionPercent}%) [${d.riskTier}]\n`;
+          });
+          report += '\n';
+        });
+      }
+    }
+
     return report;
   }
 
@@ -1018,6 +1201,8 @@ Generated: ${new Date().toISOString()}
           options.d = options.detailed;
         } else if (key === 'detailed-keys') {
           options['detailed-keys'] = value.toLowerCase() !== 'false';
+        } else if (key === 'predict-expansion') {
+          options['predict-expansion'] = value.toLowerCase() !== 'false';
         } else if (key === 'output-dir') {
           options['output-dir'] = value;
         }
@@ -1080,6 +1265,13 @@ Generated: ${new Date().toISOString()}
           } else {
             options['detailed-keys'] = true;
           }
+        } else if (key === 'predict-expansion') {
+          if (nextArg && !nextArg.startsWith('-') && ['true', 'false'].includes(nextArg.toLowerCase())) {
+            options['predict-expansion'] = nextArg.toLowerCase() !== 'false';
+            i++;
+          } else {
+            options['predict-expansion'] = true;
+          }
         } else if (key === 'output-dir') {
           options['output-dir'] = nextArg || options['output-dir'];
           if (nextArg && !nextArg.startsWith('-')) i++;
@@ -1102,6 +1294,7 @@ Options:
   --source-language <code>    Source language baseline for comparisons (default: en)
   -d, --detailed              Generate detailed report with more information
   --detailed-keys             Show detailed key-level analysis
+  --predict-expansion         Predict UI layout expansion risk per language
   --output-dir <dir>          Output directory for reports (default: ./i18ntk-reports)
   --help                  Show this help message
 `);
@@ -1126,6 +1319,7 @@ Options:
     this.format = args.format || 'table';
     this.detailed = args.detailed;
     this.detailedKeys = args['detailed-keys'];
+    this.predictExpansion = args['predict-expansion'] || false;
     this.sourceLanguage = args['source-language'] || config.sourceLanguage || this.sourceLanguage || 'en';
 
     if (!fromMenu) {

@@ -11,13 +11,32 @@ const { envManager } = require('../utils/env-manager');
 let configManager = null;
 try { configManager = require('../utils/config-manager'); } catch (_) { /* optional */ }
 
-const state = {
+function createState(options = {}) {
+  return {
+    baseDir: resolveBaseDir(options.baseDir),
+    language: options.language || 'en',
+    fallbackLanguage: options.fallbackLanguage || 'en',
+    keySeparator: options.keySeparator || '.',
+    cache: new Map(),
+    lazy: options.lazy === true,
+    keyManifest: new Map(),
+    loadedFiles: new Set(),
+    eagerLoadedLanguages: new Set(),
+  };
+}
+
+const singletonState = {
   baseDir: null,                // absolute path to locales dir (e.g., ./locales)
   language: 'en',
   fallbackLanguage: 'en',
   keySeparator: '.',
   cache: new Map(),             // lang -> merged translations object
+  lazy: false,
+  keyManifest: new Map(),       // lang -> Map: keyName -> filePath
+  loadedFiles: new Set(),       // tracks loaded files in lazy mode
+  eagerLoadedLanguages: new Set(),
 };
+let singletonInitialized = false;
 
 // --- Utilities ---
 function stripBOMAndComments(s) {
@@ -98,12 +117,12 @@ function resolveBaseDir(explicitBaseDir) {
   }
 }
 
-function listJsonFilesRecursively(dir) {
+function listJsonFilesRecursively(dir, baseDir = dir) {
   const results = [];
   const stack = [dir];
   while (stack.length) {
     const d = stack.pop();
-    if (!SecurityUtils.safeExistsSync(d)) continue;
+    if (!SecurityUtils.safeExistsSync(d, baseDir)) continue;
     try {
       for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
         const full = path.join(d, entry.name);
@@ -120,6 +139,86 @@ function listJsonFilesRecursively(dir) {
   return results;
 }
 
+function loadKeyManifestFromDir(baseDir) {
+  const validatedBase = SecurityUtils.validatePath(baseDir, path.dirname(baseDir));
+  const baseStat = SecurityUtils.safeStatSync(validatedBase, path.dirname(validatedBase));
+  const baseRoot = baseStat && baseStat.isFile() ? path.dirname(validatedBase) : validatedBase;
+  const files = baseStat && baseStat.isFile() ? [validatedBase] : listJsonFilesRecursively(validatedBase, validatedBase);
+  const manifest = new Map();
+  const MAX_SIZE = 100 * 1024;
+  let currentSize = 0;
+
+  for (const file of files) {
+    let validated;
+    try { validated = SecurityUtils.validatePath(file, baseRoot); } catch (_) { continue; }
+    const rel = path.relative(baseRoot, validated);
+    if (rel.startsWith('..') || path.isAbsolute(rel)) continue;
+
+    try {
+      const data = readJsonSafe(validated);
+      if (!data || typeof data !== 'object') continue;
+
+      for (const key of Object.keys(data)) {
+        if (manifest.has(key)) continue;
+
+        const entrySize = JSON.stringify(key).length + JSON.stringify(validated).length + 5;
+        if (currentSize + entrySize > MAX_SIZE) break;
+
+        manifest.set(key, validated);
+        currentSize += entrySize;
+      }
+    } catch (_) { continue; }
+
+    if (currentSize >= MAX_SIZE) break;
+  }
+
+  return manifest;
+}
+
+function getLanguagePath(baseDir, lang) {
+  const langDir = path.join(baseDir, lang);
+  const langFile = path.join(baseDir, `${lang}.json`);
+  const langDirStat = SecurityUtils.safeStatSync(langDir, path.dirname(langDir));
+  if (langDirStat && langDirStat.isDirectory()) return langDir;
+  const langFileStat = SecurityUtils.safeStatSync(langFile, path.dirname(langFile));
+  if (langFileStat && langFileStat.isFile()) return langFile;
+  return null;
+}
+
+function getManifestForLanguage(runtimeState, lang) {
+  if (!runtimeState.keyManifest) runtimeState.keyManifest = new Map();
+  if (runtimeState.keyManifest.has(lang)) return runtimeState.keyManifest.get(lang);
+
+  const languagePath = getLanguagePath(runtimeState.baseDir, lang);
+  const manifest = languagePath ? loadKeyManifestFromDir(languagePath) : new Map();
+  runtimeState.keyManifest.set(lang, manifest);
+  return manifest;
+}
+
+function loadFileLazy(runtimeState, filePath, lang) {
+  const baseDir = runtimeState.baseDir;
+  if (!baseDir) throw new Error('baseDir not initialized');
+
+  let validatedPath;
+  try { validatedPath = SecurityUtils.validatePath(filePath, baseDir); } catch (e) {
+    throw new Error(`Invalid file path for lazy load: ${e.message}`);
+  }
+
+  const rel = path.relative(baseDir, validatedPath);
+  if (rel.startsWith('..') || path.isAbsolute(rel)) {
+    throw new Error(`File outside base directory: ${filePath}`);
+  }
+
+  const data = readJsonSafe(validatedPath);
+  if (data && typeof data === 'object') {
+    let cacheEntry = runtimeState.cache.get(lang);
+    if (!cacheEntry) cacheEntry = {};
+    deepMerge(cacheEntry, data);
+    runtimeState.cache.set(lang, cacheEntry);
+  }
+  return data;
+}
+
 function readLanguageFromBase(baseDir, lang) {
   const merged = {};
   const langFile = path.join(baseDir, `${lang}.json`);
@@ -128,7 +227,7 @@ function readLanguageFromBase(baseDir, lang) {
   // Prefer folder if exists, otherwise single file
   const langDirStat = SecurityUtils.safeStatSync(langDir, path.dirname(langDir));
   if (langDirStat && langDirStat.isDirectory()) {
-    const files = listJsonFilesRecursively(langDir);
+    const files = listJsonFilesRecursively(langDir, langDir);
     for (const file of files) {
       try {
         const data = readJsonSafe(file);
@@ -150,10 +249,19 @@ function readLanguageFromBase(baseDir, lang) {
   return merged;
 }
 
-function getTranslations(lang) {
-  if (state.cache.has(lang)) return state.cache.get(lang);
-  const data = readLanguageFromBase(state.baseDir, lang);
-  state.cache.set(lang, data);
+function getTranslationsForState(runtimeState, lang) {
+  if (!runtimeState.baseDir) runtimeState.baseDir = resolveBaseDir();
+
+  if (runtimeState.lazy) {
+    if (runtimeState.cache.has(lang)) return runtimeState.cache.get(lang);
+    runtimeState.cache.set(lang, {});
+    getManifestForLanguage(runtimeState, lang);
+    return runtimeState.cache.get(lang);
+  }
+
+  if (runtimeState.cache.has(lang)) return runtimeState.cache.get(lang);
+  const data = readLanguageFromBase(runtimeState.baseDir, lang);
+  runtimeState.cache.set(lang, data);
   return data;
 }
 
@@ -165,7 +273,7 @@ function interpolate(template, params) {
 }
 
 // Resolve a dotted key path from an object
-function resolveKey(obj, key, sep = '.') {
+function resolveKey(obj, key, sep = '.', runtimeState = null, lang = null) {
   if (!obj || typeof obj !== 'object') return undefined;
   if (!key || typeof key !== 'string') return undefined;
   const parts = key.split(sep);
@@ -174,6 +282,29 @@ function resolveKey(obj, key, sep = '.') {
     if (cur && Object.prototype.hasOwnProperty.call(cur, p)) {
       cur = cur[p];
     } else {
+      if (runtimeState && lang && runtimeState.lazy) {
+        const manifest = getManifestForLanguage(runtimeState, lang);
+        for (let i = parts.length; i > 0; i--) {
+          const prefix = parts.slice(0, i).join(sep);
+          const filePath = manifest.get(prefix);
+          const loadedFileKey = `${lang}\0${filePath}`;
+          if (filePath && !runtimeState.loadedFiles.has(loadedFileKey)) {
+            loadFileLazy(runtimeState, filePath, lang);
+            runtimeState.loadedFiles.add(loadedFileKey);
+            const langData = runtimeState.cache.get(lang);
+            return resolveKey(langData, key, sep, runtimeState, lang);
+          }
+        }
+        if (!runtimeState.eagerLoadedLanguages.has(lang)) {
+          const fullData = readLanguageFromBase(runtimeState.baseDir, lang);
+          const langData = runtimeState.cache.get(lang) || {};
+          deepMerge(langData, fullData);
+          runtimeState.cache.set(lang, langData);
+          runtimeState.eagerLoadedLanguages.add(lang);
+          return resolveKey(langData, key, sep, runtimeState, lang);
+        }
+        return undefined;
+      }
       return undefined;
     }
   }
@@ -182,35 +313,71 @@ function resolveKey(obj, key, sep = '.') {
 
 // --- Public API ---
 function initRuntime(options = {}) {
-  state.baseDir = resolveBaseDir(options.baseDir);
-  state.language = options.language || state.language || 'en';
-  state.fallbackLanguage = options.fallbackLanguage || state.fallbackLanguage || 'en';
-  state.keySeparator = options.keySeparator || state.keySeparator || '.';
-  // Optional prewarm caches
-  state.cache.clear();
-  if (options.preload === true) {
-    getTranslations(state.language);
-    if (state.fallbackLanguage && state.fallbackLanguage !== state.language) {
-      getTranslations(state.fallbackLanguage);
+  const runtimeState = createState(options);
+  preload(runtimeState, options.preload);
+
+  if (!singletonInitialized) {
+    singletonState.baseDir = runtimeState.baseDir;
+    singletonState.language = runtimeState.language;
+    singletonState.fallbackLanguage = runtimeState.fallbackLanguage;
+    singletonState.keySeparator = runtimeState.keySeparator;
+    singletonState.lazy = runtimeState.lazy;
+    singletonState.keyManifest = new Map();
+    singletonState.loadedFiles = new Set();
+    singletonState.eagerLoadedLanguages = new Set();
+    singletonState.cache.clear();
+    preload(singletonState, options.preload);
+    singletonInitialized = true;
+  }
+
+  return createRuntime(runtimeState);
+}
+
+function preload(runtimeState, shouldPreload) {
+  if (shouldPreload === true) {
+    if (runtimeState.lazy) {
+      getManifestForLanguage(runtimeState, runtimeState.language);
+      if (!runtimeState.cache.has(runtimeState.language)) {
+        runtimeState.cache.set(runtimeState.language, {});
+      }
+      if (runtimeState.fallbackLanguage && runtimeState.fallbackLanguage !== runtimeState.language) {
+        getManifestForLanguage(runtimeState, runtimeState.fallbackLanguage);
+        if (!runtimeState.cache.has(runtimeState.fallbackLanguage)) {
+          runtimeState.cache.set(runtimeState.fallbackLanguage, {});
+        }
+      }
+    } else {
+      getTranslationsForState(runtimeState, runtimeState.language);
+      if (runtimeState.fallbackLanguage && runtimeState.fallbackLanguage !== runtimeState.language) {
+        getTranslationsForState(runtimeState, runtimeState.fallbackLanguage);
+      }
     }
   }
+}
+
+function createRuntime(runtimeState) {
+  const runtimeTranslate = (key, params) => translateWithState(runtimeState, key, params);
   return {
-    t: translate,
-    translate,
-    setLanguage,
-    getLanguage,
-    getAvailableLanguages,
-    refresh,
+    t: runtimeTranslate,
+    translate: runtimeTranslate,
+    setLanguage: (lang) => setLanguageForState(runtimeState, lang),
+    getLanguage: () => getLanguageForState(runtimeState),
+    getAvailableLanguages: () => getAvailableLanguagesForState(runtimeState),
+    refresh: (lang) => refreshForState(runtimeState, lang),
   };
 }
 
 function translate(key, params = {}) {
-  const langData = getTranslations(state.language);
-  let value = resolveKey(langData, key, state.keySeparator);
+  return translateWithState(singletonState, key, params);
+}
 
-  if (typeof value === 'undefined' && state.fallbackLanguage) {
-    const fbData = getTranslations(state.fallbackLanguage);
-    value = resolveKey(fbData, key, state.keySeparator);
+function translateWithState(runtimeState, key, params = {}) {
+  const langData = getTranslationsForState(runtimeState, runtimeState.language);
+  let value = resolveKey(langData, key, runtimeState.keySeparator, runtimeState, runtimeState.language);
+
+  if (typeof value === 'undefined' && runtimeState.fallbackLanguage) {
+    const fbData = getTranslationsForState(runtimeState, runtimeState.fallbackLanguage);
+    value = resolveKey(fbData, key, runtimeState.keySeparator, runtimeState, runtimeState.fallbackLanguage);
   }
 
   if (typeof value === 'string') return interpolate(value, params);
@@ -218,26 +385,38 @@ function translate(key, params = {}) {
 }
 
 function setLanguage(lang) {
+  setLanguageForState(singletonState, lang);
+}
+
+function setLanguageForState(runtimeState, lang) {
   if (!lang || typeof lang !== 'string') return;
-  state.language = lang;
+  runtimeState.language = lang;
 }
 
 function getLanguage() {
-  return state.language;
+  return getLanguageForState(singletonState);
+}
+
+function getLanguageForState(runtimeState) {
+  return runtimeState.language;
 }
 
 function getAvailableLanguages() {
+  return getAvailableLanguagesForState(singletonState);
+}
+
+function getAvailableLanguagesForState(runtimeState) {
   const langs = new Set();
-  if (!state.baseDir) state.baseDir = resolveBaseDir();
-  if (!SecurityUtils.safeExistsSync(state.baseDir)) return ['en'];
+  if (!runtimeState.baseDir) runtimeState.baseDir = resolveBaseDir();
+  if (!SecurityUtils.safeExistsSync(runtimeState.baseDir, path.dirname(runtimeState.baseDir))) return ['en'];
   try {
-    for (const entry of fs.readdirSync(state.baseDir, { withFileTypes: true })) {
+    for (const entry of fs.readdirSync(runtimeState.baseDir, { withFileTypes: true })) {
       if (entry.isFile() && entry.name.toLowerCase().endsWith('.json')) {
         langs.add(entry.name.replace(/\.json$/i, ''));
       } else if (entry.isDirectory()) {
         const lang = entry.name;
-        const idx = path.join(state.baseDir, lang, `${lang}.json`);
-        if (SecurityUtils.safeExistsSync(idx)) langs.add(lang);
+        const idx = path.join(runtimeState.baseDir, lang, `${lang}.json`);
+        if (SecurityUtils.safeExistsSync(idx, path.dirname(idx))) langs.add(lang);
         else langs.add(lang); // be permissive
       }
     }
@@ -248,9 +427,19 @@ function getAvailableLanguages() {
   return Array.from(langs.size ? langs : new Set(['en']));
 }
 
-function refresh(lang = state.language) {
-  if (state.cache.has(lang)) state.cache.delete(lang);
-  if (lang !== state.fallbackLanguage && state.cache.has(state.fallbackLanguage)) {
+function refresh(lang) {
+  refreshForState(singletonState, lang);
+}
+
+function refreshForState(runtimeState, lang = runtimeState.language) {
+  if (runtimeState.cache.has(lang)) runtimeState.cache.delete(lang);
+  if (runtimeState.eagerLoadedLanguages) runtimeState.eagerLoadedLanguages.delete(lang);
+  if (runtimeState.loadedFiles) {
+    for (const fileKey of Array.from(runtimeState.loadedFiles)) {
+      if (fileKey.startsWith(`${lang}\0`)) runtimeState.loadedFiles.delete(fileKey);
+    }
+  }
+  if (lang !== runtimeState.fallbackLanguage && runtimeState.cache.has(runtimeState.fallbackLanguage)) {
     // do nothing; keep or clear on demand
   }
 }
@@ -263,4 +452,5 @@ module.exports = {
   getLanguage,
   getAvailableLanguages,
   refresh,
+  loadKeyManifest: (baseDir) => loadKeyManifestFromDir(baseDir || singletonState.baseDir),
 };

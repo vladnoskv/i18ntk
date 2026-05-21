@@ -29,7 +29,7 @@ const runtime = require('i18ntk/runtime');
 ## Initialization
 
 ```js
-runtime.initRuntime({
+const i18n = runtime.initRuntime({
   baseDir: './locales',
   language: 'en',
   fallbackLanguage: 'en',
@@ -51,20 +51,20 @@ Supported options:
 ```js
 const runtime = require('i18ntk/runtime');
 
-runtime.initRuntime({
+const i18n = runtime.initRuntime({
   baseDir: './locales',
   language: 'en',
   fallbackLanguage: 'en',
   preload: true
 });
 
-console.log(runtime.t('common.hello'));
-console.log(runtime.translate('menu.home'));
+console.log(i18n.t('common.hello'));
+console.log(i18n.translate('menu.home'));
 
-runtime.setLanguage('fr');
-console.log(runtime.getLanguage());
-console.log(runtime.getAvailableLanguages());
-runtime.refresh('fr');
+i18n.setLanguage('fr');
+console.log(i18n.getLanguage());
+console.log(i18n.getAvailableLanguages());
+i18n.refresh('fr');
 ```
 
 ## Behavior
@@ -73,6 +73,8 @@ runtime.refresh('fr');
 - Missing keys fall back to the fallback language when available.
 - If a key is still missing, the key string is returned.
 - Interpolation supports `{{name}}` and `{name}`.
+- Each `initRuntime()` call returns an independent runtime instance with its own language, fallback language, base directory, and cache.
+- Module-level helpers such as `runtime.t()` remain available for compatibility and use the first initialized runtime configuration. Prefer the returned instance for new code.
 
 ## Directory Layout
 

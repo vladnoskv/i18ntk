@@ -190,7 +190,7 @@ Backup settings are optional:
 ```js
 const runtime = require('i18ntk/runtime');
 
-runtime.initRuntime({
+const i18n = runtime.initRuntime({
   baseDir: './locales',
   language: 'en',
   fallbackLanguage: 'en'

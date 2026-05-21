@@ -7,6 +7,7 @@ export interface InitOptions {
   fallbackLanguage?: string;
   keySeparator?: string;
   preload?: boolean;
+  lazy?: boolean;
 }
 
 export type TranslateParams = Record<string, unknown>;
@@ -27,3 +28,4 @@ export function setLanguage(lang: string): void;
 export function getLanguage(): string;
 export function getAvailableLanguages(): string[];
 export function refresh(lang?: string): void;
+export function loadKeyManifest(baseDir?: string): Map<string, string>;

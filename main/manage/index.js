@@ -1220,7 +1220,10 @@ class I18nManager {
             { path: path.join(process.cwd(), 'scripts', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
             { path: path.join(process.cwd(), 'scripts', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
             { path: path.join(process.cwd(), 'settings', 'backups'), name: 'Settings Backups', type: 'backups' },
-            { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' }
+            { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' },
+            { path: path.join(process.cwd(), '.cache'), name: 'Cache', type: 'cache', includeAllFiles: true },
+            { path: path.join(process.cwd(), 'settings', '.cache'), name: 'Settings Cache', type: 'cache', includeAllFiles: true },
+            { path: path.join(process.cwd(), '.cache-ultra'), name: 'Performance Cache', type: 'cache', includeAllFiles: true }
         ].filter(dir => dir.path && typeof dir.path === 'string');
 
         try {
@@ -1233,7 +1236,9 @@ class I18nManager {
             for (const dir of targetDirs) {
                 const validatedDirPath = SecurityUtils.validatePath(dir.path, projectRoot);
                 if (validatedDirPath && SecurityUtils.safeExistsSync(validatedDirPath, projectRoot)) {
-                    const files = this.getAllReportFiles(validatedDirPath, validatedDirPath);
+                    const files = this.getAllReportFiles(validatedDirPath, validatedDirPath, {
+                        includeAllFiles: dir.includeAllFiles === true
+                    });
                     if (files.length > 0) {
                         availableDirs.push({
                             ...dir,
@@ -1368,12 +1373,13 @@ class I18nManager {
         await this.showInteractiveMenu();
     }
 
-    getAllReportFiles(dir, rootDir = dir) {
+    getAllReportFiles(dir, rootDir = dir, options = {}) {
         if (!dir || typeof dir !== 'string') {
             return [];
         }
 
         let files = [];
+        const includeAllFiles = options.includeAllFiles === true;
 
         try {
             const validatedDir = SecurityUtils.validatePath(dir, rootDir);
@@ -1399,8 +1405,8 @@ class I18nManager {
                     const stat = fs.statSync(safeFullPath);
 
                     if (stat.isDirectory()) {
-                        files.push(...this.getAllReportFiles(safeFullPath, rootDir));
-                    } else if (
+                        files.push(...this.getAllReportFiles(safeFullPath, rootDir, options));
+                    } else if (includeAllFiles || (
                         // Common report file extensions
                         item.endsWith('.json') ||
                         item.endsWith('.html') ||
@@ -1415,7 +1421,7 @@ class I18nManager {
                         item.includes('report_') ||
                         item.includes('analysis-') ||
                         item.includes('validation-')
-                    ) {
+                    )) {
                         files.push(safeFullPath);
                     }
                 } catch (error) {

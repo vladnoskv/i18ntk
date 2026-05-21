@@ -474,7 +474,7 @@ export interface BasicI18nRuntime {
   /**
    * Refresh translations
    */
-  refresh(): void;
+  refresh(language?: string): void;
 }
 
 /**
@@ -492,7 +492,13 @@ export declare function initRuntime(options: {
   fallbackLanguage?: string;
   keySeparator?: string;
   preload?: boolean;
+  lazy?: boolean;
 }): BasicI18nRuntime;
+
+/**
+ * Build the lightweight runtime lazy-loading key manifest for a locale path.
+ */
+export declare function loadKeyManifest(baseDir?: string): Map<string, string>;
 
 /**
  * Type guards (runtime checks, not exported by actual code)

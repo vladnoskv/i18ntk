@@ -84,14 +84,14 @@ The manager flow runs a dry-run preview first when enabled, then writes translat
 ```js
 const runtime = require('i18ntk/runtime');
 
-runtime.initRuntime({
+const i18n = runtime.initRuntime({
   baseDir: './locales',
   language: 'en',
   fallbackLanguage: 'en',
   preload: true
 });
 
-console.log(runtime.t('common.hello'));
+console.log(i18n.t('common.hello'));
 ```
 
 ## 7. Keep configuration in sync

@@ -5,6 +5,8 @@
 const fs = require('fs');
 const fsp = fs.promises;
 const path = require('path');
+const crypto = require('crypto');
+const SecurityUtils = require('../utils/security');
 
 // Simple CLI argument parser
 function parseArgs(args) {
@@ -37,6 +39,93 @@ function parseArgs(args) {
 
   return result;
 }
+function handleError(error) {
+  logger.error(error.message || 'Unknown error');
+  logger.debug(error.stack || error.message);
+  process.exit(1);
+}
+
+function computeFileHash(filePath) {
+  const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath));
+  if (content === null) return null;
+  try {
+    const parsed = JSON.parse(content);
+    const normalized = JSON.stringify(parsed);
+    return crypto.createHash('sha256').update(normalized).digest('hex');
+  } catch {
+    return crypto.createHash('sha256').update(content).digest('hex');
+  }
+}
+
+function computeContentHash(content) {
+  if (typeof content === 'object' && content !== null) {
+    const normalized = JSON.stringify(content);
+    return crypto.createHash('sha256').update(normalized).digest('hex');
+  }
+  const str = String(content);
+  return crypto.createHash('sha256').update(str).digest('hex');
+}
+
+async function findMostRecentBackup(backupDirPath) {
+  try {
+    const files = await fsp.readdir(backupDirPath);
+    const backups = [];
+    for (const file of files) {
+      if (file.startsWith('backup-') && file.endsWith('.json')) {
+        const filePath = path.join(backupDirPath, file);
+        const stats = await fsp.stat(filePath);
+        backups.push({ name: file, path: filePath, mtime: stats.mtime });
+      }
+    }
+    backups.sort((a, b) => b.mtime - a.mtime);
+    return backups[0] || null;
+  } catch (err) {
+    if (err.code === 'ENOENT') return null;
+    throw err;
+  }
+}
+
+function getParentHashes(parentData) {
+  if (parentData._meta && parentData._meta.hashes) {
+    return parentData._meta.hashes;
+  }
+  const hashes = {};
+  for (const [file, content] of Object.entries(parentData)) {
+    if (typeof content === 'object' && content !== null) {
+      hashes[file] = computeContentHash(content);
+    }
+  }
+  return hashes;
+}
+
+async function buildRestoreChain(startPath, startData) {
+  const chain = [{ path: startPath, data: startData }];
+  let current = startData;
+  let currentPath = startPath;
+
+  while (current._meta && current._meta.parent) {
+    if (chain.length >= 11) {
+      throw new Error('Chain broken: incremental backup chain exceeds the maximum depth of 10');
+    }
+    const parentName = current._meta.parent;
+    const parentDir = path.dirname(currentPath);
+    const parentPath = path.join(parentDir, parentName);
+    if (!SecurityUtils.safeExistsSync(parentPath, parentDir)) {
+      throw new Error(`Chain broken: parent backup '${parentName}' not found in ${parentDir}`);
+    }
+    const parentRaw = SecurityUtils.safeReadFileSync(parentPath, parentDir, 'utf8');
+    if (parentRaw === null) {
+      throw new Error(`Chain broken: cannot read parent backup '${parentName}'`);
+    }
+    current = JSON.parse(parentRaw);
+    currentPath = parentPath;
+    chain.push({ path: currentPath, data: current });
+  }
+
+  chain.reverse();
+  return chain;
+}
+
 const configManager = require('../utils/config-manager');
 const { logger } = require('../utils/logger');
 const { colors } = require('../utils/logger');
@@ -103,23 +192,49 @@ Options:
   --output <path>   Output directory for backup/restore
   --force           Overwrite existing files without prompting
   --keep <number>   Number of backups to keep (default: 10)
+  --incremental     Create an incremental backup (only changed files)
 `);
 }
 
 // Command handlers
+async function cleanupOldBackups(backupDirPath) {
+  try {
+    const files = await fsp.readdir(backupDirPath);
+    const backupFiles = files
+      .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
+      .map(file => ({
+        name: file,
+        path: path.join(backupDirPath, file),
+        time: fs.statSync(path.join(backupDirPath, file)).mtime.getTime()
+      }))
+      .sort((a, b) => b.time - a.time);
+
+    const toDelete = backupFiles.slice(maxBackups);
+    for (const file of toDelete) {
+      try {
+        await fsp.unlink(file.path);
+      } catch (err) {
+        logger.warn(`Could not remove old backup ${file.name}: ${err.message}`);
+      }
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      logger.warn(`Error during cleanup: ${err.message}`);
+    }
+  }
+}
+
 async function handleCreate(args) {
-  // Use absolute path for the locales directory
   const dir = args._[1] || path.join(__dirname, '..', 'locales');
   const outputDir = args.output || backupDir;
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupName = `backup-${timestamp}.json`;
   const backupPath = path.join(outputDir, backupName);
+  const isIncremental = !!args.incremental;
 
-  // Log the paths for debugging
   logger.debug(`Source directory: ${dir}`);
   logger.debug(`Backup will be saved to: ${backupPath}`);
 
-  // Create backup directory if it doesn't exist
   try {
     await fsp.mkdir(outputDir, { recursive: true });
     logger.debug(`Created backup directory: ${outputDir}`);
@@ -131,7 +246,6 @@ async function handleCreate(args) {
     logger.debug(`Using existing backup directory: ${outputDir}`);
   }
 
-  // Validate directory
   const sourceDir = path.resolve(dir);
   try {
     const stats = await fsp.stat(sourceDir);
@@ -147,39 +261,89 @@ async function handleCreate(args) {
   }
 
   logger.info('\nCreating backup...');
-  
-  // Read all files in the directory
+
   const files = (await fsp.readdir(sourceDir, { withFileTypes: true }))
     .filter(dirent => dirent.isFile() && dirent.name.endsWith('.json'))
     .map(dirent => dirent.name);
-    
+
   if (files.length === 0) {
     logger.warn('No JSON files found in the specified directory');
     process.exit(0);
   }
-  
-  // Read all translation files
+
   const translations = {};
+  const hashes = {};
   for (const file of files) {
     const filePath = path.join(sourceDir, file);
     try {
-      const content = JSON.parse(await fsp.readFile(filePath, 'utf8'));
-      translations[file] = content;
+      const rawContent = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
+      if (rawContent === null) {
+        logger.error(`Could not read file ${file}`);
+        continue;
+      }
+      translations[file] = JSON.parse(rawContent);
+      hashes[file] = computeFileHash(filePath);
     } catch (error) {
       logger.error(`Could not read file ${file}: ${error.message}`);
     }
   }
-  
-  // Create the backup
-  await fsp.writeFile(backupPath, JSON.stringify(translations, null, 2));
+
+  let meta = {
+    type: 'full',
+    parent: null,
+    chainDepth: 0,
+    hashes: hashes
+  };
+  let filesToInclude = translations;
+
+  if (isIncremental) {
+    const parentBackup = await findMostRecentBackup(outputDir);
+    if (parentBackup) {
+      const parentRaw = SecurityUtils.safeReadFileSync(parentBackup.path, path.dirname(parentBackup.path), 'utf8');
+      const parentData = JSON.parse(parentRaw);
+      const parentDepth = (parentData._meta && parentData._meta.chainDepth) || 0;
+      if (parentDepth >= 10) {
+        logger.info('  Incremental chain depth limit reached; creating a new full backup');
+      } else {
+        const parentHashes = getParentHashes(parentData);
+
+        const changedFiles = {};
+        for (const [file, content] of Object.entries(translations)) {
+          if (!parentHashes[file] || hashes[file] !== parentHashes[file]) {
+            changedFiles[file] = content;
+          }
+        }
+        filesToInclude = changedFiles;
+
+        meta = {
+          type: 'incremental',
+          parent: parentBackup.name,
+          chainDepth: parentDepth + 1,
+          hashes: hashes
+        };
+
+        logger.info(`  Incremental mode: found ${Object.keys(filesToInclude).length} changed files (parent: ${parentBackup.name}, depth: ${meta.chainDepth})`);
+      }
+    } else {
+      logger.info('  No previous backup found; creating full backup');
+    }
+  }
+
+  const backupData = { _meta: meta };
+  for (const [file, content] of Object.entries(filesToInclude)) {
+    backupData[file] = content;
+  }
+
+  await fsp.writeFile(backupPath, JSON.stringify(backupData, null, 2));
   const stats = await fsp.stat(backupPath);
-  
+
   logger.success('Backup created successfully');
   logger.info(`  Location: ${backupPath}`);
   logger.info(`  Size: ${(stats.size / 1024).toFixed(2)} KB`);
   logger.info(`  Timestamp: ${new Date().toLocaleString()}`);
-  
-  // Clean up old backups
+  logger.info(`  Files included: ${Object.keys(filesToInclude).length}`);
+  logger.info(`  Type: ${meta.type}`);
+
   await cleanupOldBackups(outputDir);
 }
 
@@ -190,37 +354,50 @@ async function handleRestore(args) {
   }
 
   const backupPath = path.resolve(process.cwd(), backupFile);
-  const outputDir = args.output 
-    ? path.resolve(process.cwd(), args.output) 
+  const outputDir = args.output
+    ? path.resolve(process.cwd(), args.output)
     : path.join(process.cwd(), 'restored');
-  
-  // Validate backup file
+
   if (!SecurityUtils.safeExistsSync(backupPath, process.cwd())) {
     throw new Error(`Backup file not found: ${backupPath}`);
   }
-  
+
   logger.info('\nRestoring backup...');
-  
+
   try {
-    // Read the backup file
-    const backupData = await fsp.readFile(backupPath, 'utf8');
-    const translations = JSON.parse(backupData);
-    
-    // Create output directory if it doesn't exist
-    try {
+    const backupData = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
+    const isIncremental = backupData._meta && backupData._meta.type === 'incremental';
+
+    if (isIncremental) {
+      const chain = await buildRestoreChain(backupPath, backupData);
       await fsp.mkdir(outputDir, { recursive: true });
-    } catch (err) {
-      if (err.code !== 'EEXIST') throw err;
+
+      const restoredFiles = new Set();
+      for (const entry of chain) {
+        for (const [file, content] of Object.entries(entry.data)) {
+          if (file === '_meta') continue;
+          const filePath = path.join(outputDir, file);
+          SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(content, null, 2), path.dirname(filePath), 'utf8');
+          restoredFiles.add(file);
+        }
+      }
+
+      logger.success('Incremental backup restored successfully');
+      logger.info(`  ${restoredFiles.size} files restored across ${chain.length} backup(s) to: ${outputDir}`);
+    } else {
+      await fsp.mkdir(outputDir, { recursive: true });
+
+      let count = 0;
+      for (const [file, content] of Object.entries(backupData)) {
+        if (file === '_meta') continue;
+        const filePath = path.join(outputDir, file);
+        SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(content, null, 2), path.dirname(filePath), 'utf8');
+        count++;
+      }
+
+      logger.success('Backup restored successfully');
+      logger.info(`  Restored ${count} files to: ${outputDir}`);
     }
-    
-    // Write the restored files
-    for (const [file, content] of Object.entries(translations)) {
-      const filePath = path.join(outputDir, file);
-      await fsp.writeFile(filePath, JSON.stringify(content, null, 2));
-    }
-    
-    logger.success('Backup restored successfully');
-    logger.info(`  Restored ${Object.keys(translations).length} files to: ${outputDir}`);
   } catch (error) {
     handleError(error);
   }
@@ -298,25 +475,91 @@ async function handleVerify(args) {
   }
 
   const backupPath = path.resolve(process.cwd(), backupFile);
-  
-  // Validate backup file
+
   if (!SecurityUtils.safeExistsSync(backupPath, process.cwd())) {
     throw new Error(`Backup file not found: ${backupPath}`);
   }
-  
+
   logger.info('\nVerifying backup...');
-  
+
   try {
-    const data = await fsp.readFile(backupPath, 'utf8');
-    const content = JSON.parse(data);
-    
-    if (typeof content === 'object' && content !== null) {
-      const fileCount = Object.keys(content).length;
+    const data = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
+
+    if (data._meta && data._meta.hashes) {
+      logger.info('  Performing hash chain verification...');
+
+      const chain = [{ path: backupPath, data: data }];
+      let current = data;
+      let currentPath = backupPath;
+      while (current._meta && current._meta.parent) {
+        if (chain.length >= 11) {
+          logger.warn('  Chain broken: maximum incremental depth of 10 exceeded');
+          break;
+        }
+        const parentName = current._meta.parent;
+        const parentDir = path.dirname(currentPath);
+        const parentPath = path.join(parentDir, parentName);
+        if (!SecurityUtils.safeExistsSync(parentPath, parentDir)) {
+          logger.warn(`  Chain broken: parent '${parentName}' not found`);
+          break;
+        }
+        const parentRaw = SecurityUtils.safeReadFileSync(parentPath, parentDir, 'utf8');
+        if (parentRaw === null) {
+          logger.warn(`  Chain broken: cannot read parent '${parentName}'`);
+          break;
+        }
+        current = JSON.parse(parentRaw);
+        currentPath = parentPath;
+        chain.push({ path: currentPath, data: current });
+      }
+
+      let allValid = true;
+      const reconstructed = {};
+      for (const entry of chain) {
+        const entryMeta = entry.data._meta;
+        const entryHashes = entryMeta ? entryMeta.hashes : null;
+        const entryName = path.basename(entry.path);
+
+        for (const [file, content] of Object.entries(entry.data)) {
+          if (file !== '_meta') reconstructed[file] = content;
+        }
+
+        if (!entryHashes) {
+          logger.warn(`  ${entryName}: no manifest hashes (legacy backup)`);
+          continue;
+        }
+
+        let entryValid = true;
+        for (const [file, expectedHash] of Object.entries(entryHashes)) {
+          if (!Object.prototype.hasOwnProperty.call(reconstructed, file)) {
+            logger.warn(`    Missing file in manifest: ${file}`);
+            entryValid = false;
+            continue;
+          }
+          const computedHash = computeContentHash(reconstructed[file]);
+          if (computedHash !== expectedHash) {
+            logger.error(`    Hash mismatch: ${file} (expected ${expectedHash.slice(0, 12)}..., got ${computedHash.slice(0, 12)}...)`);
+            entryValid = false;
+          }
+        }
+
+        if (entryValid) {
+          logger.success(`  ${entryName}: ${Object.keys(entryHashes).length} file(s) verified`);
+        } else {
+          allValid = false;
+        }
+      }
+
+      if (allValid) {
+        logger.success('\nBackup chain verification passed');
+      } else {
+        logger.error('\nBackup chain verification FAILED');
+      }
+    } else {
+      const fileCount = Object.keys(data).filter(k => k !== '_meta').length;
       logger.success('Backup is valid');
       logger.info(`  Contains ${fileCount} translation files`);
       logger.info(`  Last modified: ${(await fsp.stat(backupPath)).mtime.toLocaleString()}`);
-    } else {
-      throw new Error('Invalid backup format');
     }
   } catch (error) {
     logger.error('Backup verification failed!');

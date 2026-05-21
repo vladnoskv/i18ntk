@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-05-21
+
+### Added
+- **Sizing Expansion Prediction**: `i18ntk-sizing` now supports `--predict-expansion` flag that computes per-key character-count expansion ratios across languages and classifies them into Safe/Warning/Critical risk tiers for UI layout planning. Includes a built-in language-pair expansion reference table (EN→DE 35%, EN→RU 50%, EN→JA -40%, etc.).
+- **Watch Hot Reload**: `utils/watch-locales.js` rewritten as an EventEmitter-compatible watcher with debouncing (300ms default) and SHA-256 hash tracking to skip no-change saves. Returns a callable watcher object with `change`, `add`, `unlink`, `error` events and `stop()`.
+- **Usage Dead Key Detection**: `i18ntk-usage` adds `--cleanup` and `--dry-run-delete` flags that identify unused translation keys with confidence scores (0.0–1.0) factoring dynamic access patterns, comment references, and file recency. Produces a `.dead-keys.json` report for safe review before deletion.
+- **Validator Key Naming Convention**: `i18ntk-validate` adds `--enforce-key-style` flag and `keyStyle` config setting supporting `dot.notation`, `snake_case`, `camelCase`, `kebab-case`, and `flat` conventions. Reports all violating keys with suggested canonical forms.
+- **Scanner Multi-Language Detection**: `i18ntk-scanner` adds `--source-language` flag with character-class profiles for 12+ languages (English, German, French, Spanish, Japanese, Chinese, Russian, Korean, Arabic, Hindi, etc.). Language-specific stopword lists and key generation with transliteration for non-Latin scripts.
+- **Backup Incremental Mode**: `i18ntk-backup` adds `--incremental` flag producing differential backups with SHA-256 file hashing, parent-chain metadata, and chained restore (oldest full → incremental diffs in order). `verify` validates the hash chain. Chain depth capped at 10.
+- **Runtime Lazy Loading**: `runtime/index.js` adds `lazy: true` option to `initRuntime()`. Defers locale file loading until the first key access, guided by an auto-generated key-to-file manifest. Falls back to eager loading if manifest is missing. Manifest capped at 100KB with path containment validation.
+- **Protection Context-Aware Rules**: `utils/translate/protection.js` extends the protection config schema to support context rules (`after:word`, `before:word`, `standalone`, `surrounded:left,right`). Plain string terms remain fully backward compatible. Total context rules capped at 100.
+
+### Fixed
+- `i18ntk/runtime` `initRuntime()` now returns independent runtime instances with separate language, fallback language, base directory, and cache state. Later `initRuntime()` calls no longer overwrite earlier returned runtimes or the module-level compatibility singleton.
+
+### Changed
+- `watchLocales()` now returns a callable watcher object with EventEmitter methods instead of only a bare `stop` function. Existing `const stop = watchLocales(...); stop();` usage remains supported. The returned object fires `change`, `add`, `unlink`, `error` events. If a callback function is passed as the second argument, it is auto-subscribed to `change` and `add` for backward compatibility.
+- **BREAKING**: `i18ntk-sizing` JSON reports now include `expansionPredictions` at the top level when `--predict-expansion` is used. This field is additive — existing report fields are preserved.
+
+### Security
+- All new features reuse existing `SecurityUtils.safe*` wrappers for file I/O, path validation, and input sanitization.
+- Watch module validates all directory paths against project root with containment checks and caps at 50 directories.
+- Runtime lazy-loading manifest entries validated for path containment and size-limited to 100KB.
+- Protection context rules parsed from constrained DSL — never accepts raw user-controlled regex from config.
+- Backup incremental chain depth capped at 10 to prevent resource exhaustion; hash chain verified before restore.
+
 ## [3.3.0] - 2026-05-20
 
 ### Changed

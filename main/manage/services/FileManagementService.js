@@ -129,7 +129,10 @@ module.exports = class FileManagementService {
       { path: path.join(process.cwd(), 'scripts', 'debug', 'logs'), name: 'Debug Logs', type: 'logs' },
       { path: path.join(process.cwd(), 'scripts', 'debug', 'reports'), name: 'Debug Reports', type: 'reports' },
       { path: path.join(process.cwd(), 'settings', 'backups'), name: 'Settings Backups', type: 'backups' },
-      { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' }
+      { path: path.join(process.cwd(), 'utils', 'i18ntk-reports'), name: 'Utils Reports', type: 'reports' },
+      { path: path.join(process.cwd(), '.cache'), name: 'Cache', type: 'cache', includeAllFiles: true },
+      { path: path.join(process.cwd(), 'settings', '.cache'), name: 'Settings Cache', type: 'cache', includeAllFiles: true },
+      { path: path.join(process.cwd(), '.cache-ultra'), name: 'Performance Cache', type: 'cache', includeAllFiles: true }
     ].filter(dir => dir.path && typeof dir.path === 'string');
 
     try {
@@ -140,7 +143,9 @@ module.exports = class FileManagementService {
       // Check which directories exist and have files
       for (const dir of targetDirs) {
         if (SecurityUtils.safeExistsSync(dir.path)) {
-          const files = this.getAllReportFiles(dir.path);
+          const files = this.getAllReportFiles(dir.path, {
+            includeAllFiles: dir.includeAllFiles === true
+          });
           if (files.length > 0) {
             availableDirs.push({
               ...dir,
@@ -267,12 +272,13 @@ module.exports = class FileManagementService {
    * @param {string} dir - Directory to scan
    * @returns {string[]} Array of file paths
    */
-  getAllReportFiles(dir) {
+  getAllReportFiles(dir, options = {}) {
     if (!dir || typeof dir !== 'string') {
       return [];
     }
 
     let files = [];
+    const includeAllFiles = options.includeAllFiles === true;
 
     try {
       if (!SecurityUtils.safeExistsSync(dir)) {
@@ -287,8 +293,8 @@ module.exports = class FileManagementService {
           const stat = fs.statSync(fullPath);
 
           if (stat.isDirectory()) {
-            files.push(...this.getAllReportFiles(fullPath));
-          } else if (
+            files.push(...this.getAllReportFiles(fullPath, options));
+          } else if (includeAllFiles || (
             // Common report file extensions
             item.endsWith('.json') ||
             item.endsWith('.html') ||
@@ -303,7 +309,7 @@ module.exports = class FileManagementService {
             item.includes('report_') ||
             item.includes('analysis-') ||
             item.includes('validation-')
-          ) {
+          )) {
             files.push(fullPath);
           }
         } catch (error) {

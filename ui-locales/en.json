@@ -1209,7 +1209,7 @@
   },
   "operations": {
     "completed": "✅ Operation completed successfully!",
-    "deleteReportsTitle": "🗑️ Delete Reports & Logs",
+    "deleteReportsTitle": "🗑️ Delete Reports, Logs & Cache",
     "scanningForFiles": "🔍 Scanning for files to delete...",
     "noFilesFoundToDelete": "✅ No files found to delete.",
     "availableDirectories": "📁 Available directories:",

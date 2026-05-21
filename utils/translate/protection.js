@@ -3,6 +3,8 @@ const SecurityUtils = require('../security');
 
 const DEFAULT_PROTECTION_FILE = 'i18ntk-auto-translate.json';
 const TOKEN_PREFIX = '__I18NTK_KEEP_';
+const MAX_CONTEXT_RULES = 100;
+const MAX_CONTEXT_INPUT_LENGTH = 200;
 
 function defaultProtectionConfig() {
   return {
@@ -49,11 +51,84 @@ function compilePatterns(patterns) {
   return compiled;
 }
 
+function parseContextString(context) {
+  if (typeof context !== 'string') return null;
+  if (context.length > MAX_CONTEXT_INPUT_LENGTH) return null;
+
+  const trimmed = context.trim();
+
+  if (trimmed === 'standalone') {
+    return { mode: 'standalone' };
+  }
+
+  const afterMatch = trimmed.match(/^after:(.+)$/i);
+  if (afterMatch) {
+    const words = afterMatch[1].split('|').map(w => w.trim()).filter(Boolean);
+    if (words.length === 0) return null;
+    return { mode: 'after', words };
+  }
+
+  const beforeMatch = trimmed.match(/^before:(.+)$/i);
+  if (beforeMatch) {
+    const words = beforeMatch[1].split('|').map(w => w.trim()).filter(Boolean);
+    if (words.length === 0) return null;
+    return { mode: 'before', words };
+  }
+
+  const surroundedMatch = trimmed.match(/^surrounded:(.+),(.+)$/i);
+  if (surroundedMatch) {
+    const leftWords = surroundedMatch[1].split('|').map(w => w.trim()).filter(Boolean);
+    const rightWords = surroundedMatch[2].split('|').map(w => w.trim()).filter(Boolean);
+    if (leftWords.length === 0 || rightWords.length === 0) return null;
+    return { mode: 'surrounded', left: leftWords, right: rightWords };
+  }
+
+  return null;
+}
+
+function parseContextRule(rule) {
+  if (typeof rule === 'string') {
+    const trimmed = rule.trim();
+    if (!trimmed || trimmed.length > MAX_CONTEXT_INPUT_LENGTH) return null;
+    return { value: trimmed, type: 'global' };
+  }
+
+  if (
+    typeof rule === 'object' &&
+    rule !== null &&
+    typeof rule.value === 'string' &&
+    typeof rule.context === 'string'
+  ) {
+    const value = rule.value.trim();
+    const rawContext = rule.context;
+
+    if (!value || value.length > MAX_CONTEXT_INPUT_LENGTH) return null;
+    if (!rawContext || rawContext.length > MAX_CONTEXT_INPUT_LENGTH) return null;
+
+    const parsed = parseContextString(rawContext);
+    if (!parsed) return null;
+
+    return { value, type: 'context', context: parsed };
+  }
+
+  return null;
+}
+
 function normalizeProtectionConfig(config = {}, filePath = null) {
   const terms = normalizeList(config.terms);
   const keys = normalizeList(config.keys);
   const values = normalizeList(config.values);
   const patterns = normalizeList(config.patterns);
+
+  const rawTerms = Array.isArray(config.terms) ? config.terms : [];
+  const normalizedTerms = [];
+  for (const term of rawTerms) {
+    const normalized = parseContextRule(term);
+    if (normalized) {
+      normalizedTerms.push(normalized);
+    }
+  }
+  const cappedTerms = normalizedTerms.slice(0, MAX_CONTEXT_RULES);
 
   return {
     enabled: true,
@@ -62,7 +137,8 @@ function normalizeProtectionConfig(config = {}, filePath = null) {
     keys,
     values,
     patterns,
-    compiledPatterns: compilePatterns(patterns)
+    compiledPatterns: compilePatterns(patterns),
+    normalizedTerms: cappedTerms
   };
 }
 
@@ -98,10 +174,20 @@ function saveProtectionFile(filePath, config, options = {}) {
   if (!SecurityUtils.safeExistsSync(dir, path.dirname(dir))) {
     SecurityUtils.safeMkdirSync(dir, path.dirname(dir), { recursive: true });
   }
+
+  const rawTerms = Array.isArray(config?.terms) ? config.terms : [];
+  const sanitizedTerms = [];
+  for (const term of rawTerms) {
+    const normalized = parseContextRule(term);
+    if (normalized) {
+      sanitizedTerms.push(term);
+    }
+  }
+
   const nextConfig = {
     ...defaultProtectionConfig(),
     ...(config || {}),
-    terms: normalizeList(config?.terms),
+    terms: sanitizedTerms.slice(0, MAX_CONTEXT_RULES),
     keys: normalizeList(config?.keys),
     values: normalizeList(config?.values),
     patterns: normalizeList(config?.patterns)
@@ -156,7 +242,8 @@ function shouldPreserveWholeValue(keyPath, value, protection) {
   if (!protection || protection.enabled === false) return false;
   if (protection.keys.some(rule => keyMatchesRule(keyPath, rule))) return true;
   const valueText = String(value);
-  return protection.values.includes(valueText) || protection.terms.includes(valueText);
+  return protection.values.includes(valueText) ||
+    (protection.normalizedTerms || []).some(rule => rule.value === valueText);
 }
 
 function addReplacement(replacements, original) {
@@ -165,13 +252,65 @@ function addReplacement(replacements, original) {
   replacements.push({ original });
 }
 
+function shouldProtectInContext(value, rule, index, fullText) {
+  if (rule.type === 'global') return true;
+
+  const { context } = rule;
+  const before = fullText.substring(0, index);
+  const after = fullText.substring(index + value.length);
+
+  if (context.mode === 'after') {
+    const alternation = context.words.map(escapeRegExp).join('|');
+    const regex = new RegExp(`\\b(${alternation})\\s+$`, 'i');
+    return regex.test(before);
+  }
+
+  if (context.mode === 'before') {
+    const alternation = context.words.map(escapeRegExp).join('|');
+    const regex = new RegExp(`^\\s+(${alternation})\\b`, 'i');
+    return regex.test(after);
+  }
+
+  if (context.mode === 'standalone') {
+    const isBoundaryBefore = before === '' || /\s$/.test(before);
+    const isBoundaryAfter = after === '' || /^[\s.,!?;:]/.test(after);
+    return isBoundaryBefore && isBoundaryAfter;
+  }
+
+  if (context.mode === 'surrounded') {
+    const leftAlternation = context.left.map(escapeRegExp).join('|');
+    const rightAlternation = context.right.map(escapeRegExp).join('|');
+    const leftRegex = new RegExp(`\\b(${leftAlternation})\\s+$`, 'i');
+    const rightRegex = new RegExp(`^\\s+(${rightAlternation})\\b`, 'i');
+    return leftRegex.test(before) && rightRegex.test(after);
+  }
+
+  return false;
+}
+
 function collectReplacements(value, protection) {
   const text = String(value);
   const replacements = [];
 
-  for (const term of protection.terms || []) {
-    if (text.includes(term)) {
-      addReplacement(replacements, term);
+  const rules = protection.normalizedTerms || (protection.terms || [])
+    .map(parseContextRule)
+    .filter(Boolean);
+  for (const rule of rules) {
+    if (rule.type === 'global') {
+      if (text.includes(rule.value)) {
+        addReplacement(replacements, rule.value);
+      }
+    } else {
+      if (!rule.value) continue;
+      const escaped = escapeRegExp(rule.value);
+      const regex = new RegExp(escaped, 'gi');
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        if (shouldProtectInContext(rule.value, rule, match.index, text)) {
+          addReplacement(replacements, match[0]);
+        }
+        if (match[0] === '') regex.lastIndex++;
+      }
     }
   }
 
@@ -221,6 +360,7 @@ function hasProtectionRules(protection) {
   return Boolean(
     protection &&
     (
+      (protection.normalizedTerms && protection.normalizedTerms.length) ||
       protection.terms.length ||
       protection.keys.length ||
       protection.values.length ||
@@ -235,6 +375,7 @@ module.exports = {
   defaultProtectionConfig,
   hasProtectionRules,
   loadProtectionConfig,
+  parseContextRule,
   protectText,
   readProtectionFile,
   restoreText,

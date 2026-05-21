@@ -1,4 +1,4 @@
-# i18ntk v3.3.0
+# i18ntk v4.0.0
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/3.3.0)](https://socket.dev/npm/package/i18ntk/overview/3.3.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.0.0)](https://socket.dev/npm/package/i18ntk/overview/4.0.0)
 
 ## Install
 
@@ -30,12 +30,17 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
-## What's New in 3.3.0
+## What's New in 4.0.0
 
-- **SECURITY**: Eliminated all 21 dynamic `require()` calls flagged by Socket.dev; 20 converted to static string literals, 1 gated with `SecurityUtils.validatePath`.
-- **AUTO TRANSLATE**: Added provider selection for Google, DeepL, and LibreTranslate.
-- **FIX**: `i18ntk-complete` now fills missing target-language keys from English values with language prefixes instead of `NOT_TRANSLATED`.
-- **DOCS**: SECURITY.md updated with Socket.dev analysis disclaimer explaining expected alerts for a CLI/i18n toolkit.
+- **SIZING**: `--predict-expansion` flag computes per-key expansion ratios across languages with Safe/Warning/Critical risk tiers for UI layout planning.
+- **WATCH**: `watchLocales()` now returns an EventEmitter-compatible watcher with debounced `change`/`add`/`unlink`/`error` events and SHA-256 hash tracking.
+- **USAGE**: `--cleanup` and `--dry-run-delete` flags identify dead translation keys with confidence scores.
+- **VALIDATOR**: `--enforce-key-style` enforces dot.notation, snake_case, camelCase, kebab-case, or flat naming conventions.
+- **SCANNER**: `--source-language` supports multi-language hardcoded text detection with 12+ language profiles.
+- **BACKUP**: `--incremental` flag creates differential backups with SHA-256 hashing and chained restores.
+- **RUNTIME**: `lazy: true` option defers locale file loading until first key access for lower memory usage.
+- **PROTECTION**: Context-aware rules (`after:word`, `before:word`, `standalone`, `surrounded:left,right`) for precise term masking.
+- **FIX**: `initRuntime()` now returns independent instances with isolated language and cache state.
 
 See [CHANGELOG.md](./CHANGELOG.md) for more release details.
 
@@ -214,7 +219,12 @@ Example `i18ntk-auto-translate.json`:
 ```json
 {
   "version": 1,
-  "terms": ["BrandName", "PRODUCT_CODE", "API"],
+  "terms": [
+    "BrandName",
+    "PRODUCT_CODE",
+    { "value": "OK", "context": "after:Click|Press|Tap" },
+    { "value": "API", "context": "standalone" }
+  ],
   "keys": ["app.brandName", "legal.companyName", "product.*.symbol"],
   "values": ["BrandName Ltd", "support@example.com"],
   "patterns": ["[A-Z]{2,}-\\d+"]
@@ -222,6 +232,8 @@ Example `i18ntk-auto-translate.json`:
 ```
 
 - `terms` are masked before translation and restored exactly afterward.
+  - **Plain strings**: masked everywhere (backward compatible).
+  - **Context objects**: masked only in specific contexts (`after:word`, `before:word`, `standalone`, `surrounded:left,right`).
 - `keys` are exact key paths or `*` wildcard paths copied unchanged.
 - `values` are exact source values copied unchanged.
 - `patterns` are JavaScript regex strings for advanced protected substrings.
@@ -272,6 +284,136 @@ i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
 
 Use `--detailed` to print per-file rows in the terminal.
 
+### Expansion Prediction (New in 4.0.0)
+
+Predict UI layout overflow risk by analyzing per-key character-count expansion across languages:
+
+```bash
+i18ntk-sizing --source-dir ./locales --predict-expansion --output-report
+```
+
+Expansion ratios are classified into risk tiers:
+
+- **Safe** (<30% expansion): no UI impact expected
+- **Warning** (30–50%): may overflow in tight layouts — test on target languages
+- **Critical** (>50%): high risk of truncation — review UI element sizing
+
+The report includes a built-in language-pair expansion reference table (EN→DE +35%, EN→RU +50%, EN→JA −40%, etc.) and lists the top-30 most-expanded keys.
+
+## Scanner: Multi-Language Detection (New in 4.0.0)
+
+`i18ntk-scanner` now supports detecting hardcoded text in multiple source languages beyond English:
+
+```bash
+i18ntk-scanner --source-dir ./src --source-language de
+i18ntk-scanner --source-dir ./src --source-language ja --output-report
+```
+
+Supported language profiles (12+): English, German, French, Spanish, Japanese, Chinese, Russian, Korean, Arabic, Hindi, and more. Each profile includes language-specific character ranges, stopword lists for false-positive filtering, and transliteration rules for key generation.
+
+## Usage: Dead Key Detection (New in 4.0.0)
+
+`i18ntk-usage` can identify translation keys that are defined but never referenced in source code:
+
+```bash
+i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup
+i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup --dry-run-delete
+```
+
+Each dead key receives a confidence score (0.0–1.0) factoring:
+- Dynamic key patterns (e.g., `` t(`prefix.${dynamic}`) ``) — lower score
+- Key appears in source code comments or JSDoc — medium score
+- Parent file recently modified (<30 days) — medium score
+- No references found anywhere — high score (>0.8)
+
+The `--dry-run-delete` flag writes a `.dead-keys.json` report for review before any destructive action.
+
+## Validator: Key Naming Conventions (New in 4.0.0)
+
+Enforce consistent translation key naming across your project:
+
+```bash
+i18ntk-validate --enforce-key-style
+```
+
+Configure the expected style in `.i18ntk-config`:
+
+```json
+{
+  "keyStyle": "dot.notation"
+}
+```
+
+Supported styles: `dot.notation`, `snake_case`, `camelCase`, `kebab-case`, `flat`. Violations are reported as warnings with suggested canonical forms.
+
+## Watch: Hot Reload (New in 4.0.0)
+
+`utils/watch-locales.js` now provides debounced file watching with EventEmitter support:
+
+```js
+const watchLocales = require('i18ntk/utils/watch-locales');
+const watcher = watchLocales('./locales');
+
+watcher.on('change', (filePath) => {
+  console.log('Locale changed:', filePath);
+});
+
+watcher.on('add', (filePath) => {
+  console.log('Locale added:', filePath);
+});
+
+// Later:
+watcher.stop();
+```
+
+Features: 300ms debounce (configurable), SHA-256 hash tracking to skip no-change saves, and a maximum of 50 watched directories.
+
+### Migration
+
+The `watchLocales` return value gained EventEmitter methods in v4.0.0. Existing stop-function usage still works:
+
+```js
+const stop = watchLocales('./locales', onChange);
+```
+
+Can be updated to:
+
+```js
+const watcher = watchLocales('./locales');
+watcher.on('change', onChange);
+watcher.stop();
+```
+
+Passing a callback as the second argument is still supported — it auto-subscribes to `change` and `add` events.
+
+## Backup: Incremental Mode (New in 4.0.0)
+
+Create differential backups that only include changed files:
+
+```bash
+i18ntk-backup create ./locales --incremental
+```
+
+Incremental backups store SHA-256 hashes per file and a parent-chain reference. Restoring an incremental backup automatically chains from the oldest full backup through each incremental diff in order. Chain depth is capped at 10 increments. Use `verify` to validate the hash chain.
+
+## Runtime: Lazy Loading (New in 4.0.0)
+
+Reduce memory usage by deferring locale file loads until first key access:
+
+```js
+const runtime = require('i18ntk/runtime');
+
+const i18n = runtime.initRuntime({
+  baseDir: './locales',
+  language: 'en',
+  lazy: true
+});
+
+console.log(i18n.t('common.hello')); // loads common.json on first access
+```
+
+When `lazy: true`, the runtime builds a key-to-file manifest on first access and loads individual files on demand. Files are loaded once and cached. If the manifest is missing or incomplete, the runtime falls back to full eager loading for that language. Manifest size is capped at 100KB with path containment validation.
+
 ## Runtime API
 
 Use `i18ntk/runtime` when an application needs to read locale JSON files at runtime.
@@ -279,7 +421,7 @@ Use `i18ntk/runtime` when an application needs to read locale JSON files at runt
 ```js
 const runtime = require('i18ntk/runtime');
 
-runtime.initRuntime({
+const i18n = runtime.initRuntime({
   baseDir: './locales',
   language: 'en',
   fallbackLanguage: 'en',
@@ -287,11 +429,11 @@ runtime.initRuntime({
   preload: true
 });
 
-console.log(runtime.t('common.hello'));
-runtime.setLanguage('fr');
-console.log(runtime.getLanguage());
-console.log(runtime.getAvailableLanguages());
-runtime.refresh('fr');
+console.log(i18n.t('common.hello'));
+i18n.setLanguage('fr');
+console.log(i18n.getLanguage());
+console.log(i18n.getAvailableLanguages());
+i18n.refresh('fr');
 ```
 
 See [docs/runtime.md](./docs/runtime.md) for runtime details.
@@ -304,7 +446,7 @@ Example:
 
 ```json
 {
-  "version": "3.3.0",
+  "version": "4.0.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
