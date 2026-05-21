@@ -29,6 +29,7 @@ const {
   restoreText,
   shouldPreserveWholeValue
 } = require('../utils/translate/protection');
+const { loadTranslations } = require('../utils/i18n-helper');
 
 describe('Security Tests', () => {
   describe('Path Validation', () => {
@@ -486,6 +487,46 @@ describe('Security Tests', () => {
         assert.strictEqual(updated.hello, 'Hello');
         assert.strictEqual(updated.nested.value, 'Value');
       } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('should interpolate manager fixer status output values', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-fixer-output-'));
+      fs.mkdirSync(path.join(dir, 'en'), { recursive: true });
+      fs.mkdirSync(path.join(dir, 'de'), { recursive: true });
+
+      fs.writeFileSync(path.join(dir, 'en', 'common.json'), JSON.stringify({ hello: 'Hello' }, null, 2));
+      fs.writeFileSync(path.join(dir, 'de', 'common.json'), JSON.stringify({ hello: 'Hallo' }, null, 2));
+
+      const originalArgv = process.argv;
+      const originalLog = console.log;
+      const lines = [];
+
+      try {
+        loadTranslations('en', path.resolve(__dirname, '../ui-locales'));
+        process.argv = ['node', 'i18ntk', 'fix'];
+        console.log = (...args) => lines.push(args.join(' '));
+
+        const command = new FixerCommand({
+          sourceDir: dir,
+          sourceLanguage: 'en',
+          backup: { enabled: false },
+          notTranslatedMarker: 'NOT_TRANSLATED'
+        });
+        command.sourceDir = dir;
+
+        await command.fix();
+
+        const output = lines.join('\n');
+        assert.match(output, /Starting translation fixing for languages: de/);
+        assert.match(output, new RegExp(`Source directory: ${dir.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')}`));
+        assert.match(output, /de: fixed 0 key\(s\), skipped 0\./);
+        assert.match(output, /Total issues found: 0/);
+        assert.doesNotMatch(output, /\{(?:languages|sourceDir|skipped|totalIssues)\}/);
+      } finally {
+        console.log = originalLog;
+        process.argv = originalArgv;
         fs.rmSync(dir, { recursive: true, force: true });
       }
     });

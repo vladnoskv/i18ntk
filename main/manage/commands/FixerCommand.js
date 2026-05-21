@@ -530,9 +530,11 @@ class FixerCommand {
             this.dryRun = args.dryRun || false;
             this.force = args.force || false;
 
+            const languages = this.getAvailableLanguages();
+
             if (!args.json) {
-                console.log(t('fixer.starting'));
-                console.log(t('fixer.sourceDirectory', { dir: path.resolve(this.sourceDir) }));
+                console.log(t('fixer.starting', { languages: languages.join(', ') || 'none' }));
+                console.log(t('fixer.sourceDirectory', { sourceDir: path.resolve(this.sourceDir) }));
                 console.log(t('fixer.dryRunMode', { mode: this.dryRun ? 'ON' : 'OFF' }));
             }
 
@@ -540,8 +542,6 @@ class FixerCommand {
             if (!args.noBackup && !this.dryRun && this.config?.backup?.enabled === true) {
                 await this.createBackup();
             }
-
-            const languages = this.getAvailableLanguages();
 
             if (languages.length === 0) {
                 const error = t('fixer.noLanguages') || 'No target languages found.';
@@ -574,10 +574,12 @@ class FixerCommand {
                 totalFixed += fixes.fixedIssues;
 
                 if (!args.json) {
+                    const skipped = Math.max(0, fixes.totalIssues - fixes.fixedIssues);
                     console.log(t('fixer.languageFixed', {
                         language,
                         issues: fixes.totalIssues,
-                        fixed: fixes.fixedIssues
+                        fixed: fixes.fixedIssues,
+                        skipped
                     }));
                 }
             }
@@ -598,7 +600,7 @@ class FixerCommand {
             // Summary
             console.log(t('fixer.summary'));
             console.log('='.repeat(50));
-            console.log(t('fixer.totalIssues', { count: totalIssues }));
+            console.log(t('fixer.totalIssues', { totalIssues }));
             console.log(t('fixer.totalFixed', { count: totalFixed }));
 
             if (this.backupDir && !args.noBackup && this.config?.backup?.enabled === true) {

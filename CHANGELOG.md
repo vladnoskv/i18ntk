@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `i18ntk/runtime` `initRuntime()` now returns independent runtime instances with separate language, fallback language, base directory, and cache state. Later `initRuntime()` calls no longer overwrite earlier returned runtimes or the module-level compatibility singleton.
+- Manager option 7 ("Fix placeholder translations") now interpolates fixer status values correctly instead of printing raw `{languages}`, `{sourceDir}`, `{skipped}`, or `{totalIssues}` placeholders.
 
 ### Changed
 - `watchLocales()` now returns a callable watcher object with EventEmitter methods instead of only a bare `stop` function. Existing `const stop = watchLocales(...); stop();` usage remains supported. The returned object fires `change`, `add`, `unlink`, `error` events. If a callback function is passed as the second argument, it is auto-subscribed to `change` and `add` for backward compatibility.
