@@ -66,6 +66,27 @@ function computeContentHash(content) {
   return crypto.createHash('sha256').update(str).digest('hex');
 }
 
+async function collectJsonFiles(rootDir, currentDir = rootDir) {
+  const entries = await fsp.readdir(currentDir, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(currentDir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await collectJsonFiles(rootDir, fullPath));
+      continue;
+    }
+    if (!entry.isFile() || !entry.name.endsWith('.json')) {
+      continue;
+    }
+
+    const relativePath = path.relative(rootDir, fullPath).split(path.sep).join('/');
+    files.push({ relativePath, fullPath });
+  }
+
+  return files;
+}
+
 async function findMostRecentBackup(backupDirPath) {
   try {
     const files = await fsp.readdir(backupDirPath);
@@ -138,6 +159,51 @@ function readBackupData(backupPath, baseDir) {
     throw new Error(`Unable to read backup: ${path.basename(backupPath)}`);
   }
   return JSON.parse(raw);
+}
+
+function validateBackupEntryName(fileName) {
+  if (!fileName || typeof fileName !== 'string') {
+    throw new Error('Invalid backup entry name');
+  }
+  if (fileName === '_meta') {
+    return null;
+  }
+  if (fileName.includes('\0') || /^[a-zA-Z]:/.test(fileName)) {
+    throw new Error(`Unsafe backup entry name: ${fileName}`);
+  }
+
+  const normalizedSeparators = fileName.replace(/\\/g, '/');
+  const rawSegments = normalizedSeparators.split('/');
+  const normalized = path.posix.normalize(normalizedSeparators);
+  const segments = normalized.split('/');
+
+  if (
+    path.posix.isAbsolute(normalizedSeparators) ||
+    rawSegments.some(segment => !segment || segment === '.' || segment === '..') ||
+    normalized === '.' ||
+    normalized === '..' ||
+    normalized.startsWith('../') ||
+    !normalized.endsWith('.json') ||
+    segments.some(segment => !segment || segment === '.' || segment === '..')
+  ) {
+    throw new Error(`Unsafe backup entry name: ${fileName}`);
+  }
+
+  return normalized;
+}
+
+function restoreBackupEntry(outputDir, fileName, content) {
+  const safeName = validateBackupEntryName(fileName);
+  if (!safeName) return false;
+
+  const filePath = SecurityUtils.safeJoin(outputDir, safeName);
+  if (!filePath) {
+    throw new Error(`Backup entry escapes restore directory: ${fileName}`);
+  }
+  if (!SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(content, null, 2), outputDir, 'utf8')) {
+    throw new Error(`Unable to restore backup entry: ${fileName}`);
+  }
+  return true;
 }
 
 function collectProtectedChainNames(backupDirPath, keptFiles) {
@@ -327,9 +393,7 @@ async function handleCreate(args) {
 
   logger.info('\nCreating backup...');
 
-  const files = (await fsp.readdir(sourceDir, { withFileTypes: true }))
-    .filter(dirent => dirent.isFile() && dirent.name.endsWith('.json'))
-    .map(dirent => dirent.name);
+  const files = await collectJsonFiles(sourceDir);
 
   if (files.length === 0) {
     logger.warn('No JSON files found in the specified directory');
@@ -339,17 +403,17 @@ async function handleCreate(args) {
   const translations = {};
   const hashes = {};
   for (const file of files) {
-    const filePath = path.join(sourceDir, file);
+    const filePath = file.fullPath;
     try {
       const rawContent = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
       if (rawContent === null) {
-        logger.error(`Could not read file ${file}`);
+        logger.error(`Could not read file ${file.relativePath}`);
         continue;
       }
-      translations[file] = JSON.parse(rawContent);
-      hashes[file] = computeFileHash(filePath);
+      translations[file.relativePath] = JSON.parse(rawContent);
+      hashes[file.relativePath] = computeFileHash(filePath);
     } catch (error) {
-      logger.error(`Could not read file ${file}: ${error.message}`);
+      logger.error(`Could not read file ${file.relativePath}: ${error.message}`);
     }
   }
 
@@ -440,10 +504,9 @@ async function handleRestore(args) {
       const restoredFiles = new Set();
       for (const entry of chain) {
         for (const [file, content] of Object.entries(entry.data)) {
-          if (file === '_meta') continue;
-          const filePath = path.join(outputDir, file);
-          SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(content, null, 2), path.dirname(filePath), 'utf8');
-          restoredFiles.add(file);
+          if (restoreBackupEntry(outputDir, file, content)) {
+            restoredFiles.add(file);
+          }
         }
       }
 
@@ -454,10 +517,9 @@ async function handleRestore(args) {
 
       let count = 0;
       for (const [file, content] of Object.entries(backupData)) {
-        if (file === '_meta') continue;
-        const filePath = path.join(outputDir, file);
-        SecurityUtils.safeWriteFileSync(filePath, JSON.stringify(content, null, 2), path.dirname(filePath), 'utf8');
-        count++;
+        if (restoreBackupEntry(outputDir, file, content)) {
+          count++;
+        }
       }
 
       logger.success('Backup restored successfully');

@@ -47,7 +47,10 @@ function initializeInternalRoots() {
     .map((entry) => entry.trim())
     .filter(Boolean);
   for (const prefix of custom) {
-    roots.add(path.resolve(prefix));
+    const resolved = path.resolve(prefix);
+    if ([...roots].some((root) => isPathInside(root, resolved))) {
+      roots.add(resolved);
+    }
   }
 
   return roots;
@@ -229,11 +232,6 @@ static _logging = false;
     const useI18n = i18n && i18n.isInitialized && typeof i18n.t === 'function';
 
     try {
-    // Check against whitelist patterns for our own package artifacts
-    if (SecurityUtils.PACKAGE_ARTIFACT_WHITELIST.some(pattern => pattern.test(filePath))) {
-    return filePath;
-    }
-    
     if (!filePath || typeof filePath !== 'string') {
         const message = useI18n
           ? i18n.t('security.pathValidationFailed')
@@ -299,7 +297,7 @@ static _logging = false;
 
       // Check for actual path traversal (going outside the base directory)
       const relativePath = path.relative(base, finalPath);
-      if (relativePath.startsWith('..')) {
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
         const message = useI18n
           ? i18n.t('security.pathTraversalAttempt')
           : 'Path traversal attempt';
@@ -623,11 +621,6 @@ static _logging = false;
   return false;
   }
   
-  // Check against whitelist patterns for our own package artifacts
-  if (SecurityUtils.PACKAGE_ARTIFACT_WHITELIST.some(pattern => pattern.test(filePath))) {
-  return true;
-  }
-
     // Allow legitimate Windows drive letter paths
     if (filePath.match(/^[A-Z]:[\/\\]/)) {
       const afterDrive = filePath.substring(3);

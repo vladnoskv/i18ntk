@@ -154,13 +154,14 @@ const DEFAULT_CONFIG = {
   },
   "autoTranslate": {
     "placeholderMode": "preserve",
-    "concurrency": 6,
+    "concurrency": 12,
     "batchSize": 100,
     "progressInterval": 25,
     "retryCount": 3,
     "retryDelay": 1000,
     "timeout": 15000,
     "dryRunFirst": true,
+    "onlyMissingOrEnglish": true,
     "reportStdout": true,
     "bom": false,
     "protectionEnabled": true,
@@ -169,7 +170,7 @@ const DEFAULT_CONFIG = {
     "promptProtectionUpdate": true
   },
   "reports": {
-    "format": "json",
+    "format": "markdown",
     "includeStats": true,
     "includeMissingKeys": true,
     "includeUnusedKeys": true,
@@ -306,6 +307,7 @@ const DEFAULT_CONFIG = {
   },
   "sourceLanguage": "en",
   "defaultLanguages": [
+    "en",
     "de",
     "es",
     "fr",

@@ -144,7 +144,7 @@ class SecurityChecker {
     this.log('Checking source files for security issues...');
 
     const sourceDirs = ['main', 'utils', 'scripts', 'settings'];
-    const excludeFiles = ['security.js', 'security-fixed.js', 'security-check.js', 'security-check-improved.js'];
+    const excludeFiles = ['security.js', 'security-check.js', 'security-check-improved.js'];
 
     for (const dir of sourceDirs) {
       const dirPath = path.join(this.projectRoot, dir);

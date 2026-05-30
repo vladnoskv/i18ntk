@@ -536,7 +536,7 @@
     "argsParseFailed": "L'analyse des arguments a échoué : {error}",
     "translationDiscoveryError": "Erreur de découverte de traduction : {error}",
     "fileTraversalError": "Erreur de parcours de fichier : {error}",
-    "sourceEqualsI18nWarn": "⚠️ Le répertoire source et le répertoire i18n sont identiques. Cela peut entraîner des problèmes avec l'analyse.",
+    "sourceEqualsI18nWarn": "{reason}. L?analyse d?usage ne scannera pas les fichiers de langue comme code source.",
     "i18nEqualsSourceWarn": "⚠️ Le répertoire I18n et le répertoire source sont identiques. Cela peut entraîner des problèmes avec l'analyse.",
     "usageAnalysisFailed": "⚠️ L'analyse de l'utilisation a échoué : {error}",
     "translationFileParseError": "⚠️ Erreur d'analyse du fichier de traduction : {error}",
@@ -642,7 +642,8 @@
     "failedToSaveReport": "Échec de l'enregistrement du rapport d'utilisation : {error}",
     "i18nDirectoryDoesNotExist": "Le répertoire I18n n'existe pas : {dir}",
     "reportSavedTo": "Rapport d'utilisation enregistré dans : {reportPath}",
-    "sourceDirectoryDoesNotExist": "Le répertoire source n'existe pas : {dir}"
+    "sourceDirectoryDoesNotExist": "Le répertoire source n'existe pas : {dir}",
+    "noSourceDirectoryConfigured": "(non configur?)"
   },
   "validate": {
     "help_message": "Utilisation du validateur de traduction I18n : nœud i18ntk-validate.js [options] Options : --source-dir <dir>     Répertoire source à analyser (par défaut : ./src) --i18n-dir <dir>       Répertoire I18n (par défaut : ./src/locales) --output-report Générer un rapport détaillé --output-dir <dir>     Répertoire de sortie des rapports (par défaut : ./reports) --help Afficher cette aide Exemples : node i18ntk-validate.js --output-report node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales node i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -922,7 +923,7 @@
     "summaryCommand": "résumé - Afficher l'état du projet",
     "debugCommand": "debug - Problèmes de traduction de débogage",
     "scannerCommand": "scanner - Rechercher des clés",
-    "translateCommand": "traduire - Traduire automatiquement les fichiers de paramètres régionaux (bêta)",
+    "translateCommand": "traduire - Traduire automatiquement les fichiers de paramètres régionaux",
     "menu": {
       "pressEnterToContinue": "Appuyez sur Entrée pour continuer...",
       "title": "🌐MENU DE GESTION I18NTK",
@@ -1102,7 +1103,32 @@
     "translationFilesCreatedWarning": "Les fichiers de traduction ont été créés avec des espaces réservés ; examen avant utilisation en production.",
     "warningCannotReadSourceDir": "Attention : impossible de lire le répertoire source {dir}: {error}",
     "warningInvalidLanguageCodes": "Attention : codes de langue invalides ignorés : {languages}",
-    "warningProceedingWithoutFramework": "Poursuite sans framework i18n détecté."
+    "warningProceedingWithoutFramework": "Poursuite sans framework i18n détecté.",
+    "backup": {
+      "title": "Param?tres de sauvegarde",
+      "description": "Les sauvegardes sont d?sactiv?es par d?faut pour ?viter la r?cursion et la pollution du d?p?t.",
+      "enablePrompt": "Activer les sauvegardes automatiques ? (o/N) : ",
+      "keepPrompt": "Combien de sauvegardes conserver automatiquement (1-3, d?faut 1) : "
+    },
+    "completionSummaryTitle": "R?sum? de fin",
+    "completionSummaryBasicTitle": "R?sum? de fin (basique)",
+    "totalChanges": "Changements totaux : {count}",
+    "languagesProcessed": "Langues trait?es : {count}",
+    "missingKeysAdded": "Cl?s manquantes ajout?es : {count}",
+    "reportPrompt": "Voulez-vous g?n?rer un rapport ? (O/n) : ",
+    "reportGenerated": "Rapport g?n?r? : {reportPath}",
+    "reportFailed": "?chec de g?n?ration du rapport : {error}",
+    "completionError": "Erreur pendant la finalisation : {error}",
+    "optimize": {
+      "title": "Optimisation de la taille du paquet",
+      "preview": "Execution de l apercu d optimisation des locales...",
+      "reduceTip": "Vous pouvez reduire la taille du paquet en selectionnant uniquement les langues necessaires.",
+      "prompt": "Voulez-vous lancer l optimisation interactive maintenant ? (o/N): ",
+      "starting": "Demarrage de l optimisation interactive des locales...",
+      "completed": "Optimisation du paquet terminee.",
+      "later": "Vous pouvez lancer l optimisation des locales plus tard avec :",
+      "unavailable": "Impossible de proposer l optimisation des locales : {error}"
+    }
   },
   "language": {
     "title": "🌍 Changer de langue",
@@ -1147,7 +1173,7 @@
       "sizing": "📏 Analyser le dimensionnement",
       "fix": "🛠️ Correction des traductions d'espaces réservés",
       "scanner": "🔍 Rechercher les problèmes i18n",
-      "translate": "🌐 Traduction automatique (bêta)",
+      "translate": "🌐 Traduction automatique",
       "workflow": "🔄 Exécuter un flux de travail complet",
       "status": "📋 Afficher l'état du projet",
       "delete": "🗑️ Supprimer tous les rapports",
@@ -1447,7 +1473,9 @@
       "securitySettings": "Paramètres de sécurité",
       "securitySettingsDesc": "Code PIN administrateur et autres options de sécurité",
       "backupSettings": "Paramètres de sauvegarde",
-      "backupSettingsDesc": "Sauvegarder et restaurer les paramètres de configuration"
+      "backupSettingsDesc": "Sauvegarder et restaurer les paramètres de configuration",
+      "autoTranslate": "Traduction automatique",
+      "autoTranslateDesc": "Ajuster les espaces reserves, la concurrence, les lots et les rapports"
     },
     "updatePackage": {
       "title": "Package de mise à jour",
@@ -1569,7 +1597,8 @@
       "processingSettings": "Paramètres de traitement",
       "advancedSettings": "Paramètres avancés",
       "scriptDirectorySettings": "Paramètres du répertoire de scripts",
-      "securitySettings": "Paramètres de sécurité"
+      "securitySettings": "Paramètres de sécurité",
+      "autoTranslate": "Parametres de traduction automatique"
     },
     "security": {
       "title": "🔐 Paramètres de sécurité",
@@ -1925,6 +1954,70 @@
           "description": "Exiger une confirmation pour les opérations de sauvegarde",
           "help": "Confirmer l'opération de sauvegarde"
         }
+      },
+      "reports_format": {
+        "label": "Format du rapport",
+        "help": "Choisissez markdown pour des rapports lisibles, json pour l automatisation ou text pour des journaux simples."
+      },
+      "autoTranslate_placeholderMode": {
+        "label": "Mode de gestion des espaces reserves",
+        "help": "Traitement des chaines avec espaces reserves pendant la traduction automatique."
+      },
+      "autoTranslate_concurrency": {
+        "label": "Requetes de traduction simultanees",
+        "help": "Nombre maximal de requetes fournisseur simultanees. Google accepte jusqu'a 100 dans i18ntk; DeepL et LibreTranslate sont limites plus bas."
+      },
+      "autoTranslate_batchSize": {
+        "label": "Segments de texte par lot",
+        "help": "Nombre de segments de texte planifies par lot."
+      },
+      "autoTranslate_progressInterval": {
+        "label": "Intervalle de progression",
+        "help": "Segments termines entre deux mises a jour de progression."
+      },
+      "autoTranslate_retryCount": {
+        "label": "Nombre de tentatives",
+        "help": "Nombre maximal de tentatives par requete echouee."
+      },
+      "autoTranslate_retryDelay": {
+        "label": "Delai de nouvelle tentative (ms)",
+        "help": "Delai de base en millisecondes."
+      },
+      "autoTranslate_timeout": {
+        "label": "Expiration de requete (ms)",
+        "help": "Delai maximal pour la requete au fournisseur de traduction."
+      },
+      "autoTranslate_dryRunFirst": {
+        "label": "Apercu d abord",
+        "help": "Afficher ce qui sera traduit avant d ecrire les fichiers."
+      },
+      "autoTranslate_onlyMissingOrEnglish": {
+        "label": "Seulement les cles manquantes ou anglaises",
+        "help": "Conserver les valeurs cible deja traduites et traduire seulement les valeurs manquantes, marqueurs, copies source ou probablement anglaises."
+      },
+      "autoTranslate_reportStdout": {
+        "label": "Afficher le rapport dans le terminal",
+        "help": "Afficher le rapport apres traduction sur stdout."
+      },
+      "autoTranslate_bom": {
+        "label": "Ecrire le BOM UTF-8",
+        "help": "Ecrire les fichiers JSON traduits avec un BOM UTF-8."
+      },
+      "autoTranslate_protectionEnabled": {
+        "label": "Proteger marques, cles et valeurs",
+        "help": "Activer les termes, cles, valeurs et motifs proteges modifiables par l utilisateur."
+      },
+      "autoTranslate_protectionFile": {
+        "label": "Fichier JSON de protection",
+        "help": "Fichier JSON du projet contenant les regles de protection de traduction automatique."
+      },
+      "autoTranslate_promptProtectionSetup": {
+        "label": "Demander la creation du fichier de protection",
+        "help": "Demander la creation du fichier de protection au premier lancement."
+      },
+      "autoTranslate_promptProtectionUpdate": {
+        "label": "Demander la mise a jour des regles de protection",
+        "help": "Demander la mise a jour des regles de protection avant les traductions du gestionnaire."
       }
     },
     "actions": {
@@ -2143,7 +2236,7 @@
       "completeCommand": "complet - Traductions complètes (couverture à 100 %)",
       "summaryCommand": "résumé - Afficher l'état du projet",
       "scannerCommand": "scanner - Rechercher les problèmes i18n",
-      "translateCommand": "traduire - Traduire automatiquement les fichiers de paramètres régionaux (bêta)",
+      "translateCommand": "traduire - Traduire automatiquement les fichiers de paramètres régionaux",
       "debugCommand": "debug - Problèmes de traduction de débogage"
     },
     "test_complete_system": {
@@ -2441,5 +2534,93 @@
   "pressEnterToContinue": "Appuyez sur Entrée pour continuer...",
   "status": {
     "exitingCompleted": "Flux de travail terminé. Sortir..."
+  },
+  "prompt": {
+    "yesTokens": [
+      "o",
+      "oui",
+      "y",
+      "yes"
+    ],
+    "noTokens": [
+      "n",
+      "non",
+      "no"
+    ]
+  },
+  "translate": {
+    "title": "Traduction automatique",
+    "sourceDirectory": {
+      "title": "Repertoire de locale source",
+      "currentProject": "Projet actuel : {dir}",
+      "accepted": "Accepte : chemin absolu ou chemin relatif au projet actuel.",
+      "localeRootExample": "./locales  (puis choisir la langue source : en)",
+      "folderHint": "Le dossier peut contenir directement des fichiers JSON ou des dossiers de langue comme ./locales/en.",
+      "defaultNotFound": "Repertoire par defaut introuvable : {dir}",
+      "enterExisting": "Saisissez un repertoire existant avec des fichiers JSON de locale.",
+      "directoryNotFound": "Repertoire introuvable : {dir}",
+      "enterFolderExample": "Saisissez un dossier existant, par exemple ./locales/en.",
+      "notDirectory": "Ce n est pas un repertoire : {dir}",
+      "using": "Repertoire source utilise : {dir}",
+      "noJsonDirect": "Aucun fichier JSON trouve directement dans : {dir}",
+      "usingLanguageFolder": "Dossier de langue source utilise : {dir}",
+      "noJsonWithLanguageFolder": "Aucun fichier JSON trouve dans : {dir}\nDossier de langue source egalement verifie : {languageDir}",
+      "noJson": "Aucun fichier JSON trouve dans : {dir}"
+    },
+    "targetLanguages": {
+      "title": "Langue(s) cible",
+      "allConfigured": "a) Toutes les langues cible configurees : {languages}",
+      "noneConfigured": "a) Toutes les langues cible configurees : aucune configuree",
+      "enterCodes": "Ou saisissez un ou plusieurs codes de langue separes par des virgules ou espaces.",
+      "sourceExcluded": "La langue source \"{lang}\" sera exclue automatiquement.",
+      "noneSelected": "Aucune langue cible valide selectionnee. Annulation.",
+      "configureHint": "Configurez defaultLanguages dans .i18ntk-config ou saisissez les codes cible manuellement.",
+      "selected": "Langues cible : {languages}"
+    },
+    "protection": {
+      "title": "Termes et cles proteges"
+    },
+    "common": {
+      "default": "Par defaut : {value}",
+      "examples": "Exemples :",
+      "exampleValue": "Exemple : {value}",
+      "examplesInline": "Exemples : {examples}",
+      "pressEnterDefault": "Appuyez sur Entree pour utiliser la valeur par defaut.",
+      "usingDefault": "Valeur par defaut utilisee : {value}"
+    },
+    "sourceLanguage": {
+      "title": "Code de langue source",
+      "hint": "Il doit correspondre a la langue des valeurs JSON source.",
+      "using": "Langue source utilisee : {lang}",
+      "invalid": "Code de langue invalide. Utilisez 2 caracteres ou plus (ex. en, de, fr)."
+    },
+    "files": {
+      "title": "Quel(s) fichier(s) traduire ?",
+      "all": "a) Tous les fichiers JSON ({count} : {files})",
+      "choicePrompt": "Choix [a/all ou numero de fichier] : ",
+      "invalidChoice": "Choix invalide. Annulation."
+    },
+    "dryRun": {
+      "previewFor": "Apercu pour \"{lang}\"..."
+    },
+    "confirm": {
+      "proceed": "Continuer avec la traduction reelle ?",
+      "yesNoPrompt": "[o]ui / [n]on : ",
+      "cancelled": "Traduction annulee."
+    },
+    "run": {
+      "translatingTo": "Traduction vers \"{lang}\"...",
+      "failedFor": "Echec pour \"{lang}\" : {error}"
+    },
+    "summary": {
+      "title": "Resume :",
+      "complete": "Traduction terminee !"
+    },
+    "nonInteractive": {
+      "useDirect": "Mode non interactif. Utilisez la CLI directe :"
+    },
+    "errors": {
+      "sourceDirectoryNotFound": "Repertoire de locale source introuvable : {dir}"
+    }
   }
 }

@@ -183,7 +183,7 @@
     "totalIssues": "发现问题总数： {totalIssues}",
     "missingTranslations": "缺少翻译： {missing}",
     "placeholderTranslations": "占位符翻译： {placeholder}",
-    "noIssues": "✅ 没有发现问题。 All translations are complete.",
+    "noIssues": "✅ 没有发现问题。所有翻译均已完成。",
     "detailedIssues": "📋详细问题：",
     "detailedSeparator": "--------------------------------------------------",
     "filePath": "📄 {file} → {path}",
@@ -536,7 +536,7 @@
     "argsParseFailed": "参数解析失败： {error}",
     "translationDiscoveryError": "翻译发现错误： {error}",
     "fileTraversalError": "文件遍历错误： {error}",
-    "sourceEqualsI18nWarn": "⚠️源码目录和i18n目录是一样的。这可能会导致分析出现问题。",
+    "sourceEqualsI18nWarn": "{reason}。使用情况分析不会将语言环境文件扫描为源代码。",
     "i18nEqualsSourceWarn": "⚠️ I18n目录和源码目录是一样的。这可能会导致分析出现问题。",
     "usageAnalysisFailed": "⚠️ 使用情况分析失败： {error}",
     "translationFileParseError": "⚠️翻译文件解析错误： {error}",
@@ -642,7 +642,8 @@
     "failedToSaveReport": "无法保存使用报告： {error}",
     "i18nDirectoryDoesNotExist": "I18n 目录不存在： {dir}",
     "reportSavedTo": "使用情况报告保存到： {reportPath}",
-    "sourceDirectoryDoesNotExist": "源目录不存在： {dir}"
+    "sourceDirectoryDoesNotExist": "源目录不存在： {dir}",
+    "noSourceDirectoryConfigured": "（未配置）"
   },
   "validate": {
     "help_message": "国际化翻译验证器用法：node i18ntk-validate.js [options] 选项：--source-dir <dir>     要扫描的源目录（默认：./src）--i18n-dir <dir>       I18n 目录（默认：./src/locales） --output-report 生成详细报告 --output-dir <dir>     报告的输出目录（默认：./reports） --help 显示此帮助示例：node i18ntk-validate.js --output-report node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales node i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -922,7 +923,7 @@
     "summaryCommand": "摘要 - 显示项目状态",
     "debugCommand": "debug - 调试翻译问题",
     "scannerCommand": "扫描仪 - 扫描钥匙",
-    "translateCommand": "翻译 - 自动翻译语言环境文件（测试版）",
+    "translateCommand": "翻译 - 自动翻译语言环境文件",
     "menu": {
       "pressEnterToContinue": "按 Enter 键继续...",
       "title": "🌐I18NTK 管理菜单",
@@ -1102,7 +1103,32 @@
     "translationFilesCreatedWarning": "翻译文件是使用占位符创建的；生产使用前进行审查。",
     "warningCannotReadSourceDir": "警告：无法读取源目录 {dir}: {error}",
     "warningInvalidLanguageCodes": "警告：忽略无效的语言代码： {languages}",
-    "warningProceedingWithoutFramework": "未检测到 i18n 框架即可继续。"
+    "warningProceedingWithoutFramework": "未检测到 i18n 框架即可继续。",
+    "backup": {
+      "title": "备份设置",
+      "description": "默认情况下禁用备份，以避免备份递归和存储库污染。",
+      "enablePrompt": "启用自动备份？ （是/否）：",
+      "keepPrompt": "应自动保留多少个备份（1-3，默认1）："
+    },
+    "completionSummaryTitle": "完成总结",
+    "completionSummaryBasicTitle": "完成总结（基本）",
+    "totalChanges": "总变化： {count}",
+    "languagesProcessed": "处理的语言： {count}",
+    "missingKeysAdded": "添加了缺少的键： {count}",
+    "reportPrompt": "您想要生成一份报告吗？ （是/否）：",
+    "reportGenerated": "生成的报告： {reportPath}",
+    "reportFailed": "无法生成报告： {error}",
+    "completionError": "完成时出错： {error}",
+    "optimize": {
+      "title": "包大小优化",
+      "preview": "正在运行语言包优化预览...",
+      "reduceTip": "只选择所需语言，可以减小包大小。",
+      "prompt": "现在运行交互式优化吗？ (y/N): ",
+      "starting": "正在启动交互式语言包优化...",
+      "completed": "包优化已完成。",
+      "later": "之后可以用以下命令运行语言包优化：",
+      "unavailable": "无法提供语言包优化：{error}"
+    }
   },
   "language": {
     "title": "🌍 更改语言",
@@ -1147,7 +1173,7 @@
       "sizing": "📏 分析尺码",
       "fix": "🛠️ 修复占位符翻译",
       "scanner": "🔍 扫描 i18n 问题",
-      "translate": "🌐 自动翻译（测试版）",
+      "translate": "🌐 自动翻译",
       "workflow": "🔄 运行完整的工作流程",
       "status": "📋 显示项目状态",
       "delete": "🗑️删除所有报告",
@@ -1447,7 +1473,9 @@
       "securitySettings": "安全设置",
       "securitySettingsDesc": "管理员 PIN 码和其他安全选项",
       "backupSettings": "备份设置",
-      "backupSettingsDesc": "备份和恢复配置设置"
+      "backupSettingsDesc": "备份和恢复配置设置",
+      "autoTranslate": "自动翻译",
+      "autoTranslateDesc": "调整占位符、并发、批量和报告"
     },
     "updatePackage": {
       "title": "更新包",
@@ -1569,7 +1597,8 @@
       "processingSettings": "处理设置",
       "advancedSettings": "高级设置",
       "scriptDirectorySettings": "脚本目录设置",
-      "securitySettings": "安全设置"
+      "securitySettings": "安全设置",
+      "autoTranslate": "自动翻译设置"
     },
     "security": {
       "title": "🔐安全设置",
@@ -1925,6 +1954,70 @@
           "description": "需要确认备份操作",
           "help": "确认备份操作"
         }
+      },
+      "reports_format": {
+        "label": "报告格式",
+        "help": "选择 markdown 生成易读报告，json 用于自动化，text 用于纯文本日志。"
+      },
+      "autoTranslate_placeholderMode": {
+        "label": "占位符处理模式",
+        "help": "自动翻译过程中如何处理带有占位符的字符串。"
+      },
+      "autoTranslate_concurrency": {
+        "label": "并发翻译请求",
+        "help": "最大并发提供商请求数。i18ntk 中 Google 最高支持 100；DeepL 和 LibreTranslate 的上限较低。"
+      },
+      "autoTranslate_batchSize": {
+        "label": "每批文本段",
+        "help": "每批计划的文本段数。"
+      },
+      "autoTranslate_progressInterval": {
+        "label": "进度更新间隔",
+        "help": "进度更新之间已完成的文本段。"
+      },
+      "autoTranslate_retryCount": {
+        "label": "重试次数",
+        "help": "每个失败请求的最大重试次数。"
+      },
+      "autoTranslate_retryDelay": {
+        "label": "重试延迟（毫秒）",
+        "help": "基本重试延迟（以毫秒为单位）。"
+      },
+      "autoTranslate_timeout": {
+        "label": "请求超时（毫秒）",
+        "help": "翻译提供商请求超时。"
+      },
+      "autoTranslate_dryRunFirst": {
+        "label": "首先进行试运行预览",
+        "help": "在写入文件之前预览将要翻译的内容。"
+      },
+      "autoTranslate_onlyMissingOrEnglish": {
+        "label": "仅缺失或英文键",
+        "help": "保留已翻译的目标值，仅翻译缺失、标记、源文复制或可能是英文的值。"
+      },
+      "autoTranslate_reportStdout": {
+        "label": "打印报告到终端",
+        "help": "将翻译后报告打印到标准输出。"
+      },
+      "autoTranslate_bom": {
+        "label": "写入 UTF-8 BOM",
+        "help": "使用 UTF-8 BOM 编写翻译后的 JSON 文件。"
+      },
+      "autoTranslate_protectionEnabled": {
+        "label": "保护品牌术语、关键、价值观",
+        "help": "启用用户可编辑的受保护术语、键、值和模式。"
+      },
+      "autoTranslate_protectionFile": {
+        "label": "保护 JSON 文件",
+        "help": "包含自动翻译保护规则的项目 JSON 文件。"
+      },
+      "autoTranslate_promptProtectionSetup": {
+        "label": "要求创建保护文件",
+        "help": "自动翻译首次运行时要求创建保护文件。"
+      },
+      "autoTranslate_promptProtectionUpdate": {
+        "label": "要求更新保护规则",
+        "help": "在经理翻译之前询问是否更新保护规则。"
       }
     },
     "actions": {
@@ -2143,7 +2236,7 @@
       "completeCommand": "完整 - 完整翻译（100% 覆盖率）",
       "summaryCommand": "摘要 - 显示项目状态",
       "scannerCommand": "扫描仪 - 扫描 i18n 问题",
-      "translateCommand": "翻译 - 自动翻译语言环境文件（测试版）",
+      "translateCommand": "翻译 - 自动翻译语言环境文件",
       "debugCommand": "debug - 调试翻译问题"
     },
     "test_complete_system": {
@@ -2441,5 +2534,97 @@
   "pressEnterToContinue": "按 Enter 键继续...",
   "status": {
     "exitingCompleted": "工作流程完成。正在退出..."
+  },
+  "prompt": {
+    "yesTokens": [
+      "是",
+      "好",
+      "确认",
+      "可以",
+      "y",
+      "yes"
+    ],
+    "noTokens": [
+      "否",
+      "不",
+      "不要",
+      "n",
+      "no"
+    ]
+  },
+  "translate": {
+    "title": "自动翻译",
+    "sourceDirectory": {
+      "title": "源语言目录",
+      "currentProject": "当前项目: {dir}",
+      "accepted": "可以使用绝对路径，或相对于当前项目的路径。",
+      "localeRootExample": "./locales  (然后选择源语言: en)",
+      "folderHint": "文件夹可以直接包含 JSON 文件，也可以包含像 ./locales/en 这样的语言文件夹。",
+      "defaultNotFound": "未找到默认目录: {dir}",
+      "enterExisting": "请输入包含 JSON 语言文件的现有目录。",
+      "directoryNotFound": "未找到目录: {dir}",
+      "enterFolderExample": "请输入现有文件夹，例如 ./locales/en。",
+      "notDirectory": "不是目录: {dir}",
+      "using": "正在使用源目录: {dir}",
+      "noJsonDirect": "未在此目录直接找到 JSON 文件: {dir}",
+      "usingLanguageFolder": "使用源语言文件夹: {dir}",
+      "noJsonWithLanguageFolder": "未找到 JSON 文件: {dir}\n也检查了源语言文件夹: {languageDir}",
+      "noJson": "未找到 JSON 文件: {dir}"
+    },
+    "targetLanguages": {
+      "title": "目标语言",
+      "allConfigured": "a) 所有已配置的目标语言: {languages}",
+      "noneConfigured": "a) 所有已配置的目标语言: 无",
+      "enterCodes": "或输入一个或多个用逗号或空格分隔的语言代码。",
+      "sourceExcluded": "源语言 \"{lang}\" 将自动排除。",
+      "noneSelected": "未选择有效的目标语言。已取消。",
+      "configureHint": "在 .i18ntk-config 中配置 defaultLanguages，或手动输入目标代码。",
+      "selected": "目标语言: {languages}"
+    },
+    "protection": {
+      "title": "受保护的术语和键"
+    },
+    "common": {
+      "default": "默认: {value}",
+      "examples": "示例:",
+      "exampleValue": "示例: {value}",
+      "examplesInline": "示例: {examples}",
+      "pressEnterDefault": "按 Enter 使用默认值。",
+      "usingDefault": "使用默认值: {value}"
+    },
+    "sourceLanguage": {
+      "title": "源语言代码",
+      "hint": "这应与源 JSON 值的语言匹配。",
+      "using": "使用源语言: {lang}",
+      "invalid": "语言代码无效。请使用 2 个或更多字符（例如 en, de, fr）。"
+    },
+    "files": {
+      "title": "要翻译哪些文件？",
+      "all": "a) 所有 JSON 文件 ({count}: {files})",
+      "choicePrompt": "选择 [a/all 或文件编号]: ",
+      "invalidChoice": "选择无效。已取消。"
+    },
+    "dryRun": {
+      "previewFor": "\"{lang}\" 的预览..."
+    },
+    "confirm": {
+      "proceed": "是否继续执行实际翻译？",
+      "yesNoPrompt": "[是] / [否]: ",
+      "cancelled": "翻译已取消。"
+    },
+    "run": {
+      "translatingTo": "正在翻译到 \"{lang}\"...",
+      "failedFor": "\"{lang}\" 失败: {error}"
+    },
+    "summary": {
+      "title": "摘要:",
+      "complete": "翻译完成！"
+    },
+    "nonInteractive": {
+      "useDirect": "非交互模式。请使用直接 CLI:"
+    },
+    "errors": {
+      "sourceDirectoryNotFound": "未找到源语言目录: {dir}"
+    }
   }
 }

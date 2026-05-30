@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-05-30
+
+### Security
+- Shared path validation no longer permits artifact-like filenames such as `.lock` or `.temp-config.json` to bypass base-directory containment.
+- Shared path validation now rejects Windows cross-drive escape cases where `path.relative()` returns an absolute path.
+- Custom `I18NTK_INTERNAL_PATH_PREFIXES` entries can no longer mark arbitrary outside directories as internal roots.
+- Backup restore now rejects backup entry names containing path separators, absolute paths, traversal, or non-JSON names before writing restored files.
+- Runtime locale loading now validates language identifiers before resolving single-file or directory locale paths, blocking `../` language names from reading JSON outside `baseDir`.
+- Auto Translate provider URL validation now blocks IPv4-mapped IPv6 loopback/private hosts.
+
+### Changed
+- Main runtime now includes production-safe features from the enhanced runtime surface: per-call language overrides, synchronous `translateBatch()`, and `clearCache()` / `getCacheInfo()` helpers.
+- `i18ntk/runtime/enhanced` remains available as a legacy public subpath for compatibility, while new production integrations should prefer the lightweight `i18ntk/runtime` API.
+- Usage analysis now indexes known translation keys back to source files, including direct i18n calls and literal key references that were previously missed.
+- Usage analysis now expands simple dynamic templates backed by literal constants, bounded literal arrays, object maps, and ternaries to exact available keys before falling back to unresolved dynamic-expression reporting.
+- Usage reports now list unresolved dynamic key expressions separately instead of treating broad wildcard prefixes as proof that every matching key is used.
+- Usage reports now include namespace/file naming recommendations such as preferring `shop.*` keys and `shop.json` for `/shop` page or route files.
+- Usage reports now list likely hardcoded user-facing text with suggested translation keys, and prefer an existing source key when the inline text matches a source translation value.
+- Translation analysis and init reports now default to Markdown for readable output, with `reports.format` supporting `markdown`, `json`, or `text` through settings and config.
+- Init default target languages now include English (`en`) before `de`, `es`, `fr`, and `ru` when the UI is running in another language.
+- Confirmation prompts now accept localized native yes/no input for supported UI languages while retaining English fallback tokens.
+- Auto Translate has moved out of beta in menus and documentation, and its settings are exposed with localized labels.
+- Auto Translate now keeps existing translated target values by default and only translates missing, marker, source-copy, or likely English target strings; use `--translate-all` to force a full re-translation.
+- Auto Translate now treats visibly corrupt target strings such as `?????`, Unicode replacement characters, and common mojibake as needing retranslation from the source language.
+- Auto Translate now defaults to 12 concurrent provider requests and allows Google concurrency up to 100 instead of the old 25-request cap; DeepL and LibreTranslate remain capped lower to avoid provider/account throttling.
+- Auto Translate progress output now separates string translation from placeholder-safe text-segment translation and shows the active key path during progress updates.
+- Placeholder detection now covers ICU plural/select blocks, i18next nested `$t(...)` references, and wider named printf formats such as `%(total).2f`.
+- Manager menu output is now grouped with clearer spacing and aligned option numbers.
+- Documentation now consolidates migration guidance around `4.2.0` and removes stale old per-version migration guides from the working docs tree.
+- Removed stale duplicate development artifacts `main/manage/index-fixed.js` and `utils/security-fixed.js` to reduce audit drift and prevent accidental reuse.
+- Updated public, root, and development package metadata for the 4.2.0 release line.
+
+### Fixed
+- Runtime JSON loading now preserves valid translation strings containing comment-like text such as `/* token */` by parsing valid JSON before using the comment-stripping fallback.
+- Enhanced runtime now exports the top-level `translateBatch()`, `translateBatchEncrypted()`, and `tTyped()` helpers declared by its TypeScript definitions, and those declarations now reflect async return values.
+- Usage analysis no longer scans the project root when `sourceDir` and `i18nDir` both point at the locale directory; it now uses a detected app source directory or disables usage scanning with a clear warning.
+- Init backup prompts, completion summaries, report prompts, and report status text now use bundled UI locale keys instead of hard-coded English.
+- Bundled UI locales were regenerated from `ui-locales/en.json` for newly added, source-copy, and corrupt target strings.
+- JSON report output is now pretty-printed object JSON instead of a single JSON string containing escaped newlines.
+- The managed Auto Translate command no longer forces UI translations back to English after the user has selected another UI language.
+- Manager validation output no longer prints duplicate source/i18n/output directory blocks before the validator summary.
+- `i18ntk-setup --help` now exits after printing help instead of running setup and writing project files.
+- `npm run languages:list` and `npm run languages:status` now produce non-interactive output instead of opening the settings menu.
+- `i18ntk-backup create locales` now recursively backs up modular locale layouts such as `locales/en/common.json`, and restore safely recreates nested JSON paths without allowing traversal.
+- Removed a stale bundled `locales/es/navigation.json` fixture that made `i18ntk-doctor` report a dangling namespace after setup/init tests.
+
 ## [4.1.0] - 2026-05-21
 
 ### Fixed

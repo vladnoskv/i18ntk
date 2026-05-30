@@ -4,7 +4,7 @@
 
 The supported production line is `4.x`.
 
-Versions earlier than `4.1.0` are not recommended for production use because later releases include Auto Translate provider hardening, dynamic-require elimination, path-validation hardening, lazy loading with manifest validation, incremental backup hash-chain verification, and post-4.0.0 critical bug fixes for runtime staleness, backup verification, and CLI flag parsing.
+Versions earlier than `4.2.0` are not recommended for production use because later releases include Auto Translate provider hardening, dynamic-require elimination, path-validation hardening, runtime language validation, lazy loading with manifest validation, incremental backup hash-chain verification, and post-4.0.0 critical bug fixes for runtime staleness, backup verification, and CLI flag parsing.
 
 ## Security Model
 
@@ -46,6 +46,12 @@ The v4.0.0 release adds the following security hardening:
 - **Scanner multi-language detection**: source-language propagation fixed; stopword-less language profiles now still enforce valid-character ratios.
 - **Usage dead key detection**: optimized O(n+m) comment scanning instead of O(n*m); all CLI boolean flags validated with strict `toBool()` conversion.
 
+The v4.2.0 release adds the following security hardening:
+- **Shared path validation**: artifact-like filenames no longer bypass base containment; cross-drive absolute paths and environment-added internal prefixes are constrained.
+- **Backup restore**: backup entry names must be plain `.json` filenames and are restored through stable output-directory containment.
+- **Runtime locale loading**: language identifiers are validated before locale path resolution.
+- **Auto Translate networking**: IPv4-mapped IPv6 loopback/private hosts are blocked by provider URL validation.
+
 ## Reporting Vulnerabilities
 
 Do not report security vulnerabilities in public GitHub issues.
@@ -68,7 +74,7 @@ Security reports are reviewed privately first. Confirmed issues should receive:
 
 ## User Guidance
 
-- Keep i18ntk updated to `4.1.0` or newer.
+- Keep i18ntk updated to `4.2.0` or newer.
 - Do not commit `.i18ntk-config`, admin PIN files, backup directories, generated reports, logs, npm credentials, or secret material.
 - Run i18ntk only in project directories you trust.
 - Review generated translation changes before committing them.

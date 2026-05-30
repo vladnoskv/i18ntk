@@ -536,7 +536,7 @@
     "argsParseFailed": "Argument parsing failed: {error}",
     "translationDiscoveryError": "Translation discovery error: {error}",
     "fileTraversalError": "File traversal error: {error}",
-    "sourceEqualsI18nWarn": "⚠️  Source directory and i18n directory are the same. This may cause issues with the analysis.",
+    "sourceEqualsI18nWarn": "{reason}. Usage analysis will not scan locale files as source code.",
     "i18nEqualsSourceWarn": "⚠️  I18n directory and source directory are the same. This may cause issues with the analysis.",
     "usageAnalysisFailed": "⚠️  Usage analysis failed: {error}",
     "translationFileParseError": "⚠️  Translation file parse error: {error}",
@@ -642,7 +642,8 @@
     "failedToSaveReport": "Failed to save usage report: {error}",
     "i18nDirectoryDoesNotExist": "I18n directory does not exist: {dir}",
     "reportSavedTo": "Usage report saved to: {reportPath}",
-    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}"
+    "sourceDirectoryDoesNotExist": "Source directory does not exist: {dir}",
+    "noSourceDirectoryConfigured": "(none configured)"
   },
   "validate": {
     "help_message": "I18n Translation Validator  Usage: node i18ntk-validate.js [options]  Options:   --source-dir <dir>     Source directory to scan (default: ./src)   --i18n-dir <dir>       I18n directory (default: ./src/locales)   --output-report        Generate detailed report   --output-dir <dir>     Output directory for reports (default: ./reports)   --help                 Show this help  Examples:   node i18ntk-validate.js --output-report   node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales   node i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -922,7 +923,7 @@
     "summaryCommand": "summary   - Show project status",
     "debugCommand": "debug     - Debug translation issues",
     "scannerCommand": "scanner   - Scan for keys",
-    "translateCommand": "translate - Auto-translate locale files (Beta)",
+    "translateCommand": "translate - Auto-translate locale files",
     "menu": {
       "pressEnterToContinue": "Press Enter to continue...",
       "title": "🌐 I18NTK MANAGEMENT MENU",
@@ -1102,7 +1103,32 @@
     "translationFilesCreatedWarning": "Translation files were created with placeholders; review before production use.",
     "warningCannotReadSourceDir": "Warning: cannot read source directory {dir}: {error}",
     "warningInvalidLanguageCodes": "Warning: invalid language codes ignored: {languages}",
-    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework."
+    "warningProceedingWithoutFramework": "Proceeding without detected i18n framework.",
+    "backup": {
+      "title": "Backup Settings",
+      "description": "Backups are disabled by default to avoid backup recursion and repo pollution.",
+      "enablePrompt": "Enable automatic backups? (y/N): ",
+      "keepPrompt": "How many backups should be kept automatically (1-3, default 1): "
+    },
+    "completionSummaryTitle": "Completion Summary",
+    "completionSummaryBasicTitle": "Completion Summary (Basic)",
+    "totalChanges": "Total changes: {count}",
+    "languagesProcessed": "Languages processed: {count}",
+    "missingKeysAdded": "Missing keys added: {count}",
+    "reportPrompt": "Would you like a report generated? (Y/n): ",
+    "reportGenerated": "Report generated: {reportPath}",
+    "reportFailed": "Failed to generate report: {error}",
+    "completionError": "Error during completion: {error}",
+    "optimize": {
+      "title": "Package size optimization",
+      "preview": "Running locale optimization preview...",
+      "reduceTip": "You can reduce package size by selecting only the languages you need.",
+      "prompt": "Would you like to run interactive optimization now? (y/n): ",
+      "starting": "Starting interactive locale optimization...",
+      "completed": "Package optimization completed.",
+      "later": "You can run locale optimization later with:",
+      "unavailable": "Could not offer locale optimization: {error}"
+    }
   },
   "language": {
     "title": "🌍 Change Language",
@@ -1147,7 +1173,7 @@
       "sizing": "📏 Analyze sizing",
       "fix": "🛠️  Fix placeholder translations",
       "scanner": "🔍 Scan for i18n issues",
-      "translate": "🌐 Auto Translate (Beta)",
+      "translate": "🌐 Auto Translate",
       "workflow": "🔄 Run full workflow",
       "status": "📋 Show project status",
       "delete": "🗑️  Delete all reports",
@@ -1447,7 +1473,9 @@
       "securitySettings": "Security Settings",
       "securitySettingsDesc": "Admin PIN and other security options",
       "backupSettings": "Backup Settings",
-      "backupSettingsDesc": "Backup and restore configuration settings"
+      "backupSettingsDesc": "Backup and restore configuration settings",
+      "autoTranslate": "Auto Translate",
+      "autoTranslateDesc": "Tune placeholder handling, concurrency, batching, and reports"
     },
     "updatePackage": {
       "title": "Update Package",
@@ -1569,7 +1597,8 @@
       "processingSettings": "Processing Settings",
       "advancedSettings": "Advanced Settings",
       "scriptDirectorySettings": "Script Directory Settings",
-      "securitySettings": "Security Settings"
+      "securitySettings": "Security Settings",
+      "autoTranslate": "Auto Translate Settings"
     },
     "security": {
       "title": "🔐 Security Settings",
@@ -1893,6 +1922,70 @@
       },
       "${helperKey}": {
         "help": "Help"
+      },
+      "reports_format": {
+        "label": "Report Format",
+        "help": "Choose markdown for readable reports, json for automation, or text for plain logs."
+      },
+      "autoTranslate_placeholderMode": {
+        "label": "Placeholder handling mode",
+        "help": "How placeholder-bearing strings are handled during auto translation."
+      },
+      "autoTranslate_concurrency": {
+        "label": "Concurrent translation requests",
+        "help": "Maximum concurrent provider requests. Google supports up to 100 in i18ntk; DeepL and LibreTranslate are capped lower."
+      },
+      "autoTranslate_batchSize": {
+        "label": "Text segments per batch",
+        "help": "Number of text segments scheduled per batch."
+      },
+      "autoTranslate_progressInterval": {
+        "label": "Progress update interval",
+        "help": "Completed text segments between progress updates."
+      },
+      "autoTranslate_retryCount": {
+        "label": "Retry count",
+        "help": "Maximum retries per failed request."
+      },
+      "autoTranslate_retryDelay": {
+        "label": "Retry delay (ms)",
+        "help": "Base retry delay in milliseconds."
+      },
+      "autoTranslate_timeout": {
+        "label": "Request timeout (ms)",
+        "help": "Translation provider request timeout."
+      },
+      "autoTranslate_dryRunFirst": {
+        "label": "Dry-run preview first",
+        "help": "Preview what will be translated before writing files."
+      },
+      "autoTranslate_onlyMissingOrEnglish": {
+        "label": "Only missing or English keys",
+        "help": "Keep existing translated target values and translate only missing, marker, source-copy, or likely English values."
+      },
+      "autoTranslate_reportStdout": {
+        "label": "Print report to terminal",
+        "help": "Print the post-translation report to stdout."
+      },
+      "autoTranslate_bom": {
+        "label": "Write UTF-8 BOM",
+        "help": "Write translated JSON files with a UTF-8 BOM."
+      },
+      "autoTranslate_protectionEnabled": {
+        "label": "Protect brand terms, keys, values",
+        "help": "Enable user-editable protected terms, keys, values, and patterns."
+      },
+      "autoTranslate_protectionFile": {
+        "label": "Protection JSON file",
+        "help": "Project JSON file containing Auto Translate protection rules."
+      },
+      "autoTranslate_promptProtectionSetup": {
+        "label": "Ask to create protection file",
+        "help": "Ask to create the protection file when Auto Translate first runs."
+      },
+      "autoTranslate_promptProtectionUpdate": {
+        "label": "Ask to update protection rules",
+        "help": "Ask whether to update protection rules before manager translations."
       }
     },
     "actions": {
@@ -2111,7 +2204,7 @@
       "completeCommand": "complete  - Complete translations (100% coverage)",
       "summaryCommand": "summary   - Show project status",
       "scannerCommand": "scanner   - Scan for i18n issues",
-      "translateCommand": "translate - Auto-translate locale files (Beta)",
+      "translateCommand": "translate - Auto-translate locale files",
       "debugCommand": "debug     - Debug translation issues"
     },
     "test_complete_system": {
@@ -2409,5 +2502,86 @@
   "pressEnterToContinue": "Press Enter to continue...",
   "status": {
     "exitingCompleted": "Workflow completed. Exiting..."
+  },
+  "prompt": {
+    "yesTokens": [
+      "y",
+      "yes"
+    ],
+    "noTokens": [
+      "n",
+      "no"
+    ]
+  },
+  "translate": {
+    "title": "Auto Translate",
+    "sourceDirectory": {
+      "title": "Source locale directory",
+      "currentProject": "Current project: {dir}",
+      "accepted": "Accepted: an absolute path, or a path relative to the current project.",
+      "localeRootExample": "./locales  (then choose source language: en)",
+      "folderHint": "The folder can contain JSON files directly, or language folders such as ./locales/en.",
+      "defaultNotFound": "Default directory not found: {dir}",
+      "enterExisting": "Please enter an existing directory with JSON locale files.",
+      "directoryNotFound": "Directory not found: {dir}",
+      "enterFolderExample": "Enter an existing folder, for example ./locales/en.",
+      "notDirectory": "Not a directory: {dir}",
+      "using": "Using source directory: {dir}"
+    },
+    "targetLanguages": {
+      "title": "Target language(s)",
+      "allConfigured": "a) All configured target languages: {languages}",
+      "noneConfigured": "a) All configured target languages: none configured",
+      "enterCodes": "Or enter one or more comma/space-separated language codes.",
+      "sourceExcluded": "Source language \"{lang}\" will be excluded automatically.",
+      "noneSelected": "No valid target languages selected. Aborting.",
+      "configureHint": "Configure defaultLanguages in .i18ntk-config, or enter target codes manually.",
+      "selected": "Target languages: {languages}"
+    },
+    "protection": {
+      "title": "Protected terms and keys"
+    },
+    "common": {
+      "default": "Default: {value}",
+      "examples": "Examples:",
+      "exampleValue": "Example: {value}",
+      "examplesInline": "Examples: {examples}",
+      "pressEnterDefault": "Press Enter to use the default.",
+      "usingDefault": "Using default: {value}"
+    },
+    "sourceLanguage": {
+      "title": "Source language code",
+      "hint": "This should match the language of the source JSON values.",
+      "using": "Using source language: {lang}",
+      "invalid": "Invalid language code. Use 2+ characters (e.g. en, de, fr)."
+    },
+    "files": {
+      "title": "Which file(s) to translate?",
+      "all": "a) All JSON files ({count}: {files})",
+      "choicePrompt": "Choice [a/all or file number]: ",
+      "invalidChoice": "Invalid choice. Aborting."
+    },
+    "dryRun": {
+      "previewFor": "Dry-run preview for \"{lang}\"..."
+    },
+    "confirm": {
+      "proceed": "Proceed with actual translation?",
+      "yesNoPrompt": "[y]es / [n]o: ",
+      "cancelled": "Translation cancelled."
+    },
+    "run": {
+      "translatingTo": "Translating to \"{lang}\"...",
+      "failedFor": "Failed for \"{lang}\": {error}"
+    },
+    "summary": {
+      "title": "Summary:",
+      "complete": "Translation complete!"
+    },
+    "nonInteractive": {
+      "useDirect": "Non-interactive mode. Use direct CLI instead:"
+    },
+    "errors": {
+      "sourceDirectoryNotFound": "Source locale directory not found: {dir}"
+    }
   }
 }

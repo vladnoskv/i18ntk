@@ -26,28 +26,31 @@ loadTranslations();
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const { showFrameworkWarningOnce } = require('../utils/cli-helper');
 const { createPrompt, isInteractive } = require('../utils/prompt-helper');
+const { parseConfirmation } = require('../utils/localized-confirm');
+const { normalizeReportFormat, writeReportFile } = require('../utils/report-writer');
 
 // Language configurations with native names
 const LANGUAGE_CONFIG = {
+  'en': { name: 'English', nativeName: 'English' },
   'de': { name: 'German', nativeName: 'Deutsch' },
-  'es': { name: 'Spanish', nativeName: 'Español' },
-  'fr': { name: 'French', nativeName: 'Français' },
-  'ru': { name: 'Russian', nativeName: 'Русский' },
+  'es': { name: 'Spanish', nativeName: 'Espa\u00f1ol' },
+  'fr': { name: 'French', nativeName: 'Fran\u00e7ais' },
+  'ru': { name: 'Russian', nativeName: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439' },
   'it': { name: 'Italian', nativeName: 'Italiano' },
-  'ja': { name: 'Japanese', nativeName: '日本語' },
-  'ko': { name: 'Korean', nativeName: '한국어' },
-  'zh': { name: 'Chinese', nativeName: '中文' },
-  'ar': { name: 'Arabic', nativeName: 'العربية' },
-  'hi': { name: 'Hindi', nativeName: 'हिन्दी' },
+  'ja': { name: 'Japanese', nativeName: '\u65e5\u672c\u8a9e' },
+  'ko': { name: 'Korean', nativeName: '\ud55c\uad6d\uc5b4' },
+  'zh': { name: 'Chinese', nativeName: '\u4e2d\u6587' },
+  'ar': { name: 'Arabic', nativeName: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' },
+  'hi': { name: 'Hindi', nativeName: '\u0939\u093f\u0928\u094d\u0926\u0940' },
   'nl': { name: 'Dutch', nativeName: 'Nederlands' },
   'sv': { name: 'Swedish', nativeName: 'Svenska' },
   'da': { name: 'Danish', nativeName: 'Dansk' },
   'no': { name: 'Norwegian', nativeName: 'Norsk' },
   'fi': { name: 'Finnish', nativeName: 'Suomi' },
   'pl': { name: 'Polish', nativeName: 'Polski' },
-  'cs': { name: 'Czech', nativeName: 'Čeština' },
+  'cs': { name: 'Czech', nativeName: '\u010ce\u0161tina' },
   'hu': { name: 'Hungarian', nativeName: 'Magyar' },
-  'tr': { name: 'Turkish', nativeName: 'Türkçe' }
+  'tr': { name: 'Turkish', nativeName: 'T\u00fcrk\u00e7e' }
 };
 
 class I18nInitializer {
@@ -76,7 +79,7 @@ class I18nInitializer {
       : path.join(this.sourceDir, this.config.sourceLanguage);
     
     // Ensure defaultLanguages is properly initialized from config
-    this.config.defaultLanguages = this.config.defaultLanguages || ['de', 'es', 'fr', 'ru'];
+    this.config.defaultLanguages = this.config.defaultLanguages || ['en', 'de', 'es', 'fr', 'ru'];
     
     // No longer create readline interface here - use CLI helpers
     this.rl = null;
@@ -153,7 +156,7 @@ class I18nInitializer {
       return true;
     }
     const answer = await this.prompt('\n' + t('init.continueWithoutI18nPrompt'));
-    return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
+    return parseConfirmation(answer, { language: this.config.uiLanguage || this.config.language || 'en', defaultValue: false });
   }
 
   // Add the missing prompt method
@@ -767,7 +770,7 @@ class I18nInitializer {
     await flushStdout();
     const enableProtection = await ask('\n' + t('adminPin.setup_prompt'));
 
-    if (enableProtection.toLowerCase() === 'y' || enableProtection.toLowerCase() === 'yes') {
+    if (parseConfirmation(enableProtection, { language: this.config.uiLanguage || this.config.language || 'en', defaultValue: false })) {
       try {
         const adminAuth = new AdminAuth();
         await adminAuth.initialize();
@@ -816,16 +819,16 @@ class I18nInitializer {
     }
 
     const { ask } = require('../utils/cli');
-    console.log('\nBackup Settings');
-    console.log('Backups are disabled by default to avoid backup recursion and repo pollution.');
-    const enableAnswer = await ask('Enable automatic backups? (y/N): ');
-    const enabled = ['y', 'yes'].includes(String(enableAnswer || '').trim().toLowerCase());
+    console.log('\n' + t('init.backup.title'));
+    console.log(t('init.backup.description'));
+    const enableAnswer = await ask(t('init.backup.enablePrompt'));
+    const enabled = parseConfirmation(enableAnswer, { language: this.config.uiLanguage || this.config.language || 'en', defaultValue: false });
 
     if (!enabled) {
       return defaultBackupConfig;
     }
 
-    const keepAnswer = await ask('How many backups should be kept automatically (1-3, default 1): ');
+    const keepAnswer = await ask(t('init.backup.keepPrompt'));
     const parsedKeep = parseInt(String(keepAnswer || '').trim(), 10);
     const maxBackups = Number.isInteger(parsedKeep) ? Math.min(Math.max(parsedKeep, 1), 3) : 1;
 
@@ -895,7 +898,7 @@ class I18nInitializer {
     let perLanguage = [];
     if (structure !== 'existing') {
       const duplicateChoice = await ask('\n' + t('init.setup.apply_all_prompt'));
-      duplicateStructure = duplicateChoice.toLowerCase() === 'y' || duplicateChoice.toLowerCase() === 'yes';
+      duplicateStructure = parseConfirmation(duplicateChoice, { language: this.config.uiLanguage || this.config.language || 'en', defaultValue: true });
       if (!duplicateStructure) {
         // Prompt for languages to include/exclude
         console.log(t('init.setup.per_language_intro'));
@@ -1056,6 +1059,10 @@ class I18nInitializer {
 
   // Generate completion summary with proper error handling
   async generateCompletionSummary(results, targetLanguages) {
+    return await this.generateLocalizedCompletionSummary(results, targetLanguages);
+  }
+
+  async generateLocalizedCompletionSummary(results, targetLanguages) {
     try {
       console.log('\n' + '='.repeat(50));
       console.log(t('init.initializationSummaryTitle'));
@@ -1070,29 +1077,19 @@ class I18nInitializer {
 
         const langName = LANGUAGE_CONFIG[lang]?.name || 'Unknown';
         const stats = data.totalStats || { total: 0, translated: 0, percentage: 0, missing: 0 };
-
         const statusIcon = stats.percentage === 100 ? '✅' : stats.percentage >= 80 ? '🟡' : '🔴';
 
-        console.log(
-          t('init.languageSummary', {
-            icon: statusIcon,
-            name: langName,
-            code: lang,
-            percentage: stats.percentage || 0,
-          })
-        );
+        console.log(t('init.languageSummary', {
+          icon: statusIcon,
+          name: langName,
+          code: lang,
+          percentage: stats.percentage || 0,
+        }));
 
-        if (data.files && Array.isArray(data.files)) {
+        if (Array.isArray(data.files)) {
           console.log(t('init.languageFiles', { count: data.files.length }));
         }
-
-        console.log(
-          t('init.languageKeys', {
-            translated: stats.translated || 0,
-            total: stats.total || 0,
-          })
-        );
-
+        console.log(t('init.languageKeys', { translated: stats.translated || 0, total: stats.total || 0 }));
         console.log(t('init.languageMissing', { count: stats.missing || 0 }));
 
         totalChanges += (stats.translated || 0) + (stats.missing || 0);
@@ -1100,24 +1097,24 @@ class I18nInitializer {
         missingKeysAdded += stats.missing || 0;
       });
 
-      console.log('\n📊 COMPLETION SUMMARY');
+      console.log('\n' + t('init.completionSummaryTitle'));
       console.log(t('common.separator'));
-      console.log(`📝 Total changes: ${totalChanges}`);
-      console.log(`🌍 Languages processed: ${languagesProcessed}`);
-      console.log(`➕ Missing keys added: ${missingKeysAdded}`);
+      console.log(t('init.totalChanges', { count: totalChanges }));
+      console.log(t('init.languagesProcessed', { count: languagesProcessed }));
+      console.log(t('init.missingKeysAdded', { count: missingKeysAdded }));
 
       if (process.stdin.isTTY && !this.config?.noPrompt) {
         const { ask } = require('../utils/cli');
-        const generateReport = await ask('\n🤖 Would you like a report generated? (Y/N): ');
-        if (generateReport.toLowerCase() === 'y' || generateReport.toLowerCase() === 'yes') {
+        const generateReport = await ask('\n' + t('init.reportPrompt'));
+        if (parseConfirmation(generateReport, { language: this.config.uiLanguage || this.config.language || 'en', defaultValue: true })) {
           await this.generateDetailedReport(results, targetLanguages);
         }
       }
     } catch (error) {
-      console.error('\n❌ Error during completion:', error.message);
-      console.log('📊 COMPLETION SUMMARY (Basic)');
+      console.error('\n' + t('init.completionError', { error: error.message }));
+      console.log(t('init.completionSummaryBasicTitle'));
       console.log(t('common.separator'));
-      console.log(`🌍 Languages processed: ${Object.keys(results || {}).length}`);
+      console.log(t('init.languagesProcessed', { count: Object.keys(results || {}).length }));
     }
   }
 
@@ -1129,11 +1126,10 @@ class I18nInitializer {
         fs.mkdirSync(outputDir, { recursive: true });
       }
       
-      const reportPath = path.join(outputDir, 'init-report.json');
-      const report = {
+      const reportPayload = {
         timestamp: new Date().toISOString(),
         languages: targetLanguages,
-        results: results,
+        results,
         summary: {
           languagesProcessed: targetLanguages.length,
           totalFiles: Object.values(results).reduce((sum, data) => sum + (data.files?.length || 0), 0),
@@ -1141,11 +1137,11 @@ class I18nInitializer {
           totalMissing: Object.values(results).reduce((sum, data) => sum + (data.totalStats?.missing || 0), 0)
         }
       };
-
-      await fs.promises.writeFile(reportPath, JSON.stringify(report, null, 2));
-      console.log(`✅ Report generated: ${reportPath}`);
+      const format = normalizeReportFormat(this.config.reports?.format || this.config.reportFormat || 'markdown');
+      const writtenPath = await writeReportFile(outputDir, 'init-report', reportPayload, { format, title: 'I18NTK Init Report' });
+      console.log(t('init.reportGenerated', { reportPath: writtenPath }));
     } catch (error) {
-      console.error('❌ Failed to generate report:', error.message);
+      console.error(t('init.reportFailed', { error: error.message }));
     }
   }
 
@@ -1153,7 +1149,7 @@ class I18nInitializer {
   async offerLocaleOptimization() {
     try {
       console.log('\n' + '='.repeat(60));
-      console.log('🎯 **PACKAGE SIZE OPTIMIZATION**');
+      console.log(t('init.optimize.title'));
       console.log('='.repeat(60));
       
       try {
@@ -1161,29 +1157,29 @@ class I18nInitializer {
         const LocaleOptimizer = require('../utils/locale-optimizer');
         
         // First run dry run to show current state
-        console.log('\n🔍 Running locale optimization preview...');
+        console.log('\n' + t('init.optimize.preview'));
         const optimizer = new LocaleOptimizer();
         await optimizer.run({ dryRun: true });
 
-        console.log('\n💡 You can reduce package size by selecting only the languages you need');
+        console.log('\n' + t('init.optimize.reduceTip'));
         
-        const answer = await this.prompt('\n🤖 Would you like to run interactive optimization now? (y/n): ');
+        const answer = await this.prompt('\n' + t('init.optimize.prompt'));
         
-        if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
-          console.log('\n🚀 Starting interactive locale optimization...');
+        if (parseConfirmation(answer, { language: this.config.uiLanguage || this.config.language || 'en', defaultValue: false })) {
+          console.log('\n' + t('init.optimize.starting'));
           await optimizer.run({ interactive: true });
-          console.log('\n✅ Package optimization completed!');
+          console.log('\n' + t('init.optimize.completed'));
         } else {
-          console.log('\n💡 You can run locale optimization later with:');
+          console.log('\n' + t('init.optimize.later'));
           console.log('   node utils/locale-optimizer.js --interactive');
         }
       } catch (error) {
-        console.log('\n⚠️ Could not offer locale optimization:', error.message);
-        console.log('\n💡 You can run locale optimization later with:');
+        console.log('\n' + t('init.optimize.unavailable', { error: error.message }));
+        console.log('\n' + t('init.optimize.later'));
         console.log('   node utils/locale-optimizer.js --interactive');
       }
     } catch (error) {
-      console.log('\n⚠️ Could not offer locale optimization:', error.message);
+      console.log('\n' + t('init.optimize.unavailable', { error: error.message }));
     }
   }
 

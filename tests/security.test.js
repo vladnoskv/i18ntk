@@ -38,13 +38,63 @@ describe('Security Tests', () => {
         '../../../etc/passwd',
         '..\\..\\..\\windows\\system32\\config\\sam',
         '/etc/passwd',
-        'valid/path/../../../etc/passwd'
+        'valid/path/../../../etc/passwd',
+        '../escape.lock',
+        '../.temp-config.json'
       ];
 
       maliciousPaths.forEach(maliciousPath => {
         const result = SecurityUtils.validatePath(maliciousPath, process.cwd());
         assert.strictEqual(result, null, `Path ${maliciousPath} should be rejected`);
       });
+    });
+
+    test('safe write should not let artifact-like names bypass base containment', () => {
+      const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-safe-write-'));
+      const base = path.join(parent, 'base');
+      fs.mkdirSync(base);
+
+      try {
+        const result = SecurityUtils.safeWriteFileSync(`..${path.sep}escape.lock`, 'blocked', base, 'utf8');
+        assert.strictEqual(result, false, 'Traversal ending in .lock must be rejected');
+        assert.strictEqual(fs.existsSync(path.join(parent, 'escape.lock')), false);
+      } finally {
+        fs.rmSync(parent, { recursive: true, force: true });
+      }
+    });
+
+    test('should reject absolute paths when relative path remains absolute', () => {
+      const originalRelative = path.relative;
+      try {
+        path.relative = () => 'C:\\tmp\\outside.json';
+        const result = SecurityUtils.validatePath('C:\\tmp\\outside.json', process.cwd());
+        assert.strictEqual(result, null, 'Cross-drive relative paths must be rejected');
+      } finally {
+        path.relative = originalRelative;
+      }
+    });
+
+    test('custom internal prefixes cannot add arbitrary outside roots', () => {
+      const envManager = require('../utils/env-manager').envManager;
+      const original = process.env.I18NTK_INTERNAL_PATH_PREFIXES;
+      const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-internal-prefix-'));
+
+      try {
+        process.env.I18NTK_INTERNAL_PATH_PREFIXES = outside;
+        envManager.clearCache();
+        delete require.cache[require.resolve('../utils/security')];
+        const FreshSecurityUtils = require('../utils/security');
+        const outsideFile = path.join(outside, 'outside.json');
+
+        assert.strictEqual(FreshSecurityUtils.validatePath(outsideFile, process.cwd()), null);
+      } finally {
+        if (original === undefined) delete process.env.I18NTK_INTERNAL_PATH_PREFIXES;
+        else process.env.I18NTK_INTERNAL_PATH_PREFIXES = original;
+        envManager.clearCache();
+        delete require.cache[require.resolve('../utils/security')];
+        require('../utils/security');
+        fs.rmSync(outside, { recursive: true, force: true });
+      }
     });
 
     test('should allow safe relative paths', () => {
@@ -492,7 +542,7 @@ describe('Security Tests', () => {
     });
 
     test('should interpolate manager fixer status output values', async () => {
-      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-fixer-output-'));
+      const dir = fs.mkdtempSync(path.join(process.cwd(), 'tmp-i18ntk-fixer-output-'));
       fs.mkdirSync(path.join(dir, 'en'), { recursive: true });
       fs.mkdirSync(path.join(dir, 'de'), { recursive: true });
 

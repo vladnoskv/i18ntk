@@ -1,6 +1,6 @@
 const assert = require('assert');
 const { test } = require('node:test');
-const { buildProviderRequest, translateText } = require('../utils/translate/api');
+const { buildProviderRequest, translateBatch, translateText } = require('../utils/translate/api');
 const { redactUrlForLog, validateUrl } = require('../utils/translate/safe-network');
 const { parseArgs } = require('../main/i18ntk-translate');
 
@@ -8,6 +8,35 @@ test('translate CLI parses provider option', () => {
   const args = parseArgs(['node', 'i18ntk-translate', 'ui-locales/en.json', 'de', '--provider', 'deepl']);
 
   assert.strictEqual(args.provider, 'deepl');
+});
+
+test('translate CLI uses provider-specific concurrency caps', () => {
+  const google = parseArgs(['node', 'i18ntk-translate', 'ui-locales/en.json', 'de', '--provider', 'google', '--concurrency', '100']);
+  const googleTooHigh = parseArgs(['node', 'i18ntk-translate', 'ui-locales/en.json', 'de', '--provider', 'google', '--concurrency', '500']);
+  const deeplTooHigh = parseArgs(['node', 'i18ntk-translate', 'ui-locales/en.json', 'de', '--provider', 'deepl', '--concurrency', '100']);
+
+  assert.strictEqual(google.concurrency, 100);
+  assert.strictEqual(googleTooHigh.concurrency, 100);
+  assert.strictEqual(deeplTooHigh.concurrency, 25);
+});
+
+test('translate batch applies provider-specific concurrency caps at runtime', async () => {
+  let active = 0;
+  let maxActive = 0;
+
+  await translateBatch(Array.from({ length: 120 }, (_, index) => `Text ${index}`), 'de', {
+    provider: 'google',
+    concurrency: 500,
+    customFn: async (text) => {
+      active++;
+      maxActive = Math.max(maxActive, active);
+      await new Promise(resolve => setTimeout(resolve, 1));
+      active--;
+      return text;
+    },
+  });
+
+  assert.strictEqual(maxActive, 100);
 });
 
 test('DeepL provider posts JSON with authorization header and extracts translated text', async () => {
@@ -166,6 +195,16 @@ test('provider URL validation blocks private hosts unless explicitly allowed', (
   });
 
   assert.strictEqual(allowedForLocalTesting.valid, true);
+});
+
+test('provider URL validation blocks IPv4-mapped IPv6 private hosts', () => {
+  const blocked = validateUrl('https://[::ffff:127.0.0.1]/translate', {
+    allowedHosts: ['[::ffff:7f00:1]'],
+    allowedPaths: ['/translate']
+  });
+
+  assert.strictEqual(blocked.valid, false);
+  assert.strictEqual(blocked.error, 'PrivateHostNotAllowed');
 });
 
 test('network log URL redaction removes translated query text', () => {

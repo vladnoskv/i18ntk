@@ -1,4 +1,4 @@
-# Auto Translate Guide (v3.2.0)
+# Auto Translate Guide (v4.2.0)
 
 Auto Translate converts source JSON locale files into target-language JSON files.
 It is available from the management menu and as the standalone `i18ntk-translate` CLI.
@@ -14,7 +14,7 @@ i18ntk
 Choose:
 
 ```text
-14. Auto Translate (Beta)
+14. Auto Translate
 ```
 
 The interactive flow asks for:
@@ -28,6 +28,8 @@ If the selected source directory contains JSON files directly, Auto Translate us
 
 Before writing files, the manager runs a dry-run preview for the first target language.
 After confirmation, it translates each requested target language and writes matching files under sibling target-language directories. By default, placeholder-bearing strings are translated in preserve mode: only the text around placeholders is sent for translation, then the original placeholders are reinserted.
+
+Auto Translate keeps existing translated target values by default. If a target JSON file already exists, only keys that are missing, empty, marked as untranslated, still identical to the source, or likely still English are sent to the provider. This avoids paying the network and time cost for strings that are already translated.
 
 On first use, the manager can create `i18ntk-auto-translate.json` in the project root. This file is user-owned and stores brand names, product terms, exact values, key paths, and regex patterns that Auto Translate should not translate. On later manager runs, i18ntk can ask whether you want to update the file before translating; choose `don't ask again` to disable that prompt, then re-enable it from Settings when needed.
 
@@ -77,6 +79,12 @@ Translate all JSON files in a source directory:
 i18ntk-translate locales/en es --source-dir locales/en --files "*.json" --no-confirm --preserve-placeholders
 ```
 
+Force a complete re-translation when needed:
+
+```bash
+i18ntk-translate locales/en/common.json de --translate-all --no-confirm
+```
+
 Create or use a protection file:
 
 ```bash
@@ -95,6 +103,9 @@ Auto Translate detects common dynamic placeholder formats, including:
 - `:id`
 - `%{name}`
 - `${value}`
+- `{count, plural, one {# item} other {# items}}`
+- `$t(common.save)`
+- `%(total).2f`
 
 The manager flow calls the translator in-process and uses `preserve` placeholder mode by default. Direct CLI users can choose:
 
@@ -153,6 +164,9 @@ Dry-run reports show planned work without writing translated output.
 - `--source-lang <code>`: source language code, default `en`
 - `--files <pattern>`: file pattern for batch translation, default `*.json`
 - `--dry-run`: preview without API calls or writes
+- `--only-missing`: translate only missing, marker, source-copy, or likely English target values; this is the default
+- `--only-missing-or-english`: alias for `--only-missing`
+- `--translate-all`: re-translate every source string, even if the target value already exists
 - `--no-confirm`: skip interactive prompts
 - `--preserve-placeholders`: translate text around placeholders and reinsert original tokens
 - `--skip-placeholders`: skip placeholder-bearing strings
@@ -160,7 +174,7 @@ Dry-run reports show planned work without writing translated output.
 - `--protection-file <path>`: JSON file for protected terms, keys, values, and patterns
 - `--create-protection-file`: create the protection JSON file if it does not exist
 - `--no-protection`: disable protection handling for one run
-- `--concurrency <n>`: max concurrent API requests, default `3`
+- `--concurrency <n>`: max concurrent API requests, default `12`; Google is capped at `100`, while DeepL and LibreTranslate remain capped lower to avoid provider/account throttling
 - `--batch-size <n>`: text segments scheduled per batch, default `50`
 - `--progress-interval <n>`: completed segments between progress updates, default `10`
 - `--retry-count <n>`: max retries per request, default `3`
@@ -173,7 +187,7 @@ Dry-run reports show planned work without writing translated output.
 
 Default provider:
 
-- `google`: uses the existing dependency-free Google Translate endpoint.
+- `google`: uses the existing dependency-free Google Translate endpoint. The CLI allows up to `100` concurrent Google requests; official Google Cloud Translation v2 quotas are much higher, but i18ntk keeps a client-side cap to avoid local socket pressure and noisy rate-limit retries.
 
 API-key providers:
 
@@ -194,14 +208,18 @@ Provider URL safety:
 
 - Source JSON structure, nested objects, arrays, null values, and non-string values are preserved.
 - The generated target files are intended for immediate review and use.
+- Existing translated target values are preserved unless `--translate-all` is used.
+- Existing target values are considered needing translation when they are missing, empty, untranslated markers, identical to the source, likely still English, or visibly corrupt from encoding damage such as `?????`, `�`, or common mojibake.
+- Progress output is stage-aware: normal keys are shown as `Translating strings`, placeholder-preserve work is shown as `Translating placeholder-safe text segments`, and updates include the active key path when available.
 - Placeholder-bearing strings skipped by policy still need manual translation.
 - Auto Translate mirrors placeholder maps to a short-lived manifest in the OS temp directory during processing and removes it after the file completes. Runtime restoration still uses the in-memory map first, with preserve-mode segmentation as the fallback.
 
 ## Settings
 
-Open Settings and choose `Auto Translate Beta` to tune:
+Open Settings and choose `Auto Translate` to tune:
 
 - placeholder mode: `preserve`, `skip`, or `send`
+- translate-only-needed mode for missing/source-copy/likely English values
 - request concurrency and text-segment batch size
 - progress interval, retry count, retry delay, and request timeout
 - dry-run preview, terminal report output, and UTF-8 BOM output

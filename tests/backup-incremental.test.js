@@ -108,3 +108,84 @@ test('backup cleanup preserves full parent chain for kept incrementals', () => {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test('restore rejects backup entries that escape the output directory', () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-backup-restore-'));
+
+  try {
+    const backupName = 'malicious.json';
+    writeJson(path.join(tempRoot, backupName), {
+      '../escaped.json': { owned: true }
+    });
+
+    const result = runBackupCli(tempRoot, ['restore', backupName, '--output', 'restored']);
+    const output = `${result.stdout}\n${result.stderr}`;
+
+    assert.notEqual(result.status, 0, output);
+    assert.match(output, /Unsafe backup entry name/);
+    assert.equal(fs.existsSync(path.join(tempRoot, 'escaped.json')), false);
+    assert.equal(fs.existsSync(path.join(tempRoot, 'restored', 'escaped.json')), false);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('backup create and restore preserve modular locale paths', () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-backup-modular-'));
+
+  try {
+    writeJson(path.join(tempRoot, 'locales', 'en', 'common.json'), { greeting: 'Hello' });
+    writeJson(path.join(tempRoot, 'locales', 'de', 'common.json'), { greeting: 'Hallo' });
+
+    const create = runBackupCli(tempRoot, ['create', 'locales', '--incremental=false']);
+    const createOutput = `${create.stdout}\n${create.stderr}`;
+    assert.equal(create.status, 0, createOutput);
+
+    const backupFiles = fs.readdirSync(path.join(tempRoot, 'i18ntk-backups'))
+      .filter(file => file.startsWith('backup-') && file.endsWith('.json'));
+    assert.equal(backupFiles.length, 1);
+    const backupData = JSON.parse(fs.readFileSync(path.join(tempRoot, 'i18ntk-backups', backupFiles[0]), 'utf8'));
+    assert.deepEqual(
+      Object.keys(backupData).filter(key => key !== '_meta').sort(),
+      ['de/common.json', 'en/common.json']
+    );
+
+    const backupPath = path.join('i18ntk-backups', backupFiles[0]);
+    const verify = runBackupCli(tempRoot, ['verify', backupPath]);
+    assert.equal(verify.status, 0, `${verify.stdout}\n${verify.stderr}`);
+
+    const restore = runBackupCli(tempRoot, ['restore', backupPath, '--output', 'restored']);
+    assert.equal(restore.status, 0, `${restore.stdout}\n${restore.stderr}`);
+    assert.deepEqual(
+      JSON.parse(fs.readFileSync(path.join(tempRoot, 'restored', 'en', 'common.json'), 'utf8')),
+      { greeting: 'Hello' }
+    );
+    assert.deepEqual(
+      JSON.parse(fs.readFileSync(path.join(tempRoot, 'restored', 'de', 'common.json'), 'utf8')),
+      { greeting: 'Hallo' }
+    );
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test('restore rejects nested backup entries that traverse with windows separators', () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-backup-restore-win-'));
+
+  try {
+    const backupName = 'malicious-windows.json';
+    writeJson(path.join(tempRoot, backupName), {
+      'en\\..\\escaped.json': { owned: true }
+    });
+
+    const result = runBackupCli(tempRoot, ['restore', backupName, '--output', 'restored']);
+    const output = `${result.stdout}\n${result.stderr}`;
+
+    assert.notEqual(result.status, 0, output);
+    assert.match(output, /Unsafe backup entry name/);
+    assert.equal(fs.existsSync(path.join(tempRoot, 'escaped.json')), false);
+    assert.equal(fs.existsSync(path.join(tempRoot, 'restored', 'escaped.json')), false);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+});

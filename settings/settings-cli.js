@@ -39,6 +39,69 @@ function isAdminPinEnabled() {
     return cfg.security?.adminPinEnabled || false;
 }
 
+function printHelp() {
+    console.log([
+        '',
+        'i18n Toolkit Settings CLI',
+        '',
+        'Usage: node settings/settings-cli.js [options]',
+        '',
+        'Options:',
+        '  --help, -h           Show this help message',
+        '  --list-languages     Print supported UI/source language codes',
+        '  --language-status    Print current language settings',
+        '',
+        'Interactive Commands:',
+        '  1) UI Settings          - Configure language, theme, and UI preferences',
+        '  2) Directory Settings    - Set source and output directories',
+        '  3) Script Directories   - Configure script-specific paths',
+        '  4) Processing Settings  - Batch size, concurrency, thresholds',
+        '  5) Security Settings    - Admin PIN, session management',
+        '  6) Advanced Settings   - Strict mode, audit logging, backups',
+        '  7) View All Settings   - Display current configuration',
+        '  8) Import/Export       - Backup and restore settings',
+        '  9) Reset to Defaults   - Restore factory settings',
+        '  0) Report Bug          - Generate bug report',
+        '  u) Update Package      - Update i18n toolkit',
+        '  s) Save Changes        - Save current configuration',
+        '  h) Help               - Show available commands',
+        '  q) Quit               - Exit settings CLI',
+        '',
+        'Examples:',
+        '  node settings/settings-cli.js',
+        '  npm run languages:list',
+        '  npm run languages:status',
+        '',
+        'Note: Run without options to open the interactive menu.',
+    ].join('\n'));
+}
+
+function printAvailableLanguages() {
+    console.log('Available languages:');
+    for (const language of settingsManager.getAvailableLanguages()) {
+        console.log(`  ${language.code} - ${language.name}`);
+    }
+}
+
+function printLanguageStatus() {
+    const settings = configManager.getConfig();
+    const availableLanguages = settingsManager.getAvailableLanguages().map(language => language.code);
+    const available = new Set(availableLanguages);
+    const uiLanguage = settings.uiLanguage || settings.language || 'en';
+    const sourceLanguage = settings.sourceLanguage || settings.language || 'en';
+    const targetLanguages = Array.isArray(settings.targetLanguages)
+        ? settings.targetLanguages
+        : Array.isArray(settings.defaultLanguages)
+            ? settings.defaultLanguages
+            : [];
+
+    console.log('Language status:');
+    console.log(`  UI language: ${uiLanguage}${available.has(uiLanguage) ? '' : ' (not in supported list)'}`);
+    console.log(`  Source language: ${sourceLanguage}${available.has(sourceLanguage) ? '' : ' (not in supported list)'}`);
+    console.log(`  Target languages: ${targetLanguages.length ? targetLanguages.join(', ') : '(none configured)'}`);
+    console.log(`  Supported languages: ${availableLanguages.join(', ')}`);
+}
+
 class SettingsCLI {
     constructor() {
         this.rl = null; // Use cliHelper instead
@@ -137,7 +200,7 @@ class SettingsCLI {
             { key: '7', label: t('settings.mainMenu.advancedSettings'), description: t('settings.mainMenu.advancedSettingsDesc') },
             { key: '8', label: t('settings.mainMenu.viewAllSettings'), description: t('settings.mainMenu.viewAllSettingsDesc') },
             { key: '9', label: t('settings.mainMenu.importExport'), description: t('settings.mainMenu.importExportDesc') },
-            { key: 'a', label: 'Auto Translate Beta', description: 'Tune placeholder handling, concurrency, batching, and reports' },
+            { key: 'a', label: t('settings.mainMenu.autoTranslate'), description: t('settings.mainMenu.autoTranslateDesc') },
             { key: '0', label: t('settings.mainMenu.reportBug'), description: t('settings.mainMenu.reportBugDesc') },
             { key: 'x', label: 'Reset Script Directory Overrides', description: 'Clear script directory overrides and use defaults' },
             { key: 'r', label: t('settings.mainMenu.resetToDefaults'), description: t('settings.mainMenu.resetToDefaultsDesc') },
@@ -332,23 +395,24 @@ class SettingsCLI {
 
         this.clearScreen();
         this.showHeader();
-        console.log(`${colors.bright}Auto Translate Beta Settings${colors.reset}\n`);
+        console.log(`${colors.bright}${t('settings.categories.autoTranslate')}${colors.reset}\n`);
 
         const autoTranslateSettings = {
-            'autoTranslate.placeholderMode': 'Placeholder handling mode',
-            'autoTranslate.concurrency': 'Concurrent translation requests',
-            'autoTranslate.batchSize': 'Text segments per batch',
-            'autoTranslate.progressInterval': 'Progress update interval',
-            'autoTranslate.retryCount': 'Retry count',
-            'autoTranslate.retryDelay': 'Retry delay (ms)',
-            'autoTranslate.timeout': 'Request timeout (ms)',
-            'autoTranslate.dryRunFirst': 'Dry-run preview first',
-            'autoTranslate.reportStdout': 'Print report to terminal',
-            'autoTranslate.bom': 'Write UTF-8 BOM',
-            'autoTranslate.protectionEnabled': 'Protect brand terms, keys, values',
-            'autoTranslate.protectionFile': 'Protection JSON file',
-            'autoTranslate.promptProtectionSetup': 'Ask to create protection file',
-            'autoTranslate.promptProtectionUpdate': 'Ask to update protection rules'
+            'autoTranslate.placeholderMode': t('settings.fields.autoTranslate_placeholderMode.label'),
+            'autoTranslate.concurrency': t('settings.fields.autoTranslate_concurrency.label'),
+            'autoTranslate.batchSize': t('settings.fields.autoTranslate_batchSize.label'),
+            'autoTranslate.progressInterval': t('settings.fields.autoTranslate_progressInterval.label'),
+            'autoTranslate.retryCount': t('settings.fields.autoTranslate_retryCount.label'),
+            'autoTranslate.retryDelay': t('settings.fields.autoTranslate_retryDelay.label'),
+            'autoTranslate.timeout': t('settings.fields.autoTranslate_timeout.label'),
+            'autoTranslate.dryRunFirst': t('settings.fields.autoTranslate_dryRunFirst.label'),
+            'autoTranslate.onlyMissingOrEnglish': t('settings.fields.autoTranslate_onlyMissingOrEnglish.label'),
+            'autoTranslate.reportStdout': t('settings.fields.autoTranslate_reportStdout.label'),
+            'autoTranslate.bom': t('settings.fields.autoTranslate_bom.label'),
+            'autoTranslate.protectionEnabled': t('settings.fields.autoTranslate_protectionEnabled.label'),
+            'autoTranslate.protectionFile': t('settings.fields.autoTranslate_protectionFile.label'),
+            'autoTranslate.promptProtectionSetup': t('settings.fields.autoTranslate_promptProtectionSetup.label'),
+            'autoTranslate.promptProtectionUpdate': t('settings.fields.autoTranslate_promptProtectionUpdate.label')
         };
 
         await this.showSettingsCategory(autoTranslateSettings);
@@ -403,7 +467,8 @@ class SettingsCLI {
         const advancedSettings = {
             'advanced.strictMode': t('settings.fields.strictMode.label'),
             'advanced.enableAuditLog': t('settings.fields.enableAuditLog.label'),
-            'advanced.backupBeforeChanges': t('settings.fields.backupBeforeChanges.label')
+            'advanced.backupBeforeChanges': t('settings.fields.backupBeforeChanges.label'),
+            'reports.format': t('settings.fields.reports_format.label')
         };
 
         await this.showSettingsCategory(advancedSettings);
@@ -564,10 +629,12 @@ class SettingsCLI {
             'security.adminPinEnabled': ['true', 'false'],
             'security.pinProtection.enabled': ['true', 'false'],
             'advanced.backupBeforeChanges': ['true', 'false'],
+            'reports.format': ['markdown', 'json', 'text'],
             'backup.enabled': ['true', 'false'],
             'backup.singleFileMode': ['true', 'false'],
             'autoTranslate.placeholderMode': ['preserve', 'skip', 'send'],
             'autoTranslate.dryRunFirst': ['true', 'false'],
+            'autoTranslate.onlyMissingOrEnglish': ['true', 'false'],
             'autoTranslate.reportStdout': ['true', 'false'],
             'autoTranslate.bom': ['true', 'false'],
             'autoTranslate.protectionEnabled': ['true', 'false'],
@@ -608,7 +675,7 @@ class SettingsCLI {
             'logRetention': { min: 1, max: 90, type: 'int', unit: 'days' },
             'retentionDays': { min: 1, max: 365, type: 'int', unit: 'days' },
             'maxBackups': { min: 1, max: 3, type: 'int' },
-            'autoTranslate.concurrency': { min: 1, max: 25, type: 'int' },
+            'autoTranslate.concurrency': { min: 1, max: 100, type: 'int' },
             'autoTranslate.batchSize': { min: 1, max: 10000, type: 'int' },
             'autoTranslate.progressInterval': { min: 1, max: 10000, type: 'int' },
             'autoTranslate.retryCount': { min: 0, max: 10, type: 'int' },
@@ -2139,6 +2206,16 @@ module.exports = SettingsCLI;
 // If run directly, start the CLI
 if (require.main === module) {
     const args = process.argv.slice(2);
+
+    if (args.includes('--list-languages')) {
+        printAvailableLanguages();
+        process.exit(0);
+    }
+
+    if (args.includes('--language-status')) {
+        printLanguageStatus();
+        process.exit(0);
+    }
     
     // Handle --help flag
     if (args.includes('--help') || args.includes('-h')) {

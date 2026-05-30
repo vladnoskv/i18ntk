@@ -104,10 +104,11 @@ function writeReport(reportText, filePath) {
   }
 }
 
-function formatSummaryLine(skippedCount, translatedCount, totalCount, placeholderProtected = 0, protectedSkipped = 0) {
+function formatSummaryLine(skippedCount, translatedCount, totalCount, placeholderProtected = 0, protectedSkipped = 0, existingKept = 0) {
   const protectedPart = placeholderProtected > 0 ? `, ${placeholderProtected} placeholder-safe` : '';
   const glossaryPart = protectedSkipped > 0 ? `, ${protectedSkipped} protected` : '';
-  return `[translate] ${translatedCount} translated${protectedPart}${glossaryPart}, ${skippedCount} skipped (of ${totalCount} total keys)`;
+  const existingPart = existingKept > 0 ? `, ${existingKept} existing kept` : '';
+  return `[translate] ${translatedCount} translated${protectedPart}${glossaryPart}${existingPart}, ${skippedCount} skipped (of ${totalCount} total keys)`;
 }
 
 module.exports = {

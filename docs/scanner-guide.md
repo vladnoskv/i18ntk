@@ -1,4 +1,4 @@
-# Scanner Guide (v3.2.0)
+# Scanner Guide (v4.2.0)
 
 ## Purpose
 
@@ -32,6 +32,7 @@ i18ntk-scanner --source-dir=./src
 - `--output-report` write report files
 - `--json` JSON terminal output
 - `--no-prompt` non-interactive mode
+- `--source-language` source-language profile for hardcoded text detection
 
 ## Practical Examples
 
@@ -44,6 +45,9 @@ i18ntk-scanner --source-dir=./src --output-report --json --no-prompt
 
 # Tuned scan for false-positive reduction
 i18ntk-scanner --source-dir=./src --exclude="*.test.js" --min-length=4 --max-length=80
+
+# Scan source text in another language
+i18ntk-scanner --source-dir=./src --source-language=de --output-report
 ```
 
 ## Recommended Workflow

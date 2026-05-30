@@ -123,7 +123,7 @@ class CommandRouter {
      * Execute a command with proper routing and error handling
      */
     async executeCommand(command, options = {}) {
-        console.log(t('menu.executingCommand', { command }));
+        console.log('\n' + t('menu.executingCommand', { command }));
 
         // Enhanced context detection
         const executionContext = this.getExecutionContext(options);
@@ -161,7 +161,7 @@ class CommandRouter {
             const result = await this.routeCommand(command, options, executionContext);
 
             // Handle command completion based on execution context
-            console.log(t('operations.completed'));
+            console.log('\n' + t('operations.completed'));
 
             if (isManagerExecution && !this.isNonInteractiveMode && this.prompt) {
                 // Interactive menu execution - return to menu

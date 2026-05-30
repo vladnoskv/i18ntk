@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "3.3.0",
+  "version": "4.2.0",
   "private": true,
   "manifestRole": "development",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
@@ -125,7 +125,7 @@
   "exports": {
     ".": "./main/manage/index.js",
     "./runtime": {
-      "types": "./runtime/i18ntk.d.ts",
+      "types": "./runtime/index.d.ts",
       "require": "./runtime/index.js",
       "default": "./runtime/index.js"
     },
@@ -181,7 +181,6 @@
     "settings/settings-cli.js",
     "settings/settings-manager.js",
     "ui-locales/",
-    "!main/manage/index-fixed.js",
     "utils/admin-auth.js",
     "utils/admin-cli.js",
     "utils/cli-helper.js",
@@ -206,16 +205,21 @@
     "utils/i18n-helper.js",
     "utils/init-helper.js",
     "utils/json-output.js",
+    "utils/localized-confirm.js",
     "utils/locale-optimizer.js",
     "utils/logger.js",
+    "utils/menu-layout.js",
     "utils/npm-version-warning.js",
     "utils/plugin-loader.js",
     "utils/prompt-helper.js",
     "utils/prompt.js",
+    "utils/report-writer.js",
     "utils/secure-errors.js",
     "utils/security.js",
     "utils/setup-enforcer.js",
     "utils/terminal-icons.js",
+    "utils/usage-source.js",
+    "utils/usage-insights.js",
     "utils/validation-risk.js",
     "utils/version-utils.js",
     "utils/watch-locales.js",
@@ -282,28 +286,27 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "3.3.0",
-    "releaseDate": "07/05/2026",
-    "lastUpdated": "07/05/2026",
+    "version": "4.2.0",
+    "releaseDate": "30/05/2026",
+    "lastUpdated": "30/05/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "NEW: Zero-dependency Google Translate API integration for automatic translation of locale JSON files.",
-      "NEW: Manager menu Auto Translate flow with dry-run preview before writing target locale files.",
-      "NEW: Standalone i18ntk-translate CLI for direct file and batch translation.",
-      "NEW: Placeholder-preserve translation mode translates text around dynamic tokens and reinserts placeholders safely.",
-      "NEW: Auto Translate beta settings for placeholder mode, concurrency, batch size, progress interval, retries, timeout, reports, protection files, and BOM output.",
-      "NEW: User-editable Auto Translate protection file for terms, key paths, exact values, and regex patterns.",
-      "NEW: Validation warnings now include specific issue types, reasons, and English-content percentage details.",
-      "NEW: Sizing analysis now reports per-language file counts, file-set mismatches, and per-file key/character statistics.",
-      "FIX: Auto Translate resolves locale roots to the selected source-language folder when JSON files are stored under language folders.",
-      "FIX: Public package staging verifies root and public manifest metadata before packing or publishing.",
-      "SECURITY: Manager Auto Translate now calls the translator in-process instead of spawning a child process."
+      "SECURITY: Path containment, backup restore, runtime language loading, and Auto Translate provider URL validation are hardened.",
+      "AUTO TRANSLATE: The manager and docs no longer mark Auto Translate beta; existing translated target values are kept by default, and Google concurrency can now be raised up to 100.",
+      "RUNTIME: The lightweight runtime gains per-call language overrides, translateBatch(), cache helpers, and safer JSON parsing.",
+      "REPORTS: Init and analysis reports default to readable Markdown, with pretty JSON and text available through reports.format.",
+      "UX: Manager menu spacing is grouped and validation output no longer repeats source/i18n/output directory blocks.",
+      "USAGE: Usage analysis avoids scanning the project root when locale and source directories are the same.",
+      "USAGE: Usage reports now index known keys to source locations, resolve bounded dynamic key patterns, report unresolved dynamic expressions, recommend route-based namespaces, and flag hardcoded text candidates."
     ],
-    "breakingChanges": [],
-    "nextVersion": "3.1.3",
+    "breakingChanges": [
+      "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
+      "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
+    ],
+    "nextVersion": "4.2.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -325,7 +328,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 3.0.0 may be unstable or insecure. Upgrade to 3.0.0 or newer."
+    "supportPolicy": "Versions earlier than 4.2.0 may be unstable or insecure. Upgrade to 4.2.0 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

@@ -54,13 +54,14 @@ class SettingsManager {
             },
             "autoTranslate": {
                 "placeholderMode": "preserve",
-                "concurrency": 6,
+                "concurrency": 12,
                 "batchSize": 100,
                 "progressInterval": 25,
                 "retryCount": 3,
                 "retryDelay": 1000,
                 "timeout": 15000,
                 "dryRunFirst": true,
+                "onlyMissingOrEnglish": true,
                 "reportStdout": true,
                 "bom": false,
                 "protectionEnabled": true,
@@ -69,7 +70,7 @@ class SettingsManager {
                 "promptProtectionUpdate": true
             },
             "reports": {
-                "format": "json",
+                "format": "markdown",
                 "includeSource": false,
                 "includeStats": true,
                 "includeRecommendations": true,
@@ -807,6 +808,18 @@ class SettingsManager {
                     description: 'Directory for generated reports',
                     default: './i18ntk-reports'
                 },
+                reports: {
+                    type: 'object',
+                    description: 'Generated report output settings',
+                    properties: {
+                        format: {
+                            type: 'string',
+                            description: 'Report file format',
+                            enum: ['markdown', 'json', 'text'],
+                            default: 'markdown'
+                        }
+                    }
+                },
                 framework: {
                     type: 'object',
                     description: 'Framework preference and detection settings',
@@ -897,7 +910,7 @@ class SettingsManager {
                 },
                 autoTranslate: {
                     type: 'object',
-                    description: 'Auto Translate beta defaults',
+                    description: 'Auto Translate defaults',
                     properties: {
                         placeholderMode: {
                             type: 'string',
@@ -907,10 +920,10 @@ class SettingsManager {
                         },
                         concurrency: {
                             type: 'number',
-                            description: 'Maximum concurrent translation requests',
+                            description: 'Maximum concurrent translation requests (Google supports up to 100 in i18ntk; other providers are capped lower)',
                             minimum: 1,
-                            maximum: 25,
-                            default: 6
+                            maximum: 100,
+                            default: 12
                         },
                         batchSize: {
                             type: 'number',
@@ -950,6 +963,11 @@ class SettingsManager {
                         dryRunFirst: {
                             type: 'boolean',
                             description: 'Run a dry-run preview before interactive manager translation',
+                            default: true
+                        },
+                        onlyMissingOrEnglish: {
+                            type: 'boolean',
+                            description: 'Only translate keys missing from the target, untranslated markers, source-language copies, or likely English target text',
                             default: true
                         },
                         reportStdout: {

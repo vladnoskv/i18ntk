@@ -892,18 +892,38 @@ function translate(key, params, options) {
 }
 
 const t = translate;
+const tTyped = translate;
+
+async function translateBatch(keys, paramsArray, options) {
+  if (!runtimeInstance) {
+    runtimeInstance = new I18nEnhancedRuntime();
+  }
+  return runtimeInstance.translateBatch(keys, paramsArray, options);
+}
+
+async function translateBatchEncrypted(keys, paramsArray, options) {
+  if (!runtimeInstance) {
+    runtimeInstance = new I18nEnhancedRuntime();
+  }
+  return runtimeInstance.translateBatchEncrypted(keys, paramsArray, options);
+}
+
+async function translateEncrypted(key, params, options) {
+  if (!runtimeInstance) {
+    runtimeInstance = new I18nEnhancedRuntime();
+  }
+  return runtimeInstance.translateEncrypted(key, params, options);
+}
 
 // Export for both CommonJS and ES modules
 module.exports = {
   initI18nRuntime,
   translate,
   t,
-  translateEncrypted: async (key, params, options) => {
-    if (!runtimeInstance) {
-      runtimeInstance = new I18nEnhancedRuntime();
-    }
-    return runtimeInstance.translateEncrypted(key, params, options);
-  },
+  tTyped,
+  translateEncrypted,
+  translateBatch,
+  translateBatchEncrypted,
   
   // TypeScript compatibility exports
   I18nEnhancedRuntime,
@@ -926,4 +946,8 @@ module.exports.default = {
   initI18nRuntime,
   translate,
   t,
+  tTyped,
+  translateEncrypted,
+  translateBatch,
+  translateBatchEncrypted,
 };

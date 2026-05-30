@@ -1,6 +1,6 @@
 // runtime/i18ntk.d.ts
 // Complete TypeScript definitions for i18ntk internationalization framework
-// Version 3.2.0 - Full TypeScript support with AES-256-GCM encryption
+// Version 4.2.0 - Enhanced API types plus lightweight runtime compatibility
 
 /**
  * Core translation parameters interface
@@ -449,12 +449,17 @@ export interface BasicI18nRuntime {
   /**
    * Translate a key with parameters (synchronous)
    */
-  translate(key: string, params?: TranslationParams): string;
+  translate(key: string, params?: TranslationParams, options?: Pick<TranslationOptions, 'language' | 'fallbackLanguage'>): string | number | boolean | null | object | unknown[];
   
   /**
    * Alias for translate function (synchronous)
    */
-  t(key: string, params?: TranslationParams): string;
+  t(key: string, params?: TranslationParams, options?: Pick<TranslationOptions, 'language' | 'fallbackLanguage'>): string | number | boolean | null | object | unknown[];
+
+  /**
+   * Translate multiple keys synchronously.
+   */
+  translateBatch(keys: string[], params?: TranslationParams | TranslationParams[], options?: Pick<TranslationOptions, 'language' | 'fallbackLanguage'>): Array<string | number | boolean | null | object | unknown[]>;
   
   /**
    * Set language
@@ -470,6 +475,24 @@ export interface BasicI18nRuntime {
    * Get available languages (synchronous)
    */
   getAvailableLanguages(): string[];
+
+  /**
+   * Clear all cached runtime data, or one language when provided.
+   */
+  clearCache(language?: string): void;
+
+  /**
+   * Return lightweight cache diagnostics for production observability.
+   */
+  getCacheInfo(): {
+    language: string;
+    fallbackLanguage: string;
+    lazy: boolean;
+    cachedLanguages: string[];
+    manifestLanguages: string[];
+    loadedFileCount: number;
+    eagerLoadedLanguages: string[];
+  };
   
   /**
    * Refresh translations
@@ -487,7 +510,7 @@ export declare function initI18nRuntime(config: I18nConfig): Promise<I18nRuntime
  * This is the default export from 'i18ntk/runtime'
  */
 export declare function initRuntime(options: {
-  baseDir: string;
+  baseDir?: string;
   language?: string;
   fallbackLanguage?: string;
   keySeparator?: string;

@@ -156,7 +156,6 @@ function prepareStage() {
     copyEntry(entry);
   }
 
-  removeIfExists('main/manage/index-fixed.js');
   const readmePath = path.join(stageDir, 'README.md');
   const readme = SecurityUtils.safeReadFileSync(readmePath, stageDir, 'utf8');
   if (!readme || readme.trim().length < 100) {

@@ -1,6 +1,6 @@
-# Getting Started with i18ntk (v3.2.0)
+# Getting Started with i18ntk (v4.2.0)
 
-This guide covers the shortest path from install to first successful run.
+This guide covers the shortest path from install to a working locale project.
 
 ## 1. Install
 
@@ -14,47 +14,54 @@ Or add it to a project:
 npm install --save-dev i18ntk
 ```
 
+Requirements:
+
+- Node.js `>=16.0.0`
+- npm `>=8.0.0`
+- No runtime dependencies
+
 ## 2. Initialize the project
 
-Run the interactive setup:
+Run the interactive manager:
 
 ```bash
 i18ntk
 ```
 
-Or run setup directly:
+Then choose `Initialize new languages`, or run the command directly:
 
 ```bash
 i18ntk --command=init
 ```
 
-During setup, i18ntk will ask for:
+During setup, i18ntk asks for source directory, source language, UI language, framework preference, output directory, backup settings, and target languages. The default target-language set is `en`, `de`, `es`, `fr`, and `ru`.
 
-- source directory
-- source language
-- UI language
-- framework preference
-- output directory
-- backup settings
-
-If you are in CI or want no prompts:
+For automation:
 
 ```bash
 i18ntk --command=init --no-prompt
 ```
 
-## 3. Validate the project
+## 3. Validate and analyze
 
-Run a first scan after setup:
+Run a first check after setup:
 
 ```bash
 i18ntk --command=analyze
 i18ntk --command=validate
 ```
 
-Validation now produces a summary report at the end of the run.
+Analysis reports default to Markdown in `./i18ntk-reports`. Validation prints a terminal summary and writes a validation summary report.
 
-## 4. Complete missing keys
+## 4. Check usage
+
+```bash
+i18ntk --command=usage
+```
+
+If your locale directory is also configured as `sourceDir`, usage analysis avoids scanning the whole project root and reports that no application source directory was available instead of inflating missing-key counts.
+
+## 5. Complete missing keys
 
 When analysis shows gaps:
 
@@ -62,13 +69,13 @@ When analysis shows gaps:
 i18ntk --command=complete
 ```
 
-## 5. Auto-translate locale files
+## 6. Auto-translate locale files
 
 Use the management menu:
 
 ```bash
 i18ntk
-# choose "Auto Translate (Beta)"
+# choose "Auto Translate"
 ```
 
 Or run the standalone translator directly:
@@ -77,9 +84,9 @@ Or run the standalone translator directly:
 i18ntk-translate locales/en/common.json de --report-stdout
 ```
 
-The manager flow runs a dry-run preview first when enabled, then writes translated target files after confirmation. Placeholder-bearing strings use preserve mode by default, so dynamic tokens stay intact while surrounding words are translated. On first use, Auto Translate can also create `i18ntk-auto-translate.json` so you can maintain protected brand terms, key paths, exact values, and regex patterns outside the package.
+Auto Translate is target-aware by default. Existing translated target values are kept, and only missing, empty, untranslated-marker, source-copy, or likely-English values are sent to the provider. Use `--translate-all` only when you intentionally want a full re-translation.
 
-## 6. Use the runtime API in your application
+## 7. Use the runtime API
 
 ```js
 const runtime = require('i18ntk/runtime');
@@ -94,9 +101,27 @@ const i18n = runtime.initRuntime({
 console.log(i18n.t('common.hello'));
 ```
 
-## 7. Keep configuration in sync
+For large modular locale folders, use lazy loading to reduce steady-state memory:
 
-The project-local `.i18ntk-config` file is the source of truth for setup and command defaults.
+```js
+const i18n = runtime.initRuntime({
+  baseDir: './locales',
+  language: 'en',
+  fallbackLanguage: 'en',
+  lazy: true
+});
+```
+
+Prefer the returned `i18n` instance in production apps, especially if the process serves multiple sites or locale roots.
+
+Useful runtime helpers:
+
+```js
+i18n.t('common.hello', {}, { language: 'de' });
+i18n.translateBatch(['menu.home', 'menu.settings']);
+i18n.clearCache('fr');
+console.log(i18n.getCacheInfo());
+```
 
 ## Suggested First Run Sequence
 
@@ -110,7 +135,8 @@ i18ntk --command=translate
 
 ## Next Steps
 
-- Read [docs/runtime.md](./runtime.md) for full runtime API details.
-- Read [docs/auto-translate.md](./auto-translate.md) for Auto Translate usage.
-- Read [docs/api/CONFIGURATION.md](./api/CONFIGURATION.md) for config fields and precedence.
-- Read [docs/scanner-guide.md](./scanner-guide.md) for scan and key discovery workflows.
+- Read [Runtime API](./runtime.md) for runtime details.
+- Read [Auto Translate](./auto-translate.md) for provider, placeholder, and protection behavior.
+- Read [Configuration](./api/CONFIGURATION.md) for config fields and precedence.
+- Read [Scanner Guide](./scanner-guide.md) for scan and key discovery workflows.
+- Read [Migration Guide v4.2.0](./migration-guide-v4.2.0.md) before upgrading older projects.

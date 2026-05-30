@@ -1,7 +1,13 @@
 const { URL } = require('url');
 const { safeHttpGet, safeHttpPost, buildGoogleTranslateUrl } = require('./safe-network');
 
-const DEFAULT_CONCURRENCY = 3;
+const DEFAULT_CONCURRENCY = 12;
+const PROVIDER_CONCURRENCY_LIMITS = {
+  google: 100,
+  deepl: 25,
+  libretranslate: 25,
+  custom: 100,
+};
 const DEFAULT_RETRY_COUNT = 3;
 const DEFAULT_RETRY_DELAY = 1000;
 const MAX_BACKOFF_DELAY = 30000;
@@ -24,6 +30,16 @@ function normalizeProvider(provider) {
   if (value === 'libre' || value === 'libretranslate') return 'libretranslate';
   if (value === 'google' || value === 'gtx') return 'google';
   return value;
+}
+
+function getProviderConcurrencyLimit(provider) {
+  return PROVIDER_CONCURRENCY_LIMITS[normalizeProvider(provider)] || 25;
+}
+
+function clampProviderConcurrency(value, provider, fallback = DEFAULT_CONCURRENCY) {
+  const parsed = parseInt(value, 10);
+  if (!Number.isInteger(parsed)) return fallback;
+  return Math.min(Math.max(parsed, 1), getProviderConcurrencyLimit(provider));
 }
 
 function normalizeDeepLLanguage(code) {
@@ -271,12 +287,21 @@ async function translateBatch(batch, targetLang, options = {}) {
 
       completed++;
       if (typeof onProgress === 'function') {
-        onProgress({ completed, total: batch.length, index: i, ok: result.ok });
+        onProgress({
+          completed,
+          total: batch.length,
+          index: i,
+          ok: result.ok,
+          keyPath: item && typeof item === 'object' ? item.keyPath : undefined,
+        });
       }
     }
   }
 
-  const workerCount = Math.min(concurrency > 0 ? concurrency : DEFAULT_CONCURRENCY, batch.length);
+  const workerCount = Math.min(
+    clampProviderConcurrency(concurrency, options.provider, DEFAULT_CONCURRENCY),
+    batch.length
+  );
   const workers = Array.from({ length: workerCount }, () => worker());
 
   await Promise.all(workers);
@@ -294,6 +319,9 @@ module.exports = {
   translateText,
   translateBatch,
   DEFAULT_CONCURRENCY,
+  PROVIDER_CONCURRENCY_LIMITS,
+  getProviderConcurrencyLimit,
+  clampProviderConcurrency,
   DEFAULT_RETRY_COUNT,
   DEFAULT_RETRY_DELAY,
 };

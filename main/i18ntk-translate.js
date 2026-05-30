@@ -24,9 +24,11 @@
  *   --protection-file <path>   JSON file with protected terms, keys, values, and patterns
  *   --create-protection-file   Create the protection JSON file if it does not exist
  *   --no-protection            Disable protected term/key/value handling for this run
- *   --concurrency <n>          Max concurrent API requests (default: 3)
+ *   --concurrency <n>          Max concurrent API requests (default: 12, Google max: 100)
  *   --batch-size <n>           Number of text segments per batch (default: 50)
  *   --dry-run                  Preview mode without API calls
+ *   --only-missing             Translate only missing, marker, source-copy, or likely English target values
+ *   --translate-all            Re-translate every source string even when a target value already exists
  *   --report-file <path>       Write report to file
  *   --report-stdout            Print report to stdout
  *   --bom                      Output UTF-8 with BOM
@@ -61,9 +63,10 @@ const {
   restoreText,
   shouldPreserveWholeValue,
 } = require('../utils/translate/protection');
-const { translateBatch } = require('../utils/translate/api');
-const { collectLeaves, setLeaf, deepClone } = require('../utils/translate/traverse');
+const { translateBatch, DEFAULT_CONCURRENCY, clampProviderConcurrency } = require('../utils/translate/api');
+const { collectLeaves, getLeaf, setLeaf, deepClone } = require('../utils/translate/traverse');
 const { generateReport, writeReport, formatSummaryLine } = require('../utils/translate/report');
+const { analyzeEnglishContent } = require('../utils/validation-risk');
 const {
   confirmGlobalChoice,
   confirmPerKey,
@@ -101,10 +104,12 @@ function printHelp() {
     '  --protection-file <path>   Protected terms/keys JSON file (default: i18ntk-auto-translate.json)',
     '  --create-protection-file   Create the protection JSON file if missing',
     '  --no-protection            Disable protected term/key/value handling',
-    '  --concurrency <n>          Max concurrent API requests (default: 3)',
+    '  --concurrency <n>          Max concurrent API requests (default: 12, Google max: 100)',
     '  --batch-size <n>           Number of text segments per batch (default: 50)',
     '  --progress-interval <n>    Progress update interval (default: 10)',
     '  --dry-run                  Preview: show what would be skipped',
+    '  --only-missing             Translate only missing, marker, source-copy, or likely English target values (default)',
+    '  --translate-all            Re-translate every source string even when target values already exist',
     '  --report-file <path>       Write post-translation report to file',
     '  --report-stdout            Print post-translation report to stdout',
     '  --bom                      Write output files with UTF-8 BOM',
@@ -141,10 +146,11 @@ function parseArgs(argv) {
     protectionFile: DEFAULT_PROTECTION_FILE,
     protectionEnabled: true,
     createProtectionFile: false,
-    concurrency: 3,
+    concurrency: DEFAULT_CONCURRENCY,
     batchSize: 50,
     progressInterval: 10,
     dryRun: false,
+    onlyMissingOrEnglish: true,
     reportFile: null,
     reportStdout: false,
     bom: false,
@@ -168,6 +174,8 @@ function parseArgs(argv) {
     else if (arg === '--no-protection') { args.protectionEnabled = false; }
     else if (arg === '--create-protection-file') { args.createProtectionFile = true; }
     else if (arg === '--dry-run') { args.dryRun = true; }
+    else if (arg === '--translate-all' || arg === '--force-translate') { args.onlyMissingOrEnglish = false; }
+    else if (arg === '--only-missing' || arg === '--only-missing-or-english') { args.onlyMissingOrEnglish = true; }
     else if (arg === '--report-stdout') { args.reportStdout = true; }
     else if (arg === '--bom') { args.bom = true; }
     else if (arg === '--source-dir' && i + 1 < argv.length) { args.sourceDir = argv[++i]; }
@@ -176,7 +184,7 @@ function parseArgs(argv) {
     else if (arg === '--provider' && i + 1 < argv.length) { args.provider = argv[++i]; }
     else if (arg === '--custom-regex' && i + 1 < argv.length) { args.customRegex.push(argv[++i]); }
     else if (arg === '--protection-file' && i + 1 < argv.length) { args.protectionFile = argv[++i]; }
-    else if (arg === '--concurrency' && i + 1 < argv.length) { args.concurrency = parseInt(argv[++i], 10) || 3; }
+    else if (arg === '--concurrency' && i + 1 < argv.length) { args.concurrency = parseInt(argv[++i], 10) || DEFAULT_CONCURRENCY; }
     else if (arg === '--batch-size' && i + 1 < argv.length) { args.batchSize = parseInt(argv[++i], 10) || 50; }
     else if (arg === '--progress-interval' && i + 1 < argv.length) { args.progressInterval = parseInt(argv[++i], 10) || 10; }
     else if (arg === '--report-file' && i + 1 < argv.length) { args.reportFile = argv[++i]; }
@@ -202,12 +210,22 @@ function parseArgs(argv) {
     process.exit(1);
   }
 
-  args.concurrency = clampInt(args.concurrency, 1, 25, 3);
+  args.concurrency = clampProviderConcurrency(args.concurrency, args.provider, DEFAULT_CONCURRENCY);
   args.batchSize = clampInt(args.batchSize, 1, 10000, 50);
   args.progressInterval = clampInt(args.progressInterval, 1, 10000, 10);
 
   return args;
 }
+
+const UNTRANSLATED_MARKERS = new Set([
+  '',
+  '__not_translated__',
+  'not_translated',
+  '[translate]',
+  '[not translated]',
+  'todo',
+  'tbd',
+]);
 
 function clampInt(value, min, max, fallback) {
   const num = parseInt(value, 10);
@@ -287,6 +305,95 @@ function classifyLeaves(leaves, customRegex) {
   }
 
   return { withPlaceholders, withoutPlaceholders };
+}
+
+function readExistingTargetData(targetPath) {
+  if (!SecurityUtils.safeExistsSync(targetPath, path.dirname(targetPath))) {
+    return null;
+  }
+
+  try {
+    const raw = SecurityUtils.safeReadFileSync(targetPath, path.dirname(targetPath), 'utf-8').replace(/^\uFEFF/, '');
+    return JSON.parse(raw);
+  } catch (error) {
+    console.warn(`Warning: Could not read existing target file "${targetPath}": ${error.message}`);
+    return null;
+  }
+}
+
+function isUntranslatedMarker(value) {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  return UNTRANSLATED_MARKERS.has(normalized);
+}
+
+function isLikelyEnglish(value, args) {
+  const text = String(value || '').trim();
+  if (!text) return false;
+  const analysis = analyzeEnglishContent(text, {
+    allowedEnglishTerms: args.allowedEnglishTerms,
+  });
+  const threshold = Number.isFinite(Number(args.englishThresholdPercent))
+    ? Number(args.englishThresholdPercent)
+    : 10;
+  return analysis.englishPercentage > threshold && analysis.englishWordCount >= 2;
+}
+
+function isBrokenTranslationValue(value) {
+  if (typeof value !== 'string') return false;
+  const text = value.trim();
+  if (!text) return false;
+  if (text.includes('\uFFFD')) return true;
+
+  const compact = text.replace(/[\s.,!;:()[\]{}'"`~_\-]/g, '');
+  if (compact.length >= 1 && /^\?+$/.test(compact)) return true;
+  if (/\?{3,}/.test(text)) return true;
+
+  const questionCount = (text.match(/\?/g) || []).length;
+  const visibleLength = Math.max(text.replace(/\s/g, '').length, 1);
+  if (questionCount >= 3 && questionCount / visibleLength >= 0.5) return true;
+
+  if (/[\u0080-\u009F]/.test(text) && /[ÃÂÐÑ]/.test(text)) return true;
+
+  const mojibakePatterns = [
+    /[ÃÂ][\u0080-\u00BF]/,
+    /Ð[\u0080-\u00BF]/,
+    /Ñ[\u0080-\u00BF]/,
+    /ã[‚ƒ€]/,
+  ];
+  return mojibakePatterns.some((pattern) => pattern.test(text));
+}
+
+function shouldTranslateTargetValue(sourceValue, targetValue, args) {
+  if (targetValue === undefined || targetValue === null) return true;
+  if (typeof targetValue !== 'string') return true;
+  if (isUntranslatedMarker(targetValue)) return true;
+  if (isBrokenTranslationValue(targetValue)) return true;
+  if (targetValue.trim() === String(sourceValue ?? '').trim()) return true;
+  if (args.onlyMissingOrEnglish !== false && isLikelyEnglish(targetValue, args)) return true;
+  return args.onlyMissingOrEnglish === false;
+}
+
+function planTargetAwareLeaves(sourceLeaves, targetData, args) {
+  if (!targetData || args.onlyMissingOrEnglish === false) {
+    return {
+      translatableLeaves: sourceLeaves,
+      existingLeaves: [],
+    };
+  }
+
+  const translatableLeaves = [];
+  const existingLeaves = [];
+
+  for (const leaf of sourceLeaves) {
+    const targetValue = getLeaf(targetData, leaf.keyPath);
+    if (shouldTranslateTargetValue(leaf.value, targetValue, args)) {
+      translatableLeaves.push(leaf);
+    } else {
+      existingLeaves.push({ ...leaf, value: targetValue, skipReason: 'existing' });
+    }
+  }
+
+  return { translatableLeaves, existingLeaves };
 }
 
 async function resolvePlaceholderStrategy(args) {
@@ -403,7 +510,11 @@ function prepareDirectBatch(toTranslate, customRegex, protection) {
 
 async function runTranslation(maskedBatch, targetLang, options) {
   const batchItems = maskedBatch.map((item) => ({ value: item.masked, keyPath: item.keyPath }));
-  const results = await translateBatchInChunks(batchItems, targetLang, options);
+  const results = await translateBatchInChunks(batchItems, targetLang, {
+    ...options,
+    stageLabel: 'Translating strings',
+    progressUnit: 'strings',
+  });
   return results;
 }
 
@@ -428,6 +539,9 @@ async function translateBatchInChunks(batch, targetLang, options) {
             total: batch.length,
             chunkCompleted: info.completed,
             chunkTotal: info.total,
+            keyPath: info.keyPath,
+            stage: options.stageLabel || 'Translating',
+            unit: options.progressUnit || 'items',
           });
         }
       },
@@ -522,7 +636,11 @@ async function translatePreservedItems(items, targetLang, options, customRegex, 
     return plan;
   });
 
-  const translatedSegments = await translateBatchInChunks(segmentJobs, targetLang, options);
+  const translatedSegments = await translateBatchInChunks(segmentJobs, targetLang, {
+    ...options,
+    stageLabel: 'Translating placeholder-safe text segments',
+    progressUnit: 'segments',
+  });
 
   return plans.map((plan) => {
     const value = plan.segments.map((segment) => {
@@ -580,8 +698,8 @@ async function translateItems(toTranslate, targetLang, options, customRegex, pro
   return finalResults;
 }
 
-function applyResults(sourceData, translatedResults, toTranslate, toSkip) {
-  const output = deepClone(sourceData);
+function applyResults(sourceData, translatedResults, toTranslate, toSkip, targetData = null) {
+  const output = deepClone(targetData || sourceData);
 
   for (let i = 0; i < toTranslate.length; i++) {
     setLeaf(output, toTranslate[i].keyPath, translatedResults[i]);
@@ -592,6 +710,12 @@ function applyResults(sourceData, translatedResults, toTranslate, toSkip) {
   }
 
   return output;
+}
+
+function formatProgressKey(keyPath) {
+  if (!keyPath) return '';
+  const value = String(keyPath);
+  return value.length > 72 ? `${value.slice(0, 69)}...` : value;
 }
 
 function writeOutput(outputData, outputPath, bom) {
@@ -628,14 +752,17 @@ async function processFile(sourcePath, targetLang, args) {
     return { total: 0, translated: 0, skipped: 0, skippedKeys: [] };
   }
 
+  const targetData = readExistingTargetData(targetPath);
+  const { translatableLeaves: candidateLeaves, existingLeaves } = planTargetAwareLeaves(leaves, targetData, args);
+
   const protection = args.protection || loadProtectionConfig(args.protectionFile, {
     enabled: args.protectionEnabled,
     create: args.createProtectionFile,
   });
-  const protectedLeaves = leaves
+  const protectedLeaves = candidateLeaves
     .filter((leaf) => shouldPreserveWholeValue(leaf.keyPath, leaf.value, protection))
     .map((leaf) => ({ ...leaf, skipReason: 'protected' }));
-  const translatableLeaves = leaves.filter((leaf) => !shouldPreserveWholeValue(leaf.keyPath, leaf.value, protection));
+  const translatableLeaves = candidateLeaves.filter((leaf) => !shouldPreserveWholeValue(leaf.keyPath, leaf.value, protection));
   const { withPlaceholders, withoutPlaceholders } = classifyLeaves(translatableLeaves, args.customRegex);
   const { strategy, interactiveMode } = await resolvePlaceholderStrategy(args);
 
@@ -649,13 +776,17 @@ async function processFile(sourcePath, targetLang, args) {
       skippedKeys,
       placeholderProtected: 0,
       protectedSkipped: protectedLeaves.length,
+      skippedExisting: existingLeaves.length,
       dryRun: true,
     };
   }
 
   if (args.dryRun) {
     const protectedCount = strategy === 'send' ? 0 : withPlaceholders.length;
-    console.log(`[${fileName}] Dry-run: ${leaves.length} strings would be translated.`);
+    console.log(`[${fileName}] Dry-run: ${candidateLeaves.length} of ${leaves.length} strings would be translated.`);
+    if (existingLeaves.length > 0) {
+      console.log(`[${fileName}] Dry-run: ${existingLeaves.length} existing translated strings would be kept.`);
+    }
     if (protectedLeaves.length > 0) {
       console.log(`[${fileName}] Dry-run: ${protectedLeaves.length} protected keys/values would be copied unchanged.`);
     }
@@ -667,11 +798,12 @@ async function processFile(sourcePath, targetLang, args) {
     }
     return {
       total: leaves.length,
-      translated: leaves.length - protectedLeaves.length,
+      translated: candidateLeaves.length - protectedLeaves.length,
       skipped: protectedLeaves.length,
       skippedKeys: protectedLeaves,
       placeholderProtected: protectedCount,
       termProtected: hasProtectionRules(protection),
+      skippedExisting: existingLeaves.length,
       dryRun: true,
     };
   }
@@ -679,8 +811,9 @@ async function processFile(sourcePath, targetLang, args) {
   const decisions = await resolvePerKeyDecisions(withPlaceholders, interactiveMode);
   const { toTranslate, toSkip } = buildTranslateList(withPlaceholders, withoutPlaceholders, strategy, decisions);
   toSkip.push(...protectedLeaves);
+  toSkip.push(...existingLeaves);
   const placeholderProtected = toTranslate.filter((leaf) => leaf.placeholderMode === 'preserve').length;
-  const placeholderSkipped = toSkip.filter((leaf) => leaf.skipReason !== 'protected').length;
+  const placeholderSkipped = toSkip.filter((leaf) => leaf.skipReason !== 'protected' && leaf.skipReason !== 'existing').length;
 
   if (placeholderSkipped > 0) {
     console.log(`[${fileName}] Skipping ${placeholderSkipped} keys with placeholders.`);
@@ -690,6 +823,9 @@ async function processFile(sourcePath, targetLang, args) {
   }
   if (protectedLeaves.length > 0) {
     console.log(`[${fileName}] Copying ${protectedLeaves.length} protected keys/values unchanged.`);
+  }
+  if (existingLeaves.length > 0) {
+    console.log(`[${fileName}] Keeping ${existingLeaves.length} existing translated keys.`);
   }
   if (hasProtectionRules(protection)) {
     console.log(`[${fileName}] Protecting terms from: ${protection.filePath}`);
@@ -708,7 +844,11 @@ async function processFile(sourcePath, targetLang, args) {
     customFn: args.translateFn,
     onProgress: (info) => {
       if (info.completed % args.progressInterval === 0 || info.completed === info.total) {
-        process.stdout.write(`\r[${fileName}] Translating... ${info.completed}/${info.total}`);
+        const stage = info.stage || 'Translating';
+        const unit = info.unit || 'items';
+        const keyPath = formatProgressKey(info.keyPath);
+        const keySuffix = keyPath ? ` | ${keyPath}` : '';
+        process.stdout.write(`\r[${fileName}] ${stage}: ${info.completed}/${info.total} ${unit}${keySuffix}`);
       }
     },
     onError: (err) => {
@@ -719,8 +859,10 @@ async function processFile(sourcePath, targetLang, args) {
   let translatedResults;
   try {
     if (toTranslate.length > 0) {
+      console.log(`[${fileName}] Preparing translation plan for ${toTranslate.length} keys.`);
       translatedResults = await translateItems(toTranslate, targetLang, translateOptions, args.customRegex, protection);
       process.stdout.write('\n');
+      console.log(`[${fileName}] Applying translated values.`);
     } else {
       translatedResults = [];
     }
@@ -728,7 +870,8 @@ async function processFile(sourcePath, targetLang, args) {
     cleanupPlaceholderManifest(manifestPath);
   }
 
-  const output = applyResults(sourceData, translatedResults, toTranslate, toSkip);
+  const output = applyResults(sourceData, translatedResults, toTranslate, toSkip, targetData);
+  console.log(`[${fileName}] Writing output.`);
   writeOutput(output, targetPath, args.bom);
 
   console.log(`[${fileName}] Written: ${targetPath}`);
@@ -736,10 +879,11 @@ async function processFile(sourcePath, targetLang, args) {
   return {
     total: leaves.length,
     translated: translatedResults.length,
-    skipped: toSkip.length,
-    skippedKeys: toSkip,
+    skipped: toSkip.filter((leaf) => leaf.skipReason !== 'existing').length,
+    skippedKeys: toSkip.filter((leaf) => leaf.skipReason !== 'existing'),
     placeholderProtected,
     protectedSkipped: protectedLeaves.length,
+    skippedExisting: existingLeaves.length,
   };
 }
 
@@ -787,6 +931,7 @@ async function run(args) {
   let grandSkipped = 0;
   let grandPlaceholderProtected = 0;
   let grandProtectedSkipped = 0;
+  let grandSkippedExisting = 0;
 
   for (const srcPath of sourceFiles) {
     const result = await processFile(srcPath, args.targetLang, args);
@@ -796,6 +941,7 @@ async function run(args) {
       grandSkipped += result.skipped;
       grandPlaceholderProtected += result.placeholderProtected || 0;
       grandProtectedSkipped += result.protectedSkipped || 0;
+      grandSkippedExisting += result.skippedExisting || 0;
       if (result.skippedKeys && result.skippedKeys.length > 0) {
         allSkippedKeys.push(...result.skippedKeys);
       }
@@ -803,7 +949,7 @@ async function run(args) {
   }
 
   console.log('');
-  console.log(formatSummaryLine(grandSkipped, grandTranslated, grandTotal, grandPlaceholderProtected, grandProtectedSkipped));
+  console.log(formatSummaryLine(grandSkipped, grandTranslated, grandTotal, grandPlaceholderProtected, grandProtectedSkipped, grandSkippedExisting));
 
   if (allSkippedKeys.length > 0 || args.reportFile || args.reportStdout) {
     const report = generateReport(allSkippedKeys, grandTranslated, grandTotal, {
@@ -834,6 +980,7 @@ async function run(args) {
     skipped: grandSkipped,
     placeholderProtected: grandPlaceholderProtected,
     protectedSkipped: grandProtectedSkipped,
+    skippedExisting: grandSkippedExisting,
   };
 }
 
@@ -852,6 +999,7 @@ if (require.main === module) {
 module.exports = {
   parseArgs,
   resolveSourceFiles,
+  isBrokenTranslationValue,
   processFile,
   run,
 };

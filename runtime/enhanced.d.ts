@@ -72,19 +72,19 @@ export interface LanguageConfig {
 }
 
 // Enhanced TypeScript-compatible translation functions
-export function translate<T = string>(key: string, params?: TranslationParams, options?: TranslationOptions): T;
-export function translate<T = string>(key: TranslationKey<T>, params?: TranslationParams, options?: TranslationOptions): T;
+export function translate<T = string>(key: string, params?: TranslationParams, options?: TranslationOptions): Promise<T>;
+export function translate<T = string>(key: TranslationKey<T>, params?: TranslationParams, options?: TranslationOptions): Promise<T>;
 
 export const t: typeof translate;
 
 // Type-safe translation with strict typing
-export function tTyped<T = string>(key: string, params?: TranslationParams, options?: TranslationOptions): T;
+export function tTyped<T = string>(key: string, params?: TranslationParams, options?: TranslationOptions): Promise<T>;
 
 // Translation with encryption support
 export function translateEncrypted<T = string>(key: string, params?: TranslationParams, options?: TranslationOptions): Promise<T>;
 
 // Batch translation operations
-export function translateBatch<T = string>(keys: string[], params?: TranslationParams[], options?: TranslationOptions): T[];
+export function translateBatch<T = string>(keys: string[], params?: TranslationParams[], options?: TranslationOptions): Promise<T[]>;
 export function translateBatchEncrypted<T = string>(keys: string[], params?: TranslationParams[], options?: TranslationOptions): Promise<T[]>;
 
 // Configuration and initialization

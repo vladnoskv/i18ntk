@@ -11,7 +11,9 @@ const path = require('path');
 const SecurityUtils = require('../../../utils/security');
 const configManager = require('../../../utils/config-manager');
 const { getUnifiedConfig } = require('../../../utils/config-helper');
-const { loadTranslations } = require('../../../utils/i18n-helper');
+const { loadTranslations, t } = require('../../../utils/i18n-helper');
+const { parseConfirmation } = require('../../../utils/localized-confirm');
+const { DEFAULT_CONCURRENCY, getProviderConcurrencyLimit } = require('../../../utils/translate/api');
 const SetupEnforcer = require('../../../utils/setup-enforcer');
 const {
     createProtectionFile,
@@ -38,6 +40,11 @@ class TranslateCommand {
         this.safeClose = safeClose;
     }
 
+    tr(key, replacements = {}, fallback = '') {
+        const value = t(key, replacements);
+        return value && value !== key ? value : fallback;
+    }
+
     async execute(options = {}) {
         try {
             await SetupEnforcer.checkSetupCompleteAsync();
@@ -46,15 +53,15 @@ class TranslateCommand {
             return { success: false, error: 'Setup required' };
         }
 
-        loadTranslations('en', path.resolve(__dirname, '..', '..', '..', 'ui-locales'));
-
         const config = this.config || {};
         let unified;
         try {
-            unified = await getUnifiedConfig('translate', options);
+            unified = { ...(await getUnifiedConfig('translate', options)), ...config };
         } catch (_) {
             unified = config;
         }
+        const uiLanguage = unified.uiLanguage || unified.language || 'en';
+        loadTranslations(uiLanguage, path.resolve(__dirname, '..', '..', '..', 'ui-locales'));
         this.autoTranslateSettings = this.getAutoTranslateSettings(unified);
 
         const defaultSourceDir = unified.sourceDir || unified.i18nDir || path.resolve(process.cwd(), 'locales', 'en');
@@ -62,13 +69,13 @@ class TranslateCommand {
         this.configuredTargetLangs = this.getConfiguredTargetLanguages(unified, defaultSourceDir);
 
         console.log('\n============================================================');
-        console.log('  \u{1F310} AUTO TRANSLATE (BETA)');
+        console.log(`  ${t('translate.title') || '\u{1F310} Auto Translate'}`);
         console.log('============================================================');
 
         if (this.isNonInteractiveMode) {
             this.sourceDir = defaultSourceDir;
             if (!SecurityUtils.safeExistsSync(this.sourceDir, path.dirname(this.sourceDir))) {
-                console.error(`Source locale directory not found: ${this.sourceDir}`);
+                console.error(this.tr('translate.errors.sourceDirectoryNotFound', { dir: this.sourceDir }, `Source locale directory not found: ${this.sourceDir}`));
                 return { success: false, error: 'Source directory not found' };
             }
             const resolvedSource = this.resolveSourceDirectoryForLanguage(this.sourceDir, this.sourceLang);
@@ -105,25 +112,25 @@ class TranslateCommand {
 
     async promptSourceDir(ask, defaultDir) {
         while (true) {
-            console.log('\n  Source locale directory');
-            console.log(`  Default: ${defaultDir}`);
-            console.log(`  Current project: ${process.cwd()}`);
-            console.log('  Accepted: an absolute path, or a path relative to the current project.');
-            console.log('  Examples:');
+            console.log('\n  ' + this.tr('translate.sourceDirectory.title', {}, 'Source locale directory'));
+            console.log('  ' + this.tr('translate.common.default', { value: defaultDir }, `Default: ${defaultDir}`));
+            console.log('  ' + this.tr('translate.sourceDirectory.currentProject', { dir: process.cwd() }, `Current project: ${process.cwd()}`));
+            console.log('  ' + this.tr('translate.sourceDirectory.accepted', {}, 'Accepted: an absolute path, or a path relative to the current project.'));
+            console.log('  ' + this.tr('translate.common.examples', {}, 'Examples:'));
             console.log('    ./locales/en');
-            console.log('    ./locales  (then choose source language: en)');
+            console.log('    ' + this.tr('translate.sourceDirectory.localeRootExample', {}, './locales  (then choose source language: en)'));
             console.log(`    ${defaultDir}`);
-            console.log('  The folder can contain JSON files directly, or language folders such as ./locales/en.');
-            console.log('  Press Enter to use the default.');
+            console.log('  ' + this.tr('translate.sourceDirectory.folderHint', {}, 'The folder can contain JSON files directly, or language folders such as ./locales/en.'));
+            console.log('  ' + this.tr('translate.common.pressEnterDefault', {}, 'Press Enter to use the default.'));
             const input = await ask('  > ');
 
             if (!input.trim()) {
                 if (!SecurityUtils.safeExistsSync(defaultDir, path.dirname(defaultDir))) {
-                    console.log(`  Default directory not found: ${defaultDir}`);
-                    console.log('  Please enter an existing directory with JSON locale files.');
+                    console.log('  ' + this.tr('translate.sourceDirectory.defaultNotFound', { dir: defaultDir }, `Default directory not found: ${defaultDir}`));
+                    console.log('  ' + this.tr('translate.sourceDirectory.enterExisting', {}, 'Please enter an existing directory with JSON locale files.'));
                     continue;
                 }
-                console.log(`  Using default: ${defaultDir}`);
+                console.log('  ' + this.tr('translate.common.usingDefault', { value: defaultDir }, `Using default: ${defaultDir}`));
                 return defaultDir;
             }
 
@@ -132,31 +139,31 @@ class TranslateCommand {
                 ? path.resolve(cleanInput)
                 : path.resolve(process.cwd(), cleanInput);
             if (!SecurityUtils.safeExistsSync(resolved, path.dirname(resolved))) {
-                console.log(`  Directory not found: ${resolved}`);
-                console.log('  Enter an existing folder, for example ./locales/en.');
+                console.log('  ' + this.tr('translate.sourceDirectory.directoryNotFound', { dir: resolved }, `Directory not found: ${resolved}`));
+                console.log('  ' + this.tr('translate.sourceDirectory.enterFolderExample', {}, 'Enter an existing folder, for example ./locales/en.'));
                 continue;
             }
             const stats = SecurityUtils.safeStatSync(resolved, path.dirname(resolved));
             if (!stats || !stats.isDirectory()) {
-                console.log(`  Not a directory: ${resolved}`);
+                console.log('  ' + this.tr('translate.sourceDirectory.notDirectory', { dir: resolved }, `Not a directory: ${resolved}`));
                 continue;
             }
-            console.log(`  Using source directory: ${resolved}`);
+            console.log('  ' + this.tr('translate.sourceDirectory.using', { dir: resolved }, `Using source directory: ${resolved}`));
             return resolved;
         }
     }
 
     async promptSourceLang(ask) {
         while (true) {
-            console.log('\n  Source language code');
-            console.log(`  Default: ${this.sourceLang}`);
-            console.log('  This should match the language of the source JSON values.');
-            console.log('  Example: en');
-            console.log('  Press Enter to use the default.');
+            console.log('\n  ' + this.tr('translate.sourceLanguage.title', {}, 'Source language code'));
+            console.log('  ' + this.tr('translate.common.default', { value: this.sourceLang }, `Default: ${this.sourceLang}`));
+            console.log('  ' + this.tr('translate.sourceLanguage.hint', {}, 'This should match the language of the source JSON values.'));
+            console.log('  ' + this.tr('translate.common.exampleValue', { value: 'en' }, 'Example: en'));
+            console.log('  ' + this.tr('translate.common.pressEnterDefault', {}, 'Press Enter to use the default.'));
             const input = await ask('  > ');
 
             if (!input.trim()) {
-                console.log(`  Using source language: ${this.sourceLang}`);
+                console.log('  ' + this.tr('translate.sourceLanguage.using', { lang: this.sourceLang }, `Using source language: ${this.sourceLang}`));
                 return this.sourceLang;
             }
 
@@ -164,46 +171,46 @@ class TranslateCommand {
             if (lang.length >= 2) {
                 return lang;
             }
-            console.log('  Invalid language code. Use 2+ characters (e.g. en, de, fr).');
+            console.log('  ' + this.tr('translate.sourceLanguage.invalid', {}, 'Invalid language code. Use 2+ characters (e.g. en, de, fr).'));
         }
     }
 
     async interactiveFlow(jsonFiles, ask) {
         await this.maybeConfigureProtection(ask);
 
-        console.log('\n  Target language(s)');
+        console.log('\n  ' + this.tr('translate.targetLanguages.title', {}, 'Target language(s)'));
         if (this.configuredTargetLangs.length > 0) {
-            console.log(`  a) All configured target languages: ${this.configuredTargetLangs.join(', ')}`);
+            console.log('  ' + this.tr('translate.targetLanguages.allConfigured', { languages: this.configuredTargetLangs.join(', ') }, `a) All configured target languages: ${this.configuredTargetLangs.join(', ')}`));
         } else {
-            console.log('  a) All configured target languages: none configured');
+            console.log('  ' + this.tr('translate.targetLanguages.noneConfigured', {}, 'a) All configured target languages: none configured'));
         }
-        console.log('  Or enter one or more comma/space-separated language codes.');
-        console.log('  Examples: de, es, fr   or   de es fr   or   zh');
-        console.log(`  Source language "${this.sourceLang}" will be excluded automatically.`);
+        console.log('  ' + this.tr('translate.targetLanguages.enterCodes', {}, 'Or enter one or more comma/space-separated language codes.'));
+        console.log('  ' + this.tr('translate.common.examplesInline', { examples: 'de, es, fr   or   de es fr   or   zh' }, 'Examples: de, es, fr   or   de es fr   or   zh'));
+        console.log('  ' + this.tr('translate.targetLanguages.sourceExcluded', { lang: this.sourceLang }, `Source language "${this.sourceLang}" will be excluded automatically.`));
         const langInput = await ask('  > ');
 
         const targetLangs = this.parseTargetLanguages(langInput);
 
         if (targetLangs.length === 0) {
-            console.log('  No valid target languages selected. Aborting.');
+            console.log('  ' + this.tr('translate.targetLanguages.noneSelected', {}, 'No valid target languages selected. Aborting.'));
             if (this.configuredTargetLangs.length === 0) {
-                console.log('  Configure defaultLanguages in .i18ntk-config, or enter target codes manually.');
+                console.log('  ' + this.tr('translate.targetLanguages.configureHint', {}, 'Configure defaultLanguages in .i18ntk-config, or enter target codes manually.'));
             }
             return { success: false, error: 'Invalid language code' };
         }
 
-        console.log(`\n  Target languages: ${targetLangs.join(', ')}`);
+        console.log('\n  ' + this.tr('translate.targetLanguages.selected', { languages: targetLangs.join(', ') }, `Target languages: ${targetLangs.join(', ')}`));
 
-        console.log(`\n  Which file(s) to translate?`);
+        console.log('\n  ' + this.tr('translate.files.title', {}, 'Which file(s) to translate?'));
         const filePreview = jsonFiles.length <= 6
             ? jsonFiles.join(', ')
             : `${jsonFiles.slice(0, 6).join(', ')}, ...`;
-        console.log(`    a) All JSON files (${jsonFiles.length}: ${filePreview})`);
+        console.log('    ' + this.tr('translate.files.all', { count: jsonFiles.length, files: filePreview }, `a) All JSON files (${jsonFiles.length}: ${filePreview})`));
         jsonFiles.forEach((f, i) => {
             console.log(`    ${i + 1}) ${f}`);
         });
 
-        const fileChoice = await ask('\n  Choice [a/all or file number]: ');
+        const fileChoice = await ask('\n  ' + this.tr('translate.files.choicePrompt', {}, 'Choice [a/all or file number]: '));
         let sourceFiles;
 
         if (['a', 'all', '*'].includes(fileChoice.trim().toLowerCase())) {
@@ -211,7 +218,7 @@ class TranslateCommand {
         } else {
             const idx = parseInt(fileChoice, 10) - 1;
             if (isNaN(idx) || idx < 0 || idx >= jsonFiles.length) {
-                console.log('  Invalid choice. Aborting.');
+                console.log('  ' + this.tr('translate.files.invalidChoice', {}, 'Invalid choice. Aborting.'));
                 return { success: false, error: 'Invalid file choice' };
             }
             sourceFiles = [path.join(this.sourceDir, jsonFiles[idx])];
@@ -220,39 +227,39 @@ class TranslateCommand {
         if (this.autoTranslateSettings.dryRunFirst !== false) {
             // Dry-run for first language only (all languages use same source so same keys)
             const firstLang = targetLangs[0];
-            console.log(`\n  Dry-run preview for "${firstLang}"...\n`);
+            console.log('\n  ' + this.tr('translate.dryRun.previewFor', { lang: firstLang }, `Dry-run preview for "${firstLang}"...`) + '\n');
             await this.runTranslate(sourceFiles, firstLang, { dryRun: true });
         }
 
-        console.log('\n  Proceed with actual translation?');
-        const answer = await ask('  [y]es / [n]o: ');
-        if (!/^y|yes$/i.test(answer.trim())) {
-            console.log('  Translation cancelled.');
+        console.log('\n  ' + this.tr('translate.confirm.proceed', {}, 'Proceed with actual translation?'));
+        const answer = await ask('  ' + this.tr('translate.confirm.yesNoPrompt', {}, '[y]es / [n]o: '));
+        if (!parseConfirmation(answer, { language: this.config.uiLanguage || this.config.language || 'en', defaultValue: false })) {
+            console.log('  ' + this.tr('translate.confirm.cancelled', {}, 'Translation cancelled.'));
             return { success: true, cancelled: true };
         }
 
         let results = [];
         for (const lang of targetLangs) {
-            console.log(`\n  Translating to "${lang}"...\n`);
+            console.log('\n  ' + this.tr('translate.run.translatingTo', { lang }, `Translating to "${lang}"...`) + '\n');
             try {
                 await this.runTranslate(sourceFiles, lang, { dryRun: false });
                 results.push({ lang, ok: true });
             } catch (e) {
-                console.error(`  Failed for "${lang}": ${e.message}`);
+                console.error('  ' + this.tr('translate.run.failedFor', { lang, error: e.message }, `Failed for "${lang}": ${e.message}`));
                 results.push({ lang, ok: false, error: e.message });
             }
         }
 
-        console.log('\n  Summary:');
+        console.log('\n  ' + this.tr('translate.summary.title', {}, 'Summary:'));
         for (const r of results) {
             console.log(`    ${r.ok ? '\u{2705}' : '\u{274C}'} ${r.lang}${r.error ? ' (' + r.error + ')' : ''}`);
         }
-        console.log('\n  Translation complete!');
+        console.log('\n  ' + this.tr('translate.summary.complete', {}, 'Translation complete!'));
         return { success: true, results };
     }
 
     async nonInteractiveFlow(jsonFiles) {
-        console.log('\n  Non-interactive mode. Use direct CLI instead:');
+        console.log('\n  ' + this.tr('translate.nonInteractive.useDirect', {}, 'Non-interactive mode. Use direct CLI instead:'));
         console.log('    i18ntk-translate <source> <lang> [options]');
         return { success: false, error: 'Non-interactive mode not supported from menu' };
     }
@@ -278,8 +285,8 @@ class TranslateCommand {
                 const languageJsonFiles = this.getJsonFiles(languageDir);
                 if (languageJsonFiles.length > 0) {
                     if (shouldLog) {
-                        console.log(`  No JSON files found directly in: ${selectedDir}`);
-                        console.log(`  Using source language folder: ${languageDir}`);
+                        console.log('  ' + this.tr('translate.sourceDirectory.noJsonDirect', { dir: selectedDir }, `No JSON files found directly in: ${selectedDir}`));
+                        console.log('  ' + this.tr('translate.sourceDirectory.usingLanguageFolder', { dir: languageDir }, `Using source language folder: ${languageDir}`));
                     }
                     return { ok: true, sourceDir: languageDir, jsonFiles: languageJsonFiles };
                 }
@@ -288,8 +295,8 @@ class TranslateCommand {
 
         const checkedLanguageDir = cleanLang ? path.join(selectedDir, cleanLang) : null;
         const message = checkedLanguageDir
-            ? `No JSON files found in: ${selectedDir}\nAlso checked source language folder: ${checkedLanguageDir}`
-            : `No JSON files found in: ${selectedDir}`;
+            ? this.tr('translate.sourceDirectory.noJsonWithLanguageFolder', { dir: selectedDir, languageDir: checkedLanguageDir }, `No JSON files found in: ${selectedDir}\nAlso checked source language folder: ${checkedLanguageDir}`)
+            : this.tr('translate.sourceDirectory.noJson', { dir: selectedDir }, `No JSON files found in: ${selectedDir}`);
         return { ok: false, sourceDir: selectedDir, jsonFiles: [], message };
     }
 
@@ -343,13 +350,14 @@ class TranslateCommand {
             placeholderMode: ['preserve', 'skip', 'send'].includes(settings.placeholderMode)
                 ? settings.placeholderMode
                 : 'preserve',
-            concurrency: this.toInt(settings.concurrency, 6, 1, 25),
+            concurrency: this.toInt(settings.concurrency, DEFAULT_CONCURRENCY, 1, getProviderConcurrencyLimit(settings.provider || 'google')),
             batchSize: this.toInt(settings.batchSize, 100, 1, 10000),
             progressInterval: this.toInt(settings.progressInterval, 25, 1, 10000),
             retryCount: this.toInt(settings.retryCount, 3, 0, 10),
             retryDelay: this.toInt(settings.retryDelay, 1000, 0, 30000),
             timeout: this.toInt(settings.timeout, 15000, 1000, 120000),
             dryRunFirst: settings.dryRunFirst !== false,
+            onlyMissingOrEnglish: settings.onlyMissingOrEnglish !== false,
             reportStdout: settings.reportStdout !== false,
             bom: settings.bom === true,
             protectionEnabled: settings.protectionEnabled !== false,
@@ -480,6 +488,7 @@ class TranslateCommand {
             args.noConfirm = true;
             args.sourceLang = this.sourceLang || 'en';
             args.dryRun = opts.dryRun === true;
+            args.onlyMissingOrEnglish = settings.onlyMissingOrEnglish;
             args.reportStdout = settings.reportStdout;
             args.bom = settings.bom;
             args.concurrency = settings.concurrency;

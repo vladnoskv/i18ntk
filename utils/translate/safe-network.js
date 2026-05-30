@@ -31,14 +31,34 @@ function isPrivateIPv4(hostname) {
     || a === 0;
 }
 
+function isPrivateIPv6(hostname) {
+  const normalized = String(hostname || '').trim().toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+  if (normalized === '::1') return true;
+  if (normalized.startsWith('fe80:') || normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
+
+  const mapped = normalized.match(/^::ffff:(?:(\d{1,3}(?:\.\d{1,3}){3})|([0-9a-f]+:[0-9a-f]+))$/i);
+  if (!mapped) return false;
+  if (mapped[1]) return isPrivateIPv4(mapped[1]);
+
+  const parts = mapped[2].split(':');
+  if (parts.length !== 2) return false;
+  const high = Number.parseInt(parts[0], 16);
+  const low = Number.parseInt(parts[1], 16);
+  if (!Number.isInteger(high) || !Number.isInteger(low)) return false;
+  const ipv4 = [
+    (high >> 8) & 0xff,
+    high & 0xff,
+    (low >> 8) & 0xff,
+    low & 0xff,
+  ].join('.');
+  return isPrivateIPv4(ipv4);
+}
+
 function isPrivateHost(hostname) {
   const normalized = String(hostname || '').trim().toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
   return normalized === 'localhost'
     || normalized.endsWith('.localhost')
-    || normalized === '::1'
-    || normalized.startsWith('fe80:')
-    || normalized.startsWith('fc')
-    || normalized.startsWith('fd')
+    || isPrivateIPv6(normalized)
     || isPrivateIPv4(normalized);
 }
 

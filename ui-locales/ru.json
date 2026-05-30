@@ -536,7 +536,7 @@
     "argsParseFailed": "Разбор аргументов не удался: {error}",
     "translationDiscoveryError": "Ошибка обнаружения перевода: {error}",
     "fileTraversalError": "Ошибка обхода файла: {error}",
-    "sourceEqualsI18nWarn": "⚠️Исходный каталог и каталог i18n совпадают. Это может вызвать проблемы с анализом.",
+    "sourceEqualsI18nWarn": "{reason}. Анализ использования не будет сканировать файлы локали как исходный код.",
     "i18nEqualsSourceWarn": "⚠️ Каталог I18n и исходный каталог совпадают. Это может вызвать проблемы с анализом.",
     "usageAnalysisFailed": "⚠️ Анализ использования не удался: {error}",
     "translationFileParseError": "⚠️ Ошибка разбора файла перевода: {error}",
@@ -642,7 +642,8 @@
     "failedToSaveReport": "Не удалось сохранить отчет об использовании: {error}",
     "i18nDirectoryDoesNotExist": "Каталог I18n не существует: {dir}",
     "reportSavedTo": "Отчет об использовании сохранен в: {reportPath}",
-    "sourceDirectoryDoesNotExist": "Исходный каталог не существует: {dir}"
+    "sourceDirectoryDoesNotExist": "Исходный каталог не существует: {dir}",
+    "noSourceDirectoryConfigured": "(ничего не настроено)"
   },
   "validate": {
     "help_message": "Использование средства проверки перевода I18n: узел i18ntk-validate.js [опции] Параметры: --source-dir <dir>     Исходный каталог для сканирования (по умолчанию: ./src) --i18n-dir <dir>       Каталог I18n (по умолчанию: ./src/locales) --output-report Создать подробный отчет --output-dir <dir>     Выходной каталог для отчетов (по умолчанию: ./reports) --help Показать эту справку Примеры: node i18ntk-validate.js --output-report node i18ntk-validate.js --source-dir=./app --i18n-dir=./locales node i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -922,7 +923,7 @@
     "summaryCommand": "резюме - Показать статус проекта",
     "debugCommand": "debug - Отладка проблем с переводом",
     "scannerCommand": "сканер - Сканировать ключи",
-    "translateCommand": "Translate — автоматически переводить файлы локали (бета-версия)",
+    "translateCommand": "Translate — автоматически переводить файлы локали",
     "menu": {
       "pressEnterToContinue": "Нажмите Enter, чтобы продолжить...",
       "title": "🌐 МЕНЮ УПРАВЛЕНИЯ I18NTK",
@@ -1102,7 +1103,32 @@
     "translationFilesCreatedWarning": "Файлы перевода были созданы с заполнителями; проверка перед использованием в производстве.",
     "warningCannotReadSourceDir": "Предупреждение: невозможно прочитать исходный каталог {dir}: {error}",
     "warningInvalidLanguageCodes": "Внимание: неверные коды языков игнорируются: {languages}",
-    "warningProceedingWithoutFramework": "Продолжаем без обнаружения платформы i18n."
+    "warningProceedingWithoutFramework": "Продолжаем без обнаружения платформы i18n.",
+    "backup": {
+      "title": "Настройки резервного копирования",
+      "description": "Резервное копирование отключено по умолчанию, чтобы избежать рекурсии резервного копирования и загрязнения репозитория.",
+      "enablePrompt": "Включить автоматическое резервное копирование? (да/нет):",
+      "keepPrompt": "Сколько резервных копий должно сохраняться автоматически (1–3, по умолчанию 1):"
+    },
+    "completionSummaryTitle": "Итоги завершения",
+    "completionSummaryBasicTitle": "Краткое описание завершения (базовое)",
+    "totalChanges": "Всего изменений: {count}",
+    "languagesProcessed": "Обработанные языки: {count}",
+    "missingKeysAdded": "Добавлены недостающие ключи: {count}",
+    "reportPrompt": "Хотите, чтобы был создан отчет? (Да/Нет):",
+    "reportGenerated": "Отчет создан: {reportPath}",
+    "reportFailed": "Не удалось создать отчет: {error}",
+    "completionError": "Ошибка при завершении: {error}",
+    "optimize": {
+      "title": "Оптимизация размера пакета",
+      "preview": "Выполняется предпросмотр оптимизации локалей...",
+      "reduceTip": "Можно уменьшить размер пакета, выбрав только нужные языки.",
+      "prompt": "Запустить интерактивную оптимизацию сейчас? (д/Н): ",
+      "starting": "Запуск интерактивной оптимизации локалей...",
+      "completed": "Оптимизация пакета завершена.",
+      "later": "Оптимизацию локалей можно запустить позже:",
+      "unavailable": "Не удалось предложить оптимизацию локалей: {error}"
+    }
   },
   "language": {
     "title": "🌍 Изменить язык",
@@ -1147,7 +1173,7 @@
       "sizing": "📏 Анализ размеров",
       "fix": "🛠️ Исправьте переводы заполнителей.",
       "scanner": "🔍 Сканирование на наличие проблем с i18n",
-      "translate": "🌐 Автоматический перевод (бета-версия)",
+      "translate": "🌐 Автоматический перевод",
       "workflow": "🔄 Запуск полного рабочего процесса",
       "status": "📋 Показать статус проекта",
       "delete": "🗑️ Удалить все отчеты",
@@ -1293,7 +1319,7 @@
     "invalidInputType": "инвалид_вход_тип",
     "pathTraversalAttempt": "path_traversal_attempt",
     "pathValidated": "✅ Путь успешно подтвержден",
-    "pathValidationError": "path_validation_error",
+    "pathValidationError": "путь_проверка_ошибка",
     "fileTooLarge": "Безопасность: Файл слишком большой: {filePath}",
     "fileReadError": "Безопасность: Ошибка чтения файла: {errorMessage}",
     "contentTooLargeForFile": "Безопасность: Содержимое слишком велико для файла: {filePath}",
@@ -1447,7 +1473,9 @@
       "securitySettings": "Настройки безопасности",
       "securitySettingsDesc": "PIN-код администратора и другие параметры безопасности",
       "backupSettings": "Настройки резервного копирования",
-      "backupSettingsDesc": "Резервное копирование и восстановление настроек конфигурации"
+      "backupSettingsDesc": "Резервное копирование и восстановление настроек конфигурации",
+      "autoTranslate": "Автоперевод",
+      "autoTranslateDesc": "Настройка плейсхолдеров, параллелизма, пакетов и отчетов"
     },
     "updatePackage": {
       "title": "Обновить пакет",
@@ -1569,7 +1597,8 @@
       "processingSettings": "Настройки обработки",
       "advancedSettings": "Расширенные настройки",
       "scriptDirectorySettings": "Настройки каталога скриптов",
-      "securitySettings": "Настройки безопасности"
+      "securitySettings": "Настройки безопасности",
+      "autoTranslate": "Настройки автоперевода"
     },
     "security": {
       "title": "🔐 Настройки безопасности",
@@ -1925,6 +1954,70 @@
           "description": "Требовать подтверждения для операций резервного копирования",
           "help": "Подтвердите операцию резервного копирования"
         }
+      },
+      "reports_format": {
+        "label": "Формат отчета",
+        "help": "Выберите markdown для читаемых отчетов, json для автоматизации или text для простых журналов."
+      },
+      "autoTranslate_placeholderMode": {
+        "label": "Режим плейсхолдеров",
+        "help": "Как обрабатывать строки с плейсхолдерами при автопереводе."
+      },
+      "autoTranslate_concurrency": {
+        "label": "Одновременные запросы перевода",
+        "help": "Максимум одновременных запросов к провайдеру. Google поддерживает до 100 в i18ntk; DeepL и LibreTranslate ограничены ниже."
+      },
+      "autoTranslate_batchSize": {
+        "label": "Текстовых сегментов на пакет",
+        "help": "Сколько текстовых сегментов планируется в один пакет."
+      },
+      "autoTranslate_progressInterval": {
+        "label": "Интервал прогресса",
+        "help": "Число готовых сегментов между обновлениями прогресса."
+      },
+      "autoTranslate_retryCount": {
+        "label": "Повторы",
+        "help": "Максимум повторов для сбойного запроса."
+      },
+      "autoTranslate_retryDelay": {
+        "label": "Задержка повтора (мс)",
+        "help": "Базовая задержка повтора в миллисекундах."
+      },
+      "autoTranslate_timeout": {
+        "label": "Тайм-аут запроса (мс)",
+        "help": "Тайм-аут запроса к провайдеру перевода."
+      },
+      "autoTranslate_dryRunFirst": {
+        "label": "Сначала предпросмотр",
+        "help": "Показать, что будет переведено, до записи файлов."
+      },
+      "autoTranslate_onlyMissingOrEnglish": {
+        "label": "Только отсутствующие или английские ключи",
+        "help": "Сохранять уже переведенные целевые значения и переводить только пустые, маркеры, копии исходника или вероятно английские значения."
+      },
+      "autoTranslate_reportStdout": {
+        "label": "Печатать отчет в терминал",
+        "help": "Выводить отчет после перевода в stdout."
+      },
+      "autoTranslate_bom": {
+        "label": "Писать UTF-8 BOM",
+        "help": "Записывать JSON-файлы с UTF-8 BOM."
+      },
+      "autoTranslate_protectionEnabled": {
+        "label": "Защита брендов, ключей и значений",
+        "help": "Включить защищенные термины, ключи, значения и шаблоны."
+      },
+      "autoTranslate_protectionFile": {
+        "label": "JSON-файл защиты",
+        "help": "JSON-файл проекта с правилами защиты автоперевода."
+      },
+      "autoTranslate_promptProtectionSetup": {
+        "label": "Спрашивать о создании файла защиты",
+        "help": "Спрашивать при первом запуске автоперевода."
+      },
+      "autoTranslate_promptProtectionUpdate": {
+        "label": "Спрашивать о бновлении правил защиты",
+        "help": "Спрашивать перед переводами из меню."
       }
     },
     "actions": {
@@ -2143,7 +2236,7 @@
       "completeCommand": "Complete – Полные переводы (100% покрытие)",
       "summaryCommand": "резюме - Показать статус проекта",
       "scannerCommand": "сканер — сканирование на наличие проблем с i18n",
-      "translateCommand": "Translate — автоматически переводить файлы локали (бета-версия)",
+      "translateCommand": "Translate — автоматически переводить файлы локали",
       "debugCommand": "debug - Отладка проблем с переводом"
     },
     "test_complete_system": {
@@ -2441,5 +2534,94 @@
   "pressEnterToContinue": "Нажмите Enter, чтобы продолжить...",
   "status": {
     "exitingCompleted": "Рабочий процесс завершен. Выход..."
+  },
+  "prompt": {
+    "yesTokens": [
+      "да",
+      "д",
+      "y",
+      "yes"
+    ],
+    "noTokens": [
+      "н",
+      "нет",
+      "n",
+      "no"
+    ]
+  },
+  "translate": {
+    "title": "Автоперевод",
+    "sourceDirectory": {
+      "title": "Каталог исходной локали",
+      "currentProject": "Текущий проект: {dir}",
+      "accepted": "Можно указать абсолютный путь или путь относительно текущего проекта.",
+      "localeRootExample": "./locales  (затем выберите исходный язык: en)",
+      "folderHint": "Папка может содержать JSON-файлы напрямую или языковые папки, например ./locales/en.",
+      "defaultNotFound": "Каталог по умолчанию не найден: {dir}",
+      "enterExisting": "Введите существующий каталог с JSON-файлами локалей.",
+      "directoryNotFound": "Каталог не найден: {dir}",
+      "enterFolderExample": "Введите существующую папку, например ./locales/en.",
+      "notDirectory": "Это не каталог: {dir}",
+      "using": "Используется исходный каталог: {dir}",
+      "noJsonDirect": "JSON-файлы напрямую не найдены: {dir}",
+      "usingLanguageFolder": "Используется папка исходного языка: {dir}",
+      "noJsonWithLanguageFolder": "JSON-файлы не найдены: {dir}\nТакже проверена папка исходного языка: {languageDir}",
+      "noJson": "JSON-файлы не найдены: {dir}"
+    },
+    "targetLanguages": {
+      "title": "Целевые языки",
+      "allConfigured": "a) Все настроенные целевые языки: {languages}",
+      "noneConfigured": "a) Все настроенные целевые языки: нет",
+      "enterCodes": "Или введите один или несколько кодов языка через запятую или пробел.",
+      "sourceExcluded": "Исходный язык \"{lang}\" будет исключен автоматически.",
+      "noneSelected": "Не выбраны допустимые целевые языки. Отмена.",
+      "configureHint": "Настройте defaultLanguages в .i18ntk-config или введите коды вручную.",
+      "selected": "Целевые языки: {languages}"
+    },
+    "protection": {
+      "title": "Защищенные термины и ключи"
+    },
+    "common": {
+      "default": "По умолчанию: {value}",
+      "examples": "Примеры:",
+      "exampleValue": "Пример: {value}",
+      "examplesInline": "Примеры: {examples}",
+      "pressEnterDefault": "Нажмите Enter, чтобы использовать значение по умолчанию.",
+      "usingDefault": "Используется по умолчанию: {value}"
+    },
+    "sourceLanguage": {
+      "title": "Код исходного языка",
+      "hint": "Он должен совпадать с языком значений в исходных JSON.",
+      "using": "Исходный язык: {lang}",
+      "invalid": "Недопустимый код языка. Используйте 2+ символа (напр. en, de, fr)."
+    },
+    "files": {
+      "title": "Какие файлы перевести?",
+      "all": "a) Все JSON-файлы ({count}: {files})",
+      "choicePrompt": "Выбор [a/all или номер файла]: ",
+      "invalidChoice": "Недопустимый выбор. Отмена."
+    },
+    "dryRun": {
+      "previewFor": "Предпросмотр для \"{lang}\"..."
+    },
+    "confirm": {
+      "proceed": "Продолжить реальный перевод?",
+      "yesNoPrompt": "[д]а / [н]ет: ",
+      "cancelled": "Перевод отменен."
+    },
+    "run": {
+      "translatingTo": "Перевод на \"{lang}\"...",
+      "failedFor": "Ошибка для \"{lang}\": {error}"
+    },
+    "summary": {
+      "title": "Сводка:",
+      "complete": "Перевод завершен!"
+    },
+    "nonInteractive": {
+      "useDirect": "Неинтерактивный режим. Используйте прямую CLI:"
+    },
+    "errors": {
+      "sourceDirectoryNotFound": "Каталог исходной локали не найден: {dir}"
+    }
   }
 }

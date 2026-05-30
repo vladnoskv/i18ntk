@@ -147,16 +147,9 @@ function watchLocales(dirs, onChange, options = {}) {
     }
 
     const resolved = path.resolve(d);
-    const validated = SecurityUtils.validatePath(resolved, process.cwd());
+    const validated = SecurityUtils.validatePath(resolved, path.dirname(resolved));
     if (!validated) {
       emitter.emit('error', new Error(`Path validation failed for: ${d}`));
-      continue;
-    }
-
-    const projectRoot = path.resolve(process.cwd());
-    const rel = path.relative(projectRoot, validated);
-    if (rel.startsWith('..')) {
-      emitter.emit('error', new Error(`Directory outside project root: ${d}`));
       continue;
     }
 

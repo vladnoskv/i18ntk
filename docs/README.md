@@ -1,6 +1,6 @@
-# i18ntk Documentation (v3.2.0)
+# i18ntk Documentation (v4.2.0)
 
-This documentation set is for **i18ntk 3.x**.
+This documentation set covers the current `i18ntk` CLI, runtime API, configuration model, Auto Translate flow, and migration notes for `4.2.0`.
 
 ## Start Here
 
@@ -11,21 +11,7 @@ This documentation set is for **i18ntk 3.x**.
 - [Auto Translate Guide](./auto-translate.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
-- [Migration Guide v3.2.0](./migration-guide-v3.2.0.md)
-- [Migration Guide v3.1.2](./migration-guide-v3.1.2.md)
-- [Migration Guide v3.1.1](./migration-guide-v3.1.1.md)
-- [Migration Guide v3.0.0](./migration-guide-v3.0.0.md)
-- [Migration Guide v2.6.0](./migration-guide-v2.6.0.md)
-- [Migration Guide v2.5.1](./migration-guide-v2.5.1.md)
-- [Migration Guide v2.5.0](./migration-guide-v2.5.0.md)
-- [Migration Guide v2.4.0](./migration-guide-v2.4.0.md)
-
-## Community Files
-
-- [Contributing](../CONTRIBUTING.md)
-- [Code of Conduct](../CODE_OF_CONDUCT.md)
-- [Security Policy](../SECURITY.md)
-- [Funding](../FUNDING.md)
+- [Migration Guide v4.2.0](./migration-guide-v4.2.0.md)
 
 ## Command Model
 
@@ -33,13 +19,20 @@ Primary CLI:
 
 ```bash
 i18ntk
+i18ntk --help
+i18ntk --version
 i18ntk --command=init
 i18ntk --command=analyze
 i18ntk --command=validate
+i18ntk --command=usage
+i18ntk --command=scanner
+i18ntk --command=sizing
+i18ntk --command=complete
 i18ntk --command=translate
+i18ntk --command=summary
 ```
 
-Standalone binaries also exist for script-specific flows:
+Standalone executables:
 
 ```bash
 i18ntk-init
@@ -56,25 +49,31 @@ i18ntk-backup
 i18ntk-translate
 ```
 
-Note: backup operations are exposed through `i18ntk-backup` (standalone CLI).
-The manager-command route `i18ntk --command=backup` is disabled in current builds.
+Backup operations are exposed through `i18ntk-backup`. The manager route `i18ntk --command=backup` is intentionally disabled in current builds.
 
 ## Configuration Source
 
-i18ntk reads project settings from:
-
-- `.i18ntk-config`
+i18ntk reads project settings from the project-local `.i18ntk-config` file. CLI flags override config values for one run, and the documented environment variables can override selected defaults.
 
 ## Setup Notes
 
 - Run `i18ntk` or `i18ntk --command=init` to initialize a project.
 - Use `--no-prompt` for CI or automated workflows.
 - Backup behavior is optional and disabled by default during setup.
+- Default target languages are `en`, `de`, `es`, `fr`, and `ru`.
+- Init and analysis reports default to Markdown. Set `reports.format` to `markdown`, `json`, or `text` to change the report format.
 
 ## Maintainer Packaging Notes
 
-- The root `package.json` is development-only.
+- The root `package.json` is the development manifest.
 - The public npm metadata lives in `package.public.json`.
 - `npm run package:public` stages the public package and runs a dry-run pack.
 - `npm run pack:public` creates the public tarball from the staged package.
 - `npm run publish:public` publishes the staged package after `npm whoami` succeeds.
+
+## Community Files
+
+- [Contributing](../CONTRIBUTING.md)
+- [Code of Conduct](../CODE_OF_CONDUCT.md)
+- [Security Policy](../SECURITY.md)
+- [Funding](../FUNDING.md)

@@ -17,6 +17,8 @@ const AdminCLI = require('../../../utils/admin-cli');
 const AdminAuth = require('../../../utils/admin-auth');
 const watchLocales = require('../../../utils/watch-locales');
 const JsonOutput = require('../../../utils/json-output');
+const configManager = require('../../../utils/config-manager');
+const { normalizeReportFormat, writeReportFile } = require('../../../utils/report-writer');
 
 loadTranslations('en', path.resolve(__dirname, '../../../ui-locales'));
 
@@ -752,22 +754,10 @@ class AnalyzeCommand {
                 return null;
             }
 
-            // Create a safe filename
             const safeLanguage = language.replace(/[^\w-]/g, '_');
-            const reportPath = path.resolve(validatedOutputDir, `translation-report-${safeLanguage}.json`);
-
-            // Ensure the final path is still within the output directory
-            if (!reportPath.startsWith(validatedOutputDir)) {
-                console.error('Invalid report path detected, potential directory traversal attack');
-                return null;
-            }
-
-            // Use safeWriteFile for secure file writing
-            const success = await SecurityUtils.safeWriteFile(reportPath, JSON.stringify(report, null, 2), process.cwd(), 'utf8');
-            if (!success) {
-                throw new Error(t('analyze.failedToWriteReportFile') || 'Failed to write report file securely');
-            }
-
+            const settings = configManager.getConfig ? configManager.getConfig() : {};
+            const format = normalizeReportFormat(this.config?.reports?.format || settings.reports?.format || this.config?.reportFormat || 'markdown');
+            const reportPath = await writeReportFile(validatedOutputDir, `translation-report-${safeLanguage}`, report, { format, title: `Translation Report ${safeLanguage.toUpperCase()}` });
             return reportPath;
 
         } catch (error) {

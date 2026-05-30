@@ -1,4 +1,5 @@
 const DEFAULT_PLACEHOLDER_PATTERNS = [
+  /\$t\([^)]+\)/g,            // $t(common.save) - i18next nested translation refs
   /\{\{[^}]+\}\}/g,         // {{variable}} - double curly (Handlebars, Mustache)
   /\{[a-zA-Z_]\w*\}/g,       // {name} - single curly (i18next, Python format named)
   /\{\d+\}/g,                // {0} - indexed curly
@@ -6,11 +7,40 @@ const DEFAULT_PLACEHOLDER_PATTERNS = [
   /:[a-zA-Z_]\w*/g,          // :param - colon-style (Rails, Swift)
   /%\{[a-zA-Z_]\w*\}/g,      // %{name} - Ruby/Perl named
   /%\([a-zA-Z_]\w*\)[sd]/g,  // %(name)s - Python named format (with type)
+  /%\([a-zA-Z_]\w*\)(?:[#+\- 0,(]*\d*(?:\.\d+)?)?[bcdeEfFgGnosxX]/g, // %(total).2f
   /\$\{[a-zA-Z_]\w*\}/g,     // ${variable} - JS template literal style
   /<[a-zA-Z_]\w*>/g,         // <name> - XML/HTML-style
   /@[a-zA-Z_]\w*/g,          // @param - Java/Spring-style
   /&[a-zA-Z_]\w*;?/g,        // &amp; HTML entity style (careful, broad match)
 ];
+
+function findIcuPlaceholders(value) {
+  const matches = [];
+  const starter = /\{[a-zA-Z_]\w*\s*,\s*(?:plural|select|selectordinal)\s*,/g;
+  let match;
+
+  while ((match = starter.exec(value)) !== null) {
+    let depth = 0;
+    for (let index = match.index; index < value.length; index++) {
+      const char = value[index];
+      if (char === '{') depth++;
+      else if (char === '}') {
+        depth--;
+        if (depth === 0) {
+          matches.push({
+            start: match.index,
+            end: index + 1,
+            value: value.slice(match.index, index + 1),
+          });
+          starter.lastIndex = index + 1;
+          break;
+        }
+      }
+    }
+  }
+
+  return matches;
+}
 
 function compilePatterns(customPatterns) {
   const patterns = [...DEFAULT_PLACEHOLDER_PATTERNS];
@@ -39,6 +69,9 @@ function detectPlaceholders(value, customPatterns) {
   if (!value || typeof value !== 'string') return [];
   const patterns = compilePatterns(customPatterns);
   const found = new Set();
+  for (const match of findIcuPlaceholders(value)) {
+    found.add(match.value);
+  }
   for (const pattern of patterns) {
     pattern.lastIndex = 0;
     const matches = value.match(pattern);
@@ -51,6 +84,7 @@ function detectPlaceholders(value, customPatterns) {
 
 function hasPlaceholders(value, customPatterns) {
   if (!value || typeof value !== 'string') return false;
+  if (findIcuPlaceholders(value).length > 0) return true;
   const patterns = compilePatterns(customPatterns);
   for (const pattern of patterns) {
     pattern.lastIndex = 0;
@@ -65,7 +99,7 @@ function splitByPlaceholders(value, customPatterns) {
   }
 
   const patterns = compilePatterns(customPatterns);
-  const matches = [];
+  const matches = findIcuPlaceholders(value);
 
   for (const pattern of patterns) {
     pattern.lastIndex = 0;
@@ -121,6 +155,12 @@ function maskPlaceholders(value, customPatterns) {
   const map = new Map();
   let idx = 0;
   let masked = value;
+  for (const match of findIcuPlaceholders(value)) {
+    const ph = `\uE000${idx}\uE001`;
+    map.set(ph, match.value);
+    idx++;
+    masked = masked.split(match.value).join(ph);
+  }
   for (const pattern of patterns) {
     pattern.lastIndex = 0;
     masked = masked.replace(pattern, (match) => {
@@ -146,6 +186,7 @@ module.exports = {
   DEFAULT_PLACEHOLDER_PATTERNS,
   compilePatterns,
   detectPlaceholders,
+  findIcuPlaceholders,
   hasPlaceholders,
   splitByPlaceholders,
   maskPlaceholders,

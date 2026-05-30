@@ -27,6 +27,7 @@ const cliHelper = require('../../utils/cli-helper');
 const { printUpgradeWarningIfOutdated } = require('../../utils/npm-version-warning');
 const { blue } = require('../../utils/colors-new');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../../utils/config');
+const { buildMainMenuLines } = require('../../utils/menu-layout');
 const SettingsCLI = require('../../settings/settings-cli');
 const pkg = require('../../package.json');
 const SetupEnforcer = require('../../utils/setup-enforcer');
@@ -861,23 +862,7 @@ class I18nManager {
     async showInteractiveMenu() {
         // Check if we're in non-interactive mode (like echo 0 | node script)
         if (this.isNonInteractiveMode()) {
-            console.log(`\n${t('menu.title')}`);
-            console.log(t('menu.separator'));
-            console.log(`1. ${t('menu.options.init')}`);
-            console.log(`2. ${t('menu.options.analyze')}`);
-            console.log(`3. ${t('menu.options.validate')}`);
-            console.log(`4. ${t('menu.options.usage')}`);
-            console.log(`5. ${t('menu.options.complete')}`);
-            console.log(`6. ${t('menu.options.sizing')}`);
-            console.log(`7. ${t('menu.options.fix')}`);
-            console.log(`8. ${t('menu.options.status')}`);
-            console.log(`9. ${t('menu.options.delete')}`);
-            console.log(`10. ${t('menu.options.settings')}`);
-            console.log(`11. ${t('menu.options.help')}`);
-            console.log(`12. ${t('menu.options.language')}`);
-            console.log(`13. ${t('menu.options.scanner')}`);
-            console.log(`14. ${t('menu.options.translate')}`);
-            console.log(`0. ${t('menu.options.exit')}`);
+            console.log(buildMainMenuLines(t).join('\n'));
 
             console.log('\n' + t('menu.nonInteractiveModeWarning'));
             console.log(t('menu.useDirectExecution'));
@@ -887,23 +872,7 @@ class I18nManager {
             return;
         }
 
-        console.log(`\n${t('menu.title')}`);
-        console.log(t('menu.separator'));
-        console.log(`1. ${t('menu.options.init')}`);
-        console.log(`2. ${t('menu.options.analyze')}`);
-        console.log(`3. ${t('menu.options.validate')}`);
-        console.log(`4. ${t('menu.options.usage')}`);
-        console.log(`5. ${t('menu.options.complete')}`);
-        console.log(`6. ${t('menu.options.sizing')}`);
-        console.log(`7. ${t('menu.options.fix')}`);
-        console.log(`8. ${t('menu.options.status')}`);
-        console.log(`9. ${t('menu.options.delete')}`);
-        console.log(`10. ${t('menu.options.settings')}`);
-        console.log(`11. ${t('menu.options.help')}`);
-        console.log(`12. ${t('menu.options.language')}`);
-        console.log(`13. ${t('menu.options.scanner')}`);
-        console.log(`14. ${t('menu.options.translate')}`);
-        console.log(`0. ${t('menu.options.exit')}`);
+        console.log(buildMainMenuLines(t).join('\n'));
 
         const choice = await this.prompt('\n' + t('menu.selectOptionPrompt'));
 

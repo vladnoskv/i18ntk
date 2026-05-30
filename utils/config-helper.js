@@ -168,7 +168,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
         maxBackups: normalizedBackupMaxBackups
       },
       settings: {
-        defaultLanguages: cfg.defaultLanguages || ['de', 'es', 'fr', 'ru'],
+        defaultLanguages: cfg.defaultLanguages || ['en', 'de', 'es', 'fr', 'ru'],
         processing: { ...cfg.processing },
         security: { ...cfg.security },
         advanced: cfg.advanced || {},

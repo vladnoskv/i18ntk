@@ -9,6 +9,7 @@
 
 const { t } = require('../../../utils/i18n-helper');
 const cliHelper = require('../../../utils/cli-helper');
+const { buildMainMenuLines } = require('../../../utils/menu-layout');
 const summaryTool = require('../../i18ntk-summary');
 
 module.exports = class InteractiveMenu {
@@ -24,22 +25,7 @@ module.exports = class InteractiveMenu {
   async showInteractiveMenu() {
     // Check if we're in non-interactive mode (like echo 0 | node script)
     if (this.manager.isNonInteractiveMode()) {
-      console.log(`\n${t('menu.title')}`);
-      console.log(t('menu.separator'));
-      console.log(`1. ${t('menu.options.init')}`);
-      console.log(`2. ${t('menu.options.analyze')}`);
-      console.log(`3. ${t('menu.options.validate')}`);
-      console.log(`4. ${t('menu.options.usage')}`);
-      console.log(`5. ${t('menu.options.complete')}`);
-      console.log(`6. ${t('menu.options.sizing')}`);
-      console.log(`7. ${t('menu.options.fix')}`);
-      console.log(`8. ${t('menu.options.status')}`);
-      console.log(`9. ${t('menu.options.delete')}`);
-      console.log(`10. ${t('menu.options.settings')}`);
-      console.log(`11. ${t('menu.options.help')}`);
-      console.log(`12. ${t('menu.options.language')}`);
-      console.log(`13. ${t('menu.options.scanner')}`);
-      console.log(`0. ${t('menu.options.exit')}`);
+      console.log(buildMainMenuLines(t, { includeTranslate: false }).join('\n'));
 
       console.log('\n' + t('menu.nonInteractiveModeWarning'));
       console.log(t('menu.useDirectExecution'));
@@ -49,22 +35,7 @@ module.exports = class InteractiveMenu {
       return;
     }
 
-    console.log(`\n${t('menu.title')}`);
-    console.log(t('menu.separator'));
-    console.log(`1. ${t('menu.options.init')}`);
-    console.log(`2. ${t('menu.options.analyze')}`);
-    console.log(`3. ${t('menu.options.validate')}`);
-    console.log(`4. ${t('menu.options.usage')}`);
-    console.log(`5. ${t('menu.options.complete')}`);
-    console.log(`6. ${t('menu.options.sizing')}`);
-    console.log(`7. ${t('menu.options.fix')}`);
-    console.log(`8. ${t('menu.options.status')}`);
-    console.log(`9. ${t('menu.options.delete')}`);
-    console.log(`10. ${t('menu.options.settings')}`);
-    console.log(`11. ${t('menu.options.help')}`);
-    console.log(`12. ${t('menu.options.language')}`);
-    console.log(`13. ${t('menu.options.scanner')}`);
-    console.log(`0. ${t('menu.options.exit')}`);
+    console.log(buildMainMenuLines(t, { includeTranslate: false }).join('\n'));
 
     const choice = await this.manager.prompt('\n' + t('menu.selectOptionPrompt'));
 

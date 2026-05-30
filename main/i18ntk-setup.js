@@ -29,8 +29,30 @@ class I18nSetupManager {
     
 }
 
+function printHelp() {
+    console.log([
+        '',
+        'i18ntk-setup - foundational i18n toolkit setup',
+        '',
+        'Usage:',
+        '  i18ntk-setup [options]',
+        '  node main/i18ntk-setup.js [options]',
+        '',
+        'Options:',
+        '  -h, --help     Show this help message',
+        '',
+        'The setup command detects the current project, writes i18ntk settings,',
+        'and generates i18ntk-setup-report.json in the current working directory.',
+    ].join('\n'));
+}
+
 // CLI interface
 if (require.main === module) {
+    if (process.argv.slice(2).some(arg => arg === '--help' || arg === '-h')) {
+        printHelp();
+        process.exit(0);
+    }
+
     const setupManager = new I18nSetupManager();
     setupManager.setup().catch(console.error);
 }
@@ -41,3 +63,4 @@ module.exports.run = async function() {
     const setupManager = new I18nSetupManager();
     return await setupManager.setup();
 };
+module.exports.printHelp = printHelp;

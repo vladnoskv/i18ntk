@@ -10,6 +10,12 @@ function loadFreshRuntime() {
   return require('../runtime');
 }
 
+function loadFreshEnhancedRuntime() {
+  const modulePath = require.resolve('../runtime/enhanced');
+  delete require.cache[modulePath];
+  return require('../runtime/enhanced');
+}
+
 function writeLocale(baseDir, language, data) {
   fs.mkdirSync(baseDir, { recursive: true });
   fs.writeFileSync(
@@ -197,5 +203,174 @@ describe('runtime initRuntime state isolation', () => {
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
+  });
+
+  test('runtime rejects language names that escape the locale base directory', () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-language-path-'));
+
+    try {
+      const runtimeModule = loadFreshRuntime();
+      const baseDir = path.join(tempRoot, 'locales');
+
+      fs.mkdirSync(baseDir, { recursive: true });
+      writeLocale(baseDir, 'en', { app: { title: 'Safe app' } });
+      fs.writeFileSync(
+        path.join(tempRoot, 'package.json'),
+        `${JSON.stringify({ name: 'outside-package' })}\n`,
+        'utf8'
+      );
+
+      const runtime = runtimeModule.initRuntime({
+        baseDir,
+        language: '../package',
+        fallbackLanguage: 'en',
+        preload: true
+      });
+
+      assert.strictEqual(runtime.getLanguage(), 'en');
+      assert.strictEqual(runtime.t('name'), 'name');
+      assert.strictEqual(runtime.t('app.title'), 'Safe app');
+
+      runtime.setLanguage('../package');
+      assert.strictEqual(runtime.getLanguage(), 'en');
+      assert.strictEqual(runtime.t('name'), 'name');
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  test('runtime preserves block-comment-like text inside valid JSON strings', () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-json-text-'));
+
+    try {
+      const runtimeModule = loadFreshRuntime();
+      const baseDir = path.join(tempRoot, 'locales');
+
+      fs.mkdirSync(baseDir, { recursive: true });
+      writeLocale(baseDir, 'en', {
+        docs: {
+          pattern: 'Keep /* token */ in visible copy'
+        }
+      });
+
+      const runtime = runtimeModule.initRuntime({
+        baseDir,
+        language: 'en',
+        fallbackLanguage: 'en',
+        preload: true
+      });
+
+      assert.strictEqual(runtime.t('docs.pattern'), 'Keep /* token */ in visible copy');
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  test('runtime translates with per-call language overrides without mutating active language', () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-language-option-'));
+
+    try {
+      const runtimeModule = loadFreshRuntime();
+      const baseDir = path.join(tempRoot, 'locales');
+
+      writeLocale(baseDir, 'en', { common: { hello: 'Hello', fallbackOnly: 'Fallback' } });
+      writeLocale(baseDir, 'de', { common: { hello: 'Hallo' } });
+
+      const runtime = runtimeModule.initRuntime({
+        baseDir,
+        language: 'en',
+        fallbackLanguage: 'en',
+        preload: true
+      });
+
+      assert.strictEqual(runtime.translate('common.hello', {}, { language: 'de' }), 'Hallo');
+      assert.strictEqual(runtime.translate('common.fallbackOnly', {}, { language: 'de' }), 'Fallback');
+      assert.strictEqual(runtime.getLanguage(), 'en');
+      assert.strictEqual(runtime.t('common.hello'), 'Hello');
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  test('runtime supports batch translation with shared and per-key params', () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-batch-'));
+
+    try {
+      const runtimeModule = loadFreshRuntime();
+      const baseDir = path.join(tempRoot, 'locales');
+
+      writeLocale(baseDir, 'en', {
+        common: {
+          hello: 'Hello {name}',
+          bye: 'Bye {name}'
+        }
+      });
+
+      const runtime = runtimeModule.initRuntime({
+        baseDir,
+        language: 'en',
+        fallbackLanguage: 'en',
+        preload: true
+      });
+
+      assert.deepStrictEqual(
+        runtime.translateBatch(['common.hello', 'common.bye'], [{ name: 'Ada' }, { name: 'Lin' }]),
+        ['Hello Ada', 'Bye Lin']
+      );
+      assert.deepStrictEqual(
+        runtime.translateBatch(['common.hello', 'common.bye'], { name: 'Sam' }),
+        ['Hello Sam', 'Bye Sam']
+      );
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  test('runtime exposes cache info and clearCache without changing language', () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-cache-'));
+
+    try {
+      const runtimeModule = loadFreshRuntime();
+      const baseDir = path.join(tempRoot, 'locales');
+
+      writeLocale(baseDir, 'en', { common: { hello: 'Hello' } });
+
+      const runtime = runtimeModule.initRuntime({
+        baseDir,
+        language: 'en',
+        fallbackLanguage: 'en',
+        preload: true
+      });
+
+      assert.strictEqual(runtime.t('common.hello'), 'Hello');
+      writeLocale(baseDir, 'en', { common: { hello: 'Updated' } });
+      assert.strictEqual(runtime.t('common.hello'), 'Hello');
+
+      const before = runtime.getCacheInfo();
+      assert.deepStrictEqual(before.cachedLanguages, ['en']);
+      assert.strictEqual(before.lazy, false);
+
+      runtime.clearCache('en');
+
+      assert.strictEqual(runtime.getLanguage(), 'en');
+      assert.strictEqual(runtime.t('common.hello'), 'Updated');
+      assert.deepStrictEqual(runtime.getCacheInfo().cachedLanguages, ['en']);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  test('enhanced runtime exports the top-level helpers declared by its types', async () => {
+    const enhanced = loadFreshEnhancedRuntime();
+
+    assert.strictEqual(typeof enhanced.translateBatch, 'function');
+    assert.strictEqual(typeof enhanced.translateBatchEncrypted, 'function');
+    assert.strictEqual(typeof enhanced.tTyped, 'function');
+
+    assert.deepStrictEqual(
+      await enhanced.translateBatch(['greeting', 'goodbye']),
+      ['Hello', 'Goodbye']
+    );
+    assert.strictEqual(await enhanced.tTyped('greeting'), 'Hello');
   });
 });

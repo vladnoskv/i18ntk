@@ -536,7 +536,7 @@
     "argsParseFailed": "Error al analizar el argumento: {error}",
     "translationDiscoveryError": "Error de descubrimiento de traducción: {error}",
     "fileTraversalError": "Error de recorrido de archivo: {error}",
-    "sourceEqualsI18nWarn": "⚠️ El directorio fuente y el directorio i18n son los mismos. Esto puede causar problemas con el análisis.",
+    "sourceEqualsI18nWarn": "{reason}. El an?lisis de uso no escanear? archivos de idioma como c?digo fuente.",
     "i18nEqualsSourceWarn": "⚠️ El directorio I18n y el directorio fuente son los mismos. Esto puede causar problemas con el análisis.",
     "usageAnalysisFailed": "⚠️ Error en el análisis de uso: {error}",
     "translationFileParseError": "⚠️ Error de análisis del archivo de traducción: {error}",
@@ -642,7 +642,8 @@
     "failedToSaveReport": "No se pudo guardar el informe de uso: {error}",
     "i18nDirectoryDoesNotExist": "El directorio I18n no existe: {dir}",
     "reportSavedTo": "Informe de uso guardado en: {reportPath}",
-    "sourceDirectoryDoesNotExist": "El directorio de origen no existe: {dir}"
+    "sourceDirectoryDoesNotExist": "El directorio de origen no existe: {dir}",
+    "noSourceDirectoryConfigured": "(sin configurar)"
   },
   "validate": {
     "help_message": "Uso del validador de traducción I18n: nodo i18ntk-validate.js [opciones] Opciones: --source-dir <dir>     Directorio de origen para escanear (predeterminado: ./src) --i18n-dir <dir>       Directorio I18n (predeterminado: ./src/locales) --output-report Generar informe detallado --output-dir <dir>     Directorio de salida para informes (predeterminado: ./reports) --help Mostrar esta ayuda Ejemplos: nodo i18ntk-validate.js --output-report nodo i18ntk-validate.js --source-dir=./app --i18n-dir=./locales nodo i18ntk-validate.js --output-dir=./analysis --output-report",
@@ -922,7 +923,7 @@
     "summaryCommand": "resumen - Mostrar el estado del proyecto",
     "debugCommand": "debug - Problemas de traducción de depuración",
     "scannerCommand": "escáner - Escanear en busca de llaves",
-    "translateCommand": "traducir: traducción automática de archivos locales (Beta)",
+    "translateCommand": "traducir: traducción automática de archivos locales",
     "menu": {
       "pressEnterToContinue": "Presione Entrar para continuar...",
       "title": "🌐 MENÚ DE GESTIÓN I18NTK",
@@ -1102,7 +1103,32 @@
     "translationFilesCreatedWarning": "Los archivos de traducción se crearon con marcadores de posición; revisión antes del uso en producción.",
     "warningCannotReadSourceDir": "Advertencia: no se puede leer el directorio fuente {dir}: {error}",
     "warningInvalidLanguageCodes": "Advertencia: se ignoran los códigos de idioma no válidos: {languages}",
-    "warningProceedingWithoutFramework": "Procediendo sin marco i18n detectado."
+    "warningProceedingWithoutFramework": "Procediendo sin marco i18n detectado.",
+    "backup": {
+      "title": "Configuraci?n de copias de seguridad",
+      "description": "Las copias de seguridad est?n desactivadas por defecto para evitar recursi?n y contaminaci?n del repositorio.",
+      "enablePrompt": "?Activar copias de seguridad autom?ticas? (s/N): ",
+      "keepPrompt": "?Cu?ntas copias conservar autom?ticamente (1-3, predeterminado 1)?: "
+    },
+    "completionSummaryTitle": "Resumen de finalizaci?n",
+    "completionSummaryBasicTitle": "Resumen de finalizaci?n (b?sico)",
+    "totalChanges": "Cambios totales: {count}",
+    "languagesProcessed": "Idiomas procesados: {count}",
+    "missingKeysAdded": "Claves faltantes a?adidas: {count}",
+    "reportPrompt": "?Quieres generar un informe? (S/n): ",
+    "reportGenerated": "Informe generado: {reportPath}",
+    "reportFailed": "No se pudo generar el informe: {error}",
+    "completionError": "Error durante la finalizaci?n: {error}",
+    "optimize": {
+      "title": "Optimizacion del tamano del paquete",
+      "preview": "Ejecutando vista previa de optimizacion de locales...",
+      "reduceTip": "Puedes reducir el tamano del paquete seleccionando solo los idiomas necesarios.",
+      "prompt": "Quieres ejecutar la optimizacion interactiva ahora? (s/N): ",
+      "starting": "Iniciando optimizacion interactiva de locales...",
+      "completed": "Optimizacion del paquete completada.",
+      "later": "Puedes ejecutar la optimizacion de locales mas tarde con:",
+      "unavailable": "No se pudo ofrecer la optimizacion de locales: {error}"
+    }
   },
   "language": {
     "title": "🌍 Cambiar idioma",
@@ -1147,7 +1173,7 @@
       "sizing": "📏 Analizar tallas",
       "fix": "🛠️ Corregir traducciones de marcadores de posición",
       "scanner": "🔍 Escanee en busca de problemas con i18n",
-      "translate": "🌐 Traducción automática (Beta)",
+      "translate": "🌐 Traducción automática",
       "workflow": "🔄 Ejecute el flujo de trabajo completo",
       "status": "📋 Mostrar estado del proyecto",
       "delete": "🗑️ Eliminar todos los informes",
@@ -1447,7 +1473,9 @@
       "securitySettings": "Configuración de seguridad",
       "securitySettingsDesc": "PIN de administrador y otras opciones de seguridad",
       "backupSettings": "Configuración de copia de seguridad",
-      "backupSettingsDesc": "Copia de seguridad y restauración de los ajustes de configuración"
+      "backupSettingsDesc": "Copia de seguridad y restauración de los ajustes de configuración",
+      "autoTranslate": "Traduccion automatica",
+      "autoTranslateDesc": "Ajustar marcadores, concurrencia, lotes e informes"
     },
     "updatePackage": {
       "title": "Paquete de actualización",
@@ -1569,7 +1597,8 @@
       "processingSettings": "Configuración de procesamiento",
       "advancedSettings": "Configuración avanzada",
       "scriptDirectorySettings": "Configuración del directorio de secuencias de comandos",
-      "securitySettings": "Configuración de seguridad"
+      "securitySettings": "Configuración de seguridad",
+      "autoTranslate": "Configuracion de traduccion automatica"
     },
     "security": {
       "title": "🔐 Configuración de seguridad",
@@ -1925,6 +1954,70 @@
           "description": "Requerir confirmación para operaciones de respaldo",
           "help": "Confirmar operación de copia de seguridad"
         }
+      },
+      "reports_format": {
+        "label": "Formato de informe",
+        "help": "Elige markdown para informes legibles, json para automatizacion o text para registros simples."
+      },
+      "autoTranslate_placeholderMode": {
+        "label": "Modo de marcadores",
+        "help": "Como se tratan las cadenas con marcadores durante la traduccion automatica."
+      },
+      "autoTranslate_concurrency": {
+        "label": "Solicitudes de traduccion simultaneas",
+        "help": "Maximo de solicitudes simultaneas al proveedor. Google admite hasta 100 en i18ntk; DeepL y LibreTranslate tienen limites mas bajos."
+      },
+      "autoTranslate_batchSize": {
+        "label": "Segmentos de texto por lote",
+        "help": "Numero de segmentos de texto programados por lote."
+      },
+      "autoTranslate_progressInterval": {
+        "label": "Intervalo de progreso",
+        "help": "Segmentos completados entre actualizaciones de progreso."
+      },
+      "autoTranslate_retryCount": {
+        "label": "Reintentos",
+        "help": "Maximo de reintentos por solicitud fallida."
+      },
+      "autoTranslate_retryDelay": {
+        "label": "Retraso de reintento (ms)",
+        "help": "Retraso base de reintento en milisegundos."
+      },
+      "autoTranslate_timeout": {
+        "label": "Tiempo limite de solicitud (ms)",
+        "help": "Tiempo limite de la solicitud al proveedor de traduccion."
+      },
+      "autoTranslate_dryRunFirst": {
+        "label": "Vista previa primero",
+        "help": "Previsualizar lo que se traducira antes de escribir archivos."
+      },
+      "autoTranslate_onlyMissingOrEnglish": {
+        "label": "Solo claves faltantes o en ingles",
+        "help": "Conservar valores ya traducidos y traducir solo valores faltantes, marcadores, copias del origen o probablemente en ingles."
+      },
+      "autoTranslate_reportStdout": {
+        "label": "Imprimir informe en terminal",
+        "help": "Imprimir el informe posterior a la traduccion en stdout."
+      },
+      "autoTranslate_bom": {
+        "label": "Escribir BOM UTF-8",
+        "help": "Escribir archivos JSON traducidos con BOM UTF-8."
+      },
+      "autoTranslate_protectionEnabled": {
+        "label": "Proteger marcas, claves y valores",
+        "help": "Activar terminos, claves, valores y patrones protegidos editables por el usuario."
+      },
+      "autoTranslate_protectionFile": {
+        "label": "Archivo JSON de proteccion",
+        "help": "Archivo JSON del proyecto con reglas de proteccion de traduccion automatica."
+      },
+      "autoTranslate_promptProtectionSetup": {
+        "label": "Preguntar para crear archivo de proteccion",
+        "help": "Preguntar si se crea el archivo de proteccion cuando se ejecuta por primera vez."
+      },
+      "autoTranslate_promptProtectionUpdate": {
+        "label": "Preguntar para actualizar reglas de proteccion",
+        "help": "Preguntar si se actualizan las reglas de proteccion antes de traducciones desde el gestor."
       }
     },
     "actions": {
@@ -2028,11 +2121,11 @@
     "helpDeleteReports": "--delete-reports Eliminar informes existentes",
     "helpHelp": "--help, -h Mostrar esta ayuda",
     "helpExamples": "Ejemplos:",
-    "helpExample1": "node i18ntk-summary.js",
-    "helpExample2": "node i18ntk-summary.js --source-dir ./locales",
+    "helpExample1": "nodo i18ntk-summary.js",
+    "helpExample2": "nodo i18ntk-summary.js --source-dir ./locales",
     "helpExample3": "node i18ntk-summary.js --resumen de salida-report.txt",
-    "helpExample4": "node i18ntk-summary.js --verbose",
-    "helpExample5": "node i18ntk-summary.js --source-dir ./locales --output report.json",
+    "helpExample4": "nodo i18ntk-summary.js --verbose",
+    "helpExample5": "nodo i18ntk-summary.js --source-dir ./locales --output report.json",
     "couldNotReadFile": "⚠️ No se pudo leer el archivo: {filePath}",
     "couldNotParseJSFile": "⚠️ No se pudo analizar el archivo JS/TS: {filePath}",
     "errorReadingFile": "⚠️ Error al leer el archivo {filePath}: {error}",
@@ -2143,7 +2236,7 @@
       "completeCommand": "complete - Traducciones completas (100% de cobertura)",
       "summaryCommand": "resumen - Mostrar el estado del proyecto",
       "scannerCommand": "escáner - Escanear en busca de problemas con i18n",
-      "translateCommand": "traducir: traducción automática de archivos locales (Beta)",
+      "translateCommand": "traducir: traducción automática de archivos locales",
       "debugCommand": "debug - Problemas de traducción de depuración"
     },
     "test_complete_system": {
@@ -2441,5 +2534,93 @@
   "pressEnterToContinue": "Presione Entrar para continuar...",
   "status": {
     "exitingCompleted": "Flujo de trabajo completado. Saliendo..."
+  },
+  "prompt": {
+    "yesTokens": [
+      "s",
+      "si",
+      "s?",
+      "y",
+      "yes"
+    ],
+    "noTokens": [
+      "norte",
+      "No"
+    ]
+  },
+  "translate": {
+    "title": "Traduccion automatica",
+    "sourceDirectory": {
+      "title": "Directorio de locales de origen",
+      "currentProject": "Proyecto actual: {dir}",
+      "accepted": "Aceptado: una ruta absoluta o una ruta relativa al proyecto actual.",
+      "localeRootExample": "./locales  (despues elige idioma de origen: en)",
+      "folderHint": "La carpeta puede contener archivos JSON directamente o carpetas de idioma como ./locales/en.",
+      "defaultNotFound": "Directorio predeterminado no encontrado: {dir}",
+      "enterExisting": "Introduce un directorio existente con archivos JSON de locales.",
+      "directoryNotFound": "Directorio no encontrado: {dir}",
+      "enterFolderExample": "Introduce una carpeta existente, por ejemplo ./locales/en.",
+      "notDirectory": "No es un directorio: {dir}",
+      "using": "Usando directorio de origen: {dir}",
+      "noJsonDirect": "No se encontraron archivos JSON directamente en: {dir}",
+      "usingLanguageFolder": "Usando carpeta del idioma de origen: {dir}",
+      "noJsonWithLanguageFolder": "No se encontraron archivos JSON en: {dir}\nTambien se comprobo la carpeta del idioma de origen: {languageDir}",
+      "noJson": "No se encontraron archivos JSON en: {dir}"
+    },
+    "targetLanguages": {
+      "title": "Idioma(s) de destino",
+      "allConfigured": "a) Todos los idiomas de destino configurados: {languages}",
+      "noneConfigured": "a) Todos los idiomas de destino configurados: ninguno configurado",
+      "enterCodes": "O introduce uno o mas codigos de idioma separados por comas o espacios.",
+      "sourceExcluded": "El idioma de origen \"{lang}\" se excluira automaticamente.",
+      "noneSelected": "No se seleccionaron idiomas de destino validos. Cancelando.",
+      "configureHint": "Configura defaultLanguages en .i18ntk-config o introduce codigos manualmente.",
+      "selected": "Idiomas de destino: {languages}"
+    },
+    "protection": {
+      "title": "Terminos y claves protegidos"
+    },
+    "common": {
+      "default": "Predeterminado: {value}",
+      "examples": "Ejemplos:",
+      "exampleValue": "Ejemplo: {value}",
+      "examplesInline": "Ejemplos: {examples}",
+      "pressEnterDefault": "Pulsa Enter para usar el valor predeterminado.",
+      "usingDefault": "Usando predeterminado: {value}"
+    },
+    "sourceLanguage": {
+      "title": "Codigo de idioma de origen",
+      "hint": "Debe coincidir con el idioma de los valores JSON de origen.",
+      "using": "Usando idioma de origen: {lang}",
+      "invalid": "Codigo de idioma no valido. Usa 2+ caracteres (p. ej. en, de, fr)."
+    },
+    "files": {
+      "title": "Que archivo(s) traducir?",
+      "all": "a) Todos los archivos JSON ({count}: {files})",
+      "choicePrompt": "Seleccion [a/all o numero de archivo]: ",
+      "invalidChoice": "Seleccion no valida. Cancelando."
+    },
+    "dryRun": {
+      "previewFor": "Vista previa para \"{lang}\"..."
+    },
+    "confirm": {
+      "proceed": "Continuar con la traduccion real?",
+      "yesNoPrompt": "[s]i / [n]o: ",
+      "cancelled": "Traduccion cancelada."
+    },
+    "run": {
+      "translatingTo": "Traduciendo a \"{lang}\"...",
+      "failedFor": "Error para \"{lang}\": {error}"
+    },
+    "summary": {
+      "title": "Resumen:",
+      "complete": "Traduccion completada!"
+    },
+    "nonInteractive": {
+      "useDirect": "Modo no interactivo. Usa la CLI directa:"
+    },
+    "errors": {
+      "sourceDirectoryNotFound": "Directorio de locales de origen no encontrado: {dir}"
+    }
   }
 }

@@ -1,4 +1,4 @@
-# i18ntk v4.1.0
+# i18ntk v4.2.0
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.1.0)](https://socket.dev/npm/package/i18ntk/overview/4.1.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.2.0)](https://socket.dev/npm/package/i18ntk/overview/4.2.0)
 
 ## Install
 
@@ -29,6 +29,21 @@ Requirements:
 - Node.js `>=16.0.0`
 - npm `>=8.0.0`
 - No runtime dependencies
+
+## What's New in 4.2.0
+
+- **SECURITY**: Hardened path containment for restore and shared filesystem helpers, including artifact-like filenames, environment-added internal prefixes, and Windows cross-drive paths.
+- **SECURITY**: Runtime locale loading now rejects unsafe language identifiers before resolving locale files, preventing `../` language names from reading JSON outside the configured locale base.
+- **SECURITY**: Auto Translate provider URL checks now block IPv4-mapped IPv6 private/loopback hosts.
+- **REPORTS**: Init and analysis reports now default to readable Markdown. Set `reports.format` to `markdown`, `json`, or `text` in Settings or `.i18ntk-config`.
+- **USAGE**: Usage analysis no longer scans the project root when locales are also configured as the source directory, avoiding inflated missing-key counts.
+- **I18N UX**: Init backup prompts, completion summaries, report prompts, default target languages, and native yes/no confirmations are now localized.
+- **AUTO TRANSLATE**: Auto Translate is out of beta, keeps existing translated target values by default, and only sends missing/source-copy/likely-English strings unless `--translate-all` is used.
+- **AUTO TRANSLATE**: Google Auto Translate concurrency now defaults to 12 and can be raised up to 100 for larger locale sets.
+- **AUTO TRANSLATE**: Corrupt target strings such as `?????`, replacement characters, and common mojibake are now repaired from the English source, and progress output distinguishes key translation from placeholder-safe text-segment translation.
+- **CLI UX**: Manager menu spacing is grouped and aligned, and validation no longer prints duplicate source/i18n/output directory blocks.
+- **DOCS**: Versioned docs and migration guidance now reflect the current 4.2.0 command surface.
+- **CLEANUP**: Removed stale duplicate fixed artifacts from the development tree to reduce audit and supply-chain drift.
 
 ## What's New in 4.1.0
 
@@ -100,7 +115,6 @@ i18ntk --command=sizing
 i18ntk --command=complete
 i18ntk --command=translate
 i18ntk --command=summary
-i18ntk --command=debug
 ```
 
 Standalone executables:
@@ -119,12 +133,29 @@ i18ntk-fixer
 i18ntk-backup
 i18ntk-translate
 ```
-`n
-Note: manager route `i18ntk --command=backup` is disabled in current builds. Use `i18ntk-backup` (or legacy `i18ntk-backup`) directly for backup operations.
+
+Note: manager route `i18ntk --command=backup` is disabled in current builds. Use `i18ntk-backup` directly for backup operations.
+
+## Command Reference
+
+| Command | What it does | Looks for | Writes or changes |
+| --- | --- | --- | --- |
+| `i18ntk` | Opens the interactive management menu. | Project config, setup state, available commands. | Only changes files after you choose a command that writes. |
+| `i18ntk --command=init` / `i18ntk-init` | Sets up locale folders and missing target-language files. | Source language files and selected target languages. | Locale JSON files, `.i18ntk-config`, optional reports/backups. |
+| `i18ntk --command=analyze` / `i18ntk-analyze` | Compares source and target translation coverage. | Missing keys, extra keys, untranslated markers, completion by language. | Markdown/JSON/text reports when report output is enabled. |
+| `i18ntk --command=validate` / `i18ntk-validate` | Validates structure and translation quality risks. | Placeholder mismatches, missing keys, risky URLs/emails/secrets, likely English target text. | Validation summary report. Does not edit locale files. |
+| `i18ntk --command=usage` / `i18ntk-usage` | Maps translation keys to source files and finds unused/missing keys. | Direct i18n calls, literal known-key references, bounded dynamic templates/object maps, unresolved dynamic expressions, hardcoded text candidates, namespace/file naming mismatches. | Usage report with key locations, namespace recommendations, unresolved dynamic expressions, hardcoded text suggestions, and optional dead-key report. Does not delete unless cleanup deletion is explicitly enabled. |
+| `i18ntk --command=scanner` / `i18ntk-scanner` | Scans source for i18n issues and hardcoded user-facing text. | JSX/template text, common text attributes, i18n usage patterns, source-language text profiles. | Scanner report. Does not edit files. |
+| `i18ntk --command=complete` / `i18ntk-complete` | Adds missing keys to target language files for 100% key coverage. | Source-language keys missing from targets. | Target locale JSON files, using missing translation markers/prefixes. |
+| `i18ntk --command=translate` / `i18ntk-translate` | Auto-translates locale JSON using configured provider behavior. | Missing, empty, untranslated-marker, source-copy, likely-English, or visibly corrupt target values by default. | Target locale JSON files and translation reports. Existing translated values are kept unless `--translate-all` is used. |
+| `i18ntk --command=sizing` / `i18ntk-sizing` | Estimates translated string length expansion and layout risk. | Text length, expansion ratios, placeholder-bearing strings. | Sizing report. Does not edit locale files. |
+| `i18ntk --command=summary` / `i18ntk-summary` | Shows project translation status. | Configured locales, reports, completeness status. | Console/report output only. |
+| `i18ntk-fixer` | Fixes placeholder and missing-marker issues. | Placeholder corruption, missing translation markers, configured language files. | Locale JSON files when fixes are applied. Use dry-run options where available before bulk edits. |
+| `i18ntk-backup` | Creates, verifies, restores, and cleans locale backups. | Locale JSON files and backup manifests. | Backup archives/manifests, or restored locale files when using restore. |
 
 ## Common Options
 
-Most commands support:
+Many commands support:
 
 - `--source-dir <path>`
 - `--i18n-dir <path>`
@@ -132,8 +163,9 @@ Most commands support:
 - `--source-language <code>`
 - `--ui-language <code>`
 - `--no-prompt`
-- `--dry-run`
 - `--help`
+
+Command-specific tools add their own flags such as `--dry-run`, `--output-report`, `--cleanup`, `--predict-expansion`, or Auto Translate provider options.
 
 Example:
 
@@ -147,7 +179,7 @@ Interactive manager flow:
 
 ```bash
 i18ntk
-# choose "Auto Translate (Beta)"
+# choose "Auto Translate"
 ```
 
 Direct CLI examples:
@@ -190,6 +222,8 @@ locales/de/common.json
 locales/fr/common.json
 ```
 
+Auto Translate is target-aware by default. When a target file already exists, it keeps translated target values and only sends values that are missing, empty, marked as untranslated, still identical to the source, likely still English, or visibly corrupt from encoding damage such as `?????`, replacement characters, or common mojibake. Use `--translate-all` when you intentionally want to re-translate every source string.
+
 ### Placeholder Handling
 
 Auto Translate detects common placeholders such as:
@@ -201,6 +235,9 @@ Auto Translate detects common placeholders such as:
 - `:id`
 - `%{name}`
 - `${value}`
+- `{count, plural, one {# item} other {# items}}`
+- `$t(common.save)`
+- `%(total).2f`
 
 Useful flags:
 
@@ -208,6 +245,10 @@ Useful flags:
 - `--skip-placeholders`: copy placeholder-bearing strings unchanged
 - `--send-placeholders`: send placeholder-bearing strings through translation after masking
 - `--custom-regex <regex>`: add project-specific placeholder detection
+- `--only-missing`: keep existing translated target values and translate only missing/source-copy/likely English values (default)
+- `--translate-all`: re-translate every source string
+
+Progress output is stage-aware for large files. Normal keys are reported as `Translating strings`, while preserve-mode placeholder work is reported as `Translating placeholder-safe text segments`; each progress update includes the current key path when available.
 
 ### Protected Terms and Keys
 
@@ -247,7 +288,7 @@ Useful flags:
 - `--create-protection-file`
 - `--no-protection`
 
-Open Settings and choose `Auto Translate Beta` to edit defaults for placeholder mode, concurrency, batch size, retry settings, report output, BOM output, protection file path, first-run setup prompt, and update prompt.
+Open Settings and choose `Auto Translate` to edit defaults for placeholder mode, translate-only-needed mode, concurrency, batch size, retry settings, report output, BOM output, protection file path, first-run setup prompt, and update prompt.
 
 See [docs/auto-translate.md](./docs/auto-translate.md) for the full Auto Translate guide.
 
@@ -255,7 +296,7 @@ See [docs/auto-translate.md](./docs/auto-translate.md) for the full Auto Transla
 
 Validation checks locale structure, completeness, placeholders, and content risks.
 
-In 3.1.2, warning types are more specific:
+Validation warning types are specific:
 
 - `Potential risky content`: URL, email address, or secret-like value
 - `Possible untranslated English content`: target-language value appears to contain too much English
@@ -324,7 +365,7 @@ i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup --dry-run-delete
 ```
 
 Each dead key receives a confidence score (0.0–1.0) factoring:
-- Dynamic key patterns (e.g., `` t(`prefix.${dynamic}`) ``) — lower score
+- Unresolved dynamic key patterns (e.g., `` t(`prefix.${dynamic}`) ``) — lower score and listed in the usage report; simple consts, bounded arrays, object maps, and ternaries are expanded to exact keys where possible
 - Key appears in source code comments or JSDoc — medium score
 - Parent file recently modified (<30 days) — medium score
 - No references found anywhere — high score (>0.8)
@@ -417,6 +458,16 @@ console.log(i18n.t('common.hello')); // loads common.json on first access
 
 When `lazy: true`, the runtime builds a key-to-file manifest on first access and loads individual files on demand. Files are loaded once and cached. If the manifest is missing or incomplete, the runtime falls back to full eager loading for that language. Manifest size is capped at 100KB with path containment validation.
 
+Production guidance:
+
+- Prefer the object returned from `initRuntime()` instead of module-level `runtime.t()` in apps with multiple tenants, projects, or locale roots.
+- Use `lazy: true` for large modular locale folders where lower steady-state memory matters more than a small first-key lookup cost.
+- Use `preload: true` without `lazy` for small locale sets or latency-sensitive startup paths.
+- Call `refresh(language)` after deploying or writing changed locale files so cached data and lazy manifests are rebuilt.
+- Use per-call language overrides when rendering one-off alternate-language strings: `i18n.t('common.hello', {}, { language: 'de' })`.
+- Use `translateBatch()` for small groups of labels and `clearCache()` / `getCacheInfo()` for cache maintenance and diagnostics.
+- `i18ntk/runtime/enhanced` remains available for compatibility with existing async/encryption users, but new production integrations should start with `i18ntk/runtime`.
+
 ## Runtime API
 
 Use `i18ntk/runtime` when an application needs to read locale JSON files at runtime.
@@ -439,6 +490,15 @@ console.log(i18n.getAvailableLanguages());
 i18n.refresh('fr');
 ```
 
+Useful production helpers:
+
+```js
+i18n.t('common.hello', {}, { language: 'de' }); // per-call language override
+i18n.translateBatch(['menu.home', 'menu.settings']);
+i18n.clearCache('fr');
+console.log(i18n.getCacheInfo());
+```
+
 See [docs/runtime.md](./docs/runtime.md) for runtime details.
 
 ## Configuration
@@ -449,23 +509,27 @@ Example:
 
 ```json
 {
-  "version": "4.1.0",
+  "version": "4.2.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
   "sourceLanguage": "en",
-  "defaultLanguages": ["de", "es", "fr", "ru"],
+  "defaultLanguages": ["en", "de", "es", "fr", "ru"],
+  "reports": {
+    "format": "markdown"
+  },
   "englishContentThresholdPercent": 10,
   "allowedEnglishTerms": ["BrandName", "PRODUCT_CODE"],
   "autoTranslate": {
     "placeholderMode": "preserve",
-    "concurrency": 6,
+    "concurrency": 12,
     "batchSize": 100,
     "progressInterval": 25,
     "retryCount": 3,
     "retryDelay": 1000,
     "timeout": 15000,
     "dryRunFirst": true,
+    "onlyMissingOrEnglish": true,
     "reportStdout": true,
     "bom": false,
     "protectionEnabled": true,
@@ -507,9 +571,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
-- [Migration Guide v3.2.0](./docs/migration-guide-v3.2.0.md)
-- [Migration Guide v3.1.1](./docs/migration-guide-v3.1.1.md)
-- [Migration Guide v3.0.0](./docs/migration-guide-v3.0.0.md)
+- [Migration Guide v4.2.0](./docs/migration-guide-v4.2.0.md)
 
 ## Security
 

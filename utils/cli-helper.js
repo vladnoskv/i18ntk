@@ -9,6 +9,7 @@
  */
 
 const { getGlobalReadline, closeGlobalReadline, ask, askHidden } = require('./cli');
+const { parseConfirmation } = require('./localized-confirm');
 
 class CliHelper {
   constructor() {
@@ -86,16 +87,11 @@ class CliHelper {
    * @param {boolean} defaultValue - Default value if user just presses enter
    * @returns {Promise<boolean>} The user's confirmation
    */
-  async confirm(question, defaultValue = false) {
+  async confirm(question, defaultValue = false, language = 'en') {
     const promptText = `${question} (${defaultValue ? 'Y/n' : 'y/N'}): `;
     
     const answer = await ask(promptText);
-    const normalized = answer.trim().toLowerCase();
-    if (normalized === '') {
-      return defaultValue;
-    } else {
-      return normalized === 'y' || normalized === 'yes';
-    }
+    return parseConfirmation(answer, { language, defaultValue });
   }
 
   /**

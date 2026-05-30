@@ -39,6 +39,9 @@ class ValidateCommand {
         this.sourceDir = null;
         this.i18nDir = null;
         this.sourceLanguageDir = null;
+        this.initialized = false;
+        this.pathsDisplayed = false;
+        this.validationBannerDisplayed = false;
     }
 
     /**
@@ -55,6 +58,10 @@ class ValidateCommand {
      */
     async initialize() {
         try {
+            if (this.initialized) {
+                return;
+            }
+
             // Initialize i18n with UI language first
             const args = this.parseArgs();
             if (args.help) {
@@ -102,6 +109,8 @@ class ValidateCommand {
             }
 
             displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
+            this.pathsDisplayed = true;
+            this.initialized = true;
 
             SecurityUtils.logSecurityEvent(
                 'I18n validator initialized successfully',
@@ -674,8 +683,11 @@ class ValidateCommand {
             const jsonOutput = new JsonOutput('validate');
 
             if (!args.json) {
+                console.log('');
                 console.log(t('validate.title'));
-                console.log(t('validate.message'));
+                if (!this.validationBannerDisplayed) {
+                    console.log(t('validate.message'));
+                }
 
                 // Delete old validation report if it exists
                 const reportPath = path.join(process.cwd(), 'validation-report.txt');
@@ -706,9 +718,12 @@ class ValidateCommand {
             }
 
             if (!args.json) {
-                console.log(t('validate.sourceDirectory', { dir: this.sourceDir }));
+                if (!this.pathsDisplayed) {
+                    console.log(t('validate.sourceDirectory', { dir: this.sourceDir }));
+                }
                 console.log(t('validate.sourceLanguage', { sourceLanguage: this.config.sourceLanguage }));
                 console.log(t('validate.strictMode', { mode: this.config.strictMode ? 'ON' : 'OFF' }));
+                console.log('');
             }
 
             // Validate source language directory exists
@@ -933,15 +948,7 @@ class ValidateCommand {
             this.config = {};
         }
 
-        // Initialize configuration properly when called from menu
-        if (fromMenu && !this.sourceDir) {
-            const baseConfig = await getUnifiedConfig('validate', args);
-            this.config = { ...baseConfig, ...this.config };
-
-            const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
-            loadTranslations(uiLanguage, path.resolve(__dirname, '../../../resources', 'i18n', 'ui-locales'));this.sourceDir = this.config.sourceDir;
-            this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
-        } else {
+        if (!this.initialized) {
             await this.initialize();
         }
 
@@ -972,7 +979,8 @@ class ValidateCommand {
         }
         const execute = async () => {
 
-            console.log(t('validate.startingValidationProcess'));
+            console.log('\n' + t('validate.startingValidationProcess'));
+            this.validationBannerDisplayed = true;
             SecurityUtils.logSecurityEvent(
                 t('validate.runStarted'),
                 'info',

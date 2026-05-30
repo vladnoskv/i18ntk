@@ -22,6 +22,8 @@ const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displ
 const I18nInitializer = require('../../i18ntk-init');
 const JsonOutput = require('../../../utils/json-output');
 const SetupEnforcer = require('../../../utils/setup-enforcer');
+const { resolveUsageSourceDir } = require('../../../utils/usage-source');
+const { analyzeSourceForUsageInsights } = require('../../../utils/usage-insights');
 
 class UsageService {
   constructor(config = {}) {
@@ -34,6 +36,11 @@ class UsageService {
     this.availableKeys = new Set();
     this.usedKeys = new Set();
     this.fileUsage = new Map();
+    this.keyUsageLocations = new Map();
+    this.hardcodedTextCandidates = [];
+    this.namespaceRecommendations = [];
+    this.unresolvedDynamicReferences = [];
+    this.translationValueIndex = new Map();
     this.translationFiles = new Map(); // Track all translation files
     this.translationStats = new Map(); // Track translation completeness
     this.extractor = getExtractor(config.extractor);
@@ -328,6 +335,11 @@ class UsageService {
     try {
       console.log(t('usage.checkUsage.analyzing_source_files'));
 
+      if (!this.sourceDir) {
+        console.warn(t('usage.noSourceFilesFound'));
+        return;
+      }
+
       // Check if source directory exists
       if (!SecurityUtils.safeExistsSync(this.sourceDir)) {
         throw new Error(this.t('usage.sourceDirectoryDoesNotExist', { dir: this.sourceDir }) || `Source directory not found: ${this.sourceDir}`);
@@ -347,17 +359,21 @@ class UsageService {
 
       for (const filePath of sourceFiles) {
         try {
-          const keys = this.extractKeysFromFile(filePath);
+          const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
+          if (!content) continue;
 
-          if (keys.length > 0) {
-            const relativePath = path.relative(this.sourceDir, filePath);
-            this.fileUsage.set(relativePath, keys);
+          const relativePath = path.relative(this.sourceDir, filePath);
+          const directKeys = this.extractKeysFromContent(content, filePath);
+          const insights = analyzeSourceForUsageInsights({
+            content,
+            relativePath,
+            availableKeys: this.availableKeys,
+            directKeys,
+            translationValueIndex: this.translationValueIndex,
+          });
 
-            keys.forEach(key => {
-              this.usedKeys.add(key);
-              totalKeysFound++;
-            });
-          }
+          this.detectFrameworkPatterns(content, relativePath);
+          totalKeysFound += this.recordUsageInsights(relativePath, insights);
 
           processedFiles++;
 
@@ -373,6 +389,18 @@ class UsageService {
 
       console.log(t("usage.checkUsage.found_thisusedkeyssize_unique_", { usedKeysSize: this.usedKeys.size }));
       console.log(t("usage.checkUsage.total_key_usages_totalkeysfoun", { totalKeysFound }));
+      if (this.keyUsageLocations.size > 0) {
+        console.log(`🔎 Indexed ${this.keyUsageLocations.size} keys with source file locations`);
+      }
+      if (this.namespaceRecommendations.length > 0) {
+        console.log(`🧭 Namespace recommendations: ${this.namespaceRecommendations.length}`);
+      }
+      if (this.hardcodedTextCandidates.length > 0) {
+        console.log(`📝 Hardcoded text candidates: ${this.hardcodedTextCandidates.length}`);
+      }
+      if (this.unresolvedDynamicReferences.length > 0) {
+        console.log(`🧩 Unresolved dynamic key expressions: ${this.unresolvedDynamicReferences.length}`);
+      }
 
     } catch (error) {
       console.error(t('usage.failedToAnalyzeUsage', { error: error.message }));
@@ -501,6 +529,12 @@ class UsageService {
         } else {
           // Add dot notation key (e.g., "pagination.showing")
           keys.push(fullKey);
+          if (typeof value === 'string') {
+            const normalizedValue = value.replace(/\s+/g, ' ').trim();
+            if (normalizedValue && !this.translationValueIndex.has(normalizedValue)) {
+              this.translationValueIndex.set(normalizedValue, fullKey);
+            }
+          }
         }
       }
     } catch (error) {
@@ -545,18 +579,67 @@ class UsageService {
       const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
       if (!content) return [];
 
-      // Skip JSON files entirely to prevent scanning translation files
-      if (filePath.endsWith('.json')) return [];
-      const rawPatterns = Array.isArray(this.config.translationPatterns) ? this.config.translationPatterns : [];
-      if (rawPatterns.length === 0) return [];
-
-      return this.extractor.extract(content, rawPatterns);
+      return this.extractKeysFromContent(content, filePath);
 
       // Null-safe translation patterns handling
     } catch (error) {
       console.warn(`${t('usage.failedToExtractKeys')} ${filePath}: ${error.message}`);
       return [];
     }
+  }
+
+  extractKeysFromContent(content, filePath = '') {
+    if (!content) return [];
+    if (filePath && filePath.endsWith('.json')) return [];
+    const rawPatterns = Array.isArray(this.config.translationPatterns) ? this.config.translationPatterns : [];
+    if (rawPatterns.length === 0) return [];
+    return this.extractor.extract(content, rawPatterns);
+  }
+
+  recordUsageInsights(relativePath, insights) {
+    const keys = [];
+    const seen = new Set();
+
+    for (const ref of insights.keyReferences || []) {
+      if (!ref.key || seen.has(ref.key)) continue;
+      seen.add(ref.key);
+      keys.push(ref.key);
+      this.usedKeys.add(ref.key);
+
+      if (!this.keyUsageLocations.has(ref.key)) {
+        this.keyUsageLocations.set(ref.key, []);
+      }
+      this.keyUsageLocations.get(ref.key).push({
+        filePath: relativePath,
+        line: ref.line,
+        column: ref.column,
+        matchType: ref.matchType,
+      });
+    }
+
+    if (keys.length > 0) {
+      this.fileUsage.set(relativePath, keys);
+    }
+
+    if (insights.namespaceRecommendation) {
+      this.namespaceRecommendations.push({
+        filePath: relativePath,
+        ...insights.namespaceRecommendation,
+      });
+    }
+
+    if (Array.isArray(insights.hardcodedTexts) && insights.hardcodedTexts.length > 0) {
+      this.hardcodedTextCandidates.push(...insights.hardcodedTexts);
+    }
+
+    if (Array.isArray(insights.unresolvedDynamicReferences) && insights.unresolvedDynamicReferences.length > 0) {
+      this.unresolvedDynamicReferences.push(...insights.unresolvedDynamicReferences.map(ref => ({
+        filePath: relativePath,
+        ...ref,
+      })));
+    }
+
+    return keys.length;
   }
 
   // Analyze translation completeness across all languages
@@ -793,6 +876,16 @@ class UsageService {
 
   // Find files that use specific keys
   findKeyUsage(searchKey) {
+    if (this.keyUsageLocations && this.keyUsageLocations.has(searchKey)) {
+      return this.keyUsageLocations.get(searchKey).map(location => ({
+        filePath: location.filePath,
+        keys: [searchKey],
+        line: location.line,
+        column: location.column,
+        matchType: location.matchType,
+      }));
+    }
+
     const usage = [];
 
     for (const [filePath, keys] of this.fileUsage) {
@@ -865,10 +958,11 @@ class UsageService {
     report += `${t('summary.usageReportTranslationCompleteness')}\n`;
     report += `${'='.repeat(50)}\n`;
     for (const [language, stats] of this.translationStats) {
-      const translations = this.translationsByLanguage[language] || {};
-      const score = this.calculateTranslationScore ? this.calculateTranslationScore(language, translations) : {
-        completeness: ((stats.translated / stats.total) * 100).toFixed(1),
-        quality: ((stats.translated / stats.total) * 100).toFixed(1),
+      const translations = this.translationsByLanguage ? this.translationsByLanguage[language] : null;
+      const completeness = stats.total > 0 ? ((stats.translated / stats.total) * 100).toFixed(1) : '0.0';
+      const score = translations && this.calculateTranslationScore ? this.calculateTranslationScore(language, translations) : {
+        completeness,
+        quality: completeness,
         placeholderAccuracy: 100
       };
 
@@ -902,6 +996,77 @@ class UsageService {
       report += `  Simple keys: ${complexityStats.simple}\n`;
       report += `  Moderate keys: ${complexityStats.moderate}\n`;
       report += `  Complex keys: ${complexityStats.complex}\n\n`;
+    }
+
+    const matchCounts = { direct: 0, literal: 0 };
+    for (const locations of this.keyUsageLocations.values()) {
+      for (const location of locations) {
+        matchCounts[location.matchType] = (matchCounts[location.matchType] || 0) + 1;
+      }
+    }
+
+    report += `🔎 Usage Match Index\n`;
+    report += `${'='.repeat(50)}\n`;
+    report += `Direct i18n calls: ${matchCounts.direct || 0}\n`;
+    report += `Known-key literal matches: ${matchCounts.literal || 0}\n`;
+    report += `Resolved dynamic expressions: ${(matchCounts['dynamic-template'] || 0) + (matchCounts['dynamic-variable'] || 0)}\n`;
+    report += `Unresolved dynamic expressions: ${this.unresolvedDynamicReferences.length}\n`;
+    report += `Indexed keys with file locations: ${this.keyUsageLocations.size}\n\n`;
+
+    const indexedKeys = Array.from(this.keyUsageLocations.entries()).slice(0, 100);
+    indexedKeys.forEach(([key, locations]) => {
+      report += `- ${key}\n`;
+      locations.slice(0, 5).forEach(location => {
+        const line = location.line ? `:${location.line}` : '';
+        report += `  - ${location.filePath}${line} (${location.matchType})\n`;
+      });
+      if (locations.length > 5) {
+        report += `  - ... ${locations.length - 5} more locations\n`;
+      }
+    });
+    if (this.keyUsageLocations.size > 100) {
+      report += `... ${this.keyUsageLocations.size - 100} more indexed keys\n`;
+    }
+    report += `\n`;
+
+    if (this.namespaceRecommendations.length > 0) {
+      report += `🧭 Namespace Recommendations\n`;
+      report += `${'='.repeat(50)}\n`;
+      this.namespaceRecommendations.slice(0, 30).forEach(item => {
+        report += `- ${item.filePath}: ${item.message}\n`;
+      });
+      if (this.namespaceRecommendations.length > 30) {
+        report += `... ${this.namespaceRecommendations.length - 30} more recommendations\n`;
+      }
+      report += `\n`;
+    }
+
+    if (this.unresolvedDynamicReferences.length > 0) {
+      report += `🧩 Unresolved Dynamic Key Expressions\n`;
+      report += `${'='.repeat(50)}\n`;
+      report += `These calls could not be resolved to exact keys without executing code. Review them manually or prefer bounded literal maps/arrays for analyzable dynamic keys.\n\n`;
+      this.unresolvedDynamicReferences.slice(0, 50).forEach(item => {
+        const prefix = item.prefix ? ` prefix: ${item.prefix}` : ' no static prefix';
+        report += `- ${item.filePath}:${item.line} ${item.expression} (${prefix})\n`;
+      });
+      if (this.unresolvedDynamicReferences.length > 50) {
+        report += `... ${this.unresolvedDynamicReferences.length - 50} more unresolved expressions\n`;
+      }
+      report += `\n`;
+    }
+
+    if (this.hardcodedTextCandidates.length > 0) {
+      report += `📝 Hardcoded Text Candidates\n`;
+      report += `${'='.repeat(50)}\n`;
+      report += `Inline user-facing text that may be moved into locale files.\n\n`;
+      this.hardcodedTextCandidates.slice(0, 50).forEach(item => {
+        const existing = item.existingKey ? ` existing key: ${item.existingKey}` : ` suggested key: ${item.suggestedKey}`;
+        report += `- ${item.filePath}:${item.line} "${item.text}" (${existing})\n`;
+      });
+      if (this.hardcodedTextCandidates.length > 50) {
+        report += `... ${this.hardcodedTextCandidates.length - 50} more candidates\n`;
+      }
+      report += `\n`;
     }
 
     // Unused keys with complexity
@@ -1318,31 +1483,25 @@ class UsageService {
         });
       }
 
-      // Ensure sourceDir points to source code, not locales
-      if (!args.sourceDir && this.config.sourceDir === this.config.i18nDir) {
-        // Default to common source directories if not explicitly provided
-        const possibleSourceDirs = ['src', 'lib', 'app', 'source'];
-
-        const projectRoot = this.config.projectRoot || '.';
-
-        for (const dir of possibleSourceDirs) {
-          const testPath = path.resolve(projectRoot, dir);
-          if (SecurityUtils.safeExistsSync(testPath)) {
-            this.config.sourceDir = testPath;
-            this.sourceDir = testPath;
-            break;
-          }
-        }
-
-        // If no common source directory found, use current directory
-        if (this.config.sourceDir === this.config.i18nDir) {
-          this.config.sourceDir = projectRoot;
-          this.sourceDir = projectRoot;
-        }
+      const usageSource = resolveUsageSourceDir({
+        sourceDir: this.sourceDir || this.config.sourceDir,
+        i18nDir: this.i18nDir || this.config.i18nDir,
+        projectRoot: this.config.projectRoot || process.cwd(),
+        explicitSourceDir: Boolean(args.sourceDir),
+      });
+      if (usageSource.reason) {
+        console.warn(t('usage.sourceEqualsI18nWarn', { reason: usageSource.reason }) || `Warning: ${usageSource.reason}`);
+      }
+      this.sourceDir = usageSource.sourceDir;
+      this.config.sourceDir = usageSource.sourceDir;
+      if (this.sourceDir) {
+        await configManager.updateConfig({
+          sourceDir: configManager.toRelative(this.sourceDir)
+        });
       }
 
       // 🚧 prevent scanning locales as source
-      if (path.resolve(this.sourceDir) === path.resolve(this.i18nDir)) {
+      if (this.sourceDir && !args.sourceDir && path.resolve(this.sourceDir) === path.resolve(this.i18nDir)) {
         const fallback = path.resolve(this.config.projectRoot || '.', 'src');
         console.warn(t('usage.sourceEqualsI18nWarn') ||
           `⚠️ sourceDir equals i18nDir (${this.sourceDir}). Falling back to ${fallback} for source scanning.`);
@@ -1358,14 +1517,11 @@ class UsageService {
         });
       }
 
-      console.log(t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir }));
+      console.log(t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir || t('usage.noSourceDirectoryConfigured') || '(none)' }));
       console.log(t('usage.detectedI18nDirectory', { i18nDir: this.i18nDir }));
 
       // Load available translation keys first
       await this.loadAvailableKeys();
-
-      // NEW: Detect framework patterns before analysis
-      await this.detectFrameworkPatterns();
 
       // Perform usage analysis with enhanced features
       await this.analyzeUsage();
@@ -1505,6 +1661,9 @@ Analysis Features (v1.8.3):
   • Advanced translation completeness scoring
   • Performance metrics and optimization tracking
   • Key complexity analysis
+  • Known-key literal matching with source file locations
+  • Namespace/file naming recommendations (for example app/shop -> shop.json)
+  • Hardcoded user-facing text candidates with suggested translation keys
   • Security-enhanced path validation
   • Detailed reporting with validation errors
 `);
