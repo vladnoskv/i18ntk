@@ -44,7 +44,7 @@ Requirements:
 ## What's New in 4.3.2
 
 - **DOCS**: README, API docs, and migration guidance now reflect the current 4.3.2 package version.
-- **RELEASE**: 4.3.0 is marked for npm deprecation because its unusable; install < 4.30 or 4.3.1 or newer.
+- **RELEASE**: 4.3.0 is marked for npm deprecation because its npm tarball is unavailable; install 4.3.1 or newer.
 
 ## What's New in 4.3.1
 
