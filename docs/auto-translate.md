@@ -1,4 +1,4 @@
-# Auto Translate Guide (v4.3.1)
+# Auto Translate Guide (v4.3.2)
 
 Auto Translate converts source JSON locale files into target-language JSON files.
 It is available from the management menu and as the standalone `i18ntk-translate` CLI.

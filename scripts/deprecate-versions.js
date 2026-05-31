@@ -11,7 +11,7 @@
  * - Comprehensive reporting and error handling
  */
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const path = require('path');
 const SecurityUtils = require('../utils/security');
 
@@ -32,10 +32,23 @@ if (!packageJson) {
   process.exit(1);
 }
 
-const deprecationMessage = '⚠️  DEPRECATED: This version contains security vulnerabilities and missing features. Please upgrade to i18ntk@1.10.0 for: 🔒 Zero shell access security, 🚀 97% performance improvement, 🐍 Python framework support, and 🛡️ PIN protection. Run: npm install i18ntk@latest';
+const defaultDeprecationMessage = 'This i18ntk version is deprecated. Upgrade to i18ntk@latest.';
 
 // Default deprecation list from package.json
-const defaultVersionsToDeprecate = packageJson.versionInfo.deprecations;
+const defaultVersionsToDeprecate = Array.isArray(packageJson.versionInfo?.deprecations)
+  ? packageJson.versionInfo.deprecations
+  : [];
+
+function npmCommand() {
+  return /^win/.test(process.platform) ? 'npm.cmd' : 'npm';
+}
+
+function runNpm(args, options = {}) {
+  return execFileSync(npmCommand(), args, {
+    ...options,
+    shell: /^win/.test(process.platform)
+  });
+}
 
 // Load admin configuration if available
 function loadAdminConfig() {
@@ -65,10 +78,17 @@ function getVersionsToDeprecate() {
   return defaultVersionsToDeprecate;
 }
 
+function getDeprecationMessage() {
+  const adminConfig = loadAdminConfig();
+  return adminConfig?.customMessage
+    || packageJson.versionInfo?.deprecationMessage
+    || defaultDeprecationMessage;
+}
+
 // Check if a version is already deprecated
 function isVersionDeprecated(version) {
   try {
-    const output = execSync(`npm view i18ntk@${version} --json`, { encoding: 'utf8' });
+    const output = runNpm(['view', `i18ntk@${version}`, '--json'], { encoding: 'utf8' });
     const versionInfo = JSON.parse(output);
     return versionInfo.deprecated !== undefined;
   } catch (error) {
@@ -80,7 +100,7 @@ function isVersionDeprecated(version) {
 // Get all published versions
 function getPublishedVersions() {
   try {
-    const output = execSync('npm view i18ntk versions --json', { encoding: 'utf8' });
+    const output = runNpm(['view', 'i18ntk', 'versions', '--json'], { encoding: 'utf8' });
     return JSON.parse(output);
   } catch (error) {
     console.error('❌ Failed to get published versions:', error.message);
@@ -128,7 +148,7 @@ function getDeprecationStatus() {
 function deprecateVersion(version, message) {
   try {
     console.log(`🔄 Deprecating ${version}...`);
-    execSync(`npm deprecate i18ntk@${version} "${message}"`, { stdio: 'inherit' });
+    runNpm(['deprecate', `i18ntk@${version}`, message], { stdio: 'inherit' });
     console.log(`✅ Successfully deprecated ${version}`);
     return true;
   } catch (error) {
@@ -155,6 +175,7 @@ function expandVersionRange(versionRange) {
 async function deprecateVersions() {
   const status = getDeprecationStatus();
   const versionsToDeprecate = getVersionsToDeprecate();
+  const deprecationMessage = getDeprecationMessage();
   const currentVersion = packageJson.version;
 
   console.log('\n📊 Deprecation Status Summary:');

@@ -1,4 +1,4 @@
-# Getting Started with i18ntk (v4.3.1)
+# Getting Started with i18ntk (v4.3.2)
 
 This guide covers the shortest path from install to a working locale project.
 
@@ -139,4 +139,4 @@ i18ntk --command=translate
 - Read [Auto Translate](./auto-translate.md) for provider, placeholder, and protection behavior.
 - Read [Configuration](./api/CONFIGURATION.md) for config fields and precedence.
 - Read [Scanner Guide](./scanner-guide.md) for scan and key discovery workflows.
-- Read [Migration Guide v4.3.1](./migration-guide-v4.3.1.md) before upgrading older projects.
+- Read [Migration Guide v4.3.2](./migration-guide-v4.3.2.md) before upgrading older projects.

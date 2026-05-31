@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.2] - 2026-05-31
+
+### Changed
+- Documentation, README badges, and migration guidance now reference the current 4.3.2 release.
+- Release metadata now marks 4.3.0 for npm deprecation because its npm tarball is unavailable.
+
 ## [4.3.1] - 2026-05-31
 
 ### Fixed

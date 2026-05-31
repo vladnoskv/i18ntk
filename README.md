@@ -1,4 +1,4 @@
-# i18ntk v4.3.1
+# i18ntk v4.3.2
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,13 +9,18 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.1)](https://socket.dev/npm/package/i18ntk/overview/4.3.1)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.2)](https://socket.dev/npm/package/i18ntk/overview/4.3.2)
 ## VS Code Extensions
 
-[![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/)
-[![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/)
+[![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
+[![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
 
-Official VS Code extensions powered by i18ntk.
+Official VS Code extensions powered by i18ntk:
+
+- **i18ntk Workbench**: setup, scanning, validation, usage checks, reports, key management, and CLI-backed Auto Translate inside VS Code.
+- **i18ntk Lens**: lightweight inline hovers, CodeLens, missing-key warnings, unused-key diagnostics, key navigation, and settings.
+
+Install both when you want the full sidebar plus inline editor feedback.
 
 ## Install
 
@@ -36,6 +41,11 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
+## What's New in 4.3.2
+
+- **DOCS**: README, API docs, and migration guidance now reflect the current 4.3.2 package version.
+- **RELEASE**: 4.3.0 is marked for npm deprecation because its unusable; install < 4.30 or 4.3.1 or newer.
+
 ## What's New in 4.3.1
 
 - **FIX**: Published tarball now includes `utils/english-placeholder-checker.js`, resolving `MODULE_NOT_FOUND` at startup for `i18ntk-fixer --check-placeholders` and manager option 7.
@@ -52,7 +62,7 @@ Requirements:
 - **FIX PLACEHOLDERS**: Menu option 7 now runs an English source placeholder audit and reports how many `[LANG] ...` values remain in English locale files. A clean project reports `0`.
 - **SIZING/USAGE**: Usage analysis no longer writes its inferred app source fallback back into the shared locale config, so running usage before sizing no longer makes sizing analyze the wrong directory.
 - **VALIDATION REPORTS**: Validation summary files now include warning and error details, including English-content warning payloads, instead of only totals.
-- **DOCS**: Versioned docs and migration guidance now reflect the current 4.3.1 command surface.
+- **DOCS**: Versioned docs and migration guidance now reflect the current 4.3.0 command surface.
 
 ## What's New in 4.1.0
 
@@ -518,7 +528,7 @@ Example:
 
 ```json
 {
-  "version": "4.3.1",
+  "version": "4.3.2",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -580,7 +590,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
-- [Migration Guide v4.3.1](./docs/migration-guide-v4.3.1.md)
+- [Migration Guide v4.3.2](./docs/migration-guide-v4.3.2.md)
 
 ## Security
 
