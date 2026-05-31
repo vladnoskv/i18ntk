@@ -365,7 +365,7 @@ function isLanguagePrefixedEnglish(value, args = {}) {
   const targetLanguage = normalizeLanguageCode(args.targetLang);
   if (targetLanguage && prefix.language !== targetLanguage) return false;
 
-  return hasLatinWordContent(prefix.text, 2) || isLikelyEnglish(prefix.text, args);
+  return hasLatinWordContent(prefix.text, 1) || isLikelyEnglish(prefix.text, args);
 }
 
 function isBrokenTranslationValue(value) {

@@ -1,6 +1,6 @@
-# i18ntk Documentation (v4.2.1)
+# i18ntk Documentation (v4.2.2)
 
-This documentation set covers the current `i18ntk` CLI, runtime API, configuration model, Auto Translate flow, and migration notes for `4.2.1`.
+This documentation set covers the current `i18ntk` CLI, runtime API, configuration model, Auto Translate flow, and migration notes for `4.2.2`.
 
 ## Start Here
 
@@ -11,7 +11,7 @@ This documentation set covers the current `i18ntk` CLI, runtime API, configurati
 - [Auto Translate Guide](./auto-translate.md)
 - [Scanner Guide](./scanner-guide.md)
 - [Environment Variables](./environment-variables.md)
-- [Migration Guide v4.2.1](./migration-guide-v4.2.1.md)
+- [Migration Guide v4.2.2](./migration-guide-v4.2.2.md)
 
 ## Command Model
 

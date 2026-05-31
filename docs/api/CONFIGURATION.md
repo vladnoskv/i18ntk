@@ -1,4 +1,4 @@
-# i18ntk Configuration Guide (v4.2.1)
+# i18ntk Configuration Guide (v4.2.2)
 
 ## Overview
 
@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "4.2.1",
+  "version": "4.2.2",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",
@@ -66,7 +66,7 @@ Example:
 - `i18nDir`: locale directory used by translation analysis, validation, completion, and usage comparison.
 - `outputDir`: report output directory.
 - `sourceLanguage`: base language for completeness checks and Auto Translate source values.
-- `defaultLanguages`: target languages used by init, completion, and manager Auto Translate. In `4.2.1`, the default set includes `en`, `de`, `es`, `fr`, and `ru`.
+- `defaultLanguages`: target languages used by init, completion, and manager Auto Translate. In `4.2.2`, the default set includes `en`, `de`, `es`, `fr`, and `ru`.
 - `uiLanguage`: CLI message language.
 - `reports.format`: report output format for init and analysis reports. Supported values are `markdown`, `json`, and `text`; default is `markdown`.
 - `setup.completed`: setup marker used by startup checks.
@@ -137,7 +137,7 @@ The manager route `i18ntk --command=backup` is disabled in current builds.
 
 Init and analysis reports use `reports.format`.
 
-- `markdown`: readable `.md` reports, default in `4.2.1`
+- `markdown`: readable `.md` reports, default in `4.2.2`
 - `json`: pretty-printed JSON
 - `text`: plain text
 

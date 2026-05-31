@@ -1,4 +1,4 @@
-# Auto Translate Guide (v4.2.1)
+# Auto Translate Guide (v4.2.2)
 
 Auto Translate converts source JSON locale files into target-language JSON files.
 It is available from the management menu and as the standalone `i18ntk-translate` CLI.
@@ -29,7 +29,7 @@ If the selected source directory contains JSON files directly, Auto Translate us
 Before writing files, the manager runs a dry-run preview for the first target language.
 After confirmation, it translates each requested target language and writes matching files under sibling target-language directories. By default, placeholder-bearing strings are translated in preserve mode: only the text around placeholders is sent for translation, then the original placeholders are reinserted.
 
-Auto Translate keeps existing translated target values by default. If a target JSON file already exists, only keys that are missing, empty, marked as untranslated, still identical to the source, likely still English, visibly corrupt, or still prefixed with the target language code such as `[AR] What We Offer` are sent to the provider. This avoids paying the network and time cost for strings that are already translated while still repairing placeholder-style leftovers from earlier runs.
+Auto Translate keeps existing translated target values by default. If a target JSON file already exists, only keys that are missing, empty, marked as untranslated, still identical to the source, likely still English, visibly corrupt, or still prefixed with the target language code such as `[AR] What We Offer`, `[AR] Email`, or `[AR] Password` are sent to the provider. This avoids paying the network and time cost for strings that are already translated while still repairing placeholder-style leftovers from earlier runs.
 
 Before writing an output file, Auto Translate runs a final leftover check. If a value still looks like a target-code placeholder, a source-language copy, an untranslated marker, or broken output, i18ntk retries that value once from the source text. If any leftovers remain after the retry, the command prints a warning, includes the values in the post-translation report, recommends rerunning Auto Translate, and exits with validation failure instead of claiming a clean completion.
 
@@ -211,7 +211,7 @@ Provider URL safety:
 - Source JSON structure, nested objects, arrays, null values, and non-string values are preserved.
 - The generated target files are intended for immediate review and use.
 - Existing translated target values are preserved unless `--translate-all` is used.
-- Existing target values are considered needing translation when they are missing, empty, untranslated markers, identical to the source, likely still English, visibly corrupt from encoding damage such as `?????`, replacement characters, or common mojibake, or prefixed with the target language code and English text, such as `[AR] What We Offer`.
+- Existing target values are considered needing translation when they are missing, empty, untranslated markers, identical to the source, likely still English, visibly corrupt from encoding damage such as `?????`, replacement characters, or common mojibake, or prefixed with the target language code and English text, such as `[AR] What We Offer`, `[AR] Email`, or `[AR] Password`.
 - Auto Translate only reports clean completion after the final leftover check finds no placeholder-prefixed or source-copy untranslated values. Remaining leftovers produce warnings and a validation-failed exit code so automation can rerun or review them.
 - Progress output is stage-aware: normal keys are shown as `Translating strings`, placeholder-preserve work is shown as `Translating placeholder-safe text segments`, and updates include the active key path when available.
 - Placeholder-bearing strings skipped by policy still need manual translation.

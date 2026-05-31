@@ -1,13 +1,13 @@
-# Migration Guide v4.2.1
+# Migration Guide v4.2.2
 
 This guide covers the current upgrade path for projects using older `i18ntk` versions.
 
 ## Recommended Upgrade
 
 ```bash
-npm install -g i18ntk@4.2.1
+npm install -g i18ntk@4.2.2
 # or, for a project-local install:
-npm install --save-dev i18ntk@4.2.1
+npm install --save-dev i18ntk@4.2.2
 ```
 
 Verify the installed version:
@@ -22,7 +22,7 @@ Review `.i18ntk-config` and update these fields when missing:
 
 ```json
 {
-  "version": "4.2.1",
+  "version": "4.2.2",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -55,7 +55,7 @@ Notes:
 - `defaultLanguages` now includes `en` by default so setup remains consistent when the UI language is not English.
 - `reports.format` controls init and analysis report output. The default is `markdown`; `json` is pretty-printed.
 - `autoTranslate.onlyMissingOrEnglish` keeps translated target values and only translates missing, marker, source-copy, or likely-English values. Use `--translate-all` for full re-translation.
-- Auto Translate now treats target-code placeholder leftovers such as `[AR] What We Offer` as needing translation, retries any remaining leftovers before writing output, and warns with report details if the provider still returns untranslated text.
+- Auto Translate now treats target-code placeholder leftovers such as `[AR] What We Offer`, `[AR] Email`, and `[AR] Password` as needing translation, retries any remaining leftovers before writing output, and warns with report details if the provider still returns untranslated text.
 
 ## Command Changes To Check
 
@@ -134,7 +134,7 @@ JSON reports are now pretty-printed instead of a one-line JSON string containing
 
 ## Usage Analysis Migration
 
-If older runs showed very high missing-key counts when `sourceDir` and `i18nDir` both pointed at `./locales`, rerun usage analysis on `4.2.1`:
+If older runs showed very high missing-key counts when `sourceDir` and `i18nDir` both pointed at `./locales`, rerun usage analysis on `4.2.2`:
 
 ```bash
 i18ntk-usage --source-dir ./src --i18n-dir ./locales
@@ -148,7 +148,7 @@ Validation output now prints one path block followed by the validator summary. T
 
 ## Security Notes
 
-Upgrade to `4.2.1` or newer for:
+Upgrade to `4.2.2` or newer for:
 
 - runtime language-name validation before locale file resolution
 - stricter backup restore entry validation

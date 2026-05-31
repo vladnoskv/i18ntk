@@ -190,7 +190,64 @@ test('auto translate retranslates uppercase language-code placeholder leftovers'
   }
 });
 
-test('auto translate final check retries leftover language-code placeholders before writing', async () => {
+test('auto translate retranslates single-word uppercase language-code placeholder leftovers', async () => {
+  const { processFile } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'auth.json');
+  const targetDir = path.join(project, 'locales', 'ar');
+  const targetFile = path.join(targetDir, 'auth.json');
+  const calls = [];
+
+  writeJson(sourceFile, {
+    auth: {
+      login: {
+        fixture: {
+          email_label: 'Email',
+          password_label: 'Password',
+          sign_in: 'Sign in',
+        },
+      },
+    },
+  });
+  writeJson(targetFile, {
+    auth: {
+      login: {
+        fixture: {
+          email_label: '[AR] Email',
+          password_label: '[AR] Password',
+          sign_in: 'تسجيل الدخول',
+        },
+      },
+    },
+  });
+
+  try {
+    process.chdir(project);
+    const result = await processFile(sourceFile, 'ar', defaultTranslateArgs({
+      outputDir: targetDir,
+      translateFn: async (text) => {
+        calls.push(text);
+        return text === 'Email' ? 'البريد الإلكتروني' : 'كلمة المرور';
+      },
+      englishThresholdPercent: 10,
+    }));
+
+    const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+    assert.deepEqual(calls.sort(), ['Email', 'Password'].sort());
+    assert.equal(output.auth.login.fixture.email_label, 'البريد الإلكتروني');
+    assert.equal(output.auth.login.fixture.password_label, 'كلمة المرور');
+    assert.equal(output.auth.login.fixture.sign_in, 'تسجيل الدخول');
+    assert.equal(result.translated, 2);
+    assert.equal(result.skippedExisting, 1);
+    assert.deepEqual(result.residualUntranslated, []);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('auto translate final check retries leftover single-word language-code placeholders before writing', async () => {
   const { processFile } = require('../main/i18ntk-translate');
   const cwd = process.cwd();
   const project = makeTempProject();
@@ -200,7 +257,7 @@ test('auto translate final check retries leftover language-code placeholders bef
   let attempts = 0;
 
   writeJson(sourceFile, {
-    offer: 'What We Offer',
+    email: 'Email',
   });
 
   try {
@@ -209,13 +266,13 @@ test('auto translate final check retries leftover language-code placeholders bef
       outputDir: targetDir,
       translateFn: async () => {
         attempts += 1;
-        return attempts === 1 ? '[AR] What We Offer' : 'ما نقدمه';
+        return attempts === 1 ? '[AR] Email' : 'البريد الإلكتروني';
       },
       englishThresholdPercent: 10,
     }));
 
     const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
-    assert.equal(output.offer, 'ما نقدمه');
+    assert.equal(output.email, 'البريد الإلكتروني');
     assert.equal(attempts, 2);
     assert.equal(result.translated, 1);
     assert.equal(result.finalCheckRetried, 1);

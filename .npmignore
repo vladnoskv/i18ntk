@@ -131,3 +131,8 @@ test_env_*/
 !README.md
 !CHANGELOG.md
 !package.json
+
+# IgnoreKit
+# Added from VS Code Explorer
+/DEVUPDATE.md
+# End IgnoreKit
