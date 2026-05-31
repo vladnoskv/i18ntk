@@ -10,6 +10,12 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.1)](https://socket.dev/npm/package/i18ntk/overview/4.3.1)
+## VS Code Extensions
+
+[![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/)
+[![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/)
+
+Official VS Code extensions powered by i18ntk.
 
 ## Install
 
