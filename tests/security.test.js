@@ -505,6 +505,78 @@ describe('Security Tests', () => {
   });
 
   describe('Fixer Command', () => {
+    test('should report language-code placeholders left in English locale files', () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-english-placeholder-'));
+      fs.mkdirSync(path.join(dir, 'en'), { recursive: true });
+
+      fs.writeFileSync(path.join(dir, 'en', 'auth.json'), JSON.stringify({
+        auth: {
+          email_label: '[AR] Email',
+          password_label: '[AR] Password',
+          title: 'Login'
+        }
+      }, null, 2));
+      fs.writeFileSync(path.join(dir, 'en', 'real.json'), JSON.stringify({
+        real: {
+          hero: {
+            kicker: '[SV] Real-Money Markets',
+            title: 'Crypto prediction markets'
+          }
+        }
+      }, null, 2));
+
+      try {
+        const command = new FixerCommand({
+          sourceDir: dir,
+          sourceLanguage: 'en',
+          backup: { enabled: false }
+        });
+        command.sourceDir = dir;
+
+        const result = command.checkEnglishPlaceholders({ print: false });
+
+        assert.strictEqual(result.placeholderCount, 3);
+        assert.strictEqual(result.success, false);
+        assert.deepStrictEqual(
+          result.placeholders.map(item => `${item.file}:${item.key}`),
+          [
+            'auth.json:auth.email_label',
+            'auth.json:auth.password_label',
+            'real.json:real.hero.kicker'
+          ]
+        );
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    test('should pass English placeholder check when source files are clean', () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-english-placeholder-clean-'));
+      fs.mkdirSync(path.join(dir, 'en'), { recursive: true });
+      fs.writeFileSync(path.join(dir, 'en', 'common.json'), JSON.stringify({
+        email_label: 'Email',
+        interpolation: 'Hello {name}'
+      }, null, 2));
+
+      try {
+        const command = new FixerCommand({
+          sourceDir: dir,
+          sourceLanguage: 'en',
+          backup: { enabled: false }
+        });
+        command.sourceDir = dir;
+
+        const result = command.checkEnglishPlaceholders({ print: false });
+
+        assert.strictEqual(result.success, true);
+        assert.strictEqual(result.placeholderCount, 0);
+        assert.strictEqual(result.fileCount, 1);
+        assert.strictEqual(result.keyCount, 2);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
     test('should write applied fixes to the target translation file', async () => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-fixer-'));
       fs.mkdirSync(path.join(dir, 'en'), { recursive: true });

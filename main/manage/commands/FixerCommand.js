@@ -15,6 +15,7 @@ const { loadTranslations, t } = require('../../../utils/i18n-helper');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../../../utils/config-helper');
 const JsonOutput = require('../../../utils/json-output');
 const SetupEnforcer = require('../../../utils/setup-enforcer');
+const { scanEnglishPlaceholders } = require('../../../utils/english-placeholder-checker');
 
 class FixerCommand {
     constructor(config = {}, ui = null) {
@@ -63,6 +64,7 @@ class FixerCommand {
                     'source-dir': 'Source directory to scan (default: ./locales)',
                     'languages': 'Comma separated list of languages to fix',
                     'markers': 'Comma separated markers to treat as untranslated',
+                    'check-placeholders': 'Only check English locale files for [LANG] placeholder leftovers',
                     'no-backup': 'Skip automatic backup creation',
                     'dry-run': 'Show what would be fixed without making changes',
                     'force': 'Force fixes without confirmation',
@@ -108,6 +110,8 @@ class FixerCommand {
                         parsed.languages = sanitizedValue.split(',').map(l => l.trim());
                     } else if (sanitizedKey === 'markers') {
                         parsed.markers = sanitizedValue.split(',').map(m => m.trim());
+                    } else if (sanitizedKey === 'check-placeholders') {
+                        parsed.checkPlaceholders = true;
                     } else if (sanitizedKey === 'no-backup') {
                         parsed.noBackup = true;
                     } else if (sanitizedKey === 'dry-run') {
@@ -520,6 +524,50 @@ class FixerCommand {
         return fixes;
     }
 
+    checkEnglishPlaceholders(options = {}) {
+        const result = scanEnglishPlaceholders({
+            sourceDir: this.sourceDir || this.config.sourceDir,
+            sourceLanguage: this.config.sourceLanguage || 'en'
+        });
+
+        if (options.print === false) {
+            return result;
+        }
+
+        console.log('\nEnglish placeholder check');
+        console.log('-'.repeat(50));
+        console.log(`Source directory: ${result.sourceDir}`);
+        console.log(`Source language: ${result.sourceLanguage}`);
+        console.log(`Files scanned: ${result.fileCount}`);
+        console.log(`Keys scanned: ${result.keyCount}`);
+        console.log(`Language-code placeholders found: ${result.placeholderCount}`);
+
+        if (result.errors.length > 0) {
+            console.log('\nParse errors:');
+            for (const item of result.errors.slice(0, 20)) {
+                console.log(`  ${item.file}: ${item.error}`);
+            }
+            if (result.errors.length > 20) {
+                console.log(`  ... and ${result.errors.length - 20} more parse errors.`);
+            }
+        }
+
+        if (result.placeholders.length > 0) {
+            console.log('\nWARNING: English locale files still contain language-code placeholders.');
+            for (const item of result.placeholders.slice(0, 20)) {
+                console.log(`  ${item.file} :: ${item.key} = ${JSON.stringify(item.value)}`);
+            }
+            if (result.placeholders.length > 20) {
+                console.log(`  ... and ${result.placeholders.length - 20} more placeholders.`);
+            }
+            console.log('Recommendation: translate or replace these English source values before fixing target locales.');
+        } else if (result.errors.length === 0) {
+            console.log('OK: English placeholder count is 0.');
+        }
+
+        return result;
+    }
+
     // Main fixing process
     async fix() {
         try {
@@ -529,6 +577,42 @@ class FixerCommand {
             // Set options from args
             this.dryRun = args.dryRun || false;
             this.force = args.force || false;
+
+            const placeholderCheck = this.checkEnglishPlaceholders({ print: !args.json });
+            if (args.checkPlaceholders) {
+                if (args.json) {
+                    jsonOutput.setStatus(placeholderCheck.success ? 'ok' : 'error');
+                    jsonOutput.setStats({
+                        files: placeholderCheck.fileCount,
+                        keys: placeholderCheck.keyCount,
+                        placeholders: placeholderCheck.placeholderCount,
+                        parseErrors: placeholderCheck.errors.length
+                    });
+                    jsonOutput.data.message = 'English placeholder check completed';
+                    jsonOutput.data.placeholders = placeholderCheck.placeholders;
+                    jsonOutput.data.errors = placeholderCheck.errors;
+                    console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
+                }
+                return placeholderCheck;
+            }
+
+            if (!placeholderCheck.success) {
+                const error = `English locale placeholder check failed: ${placeholderCheck.placeholderCount} placeholder(s), ${placeholderCheck.errors.length} parse error(s).`;
+                if (args.json) {
+                    jsonOutput.setStatus('error');
+                    jsonOutput.setStats({
+                        placeholders: placeholderCheck.placeholderCount,
+                        parseErrors: placeholderCheck.errors.length
+                    });
+                    jsonOutput.data.message = error;
+                    jsonOutput.data.placeholders = placeholderCheck.placeholders;
+                    jsonOutput.data.errors = placeholderCheck.errors;
+                    console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
+                    return { ...placeholderCheck, success: false, error };
+                }
+                console.log(`\n${error}`);
+                return { ...placeholderCheck, success: false, error };
+            }
 
             const languages = this.getAvailableLanguages();
 
@@ -546,7 +630,8 @@ class FixerCommand {
             if (languages.length === 0) {
                 const error = t('fixer.noLanguages') || 'No target languages found.';
                 if (args.json) {
-                    jsonOutput.setStatus('error', error);
+                    jsonOutput.setStatus('error');
+                    jsonOutput.data.message = error;
                     console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
                     return;
                 }
@@ -586,14 +671,15 @@ class FixerCommand {
 
             // Prepare JSON output
             if (args.json) {
-                jsonOutput.setStatus(totalFixed > 0 ? 'ok' : 'info', 'Fixer completed');
-                jsonOutput.addStats({
+                jsonOutput.setStatus(totalFixed > 0 ? 'ok' : 'info');
+                jsonOutput.setStats({
                     issues: totalIssues,
                     fixed: totalFixed,
                     languages: languages.length
                 });
+                jsonOutput.data.message = 'Fixer completed';
 
-                console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+                console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
                 return { success: true, totalIssues, totalFixed, results };
             }
 
@@ -662,8 +748,11 @@ class FixerCommand {
     async execute(options = {}) {
         try {
             await this.initialize();
-            await this.run(options);
-            return { success: true, command: 'fix' };
+            const result = await this.run(options);
+            if (result && result.success === false) {
+                return result;
+            }
+            return { success: true, command: 'fix', result };
         } catch (error) {
             console.error(`Fixer command failed: ${error.message}`);
             throw error;

@@ -227,6 +227,35 @@ test('validation summary report includes warning details', () => {
   }
 });
 
+test('command router does not print operation success when a command returns failure', async () => {
+  const CommandRouter = require('../main/manage/commands/CommandRouter');
+  const router = new CommandRouter({}, null, null);
+  const originalLog = console.log;
+  const originalError = console.error;
+  const lines = [];
+
+  try {
+    console.log = (...args) => lines.push(args.join(' '));
+    console.error = (...args) => lines.push(args.join(' '));
+    router.setRuntimeDependencies(async () => '', false, null);
+    router.commandHandlers.translate = {
+      execute: async () => ({
+        success: false,
+        error: 'Auto Translate left untranslated placeholder values',
+      }),
+    };
+
+    await router.executeCommand('translate', { fromMenu: true });
+
+    const output = lines.join('\n');
+    assert.match(output, /Auto Translate left untranslated placeholder values/);
+    assert.doesNotMatch(output, /Operation completed successfully|operations\.completed/);
+  } finally {
+    console.log = originalLog;
+    console.error = originalError;
+  }
+});
+
 test('main menu layout uses readable grouped spacing and no beta label', () => {
   const { buildMainMenuLines } = require('../utils/menu-layout');
   const locale = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'ui-locales', 'en.json'), 'utf8'));

@@ -5,10 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.2.2] - 2026-05-31
+## [4.3.0] - 2026-05-31
 
 ### Fixed
 - Auto Translate now treats single-word uppercase target-language placeholders such as `[AR] Email` and `[AR] Password` as untranslated target values, matching the existing multi-word `[AR] What We Offer` detection.
+- Auto Translate now treats bracketed target-language placeholders case-insensitively, so `[zh] Email` and `[TR] Password` are both retried for the matching target language.
+- Managed Auto Translate now checks every selected source file for a target language before reporting leftover failures, instead of stopping after the first failed file.
+- Auto Translate no longer fails a run when a provider legitimately returns a short all-caps acronym or code unchanged, such as `XP`.
+- Manager option 7 and `i18ntk-fixer --check-placeholders` now run an English source placeholder audit, reporting any `[LANG] ...` values left in English locale files; a clean project reports `0` placeholders.
+- The management command router no longer prints a generic operation-success message when a command returns `{ success: false }`.
 
 ## [4.2.1] - 2026-05-31
 

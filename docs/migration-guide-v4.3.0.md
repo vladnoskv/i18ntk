@@ -1,13 +1,13 @@
-# Migration Guide v4.2.2
+# Migration Guide v4.3.0
 
 This guide covers the current upgrade path for projects using older `i18ntk` versions.
 
 ## Recommended Upgrade
 
 ```bash
-npm install -g i18ntk@4.2.2
+npm install -g i18ntk@4.3.0
 # or, for a project-local install:
-npm install --save-dev i18ntk@4.2.2
+npm install --save-dev i18ntk@4.3.0
 ```
 
 Verify the installed version:
@@ -22,7 +22,7 @@ Review `.i18ntk-config` and update these fields when missing:
 
 ```json
 {
-  "version": "4.2.2",
+  "version": "4.3.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -55,7 +55,10 @@ Notes:
 - `defaultLanguages` now includes `en` by default so setup remains consistent when the UI language is not English.
 - `reports.format` controls init and analysis report output. The default is `markdown`; `json` is pretty-printed.
 - `autoTranslate.onlyMissingOrEnglish` keeps translated target values and only translates missing, marker, source-copy, or likely-English values. Use `--translate-all` for full re-translation.
-- Auto Translate now treats target-code placeholder leftovers such as `[AR] What We Offer`, `[AR] Email`, and `[AR] Password` as needing translation, retries any remaining leftovers before writing output, and warns with report details if the provider still returns untranslated text.
+- Auto Translate now treats target-code placeholder leftovers such as `[AR] What We Offer`, `[AR] Email`, `[zh] Email`, and `[TR] Password` as needing translation, retries any remaining leftovers before writing output, and warns with report details if the provider still returns untranslated text.
+- Managed Auto Translate now checks every selected source file for a target language before reporting leftover failures.
+- Short all-caps acronyms and codes such as `XP` may remain unchanged without failing the final leftover check.
+- Fix Placeholder now audits English source files for `[LANG] ...` leftovers before applying fixes. Use `i18ntk-fixer --check-placeholders` for the check-only mode; a clean source language reports `0` placeholders.
 
 ## Command Changes To Check
 
@@ -79,6 +82,7 @@ Use standalone CLIs for these flows:
 i18ntk-backup create ./locales
 i18ntk-backup create ./locales --incremental
 i18ntk-fixer --help
+i18ntk-fixer --check-placeholders
 i18ntk-doctor
 i18ntk-translate locales/en/common.json de --no-confirm
 ```
@@ -134,7 +138,7 @@ JSON reports are now pretty-printed instead of a one-line JSON string containing
 
 ## Usage Analysis Migration
 
-If older runs showed very high missing-key counts when `sourceDir` and `i18nDir` both pointed at `./locales`, rerun usage analysis on `4.2.2`:
+If older runs showed very high missing-key counts when `sourceDir` and `i18nDir` both pointed at `./locales`, rerun usage analysis on `4.3.0`:
 
 ```bash
 i18ntk-usage --source-dir ./src --i18n-dir ./locales
@@ -148,7 +152,7 @@ Validation output now prints one path block followed by the validator summary. T
 
 ## Security Notes
 
-Upgrade to `4.2.2` or newer for:
+Upgrade to `4.3.0` or newer for:
 
 - runtime language-name validation before locale file resolution
 - stricter backup restore entry validation

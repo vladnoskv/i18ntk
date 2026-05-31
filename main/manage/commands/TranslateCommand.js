@@ -488,34 +488,46 @@ class TranslateCommand {
     }
 
     async runTranslate(sourceFiles, targetLang, opts = {}) {
+        const failures = [];
+        for (const src of sourceFiles) {
+            const result = await this.runSingleTranslate(src, targetLang, opts);
+            if (!result || result.success !== true) {
+                failures.push({
+                    src,
+                    error: result?.error || `Translation failed for ${src}`
+                });
+            }
+        }
+
+        if (failures.length > 0) {
+            throw new Error(failures.map(item => item.error).join('; '));
+        }
+    }
+
+    async runSingleTranslate(src, targetLang, opts = {}) {
         const { parseArgs, run } = require('../../i18ntk-translate');
         const settings = this.autoTranslateSettings || this.getAutoTranslateSettings();
 
-        for (const src of sourceFiles) {
-            const args = parseArgs(['node', 'i18ntk-translate', src, targetLang]);
-            args.noConfirm = true;
-            args.sourceLang = this.sourceLang || 'en';
-            args.dryRun = opts.dryRun === true;
-            args.onlyMissingOrEnglish = settings.onlyMissingOrEnglish;
-            args.reportStdout = settings.reportStdout;
-            args.bom = settings.bom;
-            args.concurrency = settings.concurrency;
-            args.batchSize = settings.batchSize;
-            args.progressInterval = settings.progressInterval;
-            args.retryCount = settings.retryCount;
-            args.retryDelay = settings.retryDelay;
-            args.timeout = settings.timeout;
-            args.protectionEnabled = settings.protectionEnabled;
-            args.protectionFile = settings.protectionFile;
-            args.preservePlaceholders = settings.placeholderMode === 'preserve';
-            args.skipPlaceholders = settings.placeholderMode === 'skip';
-            args.sendPlaceholders = settings.placeholderMode === 'send';
+        const args = parseArgs(['node', 'i18ntk-translate', src, targetLang]);
+        args.noConfirm = true;
+        args.sourceLang = this.sourceLang || 'en';
+        args.dryRun = opts.dryRun === true;
+        args.onlyMissingOrEnglish = settings.onlyMissingOrEnglish;
+        args.reportStdout = settings.reportStdout;
+        args.bom = settings.bom;
+        args.concurrency = settings.concurrency;
+        args.batchSize = settings.batchSize;
+        args.progressInterval = settings.progressInterval;
+        args.retryCount = settings.retryCount;
+        args.retryDelay = settings.retryDelay;
+        args.timeout = settings.timeout;
+        args.protectionEnabled = settings.protectionEnabled;
+        args.protectionFile = settings.protectionFile;
+        args.preservePlaceholders = settings.placeholderMode === 'preserve';
+        args.skipPlaceholders = settings.placeholderMode === 'skip';
+        args.sendPlaceholders = settings.placeholderMode === 'send';
 
-            const result = await run(args);
-            if (!result || result.success !== true) {
-                throw new Error(result?.error || `Translation failed for ${src}`);
-            }
-        }
+        return await run(args);
     }
 }
 

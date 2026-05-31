@@ -1,4 +1,4 @@
-# Environment Variables (v4.2.2)
+# Environment Variables (v4.3.0)
 
 i18ntk uses fixed allowlists for environment variables. Core configuration variables are handled by `utils/env-manager.js`; Auto Translate provider variables are read by the translation provider layer.
 

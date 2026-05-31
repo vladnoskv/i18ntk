@@ -1,4 +1,4 @@
-# i18ntk v4.2.2
+# i18ntk v4.3.0
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.2.2)](https://socket.dev/npm/package/i18ntk/overview/4.2.2)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.0)](https://socket.dev/npm/package/i18ntk/overview/4.3.0)
 
 ## Install
 
@@ -30,14 +30,17 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
-## What's New in 4.2.2
+## What's New in 4.3.0
 
-- **AUTO TRANSLATE**: Existing target values like `[AR] What We Offer`, `[AR] Email`, and `[AR] Password` are now treated as untranslated placeholders for the matching target language and are translated from the source text.
+- **AUTO TRANSLATE**: Existing target values like `[AR] What We Offer`, `[AR] Email`, `[zh] Email`, and `[TR] Password` are now treated as untranslated placeholders for the matching target language and are translated from the source text.
 - **AUTO TRANSLATE**: Before writing each output file, Auto Translate now performs a final leftover check and retries any placeholder-prefixed or source-copy values once.
 - **AUTO TRANSLATE**: If leftovers remain after the final retry, the command warns, includes them in the report, recommends rerunning Auto Translate, and exits with validation failure instead of reporting a clean completion.
+- **AUTO TRANSLATE**: Managed Auto Translate now checks every selected source file for a target language before reporting leftovers, so one failed file does not prevent the rest from being audited.
+- **AUTO TRANSLATE**: Short all-caps acronyms and codes such as `XP` are allowed to remain unchanged instead of failing the final leftover check.
+- **FIX PLACEHOLDERS**: Menu option 7 now runs an English source placeholder audit and reports how many `[LANG] ...` values remain in English locale files. A clean project reports `0`.
 - **SIZING/USAGE**: Usage analysis no longer writes its inferred app source fallback back into the shared locale config, so running usage before sizing no longer makes sizing analyze the wrong directory.
 - **VALIDATION REPORTS**: Validation summary files now include warning and error details, including English-content warning payloads, instead of only totals.
-- **DOCS**: Versioned docs and migration guidance now reflect the current 4.2.2 command surface.
+- **DOCS**: Versioned docs and migration guidance now reflect the current 4.3.0 command surface.
 
 ## What's New in 4.1.0
 
@@ -144,7 +147,7 @@ Note: manager route `i18ntk --command=backup` is disabled in current builds. Use
 | `i18ntk --command=translate` / `i18ntk-translate` | Auto-translates locale JSON using configured provider behavior. | Missing, empty, untranslated-marker, source-copy, likely-English, or visibly corrupt target values by default. | Target locale JSON files and translation reports. Existing translated values are kept unless `--translate-all` is used. |
 | `i18ntk --command=sizing` / `i18ntk-sizing` | Estimates translated string length expansion and layout risk. | Text length, expansion ratios, placeholder-bearing strings. | Sizing report. Does not edit locale files. |
 | `i18ntk --command=summary` / `i18ntk-summary` | Shows project translation status. | Configured locales, reports, completeness status. | Console/report output only. |
-| `i18ntk-fixer` | Fixes placeholder and missing-marker issues. | Placeholder corruption, missing translation markers, configured language files. | Locale JSON files when fixes are applied. Use dry-run options where available before bulk edits. |
+| `i18ntk-fixer` | Fixes placeholder and missing-marker issues, and can audit English source files with `--check-placeholders`. | Placeholder corruption, missing translation markers, configured language files, `[LANG] ...` leftovers in English locales. | Locale JSON files when fixes are applied. Use dry-run options where available before bulk edits. |
 | `i18ntk-backup` | Creates, verifies, restores, and cleans locale backups. | Locale JSON files and backup manifests. | Backup archives/manifests, or restored locale files when using restore. |
 
 ## Common Options
@@ -503,7 +506,7 @@ Example:
 
 ```json
 {
-  "version": "4.2.2",
+  "version": "4.3.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -565,7 +568,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
-- [Migration Guide v4.2.2](./docs/migration-guide-v4.2.2.md)
+- [Migration Guide v4.3.0](./docs/migration-guide-v4.3.0.md)
 
 ## Security
 

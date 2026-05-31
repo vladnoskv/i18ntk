@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.2.2",
+  "version": "4.3.0",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
@@ -168,7 +168,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.2.2",
+    "version": "4.3.0",
     "releaseDate": "31/05/2026",
     "lastUpdated": "31/05/2026",
     "maintainer": "Vlad Noskov",
@@ -176,8 +176,11 @@
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "AUTO TRANSLATE: Uppercase target-language placeholders such as [AR] What We Offer, [AR] Email, and [AR] Password are detected, translated from source, and checked again before completion.",
+      "AUTO TRANSLATE: Target-language placeholders such as [AR] What We Offer, [AR] Email, [zh] Email, and [TR] Password are detected, translated from source, and checked again before completion.",
       "AUTO TRANSLATE: Runs now warn, report, and exit with validation failure if placeholder-prefixed or source-copy leftovers remain after the final retry.",
+      "AUTO TRANSLATE: Managed runs audit every selected file for a language before reporting leftover failures.",
+      "AUTO TRANSLATE: Short all-caps acronyms and codes such as XP may remain unchanged without failing the final leftover check.",
+      "FIX PLACEHOLDERS: Option 7 and i18ntk-fixer --check-placeholders audit English locale files for [LANG] placeholder leftovers and report a clean count of 0.",
       "SIZING: Manager sizing uses the configured i18n directory unless --source-dir is explicitly provided, so usage analysis no longer poisons the next sizing run.",
       "VALIDATION: Validation summary reports now include warning and error details, not only totals.",
       "USAGE: Usage fallback source detection no longer writes its inferred app source directory back into the shared locale configuration."
@@ -186,7 +189,7 @@
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.2.3",
+    "nextVersion": "4.3.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -208,6 +211,6 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.2.2 may be unstable or insecure. Upgrade to 4.2.2 or newer."
+    "supportPolicy": "Versions earlier than 4.3.0 may be unstable or insecure. Upgrade to 4.3.0 or newer."
   }
 }

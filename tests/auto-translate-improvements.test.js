@@ -72,7 +72,7 @@ test('auto translate preserves existing translated values and only sends missing
       outputDir: targetDir,
       translateFn: async (text) => {
         calls.push(text);
-        return `[de] ${text}`;
+        return text === 'Start now' ? 'Jetzt starten' : 'Weiter';
       },
       englishThresholdPercent: 10,
     }));
@@ -80,8 +80,8 @@ test('auto translate preserves existing translated values and only sends missing
     const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
     assert.deepEqual(calls.sort(), ['Continue', 'Start now'].sort());
     assert.equal(output.title, 'Willkommen');
-    assert.equal(output.cta, '[de] Start now');
-    assert.equal(output.missing, '[de] Continue');
+    assert.equal(output.cta, 'Jetzt starten');
+    assert.equal(output.missing, 'Weiter');
     assert.equal(output.nested.saved, 'Gespeichert');
     assert.equal(result.translated, 2);
     assert.equal(result.skipped, 0);
@@ -124,17 +124,24 @@ test('auto translate retranslates visibly broken target values from the English 
       outputDir: targetDir,
       translateFn: async (text) => {
         calls.push(text);
-        return `[de] ${text}`;
+        const translations = {
+          'Delete report': 'Bericht löschen',
+          'Open settings': 'Einstellungen öffnen',
+          'Report generated': 'Bericht erstellt',
+          'Save changes': 'Änderungen speichern',
+          'Yes': 'Ja',
+        };
+        return translations[text] || text;
       },
     }));
 
     const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
     assert.deepEqual(calls.sort(), ['Delete report', 'Open settings', 'Report generated', 'Save changes', 'Yes'].sort());
-    assert.equal(output.questionMarks, '[de] Open settings');
-    assert.equal(output.singleQuestionMark, '[de] Yes');
-    assert.equal(output.questionMarksWithPlaceholder, '[de] Report generated');
-    assert.equal(output.replacement, '[de] Save changes');
-    assert.equal(output.mojibake, '[de] Delete report');
+    assert.equal(output.questionMarks, 'Einstellungen öffnen');
+    assert.equal(output.singleQuestionMark, 'Ja');
+    assert.equal(output.questionMarksWithPlaceholder, 'Bericht erstellt');
+    assert.equal(output.replacement, 'Änderungen speichern');
+    assert.equal(output.mojibake, 'Bericht löschen');
     assert.equal(output.valid, 'Projektstatus');
     assert.equal(result.translated, 5);
     assert.equal(result.skippedExisting, 1);
@@ -247,6 +254,144 @@ test('auto translate retranslates single-word uppercase language-code placeholde
   }
 });
 
+test('auto translate retranslates lowercase language-code placeholder leftovers', async () => {
+  const { processFile } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'auth.json');
+  const targetDir = path.join(project, 'locales', 'zh');
+  const targetFile = path.join(targetDir, 'auth.json');
+  const calls = [];
+
+  writeJson(sourceFile, {
+    email_label: 'Email',
+    password_label: 'Password',
+  });
+  writeJson(targetFile, {
+    email_label: '[zh] Email',
+    password_label: '[zh] Password',
+  });
+
+  try {
+    process.chdir(project);
+    const result = await processFile(sourceFile, 'zh', defaultTranslateArgs({
+      outputDir: targetDir,
+      translateFn: async (text) => {
+        calls.push(text);
+        return text === 'Email' ? '电子邮件' : '密码';
+      },
+      englishThresholdPercent: 10,
+    }));
+
+    const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+    assert.deepEqual(calls.sort(), ['Email', 'Password'].sort());
+    assert.equal(output.email_label, '电子邮件');
+    assert.equal(output.password_label, '密码');
+    assert.equal(result.translated, 2);
+    assert.equal(result.skippedExisting, 0);
+    assert.deepEqual(result.residualUntranslated, []);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('auto translate scans a full file for multiple leftover target-code placeholders', async () => {
+  const { processFile } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'real.json');
+  const targetDir = path.join(project, 'locales', 'sv');
+  const targetFile = path.join(targetDir, 'real.json');
+  const calls = [];
+
+  writeJson(sourceFile, {
+    real: {
+      landing: {
+        hero: {
+          kicker: 'Real-Money Markets',
+          title: 'Crypto prediction markets',
+          cta: {
+            open_real_markets: 'Open Real Markets',
+            portfolio: 'Portfolio',
+            liquidity: 'Liquidity',
+          },
+        },
+        scope: {
+          title: "What's included",
+          cards: {
+            markets: {
+              title: 'Markets',
+              body: 'BTC and ETH price threshold markets with clear resolution windows.',
+            },
+          },
+        },
+      },
+    },
+  });
+  writeJson(targetFile, {
+    real: {
+      landing: {
+        hero: {
+          kicker: '[SV] Real-Money Markets',
+          title: 'Förutsägelsemarknader för krypto',
+          cta: {
+            open_real_markets: 'Öppna Real Markets',
+            portfolio: '[SV] Portfolio',
+            liquidity: '[SV] Liquidity',
+          },
+        },
+        scope: {
+          title: "[SV] What's included",
+          cards: {
+            markets: {
+              title: '[SV] Markets',
+              body: 'BTC- och ETH-priströskelmarknader med tydliga upplösningsfönster.',
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const translations = {
+    'Real-Money Markets': 'Marknader med riktiga pengar',
+    'Open Real Markets': 'Öppna marknader med riktiga pengar',
+    Portfolio: 'Portfölj',
+    Liquidity: 'Likviditet',
+    "What's included": 'Vad som ingår',
+    Markets: 'Marknader',
+  };
+
+  try {
+    process.chdir(project);
+    const result = await processFile(sourceFile, 'sv', defaultTranslateArgs({
+      outputDir: targetDir,
+      translateFn: async (text) => {
+        calls.push(text);
+        return translations[text] || text;
+      },
+      englishThresholdPercent: 10,
+    }));
+
+    const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+    assert.deepEqual(calls.sort(), Object.keys(translations).sort());
+    assert.equal(output.real.landing.hero.kicker, 'Marknader med riktiga pengar');
+    assert.equal(output.real.landing.hero.cta.open_real_markets, 'Öppna marknader med riktiga pengar');
+    assert.equal(output.real.landing.hero.cta.portfolio, 'Portfölj');
+    assert.equal(output.real.landing.hero.cta.liquidity, 'Likviditet');
+    assert.equal(output.real.landing.scope.title, 'Vad som ingår');
+    assert.equal(output.real.landing.scope.cards.markets.title, 'Marknader');
+    assert.equal(output.real.landing.hero.title, 'Förutsägelsemarknader för krypto');
+    assert.equal(result.translated, 6);
+    assert.equal(result.skippedExisting, 2);
+    assert.deepEqual(result.residualUntranslated, []);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
 test('auto translate final check retries leftover single-word language-code placeholders before writing', async () => {
   const { processFile } = require('../main/i18ntk-translate');
   const cwd = process.cwd();
@@ -278,6 +423,60 @@ test('auto translate final check retries leftover single-word language-code plac
     assert.equal(result.finalCheckRetried, 1);
     assert.deepEqual(result.residualUntranslated, []);
   } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('auto translate does not fail when a provider legitimately returns a short acronym unchanged', async () => {
+  const { parseArgs, run } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'account.json');
+  const targetDir = path.join(project, 'locales', 'zh');
+  const targetFile = path.join(targetDir, 'account.json');
+  const lines = [];
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+
+  writeJson(sourceFile, {
+    account: {
+      hub: {
+        tabs: {
+          status: {
+            xp: 'XP',
+          },
+        },
+      },
+    },
+  });
+
+  try {
+    process.chdir(project);
+    console.log = (...args) => lines.push(args.join(' '));
+    console.warn = (...args) => lines.push(args.join(' '));
+
+    const args = parseArgs(['node', 'i18ntk-translate', sourceFile, 'zh', '--no-confirm']);
+    Object.assign(args, defaultTranslateArgs({
+      outputDir: targetDir,
+      targetLang: 'zh',
+      reportStdout: true,
+      translateFn: async () => 'XP',
+      englishThresholdPercent: 10,
+    }));
+
+    const result = await run(args);
+    const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+    const text = lines.join('\n');
+
+    assert.equal(result.success, true);
+    assert.equal(result.residualUntranslated, 0);
+    assert.equal(output.account.hub.tabs.status.xp, 'XP');
+    assert.doesNotMatch(text, /Leftover warnings:\s+1/);
+    assert.doesNotMatch(text, /Auto Translate left untranslated placeholder values/);
+  } finally {
+    console.log = originalLog;
+    console.warn = originalWarn;
     process.chdir(cwd);
     fs.rmSync(project, { recursive: true, force: true });
   }
@@ -353,7 +552,7 @@ test('auto translate progress output names keys and placeholder segment stages s
     await processFile(sourceFile, 'de', defaultTranslateArgs({
       outputDir: targetDir,
       progressInterval: 1,
-      translateFn: async (text) => `[de] ${text}`,
+      translateFn: async (text) => text === 'Start now' ? 'Jetzt starten' : `Hallo ${text}`,
     }));
 
     const output = writes.join('');
@@ -469,6 +668,46 @@ test('managed auto translate reports failure when a target language has leftover
     process.chdir(cwd);
     fs.rmSync(project, { recursive: true, force: true });
   }
+});
+
+test('managed auto translate checks all files before reporting target-language leftovers', async () => {
+  const TranslateCommand = require('../main/manage/commands/TranslateCommand');
+  const command = new TranslateCommand({});
+  const calls = [];
+
+  command.sourceLang = 'en';
+  command.autoTranslateSettings = {
+    onlyMissingOrEnglish: true,
+    reportStdout: false,
+    bom: false,
+    concurrency: 1,
+    batchSize: 10,
+    progressInterval: 10,
+    retryCount: 1,
+    retryDelay: 0,
+    timeout: 1000,
+    protectionEnabled: false,
+    protectionFile: './i18ntk-auto-translate.json',
+    placeholderMode: 'preserve',
+  };
+
+  command.runSingleTranslate = async (src) => {
+    calls.push(src);
+    if (src.endsWith('account.json')) {
+      return { success: false, error: 'leftover in account.json' };
+    }
+    if (src.endsWith('real.json')) {
+      return { success: false, error: 'leftover in real.json' };
+    }
+    return { success: true };
+  };
+
+  await assert.rejects(
+    () => command.runTranslate(['account.json', 'real.json', 'about.json'], 'sv', { dryRun: false }),
+    /leftover in account\.json; leftover in real\.json/
+  );
+
+  assert.deepEqual(calls, ['account.json', 'real.json', 'about.json']);
 });
 
 test('auto translate UI labels are localized and no longer marked beta', () => {

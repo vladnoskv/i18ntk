@@ -16,6 +16,7 @@ const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const JsonOutput = require('../utils/json-output');
 const SetupEnforcer = require('../utils/setup-enforcer');
+const FixerCommand = require('./manage/commands/FixerCommand');
 
 // Ensure setup is complete before running
 (async () => {
@@ -94,11 +95,15 @@ class I18nFixer {
     }
   }
 
-  async run() {
-    await this.initialize();
-    console.log(t('fixer.running'));
-    // Placeholder for actual fixing logic
-    console.log(t('fixer.completed'));
+  async run(options = {}) {
+    const command = new FixerCommand(this.config, null);
+    const result = await command.execute(options);
+
+    if (result && result.success === false) {
+      throw new Error(result.error || 'Fixer command failed');
+    }
+
+    return result;
   }
 }
 

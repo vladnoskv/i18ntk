@@ -344,7 +344,7 @@ function normalizeLanguageCode(language) {
 
 function parseLanguagePrefix(value) {
   if (typeof value !== 'string') return null;
-  const match = value.match(/^\s*\[([A-Z]{2,3}(?:[-_][A-Z0-9]{2,4})?)\]\s*(.+)$/);
+  const match = value.match(/^\s*\[([A-Z]{2,3}(?:[-_][A-Z0-9]{2,4})?)\]\s*(.+)$/i);
   if (!match) return null;
   return {
     raw: match[1],
@@ -366,6 +366,28 @@ function isLanguagePrefixedEnglish(value, args = {}) {
   if (targetLanguage && prefix.language !== targetLanguage) return false;
 
   return hasLatinWordContent(prefix.text, 1) || isLikelyEnglish(prefix.text, args);
+}
+
+function isSafeUnchangedSourceCopy(value, args = {}) {
+  const text = String(value ?? '').trim();
+  if (!text) return false;
+
+  const normalized = text.toLowerCase();
+  const allowedTerms = new Set(['api']);
+  if (Array.isArray(args.allowedEnglishTerms)) {
+    args.allowedEnglishTerms
+      .filter(term => typeof term === 'string' && term.trim())
+      .forEach(term => allowedTerms.add(term.trim().toLowerCase()));
+  }
+  if (allowedTerms.has(normalized)) return true;
+
+  const tokens = text.match(/[A-Za-z0-9]+/g) || [];
+  if (tokens.length === 0) return true;
+
+  return tokens.every((token) => {
+    if (!/[A-Za-z]/.test(token)) return true;
+    return token.length <= 8 && /^[A-Z0-9]{2,}$/.test(token);
+  });
 }
 
 function isBrokenTranslationValue(value) {
@@ -399,7 +421,9 @@ function shouldTranslateTargetValue(sourceValue, targetValue, args) {
   if (isUntranslatedMarker(targetValue)) return true;
   if (isBrokenTranslationValue(targetValue)) return true;
   if (isLanguagePrefixedEnglish(targetValue, args)) return true;
-  if (targetValue.trim() === String(sourceValue ?? '').trim()) return true;
+  if (targetValue.trim() === String(sourceValue ?? '').trim()) {
+    return !isSafeUnchangedSourceCopy(targetValue, args);
+  }
   if (args.onlyMissingOrEnglish !== false && isLikelyEnglish(targetValue, args)) return true;
   return args.onlyMissingOrEnglish === false;
 }
@@ -410,7 +434,9 @@ function getResidualUntranslatedReason(sourceValue, targetValue, args) {
   if (isUntranslatedMarker(targetValue)) return 'marker';
   if (isBrokenTranslationValue(targetValue)) return 'broken';
   if (isLanguagePrefixedEnglish(targetValue, args)) return 'language_prefix';
-  if (targetValue.trim() === String(sourceValue ?? '').trim()) return 'source_copy';
+  if (targetValue.trim() === String(sourceValue ?? '').trim()) {
+    return isSafeUnchangedSourceCopy(targetValue, args) ? null : 'source_copy';
+  }
   return null;
 }
 

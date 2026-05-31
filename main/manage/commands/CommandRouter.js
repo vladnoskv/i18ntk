@@ -159,6 +159,9 @@ class CommandRouter {
         try {
             // Route command to appropriate handler
             const result = await this.routeCommand(command, options, executionContext);
+            if (result && result.success === false) {
+                throw new Error(result.error || result.message || `${command} command failed`);
+            }
 
             // Handle command completion based on execution context
             console.log('\n' + t('operations.completed'));

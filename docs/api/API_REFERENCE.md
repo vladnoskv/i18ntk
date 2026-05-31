@@ -1,4 +1,4 @@
-# i18ntk API Reference (v4.2.2)
+# i18ntk API Reference (v4.3.0)
 
 ## Primary CLI
 
@@ -54,6 +54,18 @@ Many commands support:
 - `--help`
 
 Command-specific tools add their own flags, such as `--dry-run`, `--output-report`, `--cleanup`, `--predict-expansion`, or Auto Translate provider options.
+
+## Fix Placeholder
+
+`i18ntk --command=fix` and `i18ntk-fixer` repair missing keys, empty values, and untranslated markers from the source language.
+
+Use the English placeholder checker when the source files may still contain copied target placeholders:
+
+```bash
+i18ntk-fixer --check-placeholders
+```
+
+The checker scans English source locale files for bracketed language-code prefixes such as `[AR] Email` or `[SV] Real-Money Markets`, reports the count, and fails when the count is not `0`.
 
 ## Validation
 
@@ -142,7 +154,7 @@ i18ntk-usage --source-dir ./src --i18n-dir ./locales
 i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup --dry-run-delete
 ```
 
-When `sourceDir` equals `i18nDir` and no application source directory can be inferred, `4.2.2` avoids scanning the whole project root to prevent inflated missing-key counts.
+When `sourceDir` equals `i18nDir` and no application source directory can be inferred, `4.3.0` avoids scanning the whole project root to prevent inflated missing-key counts.
 
 ## Backup
 
