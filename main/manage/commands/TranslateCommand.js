@@ -254,6 +254,14 @@ class TranslateCommand {
         for (const r of results) {
             console.log(`    ${r.ok ? '\u{2705}' : '\u{274C}'} ${r.lang}${r.error ? ' (' + r.error + ')' : ''}`);
         }
+        const failed = results.filter(r => !r.ok);
+        if (failed.length > 0) {
+            const message = failed.length === 1
+                ? `Translation finished with warnings for ${failed[0].lang}. Rerun Auto Translate to capture leftovers.`
+                : `Translation finished with warnings for ${failed.length} languages. Rerun Auto Translate to capture leftovers.`;
+            console.log('\n  ' + this.tr('translate.summary.incomplete', { count: failed.length }, message));
+            return { success: false, results, error: message };
+        }
         console.log('\n  ' + this.tr('translate.summary.complete', {}, 'Translation complete!'));
         return { success: true, results };
     }

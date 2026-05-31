@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "private": true,
   "manifestRole": "development",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
@@ -286,27 +286,25 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.2.0",
-    "releaseDate": "30/05/2026",
-    "lastUpdated": "30/05/2026",
+    "version": "4.2.1",
+    "releaseDate": "31/05/2026",
+    "lastUpdated": "31/05/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "SECURITY: Path containment, backup restore, runtime language loading, and Auto Translate provider URL validation are hardened.",
-      "AUTO TRANSLATE: The manager and docs no longer mark Auto Translate beta; existing translated target values are kept by default, and Google concurrency can now be raised up to 100.",
-      "RUNTIME: The lightweight runtime gains per-call language overrides, translateBatch(), cache helpers, and safer JSON parsing.",
-      "REPORTS: Init and analysis reports default to readable Markdown, with pretty JSON and text available through reports.format.",
-      "UX: Manager menu spacing is grouped and validation output no longer repeats source/i18n/output directory blocks.",
-      "USAGE: Usage analysis avoids scanning the project root when locale and source directories are the same.",
-      "USAGE: Usage reports now index known keys to source locations, resolve bounded dynamic key patterns, report unresolved dynamic expressions, recommend route-based namespaces, and flag hardcoded text candidates."
+      "AUTO TRANSLATE: Uppercase target-language placeholders such as [AR] What We Offer are detected, translated from source, and checked again before completion.",
+      "AUTO TRANSLATE: Runs now warn, report, and exit with validation failure if placeholder-prefixed or source-copy leftovers remain after the final retry.",
+      "SIZING: Manager sizing uses the configured i18n directory unless --source-dir is explicitly provided, so usage analysis no longer poisons the next sizing run.",
+      "VALIDATION: Validation summary reports now include warning and error details, not only totals.",
+      "USAGE: Usage fallback source detection no longer writes its inferred app source directory back into the shared locale configuration."
     ],
     "breakingChanges": [
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.2.1",
+    "nextVersion": "4.2.2",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -328,7 +326,7 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.2.0 may be unstable or insecure. Upgrade to 4.2.0 or newer."
+    "supportPolicy": "Versions earlier than 4.2.1 may be unstable or insecure. Upgrade to 4.2.1 or newer."
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

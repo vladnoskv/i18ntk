@@ -1,4 +1,4 @@
-# i18ntk v4.2.0
+# i18ntk v4.2.1
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.2.0)](https://socket.dev/npm/package/i18ntk/overview/4.2.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.2.1)](https://socket.dev/npm/package/i18ntk/overview/4.2.1)
 
 ## Install
 
@@ -30,20 +30,14 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
-## What's New in 4.2.0
+## What's New in 4.2.1
 
-- **SECURITY**: Hardened path containment for restore and shared filesystem helpers, including artifact-like filenames, environment-added internal prefixes, and Windows cross-drive paths.
-- **SECURITY**: Runtime locale loading now rejects unsafe language identifiers before resolving locale files, preventing `../` language names from reading JSON outside the configured locale base.
-- **SECURITY**: Auto Translate provider URL checks now block IPv4-mapped IPv6 private/loopback hosts.
-- **REPORTS**: Init and analysis reports now default to readable Markdown. Set `reports.format` to `markdown`, `json`, or `text` in Settings or `.i18ntk-config`.
-- **USAGE**: Usage analysis no longer scans the project root when locales are also configured as the source directory, avoiding inflated missing-key counts.
-- **I18N UX**: Init backup prompts, completion summaries, report prompts, default target languages, and native yes/no confirmations are now localized.
-- **AUTO TRANSLATE**: Auto Translate is out of beta, keeps existing translated target values by default, and only sends missing/source-copy/likely-English strings unless `--translate-all` is used.
-- **AUTO TRANSLATE**: Google Auto Translate concurrency now defaults to 12 and can be raised up to 100 for larger locale sets.
-- **AUTO TRANSLATE**: Corrupt target strings such as `?????`, replacement characters, and common mojibake are now repaired from the English source, and progress output distinguishes key translation from placeholder-safe text-segment translation.
-- **CLI UX**: Manager menu spacing is grouped and aligned, and validation no longer prints duplicate source/i18n/output directory blocks.
-- **DOCS**: Versioned docs and migration guidance now reflect the current 4.2.0 command surface.
-- **CLEANUP**: Removed stale duplicate fixed artifacts from the development tree to reduce audit and supply-chain drift.
+- **AUTO TRANSLATE**: Existing target values like `[AR] What We Offer` are now treated as untranslated placeholders for the matching target language and are translated from the source text.
+- **AUTO TRANSLATE**: Before writing each output file, Auto Translate now performs a final leftover check and retries any placeholder-prefixed or source-copy values once.
+- **AUTO TRANSLATE**: If leftovers remain after the final retry, the command warns, includes them in the report, recommends rerunning Auto Translate, and exits with validation failure instead of reporting a clean completion.
+- **SIZING/USAGE**: Usage analysis no longer writes its inferred app source fallback back into the shared locale config, so running usage before sizing no longer makes sizing analyze the wrong directory.
+- **VALIDATION REPORTS**: Validation summary files now include warning and error details, including English-content warning payloads, instead of only totals.
+- **DOCS**: Versioned docs and migration guidance now reflect the current 4.2.1 command surface.
 
 ## What's New in 4.1.0
 
@@ -509,7 +503,7 @@ Example:
 
 ```json
 {
-  "version": "4.2.0",
+  "version": "4.2.1",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -571,7 +565,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
-- [Migration Guide v4.2.0](./docs/migration-guide-v4.2.0.md)
+- [Migration Guide v4.2.1](./docs/migration-guide-v4.2.1.md)
 
 ## Security
 

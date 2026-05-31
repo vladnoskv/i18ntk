@@ -669,6 +669,30 @@ class ValidateCommand {
                 );
             });
 
+            if (this.errors.length > 0) {
+                lines.push('');
+                lines.push('Errors');
+                lines.push('------');
+                this.errors.forEach((error, index) => {
+                    lines.push(`${index + 1}. ${error.message}`);
+                    if (error.details && Object.keys(error.details).length > 0) {
+                        lines.push(`   Details: ${JSON.stringify(error.details, null, 2).replace(/\n/g, '\n   ')}`);
+                    }
+                });
+            }
+
+            if (this.warnings.length > 0) {
+                lines.push('');
+                lines.push('Warnings');
+                lines.push('--------');
+                this.warnings.forEach((warning, index) => {
+                    lines.push(`${index + 1}. ${warning.message}`);
+                    if (warning.details && Object.keys(warning.details).length > 0) {
+                        lines.push(`   Details: ${JSON.stringify(warning.details, null, 2).replace(/\n/g, '\n   ')}`);
+                    }
+                });
+            }
+
             SecurityUtils.safeWriteFileSync(reportPath, lines.join('\n') + '\n', process.cwd(), 'utf8');
             return reportPath;
         } catch (error) {

@@ -35,6 +35,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const configManager = require('../settings/settings-manager');
+const projectConfigManager = require('../utils/config-manager');
 const SecurityUtils = require('../utils/security');
 const { getUnifiedConfig } = require('../utils/config-helper');
 const { logger } = require('../utils/logger');
@@ -1121,7 +1122,9 @@ Generated: ${new Date().toISOString()}
       'o': true,
       'f': 'table',
       't': 50,
-      'd': false
+      'd': false,
+      sourceDirExplicit: false,
+      outputDirExplicit: false
     };
 
     for (let i = 0; i < args.length; i++) {
@@ -1141,6 +1144,7 @@ Generated: ${new Date().toISOString()}
         if (key === 'source-dir' || key === 's') {
           options['source-dir'] = value;
           options.s = value;
+          options.sourceDirExplicit = true;
         } else if (key === 'languages' || key === 'l') {
           options.languages = value;
           options.l = value;
@@ -1169,6 +1173,7 @@ Generated: ${new Date().toISOString()}
           options['predict-expansion'] = value.toLowerCase() !== 'false';
         } else if (key === 'output-dir') {
           options['output-dir'] = value;
+          options.outputDirExplicit = true;
         }
         continue;
       }
@@ -1182,6 +1187,7 @@ Generated: ${new Date().toISOString()}
         if (key === 'source-dir' || key === 's') {
           options['source-dir'] = nextArg || options['source-dir'];
           options.s = options['source-dir'];
+          options.sourceDirExplicit = true;
           if (nextArg && !nextArg.startsWith('-')) i++;
         } else if (key === 'languages' || key === 'l') {
           options.languages = nextArg || options.languages;
@@ -1238,6 +1244,7 @@ Generated: ${new Date().toISOString()}
           }
         } else if (key === 'output-dir') {
           options['output-dir'] = nextArg || options['output-dir'];
+          options.outputDirExplicit = true;
           if (nextArg && !nextArg.startsWith('-')) i++;
         }
       }
@@ -1271,11 +1278,21 @@ Options:
   // Add run method for compatibility with manager
   async run(options = {}) {
     const { fromMenu = false } = options;
-    
-    const args = this.parseArgs();
-    const config = await getUnifiedConfig('sizing', args);
 
-    this.sourceDir = path.resolve(config.projectRoot || '.', config.sourceDir || './locales');
+    const args = this.parseArgs();
+    const commonArgs = {};
+    if (args.sourceDirExplicit) commonArgs.sourceDir = args['source-dir'];
+    if (args.outputDirExplicit) commonArgs.outputDir = args['output-dir'];
+    if (args['source-language']) commonArgs.sourceLanguage = args['source-language'];
+    const persistedConfig = projectConfigManager.getConfig();
+    const config = await getUnifiedConfig('sizing', commonArgs);
+    const projectRoot = config.projectRoot || persistedConfig.projectRoot || process.cwd();
+    const configuredSizingDir = persistedConfig.scriptDirectories?.sizing;
+    const translationDir = args.sourceDirExplicit
+      ? args['source-dir']
+      : (configuredSizingDir || persistedConfig.i18nDir || persistedConfig.sourceDir || config.i18nDir || config.sourceDir || './locales');
+
+    this.sourceDir = path.resolve(projectRoot, translationDir);
     this.outputDir = path.resolve(config.projectRoot || '.', config.outputDir || './i18ntk-reports');
     this.threshold = args.threshold ?? config.processing?.sizingThreshold ?? 50;
     this.languages = args.languages ? args.languages.split(',').map(l => l.trim()) : [];

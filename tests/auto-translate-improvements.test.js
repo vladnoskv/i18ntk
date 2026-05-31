@@ -144,6 +144,135 @@ test('auto translate retranslates visibly broken target values from the English 
   }
 });
 
+test('auto translate retranslates uppercase language-code placeholder leftovers', async () => {
+  const { processFile } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'home.json');
+  const targetDir = path.join(project, 'locales', 'ar');
+  const targetFile = path.join(targetDir, 'home.json');
+  const calls = [];
+
+  writeJson(sourceFile, {
+    hero: {
+      title: 'What We Offer',
+      subtitle: 'Start now',
+    },
+  });
+  writeJson(targetFile, {
+    hero: {
+      title: '[AR] What We Offer',
+      subtitle: 'ابدأ الآن',
+    },
+  });
+
+  try {
+    process.chdir(project);
+    const result = await processFile(sourceFile, 'ar', defaultTranslateArgs({
+      outputDir: targetDir,
+      translateFn: async (text) => {
+        calls.push(text);
+        return text === 'What We Offer' ? 'ما نقدمه' : `[ar] ${text}`;
+      },
+      englishThresholdPercent: 10,
+    }));
+
+    const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+    assert.deepEqual(calls, ['What We Offer']);
+    assert.equal(output.hero.title, 'ما نقدمه');
+    assert.equal(output.hero.subtitle, 'ابدأ الآن');
+    assert.equal(result.translated, 1);
+    assert.equal(result.skippedExisting, 1);
+    assert.deepEqual(result.residualUntranslated, []);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('auto translate final check retries leftover language-code placeholders before writing', async () => {
+  const { processFile } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'home.json');
+  const targetDir = path.join(project, 'locales', 'ar');
+  const targetFile = path.join(targetDir, 'home.json');
+  let attempts = 0;
+
+  writeJson(sourceFile, {
+    offer: 'What We Offer',
+  });
+
+  try {
+    process.chdir(project);
+    const result = await processFile(sourceFile, 'ar', defaultTranslateArgs({
+      outputDir: targetDir,
+      translateFn: async () => {
+        attempts += 1;
+        return attempts === 1 ? '[AR] What We Offer' : 'ما نقدمه';
+      },
+      englishThresholdPercent: 10,
+    }));
+
+    const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+    assert.equal(output.offer, 'ما نقدمه');
+    assert.equal(attempts, 2);
+    assert.equal(result.translated, 1);
+    assert.equal(result.finalCheckRetried, 1);
+    assert.deepEqual(result.residualUntranslated, []);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('auto translate run warns and fails when final check still finds placeholder leftovers', async () => {
+  const { parseArgs, run } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'home.json');
+  const targetDir = path.join(project, 'locales', 'ar');
+  const targetFile = path.join(targetDir, 'home.json');
+  const lines = [];
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+
+  writeJson(sourceFile, {
+    offer: 'What We Offer',
+  });
+
+  try {
+    process.chdir(project);
+    console.log = (...args) => lines.push(args.join(' '));
+    console.warn = (...args) => lines.push(args.join(' '));
+
+    const args = parseArgs(['node', 'i18ntk-translate', sourceFile, 'ar', '--no-confirm']);
+    Object.assign(args, defaultTranslateArgs({
+      outputDir: targetDir,
+      targetLang: 'ar',
+      reportStdout: true,
+      translateFn: async () => '[AR] What We Offer',
+      englishThresholdPercent: 10,
+    }));
+
+    const result = await run(args);
+    const output = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
+    const text = lines.join('\n');
+
+    assert.equal(result.success, false);
+    assert.equal(result.residualUntranslated, 1);
+    assert.equal(output.offer, '[AR] What We Offer');
+    assert.match(text, /WARNING: 1 values still look untranslated/);
+    assert.match(text, /Rerun Auto Translate/);
+    assert.match(text, /home\.json\s+offer\s+\[AR\] What We Offer/);
+  } finally {
+    console.log = originalLog;
+    console.warn = originalWarn;
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
 test('auto translate progress output names keys and placeholder segment stages separately', async () => {
   const { processFile } = require('../main/i18ntk-translate');
   const cwd = process.cwd();
@@ -237,6 +366,50 @@ test('managed auto translate does not force the UI locale back to English', asyn
     helper.loadTranslations = originalLoad;
     setup.checkSetupCompleteAsync = originalCheck;
     delete require.cache[commandPath];
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('managed auto translate reports failure when a target language has leftovers', async () => {
+  const TranslateCommand = require('../main/manage/commands/TranslateCommand');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceDir = path.join(project, 'locales', 'en');
+  const sourceFile = path.join(sourceDir, 'home.json');
+  const originalLog = console.log;
+  const originalError = console.error;
+  const lines = [];
+  const answers = ['ar', 'a', 'y'];
+
+  writeJson(sourceFile, {
+    offer: 'What We Offer',
+  });
+
+  try {
+    process.chdir(project);
+    console.log = (...args) => lines.push(args.join(' '));
+    console.error = (...args) => lines.push(args.join(' '));
+
+    const command = new TranslateCommand({ uiLanguage: 'en', language: 'en' });
+    command.sourceDir = sourceDir;
+    command.sourceLang = 'en';
+    command.configuredTargetLangs = ['ar'];
+    command.autoTranslateSettings = { dryRunFirst: false };
+    command.runTranslate = async () => {
+      throw new Error('Auto Translate left untranslated placeholder values');
+    };
+
+    const result = await command.interactiveFlow(['home.json'], async () => answers.shift() || '');
+    const output = lines.join('\n');
+
+    assert.equal(result.success, false);
+    assert.match(result.error, /Rerun Auto Translate/);
+    assert.match(output, /❌ ar \(Auto Translate left untranslated placeholder values\)/);
+    assert.doesNotMatch(output, /Translation complete!/);
+  } finally {
+    console.log = originalLog;
+    console.error = originalError;
+    process.chdir(cwd);
     fs.rmSync(project, { recursive: true, force: true });
   }
 });

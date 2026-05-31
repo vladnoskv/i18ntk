@@ -338,6 +338,36 @@ function isLikelyEnglish(value, args) {
   return analysis.englishPercentage > threshold && analysis.englishWordCount >= 2;
 }
 
+function normalizeLanguageCode(language) {
+  return String(language || '').trim().toLowerCase().replace(/_/g, '-').split('-')[0];
+}
+
+function parseLanguagePrefix(value) {
+  if (typeof value !== 'string') return null;
+  const match = value.match(/^\s*\[([A-Z]{2,3}(?:[-_][A-Z0-9]{2,4})?)\]\s*(.+)$/);
+  if (!match) return null;
+  return {
+    raw: match[1],
+    language: normalizeLanguageCode(match[1]),
+    text: match[2].trim(),
+  };
+}
+
+function hasLatinWordContent(value, minWords = 2) {
+  const words = String(value || '').match(/[A-Za-z][A-Za-z'-]*/g) || [];
+  return words.filter(word => word.length > 1).length >= minWords;
+}
+
+function isLanguagePrefixedEnglish(value, args = {}) {
+  const prefix = parseLanguagePrefix(value);
+  if (!prefix || !prefix.text) return false;
+
+  const targetLanguage = normalizeLanguageCode(args.targetLang);
+  if (targetLanguage && prefix.language !== targetLanguage) return false;
+
+  return hasLatinWordContent(prefix.text, 2) || isLikelyEnglish(prefix.text, args);
+}
+
 function isBrokenTranslationValue(value) {
   if (typeof value !== 'string') return false;
   const text = value.trim();
@@ -368,9 +398,20 @@ function shouldTranslateTargetValue(sourceValue, targetValue, args) {
   if (typeof targetValue !== 'string') return true;
   if (isUntranslatedMarker(targetValue)) return true;
   if (isBrokenTranslationValue(targetValue)) return true;
+  if (isLanguagePrefixedEnglish(targetValue, args)) return true;
   if (targetValue.trim() === String(sourceValue ?? '').trim()) return true;
   if (args.onlyMissingOrEnglish !== false && isLikelyEnglish(targetValue, args)) return true;
   return args.onlyMissingOrEnglish === false;
+}
+
+function getResidualUntranslatedReason(sourceValue, targetValue, args) {
+  if (targetValue === undefined || targetValue === null) return 'missing';
+  if (typeof targetValue !== 'string') return 'non_string';
+  if (isUntranslatedMarker(targetValue)) return 'marker';
+  if (isBrokenTranslationValue(targetValue)) return 'broken';
+  if (isLanguagePrefixedEnglish(targetValue, args)) return 'language_prefix';
+  if (targetValue.trim() === String(sourceValue ?? '').trim()) return 'source_copy';
+  return null;
 }
 
 function planTargetAwareLeaves(sourceLeaves, targetData, args) {
@@ -712,6 +753,41 @@ function applyResults(sourceData, translatedResults, toTranslate, toSkip, target
   return output;
 }
 
+function findResidualUntranslatedLeaves(sourceLeaves, outputData, args, options = {}) {
+  const ignoredKeys = options.ignoredKeys || new Set();
+  const residual = [];
+
+  for (const leaf of sourceLeaves) {
+    if (ignoredKeys.has(leaf.keyPath)) continue;
+
+    const targetValue = getLeaf(outputData, leaf.keyPath);
+    const reason = getResidualUntranslatedReason(leaf.value, targetValue, args);
+    if (reason) {
+      residual.push({
+        keyPath: leaf.keyPath,
+        value: String(targetValue ?? ''),
+        sourceValue: leaf.value,
+        reason,
+        fileName: options.fileName,
+      });
+    }
+  }
+
+  return residual;
+}
+
+function buildResidualRetryItems(residualLeaves, customRegex) {
+  return residualLeaves.map((leaf) => {
+    const placeholders = detectPlaceholders(leaf.sourceValue, customRegex);
+    return {
+      keyPath: leaf.keyPath,
+      value: leaf.sourceValue,
+      placeholders,
+      placeholderMode: placeholders.length > 0 ? 'preserve' : 'none',
+    };
+  });
+}
+
 function formatProgressKey(keyPath) {
   if (!keyPath) return '';
   const value = String(keyPath);
@@ -735,6 +811,7 @@ async function processFile(sourcePath, targetLang, args) {
   const fileName = path.basename(sourcePath);
   const targetDir = args.outputDir || path.join(path.dirname(path.dirname(sourcePath)), targetLang);
   const targetPath = path.join(targetDir, fileName);
+  const runArgs = { ...args, targetLang };
 
   let sourceData;
   try {
@@ -753,18 +830,18 @@ async function processFile(sourcePath, targetLang, args) {
   }
 
   const targetData = readExistingTargetData(targetPath);
-  const { translatableLeaves: candidateLeaves, existingLeaves } = planTargetAwareLeaves(leaves, targetData, args);
+  const { translatableLeaves: candidateLeaves, existingLeaves } = planTargetAwareLeaves(leaves, targetData, runArgs);
 
-  const protection = args.protection || loadProtectionConfig(args.protectionFile, {
-    enabled: args.protectionEnabled,
-    create: args.createProtectionFile,
+  const protection = runArgs.protection || loadProtectionConfig(runArgs.protectionFile, {
+    enabled: runArgs.protectionEnabled,
+    create: runArgs.createProtectionFile,
   });
   const protectedLeaves = candidateLeaves
     .filter((leaf) => shouldPreserveWholeValue(leaf.keyPath, leaf.value, protection))
     .map((leaf) => ({ ...leaf, skipReason: 'protected' }));
   const translatableLeaves = candidateLeaves.filter((leaf) => !shouldPreserveWholeValue(leaf.keyPath, leaf.value, protection));
-  const { withPlaceholders, withoutPlaceholders } = classifyLeaves(translatableLeaves, args.customRegex);
-  const { strategy, interactiveMode } = await resolvePlaceholderStrategy(args);
+  const { withPlaceholders, withoutPlaceholders } = classifyLeaves(translatableLeaves, runArgs.customRegex);
+  const { strategy, interactiveMode } = await resolvePlaceholderStrategy(runArgs);
 
   if (args.dryRun && strategy === 'skip' && withPlaceholders.length > 0) {
     await previewSkipped(withPlaceholders);
@@ -834,16 +911,16 @@ async function processFile(sourcePath, targetLang, args) {
   const manifestPath = createPlaceholderManifest(sourcePath, targetLang, toTranslate);
 
   const translateOptions = {
-    sourceLang: args.sourceLang,
-    provider: args.provider,
-    concurrency: args.concurrency,
-    batchSize: args.batchSize,
-    retryCount: args.retryCount,
-    retryDelay: args.retryDelay,
-    timeout: args.timeout,
-    customFn: args.translateFn,
+    sourceLang: runArgs.sourceLang,
+    provider: runArgs.provider,
+    concurrency: runArgs.concurrency,
+    batchSize: runArgs.batchSize,
+    retryCount: runArgs.retryCount,
+    retryDelay: runArgs.retryDelay,
+    timeout: runArgs.timeout,
+    customFn: runArgs.translateFn,
     onProgress: (info) => {
-      if (info.completed % args.progressInterval === 0 || info.completed === info.total) {
+      if (info.completed % runArgs.progressInterval === 0 || info.completed === info.total) {
         const stage = info.stage || 'Translating';
         const unit = info.unit || 'items';
         const keyPath = formatProgressKey(info.keyPath);
@@ -860,7 +937,7 @@ async function processFile(sourcePath, targetLang, args) {
   try {
     if (toTranslate.length > 0) {
       console.log(`[${fileName}] Preparing translation plan for ${toTranslate.length} keys.`);
-      translatedResults = await translateItems(toTranslate, targetLang, translateOptions, args.customRegex, protection);
+      translatedResults = await translateItems(toTranslate, targetLang, translateOptions, runArgs.customRegex, protection);
       process.stdout.write('\n');
       console.log(`[${fileName}] Applying translated values.`);
     } else {
@@ -871,8 +948,33 @@ async function processFile(sourcePath, targetLang, args) {
   }
 
   const output = applyResults(sourceData, translatedResults, toTranslate, toSkip, targetData);
+  const ignoredResidualKeys = new Set(protectedLeaves.map((leaf) => leaf.keyPath));
+  let residualUntranslated = findResidualUntranslatedLeaves(leaves, output, runArgs, {
+    ignoredKeys: ignoredResidualKeys,
+    fileName,
+  });
+  let finalCheckRetried = 0;
+
+  if (residualUntranslated.length > 0) {
+    console.warn(`[${fileName}] Warning: Final check found ${residualUntranslated.length} values that still look untranslated. Retrying once before writing.`);
+    const retryItems = buildResidualRetryItems(residualUntranslated, runArgs.customRegex);
+    const retryResults = await translateItems(retryItems, targetLang, translateOptions, runArgs.customRegex, protection);
+    retryItems.forEach((item, index) => {
+      setLeaf(output, item.keyPath, retryResults[index]);
+    });
+    finalCheckRetried = retryItems.length;
+    residualUntranslated = findResidualUntranslatedLeaves(leaves, output, runArgs, {
+      ignoredKeys: ignoredResidualKeys,
+      fileName,
+    });
+  }
+
+  if (residualUntranslated.length > 0) {
+    console.warn(`[${fileName}] Warning: ${residualUntranslated.length} values still look untranslated after retry. Rerun Auto Translate to capture leftovers.`);
+  }
+
   console.log(`[${fileName}] Writing output.`);
-  writeOutput(output, targetPath, args.bom);
+  writeOutput(output, targetPath, runArgs.bom);
 
   console.log(`[${fileName}] Written: ${targetPath}`);
 
@@ -884,6 +986,8 @@ async function processFile(sourcePath, targetLang, args) {
     placeholderProtected,
     protectedSkipped: protectedLeaves.length,
     skippedExisting: existingLeaves.length,
+    finalCheckRetried,
+    residualUntranslated,
   };
 }
 
@@ -932,6 +1036,8 @@ async function run(args) {
   let grandPlaceholderProtected = 0;
   let grandProtectedSkipped = 0;
   let grandSkippedExisting = 0;
+  let grandFinalCheckRetried = 0;
+  const allResidualUntranslated = [];
 
   for (const srcPath of sourceFiles) {
     const result = await processFile(srcPath, args.targetLang, args);
@@ -942,25 +1048,38 @@ async function run(args) {
       grandPlaceholderProtected += result.placeholderProtected || 0;
       grandProtectedSkipped += result.protectedSkipped || 0;
       grandSkippedExisting += result.skippedExisting || 0;
+      grandFinalCheckRetried += result.finalCheckRetried || 0;
       if (result.skippedKeys && result.skippedKeys.length > 0) {
         allSkippedKeys.push(...result.skippedKeys);
+      }
+      if (result.residualUntranslated && result.residualUntranslated.length > 0) {
+        allResidualUntranslated.push(...result.residualUntranslated);
       }
     }
   }
 
   console.log('');
   console.log(formatSummaryLine(grandSkipped, grandTranslated, grandTotal, grandPlaceholderProtected, grandProtectedSkipped, grandSkippedExisting));
+  if (grandFinalCheckRetried > 0) {
+    console.log(`[translate] final check retried ${grandFinalCheckRetried} leftover values`);
+  }
 
-  if (allSkippedKeys.length > 0 || args.reportFile || args.reportStdout) {
+  if (allResidualUntranslated.length > 0) {
+    console.warn(`WARNING: ${allResidualUntranslated.length} values still look untranslated after Auto Translate.`);
+    console.warn('Rerun Auto Translate to capture leftovers, or review the values listed in the report.');
+  }
+
+  if (allSkippedKeys.length > 0 || allResidualUntranslated.length > 0 || args.reportFile || args.reportStdout) {
     const report = generateReport(allSkippedKeys, grandTranslated, grandTotal, {
       sourceFile: sourceFiles.length === 1 ? sourceFiles[0] : `${sourceFiles.length} files`,
       targetLang: args.targetLang,
       dryRun: args.dryRun,
       placeholderProtected: grandPlaceholderProtected,
       protectedSkipped: grandProtectedSkipped,
+      residualUntranslated: allResidualUntranslated,
     });
 
-    if (args.reportStdout || (!args.reportFile && allSkippedKeys.length > 0)) {
+    if (args.reportStdout || (!args.reportFile && (allSkippedKeys.length > 0 || allResidualUntranslated.length > 0))) {
       console.log('');
       console.log(report);
     }
@@ -973,14 +1092,17 @@ async function run(args) {
   }
 
   return {
-    success: true,
-    exitCode: ExitCodes.SUCCESS,
+    success: allResidualUntranslated.length === 0,
+    exitCode: allResidualUntranslated.length === 0 ? ExitCodes.SUCCESS : ExitCodes.VALIDATION_FAILED,
+    error: allResidualUntranslated.length === 0 ? undefined : 'Auto Translate left untranslated placeholder values',
     total: grandTotal,
     translated: grandTranslated,
     skipped: grandSkipped,
     placeholderProtected: grandPlaceholderProtected,
     protectedSkipped: grandProtectedSkipped,
     skippedExisting: grandSkippedExisting,
+    finalCheckRetried: grandFinalCheckRetried,
+    residualUntranslated: allResidualUntranslated.length,
   };
 }
 

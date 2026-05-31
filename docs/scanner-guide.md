@@ -1,4 +1,4 @@
-# Scanner Guide (v4.2.0)
+# Scanner Guide (v4.2.1)
 
 ## Purpose
 

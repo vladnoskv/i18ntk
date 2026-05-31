@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.1] - 2026-05-31
+
+### Changed
+- Auto Translate now treats uppercase target-language placeholders such as `[AR] What We Offer` as untranslated target values when the bracketed code matches the target language, so target-aware mode sends the source text for translation instead of keeping the placeholder copy.
+- Auto Translate now performs a final pre-write leftover check and retries values that still look like placeholder-prefixed untranslated text, untranslated markers, source-language copies, or broken output.
+- Auto Translate reports leftover values in the post-translation report and exits with validation failure when leftovers remain after the final retry, instead of reporting a clean completion.
+
+### Fixed
+- Usage analysis no longer writes its inferred app source fallback, such as `src`, back into the shared locale configuration when `sourceDir` and `i18nDir` are both the locale directory.
+- Manager sizing now reads the configured i18n directory unless `--source-dir` is explicitly provided, so running sizing after usage no longer silently analyzes the wrong directory.
+- Manager sizing now treats a failed sizing analysis as a command failure instead of printing a generic operation success.
+- Validation summary reports now include warning and error details, including content-risk warning payloads, instead of only totals.
+
 ## [4.2.0] - 2026-05-30
 
 ### Security

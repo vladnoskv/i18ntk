@@ -30,8 +30,11 @@ class SizingCommand {
         try {
             const I18nSizingAnalyzer = require('../../i18ntk-sizing');
             const sizingAnalyzer = new I18nSizingAnalyzer();
-            await sizingAnalyzer.run(options);
-            return { success: true, command: 'sizing' };
+            const result = await sizingAnalyzer.run(options);
+            if (result && result.success === false) {
+                throw new Error(result.error || 'Sizing analysis failed');
+            }
+            return { success: true, command: 'sizing', result };
         } catch (error) {
             console.error(`Sizing command failed: ${error.message}`);
             throw error;

@@ -1476,7 +1476,7 @@ class UsageService {
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
       }
 
-      if (this.sourceDir || this.i18nDir) {
+      if (args.sourceDir || args.i18nDir) {
         await configManager.updateConfig({
           sourceDir: configManager.toRelative(this.sourceDir || this.config.sourceDir),
           i18nDir: configManager.toRelative(this.i18nDir || this.config.i18nDir)
@@ -1494,11 +1494,6 @@ class UsageService {
       }
       this.sourceDir = usageSource.sourceDir;
       this.config.sourceDir = usageSource.sourceDir;
-      if (this.sourceDir) {
-        await configManager.updateConfig({
-          sourceDir: configManager.toRelative(this.sourceDir)
-        });
-      }
 
       // 🚧 prevent scanning locales as source
       if (this.sourceDir && !args.sourceDir && path.resolve(this.sourceDir) === path.resolve(this.i18nDir)) {
@@ -1512,9 +1507,6 @@ class UsageService {
           this.sourceDir = path.resolve(this.config.projectRoot || '.');
         }
         this.config.sourceDir = this.sourceDir;
-        await configManager.updateConfig({
-          sourceDir: configManager.toRelative(this.sourceDir)
-        });
       }
 
       console.log(t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir || t('usage.noSourceDirectoryConfigured') || '(none)' }));

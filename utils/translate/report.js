@@ -9,6 +9,7 @@ function generateReport(skippedKeys, translatedCount, totalCount, options = {}) 
     timestamp = new Date().toISOString(),
     placeholderProtected = 0,
     protectedSkipped = 0,
+    residualUntranslated = [],
   } = options;
   const placeholderSkipped = skippedKeys.filter(key => key.skipReason !== 'protected');
   const protectedKeys = skippedKeys.filter(key => key.skipReason === 'protected');
@@ -28,13 +29,36 @@ function generateReport(skippedKeys, translatedCount, totalCount, options = {}) 
   lines.push(`  Placeholder-safe: ${String(placeholderProtected).padStart(6)}`);
   lines.push(`  Protected:       ${String(protectedSkipped).padStart(6)}`);
   lines.push(`  Skipped:         ${skippedKeys.length}`);
+  lines.push(`  Leftover warnings: ${String(residualUntranslated.length).padStart(3)}`);
   lines.push('='.repeat(72));
 
-  if (skippedKeys.length === 0) {
+  if (skippedKeys.length === 0 && residualUntranslated.length === 0) {
     lines.push('');
     lines.push('  All strings were processed. No keys were skipped.');
     lines.push('');
   } else {
+    if (residualUntranslated.length > 0) {
+      lines.push('');
+      lines.push('  WARNING: The following values still look untranslated after');
+      lines.push('  Auto Translate and one final retry.');
+      lines.push('');
+      lines.push('  Rerun Auto Translate to capture leftovers, then review this');
+      lines.push('  report if any warnings remain.');
+      lines.push('');
+      lines.push(`  ${'-'.repeat(72)}`);
+      lines.push('  File                 Key Path                                 Current Value');
+      lines.push(`  ${'-'.repeat(72)}`);
+      for (const item of residualUntranslated) {
+        const fileDisplay = String(item.fileName || path.basename(sourceFile || '') || 'N/A').padEnd(20).slice(0, 20);
+        const keyDisplay = String(item.keyPath || '').padEnd(40).slice(0, 40);
+        const valDisplay = String(item.value || '').length > 90
+          ? String(item.value).slice(0, 87) + '...'
+          : String(item.value || '');
+        lines.push(`  ${fileDisplay} ${keyDisplay} ${valDisplay}`);
+      }
+      lines.push(`  ${'-'.repeat(72)}`);
+    }
+
     if (placeholderSkipped.length > 0) {
       lines.push('');
       lines.push('  WARNING: The following keys were SKIPPED because they contain');
@@ -78,7 +102,10 @@ function generateReport(skippedKeys, translatedCount, totalCount, options = {}) 
   }
 
   lines.push('');
-  if (skippedKeys.length === 0) {
+  if (residualUntranslated.length > 0) {
+    lines.push('  Auto Translate did not fully complete because leftover');
+    lines.push('  placeholder-prefixed or English-looking values remain.');
+  } else if (skippedKeys.length === 0) {
     lines.push('  The generated file can be used immediately after review.');
     lines.push('  Placeholder tokens were preserved automatically where found.');
   } else if (placeholderSkipped.length > 0) {
