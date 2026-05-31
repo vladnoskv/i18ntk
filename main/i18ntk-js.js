@@ -9,9 +9,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const SecurityUtils = require('../utils/security.js');
-const { getConfig, saveConfig } = require('../utils/config-helper.js');
-const I18nHelper = require('../utils/i18n-helper.js');
+const SecurityUtils = require('../utils/security');
+const { getConfig, saveConfig } = require('../utils/config-helper');
+const I18nHelper = require('../utils/i18n-helper');
 const SetupEnforcer = require('../utils/setup-enforcer');
 const { program } = require('../utils/mini-commander');
 

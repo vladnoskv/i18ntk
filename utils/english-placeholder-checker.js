@@ -1,5 +1,5 @@
-const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 const LANGUAGE_PREFIX_PATTERN = /^\s*\[[A-Za-z]{2,3}(?:[-_][A-Za-z0-9]{2,8})?\]\s+\S/;
 
@@ -34,22 +34,24 @@ function collectStringLeaves(value, prefix = '') {
 }
 
 function collectJsonFiles(dir, rootDir = dir) {
-  if (!fs.existsSync(dir)) return [];
+  const baseDir = path.resolve(rootDir);
+  const validatedDir = SecurityUtils.validatePath(path.resolve(dir), baseDir);
+  if (!validatedDir || !SecurityUtils.safeExistsSync(validatedDir, baseDir)) return [];
 
-  const stat = fs.statSync(dir);
+  const stat = SecurityUtils.safeStatSync(validatedDir, baseDir);
   if (!stat.isDirectory()) return [];
 
   const results = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+  for (const entry of SecurityUtils.safeReaddirSync(validatedDir, baseDir, { withFileTypes: true })) {
     if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
 
-    const fullPath = path.join(dir, entry.name);
+    const fullPath = path.join(validatedDir, entry.name);
     if (entry.isDirectory()) {
-      results.push(...collectJsonFiles(fullPath, rootDir));
+      results.push(...collectJsonFiles(fullPath, baseDir));
     } else if (entry.isFile() && entry.name.endsWith('.json')) {
       results.push({
         fullPath,
-        displayPath: path.relative(rootDir, fullPath) || entry.name
+        displayPath: path.relative(baseDir, fullPath) || entry.name
       });
     }
   }
@@ -58,7 +60,10 @@ function collectJsonFiles(dir, rootDir = dir) {
 }
 
 function getEnglishLocaleFiles(sourceDir, sourceLanguage = 'en') {
-  const localeRoot = path.resolve(sourceDir || './locales');
+  const requestedRoot = path.resolve(sourceDir || './locales');
+  const localeRoot = SecurityUtils.validatePath(requestedRoot, process.cwd());
+  if (!localeRoot) return [];
+
   const files = [];
   const seen = new Set();
 
@@ -75,7 +80,8 @@ function getEnglishLocaleFiles(sourceDir, sourceLanguage = 'en') {
   }
 
   const monolithFile = path.join(localeRoot, `${sourceLanguage}.json`);
-  if (fs.existsSync(monolithFile) && fs.statSync(monolithFile).isFile()) {
+  const monolithStat = SecurityUtils.safeStatSync(monolithFile, localeRoot);
+  if (monolithStat && monolithStat.isFile()) {
     addFile({
       fullPath: monolithFile,
       displayPath: path.basename(monolithFile)
@@ -94,6 +100,7 @@ function getEnglishLocaleFiles(sourceDir, sourceLanguage = 'en') {
 function scanEnglishPlaceholders(options = {}) {
   const sourceDir = options.sourceDir || './locales';
   const sourceLanguage = options.sourceLanguage || 'en';
+  const localeRoot = SecurityUtils.validatePath(path.resolve(sourceDir), process.cwd()) || process.cwd();
   const files = getEnglishLocaleFiles(sourceDir, sourceLanguage);
   const placeholders = [];
   const errors = [];
@@ -101,8 +108,17 @@ function scanEnglishPlaceholders(options = {}) {
 
   for (const file of files) {
     try {
-      const content = fs.readFileSync(file.fullPath, 'utf8');
-      const parsed = JSON.parse(content);
+      const content = SecurityUtils.safeReadFileSync(file.fullPath, localeRoot, 'utf8');
+      if (!content) {
+        throw new Error('Unable to read locale file');
+      }
+
+      const parseFailed = { __i18ntkParseFailed: true };
+      const parsed = SecurityUtils.safeParseJSON(content, parseFailed);
+      if (parsed === parseFailed) {
+        throw new Error('Invalid JSON content');
+      }
+
       const leaves = collectStringLeaves(parsed);
       keyCount += leaves.length;
 

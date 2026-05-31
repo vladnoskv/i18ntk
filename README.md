@@ -1,4 +1,4 @@
-# i18ntk v4.3.0
+# i18ntk v4.3.1
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.0)](https://socket.dev/npm/package/i18ntk/overview/4.3.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.1)](https://socket.dev/npm/package/i18ntk/overview/4.3.1)
 
 ## Install
 
@@ -30,6 +30,12 @@ Requirements:
 - npm `>=8.0.0`
 - No runtime dependencies
 
+## What's New in 4.3.1
+
+- **FIX**: Published tarball now includes `utils/english-placeholder-checker.js`, resolving `MODULE_NOT_FOUND` at startup for `i18ntk-fixer --check-placeholders` and manager option 7.
+- **FIX**: Language-specific CLI entry points (`i18ntk-go`, `i18ntk-java`, `i18ntk-js`, `i18ntk-php`, `i18ntk-py`) and their shared `utils/mini-commander.js` dependency are now included in the published package.
+- **FIX**: Removed inconsistent `.js` extension suffixes from require paths in `main/i18ntk-js.js`.
+
 ## What's New in 4.3.0
 
 - **AUTO TRANSLATE**: Existing target values like `[AR] What We Offer`, `[AR] Email`, `[zh] Email`, and `[TR] Password` are now treated as untranslated placeholders for the matching target language and are translated from the source text.
@@ -40,7 +46,7 @@ Requirements:
 - **FIX PLACEHOLDERS**: Menu option 7 now runs an English source placeholder audit and reports how many `[LANG] ...` values remain in English locale files. A clean project reports `0`.
 - **SIZING/USAGE**: Usage analysis no longer writes its inferred app source fallback back into the shared locale config, so running usage before sizing no longer makes sizing analyze the wrong directory.
 - **VALIDATION REPORTS**: Validation summary files now include warning and error details, including English-content warning payloads, instead of only totals.
-- **DOCS**: Versioned docs and migration guidance now reflect the current 4.3.0 command surface.
+- **DOCS**: Versioned docs and migration guidance now reflect the current 4.3.1 command surface.
 
 ## What's New in 4.1.0
 
@@ -506,7 +512,7 @@ Example:
 
 ```json
 {
-  "version": "4.3.0",
+  "version": "4.3.1",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -568,7 +574,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
-- [Migration Guide v4.3.0](./docs/migration-guide-v4.3.0.md)
+- [Migration Guide v4.3.1](./docs/migration-guide-v4.3.1.md)
 
 ## Security
 

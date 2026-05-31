@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.1] - 2026-05-31
+
+### Fixed
+- Published tarball now includes `utils/english-placeholder-checker.js`, resolving `MODULE_NOT_FOUND` at startup for `i18ntk-fixer --check-placeholders` and manager option 7.
+- Language-specific CLI entry points (`main/i18ntk-go.js`, `main/i18ntk-java.js`, `main/i18ntk-js.js`, `main/i18ntk-php.js`, `main/i18ntk-py.js`) and their shared `utils/mini-commander.js` dependency are now included in the published package.
+- Removed inconsistent `.js` extension suffixes from require paths in `main/i18ntk-js.js`.
+
 ## [4.3.0] - 2026-05-31
 
 ### Fixed

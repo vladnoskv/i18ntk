@@ -1,13 +1,13 @@
-# Migration Guide v4.3.0
+# Migration Guide v4.3.1
 
 This guide covers the current upgrade path for projects using older `i18ntk` versions.
 
 ## Recommended Upgrade
 
 ```bash
-npm install -g i18ntk@4.3.0
+npm install -g i18ntk@4.3.1
 # or, for a project-local install:
-npm install --save-dev i18ntk@4.3.0
+npm install --save-dev i18ntk@4.3.1
 ```
 
 Verify the installed version:
@@ -22,7 +22,7 @@ Review `.i18ntk-config` and update these fields when missing:
 
 ```json
 {
-  "version": "4.3.0",
+  "version": "4.3.1",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -138,7 +138,7 @@ JSON reports are now pretty-printed instead of a one-line JSON string containing
 
 ## Usage Analysis Migration
 
-If older runs showed very high missing-key counts when `sourceDir` and `i18nDir` both pointed at `./locales`, rerun usage analysis on `4.3.0`:
+If older runs showed very high missing-key counts when `sourceDir` and `i18nDir` both pointed at `./locales`, rerun usage analysis on `4.3.1`:
 
 ```bash
 i18ntk-usage --source-dir ./src --i18n-dir ./locales
@@ -152,7 +152,7 @@ Validation output now prints one path block followed by the validator summary. T
 
 ## Security Notes
 
-Upgrade to `4.3.0` or newer for:
+Upgrade to `4.3.1` or newer for:
 
 - runtime language-name validation before locale file resolution
 - stricter backup restore entry validation

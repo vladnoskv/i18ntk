@@ -1,4 +1,4 @@
-# i18ntk API Reference (v4.3.0)
+# i18ntk API Reference (v4.3.1)
 
 ## Primary CLI
 
@@ -154,7 +154,7 @@ i18ntk-usage --source-dir ./src --i18n-dir ./locales
 i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup --dry-run-delete
 ```
 
-When `sourceDir` equals `i18nDir` and no application source directory can be inferred, `4.3.0` avoids scanning the whole project root to prevent inflated missing-key counts.
+When `sourceDir` equals `i18nDir` and no application source directory can be inferred, `4.3.1` avoids scanning the whole project root to prevent inflated missing-key counts.
 
 ## Backup
 

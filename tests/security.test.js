@@ -505,6 +505,15 @@ describe('Security Tests', () => {
   });
 
   describe('Fixer Command', () => {
+    test('package manifests should include English placeholder checker', () => {
+      const requiredFile = 'utils/english-placeholder-checker.js';
+      const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+      const publicPackageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.public.json'), 'utf8'));
+
+      assert.ok(packageJson.files.includes(requiredFile), 'package.json files must publish the placeholder checker');
+      assert.ok(publicPackageJson.files.includes(requiredFile), 'package.public.json files must publish the placeholder checker');
+    });
+
     test('should report language-code placeholders left in English locale files', () => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-english-placeholder-'));
       fs.mkdirSync(path.join(dir, 'en'), { recursive: true });
