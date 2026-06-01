@@ -167,13 +167,15 @@ class I18nUsageAnalyzer {
       // Ensure translation patterns are defined
       this.config = this.config || {};
       this.config.translationPatterns = this.config.translationPatterns || [
-        /t\(['"`]([^'"`]+)['"`]/g,
+        /(?<![\w$.])t\s*\(['"`]([^'"`]+)['"`]/g,
+        /(?<![\w$.])tx\s*\(['"`]([^'"`]+)['"`]/g,
         /i18n\.t\(['"`]([^'"`]+)['"`]/g,
         /useTranslation\(\)\.t\(['"`]([^'"`]+)['"`]/g,
-        /t\(`([^`]+)`\)/g,
+        /(?<![\w$.])t\s*\(`([^`]+)`\)/g,
+        /(?<![\w$.])tx\s*\(`([^`]+)`\)/g,
         /i18nKey=['"`]([^'"`]+)['"`]/g,
         /\$t\(['"`]([^'"`]+)['"`]/g,
-        /getTranslation\(['"`]([^'"`]+)['"`]/g
+        /(?<![\w$.])getTranslation\s*\(['"`]([^'"`]+)['"`]/g
       ];
             this.extractor = getExtractor(this.config.extractor);
 
@@ -422,13 +424,15 @@ class I18nUsageAnalyzer {
         loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         if (!Array.isArray(this.config.translationPatterns)) {
           this.config.translationPatterns = [
-            /t\(['"`]([^'"`]+)['"`]/g,
+            /(?<![\w$.])t\s*\(['"`]([^'"`]+)['"`]/g,
+            /(?<![\w$.])tx\s*\(['"`]([^'"`]+)['"`]/g,
             /i18n\.t\(['"`]([^'"`]+)['"`]/g,
             /useTranslation\(\)\.t\(['"`]([^'"`]+)['"`]/g,
-            /t\(`([^`]+)`\)/g,
+            /(?<![\w$.])t\s*\(`([^`]+)`\)/g,
+            /(?<![\w$.])tx\s*\(`([^`]+)`\)/g,
             /i18nKey=['"`]([^'"`]+)['"`]/g,
             /\$t\(['"`]([^'"`]+)['"`]/g,
-            /getTranslation\(['"`]([^'"`]+)['"`]/g
+            /(?<![\w$.])getTranslation\s*\(['"`]([^'"`]+)['"`]/g
           ];
         }
         if (!Array.isArray(this.config.excludeDirs)) {

@@ -1,4 +1,4 @@
-# i18ntk v4.3.2
+# i18ntk v4.3.3
 
 A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.2)](https://socket.dev/npm/package/i18ntk/overview/4.3.2)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.3)](https://socket.dev/npm/package/i18ntk/overview/4.3.3)
 ## VS Code Extensions
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
@@ -40,6 +40,13 @@ Requirements:
 - Node.js `>=16.0.0`
 - npm `>=8.0.0`
 - No runtime dependencies
+
+## What's New in 4.3.3
+
+- **USAGE FIX**: Usage extraction no longer treats ordinary method calls such as `get("next")`, `headers.get("etag")`, `set(...)`, or `setItem(...)` as translation calls.
+- **USAGE FIX**: Local `tx(...)` wrappers and bounded dynamic `tx` template usages are resolved so real keys are less likely to appear unused.
+- **KEY STYLE**: Hybrid dot-path plus snake_case segment keys are valid, for example `namespace.section.snake_case_leaf`; malformed separators and uppercase segments are still reported.
+- **SAFETY**: Unused-key reports are advisory. Do not bulk-delete keys from an unused report without manual verification or a precise usage scan.
 
 ## What's New in 4.3.2
 
@@ -528,7 +535,7 @@ Example:
 
 ```json
 {
-  "version": "4.3.2",
+  "version": "4.3.3",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -590,7 +597,7 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Auto Translate Guide](./docs/auto-translate.md)
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
-- [Migration Guide v4.3.2](./docs/migration-guide-v4.3.2.md)
+- [Migration Guide v4.3.3](./docs/migration-guide-v4.3.3.md)
 
 ## Security
 
@@ -604,6 +611,16 @@ The public package manifest includes `readmeFilename: "README.md"`, and the rele
 - [Contributing](./CONTRIBUTING.md)
 - [Code of Conduct](./CODE_OF_CONDUCT.md)
 - [Funding](./FUNDING.md)
+
+## Related Tools
+
+| Tool | Purpose |
+|---|---|
+| **i18ntk** | Zero-dependency i18n toolkit for scanning, validation, translation, reports, and runtime loading. |
+| **i18ntk Workbench** | Full VS Code localization health dashboard powered by i18ntk. |
+| **i18ntk Lens** | Lightweight inline translation hovers, diagnostics, and key navigation. |
+| **PublishGuard** | Pre-publish safety scanner for npm packages and VS Code extensions. |
+| **ContextKit** | AI coding context manager for AGENTS.md, Claude, Cursor, Copilot, Roo, and Codex files. |
 
 ## License
 

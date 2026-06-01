@@ -206,7 +206,7 @@ function inferDynamicKeyReferences(content, availableKeys) {
   const bindings = collectSimpleBindings(source);
   const references = [];
   const seen = new Set();
-  const callPattern = /(?:\bt|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
+  const callPattern = /(?:\bt|\btx|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
   let match;
 
   while ((match = callPattern.exec(source)) !== null) {
@@ -244,7 +244,7 @@ function findUnresolvedDynamicReferences(content, availableKeys) {
   const bindings = collectSimpleBindings(source);
   const unresolved = [];
   const seen = new Set();
-  const callPattern = /(?:\bt|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
+  const callPattern = /(?:\bt|\btx|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
   let match;
 
   while ((match = callPattern.exec(source)) !== null) {

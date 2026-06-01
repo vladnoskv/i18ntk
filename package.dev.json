@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.3.2",
+  "version": "4.3.3",
   "private": true,
   "manifestRole": "development",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
@@ -293,9 +293,9 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.3.2",
-    "releaseDate": "31/05/2026",
-    "lastUpdated": "31/05/2026",
+    "version": "4.3.3",
+    "releaseDate": "01/06/2026",
+    "lastUpdated": "01/06/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
@@ -307,6 +307,8 @@
       "AUTO TRANSLATE: Short all-caps acronyms and codes such as XP may remain unchanged without failing the final leftover check.",
       "FIX PLACEHOLDERS: Option 7 and i18ntk-fixer --check-placeholders audit English locale files for [LANG] placeholder leftovers and report a clean count of 0.",
       "SIZING: Manager sizing uses the configured i18n directory unless --source-dir is explicitly provided, so usage analysis no longer poisons the next sizing run.",
+      "USAGE: Usage extraction now avoids false missing-key matches from ordinary methods such as get(), headers.get(), set(), and setItem().",
+      "USAGE: Usage insights now resolve tx() wrapper dynamic keys backed by bounded literal values, reducing false unused-key reports.",
       "VALIDATION: Validation summary reports now include warning and error details, not only totals.",
       "USAGE: Usage fallback source detection no longer writes its inferred app source directory back into the shared locale configuration."
     ],
@@ -314,7 +316,7 @@
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.3.3",
+    "nextVersion": "4.3.4",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",

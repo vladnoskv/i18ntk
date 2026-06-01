@@ -84,6 +84,45 @@ test('usage insights resolves simple dynamic template keys before wildcard fallb
   );
 });
 
+test('usage insights resolves tx wrapper dynamic template keys', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      const statuses = ['open', 'closed'];
+      statuses.map(normalized => tx(\`tournaments.status.\${normalized}\`));
+    `,
+    relativePath: 'app/tournaments/page.tsx',
+    availableKeys: new Set(['tournaments.status.open', 'tournaments.status.closed', 'tournaments.status.pending']),
+    directKeys: ['tournaments.status.*'],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(
+    insights.keyReferences.map(ref => [ref.key, ref.matchType]),
+    [
+      ['tournaments.status.open', 'dynamic-template'],
+      ['tournaments.status.closed', 'dynamic-template'],
+    ]
+  );
+});
+
+test('usage insights reports unresolved tx dynamic expressions without wildcard over-credit', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Status({ normalized }) {
+        return <span>{tx(\`tournaments.status.\${normalized}\`)}</span>;
+      }
+    `,
+    relativePath: 'app/tournaments/page.tsx',
+    availableKeys: new Set(['tournaments.status.open', 'tournaments.status.closed']),
+    directKeys: ['tournaments.status.*'],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(insights.keyReferences, []);
+  assert.equal(insights.unresolvedDynamicReferences.length, 1);
+  assert.equal(insights.unresolvedDynamicReferences[0].prefix, 'tournaments.status.');
+});
+
 test('usage insights expands bounded dynamic key arrays to exact available keys', () => {
   const insights = analyzeSourceForUsageInsights({
     content: `

@@ -95,7 +95,7 @@ const FRAMEWORKS = {
     deps: ['@lingui/core', '@lingui/react'],
     globs: ['src/**/*.{js,jsx,ts,tsx}'],
     patterns: [
-      /t\(['"`]([^'"`]+)['"`]\)/g,
+      /(?<![\w$.])t\s*\(['"`]([^'"`]+)['"`]\)/g,
       /_\(['"`]([^'"`]+)['"`]\)/g
     ],
     ignore: ['node_modules/**']
@@ -226,7 +226,7 @@ const FRAMEWORKS = {
       'config/locales/*.{rb,yml,yaml}'
     ],
     patterns: [
-      /t\(['"]([^'"]+)['"]/g,
+      /(?<![\w$.])t\s*\(['"]([^'"]+)['"]/g,
       /I18n\.t\(['"]([^'"]+)['"]/g,
       /I18n\.translate\(['"]([^'"]+)['"]/g,
       /l\(['"]([^'"]+)['"]/g,

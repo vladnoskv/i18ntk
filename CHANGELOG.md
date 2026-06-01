@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.3] - 2026-06-01
+
+### Fixed
+- Usage extraction no longer reports ordinary method calls such as `get("next")`, `headers.get("etag")`, `set(...)`, or `setItem(...)` as missing translation keys.
+- Usage insights now resolve `tx(...)` wrapper calls and bounded dynamic `tx` template keys, reducing false unused-key reports for local wrappers.
+- Key naming validation now supports hybrid dot-path plus snake_case segment keys, such as `namespace.section.snake_case_leaf`, while still rejecting malformed separators and uppercase segments.
+- Usage documentation now treats unused-key reports as advisory; do not bulk-delete keys from an unused report without manual verification or a more precise usage scan.
+
 ## [4.3.2] - 2026-05-31
 
 ### Changed

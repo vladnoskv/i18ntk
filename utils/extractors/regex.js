@@ -22,6 +22,17 @@ function normalizeKeyCandidate(rawKey) {
   return key;
 }
 
+function leadingIdentifierFromPattern(pattern) {
+  const source = pattern instanceof RegExp ? pattern.source : String(pattern || '');
+  const match = /^([A-Za-z_$][A-Za-z0-9_$]*)\\(?:\(|s|b|.)?/.exec(source);
+  return match ? match[1] : null;
+}
+
+function hasIdentifierCallBoundary(content, index) {
+  if (index <= 0) return true;
+  return !/[A-Za-z0-9_$.]/.test(content[index - 1]);
+}
+
 function extract(content, patterns = []) {
   const keys = new Set();
   if (!Array.isArray(patterns)) return [];
@@ -30,8 +41,13 @@ function extract(content, patterns = []) {
   for (const pattern of patterns) {
     try {
       let regex = pattern instanceof RegExp ? new RegExp(pattern.source, 'g') : new RegExp(pattern, 'g');
+      const leadingIdentifier = leadingIdentifierFromPattern(pattern);
       let match;
       while ((match = regex.exec(contentStr)) !== null) {
+        if (leadingIdentifier && match[0].startsWith(leadingIdentifier) && !hasIdentifierCallBoundary(contentStr, match.index)) {
+          if (regex.lastIndex === 0) break;
+          continue;
+        }
         if (match[1]) {
           const normalized = normalizeKeyCandidate(match[1]);
           if (normalized) keys.add(normalized);

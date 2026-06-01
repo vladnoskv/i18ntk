@@ -687,9 +687,10 @@ class I18nValidator {
   validateKeyNaming(sourceObj, style) {
     const keyStyle = style || this.config.keyStyle || 'dot.notation';
     const allKeys = this.getAllKeys(sourceObj);
+    const hybridDotSnake = /^[a-z0-9]+(?:_[a-z0-9]+)*(?:\.[a-z0-9]+(?:_[a-z0-9]+)*)*$/;
     const validators = {
-      'dot.notation': /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$/,
-      'snake_case': /^[a-z][a-z0-9]*(_[a-z][a-z0-9]*)*$/,
+      'dot.notation': hybridDotSnake,
+      'snake_case': hybridDotSnake,
       'camelCase': /^[a-z][a-zA-Z0-9]*$/,
       'kebab-case': /^[a-z][a-z0-9]*(-[a-z][a-z0-9]*)*$/,
       'flat': /^[a-zA-Z][a-zA-Z0-9]*$/
