@@ -518,8 +518,14 @@ test('auto translate run warns and fails when final check still finds placeholde
     assert.equal(result.success, false);
     assert.equal(result.residualUntranslated, 1);
     assert.equal(output.offer, '[AR] What We Offer');
+    const residualReport = JSON.parse(fs.readFileSync(path.join(project, 'i18ntk-reports', 'auto-translate', 'latest.json'), 'utf8'));
+    assert.equal(residualReport.kind, 'i18ntk.autoTranslateResiduals');
+    assert.equal(residualReport.targetLang, 'ar');
+    assert.deepEqual(residualReport.items.map((item) => [item.fileName, item.keyPath, item.value]), [
+      ['home.json', 'offer', '[AR] What We Offer']
+    ]);
     assert.match(text, /WARNING: 1 values still look untranslated/);
-    assert.match(text, /Rerun Auto Translate/);
+    assert.match(text, /resume report/);
     assert.match(text, /home\.json\s+offer\s+\[AR\] What We Offer/);
   } finally {
     console.log = originalLog;
@@ -659,7 +665,7 @@ test('managed auto translate reports failure when a target language has leftover
     const output = lines.join('\n');
 
     assert.equal(result.success, false);
-    assert.match(result.error, /Rerun Auto Translate/);
+    assert.match(result.error, /resume report/);
     assert.match(output, /❌ ar \(Auto Translate left untranslated placeholder values\)/);
     assert.doesNotMatch(output, /Translation complete!/);
   } finally {

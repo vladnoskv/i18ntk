@@ -31,7 +31,9 @@ After confirmation, it translates each requested target language and writes matc
 
 Auto Translate keeps existing translated target values by default. If a target JSON file already exists, only keys that are missing, empty, marked as untranslated, still identical to the source, likely still English, visibly corrupt, or still prefixed with the target language code such as `[AR] What We Offer`, `[AR] Email`, `[zh] Email`, or `[TR] Password` are sent to the provider. This avoids paying the network and time cost for strings that are already translated while still repairing placeholder-style leftovers from earlier runs.
 
-Before writing an output file, Auto Translate runs a final leftover check. If a value still looks like a target-code placeholder, a source-language copy, an untranslated marker, or broken output, i18ntk retries that value once from the source text. If any leftovers remain after the retry, the command prints a warning, includes the values in the post-translation report, recommends rerunning Auto Translate, and exits with validation failure instead of claiming a clean completion.
+Before writing an output file, Auto Translate runs a final leftover check. If a value still looks like a target-code placeholder, a source-language copy, an untranslated marker, or broken output, i18ntk retries that value once from the source text. If any leftovers remain after the retry, the command prints a warning, includes the values in the post-translation report, writes a structured resume report to `i18ntk-reports/auto-translate/latest.json`, and exits with validation failure instead of claiming a clean completion.
+
+The resume report is intentionally small and machine-readable. It lists the target language, source file context, and unresolved `{ fileName, keyPath, value, reason }` items so follow-up tooling can retry only those keys instead of restarting a full translation run. i18ntk Workbench and i18ntk Lens read this report during scan, surface the affected locale JSON key in the VS Code editor, and offer a quick action to add a key to `i18ntk-auto-translate.json` protection when that value should remain unchanged.
 
 When the manager translates multiple files for one target language, it audits every selected file before reporting the target language as failed. A leftover warning in one file does not stop the remaining files from being checked.
 
@@ -158,7 +160,7 @@ i18ntk-translate locales/en/common.json de --report-stdout
 i18ntk-translate locales/en/common.json de --report-file ./i18ntk-reports/translate-de.txt
 ```
 
-Dry-run reports show planned work without writing translated output. When the final leftover check cannot fully clear untranslated placeholder-style values, reports include a `Leftover warnings` count and a table with file name, key path, current value, and a rerun recommendation.
+Dry-run reports show planned work without writing translated output. When the final leftover check cannot fully clear untranslated placeholder-style values, reports include a `Leftover warnings` count and a table with file name, key path, and current value. The same unresolved values are written to `i18ntk-reports/auto-translate/latest.json` for targeted retry or VS Code review.
 
 ## Useful Options
 
@@ -215,7 +217,7 @@ Provider URL safety:
 - Existing translated target values are preserved unless `--translate-all` is used.
 - Existing target values are considered needing translation when they are missing, empty, untranslated markers, identical to the source, likely still English, visibly corrupt from encoding damage such as `?????`, replacement characters, or common mojibake, or prefixed with the target language code and English text, such as `[AR] What We Offer`, `[AR] Email`, `[zh] Email`, or `[TR] Password`.
 - Short all-caps acronyms and codes such as `XP`, `API`, and `2FA` may remain unchanged without failing the final leftover check.
-- Auto Translate only reports clean completion after the final leftover check finds no placeholder-prefixed or source-copy untranslated values. Remaining leftovers produce warnings and a validation-failed exit code so automation can rerun or review them.
+- Auto Translate only reports clean completion after the final leftover check finds no placeholder-prefixed or source-copy untranslated values. Remaining leftovers produce warnings, a validation-failed exit code, and `i18ntk-reports/auto-translate/latest.json` so automation or VS Code companions can retry or review only unresolved keys.
 - Managed Auto Translate processes all selected files for a language before summarizing leftover failures.
 - Progress output is stage-aware: normal keys are shown as `Translating strings`, placeholder-preserve work is shown as `Translating placeholder-safe text segments`, and updates include the active key path when available.
 - Placeholder-bearing strings skipped by policy still need manual translation.

@@ -42,8 +42,8 @@ function generateReport(skippedKeys, translatedCount, totalCount, options = {}) 
       lines.push('  WARNING: The following values still look untranslated after');
       lines.push('  Auto Translate and one final retry.');
       lines.push('');
-      lines.push('  Rerun Auto Translate to capture leftovers, then review this');
-      lines.push('  report if any warnings remain.');
+      lines.push('  A resume report has been written so VS Code companions can');
+      lines.push('  show the affected keys and retry only unresolved values.');
       lines.push('');
       lines.push(`  ${'-'.repeat(72)}`);
       lines.push('  File                 Key Path                                 Current Value');
@@ -131,6 +131,29 @@ function writeReport(reportText, filePath) {
   }
 }
 
+function writeResidualReport(residualUntranslated, options = {}) {
+  if (!Array.isArray(residualUntranslated) || residualUntranslated.length === 0) return null;
+  const reportDir = path.resolve(process.cwd(), 'i18ntk-reports', 'auto-translate');
+  const reportPath = path.join(reportDir, 'latest.json');
+  const timestamp = options.timestamp || new Date().toISOString();
+  const report = {
+    kind: 'i18ntk.autoTranslateResiduals',
+    version: 1,
+    generatedAt: timestamp,
+    targetLang: options.targetLang || '',
+    sourceFile: options.sourceFile || '',
+    resumeMode: 'onlyMissing',
+    items: residualUntranslated.map((item) => ({
+      fileName: String(item.fileName || ''),
+      keyPath: String(item.keyPath || ''),
+      value: String(item.value || ''),
+      reason: String(item.reason || 'untranslated')
+    }))
+  };
+  const ok = SecurityUtils.safeWriteFileSync(reportPath, JSON.stringify(report, null, 2) + '\n', process.cwd(), 'utf-8');
+  return ok ? reportPath : null;
+}
+
 function formatSummaryLine(skippedCount, translatedCount, totalCount, placeholderProtected = 0, protectedSkipped = 0, existingKept = 0) {
   const protectedPart = placeholderProtected > 0 ? `, ${placeholderProtected} placeholder-safe` : '';
   const glossaryPart = protectedSkipped > 0 ? `, ${protectedSkipped} protected` : '';
@@ -141,5 +164,6 @@ function formatSummaryLine(skippedCount, translatedCount, totalCount, placeholde
 module.exports = {
   generateReport,
   writeReport,
+  writeResidualReport,
   formatSummaryLine,
 };

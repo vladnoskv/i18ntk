@@ -1,4 +1,4 @@
-# i18ntk v4.3.3
+# i18ntk v4.4.0
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.3)](https://socket.dev/npm/package/i18ntk/overview/4.3.3)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.4.0)](https://socket.dev/npm/package/i18ntk/overview/4.4.0)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -56,12 +56,24 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Validation reports | Yes | Limited |
 | Auto-translation workflow | Yes | External tooling |
 
-## What's New in 4.3.3
+## What's New in 4.4.0
 
-- **USAGE FIX**: Usage extraction no longer treats ordinary method calls such as `get("next")`, `headers.get("etag")`, `set(...)`, or `setItem(...)` as translation calls.
-- **USAGE FIX**: Local `tx(...)` wrappers and bounded dynamic `tx` template usages are resolved so real keys are less likely to appear unused.
-- **KEY STYLE**: Hybrid dot-path plus snake_case segment keys are valid, for example `namespace.section.snake_case_leaf`; malformed separators and uppercase segments are still reported.
-- **SAFETY**: Unused-key reports are advisory. Do not bulk-delete keys from an unused report without manual verification or a precise usage scan.
+- **DEAD-KEY DETECTION**: Dead-key confidence now uses resolved dynamic key data from usage insights instead of crude text-overlap heuristics. Keys expanded from template literals or const arrays are properly tracked.
+- **LOCALE JSON IMPORT DETECTION**: `import en from '../../locales/en/foo.json'` is now detected and property accesses are tracked as key usages, closing the gap between CLI and VSCode scanners.
+- **CONFIDENCE-SPLIT REPORTS**: Unused keys are now reported by confidence tier — confirmed (≥80%), likely (40-80%), possibly used (<40%) — instead of a flat list.
+- **NEW CLI FLAGS**: `--strict-unused` (only high-confidence keys), `--json` (structured JSON output for CI), `--prune` / `--prune-keep` (stale report cleanup).
+- **MOJIBAKE DETECTION**: Replacement-character artifacts like `Abwicklungspr?fung` and `L?ser` are detected during translation analysis.
+- **CLIENT-BOUNDARY WARNINGS**: `"use client"` files importing locale JSON are flagged — this bypasses the runtime and increases bundle size.
+- **COPY-FORMATTER DETECTION**: Local `const tx = ...` functions that don't call a translation runtime are identified as likely copy formatters, reducing false positive key noise.
+- **CONFIG FIX**: `--source-dir` and `--i18n-dir` are no longer forced equal when both are explicitly passed via CLI.
+- **Next.js DETECTION**: App Router files with `"use server"` / `"use client"` directives are now detected and reported by component type.
+- **VSCode DIAGNOSTICS**: New `i18ntk.clearDiagnostics` command. Stale diagnostics are now cleared at scan start. New diagnostic codes: `i18ntk.clientBoundary`, `i18ntk.copyFormatter`.
+- **AUTO TRANSLATE RESUME REPORTS**: If a provider still returns untranslated values after the final targeted retry, Auto Translate writes `i18ntk-reports/auto-translate/latest.json` so tooling can identify and retry only unresolved keys.
+- **VS CODE RESIDUAL PICKUP**: i18ntk Workbench and Lens read Auto Translate residual reports, show the affected locale JSON key in the editor, and can add intentionally unchanged keys to Auto Translate protection.
+- **WRAPPER CONFIG**: `.i18ntk-config` now supports `usage.translationFunctions`, `usage.serverWrappers`, and `usage.copyFormatters` for fine-grained control.
+- **TELEMETRY/EVENT STRING FILTERING**: String literals inside `trackEvent()`, `emitDomainEvent()`, `analytics.track()` and similar calls are classified as telemetry literals and no longer falsely counted as translation usage.
+- **OBJECT-METHOD KEY DETECTION**: `input.tx("key")`, `helper.tx("key")`, and `.tx(\`dynamic.${var}\`)` patterns are now recognized as translation calls alongside standalone `tx()` calls.
+- **LOCAL WRAPPER RESOLUTION**: Functions like `const text = (key, fallback) => tx(key)` that internally call the translation runtime are detected, and their string-literal invocations are automatically resolved to actual keys.
 
 See [CHANGELOG.md](./CHANGELOG.md) for more release details.
 
@@ -150,7 +162,7 @@ Note: manager route `i18ntk --command=backup` is disabled in current builds. Use
 | `i18ntk --command=usage` / `i18ntk-usage` | Maps translation keys to source files and finds unused/missing keys. | Direct i18n calls, literal known-key references, bounded dynamic templates/object maps, unresolved dynamic expressions, hardcoded text candidates, namespace/file naming mismatches. | Usage report with key locations, namespace recommendations, unresolved dynamic expressions, hardcoded text suggestions, and optional dead-key report. Does not delete unless cleanup deletion is explicitly enabled. |
 | `i18ntk --command=scanner` / `i18ntk-scanner` | Scans source for i18n issues and hardcoded user-facing text. | JSX/template text, common text attributes, i18n usage patterns, source-language text profiles. | Scanner report. Does not edit files. |
 | `i18ntk --command=complete` / `i18ntk-complete` | Adds missing keys to target language files for 100% key coverage. | Source-language keys missing from targets. | Target locale JSON files, using missing translation markers/prefixes. |
-| `i18ntk --command=translate` / `i18ntk-translate` | Auto-translates locale JSON using configured provider behavior. | Missing, empty, untranslated-marker, source-copy, likely-English, or visibly corrupt target values by default. | Target locale JSON files and translation reports. Existing translated values are kept unless `--translate-all` is used. |
+| `i18ntk --command=translate` / `i18ntk-translate` | Auto-translates locale JSON using configured provider behavior. | Missing, empty, untranslated-marker, source-copy, likely-English, or visibly corrupt target values by default. | Target locale JSON files and translation reports. Existing translated values are kept unless `--translate-all` is used. If unresolved values remain after retry, writes `i18ntk-reports/auto-translate/latest.json` for targeted follow-up. |
 | `i18ntk --command=sizing` / `i18ntk-sizing` | Estimates translated string length expansion and layout risk. | Text length, expansion ratios, placeholder-bearing strings. | Sizing report. Does not edit locale files. |
 | `i18ntk --command=summary` / `i18ntk-summary` | Shows project translation status. | Configured locales, reports, completeness status. | Console/report output only. |
 | `i18ntk-fixer` | Fixes placeholder and missing-marker issues, and can audit English source files with `--check-placeholders`. | Placeholder corruption, missing translation markers, configured language files, `[LANG] ...` leftovers in English locales. | Locale JSON files when fixes are applied. Use dry-run options where available before bulk edits. |

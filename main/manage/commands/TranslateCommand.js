@@ -257,8 +257,8 @@ class TranslateCommand {
         const failed = results.filter(r => !r.ok);
         if (failed.length > 0) {
             const message = failed.length === 1
-                ? `Translation finished with warnings for ${failed[0].lang}. Rerun Auto Translate to capture leftovers.`
-                : `Translation finished with warnings for ${failed.length} languages. Rerun Auto Translate to capture leftovers.`;
+                ? `Translation finished with warnings for ${failed[0].lang}. Review the Auto Translate resume report for unresolved keys.`
+                : `Translation finished with warnings for ${failed.length} languages. Review the Auto Translate resume report for unresolved keys.`;
             console.log('\n  ' + this.tr('translate.summary.incomplete', { count: failed.length }, message));
             return { success: false, results, error: message };
         }

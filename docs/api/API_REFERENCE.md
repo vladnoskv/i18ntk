@@ -137,6 +137,8 @@ Translate-specific options:
 
 By default, existing translated target values are kept and only missing, marker, source-copy, likely-English, or visibly corrupt values are translated. Corrupt-value detection covers common broken output such as `?????`, Unicode replacement characters, and mojibake. Use `--translate-all` or `--force-translate` for a full re-translation.
 
+If the final leftover check still finds untranslated values after its targeted retry, Auto Translate exits with validation failure and writes `i18ntk-reports/auto-translate/latest.json`. That report lists unresolved keys so automation, i18ntk Workbench, or i18ntk Lens can retry or review only the remaining values instead of restarting a full translation.
+
 ## Sizing
 
 ```bash

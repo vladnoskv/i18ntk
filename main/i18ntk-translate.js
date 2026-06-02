@@ -65,7 +65,7 @@ const {
 } = require('../utils/translate/protection');
 const { translateBatch, DEFAULT_CONCURRENCY, clampProviderConcurrency } = require('../utils/translate/api');
 const { collectLeaves, getLeaf, setLeaf, deepClone } = require('../utils/translate/traverse');
-const { generateReport, writeReport, formatSummaryLine } = require('../utils/translate/report');
+const { generateReport, writeReport, writeResidualReport, formatSummaryLine } = require('../utils/translate/report');
 const { analyzeEnglishContent } = require('../utils/validation-risk');
 const {
   confirmGlobalChoice,
@@ -996,7 +996,7 @@ async function processFile(sourcePath, targetLang, args) {
   }
 
   if (residualUntranslated.length > 0) {
-    console.warn(`[${fileName}] Warning: ${residualUntranslated.length} values still look untranslated after retry. Rerun Auto Translate to capture leftovers.`);
+    console.warn(`[${fileName}] Warning: ${residualUntranslated.length} values still look untranslated after retry. A resume report will capture these keys.`);
   }
 
   console.log(`[${fileName}] Writing output.`);
@@ -1092,7 +1092,15 @@ async function run(args) {
 
   if (allResidualUntranslated.length > 0) {
     console.warn(`WARNING: ${allResidualUntranslated.length} values still look untranslated after Auto Translate.`);
-    console.warn('Rerun Auto Translate to capture leftovers, or review the values listed in the report.');
+    const residualReportPath = writeResidualReport(allResidualUntranslated, {
+      sourceFile: sourceFiles.length === 1 ? sourceFiles[0] : `${sourceFiles.length} files`,
+      targetLang: args.targetLang,
+    });
+    if (residualReportPath) {
+      console.warn(`Auto Translate resume report written: ${residualReportPath}`);
+    } else {
+      console.warn('Auto Translate could not write the resume report. Review the values listed in the report output.');
+    }
   }
 
   if (allSkippedKeys.length > 0 || allResidualUntranslated.length > 0 || args.reportFile || args.reportStdout) {

@@ -4,6 +4,9 @@ const KEY_BOUNDARY = /[A-Za-z0-9_.:*-]/;
 const HUMAN_TEXT_MIN = 3;
 const HUMAN_TEXT_MAX = 120;
 const MAX_DYNAMIC_EXPANSIONS = 25;
+const LOCALE_IMPORT_PATTERN = /\bimport\s+(?:\*\s+as\s+)?([A-Za-z_$][\w$]*)\s+from\s+['"]([^'"]+\.json)['"]/g;
+const LOCALE_REQUIRE_PATTERN = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\s*\(\s*['"]([^'"]+\.json)['"]\s*\)/g;
+const LOCALE_PROPERTY_READ = /(?<![\w$'"\/\.-])([A-Za-z_$][\w$]*)\s*\.\s*([A-Za-z_$][\w$]+(?:\s*\.\s*[A-Za-z_$][\w$]+)*)\s*(?:[;,\n\)\]\}])/g;
 
 function stripComments(content) {
   return String(content || '')
@@ -28,6 +31,7 @@ function isBoundaryAt(content, index) {
 function findLiteralKeyReferences(content, availableKeys) {
   const source = stripComments(content);
   const references = [];
+  const literalContexts = [];
 
   for (const key of Array.from(availableKeys || []).sort((a, b) => b.length - a.length)) {
     if (!key || typeof key !== 'string') continue;
@@ -43,11 +47,14 @@ function findLiteralKeyReferences(content, availableKeys) {
       const beforeOnLine = source.slice(lineStart, index);
       const looksLikeObjectValue = /:\s*['"`]?$/.test(beforeOnLine);
       if (beforeOk && afterOk && !looksLikeObjectValue) {
+        const context = classifyLiteralContext(source, index, key);
         references.push({
           key,
-          matchType: 'literal',
+          matchType: context.isTelemetry ? 'literal-telemetry' : 'literal',
           ...findLineColumn(source, index),
+          context,
         });
+        literalContexts.push({ key, index, context });
         break;
       }
 
@@ -56,6 +63,39 @@ function findLiteralKeyReferences(content, availableKeys) {
   }
 
   return references;
+}
+
+const TELEMETRY_PATTERNS = [
+  /\.?\b(trackEvent|emitDomainEvent|emitEvent|track|analytics\.send|analytics\.track|gtag|dataLayer\.push|logEvent)\s*\(\s*['"`]?\s*$/,
+  /\.?\b(event|telemetry)\s*[.\s]*['"`]?\s*$/,
+];
+
+function classifyLiteralContext(source, matchIndex, key) {
+  const lineStart = source.lastIndexOf('\n', matchIndex) + 1;
+  const before = source.slice(lineStart, matchIndex).trimEnd();
+
+  let isTelemetry = false;
+  let containerCall = null;
+  let contextNote = null;
+
+  for (const pattern of TELEMETRY_PATTERNS) {
+    if (pattern.test(before)) {
+      isTelemetry = true;
+      containerCall = before.replace(pattern, '').trim();
+      contextNote = 'Appears inside a telemetry/event/analytics call — probably not a translation key.';
+      break;
+    }
+  }
+
+  if (!isTelemetry) {
+    const callMatch = /\.?\b(\w+)\s*\(\s*['"`]?\s*$/.exec(before);
+    if (callMatch && callMatch[1] !== 't' && callMatch[1] !== 'tx' && callMatch[1] !== 'translate' && callMatch[1] !== 'i18n' && callMatch[1] !== '$t') {
+      containerCall = callMatch[1];
+      contextNote = `Appears inside ${containerCall}() — not a recognized translation call.`;
+    }
+  }
+
+  return { isTelemetry, containerCall, contextNote };
 }
 
 function parseStringList(raw) {
@@ -206,7 +246,7 @@ function inferDynamicKeyReferences(content, availableKeys) {
   const bindings = collectSimpleBindings(source);
   const references = [];
   const seen = new Set();
-  const callPattern = /(?:\bt|\btx|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
+  const callPattern = /(?:\bt|\btx|\.tx|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
   let match;
 
   while ((match = callPattern.exec(source)) !== null) {
@@ -244,7 +284,7 @@ function findUnresolvedDynamicReferences(content, availableKeys) {
   const bindings = collectSimpleBindings(source);
   const unresolved = [];
   const seen = new Set();
-  const callPattern = /(?:\bt|\btx|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
+  const callPattern = /(?:\bt|\btx|\.tx|\bi18n\.t|\$t|\btranslate)\s*\(\s*(`[^`]*`|['"][^'"\r\n]+['"]|[^,\)\r\n]+)/g;
   let match;
 
   while ((match = callPattern.exec(source)) !== null) {
@@ -372,6 +412,182 @@ function buildNamespaceRecommendation(relativePath, keyReferences, availableKeys
   };
 }
 
+function findImportedLocaleKeys(content) {
+  const references = [];
+  const imports = new Map();
+
+  let match;
+  const importPattern = /\bimport\s+(?:\*\s+as\s+)?([A-Za-z_$][\w$]*)\s+from\s+['"]([^'"]+\.json)['"]/g;
+  while ((match = importPattern.exec(content)) !== null) {
+    const specifier = match[2];
+    if (/\b(locales?|i18n|translations?)\b/i.test(specifier)) {
+      const namespace = specifier.replace(/\\/g, '/').split('/').pop().replace(/\.json$/, '');
+      imports.set(match[1], namespace);
+    }
+  }
+
+  const requirePattern = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\s*\(\s*['"]([^'"]+\.json)['"]\s*\)/g;
+  while ((match = requirePattern.exec(content)) !== null) {
+    const specifier = match[2];
+    if (/\b(locales?|i18n|translations?)\b/i.test(specifier)) {
+      const namespace = specifier.replace(/\\/g, '/').split('/').pop().replace(/\.json$/, '');
+      imports.set(match[1], namespace);
+    }
+  }
+
+  for (const [varName, namespace] of imports) {
+    const escaped = varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const propPattern = new RegExp(`(?<![\\w$'"\/\.-])${escaped}\\s*\\.\\s*([A-Za-z_$][\\w$]+(?:\\s*\\.\\s*[A-Za-z_$][\\w$]+)*)\\s*(?:[;,\\n\\)\\]\\}])`, 'g');
+    let propMatch;
+    while ((propMatch = propPattern.exec(content)) !== null) {
+      const propertyPath = propMatch[1].replace(/\s+/g, '');
+      const key = propertyPath.startsWith(namespace + '.') ? propertyPath : `${namespace}.${propertyPath}`;
+      const location = findLineColumn(content, propMatch.index);
+      references.push({
+        key,
+        matchType: 'imported-locale',
+        line: location.line,
+        column: location.column,
+      });
+    }
+  }
+
+  return references;
+}
+
+function findLocalTranslationWrappers(content) {
+  const wrappers = new Map();
+  const source = stripComments(content);
+
+  const arrowWrapper = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:\((?:[^)]*)\)\s*=>|(?:async\s+)?\([^)]*\)\s*=>)\s*(?:\{[^}]*\}|\S)/g;
+  let match;
+  while ((match = arrowWrapper.exec(source)) !== null) {
+    const name = match[1];
+    if (name === 't' || name === 'tx' || name === 'translate' || name === 'i18n' || name === '$t') continue;
+
+    const declStart = match.index;
+    const declEnd = findMatchingBrace(source, source.indexOf('=>', declStart) + 2);
+    const bodyEnd = declEnd > 0 ? declEnd : Math.min(declStart + 500, source.length);
+    const body = source.slice(declStart, bodyEnd);
+
+    if (/\b(?:t|tx|i18n\.t|translate|\$t)\((?:['"`][^'"`\r\n]+['"`]|`|\w+)/.test(body)) {
+      const params = extractFirstParam(source, declStart);
+      wrappers.set(name, {
+        name,
+        params,
+        line: findLineColumn(source, declStart).line,
+        type: 'translation-wrapper',
+      });
+    }
+  }
+
+  return wrappers;
+}
+
+function findMatchingBrace(source, start) {
+  let depth = 0;
+  for (let i = start; i < Math.min(start + 1000, source.length); i++) {
+    if (source[i] === '{') depth++;
+    if (source[i] === '}') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function extractFirstParam(source, declStart) {
+  const afterEquals = source.slice(declStart).match(/=\s*(?:async\s+)?(?:\(([^)]*)\)|([A-Za-z_$][\w$]*)\s*=>)/);
+  if (!afterEquals) return ['key'];
+  const params = (afterEquals[1] || afterEquals[2] || 'key').split(',').map(p => p.trim().split(/\s|=|:/)[0]).filter(Boolean);
+  return params.length > 0 ? params : ['key'];
+}
+
+function findLocalWrapperCallReferences(content, wrappers, availableKeys) {
+  const source = stripComments(content);
+  const references = [];
+
+  for (const [name, wrapper] of wrappers) {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const callPattern = new RegExp(`(?<!\\w)${escaped}\\s*\\(\\s*['"\`]([^'"\`\\r\\n]+)['"\`]`, 'g');
+    let match;
+    while ((match = callPattern.exec(source)) !== null) {
+      const key = match[1];
+      if (!availableKeys || !availableKeys.size || availableKeys.has(key)) {
+        references.push({
+          key,
+          matchType: 'local-wrapper',
+          line: findLineColumn(source, match.index).line,
+          column: findLineColumn(source, match.index).column,
+          wrapperName: name,
+        });
+      }
+    }
+  }
+
+  return references;
+}
+
+function findClientBoundaryIssues(content, relativePath) {
+  const issues = [];
+  if (/['"]use client['"]/.test(content) || /['"]use client['"]/.test(String(content).slice(0, 200))) {
+    const importPattern = /\bimport\s+\w+\s+from\s+['"]([^'"]+\.json)['"]/g;
+    let match;
+    while ((match = importPattern.exec(content)) !== null) {
+      if (/\b(locales?|i18n|translations?)\b/i.test(match[1])) {
+        issues.push({
+          filePath: relativePath,
+          importPath: match[1],
+          message: `"use client" file imports locale JSON (${match[1]}). This bypasses i18ntk runtime and increases client bundle size. Use a server bridge route instead.`,
+        });
+      }
+    }
+  }
+  return issues;
+}
+
+function detectCopyFormatters(content) {
+  const formatters = [];
+  const declarationPattern = /\b(?:const|let|var)\s+(tx|copy|formatCopy|formatMessage|fmt|localize)\s*=\s*(?:useCallback\s*\(|useMemo\s*\(|\([^)]*\)\s*=>|function\s*\()/g;
+  let match;
+  while ((match = declarationPattern.exec(content)) !== null) {
+    const name = match[1];
+    const isTx = name === 'tx';
+
+    if (!isTx) {
+      formatters.push({ name, line: findLineColumn(content, match.index).line, type: 'copyFormatter' });
+      continue;
+    }
+
+    const afterEquals = content.slice(match.index + match[0].length, Math.min(match.index + match[0].length + 500, content.length));
+    const callsTranslationRuntime = /\b(?:t|i18n\.t|\.getTranslation|translate)\s*\(/.test(afterEquals);
+
+    if (!callsTranslationRuntime) {
+      formatters.push({
+        name,
+        line: findLineColumn(content, match.index).line,
+        type: 'suspectedCopyFormatter',
+        message: `Local function "tx" does not call a known translation runtime and may be a copy formatter. Calls to this function will be treated as translation keys. Rename to "copy" or configure "copyFormatters" to suppress.`,
+      });
+    }
+  }
+  return formatters;
+}
+
+function detectMojibakeInTranslations(key, value, sourceLanguage, targetLanguage) {
+  if (typeof value !== 'string' || !value) return null;
+  const artifacts = value.match(/[A-Za-z\u00C0-\u00FF]+\?[A-Za-z\u00C0-\u00FF]+/g);
+  if (artifacts) {
+    return {
+      key,
+      locale: targetLanguage,
+      artifact: artifacts[0],
+      message: `Replacement-character artifact detected: "${artifacts[0]}" in translation "${value.slice(0, 80)}"`,
+    };
+  }
+  return null;
+}
+
 function analyzeSourceForUsageInsights({
   content,
   relativePath,
@@ -384,9 +600,16 @@ function analyzeSourceForUsageInsights({
   const dynamicReferences = inferDynamicKeyReferences(content, availableKeys);
   const unresolvedDynamicReferences = findUnresolvedDynamicReferences(content, availableKeys);
   const literalReferences = findLiteralKeyReferences(content, availableKeys);
+  const importedLocaleReferences = findImportedLocaleKeys(content);
+  const clientBoundaryIssues = findClientBoundaryIssues(content, relativePath);
+  const copyFormatters = detectCopyFormatters(content);
+  const localWrappers = findLocalTranslationWrappers(content);
+  const localWrapperRefs = findLocalWrapperCallReferences(content, localWrappers, availableKeys);
   const exactInferredKeys = new Set([
     ...dynamicReferences.map(ref => ref.key),
     ...literalReferences.map(ref => ref.key),
+    ...importedLocaleReferences.map(ref => ref.key),
+    ...localWrapperRefs.map(ref => ref.key),
   ]);
 
   for (const key of directKeys || []) {
@@ -410,7 +633,25 @@ function analyzeSourceForUsageInsights({
     references.push(ref);
   }
 
+  for (const ref of localWrapperRefs) {
+    if (seen.has(ref.key)) continue;
+    seen.add(ref.key);
+    references.push(ref);
+  }
+
   for (const ref of literalReferences) {
+    if (seen.has(ref.key)) continue;
+    seen.add(ref.key);
+    references.push(ref);
+  }
+
+  for (const ref of importedLocaleReferences) {
+    if (seen.has(ref.key)) continue;
+    seen.add(ref.key);
+    references.push(ref);
+  }
+
+  for (const ref of localWrapperRefs) {
     if (seen.has(ref.key)) continue;
     seen.add(ref.key);
     references.push(ref);
@@ -421,6 +662,10 @@ function analyzeSourceForUsageInsights({
     unresolvedDynamicReferences,
     hardcodedTexts: collectHardcodedText(content, relativePath, translationValueIndex),
     namespaceRecommendation: buildNamespaceRecommendation(relativePath, references, availableKeys),
+    importedLocaleReferences,
+    clientBoundaryIssues,
+    copyFormatters,
+    localWrappers: Array.from(localWrappers.values()),
   };
 }
 
@@ -431,5 +676,11 @@ module.exports = {
   findLiteralKeyReferences,
   inferDynamicKeyReferences,
   findUnresolvedDynamicReferences,
+  findImportedLocaleKeys,
+  findClientBoundaryIssues,
+  detectCopyFormatters,
+  detectMojibakeInTranslations,
+  findLocalTranslationWrappers,
+  findLocalWrapperCallReferences,
   looksLikeHumanText,
 };

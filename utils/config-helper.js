@@ -123,9 +123,25 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
 
       settingsDir = settingsManager.configDir;
     }
-    const chosenDir = normalizePath(cliArgs.i18nDir || cliArgs.sourceDir || cfg.sourceDir || './locales');
-    cfg.sourceDir = chosenDir;
-    cfg.i18nDir = chosenDir;
+
+    const hasExplicitSourceDir = Boolean(cliArgs.sourceDir);
+    const hasExplicitI18nDir = Boolean(cliArgs.i18nDir);
+
+    if (hasExplicitSourceDir && hasExplicitI18nDir) {
+      cfg.sourceDir = normalizePath(cliArgs.sourceDir);
+      cfg.i18nDir = normalizePath(cliArgs.i18nDir);
+    } else if (hasExplicitSourceDir && !hasExplicitI18nDir) {
+      const explicitSrc = normalizePath(cliArgs.sourceDir);
+      cfg.sourceDir = explicitSrc;
+      cfg.i18nDir = cfg.i18nDir || cfg.sourceDir;
+    } else if (!hasExplicitSourceDir && hasExplicitI18nDir) {
+      cfg.i18nDir = normalizePath(cliArgs.i18nDir);
+      cfg.sourceDir = cfg.sourceDir || cfg.i18nDir;
+    } else {
+      const chosenDir = normalizePath(cliArgs.sourceDir || cfg.sourceDir || './locales');
+      cfg.sourceDir = chosenDir;
+      cfg.i18nDir = chosenDir;
+    }
 
     const displayPaths = {
       projectRoot: '.',

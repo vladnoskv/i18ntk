@@ -100,6 +100,14 @@ class I18nUsageAnalyzer {
     this.cleanupMode = false;
     this.dryRunDelete = false;
     this._sourceCommentsSet = null;
+    this._dynamicallyReferencedKeys = new Set();
+    this._dynamicPrefixes = new Set();
+    this._resolvedDynamicExpansions = new Map();
+    this._clientBoundaryIssues = [];
+    this._mojibakeIssues = [];
+    this._copyFormatters = [];
+    this._telemetryLiterals = [];
+    this._localWrapperRefs = [];
     
     // Use global translation function
     this.rl = null;
@@ -161,18 +169,20 @@ class I18nUsageAnalyzer {
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
       }
 
-      displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
-      
+      // Path display deferred until after CLI arg overrides are applied in run()
       
       // Ensure translation patterns are defined
       this.config = this.config || {};
       this.config.translationPatterns = this.config.translationPatterns || [
         /(?<![\w$.])t\s*\(['"`]([^'"`]+)['"`]/g,
         /(?<![\w$.])tx\s*\(['"`]([^'"`]+)['"`]/g,
+        /\.tx\s*\(['"`]([^'"`]+)['"`]/g,
+        /(?<=[)\s])\.tx\s*\(['"`]([^'"`]+)['"`]/g,
         /i18n\.t\(['"`]([^'"`]+)['"`]/g,
         /useTranslation\(\)\.t\(['"`]([^'"`]+)['"`]/g,
         /(?<![\w$.])t\s*\(`([^`]+)`\)/g,
         /(?<![\w$.])tx\s*\(`([^`]+)`\)/g,
+        /\.tx\s*\(`([^`]+)`\)/g,
         /i18nKey=['"`]([^'"`]+)['"`]/g,
         /\$t\(['"`]([^'"`]+)['"`]/g,
         /(?<![\w$.])getTranslation\s*\(['"`]([^'"`]+)['"`]/g
@@ -208,7 +218,11 @@ class I18nUsageAnalyzer {
       strict: a.strict,
       debug: a.debug,
       cleanup: a.cleanup ?? a['cleanup'],
-      dryRunDelete: a.dryRunDelete ?? a['dry-run-delete']
+      dryRunDelete: a.dryRunDelete ?? a['dry-run-delete'],
+      strictUnused: a.strictUnused ?? a['strict-unused'],
+      json: a.json,
+      prune: a.prune,
+      pruneKeep: parseInt(a['prune-keep'] || a.pruneKeep, 10) || 10
     };
   }
 
@@ -403,6 +417,12 @@ class I18nUsageAnalyzer {
     if (toBool(args.dryRunDelete)) {
       this.dryRunDelete = true;
     }
+
+    if (toBool(args.prune)) {
+      const outputDir = args.outputDir || this.config.outputDir || './i18ntk-reports/usage';
+      this.pruneReports(outputDir, args.pruneKeep || 10);
+      return;
+    }
     
     try {
       // Ensure config is always initialized
@@ -426,10 +446,12 @@ class I18nUsageAnalyzer {
           this.config.translationPatterns = [
             /(?<![\w$.])t\s*\(['"`]([^'"`]+)['"`]/g,
             /(?<![\w$.])tx\s*\(['"`]([^'"`]+)['"`]/g,
+            /\.tx\s*\(['"`]([^'"`]+)['"`]/g,
             /i18n\.t\(['"`]([^'"`]+)['"`]/g,
             /useTranslation\(\)\.t\(['"`]([^'"`]+)['"`]/g,
             /(?<![\w$.])t\s*\(`([^`]+)`\)/g,
             /(?<![\w$.])tx\s*\(`([^`]+)`\)/g,
+            /\.tx\s*\(`([^`]+)`\)/g,
             /i18nKey=['"`]([^'"`]+)['"`]/g,
             /\$t\(['"`]([^'"`]+)['"`]/g,
             /(?<![\w$.])getTranslation\s*\(['"`]([^'"`]+)['"`]/g
@@ -537,6 +559,8 @@ class I18nUsageAnalyzer {
           sourceDir: configManager.toRelative(this.sourceDir)
         });
       }
+      
+      displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
       
       console.log(t('usage.detectedSourceDirectory', { sourceDir: this.sourceDir || t('usage.noSourceDirectoryConfigured') || '(none)' }));
       console.log(t('usage.detectedI18nDirectory', { i18nDir: this.i18nDir }));
@@ -650,8 +674,50 @@ class I18nUsageAnalyzer {
       }
       
       if (args.outputReport) {
-        const report = this.generateUsageReport();
-        await this.saveReport(report, args.outputDir);
+        const confidenceFilteredUnused = this._computeConfidenceFilteredUnused(unusedKeys);
+        const report = this.generateUsageReport(confidenceFilteredUnused);
+        if (args.json) {
+          await this.saveJsonReport(report, args.outputDir);
+        } else {
+          await this.saveReport(report, args.outputDir);
+        }
+      }
+
+      if (args.json && !args.outputReport) {
+        const confidenceFilteredUnused = this._computeConfidenceFilteredUnused(unusedKeys);
+        const jsonReport = this.generateJsonReport(confidenceFilteredUnused);
+        console.log(JSON.stringify(jsonReport, null, 2));
+      }
+
+      if (this._mojibakeIssues.length > 0) {
+        console.log('\n🔤 Locale Quality - Mojibake Artifacts:');
+        this._mojibakeIssues.forEach(issue => {
+          console.log(`  ⚠️  ${issue.key} [${issue.locale}]: ${issue.artifact}`);
+        });
+      }
+
+      if (this._clientBoundaryIssues.length > 0) {
+        console.log('\n📦 Client-Boundary Warnings:');
+        this._clientBoundaryIssues.forEach(issue => {
+          console.log(`  ⚠️  ${issue.filePath}: ${issue.message}`);
+        });
+      }
+
+      if (this._copyFormatters.length > 0) {
+        const suspected = this._copyFormatters.filter(cf => cf.type === 'suspectedCopyFormatter');
+        if (suspected.length > 0) {
+          console.log('\n🔧 Suspected Copy Formatters:');
+          suspected.forEach(cf => {
+            console.log(`  ⚠️  ${cf.filePath}:${cf.line} - ${cf.message}`);
+          });
+        }
+      }
+
+      if (toBool(args.strictUnused)) {
+        const deadKeys = this.findDeadKeys();
+        const strictUnused = deadKeys.filter(dk => dk.confidence >= 0.8);
+        const strictCount = strictUnused.length;
+        console.log(`\n🔒 Strict-Unused Mode: ${strictCount} high-confidence dead keys (filtered from ${deadKeys.length} total candidates)`);
       }
       
       console.log('\n' + t('usage.analysisCompletedSuccessfully'));
@@ -687,6 +753,8 @@ Options:
   --output-report        Generate detailed usage report
   --output-dir=<path>    Directory for output reports (default: ./i18ntk-reports/usage)
   --strict               Show all warnings and errors during analysis
+  --strict-unused        Only report high-confidence (>80%) unused keys
+  --json                 Output results as JSON (to console or with --output-report)
   --debug                Enable debug mode with stack traces
   --no-prompt            Skip interactive prompts (useful for CI/CD)
   --validate-placeholders Enable placeholder key validation
@@ -703,7 +771,7 @@ Examples:
   node i18ntk-usage.js --cleanup --dry-run-delete
 
 Analysis Features (v1.10.1):
-  • Detects unused translation keys
+  • Detects unused translation keys with confidence scoring
   • Identifies missing translation keys
   • Shows translation completeness by language
   • Reports NOT_TRANSLATED values
@@ -719,6 +787,12 @@ Analysis Features (v1.10.1):
   • Security-enhanced path validation
   • Detailed reporting with validation errors
   • Dead key detection with confidence scoring
+  • Locale JSON import key detection
+  • Client-boundary warnings ("use client" files importing locale JSON)
+  • Copy formatter detection (local "tx" that doesn't call translation runtime)
+  • Mojibake artifact detection in translations
+  • Confidence-split unused key reporting (confirmed / likely / possibly used)
+  • JSON output format (--json)
 `);
   }
 
@@ -849,6 +923,17 @@ Analysis Features (v1.10.1):
     return keys;
   }
 
+  _getNestedValue(obj, key) {
+    if (!obj || typeof obj !== 'object') return undefined;
+    const parts = key.split('.');
+    let current = obj;
+    for (const part of parts) {
+      if (current == null || typeof current !== 'object') return undefined;
+      current = current[part];
+    }
+    return typeof current === 'string' ? current : undefined;
+  }
+
   collectPlaceholderKeys(obj, prefix = '', language) {
     const patterns = this.placeholderStyles[language] || [];
     const regexes = patterns.reduce((compiled, pattern) => {
@@ -909,6 +994,35 @@ Analysis Features (v1.10.1):
       keys.push(ref.key);
       this.usedKeys.add(ref.key);
 
+      if (ref.matchType === 'dynamic-template' || ref.matchType === 'dynamic-variable') {
+        this._dynamicallyReferencedKeys.add(ref.key);
+        if (!this._resolvedDynamicExpansions.has(ref.key)) {
+          this._resolvedDynamicExpansions.set(ref.key, []);
+        }
+        this._resolvedDynamicExpansions.get(ref.key).push(relativePath);
+      }
+
+      if (ref.matchType === 'literal-telemetry') {
+        if (!this._telemetryLiterals) this._telemetryLiterals = [];
+        this._telemetryLiterals.push({
+          filePath: relativePath,
+          key: ref.key,
+          line: ref.line,
+          column: ref.column,
+          contextNote: ref.context?.contextNote,
+        });
+      }
+
+      if (ref.matchType === 'local-wrapper') {
+        if (!this._localWrapperRefs) this._localWrapperRefs = [];
+        this._localWrapperRefs.push({
+          filePath: relativePath,
+          key: ref.key,
+          line: ref.line,
+          wrapperName: ref.wrapperName,
+        });
+      }
+
       if (!this.keyUsageLocations.has(ref.key)) {
         this.keyUsageLocations.set(ref.key, []);
       }
@@ -939,6 +1053,24 @@ Analysis Features (v1.10.1):
       this.unresolvedDynamicReferences.push(...insights.unresolvedDynamicReferences.map(ref => ({
         filePath: relativePath,
         ...ref,
+      })));
+      for (const ref of insights.unresolvedDynamicReferences) {
+        if (ref.prefix) {
+          this._dynamicPrefixes.add(ref.prefix);
+        }
+      }
+    }
+
+    if (Array.isArray(insights.clientBoundaryIssues) && insights.clientBoundaryIssues.length > 0) {
+      if (!this._clientBoundaryIssues) this._clientBoundaryIssues = [];
+      this._clientBoundaryIssues.push(...insights.clientBoundaryIssues);
+    }
+
+    if (Array.isArray(insights.copyFormatters) && insights.copyFormatters.length > 0) {
+      if (!this._copyFormatters) this._copyFormatters = [];
+      this._copyFormatters.push(...insights.copyFormatters.map(cf => ({
+        filePath: relativePath,
+        ...cf,
       })));
     }
 
@@ -1139,6 +1271,19 @@ Analysis Features (v1.10.1):
               const stats = this.analyzeFileCompleteness(jsonData);
               totalKeys += stats.total;
               translatedKeys += stats.translated;
+
+              if (language !== this.config.sourceLanguage) {
+                const { detectMojibakeInTranslations } = require('../utils/usage-insights');
+                const flatKeys = this.extractKeysFromObject(jsonData, '');
+                for (const key of flatKeys) {
+                  const value = this._getNestedValue(jsonData, key);
+                  const issue = detectMojibakeInTranslations(key, value, this.config.sourceLanguage, language);
+                  if (issue) {
+                    issue.filePath = fileInfo.filePath;
+                    this._mojibakeIssues.push(issue);
+                  }
+                }
+              }
             } catch (error) {
               if (isDebug || isStrict) {
                 console.warn(`❌ Failed to analyze file ${path.basename(fileInfo.filePath)}: ${error.message}`);
@@ -1273,9 +1418,12 @@ Analysis Features (v1.10.1):
       let confidence = 0.9;
       let reason = 'Key not found in any source file';
 
-      if (this._matchesDynamicPattern(key)) {
+      if (this._resolvedDynamicExpansions.has(key)) {
+        confidence = 0.2;
+        reason = `Key resolved through dynamic template expansion (${this._resolvedDynamicExpansions.get(key).join(', ')})`;
+      } else if (this._matchesDynamicPrefix(key)) {
         confidence = 0.3;
-        reason = 'Key matches dynamic template pattern (likely used)';
+        reason = 'Key prefix matches unresolved dynamic template pattern';
       } else if (this._keyInSourceComments(key)) {
         confidence = 0.5;
         reason = 'Key referenced in comments/JSDoc';
@@ -1291,39 +1439,19 @@ Analysis Features (v1.10.1):
     return deadKeys;
   }
 
-  _matchesDynamicPattern(key) {
-    const keyParts = key.split('.');
-    if (keyParts.length < 2) return false;
-
-    const dynamicPatterns = [
-      /t\(`[^`]*\$\{[^}]*\}[^`]*`\)/g,
-      /i18n\.t\(`[^`]*\$\{[^}]*\}[^`]*`\)/g,
-      /useTranslation\(\)\.t\(`[^`]*\$\{[^}]*\}[^`]*`\)/g
-    ];
-
-    try {
-      const sourceFiles = Array.from(this.fileUsage.keys());
-      for (const filePath of sourceFiles) {
-        const fullPath = path.join(this.sourceDir, filePath);
-        if (!SecurityUtils.safeExistsSync(fullPath, this.sourceDir)) continue;
-
-        const content = SecurityUtils.safeReadFileSync(fullPath, this.sourceDir, 'utf8');
-        if (!content) continue;
-
-        for (const pattern of dynamicPatterns) {
-          const matches = content.match(pattern);
-          if (matches) {
-            for (const match of matches) {
-              const matchLower = match.toLowerCase();
-              if (keyParts.some(part => matchLower.includes(part.toLowerCase()))) {
-                return true;
-              }
-            }
-          }
-        }
+  _matchesDynamicPrefix(key) {
+    for (const prefix of this._dynamicPrefixes) {
+      if (key.startsWith(prefix + '.') || key.startsWith(prefix + '_') || key === prefix) {
+        return true;
       }
-    } catch (e) {
-      // Silently fail - dynamic pattern detection is best-effort
+    }
+
+    for (const resolvedKey of this._dynamicallyReferencedKeys) {
+      const parts = resolvedKey.split('.');
+      for (let i = 1; i < parts.length; i++) {
+        const subPrefix = parts.slice(0, i).join('.');
+        if (key.startsWith(subPrefix + '.')) return true;
+      }
     }
 
     return false;
@@ -1567,6 +1695,8 @@ Analysis Features (v1.10.1):
     report += `Direct i18n calls: ${matchCounts.direct || 0}\n`;
     report += `Known-key literal matches: ${matchCounts.literal || 0}\n`;
     report += `Resolved dynamic expressions: ${(matchCounts['dynamic-template'] || 0) + (matchCounts['dynamic-variable'] || 0)}\n`;
+    report += `Local wrapper references: ${(matchCounts['local-wrapper'] || 0)}\n`;
+    report += `Telemetry/event literals (excluded from usage): ${(this._telemetryLiterals?.length || 0)}\n`;
     report += `Unresolved dynamic expressions: ${this.unresolvedDynamicReferences.length}\n`;
     report += `Indexed keys with file locations: ${this.keyUsageLocations.size}\n\n`;
 
@@ -1612,6 +1742,23 @@ Analysis Features (v1.10.1):
       report += `\n`;
     }
 
+    if (this._dynamicallyReferencedKeys.size > 0) {
+      report += `🧩 Resolved Dynamic Key Expansions\n`;
+      report += `${'='.repeat(50)}\n`;
+      report += `These keys were resolved through dynamic template expansion. Consider converting to explicit literal maps for better static analysis.\n\n`;
+      report += `Recommendation pattern:\n`;
+      report += `  const labels = {\n`;
+      report += `    active: tx("namespace.status.active"),\n`;
+      report += `    closed: tx("namespace.status.closed"),\n`;
+      report += `  };\n\n`;
+      const sampleKeys = Array.from(this._dynamicallyReferencedKeys).slice(0, 20);
+      report += `Resolved keys:` + sampleKeys.map(k => `\n  - ${k}`).join('') + `\n`;
+      if (this._dynamicallyReferencedKeys.size > 20) {
+        report += `  ... ${this._dynamicallyReferencedKeys.size - 20} more resolved keys\n`;
+      }
+      report += `\n`;
+    }
+
     if (this.hardcodedTextCandidates.length > 0) {
       report += `📝 Hardcoded Text Candidates\n`;
       report += `${'='.repeat(50)}\n`;
@@ -1626,23 +1773,44 @@ Analysis Features (v1.10.1):
       report += `\n`;
     }
     
-    // Unused keys with complexity
+    // Unused keys with complexity and confidence
     if (unusedKeys.length > 0) {
+      const confidenceFiltered = this._computeConfidenceFilteredUnused(unusedKeys);
+      const confirmed = confidenceFiltered.filter(u => u.confidence >= 0.8);
+      const likely = confidenceFiltered.filter(u => u.confidence >= 0.4 && u.confidence < 0.8);
+      const possible = confidenceFiltered.filter(u => u.confidence < 0.4);
+
       report += `${t('summary.usageReportUnusedTranslationKeys')}\n`;
       report += `${'='.repeat(50)}\n`;
-      report += `${t('summary.usageReportUnusedKeysDescription')}\n\n`;
-      
-      unusedKeys.slice(0, 100).forEach(key => {
-        const complexity = this.keyComplexity && this.keyComplexity.get(key);
-        const complexityLevel = complexity ? ` (${complexity.level})` : '';
-        report += `${t('summary.usageReportUnusedKey', { key: key + complexityLevel })}\n`;
-      });
-      
-      if (unusedKeys.length > 100) {
-        report += `${t('summary.usageReportMoreUnusedKeys', { count: unusedKeys.length - 100 })}\n`;
+      report += `${t('summary.usageReportUnusedKeysDescription')}\n`;
+      report += `Confidence breakdown: ${confirmed.length} confirmed, ${likely.length} likely, ${possible.length} possibly used\n\n`;
+
+      if (confirmed.length > 0) {
+        report += `Confirmed Unused (high confidence):\n`;
+        confirmed.slice(0, 50).forEach(u => {
+          report += `  - ${u.key} [${(u.confidence * 100).toFixed(0)}%]\n`;
+        });
+        if (confirmed.length > 50) report += `  ... ${confirmed.length - 50} more\n`;
+        report += `\n`;
       }
-      
-      report += `\n`;
+
+      if (likely.length > 0) {
+        report += `Likely Unused (medium confidence):\n`;
+        likely.slice(0, 30).forEach(u => {
+          report += `  - ${u.key} [${(u.confidence * 100).toFixed(0)}%] ${u.reason}\n`;
+        });
+        if (likely.length > 30) report += `  ... ${likely.length - 30} more\n`;
+        report += `\n`;
+      }
+
+      if (possible.length > 0) {
+        report += `Possibly Used (low confidence - may be dynamic):\n`;
+        possible.slice(0, 20).forEach(u => {
+          report += `  - ${u.key} [${(u.confidence * 100).toFixed(0)}%] ${u.reason}\n`;
+        });
+        if (possible.length > 20) report += `  ... ${possible.length - 20} more\n`;
+        report += `\n`;
+      }
     }
     
     // Missing keys with location and framework
@@ -1737,6 +1905,39 @@ Analysis Features (v1.10.1):
     if (this.fileUsage.size > 20) {
       report += `${t('summary.usageReportMoreFiles', { count: this.fileUsage.size - 20 })}\n`;
     }
+
+    if (this._mojibakeIssues && this._mojibakeIssues.length > 0) {
+      report += `\n🔤 Locale Quality - Mojibake Artifacts\n`;
+      report += `${'='.repeat(50)}\n`;
+      report += `Replacement-character artifacts detected in translations. These may indicate encoding issues during translation.\n\n`;
+      this._mojibakeIssues.forEach(issue => {
+        report += `  - ${issue.key} [${issue.locale}]: ${issue.artifact}\n`;
+      });
+      report += `\n`;
+    }
+
+    if (this._clientBoundaryIssues && this._clientBoundaryIssues.length > 0) {
+      report += `\n📦 Client-Boundary Warnings\n`;
+      report += `${'='.repeat(50)}\n`;
+      report += `"use client" files importing locale JSON. This bypasses the shared runtime and increases bundle size.\n\n`;
+      this._clientBoundaryIssues.forEach(issue => {
+        report += `  - ${issue.filePath}: ${issue.message}\n`;
+      });
+      report += `\n`;
+    }
+
+    if (this._copyFormatters && this._copyFormatters.length > 0) {
+      const suspected = this._copyFormatters.filter(cf => cf.type === 'suspectedCopyFormatter');
+      if (suspected.length > 0) {
+        report += `\n🔧 Suspected Copy Formatters\n`;
+        report += `${'='.repeat(50)}\n`;
+        report += `Functions named "tx" that do not call known translation runtimes. Rename to "copy" or configure "usage.copyFormatters".\n\n`;
+        suspected.forEach(cf => {
+          report += `  - ${cf.filePath}:${cf.line}: ${cf.message}\n`;
+        });
+        report += `\n`;
+      }
+    }
     
     return report;
   }
@@ -1758,6 +1959,93 @@ Analysis Features (v1.10.1):
       return filepath;
     } catch (error) {
       console.error(t('usage.failedToSaveReport', { error: error.message }));
+    }
+  }
+
+  _computeConfidenceFilteredUnused(allUnused) {
+    const deadKeys = this.findDeadKeys();
+    const deadKeyMap = new Map();
+    for (const dk of deadKeys) {
+      deadKeyMap.set(dk.key, dk);
+    }
+    return allUnused.map(key => ({
+      key,
+      confidence: (deadKeyMap.get(key) || { confidence: 0.9 }).confidence,
+      reason: (deadKeyMap.get(key) || { reason: 'Not found in source' }).reason,
+    }));
+  }
+
+  generateJsonReport(confidenceFilteredUnused) {
+    return {
+      version: this.version,
+      timestamp: new Date().toISOString(),
+      sourceDir: this.sourceDir,
+      i18nDir: this.i18nDir,
+      summary: {
+        availableKeys: this.availableKeys.size,
+        usedKeys: this.usedKeys.size,
+        unusedKeys: confidenceFilteredUnused.length,
+        missingKeys: this.findMissingKeys().length,
+        notTranslated: this.getNotTranslatedStats().total,
+      },
+      unusedKeys: confidenceFilteredUnused,
+      missingKeys: this.findMissingKeys(),
+      dynamicPrefixes: Array.from(this._dynamicPrefixes),
+      unresolvedDynamicReferences: this.unresolvedDynamicReferences,
+      namespaceRecommendations: this.namespaceRecommendations,
+      hardcodedTextCandidates: this.hardcodedTextCandidates,
+      clientBoundaryIssues: this._clientBoundaryIssues || [],
+      mojibakeIssues: this._mojibakeIssues || [],
+      translationCompleteness: Object.fromEntries(this.translationStats),
+    };
+  }
+
+  async saveJsonReport(report, outputDir = './i18ntk-reports/usage') {
+    try {
+      if (!SecurityUtils.safeExistsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `usage-report-${timestamp}.json`;
+      const filepath = path.join(outputDir, filename);
+      const jsonReport = this.generateJsonReport(
+        this._computeConfidenceFilteredUnused(this.findUnusedKeys())
+      );
+      await SecurityUtils.safeWriteFile(filepath, JSON.stringify(jsonReport, null, 2));
+      console.log(t('usage.reportSavedTo', { reportPath: filepath }));
+      return filepath;
+    } catch (error) {
+      console.error(t('usage.failedToSaveReport', { error: error.message }));
+    }
+  }
+
+  pruneReports(outputDir = './i18ntk-reports/usage', keepCount = 10) {
+    try {
+      const resolvedDir = path.resolve(outputDir);
+      if (!SecurityUtils.safeExistsSync(resolvedDir, process.cwd())) {
+        console.log(`Report directory ${outputDir} does not exist.`);
+        return 0;
+      }
+      const items = fs.readdirSync(resolvedDir);
+      const reportFiles = items
+        .filter(f => /^usage-(analysis|report)-.+\.(txt|json)$/.test(f))
+        .map(f => ({ name: f, path: path.join(resolvedDir, f), mtime: fs.statSync(path.join(resolvedDir, f)).mtime }))
+        .sort((a, b) => b.mtime - a.mtime);
+
+      if (reportFiles.length <= keepCount) {
+        console.log(`${reportFiles.length} report files, ${keepCount} keep limit. Nothing to prune.`);
+        return 0;
+      }
+
+      const toDelete = reportFiles.slice(keepCount);
+      for (const file of toDelete) {
+        fs.unlinkSync(file.path);
+      }
+      console.log(`Pruned ${toDelete.length} stale report files (kept ${keepCount} most recent).`);
+      return toDelete.length;
+    } catch (error) {
+      console.error(`Failed to prune reports: ${error.message}`);
+      return 0;
     }
   }
 
@@ -1835,9 +2123,25 @@ Analysis Features (v1.10.1):
           /\.instant\(/g
         ],
         score: 0
+      },
+      nextjs: {
+        patterns: [
+          /['"]use server['"]/g,
+          /['"]use client['"]/g,
+          /export\s+default\s+function\s+\w*Page/g,
+          /export\s+async\s+function\s+generate/g,
+          /GetStaticProps|GetServerSideProps/g,
+          /next\/headers/g,
+          /next\/navigation/g,
+          /'server only'/g,
+          /'client only'/g,
+          /getLocale\s*\(/g,
+          /setLocale\s*\(/g,
+        ],
+        score: 0
       }
     };
-    
+
     const contentStr = String(content || '');
     Object.keys(frameworkPatterns).forEach(framework => {
       const config = frameworkPatterns[framework];
@@ -1848,24 +2152,31 @@ Analysis Features (v1.10.1):
         }
       });
     });
-    
-    // Find dominant framework
+
     let dominantFramework = 'generic';
     let maxScore = 0;
-    
+
     Object.keys(frameworkPatterns).forEach(framework => {
       if (frameworkPatterns[framework].score > maxScore) {
         maxScore = frameworkPatterns[framework].score;
         dominantFramework = framework;
       }
     });
-    
+
+    let componentType = null;
+    if (dominantFramework === 'nextjs') {
+      if (/['"]use server['"]/.test(contentStr)) componentType = 'Server Component';
+      else if (/['"]use client['"]/.test(contentStr)) componentType = 'Client Component';
+      else if (/(?:page|layout|loading|error|not-found|template)\.[jt]sx?$/.test(filePath)) componentType = 'App Router (default: Server)';
+    }
+
     this.frameworkUsage.set(filePath, {
       framework: dominantFramework,
       score: maxScore,
-      patterns: frameworkPatterns[dominantFramework]?.patterns || []
+      patterns: frameworkPatterns[dominantFramework]?.patterns || [],
+      componentType,
     });
-    
+
     return dominantFramework;
   }
 

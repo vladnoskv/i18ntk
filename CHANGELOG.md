@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-06-02
+
+### Added
+- Dead-key detection now uses resolved dynamic key data from usage insights instead of crude text-overlap heuristics. Keys expanded from template literals or const arrays are properly tracked and marked with low confidence.
+- Locale JSON import detection: `import en from '../../locales/en/foo.json'` is detected and property accesses are tracked as key usages.
+- Confidence-split unused key reports: confirmed (≥80%), likely (40-80%), possibly used (<40%).
+- `--strict-unused` flag: only reports high-confidence confirmed unused keys.
+- `--json` flag: outputs structured JSON report for automation and CI/CD.
+- `--prune` / `--prune-keep` flags: removes stale report files, keeping N most recent.
+- Mojibake detection: replacement-character artifacts like `Abwicklungspr?fung` and `L?ser` detected during translation analysis.
+- Client-boundary warnings: flags `"use client"` files that import locale JSON, which bypasses i18ntk runtime and increases bundle size.
+- Copy-formatter detection: identifies local `const tx = ...` functions that do not call known translation runtimes.
+- Wrapper configuration: `.i18ntk-config` now supports `usage.translationFunctions`, `usage.serverWrappers`, and `usage.copyFormatters`.
+- Next.js App Router detection: identifies `"use server"` / `"use client"` directives and reports component type.
+- VSCode `i18ntk.clearDiagnostics` command. Stale diagnostics now cleared at scan start.
+- VSCode new diagnostic codes: `i18ntk.clientBoundary` (warning), `i18ntk.copyFormatter` (warning).
+- Lens scanner: `detectSuspectedCopyFormatters()` and `findClientBoundaryLocaleImports()` exported.
+- Auto Translate now writes `i18ntk-reports/auto-translate/latest.json` when residual untranslated values remain after the final targeted retry, so follow-up tooling can retry only unresolved keys.
+- i18ntk Workbench and i18ntk Lens can read Auto Translate residual reports, show the affected key in the VS Code editor, and offer a quick action to add intentionally unchanged keys to Auto Translate protection.
+- Bounded dynamic expansion suggestions in usage report with explicit-map recommendation pattern.
+- Telemetry/event literal classification: known-key strings inside `trackEvent()`, `emitDomainEvent()`, `analytics.track()`, etc. are classified as `literal-telemetry` and excluded from translation usage counts. Non-translation calls get context notes in the report.
+- Object-method translation calls: `input.tx("key")`, `helper.tx("key")`, and `.tx(\`key.${var}\`)` are now recognized as translation calls alongside standalone `tx()`.
+- Local wrapper resolution: functions like `const text = (key, fallback) => tx(key)` that internally call known translation runtimes are detected and their string-literal invocations resolved to keys with `local-wrapper` match type.
+
+### Fixed
+- `--source-dir` and `--i18n-dir` no longer forced to the same value when both are explicitly passed via CLI.
+- Path display (`displayPaths`) now reflects CLI overrides instead of only config file values.
+- Dead-key detection `_matchesDynamicPattern` replaced with `_matchesDynamicPrefix` using actual resolved data.
+- Locale JSON import detection properly deduplicates namespace prefix (e.g., `leaderboard.error` not `leaderboard.leaderboard.error`).
+- Literal key matching no longer credits telemetry/event call strings (e.g., `trackEvent("leaderboard.view")`) as translation usage, preventing CLI false negatives on genuinely unused keys.
+- Object-method `tx()` calls and local wrapper functions are now included in usage analysis, preventing Lens false positives on keys used through these patterns.
+
+### Changed
+- VSCode workbench bumped to 1.1.0, lens extension to 1.1.0.
+- Major changes list in package.json and package.public.json updated for 4.4.0.
+
 ## [4.3.3] - 2026-06-01
 
 ### Fixed
