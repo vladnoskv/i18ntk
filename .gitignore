@@ -101,6 +101,8 @@ scripts/prepublish-dev.js
 # Security scan results
 audit-results.json
 security-scan-*.json
+tests/security-pentest/
+tests/security-pentest-*.test.js
 
 # Development configuration
 .i18ntk-config

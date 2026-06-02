@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.4.0",
+  "version": "4.4.1",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
@@ -175,7 +175,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.4.0",
+    "version": "4.4.1",
     "releaseDate": "02/06/2026",
     "lastUpdated": "02/06/2026",
     "maintainer": "Vlad Noskov",
@@ -183,29 +183,28 @@
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "USAGE: Dead-key detection now uses resolved dynamic key data from insights instead of crude text-overlap heuristics. Confidence scoring improved with dynamic prefix matching.",
-      "USAGE: Locale JSON imports (import en from '../../locales/en/foo.json') are now detected and property accesses are tracked as key usages.",
-      "USAGE: Confidence-split unused key report sections — confirmed (>80%), likely (40-80%), possibly used (<40%) — instead of a flat unused list.",
-      "USAGE: New --strict-unused flag reports only high-confidence confirmed unused keys.",
-      "USAGE: New --json flag outputs structured JSON report for automation and CI/CD.",
-      "USAGE: New --prune / --prune-keep flags for stale report cleanup.",
-      "USAGE: Mojibake detection identifies replacement-character artifacts in translations (e.g. Abwicklungspr?fung).",
-      "USAGE: Wrapper config section in .i18ntk-config supports usage.translationFunctions, usage.serverWrappers, and usage.copyFormatters.",
-      "USAGE: Client-boundary warnings flag 'use client' files that import locale JSON, which bypasses the runtime and increases bundle size.",
-      "USAGE: Copy-formatter detection identifies local 'tx' functions that do not call a known translation runtime.",
-      "USAGE: Next.js App Router detection identifies Server/Client Components and reports component type.",
-      "CONFIG: --source-dir and --i18n-dir are no longer forced to the same value when both are explicitly passed via CLI.",
-      "CONFIG: Path display now reflects CLI overrides instead of only config file values.",
-      "VSCode: Client-boundary and copy-formatter diagnostics added with i18ntk.clientBoundary and i18ntk.copyFormatter diagnostic codes.",
-      "TRANSLATE: Auto Translate writes i18ntk-reports/auto-translate/latest.json when residual untranslated values remain after targeted retry.",
-      "VSCode: Workbench and Lens read Auto Translate residual reports and offer protection quick fixes for intentionally unchanged keys.",
-      "LENS: Client-boundary and copy-formatter functions exported for standalone lens scanner."
+      "SECURITY: Backup operations now validate all paths via SecurityUtils.validatePath — fixes path traversal enabling arbitrary filesystem writes.",
+      "SECURITY: i18ntk-complete --source-dir CLI override now validated; --source-language sanitized through SecurityUtils.sanitizeInput.",
+      "SECURITY: config-helper dual-path resolution wraps --source-dir / --i18n-dir in SecurityUtils.validatePath.",
+      "SECURITY: JSON parsing enforces depth (1000) and size (50 MB) limits in safeParseJSON to prevent DoS.",
+      "SECURITY: LibreTranslate custom URL now requires I18NTK_ALLOW_CUSTOM_LIBRETRANSLATE_HOST=1 flag.",
+      "SECURITY: sanitizeInput default whitelist tightened — removed backslash and curly brace characters.",
+      "SECURITY: VSCode Workbench now validates report paths, limits JSON input size, checks write paths within root.",
+      "SECURITY: i18ntk Lens rejects custom wrapper names >100 chars to prevent ReDoS.",
+      "USAGE: Dead-key detection now uses resolved dynamic key data from insights instead of crude text-overlap heuristics.",
+      "USAGE: Locale JSON imports are detected; telemetry/event call strings classified and excluded from translation counts.",
+      "USAGE: Confidence-split unused key reports — confirmed/likely/possibly used tiers.",
+      "USAGE: New --strict-unused, --json, --prune / --prune-keep flags.",
+      "USAGE: Mojibake detection, client-boundary warnings, copy-formatter detection, local wrapper resolution.",
+      "USAGE: Object-method .tx() calls and bounded dynamic key expansions now recognized.",
+      "VSCode: i18ntk.clearDiagnostics command, new diagnostic codes, stale diagnostics cleared at scan start.",
+      "TRANSLATE: Auto Translate residual reports and VS Code quick-fix integration."
     ],
     "breakingChanges": [
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.4.1",
+    "nextVersion": "4.4.2",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -227,10 +226,17 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.3.1 may be unstable or insecure. Upgrade to 4.3.1 or newer.",
+    "supportPolicy": "Versions earlier than 4.4.1 may be unstable or insecure. Upgrade to 4.4.1 or newer.",
     "deprecations": [
-      "4.3.0"
+      "4.3.0",
+      "4.3.1",
+      "4.3.2",
+      "4.3.3"
     ],
-    "deprecationMessage": "i18ntk 4.3.0 was published with a missing npm tarball. Upgrade to i18ntk@4.3.1 or newer: npm install -g i18ntk@latest"
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.4.1 or newer: npm install -g i18ntk@latest",
+    "securityAdvisories": [
+      "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
+      "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"
+    ]
   }
 }

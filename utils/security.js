@@ -111,6 +111,10 @@ function getI18n() {
  * to prevent path traversal, code injection, and other security vulnerabilities
  */
 class SecurityUtils {
+  static MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  static MAX_JSON_SIZE = 50 * 1024 * 1024; // 50 MB
+  static MAX_JSON_DEPTH = 1000;
+  static MAX_FILENAME_LENGTH = 255;
 
 // Whitelist patterns for our own package artifacts
 static PACKAGE_ARTIFACT_WHITELIST = [
@@ -511,7 +515,17 @@ static _logging = false;
     }
 
     if (typeof input === 'object' && !Array.isArray(input)) {
-      return JSON.parse(JSON.stringify(input));
+      try {
+        var check = JSON.stringify(input);
+        if (check.length > SecurityUtils.MAX_JSON_SIZE) {
+          SecurityUtils.logSecurityEvent('Oversized JSON input', 'error', { size: check.length });
+          return fallback;
+        }
+        return JSON.parse(check);
+      } catch (e) {
+        SecurityUtils.logSecurityEvent('JSON re-parse failed', 'error', { error: e.message });
+        return fallback;
+      }
     }
 
     if (typeof input !== 'string') {
@@ -523,12 +537,31 @@ static _logging = false;
       return fallback;
     }
 
+    if (trimmed.length > SecurityUtils.MAX_JSON_SIZE) {
+      SecurityUtils.logSecurityEvent('Oversized JSON string', 'error', { size: trimmed.length });
+      return fallback;
+    }
+
+    // Quick heuristic for deeply nested JSON — reject content with excessive
+    // bracket depth before attempting to parse.
+    let depth = 0;
+    let maxDepth = 0;
+    for (let i = 0; i < Math.min(trimmed.length, 500000); i++) {
+      if (trimmed[i] === '{' || trimmed[i] === '[') depth++;
+      else if (trimmed[i] === '}' || trimmed[i] === ']') depth--;
+      maxDepth = Math.max(maxDepth, depth);
+    }
+    if (maxDepth > SecurityUtils.MAX_JSON_DEPTH) {
+      SecurityUtils.logSecurityEvent('Excessively deep JSON', 'error', { maxDepth });
+      return fallback;
+    }
+
     try {
       const normalized = trimmed.charCodeAt(0) === 0xFEFF ? trimmed.slice(1) : trimmed;
       return JSON.parse(normalized);
     } catch (error) {
-    SecurityUtils.logSecurityEvent('Invalid JSON content', 'error', { error: error.message });
-    return fallback;
+      SecurityUtils.logSecurityEvent('Invalid JSON content', 'error', { error: error.message });
+      return fallback;
     }
   }
 
@@ -538,7 +571,7 @@ static _logging = false;
     }
 
     const {
-      allowedChars = /^[a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:\;"'\/\\]+$/,
+      allowedChars = /^[a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]:;"'\/]+$/,
       maxLength = 1000,
       removeHTML = true,
       removeScripts = true
@@ -573,8 +606,18 @@ static _logging = false;
         const i18n = getI18n();
         SecurityUtils.logSecurityEvent('Input contains disallowed characters', 'warn');
       }
-      // Allow more characters for file paths and content
-      sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]\{\}\:\;"'\/\\]/g, '');
+      // Strip characters outside the safe character set.
+      // Build allowed set from the regex pattern: extract the character class from ^[...]+$
+      const source = allowedChars.source;
+      const classMatch = source.match(/^\^\[(.+)\]\+\$$/);
+      if (classMatch) {
+        // Use the raw character class directly (classes like a-z, s, d are ranges)
+        const strictRegex = new RegExp(`[^${classMatch[1]}]`, 'g');
+        sanitized = sanitized.replace(strictRegex, '');
+      } else {
+        // Safe fallback that excludes backslash, braces, angle brackets
+        sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]:;"'\/]/g, '');
+      }
     }
 
     return sanitized;

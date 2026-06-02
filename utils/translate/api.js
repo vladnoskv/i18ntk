@@ -88,7 +88,22 @@ function getLibreTranslateUrl(options = {}) {
 }
 
 function getLibreTranslateAllowedHosts(url) {
-  return [...new Set(['libretranslate.com', new URL(url).hostname])];
+  const customFlag = process.env.I18NTK_ALLOW_CUSTOM_LIBRETRANSLATE_HOST === '1';
+  const hosts = new Set(['libretranslate.com']);
+  if (url) {
+    try {
+      const host = new URL(url).hostname;
+      if (customFlag) {
+        hosts.add(host);
+      } else {
+        // Only allow the default host; custom host requires the env flag
+        if (host === 'libretranslate.com' || host.endsWith('.libretranslate.com')) {
+          hosts.add(host);
+        }
+      }
+    } catch {}
+  }
+  return [...hosts];
 }
 
 function extractLibreTranslateTranslation(data) {

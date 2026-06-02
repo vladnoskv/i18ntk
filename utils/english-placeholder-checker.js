@@ -61,7 +61,7 @@ function collectJsonFiles(dir, rootDir = dir) {
 
 function getEnglishLocaleFiles(sourceDir, sourceLanguage = 'en') {
   const requestedRoot = path.resolve(sourceDir || './locales');
-  const localeRoot = SecurityUtils.validatePath(requestedRoot, process.cwd());
+  const localeRoot = SecurityUtils.validatePath(requestedRoot, requestedRoot);
   if (!localeRoot) return [];
 
   const files = [];
@@ -100,7 +100,20 @@ function getEnglishLocaleFiles(sourceDir, sourceLanguage = 'en') {
 function scanEnglishPlaceholders(options = {}) {
   const sourceDir = options.sourceDir || './locales';
   const sourceLanguage = options.sourceLanguage || 'en';
-  const localeRoot = SecurityUtils.validatePath(path.resolve(sourceDir), process.cwd()) || process.cwd();
+  const requestedRoot = path.resolve(sourceDir);
+  const localeRoot = SecurityUtils.validatePath(requestedRoot, requestedRoot);
+  if (!localeRoot) {
+    return {
+      success: false,
+      sourceDir: requestedRoot,
+      sourceLanguage,
+      fileCount: 0,
+      keyCount: 0,
+      placeholderCount: 0,
+      placeholders: [],
+      errors: [{ file: sourceDir, path: requestedRoot, error: 'Invalid source directory' }]
+    };
+  }
   const files = getEnglishLocaleFiles(sourceDir, sourceLanguage);
   const placeholders = [];
   const errors = [];

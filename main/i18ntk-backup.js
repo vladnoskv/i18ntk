@@ -356,25 +356,38 @@ async function cleanupOldBackups(backupDirPath) {
 }
 
 async function handleCreate(args) {
-  const dir = args._[1] || path.join(__dirname, '..', 'locales');
-  const outputDir = args.output || backupDir;
+  const rawSourceDir = args._[1] || path.join(__dirname, '..', 'locales');
+  const rawOutputDir = args.output || backupDir;
+
+  // Validate both paths against project root (cwd) for security
+  const sourceDir = path.resolve(rawSourceDir);
+  if (!SecurityUtils.validatePath(sourceDir, process.cwd())) {
+    throw new Error(`Source directory is outside the allowed project boundary.`);
+  }
+
+  const outputDir = path.resolve(rawOutputDir);
+  const validatedOutputDir = SecurityUtils.validatePath(outputDir, process.cwd());
+  if (!validatedOutputDir) {
+    throw new Error(`Output directory is outside the allowed project boundary.`);
+  }
+
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupName = `backup-${timestamp}.json`;
-  const backupPath = path.join(outputDir, backupName);
+  const backupPath = path.join(validatedOutputDir, backupName);
   const isIncremental = args.incremental !== 'false' && args.incremental !== false;
 
-  logger.debug(`Source directory: ${dir}`);
+  logger.debug(`Source directory: ${sourceDir}`);
   logger.debug(`Backup will be saved to: ${backupPath}`);
 
   try {
-    await fsp.mkdir(outputDir, { recursive: true });
-    logger.debug(`Created backup directory: ${outputDir}`);
+    SecurityUtils.safeMkdirSync(validatedOutputDir, process.cwd());
+    logger.debug(`Created backup directory: ${validatedOutputDir}`);
   } catch (err) {
     if (err.code !== 'EEXIST') {
       logger.error(`Failed to create backup directory: ${err.message}`);
       throw err;
     }
-    logger.debug(`Using existing backup directory: ${outputDir}`);
+    logger.debug(`Using existing backup directory: ${validatedOutputDir}`);
   }
 
   const sourceDir = path.resolve(dir);
@@ -463,7 +476,7 @@ async function handleCreate(args) {
     backupData[file] = content;
   }
 
-  await fsp.writeFile(backupPath, JSON.stringify(backupData, null, 2));
+  SecurityUtils.safeWriteFileSync(backupPath, JSON.stringify(backupData, null, 2), validatedOutputDir);
   const stats = await fsp.stat(backupPath);
 
   logger.success('Backup created successfully');
@@ -483,9 +496,11 @@ async function handleRestore(args) {
   }
 
   const backupPath = path.resolve(process.cwd(), backupFile);
-  const outputDir = args.output
-    ? path.resolve(process.cwd(), args.output)
-    : path.join(process.cwd(), 'restored');
+  const rawOutputDir = args.output || path.join(process.cwd(), 'restored');
+  const validatedOutputDir = SecurityUtils.validatePath(rawOutputDir, process.cwd());
+  if (!validatedOutputDir) {
+    throw new Error(`Restore output directory is outside the allowed project boundary.`);
+  }
 
   if (!SecurityUtils.safeExistsSync(backupPath, process.cwd())) {
     throw new Error(`Backup file not found: ${backupPath}`);
@@ -494,36 +509,38 @@ async function handleRestore(args) {
   logger.info('\nRestoring backup...');
 
   try {
-    const backupData = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
+    const rawContent = SecurityUtils.safeReadFileSync(backupPath, process.cwd(), 'utf8');
+    if (!rawContent) throw new Error(`Could not read backup file: ${backupPath}`);
+    const backupData = JSON.parse(rawContent);
     const isIncremental = backupData._meta && backupData._meta.type === 'incremental';
 
     if (isIncremental) {
       const chain = await buildRestoreChain(backupPath, backupData);
-      await fsp.mkdir(outputDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(validatedOutputDir, process.cwd());
 
       const restoredFiles = new Set();
       for (const entry of chain) {
         for (const [file, content] of Object.entries(entry.data)) {
-          if (restoreBackupEntry(outputDir, file, content)) {
+          if (restoreBackupEntry(validatedOutputDir, file, content)) {
             restoredFiles.add(file);
           }
         }
       }
 
       logger.success('Incremental backup restored successfully');
-      logger.info(`  ${restoredFiles.size} files restored across ${chain.length} backup(s) to: ${outputDir}`);
+      logger.info(`  ${restoredFiles.size} files restored across ${chain.length} backup(s) to: ${validatedOutputDir}`);
     } else {
-      await fsp.mkdir(outputDir, { recursive: true });
+      SecurityUtils.safeMkdirSync(validatedOutputDir, process.cwd());
 
       let count = 0;
       for (const [file, content] of Object.entries(backupData)) {
-        if (restoreBackupEntry(outputDir, file, content)) {
+        if (restoreBackupEntry(validatedOutputDir, file, content)) {
           count++;
         }
       }
 
       logger.success('Backup restored successfully');
-      logger.info(`  Restored ${count} files to: ${outputDir}`);
+      logger.info(`  Restored ${count} files to: ${validatedOutputDir}`);
     }
   } catch (error) {
     handleError(error);
@@ -532,32 +549,38 @@ async function handleRestore(args) {
 
 async function handleList() {
   try {
-    // Ensure backup directory exists
-    try {
-      await fsp.access(backupDir);
-    } catch (err) {
-      if (err.code === 'ENOENT') {
-        logger.warn('No backups found. The backup directory does not exist yet.');
-      } else {
-        logger.error(`Error accessing backup directory: ${err.message}`);
-      }
+    const validatedBackupDir = SecurityUtils.validatePath(backupDir, process.cwd());
+    if (!validatedBackupDir) {
+      logger.error('Backup directory is outside allowed project boundary.');
       return;
     }
 
-    const files = await fsp.readdir(backupDir);
+    if (!SecurityUtils.safeExistsSync(validatedBackupDir, process.cwd())) {
+      logger.warn('No backups found. The backup directory does not exist yet.');
+      return;
+    }
+
+    const files = SecurityUtils.safeReaddirSync(validatedBackupDir, process.cwd());
+    if (!files || files.length === 0) {
+      logger.warn('No valid backup files found in the backup directory.');
+      return;
+    }
+
     const backups = [];
-    
+
     for (const file of files) {
-      if (file.startsWith('backup-') && file.endsWith('.json')) {
+      if (Array.isArray(files) && file.startsWith('backup-') && file.endsWith('.json')) {
         try {
-          const filePath = path.join(backupDir, file);
-        const stats = await fsp.stat(filePath);
-          backups.push({
-            name: file,
-            path: filePath,
-            size: stats.size,
-            createdAt: stats.mtime
-          });
+          const filePath = path.join(validatedBackupDir, file);
+          const stats = SecurityUtils.safeStatSync(filePath, process.cwd());
+          if (stats) {
+            backups.push({
+              name: file,
+              path: filePath,
+              size: stats.size,
+              createdAt: stats.mtime
+            });
+          }
         } catch (err) {
           logger.warn(`Skipping invalid backup file ${file}: ${err.message}`);
         }
@@ -610,7 +633,9 @@ async function handleVerify(args) {
   logger.info('\nVerifying backup...');
 
   try {
-    const data = JSON.parse(await fsp.readFile(backupPath, 'utf8'));
+    const rawContent = SecurityUtils.safeReadFileSync(backupPath, process.cwd(), 'utf8');
+    if (!rawContent) throw new Error(`Could not read backup file: ${backupPath}`);
+    const data = JSON.parse(rawContent);
 
     if (data._meta && data._meta.hashes) {
       logger.info('  Performing hash chain verification...');

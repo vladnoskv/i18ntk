@@ -33,6 +33,11 @@ const SetupEnforcer = require('../utils/setup-enforcer');
   }
 })();
 
+    console.error('Setup check failed:', error.message);
+    process.exit(1);
+  }
+})();
+
 loadTranslations();
 
 class I18nTextScanner {

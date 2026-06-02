@@ -1,4 +1,4 @@
-# i18ntk v4.4.0
+# i18ntk v4.4.1
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.4.0)](https://socket.dev/npm/package/i18ntk/overview/4.4.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.4.1)](https://socket.dev/npm/package/i18ntk/overview/4.4.1)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -56,7 +56,7 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Validation reports | Yes | Limited |
 | Auto-translation workflow | Yes | External tooling |
 
-## What's New in 4.4.0
+## What's New in 4.4.1
 
 - **DEAD-KEY DETECTION**: Dead-key confidence now uses resolved dynamic key data from usage insights instead of crude text-overlap heuristics. Keys expanded from template literals or const arrays are properly tracked.
 - **LOCALE JSON IMPORT DETECTION**: `import en from '../../locales/en/foo.json'` is now detected and property accesses are tracked as key usages, closing the gap between CLI and VSCode scanners.
@@ -72,10 +72,19 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 - **VS CODE RESIDUAL PICKUP**: i18ntk Workbench and Lens read Auto Translate residual reports, show the affected locale JSON key in the editor, and can add intentionally unchanged keys to Auto Translate protection.
 - **WRAPPER CONFIG**: `.i18ntk-config` now supports `usage.translationFunctions`, `usage.serverWrappers`, and `usage.copyFormatters` for fine-grained control.
 - **TELEMETRY/EVENT STRING FILTERING**: String literals inside `trackEvent()`, `emitDomainEvent()`, `analytics.track()` and similar calls are classified as telemetry literals and no longer falsely counted as translation usage.
-- **OBJECT-METHOD KEY DETECTION**: `input.tx("key")`, `helper.tx("key")`, and `.tx(\`dynamic.${var}\`)` patterns are now recognized as translation calls alongside standalone `tx()` calls.
+- **OBJECT-METHOD KEY DETECTION**: input.tx("key"), helper.tx("key"), and .tx(\`dynamic.${var}\`) patterns are now recognized as translation calls alongside standalone `tx()` calls.
+
 - **LOCAL WRAPPER RESOLUTION**: Functions like `const text = (key, fallback) => tx(key)` that internally call the translation runtime are detected, and their string-literal invocations are automatically resolved to actual keys.
 
 See [CHANGELOG.md](./CHANGELOG.md) for more release details.
+
+## Security hardening in 4.4.1
+
+- **PATH TRAVERSAL HARDENED**: Backup, complete, and config-helper commands now validate all user-supplied paths through `SecurityUtils.validatePath()`, blocking writes outside project boundaries.
+- **JSON DoS PREVENTED**: `safeParseJSON` enforces maximum depth (1000) and maximum size (50 MB) before parsing, preventing denial-of-service via deeply nested or oversized JSON.
+- **INPUT SANITIZATION TIGHTENED**: `sanitizeInput` default whitelist no longer allows backslashes or curly braces that could enable path traversal or template injection.
+
+- **LIBRETRANSLATE URL GATED**: Custom LibreTranslate host now requires `I18NTK_ALLOW_CUSTOM_LIBRETRANSLATE_HOST=1` env flag (parity with DeepL).
 
 ## Quick Start
 

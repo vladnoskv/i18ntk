@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.1] - 2026-06-02
+
+### Security
+- **HIGH**: Backup operations (`create`, `restore`, `list`, `verify`) now validate all path arguments via `SecurityUtils.validatePath()`. Previously, `i18ntk-backup` accepted arbitrary `--output` and source directory paths without any validation, enabling writes outside project boundaries.
+- **HIGH**: Backup `handleCreate`, `handleRestore` now use `SecurityUtils.safeWriteFileSync`, `safeReadFileSync`, `safeMkdirSync` instead of raw `fs.promises`/`fs` calls.
+- **HIGH**: `i18ntk-complete` now validates `--source-dir` CLI override through `SecurityUtils.validatePath()` and sanitizes `--source-language` through `SecurityUtils.sanitizeInput()` instead of accepting raw user input.
+- **HIGH**: `config-helper` dual-path resolution (when both `--source-dir` and `--i18n-dir` are explicit) now wraps each resolved path in `SecurityUtils.validatePath()`.
+- **MEDIUM**: JSON parsing now enforces maximum depth (1000) and maximum size (50 MB) limits in `safeParseJSON` to prevent denial-of-service via deeply nested or oversized JSON files.
+- **MEDIUM**: LibreTranslate custom URL (`LIBRETRANSLATE_URL`) now requires `I18NTK_ALLOW_CUSTOM_LIBRETRANSLATE_HOST=1` env flag to add arbitrary hosts to the allowed list, bringing parity with DeepL's gated approach.
+- **MEDIUM**: `sanitizeInput` default character whitelist tightened — removed `\\`, `{`, `}` characters that could enable path traversal or template injection.
+- **MEDIUM**: VSCode Workbench `workspaceScanner.ts` now validates auto-translate report paths with `normalizeWithinRoot()` and rejects JSON content > 50 MB.
+- **MEDIUM**: VSCode Workbench `localeFileService.ts` now validates `addKey()` write paths via `isPathWithinRoot()` and rejects locale files > 10 MB before parsing.
+- **LOW**: i18ntk Lens `scanner.ts` now rejects custom wrapper names > 100 characters to prevent ReDoS via malicious VSCode config values.
+
+### Added
+- `SecurityUtils.MAX_JSON_SIZE`, `SecurityUtils.MAX_JSON_DEPTH`, `SecurityUtils.MAX_FILENAME_LENGTH` constants for configurable safety limits.
+
 ## [4.4.0] - 2026-06-02
 
 ### Added

@@ -13,8 +13,8 @@
 
 
 const path = require('path');
+const fs = require('fs');
 const SecurityUtils = require('../utils/security');
-const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 const SetupEnforcer = require('../utils/setup-enforcer');
@@ -559,12 +559,23 @@ class I18nCompletionTool {
       await this.initialize();
       
       if (args.sourceDir) {
-        this.config.sourceDir = args.sourceDir;
-        this.sourceDir = path.resolve(this.config.sourceDir);
+        const resolvedSourceDir = path.resolve(args.sourceDir);
+        const validatedSourceDir = SecurityUtils.validatePath(resolvedSourceDir, process.cwd());
+        if (!validatedSourceDir) {
+          console.error(t("complete.invalidSourceDir", { sourceDir: args.sourceDir }));
+          console.error(`Path validation failed — source directory is outside the allowed project boundary.`);
+          process.exit(1);
+        }
+        this.config.sourceDir = resolvedSourceDir;
+        this.sourceDir = validatedSourceDir;
       }
       
       if (args.sourceLanguage) {
-        this.config.sourceLanguage = args.sourceLanguage;
+        this.config.sourceLanguage = SecurityUtils.sanitizeInput(args.sourceLanguage, { 
+          allowedChars: /^[a-zA-Z0-9\-_]+$/, 
+          maxLength: 10,
+          removeHTML: true 
+        });
       }
       
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
