@@ -834,15 +834,19 @@ function writeOutput(outputData, outputPath, bom) {
 }
 
 async function processFile(sourcePath, targetLang, args) {
-  const fileName = path.basename(sourcePath);
-  const targetDir = args.outputDir || path.join(path.dirname(path.dirname(sourcePath)), targetLang);
+  const resolvedSourcePath = path.resolve(process.cwd(), sourcePath);
+  const fileName = path.basename(resolvedSourcePath);
+  const targetDir = args.outputDir || path.join(path.dirname(path.dirname(resolvedSourcePath)), targetLang);
   const targetPath = path.join(targetDir, fileName);
   const runArgs = { ...args, targetLang };
 
   let sourceData;
   try {
-    const raw = SecurityUtils.safeReadFileSync(sourcePath, path.dirname(sourcePath), 'utf-8').replace(/^\uFEFF/, '');
-    sourceData = JSON.parse(raw);
+    const raw = SecurityUtils.safeReadFileSync(resolvedSourcePath, path.dirname(resolvedSourcePath), 'utf-8');
+    if (raw === null || raw === undefined) {
+      throw new Error('safe read returned no content');
+    }
+    sourceData = JSON.parse(raw.replace(/^\uFEFF/, ''));
   } catch (e) {
     console.error(`Error reading "${sourcePath}": ${e.message}`);
     return null;
@@ -934,7 +938,7 @@ async function processFile(sourcePath, targetLang, args) {
     console.log(`[${fileName}] Protecting terms from: ${protection.filePath}`);
   }
 
-  const manifestPath = createPlaceholderManifest(sourcePath, targetLang, toTranslate);
+  const manifestPath = createPlaceholderManifest(resolvedSourcePath, targetLang, toTranslate);
 
   const translateOptions = {
     sourceLang: runArgs.sourceLang,

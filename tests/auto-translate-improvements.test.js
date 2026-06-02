@@ -92,6 +92,78 @@ test('auto translate preserves existing translated values and only sends missing
   }
 });
 
+test('auto translate treats protected product terms as allowed English when deciding only-missing work', async () => {
+  const { processFile } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'ui.json');
+  const targetDir = path.join(project, 'locales', 'es');
+  const targetFile = path.join(targetDir, 'ui.json');
+
+  writeJson(sourceFile, {
+    workspaceRequired: 'i18ntk Workbench requires an open workspace.',
+    protectionAdded: 'Added "{key}" to i18ntk Auto Translate protection keys.',
+  });
+  writeJson(targetFile, {
+    workspaceRequired: 'i18ntk Workbench requiere un espacio de trabajo abierto.',
+    protectionAdded: 'Se agrego "{key}" a las claves protegidas de i18ntk Auto Translate.',
+  });
+
+  try {
+    process.chdir(project);
+    const result = await processFile(sourceFile, 'es', defaultTranslateArgs({
+      dryRun: true,
+      outputDir: targetDir,
+      preservePlaceholders: true,
+      protection: {
+        terms: ['i18ntk', 'Workbench', 'Auto Translate'],
+        keys: [],
+        values: [],
+        patterns: [],
+      },
+    }));
+
+    assert.equal(result.translated, 0);
+    assert.equal(result.skippedExisting, 2);
+    assert.equal(result.placeholderProtected, 0);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('auto translate processFile accepts source paths relative to the current project', async () => {
+  const { processFile } = require('../main/i18ntk-translate');
+  const cwd = process.cwd();
+  const project = makeTempProject();
+  const sourceFile = path.join(project, 'locales', 'en', 'ui.json');
+  const targetDir = path.join(project, 'locales', 'es');
+  const targetFile = path.join(targetDir, 'ui.json');
+
+  writeJson(sourceFile, {
+    title: 'Open settings',
+  });
+  writeJson(targetFile, {
+    title: 'Abrir configuracion',
+  });
+
+  try {
+    process.chdir(project);
+    const result = await processFile('locales/en/ui.json', 'es', defaultTranslateArgs({
+      dryRun: true,
+      outputDir: targetDir,
+      preservePlaceholders: true,
+    }));
+
+    assert.equal(result.total, 1);
+    assert.equal(result.translated, 0);
+    assert.equal(result.skippedExisting, 1);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
 test('auto translate retranslates visibly broken target values from the English source', async () => {
   const { processFile } = require('../main/i18ntk-translate');
   const cwd = process.cwd();

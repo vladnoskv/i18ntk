@@ -1,4 +1,4 @@
-# i18ntk v4.4.1
+# i18ntk v4.4.2
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.4.1)](https://socket.dev/npm/package/i18ntk/overview/4.4.1)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.4.2)](https://socket.dev/npm/package/i18ntk/overview/4.4.2)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -55,6 +55,13 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Unused key detection | Yes | No |
 | Validation reports | Yes | Limited |
 | Auto-translation workflow | Yes | External tooling |
+
+## What's New in 4.4.2
+
+- **AUTO TRANSLATE RELATIVE PATHS**: Programmatic `processFile()` calls now accept project-relative source paths, matching CLI source resolution.
+- **PROTECTED TERMS IN ONLY-MISSING MODE**: Existing translations that intentionally keep protected product terms such as `i18ntk` are no longer treated as English leftovers.
+- **BROKEN TARGET RETRIES**: Auto Translate now detects and retries more visibly broken target values, including mojibake, replacement characters, repeated question marks, and target-language prefix leftovers.
+- **REGRESSION COVERAGE**: Added focused tests for relative paths, protected product terms, broken values, placeholder handling, and residual checks.
 
 ## What's New in 4.4.1
 

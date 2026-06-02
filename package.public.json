@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.4.1",
+  "version": "4.4.2",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
@@ -175,7 +175,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.4.1",
+    "version": "4.4.2",
     "releaseDate": "02/06/2026",
     "lastUpdated": "02/06/2026",
     "maintainer": "Vlad Noskov",
@@ -183,6 +183,10 @@
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "TRANSLATE: processFile() accepts project-relative source paths, matching direct CLI resolution.",
+      "TRANSLATE: only-missing mode keeps existing translations that intentionally preserve configured product terms.",
+      "TRANSLATE: broken target value detection now catches mojibake, replacement characters, repeated question marks, and target-language prefix leftovers.",
+      "TESTS: Auto Translate regression coverage expanded for relative paths, protected terms, placeholder handling, and residual checks.",
       "SECURITY: Backup operations now validate all paths via SecurityUtils.validatePath — fixes path traversal enabling arbitrary filesystem writes.",
       "SECURITY: i18ntk-complete --source-dir CLI override now validated; --source-language sanitized through SecurityUtils.sanitizeInput.",
       "SECURITY: config-helper dual-path resolution wraps --source-dir / --i18n-dir in SecurityUtils.validatePath.",
@@ -204,7 +208,7 @@
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.4.2",
+    "nextVersion": "4.4.3",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -226,14 +230,14 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.4.1 may be unstable or insecure. Upgrade to 4.4.1 or newer.",
+    "supportPolicy": "Versions earlier than 4.4.1 may be unstable or insecure. Upgrade to 4.4.2 or newer.",
     "deprecations": [
       "4.3.0",
       "4.3.1",
       "4.3.2",
       "4.3.3"
     ],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.4.1 or newer: npm install -g i18ntk@latest",
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.4.2 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"

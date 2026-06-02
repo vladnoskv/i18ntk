@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.2] - 2026-06-02
+
+### Fixed
+- Auto Translate `processFile()` now accepts source file paths relative to the current project, matching direct CLI behavior and avoiding safe-read failures in programmatic callers.
+- Auto Translate now treats protected product terms as allowed English when deciding whether existing target values should be kept in `only-missing` mode.
+- Auto Translate detects and retries more visibly broken target values, including replacement-character artifacts, mojibake, repeated question marks, and target-language prefix leftovers.
+
+### Added
+- Added regression coverage for relative source paths, protected product terms, broken target values, placeholder handling, and managed Auto Translate residual checks.
+
 ## [4.4.1] - 2026-06-02
 
 ### Security
