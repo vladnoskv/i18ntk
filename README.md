@@ -1,6 +1,6 @@
 # i18ntk v4.3.3
 
-A i18n toolkit - A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
+A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
 ![i18ntk Logo](https://raw.githubusercontent.com/vladnoskv/i18ntk/main/docs/screenshots/i18ntk-logo-public.PNG)
 
@@ -10,17 +10,9 @@ A i18n toolkit - A zero-dependency internationalization toolkit for setup, scann
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.3.3)](https://socket.dev/npm/package/i18ntk/overview/4.3.3)
-## VS Code Extensions
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
-
-Official VS Code extensions powered by i18ntk:
-
-- **i18ntk Workbench**: setup, scanning, validation, usage checks, reports, key management, and CLI-backed Auto Translate inside VS Code.
-- **i18ntk Lens**: lightweight inline hovers, CodeLens, missing-key warnings, unused-key diagnostics, key navigation, and settings.
-
-Install both when you want the full sidebar plus inline editor feedback.
 
 ## Install
 
@@ -35,11 +27,34 @@ npm install --save-dev i18ntk
 npx i18ntk --help
 ```
 
-Requirements:
+## i18ntk Summary
 
-- Node.js `>=16.0.0`
-- npm `>=8.0.0`
-- No runtime dependencies
+**What it does**
+
+- Manages locale files from the command line.
+- Finds missing, unused, risky, and inconsistent translation keys.
+- Produces validation and summary reports.
+- Supports framework-aware i18n workflows.
+- Provides a lightweight runtime translation toolkit.
+
+**What it does not do**
+
+- It is not a translation management SaaS.
+- It does not replace human translation review.
+- It does not force you to replace i18next, react-i18next, vue-i18n, or another runtime.
+
+**Why not i18next?**
+
+i18next is mainly a runtime internationalization library. i18ntk is mainly workflow tooling around translation files. They can work together: i18next handles runtime translation, while i18ntk handles setup, scanning, validation, reporting, and maintenance.
+
+| Need | i18ntk | i18next |
+| --- | --- | --- |
+| Runtime translation | Basic toolkit | Mature runtime |
+| Locale file scanning | Yes | No |
+| Missing key detection | Yes | No |
+| Unused key detection | Yes | No |
+| Validation reports | Yes | Limited |
+| Auto-translation workflow | Yes | External tooling |
 
 ## What's New in 4.3.3
 
@@ -47,44 +62,6 @@ Requirements:
 - **USAGE FIX**: Local `tx(...)` wrappers and bounded dynamic `tx` template usages are resolved so real keys are less likely to appear unused.
 - **KEY STYLE**: Hybrid dot-path plus snake_case segment keys are valid, for example `namespace.section.snake_case_leaf`; malformed separators and uppercase segments are still reported.
 - **SAFETY**: Unused-key reports are advisory. Do not bulk-delete keys from an unused report without manual verification or a precise usage scan.
-
-## What's New in 4.3.2
-
-- **DOCS**: README, API docs, and migration guidance now reflect the current 4.3.2 package version.
-- **RELEASE**: 4.3.0 is marked for npm deprecation because its npm tarball is unavailable; install 4.3.1 or newer.
-
-## What's New in 4.3.1
-
-- **FIX**: Published tarball now includes `utils/english-placeholder-checker.js`, resolving `MODULE_NOT_FOUND` at startup for `i18ntk-fixer --check-placeholders` and manager option 7.
-- **FIX**: Language-specific CLI entry points (`i18ntk-go`, `i18ntk-java`, `i18ntk-js`, `i18ntk-php`, `i18ntk-py`) and their shared `utils/mini-commander.js` dependency are now included in the published package.
-- **FIX**: Removed inconsistent `.js` extension suffixes from require paths in `main/i18ntk-js.js`.
-
-## What's New in 4.3.0
-
-- **AUTO TRANSLATE**: Existing target values like `[AR] What We Offer`, `[AR] Email`, `[zh] Email`, and `[TR] Password` are now treated as untranslated placeholders for the matching target language and are translated from the source text.
-- **AUTO TRANSLATE**: Before writing each output file, Auto Translate now performs a final leftover check and retries any placeholder-prefixed or source-copy values once.
-- **AUTO TRANSLATE**: If leftovers remain after the final retry, the command warns, includes them in the report, recommends rerunning Auto Translate, and exits with validation failure instead of reporting a clean completion.
-- **AUTO TRANSLATE**: Managed Auto Translate now checks every selected source file for a target language before reporting leftovers, so one failed file does not prevent the rest from being audited.
-- **AUTO TRANSLATE**: Short all-caps acronyms and codes such as `XP` are allowed to remain unchanged instead of failing the final leftover check.
-- **FIX PLACEHOLDERS**: Menu option 7 now runs an English source placeholder audit and reports how many `[LANG] ...` values remain in English locale files. A clean project reports `0`.
-- **SIZING/USAGE**: Usage analysis no longer writes its inferred app source fallback back into the shared locale config, so running usage before sizing no longer makes sizing analyze the wrong directory.
-- **VALIDATION REPORTS**: Validation summary files now include warning and error details, including English-content warning payloads, instead of only totals.
-- **DOCS**: Versioned docs and migration guidance now reflect the current 4.3.0 command surface.
-
-## What's New in 4.1.0
-
-- **FIX**: Critical and high-impact bugs resolved across the v4.0.0 feature set — runtime staleness crashes, backup hash-chain verification, sizing adminAuth crash, scanner `--source-language` propagation, watch callback subscriptions, dead key detection performance, validator key style enforcement, and protection Unicode boundary handling. See [CHANGELOG.md](./CHANGELOG.md) for complete details.
-
-## What's New in 4.0.0
-
-- **SIZING**: `--predict-expansion` flag computes per-key expansion ratios across languages with Safe/Warning/Critical risk tiers for UI layout planning.
-- **WATCH**: `watchLocales()` now returns an EventEmitter-compatible watcher with debounced `change`/`add`/`unlink`/`error` events and SHA-256 hash tracking.
-- **USAGE**: `--cleanup` and `--dry-run-delete` flags identify dead translation keys with confidence scores.
-- **VALIDATOR**: `--enforce-key-style` enforces dot.notation, snake_case, camelCase, kebab-case, or flat naming conventions.
-- **SCANNER**: `--source-language` supports multi-language hardcoded text detection with 12+ language profiles.
-- **BACKUP**: `--incremental` flag creates differential backups with SHA-256 hashing and chained restores.
-- **RUNTIME**: `lazy: true` option defers locale file loading until first key access for lower memory usage.
-- **PROTECTION**: Context-aware rules (`after:word`, `before:word`, `standalone`, `surrounded:left,right`) for precise term masking.
 
 See [CHANGELOG.md](./CHANGELOG.md) for more release details.
 
@@ -573,7 +550,7 @@ See [docs/api/CONFIGURATION.md](./docs/api/CONFIGURATION.md) for the full config
 
 ## Public Package Contents
 
-The public package intentionally ships runtime and CLI files only. The publish staging script excludes development-only content such as tests, scripts, docs, release staging folders, local config files, and generated protection files.
+The public package intentionally ships runtime and CLI files only.
 
 The package includes:
 
