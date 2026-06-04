@@ -14,6 +14,14 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
 
+## The i18ntk ecosystem
+
+- i18ntk — CLI and runtime toolkit
+- i18ntk Workbench — full VS Code dashboard and reports
+- i18ntk Lens — inline hovers, CodeLens, and diagnostics
+
+Use the CLI in CI, Workbench for project-level management, and Lens for day-to-day editor feedback.
+
 ## Install
 
 ```bash
@@ -109,6 +117,7 @@ Run common checks:
 i18ntk --command=analyze
 i18ntk --command=validate
 i18ntk --command=usage
+i18ntk report --json
 i18ntk --command=sizing
 i18ntk --command=summary
 ```
@@ -141,6 +150,7 @@ i18ntk --command=init
 i18ntk --command=analyze
 i18ntk --command=validate
 i18ntk --command=usage
+i18ntk report --json --markdown --html --out ./i18ntk-reports
 i18ntk --command=scanner
 i18ntk --command=sizing
 i18ntk --command=complete
@@ -155,6 +165,7 @@ i18ntk-init
 i18ntk-analyze
 i18ntk-validate
 i18ntk-usage
+i18ntk-report
 i18ntk-scanner
 i18ntk-sizing
 i18ntk-complete
@@ -176,6 +187,7 @@ Note: manager route `i18ntk --command=backup` is disabled in current builds. Use
 | `i18ntk --command=analyze` / `i18ntk-analyze` | Compares source and target translation coverage. | Missing keys, extra keys, untranslated markers, completion by language. | Markdown/JSON/text reports when report output is enabled. |
 | `i18ntk --command=validate` / `i18ntk-validate` | Validates structure and translation quality risks. | Placeholder mismatches, missing keys, risky URLs/emails/secrets, likely English target text. | Validation summary report. Does not edit locale files. |
 | `i18ntk --command=usage` / `i18ntk-usage` | Maps translation keys to source files and finds unused/missing keys. | Direct i18n calls, literal known-key references, bounded dynamic templates/object maps, unresolved dynamic expressions, hardcoded text candidates, namespace/file naming mismatches. | Usage report with key locations, namespace recommendations, unresolved dynamic expressions, hardcoded text suggestions, and optional dead-key report. Does not delete unless cleanup deletion is explicitly enabled. |
+| `i18ntk report` / `i18ntk-report` | Generates the stable schemaVersion 1 report used by CLI automation and i18ntk Workbench. | Locale completeness, missing keys, unused keys with confidence, placeholders, likely untranslated values, expansion risk, and hardcoded text candidates. | JSON to stdout by default, plus JSON/Markdown/HTML files when `--out` is used. Does not edit locale files. |
 | `i18ntk --command=scanner` / `i18ntk-scanner` | Scans source for i18n issues and hardcoded user-facing text. | JSX/template text, common text attributes, i18n usage patterns, source-language text profiles. | Scanner report. Does not edit files. |
 | `i18ntk --command=complete` / `i18ntk-complete` | Adds missing keys to target language files for 100% key coverage. | Source-language keys missing from targets. | Target locale JSON files, using missing translation markers/prefixes. |
 | `i18ntk --command=translate` / `i18ntk-translate` | Auto-translates locale JSON using configured provider behavior. | Missing, empty, untranslated-marker, source-copy, likely-English, or visibly corrupt target values by default. | Target locale JSON files and translation reports. Existing translated values are kept unless `--translate-all` is used. If unresolved values remain after retry, writes `i18ntk-reports/auto-translate/latest.json` for targeted follow-up. |

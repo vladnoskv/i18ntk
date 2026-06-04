@@ -305,17 +305,25 @@ class I18nManager {
         const args = this.parseArgs();
         const rawArgs = process.argv.slice(2);
         const directCommands = [
-            'init', 'analyze', 'validate', 'usage', 'scanner', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow'
+            'init', 'analyze', 'validate', 'usage', 'scanner', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow', 'report'
         ];
         const commandFlagArg = rawArgs.find(arg => arg.startsWith('--command='));
         const requestedCommand = commandFlagArg
             ? commandFlagArg.split('=')[1]
             : (rawArgs.length > 0 && directCommands.includes(rawArgs[0]) ? rawArgs[0] : null);
-        const shouldSkipInitCheck = requestedCommand === 'init';
+        const shouldSkipInitCheck = requestedCommand === 'init' || requestedCommand === 'report';
 
         // Show help immediately without any setup/auth (useful for CI/uninitialized projects)
         if (args.help) {
             this.showHelp();
+            return;
+        }
+
+        if (requestedCommand === 'report') {
+            const ReportCommand = require('./commands/ReportCommand');
+            const command = new ReportCommand(this.config, this.ui);
+            await command.execute(args);
+            this.safeClose();
             return;
         }
 
