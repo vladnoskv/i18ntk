@@ -331,6 +331,7 @@ function looksLikelyUntranslated(source, target, locale) {
   if (!source || !target || locale === 'en') return false;
   const normalizedSource = normalizeText(source);
   const normalizedTarget = normalizeText(target);
+  if (!/[a-z]/i.test(normalizedSource)) return false;
   return normalizedSource.length >= 4 && normalizedSource === normalizedTarget;
 }
 

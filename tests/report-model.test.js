@@ -61,3 +61,29 @@ test('generateI18ntkReport returns the stable schema with locale and issue summa
   assert.match(renderReportAsMarkdown(report), /## Translation completeness/);
   assert.match(renderReportAsHtml(report), /<!doctype html>/i);
 });
+
+test('generateI18ntkReport does not flag placeholder-only dynamic values as untranslated', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-report-model-'));
+  fs.mkdirSync(path.join(dir, 'locales', 'en'), { recursive: true });
+  fs.mkdirSync(path.join(dir, 'locales', 'zh'), { recursive: true });
+  fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'locales', 'en', 'common.json'), JSON.stringify({
+    command: 'Command: {command}',
+    location: '📄 {file} → {path}'
+  }));
+  fs.writeFileSync(path.join(dir, 'locales', 'zh', 'common.json'), JSON.stringify({
+    command: '指示： {command}',
+    location: '📄 {file} → {path}'
+  }));
+  fs.writeFileSync(path.join(dir, 'src', 'app.js'), 't("command"); t("location");');
+
+  const report = generateI18ntkReport({
+    projectRoot: dir,
+    localesDir: 'locales',
+    sourceDir: 'src',
+    sourceLocale: 'en'
+  });
+
+  assert.equal(report.issues.some(issue => issue.type === 'likely_untranslated' && issue.key === 'command'), false);
+  assert.equal(report.issues.some(issue => issue.type === 'likely_untranslated' && issue.key === 'location'), false);
+});

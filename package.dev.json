@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.4.3",
+  "version": "4.4.4",
   "private": true,
   "manifestRole": "development",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
@@ -294,14 +294,17 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.4.3",
-    "releaseDate": "01/06/2026",
-    "lastUpdated": "01/06/2026",
+    "version": "4.4.4",
+    "releaseDate": "05/06/2026",
+    "lastUpdated": "05/06/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "CONFIG: Shared .i18ntk-config now accepts extension-owned sections under extensions.workbench and extensions.lens; the CLI preserves the top-level extensions object while ignoring unknown nested extension settings.",
+      "REPORTS: Likely-untranslated detection now ignores placeholder-only and symbol/dynamic values such as {file}, {path}, and emoji labels instead of treating them as untranslated English.",
+      "REPORTS: Dynamic values with translated surrounding copy and English placeholder tokens are no longer flagged as untranslated.",
       "AUTO TRANSLATE: Target-language placeholders such as [AR] What We Offer, [AR] Email, [zh] Email, and [TR] Password are detected, translated from source, and checked again before completion.",
       "AUTO TRANSLATE: Runs now warn, report, and exit with validation failure if placeholder-prefixed or source-copy leftovers remain after the final retry.",
       "AUTO TRANSLATE: Managed runs audit every selected file for a language before reporting leftover failures.",
@@ -317,7 +320,7 @@
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.4.4",
+    "nextVersion": "4.4.5",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -339,11 +342,11 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.3.1 may be unstable or insecure. Upgrade to 4.3.1 or newer.",
+    "supportPolicy": "Versions earlier than 4.4.1 may be unstable or insecure. Upgrade to 4.4.4 or newer.",
     "deprecations": [
       "4.3.0"
     ],
-    "deprecationMessage": "i18ntk 4.3.0 was published with a missing npm tarball. Upgrade to i18ntk@4.3.1 or newer: npm install -g i18ntk@latest"
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.4.4 or newer: npm install -g i18ntk@latest"
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

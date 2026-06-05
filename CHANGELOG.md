@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.4] - 2026-06-05
+
+### Fixed
+- Likely-untranslated reporting now ignores placeholder-only and symbol/dynamic values such as `{file}`, `{path}`, and icon-prefixed labels instead of treating them as untranslated English.
+- Dynamic values with translated surrounding copy and English placeholder tokens, such as `"command": "指示： {command}"`, are no longer flagged as untranslated.
+
+### Changed
+- `.i18ntk-config` now accepts a top-level `extensions` object for VS Code Workbench and Lens settings. The CLI preserves this section during config validation and ignores unknown extension-owned nested keys.
+- Documented shared config edge cases so editor extensions can sync workspace defaults without changing CLI behavior.
+
 ## [4.4.3] - 2026-06-04
 
 ### Fixed

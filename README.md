@@ -64,6 +64,12 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Validation reports | Yes | Limited |
 | Auto-translation workflow | Yes | External tooling |
 
+## What's New in 4.4.4
+
+- **SHARED CONFIG FOR EXTENSIONS**: `.i18ntk-config` can now carry editor-owned settings under `extensions.workbench` and `extensions.lens`. The CLI preserves the top-level `extensions` object and ignores unknown nested extension keys.
+- **DYNAMIC VALUE REPORTING**: Likely-untranslated reports now ignore placeholder-only and symbol/dynamic values such as `{file}`, `{path}`, and icon-prefixed labels.
+- **PLACEHOLDER-AWARE TRANSLATION CHECKS**: Values with translated surrounding copy and English placeholder tokens, such as `"command": "指示： {command}"`, are no longer reported as untranslated.
+
 ## What's New in 4.4.2
 
 - **AUTO TRANSLATE RELATIVE PATHS**: Programmatic `processFile()` calls now accept project-relative source paths, matching CLI source resolution.
@@ -552,7 +558,7 @@ Example:
 
 ```json
 {
-  "version": "4.3.3",
+  "version": "4.4.4",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",
@@ -582,6 +588,17 @@ Example:
   },
   "setup": {
     "completed": true
+  },
+  "extensions": {
+    "workbench": {
+      "localeDirectory": "./locales",
+      "sourceLocale": "en"
+    },
+    "lens": {
+      "localeDirectory": "./locales",
+      "sourceLocale": "en",
+      "keyFormats": ["dot", "snake"]
+    }
   }
 }
 ```

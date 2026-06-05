@@ -736,6 +736,8 @@ static _logging = false;
       'theme', 'ui', 'setup', 'reports', 'display', 'interface',
       // Security and settings
       'security', 'settings', 'preferences', 'config', 'configuration',
+      // Extension-owned config sections. The CLI preserves these but ignores unknown nested keys.
+      'extensions',
       // Additional common properties
       'autoSave', 'autoBackup', 'validateOnSave', 'showWarnings', 'verbose',
       'timeout', 'retries', 'batchSize', 'maxConcurrency', 'cacheEnabled',

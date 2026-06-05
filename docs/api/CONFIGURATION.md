@@ -1,4 +1,4 @@
-# i18ntk Configuration Guide (v4.3.2)
+# i18ntk Configuration Guide (v4.4.4)
 
 ## Overview
 
@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "4.3.2",
+  "version": "4.4.4",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",
@@ -56,6 +56,18 @@ Example:
   },
   "setup": {
     "completed": true
+  },
+  "extensions": {
+    "workbench": {
+      "localeDirectory": "./locales",
+      "sourceLocale": "en",
+      "maxScanFiles": 2000
+    },
+    "lens": {
+      "localeDirectory": "./locales",
+      "sourceLocale": "en",
+      "keyFormats": ["dot", "snake"]
+    }
   }
 }
 ```
@@ -66,7 +78,7 @@ Example:
 - `i18nDir`: locale directory used by translation analysis, validation, completion, and usage comparison.
 - `outputDir`: report output directory.
 - `sourceLanguage`: base language for completeness checks and Auto Translate source values.
-- `defaultLanguages`: target languages used by init, completion, and manager Auto Translate. In `4.3.2`, the default set includes `en`, `de`, `es`, `fr`, and `ru`.
+- `defaultLanguages`: target languages used by init, completion, and manager Auto Translate.
 - `uiLanguage`: CLI message language.
 - `reports.format`: report output format for init and analysis reports. Supported values are `markdown`, `json`, and `text`; default is `markdown`.
 - `setup.completed`: setup marker used by startup checks.
@@ -84,6 +96,23 @@ Example:
 - `autoTranslate.protectionFile`: project JSON file containing protected terms, key paths, exact values, and patterns.
 - `autoTranslate.promptProtectionSetup`: ask to create the protection file on first manager run.
 - `autoTranslate.promptProtectionUpdate`: ask whether to update protection rules before manager translations.
+- `extensions`: optional extension-owned settings. The CLI preserves this object and ignores unknown nested keys.
+
+## Shared Extension Config
+
+i18ntk Workbench and i18ntk Lens can read and write project defaults from `.i18ntk-config`:
+
+- `extensions.workbench`: Workbench-owned settings such as locale directory, source locale, report format, diagnostics, scan scheduling, and Auto Translate defaults.
+- `extensions.lens`: Lens-owned settings such as locale directory, source locale, scan scheduling, custom wrappers, and key formats.
+
+The CLI treats these as extension data. It validates the top-level `extensions` property as allowed config, preserves it when config is read back, and does not use nested extension-only keys for CLI commands.
+
+Shared defaults:
+
+- If an extension-specific value is missing, extensions can fall back to top-level `i18nDir`, `sourceDir`, `sourceLanguage`, and `excludeDirs`.
+- Explicit VS Code workspace/user settings still override values from `.i18ntk-config`.
+- Do not store secrets or provider credentials in `extensions.*`; use environment variables for credentials.
+- Unknown nested extension keys are reserved for editor tooling and should not affect CLI scans, validation, or Auto Translate.
 
 ## Value Precedence
 
@@ -137,7 +166,7 @@ The manager route `i18ntk --command=backup` is disabled in current builds.
 
 Init and analysis reports use `reports.format`.
 
-- `markdown`: readable `.md` reports, default in `4.3.2`
+- `markdown`: readable `.md` reports, default
 - `json`: pretty-printed JSON
 - `text`: plain text
 
@@ -148,6 +177,8 @@ Validation and some specialized tools may still write their own report formats, 
 Validation checks URLs, email addresses, secret-like values, and likely untranslated English content.
 
 For non-English target languages, English-content warnings only trigger when the detected English percentage is above the configured threshold and at least three English words are found. Brand names, acronyms, placeholders, URLs, emails, and allowed terms are excluded from the percentage calculation.
+
+Dynamic placeholders inside translated values are ignored for English-content scoring. For example, values such as `"指示： {command}"` or `"📄 {file} -> {path}"` should not be reported as untranslated only because placeholder tokens use English names.
 
 Example:
 
@@ -161,6 +192,16 @@ Example:
 ## Auto Translate Tuning
 
 Auto Translate reads defaults from `autoTranslate` when launched from the management menu. Direct `i18ntk-translate` flags override command behavior for that run.
+
+## CLI Edge Cases To Review
+
+The CLI intentionally ignores extension-only settings, but the following areas should be reviewed when extending the main package:
+
+- Config synchronization: keep top-level `i18nDir`, `sourceDir`, `sourceLanguage`, and `excludeDirs` compatible with `extensions.workbench` and `extensions.lens` fallbacks.
+- Report scoring: dynamic placeholder names, icon-only labels, file-path templates, and command examples should not be treated as untranslated copy unless the surrounding human text is also untranslated.
+- Unknown extension keys: nested keys under `extensions.*` should remain editor-owned and must not change CLI behavior without an explicit CLI feature.
+- Bulk ignore workflows: ignored diagnostics should remain scoped enough to avoid hiding unrelated missing or untranslated keys.
+- Auto Translate protection: intentionally unchanged brands, acronyms, commands, and placeholder-heavy values should be added to protection rules instead of broad global allow-lists.
 
 Recommended defaults:
 

@@ -343,6 +343,28 @@ describe('Security Tests', () => {
       assert.ok(!result.sourceDir || !result.sourceDir.includes('..'), 'Should not allow parent directory traversal');
       assert.ok(!result.unknownProperty, 'Should remove unknown properties');
     });
+
+    test('should preserve extension-owned shared config sections', () => {
+      const config = {
+        sourceDir: './locales',
+        i18nDir: './locales',
+        sourceLanguage: 'en',
+        extensions: {
+          workbench: {
+            localeDirectory: './locales',
+            reportFormat: 'webview'
+          },
+          lens: {
+            localeDirectory: './locales',
+            keyFormats: ['dot', 'snake']
+          }
+        }
+      };
+
+      const result = SecurityUtils.validateConfig(config);
+
+      assert.deepStrictEqual(result.extensions, config.extensions);
+    });
   });
 
   describe('Path Safety Checks', () => {
