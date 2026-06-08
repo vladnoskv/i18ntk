@@ -783,7 +783,12 @@ static _logging = false;
         const isUnixAbsolute = originalPath.startsWith('/') || originalPath.startsWith('\\');
         
         if (isWindowsAbsolute || isUnixAbsolute) {
-          // Allow absolute paths - they're legitimate for project directories
+          if (!SecurityUtils.isSafePath(originalPath)) {
+            SecurityUtils.logSecurityEvent('Path validation failed for configuration property', 'warn', {
+              property: prop,
+              originalPath: originalPath
+            });
+          }
           return;
         }
         

@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('./security');
 
 const ISSUE_TYPES = new Set([
   'missing_key',
@@ -20,7 +21,7 @@ function generateI18ntkReport(options = {}) {
 
   ensureWithin(projectRoot, localesDir, 'Locale directory');
   ensureWithin(projectRoot, sourceDir, 'Source directory');
-  if (!fs.existsSync(localesDir)) {
+  if (!SecurityUtils.safeExistsSync(localesDir, projectRoot)) {
     throw new Error(`Locale directory not found: ${localesDir}`);
   }
 
@@ -37,7 +38,7 @@ function generateI18ntkReport(options = {}) {
   const localeValues = {};
   const keyLocations = new Map();
   for (const item of localeFiles) {
-    const raw = fs.readFileSync(item.filePath, 'utf8');
+    const raw = SecurityUtils.safeReadFileSync(item.filePath, localesDir);
     let parsed;
     try {
       parsed = JSON.parse(raw);

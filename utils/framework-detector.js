@@ -1,5 +1,4 @@
 const path = require('path');
-const { gte } = require('./version-utils');
 const SecurityUtils = require('./security');
 
 // Framework compatibility information
@@ -31,7 +30,7 @@ const FRAMEWORKS = {
       /\bi18n\.t\(\s*['\"`]([^'\"`]+)['\"`]\s*(?:,|\/\*|\*\/|\/\/|$)/g,  // i18n.t('key')
       /\bi18n\.translate\(\s*['\"`]([^'\"`]+)['\"`]\s*(?:,|\/\*|\*\/|\/\/|$)/g,  // i18n.translate('key')
       /\buseI18n\(\s*\)\s*\.\s*t\(\s*['\"`]([^'\"`]+)['\"`]\s*(?:,|\/\*|\*\/|\/\/|$)/g,  // useI18n().t('key')
-      /\buseTranslation\(\s*['\"`][^'\"`]*['\"`]?\s*\)\s*\{\s*\w*\s*,\s*t\s*\}/.source + '\s*' + /t\(\s*['\"`]([^'\"`]+)['\"`]\s*(?:,|\/\*|\*\/|\/\/|$)/.source,  // const { t } = useTranslation()
+      /\buseTranslation\(\s*['\"`][^'\"`]*['\"`]?\s*\)\s*\{\s*\w*\s*,\s*t\s*\}[^)]*\)\s*=>/g,  // const { t } = useTranslation()
       /\$\{\s*t\(\s*['\"`]([^'\"`]+)['\"`]\s*(?:,|\/\*|\*\/|\/\/|$)/g  // ${t('key')} in template literals
     ],
     configFile: 'i18n.js',
@@ -71,7 +70,7 @@ const FRAMEWORKS = {
   'react-i18next': {
     name: 'React i18next',
     description: 'Internationalization framework for React',
-    dependencies: ['i18next', 'react-i18next'],
+    deps: ['i18next', 'react-i18next'],
     globs: ['**/*.{js,jsx,ts,tsx}'],
     regex: /\b(?:useTranslation|withTranslation|Trans|I18n|i18n\.t|t\(?=\s*[`'"])/,
     configFile: 'i18n.js',
@@ -274,15 +273,64 @@ const FRAMEWORKS = {
       '**/test/**',
       '**/tests/**'
     ]
+  },
+
+  'ngx-translate': {
+    name: 'Angular ngx-translate',
+    deps: ['@ngx-translate/core', '@ngx-translate/http-loader'],
+    patterns: [
+      /translate\s*=\s*["'`]([^"'`]+)["'`]/g,
+      /translateService\.instant\(\s*['"`]([^"'`]+)['"`]/g,
+      /translateService\.get\(\s*['"`]([^"'`]+)['"`]/g,
+      /\|\s*translate\s*[^}]*\}\}/g
+    ]
+  },
+
+  'next-intl': {
+    name: 'next-intl (Next.js)',
+    deps: ['next-intl', 'next-i18next', '@next-intl/core'],
+    patterns: [
+      /\bt\(\s*['"`]([^'"`]+)['"`]/g,
+      /\buseTranslations\(\s*\)/g
+    ]
+  },
+
+  'nuxt-i18n': {
+    name: 'Nuxt i18n',
+    deps: ['@nuxtjs/i18n', 'nuxt-i18n', '@intlify/nuxt3'],
+    patterns: [
+      /\$t\(\s*['"`]([^'"`]+)['"`]/g,
+      /\$tc\(\s*['"`]([^'"`]+)['"`]/g,
+      /\blocalePath\(\s*\)/g
+    ]
+  },
+
+  'svelte-i18n': {
+    name: 'svelte-i18n',
+    deps: ['svelte-i18n', 'sveltekit-i18n', '@sveltekit-i18n/base'],
+    patterns: [
+      /\$_\(\s*['"`]([^'"`]+)['"`]/g,
+      /\$_\w*\(\s*['"`]([^'"`]+)['"`]/g,
+      /\bt\.get\(\s*['"`]([^'"`]+)['"`]/g
+    ]
+  },
+
+  'solid-i18n': {
+    name: 'Solid i18n',
+    deps: ['@solid-primitives/i18n', 'i18next-solid'],
+    patterns: [
+      /\buseI18n\(\s*\)\s*\.\s*t\(\s*['"`]([^'"`]+)['"`]/g,
+      /\bt\(\s*['"`]([^'"`]+)['"`]/g
+    ]
   }
 };
 
 /**
  * Detects the i18n framework being used in the project
  * @param {string} projectRoot - Path to the project root
- * @returns {Promise<Object|null>} Detected framework info or null if none found
+ * @returns {Object|null} Detected framework info or null if none found
  */
-async function detectFramework(projectRoot) {
+function detectFramework(projectRoot) {
   if (!projectRoot || typeof projectRoot !== 'string') {
     throw new Error('Invalid project root path');
   }
@@ -320,7 +368,7 @@ async function detectFramework(projectRoot) {
     // Check each framework's dependencies
     for (const [id, framework] of sortedFrameworks) {
       try {
-        const frameworkDeps = framework.deps || [];
+        const frameworkDeps = framework.deps || framework.dependencies || [];
         const hasAnyDep = frameworkDeps.some(dep => dep in deps);
 
         if (hasAnyDep) {

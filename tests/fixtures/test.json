@@ -1,0 +1,7 @@
+{
+  "name": "test",
+  "value": "hello world",
+  "nested": {
+    "key": "value"
+  }
+}

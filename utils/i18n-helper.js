@@ -233,9 +233,21 @@ let currentLanguage = 'en';
 let isInitialized = false;
 const missingKeyCache = new Map();
 const missingKeyTtlMs = 5 * 60 * 1000;
+const CACHE_PRUNE_INTERVAL_MS = 10 * 60 * 1000;
+let lastCachePruneTime = Date.now();
+
+function pruneMissingKeyCache() {
+  const now = Date.now();
+  if (now - lastCachePruneTime < CACHE_PRUNE_INTERVAL_MS) return;
+  lastCachePruneTime = now;
+  for (const [key, expiresAt] of missingKeyCache) {
+    if (expiresAt <= now) missingKeyCache.delete(key);
+  }
+}
 
 function shouldReportMissingKey(key) {
   const now = Date.now();
+  pruneMissingKeyCache();
   const expiresAt = missingKeyCache.get(key) || 0;
   if (expiresAt > now) {
     return false;

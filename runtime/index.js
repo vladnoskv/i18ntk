@@ -56,7 +56,7 @@ function stripBOMAndComments(s) {
 }
 
 function readJsonSafe(file) {
-  const raw = SecurityUtils.safeReadFileSync(file, path.dirname(file), 'utf8');
+  const raw = SecurityUtils.safeReadFileSync(file, path.resolve(file, '..'), 'utf8');
   if (raw === null || raw === undefined) {
     throw new Error(`Unable to read JSON file: ${file}`);
   }
@@ -64,6 +64,17 @@ function readJsonSafe(file) {
   if (!withoutBOM) {
     throw new Error(`Empty JSON file: ${file}`);
   }
+
+  let depth = 0;
+  let maxDepth = 0;
+  for (let i = 0; i < Math.min(withoutBOM.length, 50000); i++) {
+    if (withoutBOM[i] === '{' || withoutBOM[i] === '[') { depth++; maxDepth = Math.max(maxDepth, depth); }
+    else if (withoutBOM[i] === '}' || withoutBOM[i] === ']') depth--;
+  }
+  if (maxDepth > 1000) {
+    throw new Error(`JSON nesting too deep (${maxDepth} levels) in file: ${file}`);
+  }
+
   try {
     return JSON.parse(withoutBOM);
   } catch (parseError) {
@@ -419,7 +430,8 @@ function translateWithState(runtimeState, key, params = {}, options = {}) {
   }
 
   if (typeof value === 'string') return interpolate(value, params);
-  return typeof value === 'undefined' ? key : value;
+  if (typeof value === 'undefined') return typeof key === 'string' ? key : String(key ?? '');
+  return typeof value === 'string' ? value : String(value ?? '');
 }
 
 function translateBatch(keys, params = {}, options = {}) {

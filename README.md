@@ -1,4 +1,4 @@
-# i18ntk v4.4.2
+# i18ntk v4.4.5
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.4.2)](https://socket.dev/npm/package/i18ntk/overview/4.4.2)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.4.5)](https://socket.dev/npm/package/i18ntk/overview/4.4.5)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -63,6 +63,18 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Unused key detection | Yes | No |
 | Validation reports | Yes | Limited |
 | Auto-translation workflow | Yes | External tooling |
+
+## What's New in 4.4.5
+
+- **FRAMEWORK DETECTION FIXED**: `detectFramework()` no longer returns unresolved Promises. `react-i18next` (the most popular React i18n framework) is now correctly detected. Added support for Angular (ngx-translate), Next.js (next-intl), Nuxt (nuxt-i18n), Svelte (svelte-i18n), and Solid (solid-i18n).
+- **RUNTIME NULL SAFETY**: `t(null)` and `t(undefined)` now return strings instead of crashing rendering engines.
+- **JSON DEPTH PROTECTION**: Malicious deeply-nested JSON locale files are rejected before parsing, preventing stack overflow DoS.
+- **CONFIG VALIDATION HARDENED**: Absolute configuration paths now undergo `isSafePath` validation instead of being silently skipped.
+- **SCANNER CLI FIX**: Removed orphaned duplicate code block in `i18ntk-scanner.js` that caused a SyntaxError.
+- **SAFE JSON FIX**: Fixed duplicate `readJsonSafe` that overwrote the secure implementation with a broken version.
+- **MEMORY LEAK FIX**: Added periodic cache eviction to `missingKeyCache` to prevent unbounded memory growth.
+- **WATCHER ERROR LOGGING**: File watcher errors are now logged to stderr instead of silently swallowed.
+- **REPORT MODEL SECURITY**: Report generation now routes through `SecurityUtils` for path containment and file-size validation.
 
 ## What's New in 4.4.4
 
@@ -558,7 +570,7 @@ Example:
 
 ```json
 {
-  "version": "4.4.4",
+  "version": "4.4.5",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",

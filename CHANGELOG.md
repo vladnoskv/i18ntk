@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.5] - 2026-06-08
+
+### Fixed
+- Removed orphaned duplicate code block from `main/i18ntk-scanner.js` that caused a SyntaxError when loading the scanner CLI.
+- Fixed `utils/safe-json.js` where a duplicate `readJsonSafe` function overwrote the SecurityUtils-based implementation with an insecure version that referenced an undefined `fs` variable.
+- Added periodic cache eviction to `missingKeyCache` in `utils/i18n-helper.js` to prevent unbounded memory growth in long-running processes.
+- Replaced silent error swallowing in `utils/watch-locales.js` with stderr logging so file-watcher failures are visible.
+- Routed `utils/report-model.js` through `SecurityUtils.safeExistsSync` and `SecurityUtils.safeReadFileSync` for consistent path containment and file-size validation.
+- **Framework detection:** Removed `async` keyword from `detectFramework()` that caused callers to receive unresolved Promises instead of framework objects, silently losing framework-specific translation patterns.
+- **Framework detection:** Fixed `react-i18next` entry using `dependencies` instead of `deps`, which made the most popular React i18n framework completely invisible to dependency-based detection.
+- **Framework detection:** Replaced broken `.source` concatenation that produced a String instead of a RegExp for the `useTranslation()` destructuring pattern.
+- **Runtime:** `t(null)` and `t(undefined)` now return strings instead of raw null/undefined, preventing crashes in string-based renderers.
+- **Runtime:** Added JSON nesting depth limit (max 1000 levels) to `readJsonSafe` to prevent stack overflow DoS from malicious deeply-nested locale files.
+- **Runtime:** Fixed path containment boundary in `readJsonSafe` using `path.dirname()` which was too lax; now uses resolved parent directory.
+- **Security:** `validateConfig` now runs `isSafePath` validation on absolute paths instead of skipping them entirely (`return` in forEach was bypassing all checks for absolute config paths).
+
+### Added
+- **Framework detection:** Added support for ngx-translate (Angular), next-intl (Next.js), nuxt-i18n (Nuxt), svelte-i18n (Svelte), and solid-i18n (Solid) framework detection via dependency lookup.
+- `detectFramework()` now also checks the `dependencies` property as a fallback for the `deps` array, ensuring backward compatibility.
+- Created `tests/fixtures/test.json` fixture so file system security tests validate real file reads instead of passing vacuously.
+
+### Changed
+- Removed dead `{ gte }` import from `version-utils` and unused `FRAMEWORK_COMPATIBILITY` object from `framework-detector.js`.
+- Security test `logSecurityEvent` now properly sets `I18NTK_DEBUG` and `I18NTK_ENABLE_SECURITY_LOGS` env vars and uses try/catch to verify non-throw behavior.
+- `validateConfig` "reject invalid configuration" test now uses `assert.strictEqual` for stronger path traversal assertions.
+
 ## [4.4.4] - 2026-06-05
 
 ### Fixed

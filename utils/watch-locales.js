@@ -119,7 +119,9 @@ function watchDirectory(dir, emitter, watchers, options = {}) {
 function watchLocales(dirs, onChange, options = {}) {
   const directories = Array.isArray(dirs) ? dirs : [dirs];
   const emitter = new EventEmitter();
-  emitter.on('error', () => {});
+  emitter.on('error', (err) => {
+    process.stderr.write(`[i18ntk] File watcher error: ${err?.message || err}\n`);
+  });
   const watchers = [];
 
   // Backward-compatible onChange callback

@@ -141,17 +141,15 @@ describe('Security Tests', () => {
     test('should safely check file existence', () => {
       const testFile = path.join(__dirname, 'fixtures', 'test.json');
       const result = SecurityUtils.safeExistsSync(testFile, __dirname);
-      assert.strictEqual(typeof result, 'boolean', 'Result should be a boolean');
+      assert.strictEqual(result, true, 'Should report that the test fixture exists');
     });
 
     test('should safely read files with size limits', () => {
       const testFile = path.join(__dirname, 'fixtures', 'test.json');
       const result = SecurityUtils.safeReadFileSync(testFile, __dirname, 'utf8');
-
-      if (result) {
-        assert.strictEqual(typeof result, 'string', 'Result should be a string');
-        assert.ok(result.length <= 10 * 1024 * 1024, 'File size should not exceed 10MB limit');
-      }
+      assert.ok(result !== null, 'Should read the test fixture successfully');
+      assert.strictEqual(typeof result, 'string', 'Result should be a string');
+      assert.ok(result.length <= 10 * 1024 * 1024, 'File size should not exceed 10MB limit');
     });
 
     test('should handle non-existent files gracefully', () => {
@@ -291,21 +289,22 @@ describe('Security Tests', () => {
 
   describe('Security Event Logging', () => {
     test('should log security events without throwing', () => {
-      // Capture console output
-      const originalConsoleLog = console.log;
-      const logs = [];
-      console.log = (...args) => logs.push(args.join(' '));
-      const originalLevel = process.env.SECURITY_LOG_LEVEL;
-      process.env.SECURITY_LOG_LEVEL = 'info';
+      const originalDebugMode = process.env.I18NTK_DEBUG;
+      const originalSecurityLogs = process.env.I18NTK_ENABLE_SECURITY_LOGS;
+      process.env.I18NTK_DEBUG = 'true';
+      process.env.I18NTK_ENABLE_SECURITY_LOGS = 'true';
 
+      let threw = false;
       try {
-        SecurityUtils.logSecurityEvent('Test security event', 'info', { test: true });
-        // Just verify it doesn't throw - logging implementation may vary
-        assert.ok(true, 'logSecurityEvent should not throw');
+        SecurityUtils.logSecurityEvent('Test security event', 'info', { test: true, source: 'user' });
+        SecurityUtils.logSecurityEvent('Test warn event', 'warn', { test: false, source: 'user' });
+      } catch {
+        threw = true;
       } finally {
-        process.env.SECURITY_LOG_LEVEL = originalLevel;
-        console.log = originalConsoleLog;
+        process.env.I18NTK_DEBUG = originalDebugMode;
+        process.env.I18NTK_ENABLE_SECURITY_LOGS = originalSecurityLogs;
       }
+      assert.strictEqual(threw, false, 'logSecurityEvent should not throw');
     });
 
     test('should handle security event logging errors gracefully', () => {
@@ -340,8 +339,8 @@ describe('Security Tests', () => {
 
       const result = SecurityUtils.validateConfig(invalidConfig);
       assert.ok(result, 'Should return a config object');
-      assert.ok(!result.sourceDir || !result.sourceDir.includes('..'), 'Should not allow parent directory traversal');
-      assert.ok(!result.unknownProperty, 'Should remove unknown properties');
+      assert.strictEqual(result.sourceDir.includes('..'), false, 'Should not allow parent directory traversal');
+      assert.strictEqual(result.unknownProperty, undefined, 'Should remove unknown properties');
     });
 
     test('should preserve extension-owned shared config sections', () => {
