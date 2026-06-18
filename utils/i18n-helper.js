@@ -80,6 +80,7 @@ function safeRequireConfig() {
 }
 
 function stripBOMAndComments(s) {
+  if (!s || typeof s !== 'string') return s || '';
   if (s.charCodeAt(0) === 0xFEFF) s = s.slice(1);
   s = s.replace(/\/\*[\s\S]*?\*\//g, '');
   s = s.replace(/^\s*\/\/.*$/mg, '');
@@ -474,7 +475,11 @@ function getAvailableLanguages() {
  * @returns {object} - The merged object.
  */
 function deepMerge(target, source) {
-  for (const key in source) {
+  if (!target || typeof target !== 'object') target = {};
+  if (!source || typeof source !== 'object') return target;
+  for (const key of Object.keys(source)) {
+    // Block prototype pollution
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
     if (source.hasOwnProperty(key)) {
       if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key]) &&
           typeof target[key] === 'object' && target[key] !== null && !Array.isArray(target[key])) {

@@ -368,7 +368,13 @@ class SettingsManager {
      * @returns {object} Merged settings
      */
     mergeWithDefaults(loadedSettings) {
-        const merged = { ...this.defaultConfig, ...loadedSettings };
+        // Filter prototype pollution keys before merging
+        const safe = {};
+        for (const key of Object.keys(loadedSettings || {})) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+            safe[key] = loadedSettings[key];
+        }
+        const merged = { ...this.defaultConfig, ...safe };
         
         // Ensure nested objects are properly merged
         if (loadedSettings.notifications) {
@@ -486,7 +492,8 @@ class SettingsManager {
             
             console.log('Settings saved successfully');
         } catch (error) {
-            console.error('Error saving settings:', error.message);
+            console.error('[i18ntk] Error saving settings:', error.message);
+            throw error;
         }
         
         this.saveTimeout = null;

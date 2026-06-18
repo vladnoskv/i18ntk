@@ -18,6 +18,7 @@ const SecurityUtils = require('../utils/security');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 const SetupEnforcer = require('../utils/setup-enforcer');
+const { getUnifiedConfig } = require('../utils/config-helper');
 
 // Ensure setup is complete before running, except for help output.
 (async () => {

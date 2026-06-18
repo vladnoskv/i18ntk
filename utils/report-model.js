@@ -44,7 +44,8 @@ function generateI18ntkReport(options = {}) {
       parsed = JSON.parse(raw);
     } catch (error) {
       const rel = path.relative(projectRoot, item.filePath);
-      throw new Error(`Invalid JSON in ${rel}: ${error.message}`);
+      console.warn(`Skipping malformed JSON file: ${rel} (${error.message})`);
+      continue;
     }
     const flat = flattenObject(parsed);
     localeValues[item.locale] = { ...(localeValues[item.locale] || {}), ...flat };
@@ -228,7 +229,7 @@ function discoverLocaleFiles(localesDir) {
   for (const entry of entries) {
     const entryPath = path.join(localesDir, entry.name);
     if (entry.isDirectory()) {
-      for (const filePath of walk(entryPath, ['.json'])) {
+      for (const filePath of walk(entryPath, ['.json'], [], entryPath)) {
         files.push({
           locale: entry.name,
           namespace: path.basename(filePath, '.json'),
@@ -246,12 +247,12 @@ function discoverLocaleFiles(localesDir) {
   return files;
 }
 
-function walk(dir, extensions, acc = []) {
-  if (!fs.existsSync(dir)) return acc;
+function walk(dir, extensions, acc = [], basePath = process.cwd()) {
+  if (!SecurityUtils.safeExistsSync(dir, basePath)) return acc;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (['node_modules', '.git', 'dist', 'build', 'coverage', 'out', 'tmp', 'temp', 'test', 'tests', 'test_env', 'i18ntk-reports'].includes(entry.name)) continue;
     const entryPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(entryPath, extensions, acc);
+    if (entry.isDirectory()) walk(entryPath, extensions, acc, basePath);
     else if (entry.isFile() && extensions.includes(path.extname(entry.name))) acc.push(entryPath);
   }
   return acc;
@@ -273,10 +274,11 @@ function scanSourceFiles(sourceDir, availableKeys) {
   const usageLocations = new Map();
   const hardcodedTexts = [];
   const translationValueIndex = new Map();
-  const files = walk(sourceDir, ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte']);
+  const basePath = path.resolve(sourceDir);
+  const files = walk(sourceDir, ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'], [], basePath);
 
   for (const file of files) {
-    const content = fs.readFileSync(file, 'utf8');
+    const content = SecurityUtils.safeReadFileSync(file, basePath, 'utf8');
     const lines = content.split(/\r?\n/);
     const keyPatterns = [
       /\b(?:t|tx|__|_t)\s*\(\s*['"`]([^'"`]+)['"`]/g,

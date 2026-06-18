@@ -76,24 +76,38 @@ function readJsonSafe(file) {
   }
 
   try {
-    return JSON.parse(withoutBOM);
+    return stripPrototypeKeys(JSON.parse(withoutBOM));
   } catch (parseError) {
     const cleaned = stripBOMAndComments(raw);
     if (!cleaned) {
       throw new Error(`Empty JSON file: ${file}`);
     }
     try {
-      return JSON.parse(cleaned);
+      return stripPrototypeKeys(JSON.parse(cleaned));
     } catch (_) {
       throw new Error(`Invalid JSON in file ${file}: ${parseError.message}`);
     }
   }
 }
 
+function stripPrototypeKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(item => stripPrototypeKeys(item));
+  const clean = {};
+  for (const key of Object.keys(obj)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    const value = obj[key];
+    clean[key] = (value && typeof value === 'object') ? stripPrototypeKeys(value) : value;
+  }
+  return clean;
+}
+
 function deepMerge(target, source) {
   if (!target || typeof target !== 'object') target = {};
   if (!source || typeof source !== 'object') return target;
   for (const key of Object.keys(source)) {
+    // Block prototype pollution via __proto__, constructor, prototype keys
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
     const sv = source[key];
     const tv = target[key];
     if (
@@ -326,8 +340,11 @@ function resolveKey(obj, key, sep = '.', runtimeState = null, lang = null) {
             runtimeState.loadedFiles.add(loadedFileKey);
             try {
               loadFileLazy(runtimeState, filePath, lang);
-            } catch (_) {
-              // stale manifest entry — already marked as loaded to prevent retry
+            } catch (lazyErr) {
+              // stale manifest entry — log and mark as loaded to prevent retry
+              if (process.env.I18NTK_DEBUG) {
+                console.warn(`[i18ntk/runtime] Lazy load failed for ${filePath}: ${lazyErr.message}`);
+              }
             }
             const langData = runtimeState.cache.get(lang);
             return resolveKey(langData, key, sep, runtimeState, lang);

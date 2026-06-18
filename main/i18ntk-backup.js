@@ -390,20 +390,6 @@ async function handleCreate(args) {
     logger.debug(`Using existing backup directory: ${validatedOutputDir}`);
   }
 
-  const sourceDir = path.resolve(dir);
-  try {
-    const stats = await fsp.stat(sourceDir);
-    if (!stats.isDirectory()) {
-      throw new Error(`Path exists but is not a directory: ${sourceDir}`);
-    }
-    logger.debug(`Source directory exists: ${sourceDir}`);
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      throw new Error(`Directory not found: ${sourceDir}. Please specify a valid directory.`);
-    }
-    throw new Error(`Error accessing directory ${sourceDir}: ${err.message}`);
-  }
-
   logger.info('\nCreating backup...');
 
   const files = await collectJsonFiles(sourceDir);
@@ -511,7 +497,15 @@ async function handleRestore(args) {
   try {
     const rawContent = SecurityUtils.safeReadFileSync(backupPath, process.cwd(), 'utf8');
     if (!rawContent) throw new Error(`Could not read backup file: ${backupPath}`);
-    const backupData = JSON.parse(rawContent);
+    let backupData;
+    try {
+      backupData = JSON.parse(rawContent);
+    } catch (parseErr) {
+      throw new Error(`Corrupt backup file (invalid JSON): ${backupPath} — ${parseErr.message}`);
+    }
+    if (!backupData || typeof backupData !== 'object') {
+      throw new Error(`Invalid backup file format: ${backupPath}`);
+    }
     const isIncremental = backupData._meta && backupData._meta.type === 'incremental';
 
     if (isIncremental) {

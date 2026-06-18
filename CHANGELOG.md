@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.0] - 2026-06-19
+
+### Security — Prototype Pollution Hardened
+- **safe-json.js:** Added `stripPrototypePollution()` function that recursively filters `__proto__`, `constructor`, and `prototype` keys from parsed JSON locale files. Applied to all `readJsonSafe()` calls.
+- **runtime/index.js:** `deepMerge()` now blocks `__proto__`, `constructor`, and `prototype` keys during locale data merging. `readJsonSafe()` now applies `stripPrototypeKeys()` to all parsed JSON, ensuring prototype pollution protection at runtime data ingestion point.
+- **settings-manager.js:** `mergeWithDefaults()` now filters prototype pollution keys from user-supplied settings before spreading into defaults.
+- **safe-json.js:** Exported `stripPrototypePollution` for use by other modules.
+
+### Fixed
+- **Backup:** Removed duplicate `const sourceDir` declaration that caused SyntaxError at module load (was unrecoverable crash for all backup operations).
+- **Backup:** Added `try/catch` around `JSON.parse()` in restore path to handle corrupt backup files gracefully with a descriptive error message.
+- **Complete:** Added missing `getUnifiedConfig` import from `utils/config-helper` (was ReferenceError at runtime).
+- **Report:** Replaced 3 direct `fs.writeFileSync` calls with `SecurityUtils.safeWriteFileSync` for path containment on report output.
+- **Report Model:** Replaced direct `fs.existsSync` and `fs.readFileSync` with `SecurityUtils` wrappers. Malformed JSON locale files now skipped gracefully with a warning instead of aborting report generation.
+- **Runtime:** Lazy-load failures now log to console when `I18NTK_DEBUG` is set (was silently swallowed).
+- **Settings Manager:** `_saveImmediately()` now re-throws errors instead of silently logging them, so callers can react to save failures.
+- **Config Manager:** Fire-and-forget legacy config migration now has proper `.catch()` error handling instead of an unobserved promise.
+- **i18n-helper:** `stripBOMAndComments()` now safely handles null/undefined inputs.
+
+### Changed
+- **Version:** Bumped to 4.5.0 (minor version due to scope and severity of security fixes).
+- **i18n-helper deepMerge:** Synchronized with runtime `deepMerge` — now uses `Object.keys` (safe) instead of `for...in`, handles null target/fallback, and filters `__proto__`/`constructor`/`prototype` keys for consistent prototype pollution protection across all code paths.
+- **Testing:** Added `tests/edge-case-hardening.test.js` with 33 new tests covering prototype pollution protection, SecurityUtils edge cases, backup corrupt handling, report malformed JSON resilience, validation risk detection null-safety, config manager robustness, version consistency, and deepMerge edge cases.
+- **Audit Complete:** Comprehensive security audit (24 findings) and error-handling audit (42 findings) completed with critical fixes applied.
+
 ## [4.4.5] - 2026-06-08
 
 ### Fixed

@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SecurityUtils = require('../utils/security');
 const {
   generateI18ntkReport,
   renderReportAsMarkdown,
@@ -68,15 +69,15 @@ async function run(argv = process.argv.slice(2), env = process.env) {
     fs.mkdirSync(outDir, { recursive: true });
     if (args.json) {
       exports.json = path.join(outDir, 'i18ntk-report.json');
-      fs.writeFileSync(exports.json, `${JSON.stringify({ ...report, exports: undefined }, null, 2)}\n`, 'utf8');
+      SecurityUtils.safeWriteFileSync(exports.json, `${JSON.stringify({ ...report, exports: undefined }, null, 2)}\n`, projectRoot, 'utf8');
     }
     if (args.markdown) {
       exports.markdown = path.join(outDir, 'i18ntk-report.md');
-      fs.writeFileSync(exports.markdown, renderReportAsMarkdown(report), 'utf8');
+      SecurityUtils.safeWriteFileSync(exports.markdown, renderReportAsMarkdown(report), projectRoot, 'utf8');
     }
     if (args.html) {
       exports.html = path.join(outDir, 'i18ntk-report.html');
-      fs.writeFileSync(exports.html, renderReportAsHtml(report), 'utf8');
+      SecurityUtils.safeWriteFileSync(exports.html, renderReportAsHtml(report), projectRoot, 'utf8');
     }
   }
 

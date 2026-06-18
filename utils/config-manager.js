@@ -550,8 +550,11 @@ function loadConfig() {
          // Attempt to migrate to project settings
          // Ignore migration errors; we still return merged cfg in memory
          // eslint-disable-next-line no-unused-vars
-         logWarn('[i18ntk] Detected legacy config at ~/.i18ntk. Migrating to project settings directory...');
-         const _ = (async () => { await migrateLegacyIfNeeded(DEFAULT_CONFIG); })();
+          logWarn('[i18ntk] Detected legacy config at ~/.i18ntk. Migrating to project settings directory...');
+          // Fire migration asynchronously with error handling
+          migrateLegacyIfNeeded(DEFAULT_CONFIG).catch((err) => {
+            logWarn('[i18ntk] Legacy config migration failed', { error: err.message });
+          });
        }
      }
    }

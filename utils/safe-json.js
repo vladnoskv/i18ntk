@@ -8,6 +8,20 @@ function stripBOM(s) {
   return s;
 }
 
+function stripPrototypePollution(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(item => stripPrototypePollution(item));
+  }
+  const clean = {};
+  for (const key of Object.keys(obj)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    const value = obj[key];
+    clean[key] = (value && typeof value === 'object') ? stripPrototypePollution(value) : value;
+  }
+  return clean;
+}
+
 async function readJsonSafe(filePath, { maxBytes = 1_000_000 } = {}) {
   const baseDir = path.dirname(filePath);
   const raw = SecurityUtils.safeReadFileSync(filePath, baseDir, null);
@@ -33,7 +47,7 @@ async function readJsonSafe(filePath, { maxBytes = 1_000_000 } = {}) {
     throw err;
   }
   try {
-    return JSON.parse(stripBOM(buf.toString('utf8')));
+    return stripPrototypePollution(JSON.parse(stripBOM(buf.toString('utf8'))));
   } catch (e) {
     const err = new Error('Invalid JSON');
     err.code = 'EJSONPARSE';
@@ -43,4 +57,4 @@ async function readJsonSafe(filePath, { maxBytes = 1_000_000 } = {}) {
   }
 }
 
-module.exports = { readJsonSafe };
+module.exports = { readJsonSafe, stripPrototypePollution };
