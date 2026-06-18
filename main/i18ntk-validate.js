@@ -262,16 +262,21 @@ class I18nValidator {
   }
 
   // Get all keys recursively from an object
-  getAllKeys(obj, prefix = '') {
+  getAllKeys(obj, prefix = '', onlyLeaves = true) {
     const keys = new Set();
     
     for (const [key, value] of Object.entries(obj)) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
-      keys.add(fullKey);
       
       if (value && typeof value === 'object' && !Array.isArray(value)) {
-        const nestedKeys = this.getAllKeys(value, fullKey);
+        const nestedKeys = this.getAllKeys(value, fullKey, onlyLeaves);
         nestedKeys.forEach(k => keys.add(k));
+        // Only add parent key if we want all keys (not leaves-only)
+        if (!onlyLeaves) {
+          keys.add(fullKey);
+        }
+      } else {
+        keys.add(fullKey);
       }
     }
     
@@ -517,6 +522,7 @@ class I18nValidator {
           totalFiles: sourceFiles.length,
           validFiles: 0,
           totalKeys: 0,
+          sourceTotalKeys: 0,
           translatedKeys: 0,
           missingFiles: [],
           syntaxErrors: [],
@@ -624,6 +630,10 @@ class I18nValidator {
       validation.summary.validFiles++;
       validation.summary.totalKeys += translations.totalKeys;
       validation.summary.translatedKeys += translations.translatedKeys;
+      // Count source locale leaf keys as reference total
+      if (sourceContent) {
+        validation.summary.sourceTotalKeys += this.getAllKeys(sourceContent).size;
+      }
       
       if (!structural.isConsistent) {
         validation.summary.structuralIssues.push({
@@ -636,9 +646,10 @@ class I18nValidator {
       validation.summary.translationIssues.push(...translations.issues);
     }
     
-    // Calculate completion percentage
-    validation.summary.percentage = validation.summary.totalKeys > 0 
-      ? Math.round((validation.summary.translatedKeys / validation.summary.totalKeys) * 100) 
+    // Calculate completion percentage against source locale total
+    const refTotal = validation.summary.sourceTotalKeys || validation.summary.totalKeys;
+    validation.summary.percentage = refTotal > 0 
+      ? Math.round((validation.summary.translatedKeys / refTotal) * 100) 
       : 0;
     
     return validation;
@@ -774,7 +785,7 @@ class I18nValidator {
 
       Object.entries(results).forEach(([language, validation]) => {
         const summary = validation?.summary || {};
-        lines.push(`${language}: ${summary.percentage || 0}% (${summary.translatedKeys || 0}/${summary.totalKeys || 0})`);
+        lines.push(`${language}: ${summary.percentage || 0}% (${summary.translatedKeys || 0}/${summary.sourceTotalKeys || summary.totalKeys || 0} keys vs source)`);
       });
 
       SecurityUtils.safeWriteFileSync(reportPath, lines.join('\n') + '\n', process.cwd(), 'utf8');
@@ -908,7 +919,7 @@ class I18nValidator {
           const { summary } = validation;
           const status = summary.syntaxErrors.length > 0 ? '❌' : 
                         summary.missingFiles.length > 0 ? '⚠️' : '✅';
-          console.log(`   ${status} ${language}: ${summary.percentage}% (${summary.translatedKeys}/${summary.totalKeys} keys)`);
+          console.log(`   ${status} ${language}: ${summary.percentage}% (${summary.translatedKeys}/${summary.sourceTotalKeys || summary.totalKeys} keys vs source)`);
         }
         
         // Aggregate issues for JSON output

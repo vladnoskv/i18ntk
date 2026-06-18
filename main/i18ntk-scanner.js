@@ -696,6 +696,11 @@ class I18nTextScanner {
     this.config = { ...baseConfig, ...(this.config || {}) };
 
     this.sourceDir = this.config.sourceDir || './src';
+    // If sourceDir equals the locale/i18n directory, fall back to ./src for source code scanning
+    const i18nDir = this.config.i18nDir || this.config.localeDir || './locales';
+    if (path.resolve(this.sourceDir) === path.resolve(i18nDir)) {
+      this.sourceDir = './src';
+    }
 
     // Source language for multi-language detection
     this.sourceLanguage = args.sourceLanguage || this.config.sourceLanguage || 'en';

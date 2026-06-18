@@ -1,4 +1,4 @@
-# i18ntk v4.5.0
+# i18ntk v4.5.1
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.5.0)](https://socket.dev/npm/package/i18ntk/overview/4.5.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.5.1)](https://socket.dev/npm/package/i18ntk/overview/4.5.1)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -63,6 +63,14 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Unused key detection      | Yes           | No               |
 | Validation reports        | Yes           | Limited          |
 | Auto-translation workflow | Yes           | External tooling |
+
+## What's New in 4.5.1
+
+- **CORRECT COMPLETENESS**: Validation now shows accurate completion percentages vs source locale (e.g., 33% instead of misleading 100%).
+- **NO MORE PARENT KEYS**: `getAllKeys()` no longer reports parent namespace objects (`footer`) as missing keys alongside their leaf children (`footer.copyright`).
+- **DOCTOR SMARTER**: No longer flags unconfigured languages (`de`, `ru`) as issues. Auto-detects available languages from the i18n directory structure.
+- **SCANNER FIXED**: Scanner now correctly scans `src/` directory for hardcoded text, not `locales/`.
+- **RUNTIME ALIASES**: `initRuntime()` now supports `localeDir`/`targetLocale`/`sourceLocale` as aliases for `baseDir`/`language`/`fallbackLanguage`.
 
 ## What's New in 4.5.0
 
@@ -527,7 +535,7 @@ Example:
 
 ```json
 {
-  "version": "4.5.0",
+  "version": "4.5.1",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",

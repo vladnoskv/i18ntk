@@ -105,9 +105,22 @@ class I18nDoctor {
     }
 
     const sourceLang = config.sourceLanguage || 'en';
-    const languages = config.defaultLanguages || [];
+    // Only check languages that actually have locale directories in the project
     const srcDir = path.join(config.i18nDir, sourceLang);
     const srcFiles = SecurityUtils.safeExistsSync(srcDir) ? fs.readdirSync(srcDir).filter(f => f.endsWith('.json')) : [];
+    // Auto-detect available languages from the i18n dir instead of relying on defaultLanguages config
+    const availableLangs = new Set();
+    if (SecurityUtils.safeExistsSync(config.i18nDir)) {
+      const i18nEntries = fs.readdirSync(config.i18nDir, { withFileTypes: true });
+      for (const entry of i18nEntries) {
+        if (entry.isDirectory() && entry.name !== sourceLang && !entry.name.startsWith('.')) {
+          availableLangs.add(entry.name);
+        }
+      }
+    }
+    // Only check languages auto-detected from the i18n directory structure.
+    // defaultLanguages config is a hint for setup/translate, not a doctor requirement.
+    const languages = [...availableLangs];
 
     for (const lang of languages) {
       const langDir = path.join(config.i18nDir, lang);

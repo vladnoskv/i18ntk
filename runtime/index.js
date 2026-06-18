@@ -368,7 +368,14 @@ function resolveKey(obj, key, sep = '.', runtimeState = null, lang = null) {
 
 // --- Public API ---
 function initRuntime(options = {}) {
-  const runtimeState = createState(options);
+  // Support alias parameter names for better DX
+  const opts = { ...options };
+  if (opts.localeDir && !opts.baseDir) opts.baseDir = opts.localeDir;
+  if (opts.targetLocale && !opts.language) opts.language = opts.targetLocale;
+  if (opts.sourceLocale && !opts.fallbackLanguage) opts.fallbackLanguage = opts.sourceLocale;
+  if (opts.projectRoot && !opts.baseDir && opts.localeDir) opts.baseDir = path.resolve(opts.projectRoot, opts.localeDir);
+
+  const runtimeState = createState(opts);
   preload(runtimeState, options.preload);
 
   if (!singletonInitialized) {

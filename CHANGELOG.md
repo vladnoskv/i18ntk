@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.1] - 2026-06-19
+
+### Fixed
+- **Validate:** `getAllKeys()` no longer reports parent namespace objects (e.g., `footer`) as missing keys alongside their leaf children (`footer.copyright`). Only leaf (string) keys are now compared during structural validation.
+- **Validate:** Completion percentage now compares against source locale total keys, not target locale self-count. A locale with 14 of 42 source keys now correctly shows 33% instead of 100%.
+- **Doctor:** No longer flags unconfigured locales (`de`, `ru`) as "missing". Now auto-detects available languages from the i18n directory structure, only checking against actually-configured languages.
+- **Scanner:** Now detects when `sourceDir` was set to the locale directory (common after setup) and falls back to `./src` for source code scanning instead of scanning locale JSON files.
+- **Runtime:** `initRuntime()` now accepts alias parameter names for better developer experience: `localeDir` → `baseDir`, `targetLocale` → `language`, `sourceLocale` → `fallbackLanguage`, `projectRoot` + `localeDir` → `baseDir` resolution.
+
 ## [4.5.0] - 2026-06-19
 
 ### Security — Prototype Pollution Hardened
