@@ -836,7 +836,9 @@ function writeOutput(outputData, outputPath, bom) {
 async function processFile(sourcePath, targetLang, args) {
   const resolvedSourcePath = path.resolve(process.cwd(), sourcePath);
   const fileName = path.basename(resolvedSourcePath);
-  const targetDir = args.outputDir || path.join(path.dirname(path.dirname(resolvedSourcePath)), targetLang);
+  const targetDir = args.outputDir
+    ? path.join(args.outputDir, targetLang)
+    : path.join(path.dirname(path.dirname(resolvedSourcePath)), targetLang);
   const targetPath = path.join(targetDir, fileName);
   const runArgs = { ...args, targetLang };
 

@@ -14,6 +14,19 @@ const { loadTranslations } = require('../../../utils/i18n-helper');
 const SecurityUtils = require('../../../utils/security');
 const SetupEnforcer = require('../../../utils/setup-enforcer');
 
+const JS_BUILTIN_NAMES = new Set([
+  'Promise', 'Boolean', 'String', 'Number', 'Array', 'Object', 'Function',
+  'Symbol', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Date', 'RegExp', 'Error',
+  'BigInt', 'Int8Array', 'Uint8Array', 'Int16Array', 'Uint16Array',
+  'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Buffer',
+  'ReadableStream', 'WritableStream', 'FormData', 'URL', 'URLSearchParams',
+  'Headers', 'Request', 'Response', 'AbortController', 'AbortSignal',
+  'Blob', 'File', 'FileList', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl',
+  'console', 'process', 'global', 'globalThis', 'window', 'document',
+  'navigator', 'Element', 'HTMLElement', 'Node', 'Event', 'Component',
+  'React', 'NextResponse', 'NextRequest', 'NextApiRequest', 'NextApiResponse',
+]);
+
 class ScannerCommand {
     constructor(config = {}, ui = null) {
         this.config = config;
@@ -294,6 +307,9 @@ class ScannerCommand {
         // Skip if it's just numbers or special characters
         if (/^\d+$/.test(trimmed)) return false;
         if (/^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]+$/.test(trimmed)) return false;
+
+        if (JS_BUILTIN_NAMES.has(trimmed)) return false;
+        if (/[&|!=<>+\-*/%]=|&&|\|\||===|!==|=>|;|function\b|\$\{/.test(trimmed)) return false;
 
         // Allow Unicode characters including CJK, Cyrillic, etc.
         const validChars = trimmed.match(/[\p{L}\p{N}\s\-,.!?':"()\[\]{}]/gu) || [];

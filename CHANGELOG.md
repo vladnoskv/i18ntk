@@ -5,9 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.2] - 2026-06-19
+
+### Fixed
+- **Complete (Namespace Wrapper):** Fixed critical bug where missing keys were inserted at the wrong nesting level in target locale files. When a file (e.g., `auth.json`) contains a namespace wrapper matching its filename (`{ "auth": { ... } }`), the `complete` command now detects this wrapper and inserts keys inside it (`auth.panel.sign_in`) instead of at root level (`panel.sign_in`). This prevents runtime lookup failures for `t("auth.panel.sign_in")`.
+- **Translate (--output-dir):** Fixed bug where the `--output-dir` flag wrote translated files directly to `<output-dir>/<filename>` instead of `<output-dir>/<targetLang>/<filename>`. This caused all translations (regardless of target language) to land in the same directory, silently overwriting files from other languages in multi-language projects. When `args.outputDir` is provided, `processFile()` now appends `targetLang` to construct the correct output path.
+
+### Tests
+- Added `tests/regression-v452.test.js` with 18 regression tests covering:
+  - Complete command namespace wrapper detection (parseKeyPath, setNestedValue, hasNestedKey, wrapper detection logic)
+  - Validate getAllKeys leaf-only mode and completeness calculation
+  - Runtime alias parameter support (localeDir/targetLocale/sourceLocale)
+  - Scanner source directory fallback when sourceDir equals i18nDir
+  - Doctor auto-detection of languages from i18n directory
+  - Version consistency across package files
+- Added `--output-dir` target language subdirectory tests to `tests/regression-v452.test.js`: verifies `processFile()` places output in `<outputDir>/<targetLang>/<file>` and that CLI `--output-dir` produces the correct nested path
+- Added 8 tests in `tests/usage-insights.test.js` for hardcoded text false-positive filtering:
+  - JS/TS built-in type name rejection (Promise, Boolean, String)
+  - Code expression operator rejection (&&, ||, ===, !==, =>)
+  - Template literal interpolation rejection (${...})
+  - Real human text still correctly detected (welcome messages, form labels)
+
 ## [4.5.1] - 2026-06-19
 
 ### Fixed
+- **Complete:** Fixed wrong nesting level when adding missing keys to target locale files that have a namespace wrapper matching the file name. Previously, `parseKeyPath("auth.panel.sign_in")` returned `{ file: "auth.json", key: "panel.sign_in" }`, and `setNestedValue` inserted `panel` at the root level instead of inside the existing `auth` wrapper. The fix detects namespace wrappers (e.g., `auth.json` containing `{ "auth": { ... } }`) and prepends the namespace to the insertion path so keys go inside the wrapper.
 - **Validate:** `getAllKeys()` no longer reports parent namespace objects (e.g., `footer`) as missing keys alongside their leaf children (`footer.copyright`). Only leaf (string) keys are now compared during structural validation.
 - **Validate:** Completion percentage now compares against source locale total keys, not target locale self-count. A locale with 14 of 42 source keys now correctly shows 33% instead of 100%.
 - **Doctor:** No longer flags unconfigured locales (`de`, `ru`) as "missing". Now auto-detects available languages from the i18n directory structure, only checking against actually-configured languages.

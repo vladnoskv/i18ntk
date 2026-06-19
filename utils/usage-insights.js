@@ -347,6 +347,20 @@ function createTextKey(text, namespace = 'ui') {
   return `${namespace || 'ui'}.${slug || 'text'}`;
 }
 
+const CODE_EXPRESSION_PATTERN = /[&|!=<>+\-*/%]=|&&|\|\||===|!==|=>|;|function\b|\$\{/;
+const JS_BUILTIN_NAMES = new Set([
+  'Promise', 'Boolean', 'String', 'Number', 'Array', 'Object', 'Function',
+  'Symbol', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Date', 'RegExp', 'Error',
+  'BigInt', 'Int8Array', 'Uint8Array', 'Int16Array', 'Uint16Array',
+  'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Buffer',
+  'ReadableStream', 'WritableStream', 'FormData', 'URL', 'URLSearchParams',
+  'Headers', 'Request', 'Response', 'AbortController', 'AbortSignal',
+  'Blob', 'File', 'FileList', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl',
+  'console', 'process', 'global', 'globalThis', 'window', 'document',
+  'navigator', 'Element', 'HTMLElement', 'Node', 'Event', 'Component',
+  'React', 'NextResponse', 'NextRequest', 'NextApiRequest', 'NextApiResponse',
+]);
+
 function looksLikeHumanText(text) {
   const value = String(text || '').replace(/\s+/g, ' ').trim();
   if (value.length < HUMAN_TEXT_MIN || value.length > HUMAN_TEXT_MAX) return false;
@@ -354,6 +368,8 @@ function looksLikeHumanText(text) {
   if (/^[A-Z0-9_./:-]+$/.test(value)) return false;
   if (/^[a-z0-9_.:-]+$/.test(value) && value.includes('.')) return false;
   if (/^(true|false|null|undefined|className|href|src|type)$/i.test(value)) return false;
+  if (JS_BUILTIN_NAMES.has(value)) return false;
+  if (CODE_EXPRESSION_PATTERN.test(value)) return false;
   return true;
 }
 

@@ -13,6 +13,21 @@ const ISSUE_TYPES = new Set([
   'hardcoded_text',
 ]);
 
+const JS_BUILTIN_NAMES = new Set([
+  'Promise', 'Boolean', 'String', 'Number', 'Array', 'Object', 'Function',
+  'Symbol', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Date', 'RegExp', 'Error',
+  'BigInt', 'Int8Array', 'Uint8Array', 'Int16Array', 'Uint16Array',
+  'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Buffer',
+  'ReadableStream', 'WritableStream', 'FormData', 'URL', 'URLSearchParams',
+  'Headers', 'Request', 'Response', 'AbortController', 'AbortSignal',
+  'Blob', 'File', 'FileList', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl',
+  'console', 'process', 'global', 'globalThis', 'window', 'document',
+  'navigator', 'Element', 'HTMLElement', 'Node', 'Event', 'Component',
+  'React', 'NextResponse', 'NextRequest', 'NextApiRequest', 'NextApiResponse',
+]);
+
+const CODE_EXPRESSION_PATTERN = /[&|!=<>+\-*/%]=|&&|\|\||===|!==|=>|;|function\b|\$\{/;
+
 function generateI18ntkReport(options = {}) {
   const projectRoot = path.resolve(options.projectRoot || process.cwd());
   const localesDir = path.resolve(projectRoot, options.localesDir || options.i18nDir || './locales');
@@ -305,6 +320,8 @@ function scanSourceFiles(sourceDir, availableKeys) {
         let match;
         while ((match = pattern.exec(lineText))) {
           const text = match[1].trim();
+          if (JS_BUILTIN_NAMES.has(text)) continue;
+          if (CODE_EXPRESSION_PATTERN.test(text)) continue;
           const existingKey = translationValueIndex.get(text) || findKeyByValue(text, availableKeys);
           hardcodedTexts.push({ file, line: index + 1, column: match.index + 1, text, existingKey });
         }

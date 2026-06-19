@@ -1,4 +1,4 @@
-# i18ntk v4.5.1
+# i18ntk v4.5.2
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.5.1)](https://socket.dev/npm/package/i18ntk/overview/4.5.1)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.5.2)](https://socket.dev/npm/package/i18ntk/overview/4.5.2)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -63,6 +63,13 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Unused key detection      | Yes           | No               |
 | Validation reports        | Yes           | Limited          |
 | Auto-translation workflow | Yes           | External tooling |
+
+## What's New in 4.5.2
+
+- The `complete` command now correctly inserts missing keys at the right nesting level when target locale files have namespace wrappers (e.g., `auth.json` containing `{ "auth": { ... } }`). Keys inside `auth.panel.sign_in` now go inside the `auth` wrapper, not at root level.
+- Fixed `complete` command: missing keys now inserted inside namespace wrapper when file has top-level key matching filename (e.g., auth.json with `{ "auth": … }`).
+- Fixed `translate --output-dir`: output now placed in `<outputDir>/<targetLang>/<filename>`, preventing language overwrites.
+- Enhanced `scanner` and `report-model` to filter out JS built-in type names (e.g., Promise, Boolean) and code expressions (e.g., `&&`, `${…}`) from hardcoded text detection.
 
 ## What's New in 4.5.1
 
@@ -535,7 +542,7 @@ Example:
 
 ```json
 {
-  "version": "4.5.1",
+  "version": "4.5.2",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",

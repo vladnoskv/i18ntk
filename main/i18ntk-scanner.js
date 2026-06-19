@@ -35,6 +35,19 @@ const SetupEnforcer = require('../utils/setup-enforcer');
 
 loadTranslations();
 
+const JS_BUILTIN_NAMES = new Set([
+  'Promise', 'Boolean', 'String', 'Number', 'Array', 'Object', 'Function',
+  'Symbol', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Date', 'RegExp', 'Error',
+  'BigInt', 'Int8Array', 'Uint8Array', 'Int16Array', 'Uint16Array',
+  'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Buffer',
+  'ReadableStream', 'WritableStream', 'FormData', 'URL', 'URLSearchParams',
+  'Headers', 'Request', 'Response', 'AbortController', 'AbortSignal',
+  'Blob', 'File', 'FileList', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl',
+  'console', 'process', 'global', 'globalThis', 'window', 'document',
+  'navigator', 'Element', 'HTMLElement', 'Node', 'Event', 'Component',
+  'React', 'NextResponse', 'NextRequest', 'NextApiRequest', 'NextApiResponse',
+]);
+
 class I18nTextScanner {
   constructor(config = {}) {
     this.config = config;
@@ -313,6 +326,9 @@ class I18nTextScanner {
 
     if (/^\d+$/.test(trimmed)) return false;
     if (/^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]+$/.test(trimmed)) return false;
+
+    if (JS_BUILTIN_NAMES.has(trimmed)) return false;
+    if (/[&|!=<>+\-*/%]=|&&|\|\||===|!==|=>|;|function\b|\$\{/.test(trimmed)) return false;
 
     const validChars = trimmed.match(/[\p{L}\p{N}\s\-,.!?':"()\[\]{}]/gu) || [];
     const validRatio = validChars.length / trimmed.length;

@@ -300,14 +300,27 @@ class I18nCompletionTool {
       
       // Add missing keys
       let fileChanged = false;
+      // Detect namespace wrapper: if file is "auth.json" and content has an "auth" top-level key,
+      // keys should be inserted inside that wrapper, not at root.
+      const fileNamespace = path.basename(fileName, '.json');
+      const hasWrapper = fileContent && typeof fileContent === 'object' && !Array.isArray(fileContent)
+        && fileNamespace in fileContent && typeof fileContent[fileNamespace] === 'object';
+
       keys.forEach(({ keyPath, key }) => {
-        // Check if key already exists
-        if (!this.hasNestedKey(fileContent, key)) {
+        // Resolve the correct insertion path: if the file has a namespace wrapper matching
+        // the filename, prepend it so keys go inside the wrapper (e.g. "auth.panel.sign_in"
+        // instead of "panel.sign_in").
+        const effectiveKey = hasWrapper && !key.startsWith(fileNamespace + '.')
+          ? `${fileNamespace}.${key}`
+          : key;
+
+        // Check if key already exists at the effective path
+        if (!this.hasNestedKey(fileContent, effectiveKey)) {
           const value = this.generateTranslationValue(keyPath, language);
-          
-          this.setNestedValue(fileContent, key, value);
+
+          this.setNestedValue(fileContent, effectiveKey, value);
           fileChanged = true;
-          
+
           changes.push({
             file: fileName,
             key: keyPath,

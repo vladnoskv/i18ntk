@@ -205,3 +205,133 @@ test('usage insights reports unresolved dynamic expressions without wildcard ove
   assert.equal(insights.unresolvedDynamicReferences[0].prefix, 'common.');
   assert.match(insights.unresolvedDynamicReferences[0].expression, /keyFromApi/);
 });
+
+test('hardcoded text filtering rejects JS/TS built-in type names', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Example() {
+        return <button aria-label="Promise" title="Boolean" alt="String">Promise</button>;
+      }
+    `,
+    relativePath: 'app/example/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(insights.hardcodedTexts, []);
+});
+
+test('hardcoded text filtering rejects code expressions with && operator', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Example() {
+        return <span>= 0 && visibleRow</span>;
+      }
+    `,
+    relativePath: 'app/example/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(insights.hardcodedTexts, []);
+});
+
+test('hardcoded text filtering rejects code expressions with || operator', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Example() {
+        return <span>a || b</span>;
+      }
+    `,
+    relativePath: 'app/example/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(insights.hardcodedTexts, []);
+});
+
+test('hardcoded text filtering rejects template literal interpolation', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Example() {
+        return <span>{log(\`\${input.value} PDT chip\`)}</span>;
+      }
+    `,
+    relativePath: 'app/example/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(insights.hardcodedTexts, []);
+});
+
+test('hardcoded text filtering rejects arrow function syntax', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Example() {
+        return <span>= () => true</span>;
+      }
+    `,
+    relativePath: 'app/example/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(insights.hardcodedTexts, []);
+});
+
+test('hardcoded text still detects real human text like welcome messages', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Welcome() {
+        return <h1>Welcome to our store</h1>;
+      }
+    `,
+    relativePath: 'app/welcome/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.ok(insights.hardcodedTexts.length >= 1);
+  assert.ok(insights.hardcodedTexts.some(h => h.text.includes('Welcome')));
+});
+
+test('hardcoded text filtering rejects strict equality operator strings', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Example() {
+        return <span>x === 0 && y !== 1</span>;
+      }
+    `,
+    relativePath: 'app/example/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.deepEqual(insights.hardcodedTexts, []);
+});
+
+test('hardcoded text still detects standard HTML attribute text', () => {
+  const insights = analyzeSourceForUsageInsights({
+    content: `
+      export function Submit() {
+        return <button aria-label="Submit form" title="Click to submit">Submit</button>;
+      }
+    `,
+    relativePath: 'app/submit/page.tsx',
+    availableKeys: new Set(),
+    directKeys: [],
+    translationValueIndex: new Map(),
+  });
+
+  assert.ok(insights.hardcodedTexts.length >= 1);
+  assert.ok(insights.hardcodedTexts.some(h => h.text === 'Submit form'));
+});

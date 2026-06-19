@@ -69,7 +69,7 @@ test('auto translate preserves existing translated values and only sends missing
   try {
     process.chdir(project);
     const result = await processFile(sourceFile, 'de', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       translateFn: async (text) => {
         calls.push(text);
         return text === 'Start now' ? 'Jetzt starten' : 'Weiter';
@@ -113,7 +113,7 @@ test('auto translate treats protected product terms as allowed English when deci
     process.chdir(project);
     const result = await processFile(sourceFile, 'es', defaultTranslateArgs({
       dryRun: true,
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       preservePlaceholders: true,
       protection: {
         terms: ['i18ntk', 'Workbench', 'Auto Translate'],
@@ -151,7 +151,7 @@ test('auto translate processFile accepts source paths relative to the current pr
     process.chdir(project);
     const result = await processFile('locales/en/ui.json', 'es', defaultTranslateArgs({
       dryRun: true,
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       preservePlaceholders: true,
     }));
 
@@ -193,7 +193,7 @@ test('auto translate retranslates visibly broken target values from the English 
   try {
     process.chdir(project);
     const result = await processFile(sourceFile, 'de', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       translateFn: async (text) => {
         calls.push(text);
         const translations = {
@@ -248,7 +248,7 @@ test('auto translate retranslates uppercase language-code placeholder leftovers'
   try {
     process.chdir(project);
     const result = await processFile(sourceFile, 'ar', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       translateFn: async (text) => {
         calls.push(text);
         return text === 'What We Offer' ? 'ما نقدمه' : `[ar] ${text}`;
@@ -304,7 +304,7 @@ test('auto translate retranslates single-word uppercase language-code placeholde
   try {
     process.chdir(project);
     const result = await processFile(sourceFile, 'ar', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       translateFn: async (text) => {
         calls.push(text);
         return text === 'Email' ? 'البريد الإلكتروني' : 'كلمة المرور';
@@ -347,7 +347,7 @@ test('auto translate retranslates lowercase language-code placeholder leftovers'
   try {
     process.chdir(project);
     const result = await processFile(sourceFile, 'zh', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       translateFn: async (text) => {
         calls.push(text);
         return text === 'Email' ? '电子邮件' : '密码';
@@ -438,7 +438,7 @@ test('auto translate scans a full file for multiple leftover target-code placeho
   try {
     process.chdir(project);
     const result = await processFile(sourceFile, 'sv', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       translateFn: async (text) => {
         calls.push(text);
         return translations[text] || text;
@@ -480,7 +480,7 @@ test('auto translate final check retries leftover single-word language-code plac
   try {
     process.chdir(project);
     const result = await processFile(sourceFile, 'ar', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       translateFn: async () => {
         attempts += 1;
         return attempts === 1 ? '[AR] Email' : 'البريد الإلكتروني';
@@ -530,7 +530,7 @@ test('auto translate does not fail when a provider legitimately returns a short 
 
     const args = parseArgs(['node', 'i18ntk-translate', sourceFile, 'zh', '--no-confirm']);
     Object.assign(args, defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       targetLang: 'zh',
       reportStdout: true,
       translateFn: async () => 'XP',
@@ -576,7 +576,7 @@ test('auto translate run warns and fails when final check still finds placeholde
 
     const args = parseArgs(['node', 'i18ntk-translate', sourceFile, 'ar', '--no-confirm']);
     Object.assign(args, defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       targetLang: 'ar',
       reportStdout: true,
       translateFn: async () => '[AR] What We Offer',
@@ -628,7 +628,7 @@ test('auto translate progress output names keys and placeholder segment stages s
       return originalWrite.call(process.stdout, chunk, ...args);
     };
     await processFile(sourceFile, 'de', defaultTranslateArgs({
-      outputDir: targetDir,
+      outputDir: path.dirname(targetDir),
       progressInterval: 1,
       translateFn: async (text) => text === 'Start now' ? 'Jetzt starten' : `Hallo ${text}`,
     }));
