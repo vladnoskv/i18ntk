@@ -169,7 +169,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       uiLanguage: cliArgs.uiLanguage || cfg.uiLanguage || 'en',
       notTranslatedMarker: markerList[0],
       notTranslatedMarkers: markerList,
-      supportedExtensions: cfg.supportedExtensions || cfg.processing?.supportedExtensions || ['.json', '.js', '.ts'],
+      supportedExtensions: cfg.supportedExtensions || cfg.processing?.supportedExtensions || ['.json', '.js', '.jsx', '.ts', '.tsx'],
       excludeFiles: cfg.excludeFiles || cfg.processing?.excludeFiles || ['.DS_Store', 'Thumbs.db'],
       excludeDirs: cfg.excludeDirs || cfg.processing?.excludeDirs || ['node_modules', '.next', '.git', 'dist', 'build'],
       strictMode: cliArgs.strictMode || cfg.strictMode || false,

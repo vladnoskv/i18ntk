@@ -195,7 +195,7 @@ class I18nUsageAnalyzer {
         this.config.excludeDirs = ['node_modules', '.git'];
       }
       if (!Array.isArray(this.config.includeExtensions) && !Array.isArray(this.config.supportedExtensions)) {
-        this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.py', '.pyx', '.pyi'];
+        this.config.includeExtensions = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte', '.py', '.pyx', '.pyi'];
       }
       
       await SecurityUtils.logSecurityEvent(t('usage.analyzerInitialized'), 'info', { component: 'i18ntk-usage' });
