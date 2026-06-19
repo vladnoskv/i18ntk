@@ -115,8 +115,8 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
         cfg.sourceDir = path.resolve(cfg.projectRoot, cfg.scriptDirectories[scriptName]);
       }
 
-      // Auto-fix i18nDir if missing but sourceDir exists
-      if (!SecurityUtils.safeExistsSync(cfg.i18nDir, projectRoot) && SecurityUtils.safeExistsSync(cfg.sourceDir, projectRoot)) {
+      // Auto-fix configured i18nDir only when the user did not pass an explicit locale path.
+      if (!cliArgs.i18nDir && !SecurityUtils.safeExistsSync(cfg.i18nDir, projectRoot) && SecurityUtils.safeExistsSync(cfg.sourceDir, projectRoot)) {
         await configManager.updateConfig({ i18nDir: configManager.toRelative(cfg.sourceDir) });
         cfg.i18nDir = cfg.sourceDir;
       }
@@ -192,6 +192,8 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       debug: cfg.debug || {},
       displayPaths,
     };
+    config.codeDir = config.sourceDir;
+    config.localesDir = config.i18nDir;
 
     SecurityUtils.validateConfig(config);
     return config;
@@ -256,9 +258,12 @@ function parseCommonArgs(args) {
       const sanitizedValue = value !== undefined ? value.trim() : true;
       
       switch (sanitizedKey) {
+        case 'code-dir':
+        case 'source-code-dir':
         case 'source-dir':
           parsed.sourceDir = sanitizedValue;
           break;
+        case 'locales-dir':
         case 'i18n-dir':
           parsed.i18nDir = sanitizedValue;
           break;
@@ -268,6 +273,7 @@ function parseCommonArgs(args) {
         case 'config-dir':
           parsed.configDir = sanitizedValue;
           break;
+        case 'source-locale':
         case 'source-language':
           parsed.sourceLanguage = sanitizedValue;
           break;
@@ -368,10 +374,14 @@ function parseCommonArgs(args) {
  */
 function displayHelp(scriptName, additionalOptions = {}) {
   const commonOptions = {
-    'source-dir': 'Source directory for translation files',
-    'i18n-dir': 'Directory containing i18n files (can differ from source-dir)',
+    'code-dir': 'Application source code directory to scan',
+    'source-code-dir': 'Alias for --code-dir',
+    'source-dir': 'Legacy alias; source code for scanner commands, locale root for locale-only commands',
+    'locales-dir': 'Directory containing locale/i18n files',
+    'i18n-dir': 'Alias for --locales-dir',
     'output-dir': 'Output directory for reports',
-    'source-language': 'Source language code (e.g., en, de)',
+    'source-locale': 'Source locale code (e.g., en, de)',
+    'source-language': 'Legacy alias for --source-locale',
     'ui-language': 'UI language for messages',
     'log-level': 'Logging level (error, warn, info, debug, silent)',
     'framework': 'Preferred framework (auto, react, vue, etc.)',
@@ -415,15 +425,15 @@ function displayHelp(scriptName, additionalOptions = {}) {
   console.log(`  I18NTK_FRAMEWORK_PREFERENCE Preferred framework (auto, react, vue, etc.)`);
   
   console.log(`\nExamples:`);
-  console.log(`  node ${scriptName}.js --source-dir=./locales`);
-  console.log(`  node ${scriptName}.js --source-dir=./app --i18n-dir=./locales`);
+  console.log(`  node ${scriptName}.js --locales-dir=./locales --source-locale=en`);
+  console.log(`  node ${scriptName}.js --code-dir=./app --locales-dir=./locales`);
   console.log(`  node ${scriptName}.js --output-dir=./i18ntk-reports`);
-  console.log(`  I18NTK_LOG_LEVEL=debug node ${scriptName}.js --source-dir=./locales`);
+  console.log(`  I18NTK_LOG_LEVEL=debug node ${scriptName}.js --locales-dir=./locales`);
   console.log(`  npx i18ntk ${scriptName.replace('i18ntk-', '')} --help`);
   
   console.log('\nConfiguration:');
   console.log(`  Settings are loaded from ${configManager.CONFIG_PATH}`);
-  console.log('  Use --source-dir, --i18n-dir, and --output-dir to override');
+  console.log('  Use --code-dir, --locales-dir, --source-locale, and --output-dir to override');
   console.log('  Environment variables can also be used for configuration');
 }
 

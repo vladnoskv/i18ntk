@@ -56,11 +56,14 @@ class I18nSummaryReporter {
       const uiLanguage = this.config.uiLanguage || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
 
-      this.sourceDir = this.config.sourceDir;
+      this.sourceDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
+      this.config.sourceDir = this.sourceDir;
 
-      // Validate source directory
-      const { validateSourceDir } = require('../utils/config-helper');
-      validateSourceDir(this.sourceDir, 'i18ntk-summary');
+      if (!SecurityUtils.safeExistsSync(this.sourceDir, process.cwd())) {
+        const err = new Error(`Locale directory not found: ${this.sourceDir}`);
+        err.exitCode = 2;
+        throw err;
+      }
     } catch (error) {
       console.error(`Error initializing summary reporter: ${error.message}`);
       throw error;
@@ -523,7 +526,10 @@ class I18nSummaryReporter {
     report.push(t('summary.languagesCount', {count: this.stats.languages.length}));
     report.push(t('summary.totalFiles', {count: this.stats.totalFiles}));
     report.push(t('summary.totalKeys', {count: this.stats.totalKeys}));
-    report.push(t('summary.avgKeysPerLanguage', {count: Math.round(this.stats.totalKeys / this.stats.languages.length)}));
+    const averageKeysPerLanguage = this.stats.languages.length > 0
+      ? Math.round(this.stats.totalKeys / this.stats.languages.length)
+      : 0;
+    report.push(t('summary.avgKeysPerLanguage', {count: averageKeysPerLanguage}));
     
     // Calculate total size
     const totalSize = Object.values(this.stats.folderSizes).reduce((sum, size) => sum + size, 0);
@@ -666,6 +672,11 @@ class I18nSummaryReporter {
         }
         report.push('');
       }
+    } else if (this.stats.languages.length === 0) {
+      report.push('⚠️  NO LOCALE LANGUAGES FOUND');
+      report.push('='.repeat(30));
+      report.push('No locale language files or directories were found in the selected locale root.');
+      report.push('');
     } else {
       report.push(t('summary.noIssuesFound'));
       report.push('='.repeat(30));
@@ -795,13 +806,20 @@ class I18nSummaryReporter {
     const args = process.argv.slice(2);
     const parsed = {};
     
-    args.forEach(arg => {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
       if (arg.startsWith('--')) {
-        const [key, value] = arg.substring(2).split('=');
-        if (key === 'source-dir') {
+        const [key, rawValue] = arg.substring(2).split('=');
+        const value = rawValue !== undefined
+          ? rawValue
+          : (args[i + 1] && !args[i + 1].startsWith('--') ? args[++i] : true);
+        if (key === 'source-dir' || key === 'locales-dir' || key === 'i18n-dir') {
           parsed.sourceDir = value;
-        } else if (key === 'source-language') {
+          parsed.i18nDir = value;
+        } else if (key === 'source-language' || key === 'source-locale') {
           parsed.sourceLanguage = value;
+        } else if (key === 'code-dir' || key === 'source-code-dir') {
+          parsed.codeDir = value;
         } else if (key === 'output-file') {
           parsed.outputFile = value;
         } else if (key === 'verbose') {
@@ -816,7 +834,7 @@ class I18nSummaryReporter {
           parsed.help = true;
         }
       }
-    });
+    }
     
     return parsed;
   }
@@ -835,6 +853,8 @@ class I18nSummaryReporter {
     if (!this.config.sourceDir) {
       this.config.sourceDir = this.detectI18nDirectory();
     }
+    this.config.sourceDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
+    this.sourceDir = this.config.sourceDir;
     
     if (!fromMenu) {
       // Check admin authentication for sensitive operations (only when called directly)
@@ -866,9 +886,9 @@ class I18nSummaryReporter {
       }
       
       // Validate source directory exists
-      if (!SecurityUtils.safeExistsSync(this.config.sourceDir, this.config.sourceDir)) {
+      if (!SecurityUtils.safeExistsSync(this.config.sourceDir, process.cwd())) {
         console.error(t('summary.sourceDirectoryDoesNotExist', { sourceDir: this.config.sourceDir }));
-        process.exit(1);
+        process.exit(2);
       }
     }
     
@@ -992,6 +1012,8 @@ class I18nSummaryReporter {
       
       if (totalIssues > 0) {
         console.log(t('summary.foundIssues', {count: totalIssues}));
+      } else if (this.stats.languages.length === 0) {
+        console.log('⚠️  No locale languages found in the selected locale root.');
       } else {
         console.log(t('summary.noIssuesConsole'));
       }
@@ -1001,7 +1023,7 @@ class I18nSummaryReporter {
       if (args.verbose) {
         console.error(error.stack);
       }
-      process.exit(1);
+      process.exit(error.exitCode || 1);
     }
     process.exit(0);
   }
@@ -1016,7 +1038,7 @@ if (require.main === module) {
   }
   main().catch(error => {
     console.error('Error in i18ntk-summary:', error.message);
-    process.exit(1);
+    process.exit(error.exitCode || 1);
   });
 }
 

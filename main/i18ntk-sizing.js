@@ -1141,7 +1141,7 @@ Generated: ${new Date().toISOString()}
         const key = keyValueMatch[1];
         const value = keyValueMatch[2];
         
-        if (key === 'source-dir' || key === 's') {
+        if (key === 'source-dir' || key === 'locales-dir' || key === 'i18n-dir' || key === 's') {
           options['source-dir'] = value;
           options.s = value;
           options.sourceDirExplicit = true;
@@ -1162,7 +1162,7 @@ Generated: ${new Date().toISOString()}
             options.threshold = numValue;
             options.t = numValue;
           }
-        } else if (key === 'source-language') {
+        } else if (key === 'source-language' || key === 'source-locale') {
           options['source-language'] = value;
         } else if (key === 'detailed' || key === 'd') {
           options.detailed = value.toLowerCase() !== 'false';
@@ -1184,7 +1184,7 @@ Generated: ${new Date().toISOString()}
         const key = match[1];
         const nextArg = args[i + 1];
         
-        if (key === 'source-dir' || key === 's') {
+        if (key === 'source-dir' || key === 'locales-dir' || key === 'i18n-dir' || key === 's') {
           options['source-dir'] = nextArg || options['source-dir'];
           options.s = options['source-dir'];
           options.sourceDirExplicit = true;
@@ -1216,7 +1216,7 @@ Generated: ${new Date().toISOString()}
             options.t = value;
           }
           if (nextArg && !nextArg.startsWith('-') && !isNaN(parseInt(nextArg))) i++;
-        } else if (key === 'source-language') {
+        } else if (key === 'source-language' || key === 'source-locale') {
           options['source-language'] = nextArg || options['source-language'];
           if (nextArg && !nextArg.startsWith('-')) i++;
         } else if (key === 'detailed' || key === 'd') {
@@ -1257,12 +1257,15 @@ I18NTK Sizing Analysis Tool
 Usage: i18ntk-sizing [options]
 
 Options:
-  -s, --source-dir <dir>      Source directory containing translation files (default: ./locales)
+  -s, --locales-dir <dir>     Locale directory containing translation files (default: ./locales)
+  --i18n-dir <dir>            Alias for --locales-dir
+  --source-dir <dir>          Legacy alias for --locales-dir
   -l, --languages <langs>     Comma-separated list of languages to analyze
   -o, --output-report         Generate detailed sizing report (default: true)
   -f, --format <format>       Output format: json, csv, table (default: table)
   -t, --threshold <number>    Size difference threshold for warnings (%) (default: 50)
-  --source-language <code>    Source language baseline for comparisons (default: en)
+  --source-locale <code>      Source locale baseline for comparisons (default: en)
+  --source-language <code>    Legacy alias for --source-locale
   -d, --detailed              Generate detailed report with more information
   --detailed-keys             Show detailed key-level analysis
   --predict-expansion         Predict UI layout expansion risk per language

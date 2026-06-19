@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.4] - 2026-06-19
+
+### Fixed
+
+- **Analyze:** Fixed `this.provideSetupGuidance is not a function` when no target locales are available. Analyze now prints setup guidance instead of crashing.
+- **Manager Route:** Manager-routed commands now propagate subcommand failures and no longer print `Operation completed successfully!` after a runtime failure.
+- **Complete:** Fixed `i18ntk-complete --help` by wiring the shared help renderer and keeping help output side-effect free.
+- **Validate:** Removed mixed failure/success output. Validation only prints successful completion when the validation result succeeds.
+- **Summary:** Guarded empty locale roots so `Average keys per language` prints `0` instead of `NaN`, and missing locale roots exit as invalid setup/argument failures.
+- **Analyze Reports:** Report write failures now fail analyze with a non-zero exit code instead of continuing with success wording.
+
+### Changed
+
+- **CLI Flags:** Added canonical aliases: `--code-dir` / `--source-code-dir` for application source files, `--locales-dir` / `--i18n-dir` for locale files, and `--source-locale` for source language. Legacy `--source-dir`, `--i18n-dir`, and `--source-language` remain supported.
+- **Exit Codes:** Standardized automation behavior: `0` for success, `1` for validation/report/runtime failures, and `2` for invalid arguments or missing setup in non-interactive mode.
+- **CI Behavior:** Commands skip prompts when `--no-prompt` is passed, `CI=true`, stdin is not a TTY, or stdout is not a TTY.
+- **Complete Summary:** Completion output now distinguishes locales scanned, target locales changed, unique source keys added, total key insertions, files modified, files skipped, and dry-run status.
+
+### Documentation
+
+- Updated README, API, configuration, scanner, and environment-variable docs with canonical CLI flags, legacy alias notes, and CI exit-code behavior.
+
+### Tests
+
+- Added CLI reliability regression coverage for the analyze crash, manager failure propagation, complete help output, directory/source-locale aliases, summary `NaN`, non-interactive prompt suppression, validation wording, and completion summary labels.
+
 ## [4.5.3] - 2026-06-19
 
 ### Fixed

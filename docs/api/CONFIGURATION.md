@@ -1,4 +1,4 @@
-# i18ntk Configuration Guide (v4.4.4)
+# i18ntk Configuration Guide (v4.5.4)
 
 ## Overview
 
@@ -14,7 +14,7 @@ Example:
 
 ```json
 {
-  "version": "4.4.4",
+  "version": "4.5.4",
   "language": "en",
   "uiLanguage": "en",
   "projectRoot": ".",
@@ -125,18 +125,22 @@ Configuration order, highest to lowest:
 
 Common flags:
 
-- `--source-dir`
-- `--i18n-dir`
+- `--code-dir` / `--source-code-dir`
+- `--locales-dir` / `--i18n-dir`
+- `--source-dir` (legacy alias)
 - `--output-dir`
-- `--source-language`
+- `--source-locale`
+- `--source-language` (legacy alias)
 - `--ui-language`
 - `--no-prompt`
+
+For source-scanning commands such as `usage`, `report`, and `scanner`, `--source-dir` remains a legacy alias for the application source directory. For locale-only commands such as `validate`, `summary`, `complete`, and `sizing`, prefer `--locales-dir` to make the locale root explicit.
 
 ## Command Examples
 
 ```bash
 i18ntk --command=init
-i18ntk --command=analyze --source-dir=./src --i18n-dir=./locales --output-dir=./i18ntk-reports
+i18ntk --command=analyze --code-dir=./src --locales-dir=./locales --source-locale=en --output-dir=./i18ntk-reports
 i18ntk --command=validate --no-prompt
 i18ntk --command=translate
 ```
@@ -145,8 +149,8 @@ Standalone binaries also read `.i18ntk-config`:
 
 ```bash
 i18ntk-init --no-prompt
-i18ntk-analyze --source-dir=./src --i18n-dir=./locales
-i18ntk-validate --source-language=en
+i18ntk-analyze --code-dir=./src --locales-dir=./locales
+i18ntk-validate --locales-dir=./locales --source-locale=en
 i18ntk-translate locales/en/common.json de --no-confirm
 ```
 

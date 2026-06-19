@@ -262,8 +262,11 @@ class I18nManager {
 
                 switch (sanitizedKey) {
                     case 'source-dir':
+                    case 'code-dir':
+                    case 'source-code-dir':
                         parsed.sourceDir = sanitizedValue;
                         break;
+                    case 'locales-dir':
                     case 'i18n-dir':
                         parsed.i18nDir = sanitizedValue;
                         break;
@@ -271,6 +274,7 @@ class I18nManager {
                         parsed.outputDir = sanitizedValue;
                         break;
                     case 'source-language':
+                    case 'source-locale':
                         parsed.sourceLanguage = sanitizedValue;
                         break;
                     case 'ui-language':

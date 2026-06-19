@@ -18,7 +18,8 @@ const SecurityUtils = require('../utils/security');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const { getGlobalReadline, closeGlobalReadline } = require('../utils/cli');
 const SetupEnforcer = require('../utils/setup-enforcer');
-const { getUnifiedConfig } = require('../utils/config-helper');
+const { getUnifiedConfig, displayHelp } = require('../utils/config-helper');
+const { isInteractive } = require('../utils/prompt-helper');
 
 // Ensure setup is complete before running, except for help output.
 (async () => {
@@ -64,7 +65,7 @@ class I18nCompletionTool {
       
       const baseConfig = await getUnifiedConfig('complete', args);
       this.config = { ...baseConfig, ...(this.config || {}) };
-      this.sourceDir = this.config.sourceDir;
+      this.sourceDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       
       // Validate source directory exists
@@ -99,14 +100,21 @@ class I18nCompletionTool {
     const args = process.argv.slice(2);
     const parsed = {};
     
-    args.forEach(arg => {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
       if (arg.startsWith('--')) {
-        const [key, value] = arg.substring(2).split('=');
-        if (key === 'source-dir') {
+        const [key, rawValue] = arg.substring(2).split('=');
+        const value = rawValue !== undefined
+          ? rawValue
+          : (args[i + 1] && !args[i + 1].startsWith('--') ? args[++i] : true);
+        if (key === 'source-dir' || key === 'locales-dir' || key === 'i18n-dir') {
           parsed.sourceDir = value;
-        } else if (key === 'source-language') {
-          parsed.sourceLanguage = value;
-        } else if (key === 'auto-translate') {
+          parsed.i18nDir = value;
+      } else if (key === 'source-language' || key === 'source-locale') {
+        parsed.sourceLanguage = value;
+      } else if (key === 'code-dir' || key === 'source-code-dir') {
+        parsed.codeDir = value;
+      } else if (key === 'auto-translate') {
           parsed.autoTranslate = true;
         } else if (key === 'dry-run') {
           parsed.dryRun = true;
@@ -116,7 +124,7 @@ class I18nCompletionTool {
           parsed.help = true;
         }
       }
-    });
+    }
     
     return parsed;
   }
@@ -567,20 +575,22 @@ class I18nCompletionTool {
       
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
-      this.sourceDir = this.config.sourceDir;
+      this.sourceDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
     } else {
       await this.initialize();
       
-      if (args.sourceDir) {
-        const resolvedSourceDir = path.resolve(args.sourceDir);
+      const localesDirArg = args.i18nDir || args.sourceDir;
+      if (localesDirArg) {
+        const resolvedSourceDir = path.resolve(localesDirArg);
         const validatedSourceDir = SecurityUtils.validatePath(resolvedSourceDir, process.cwd());
         if (!validatedSourceDir) {
-          console.error(t("complete.invalidSourceDir", { sourceDir: args.sourceDir }));
+          console.error(t("complete.invalidSourceDir", { sourceDir: localesDirArg }));
           console.error(`Path validation failed — source directory is outside the allowed project boundary.`);
           process.exit(1);
         }
         this.config.sourceDir = resolvedSourceDir;
+        this.config.i18nDir = resolvedSourceDir;
         this.sourceDir = validatedSourceDir;
       }
       
@@ -645,11 +655,20 @@ class I18nCompletionTool {
       console.log('\n');
       console.log(t("complete.summaryTitle"));
       console.log(t("complete.separator"));
-      console.log(t("complete.totalChanges", { totalChanges }));
-      console.log(t("complete.languagesProcessed", { languagesProcessed: languages.length }));
-      console.log(t("complete.missingKeysAdded", { missingKeysAdded: missingKeys.length }));
+      const targetLocalesChanged = allChanges.length;
+      const filesModified = new Set(allChanges.flatMap(lang => lang.changes.map(change => `${lang.language}/${change.file}`))).size;
+      const filesSkipped = Math.max(0, targetLanguages.length - targetLocalesChanged);
+      console.log(`Locales scanned: ${languages.length}`);
+      console.log(`Target locales changed: ${targetLocalesChanged}`);
+      console.log(`Unique source keys added: ${missingKeys.length}`);
+      console.log(`Total key insertions: ${totalChanges}`);
+      console.log(`Files modified: ${args.dryRun ? 0 : filesModified}`);
+      console.log(`Files skipped: ${filesSkipped}`);
+      if (args.dryRun) {
+        console.log('Dry run only. No files were modified.');
+      }
       
-      if (!args.dryRun && allChanges.length > 0 && !args.noPrompt) {
+      if (!args.dryRun && allChanges.length > 0 && isInteractive(args)) {
         const rl = this.rl || this.initReadline();
         const answer = await this.prompt('\n' + t('complete.generateReportPrompt') + ' (Y/N): ');
         

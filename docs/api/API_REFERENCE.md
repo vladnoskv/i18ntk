@@ -1,4 +1,4 @@
-# i18ntk API Reference (v4.3.2)
+# i18ntk API Reference (v4.5.4)
 
 ## Primary CLI
 
@@ -45,13 +45,17 @@ i18ntk-translate
 
 Many commands support:
 
-- `--source-dir <path>`
-- `--i18n-dir <path>`
+- `--code-dir <path>` or `--source-code-dir <path>` for application source files
+- `--locales-dir <path>` or `--i18n-dir <path>` for locale files
+- `--source-dir <path>` legacy alias; source code for scanner-style commands, locale root for locale-only commands
 - `--output-dir <path>`
-- `--source-language <code>`
+- `--source-locale <code>`
+- `--source-language <code>` legacy alias for `--source-locale`
 - `--ui-language <code>`
 - `--no-prompt`
 - `--help`
+
+Exit codes are standardized for automation: `0` means successful execution, `1` means validation/report/runtime failure, and `2` means invalid arguments or missing required setup in non-interactive mode. Commands do not prompt when `--no-prompt` is passed, `CI=true`, stdin is not a TTY, or stdout is not a TTY.
 
 Command-specific tools add their own flags, such as `--dry-run`, `--output-report`, `--cleanup`, `--predict-expansion`, or Auto Translate provider options.
 
@@ -82,8 +86,10 @@ English-content warning details include detected percentage, threshold, matched 
 
 `i18ntk-scanner` and `i18ntk --command=scanner` support:
 
-- `--source-dir <dir>`
-- `--source-language <code>`
+- `--code-dir <dir>` or `--source-code-dir <dir>`
+- `--source-dir <dir>` legacy alias for source code directory
+- `--source-locale <code>`
+- `--source-language <code>` legacy alias for source locale
 - `--patterns <regex-list>`
 - `--exclude <pattern-list>`
 - `--output-report`
@@ -142,9 +148,9 @@ If the final leftover check still finds untranslated values after its targeted r
 ## Sizing
 
 ```bash
-i18ntk-sizing --source-dir ./locales --format table
-i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
-i18ntk-sizing --source-dir ./locales --predict-expansion --output-report
+i18ntk-sizing --locales-dir ./locales --format table
+i18ntk-sizing --locales-dir ./locales --detailed --output-dir ./i18ntk-reports
+i18ntk-sizing --locales-dir ./locales --predict-expansion --output-report
 ```
 
 Sizing reports translation file sizes, key counts, average value length, file-set mismatches, and optional expansion prediction risk tiers.
@@ -152,11 +158,11 @@ Sizing reports translation file sizes, key counts, average value length, file-se
 ## Usage
 
 ```bash
-i18ntk-usage --source-dir ./src --i18n-dir ./locales
-i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup --dry-run-delete
+i18ntk-usage --code-dir ./src --locales-dir ./locales
+i18ntk-usage --code-dir ./src --locales-dir ./locales --cleanup --dry-run-delete
 ```
 
-When `sourceDir` equals `i18nDir` and no application source directory can be inferred, `4.3.2` avoids scanning the whole project root to prevent inflated missing-key counts.
+When `sourceDir` equals `i18nDir` and no application source directory can be inferred, current releases avoid scanning the whole project root to prevent inflated missing-key counts.
 
 ## Backup
 

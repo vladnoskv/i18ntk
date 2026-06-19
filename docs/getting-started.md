@@ -1,4 +1,4 @@
-# Getting Started with i18ntk (v4.3.2)
+# Getting Started with i18ntk (v4.5.4)
 
 This guide covers the shortest path from install to a working locale project.
 

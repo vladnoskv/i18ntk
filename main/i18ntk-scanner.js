@@ -133,6 +133,8 @@ class I18nTextScanner {
 
         switch (key) {
           case 'source-dir':
+          case 'code-dir':
+          case 'source-code-dir':
             parsed.sourceDir = value || '';
             if (value === args[i + 1]) i++;
             break;
@@ -167,6 +169,7 @@ class I18nTextScanner {
             parsed.includeTests = true;
             break;
           case 'source-language':
+          case 'source-locale':
             parsed.sourceLanguage = value || '';
             if (value === args[i + 1]) i++;
             break;

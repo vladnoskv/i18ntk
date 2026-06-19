@@ -71,9 +71,16 @@ class I18nAnalyzer {
       const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
       loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
       
-      this.sourceDir = this.config.sourceDir;
+      this.sourceDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       this.outputDir = this.config.outputDir;
+
+      const explicitLocaleDir = args.i18nDir || (!args.i18nDir && args.sourceDir ? args.sourceDir : null);
+      if (explicitLocaleDir && !SecurityUtils.safeExistsSync(this.sourceDir, process.cwd())) {
+        const err = new Error(`Locale directory not found: ${this.sourceDir}`);
+        err.exitCode = 2;
+        throw err;
+      }
       
       // Validate source directory exists
       const { validateSourceDir } = require('../utils/config-helper');
@@ -715,6 +722,28 @@ try {
     console.log(t('analyze.help_message'));
   }
 
+  provideSetupGuidance() {
+    return [
+      'Setup guidance:',
+      `- Ensure the locale root exists: ${this.sourceDir}`,
+      `- Ensure the source locale exists: ${path.join(this.sourceDir, this.config.sourceLanguage)}`,
+      '- Add at least one target locale, for example de/common.json or de.json.',
+      '- Prefer --locales-dir for locale files. Use --code-dir for application source files.'
+    ].join('\n');
+  }
+
+  detectStructureType() {
+    const sourceLocaleDir = path.join(this.sourceDir, this.config.sourceLanguage);
+    const sourceLocaleFile = path.join(this.sourceDir, `${this.config.sourceLanguage}.json`);
+    if (SecurityUtils.safeExistsSync(sourceLocaleFile, this.sourceDir)) {
+      return { type: 'monolith' };
+    }
+    if (SecurityUtils.safeExistsSync(sourceLocaleDir, this.sourceDir)) {
+      return { type: 'directory' };
+    }
+    return { type: 'unknown' };
+  }
+
   // Main analyze method
   async analyze() {
     try {
@@ -753,7 +782,7 @@ try {
         }
         console.log(error);
         console.log('\n' + guidance);
-        return;
+        return { success: true, warnings: 1, message: error };
       }
       
       if (!args.json) {
@@ -774,6 +803,9 @@ try {
 
           // Save report
           const reportPath = await this.saveReport(language, report);
+          if (!reportPath) {
+            throw new Error(`Failed to save analysis report for ${language}`);
+          }
           const processedCount = results.length + 1;
 
           if (!args.json) {
@@ -842,7 +874,7 @@ try {
       console.log(t('analyze.finished') || '\n✅ Analysis completed successfully!');
       
       // Only prompt for input if running standalone and not in no-prompt mode
-      if (require.main === module && !this.noPrompt) {
+      if (require.main === module && !this.noPrompt && process.env.CI !== 'true' && process.stdin.isTTY && process.stdout.isTTY) {
         await this.prompt('\nPress Enter to continue...');
       }
       this.closeReadline();
@@ -881,7 +913,7 @@ try {
         const uiLanguage = this.config.uiLanguage || 'en';
         loadTranslations(uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));
         
-        this.sourceDir = this.config.sourceDir;
+        this.sourceDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
         this.outputDir = this.config.outputDir;
       }
@@ -921,9 +953,10 @@ try {
         loadTranslations(args.uiLanguage, path.resolve(__dirname, '..', 'ui-locales'));}
       
       // Update config if source directory is provided
-      if (args.sourceDir) {
-        this.config.sourceDir = args.sourceDir;
-        this.sourceDir = path.resolve(PROJECT_ROOT, this.config.sourceDir);
+      const localeDirArg = args.i18nDir || (!args.i18nDir && args.sourceDir ? args.sourceDir : null);
+      if (localeDirArg) {
+        this.config.i18nDir = localeDirArg;
+        this.sourceDir = path.resolve(PROJECT_ROOT, localeDirArg);
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       }
       
@@ -932,7 +965,7 @@ try {
         this.outputDir = path.resolve(this.config.outputDir);
       }
       const execute = async () => {
-        await this.analyze();
+        return await this.analyze();
       };
 
       if (args.watch) {
@@ -949,10 +982,11 @@ try {
         });
         console.log('��� Watching for translation changes. Press Ctrl+C to exit.');
       } else {
-        await execute();
+        const result = await execute();
         if (!fromMenu && require.main === module) {
           process.exit(0);
         }
+        return result;
       }
     } catch (error) {
       console.error(t('analyze.error') || '❌ Analysis failed:', error.message);
@@ -960,6 +994,7 @@ try {
       if (!fromMenu && require.main === module) {
         process.exit(1);
       }
+      throw error;
     }
   }
   

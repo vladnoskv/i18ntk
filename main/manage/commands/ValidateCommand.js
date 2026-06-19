@@ -17,6 +17,7 @@ const AdminAuth = require('../../../utils/admin-auth');
 const watchLocales = require('../../../utils/watch-locales');
 const { getGlobalReadline, closeGlobalReadline } = require('../../../utils/cli');
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../../../utils/config-helper');
+const { isInteractive } = require('../../../utils/prompt-helper');
 const I18nInitializer = require('../../i18ntk-init');
 const JsonOutput = require('../../../utils/json-output');
 const ExitCodes = require('../../../utils/exit-codes');
@@ -86,13 +87,20 @@ class ValidateCommand {
             );
 
             // Use the i18n directory for language files
-            this.sourceDir = this.config.i18nDir || this.config.sourceDir;
-            this.i18nDir = this.config.i18nDir || this.config.sourceDir;
+            this.sourceDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
+            this.i18nDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
             this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
 
             try {
-                validateSourceDir(this.sourceDir, 'i18ntk-validate');
+                if (!SecurityUtils.safeExistsSync(this.sourceDir, process.cwd())) {
+                    const err = new Error(`Locale directory not found: ${this.sourceDir}`);
+                    err.exitCode = 2;
+                    throw err;
+                }
             } catch (err) {
+                if (!isInteractive(args)) {
+                    throw err;
+                }
                 console.log(t('init.requiredTitle'));
                 console.log(t('init.requiredBody'));
                 const answer = await this.prompt(t('init.promptRunNow'));
@@ -732,9 +740,11 @@ class ValidateCommand {
             if (args.uiLanguage) {
                 loadTranslations(args.uiLanguage, path.resolve(__dirname, '../../../ui-locales'));}
 
-            if (args.sourceDir) {
-                this.config.sourceDir = args.sourceDir;
-                this.sourceDir = path.resolve(this.config.sourceDir);
+            const localeDirArg = args.i18nDir || (!args.i18nDir && args.sourceDir ? args.sourceDir : null);
+            if (localeDirArg) {
+                this.config.i18nDir = localeDirArg;
+                this.sourceDir = path.resolve(localeDirArg);
+                this.i18nDir = this.sourceDir;
                 this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
             }
             if (args.strictMode) {
@@ -1013,11 +1023,15 @@ class ValidateCommand {
 
             const result = await this.validate();
 
-            console.log(t('validate.validationProcessCompletedSuccessfully'));
+            if (result.success) {
+                console.log(t('validate.validationProcessCompletedSuccessfully'));
+            } else {
+                console.log('❌ Validation failed.');
+            }
             SecurityUtils.logSecurityEvent(
-                t('validate.runCompleted'),
-                'info',
-                { message: 'Validation run completed successfully' }
+                result.success ? t('validate.runCompleted') : t('validate.runError'),
+                result.success ? 'info' : 'error',
+                { message: result.success ? 'Validation run completed successfully' : 'Validation run failed' }
             );
             return result;
         };
@@ -1047,8 +1061,8 @@ class ValidateCommand {
     async execute(options = {}) {
         try {
             await this.initialize();
-            await this.run(options);
-            return { success: true, command: 'validate' };
+            const result = await this.run(options);
+            return result && result.success === false ? result : { success: true, command: 'validate', result };
         } catch (error) {
             console.error(`Validate command failed: ${error.message}`);
             throw error;

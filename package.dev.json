@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.4.4",
+  "version": "4.5.4",
   "private": true,
   "manifestRole": "development",
   "description": "Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
@@ -294,33 +294,50 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.4.4",
+    "version": "4.5.4",
     "releaseDate": "05/06/2026",
-    "lastUpdated": "05/06/2026",
+    "lastUpdated": "06/19/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "CLI: Standardized directory flags with --code-dir/--source-code-dir for application source files, --locales-dir/--i18n-dir for locale files, and --source-locale as the preferred source language flag while preserving legacy aliases.",
+      "CLI: Direct and manager-routed commands now propagate runtime failures and validation/report failures with non-zero exit codes, and no longer print success messages after failures.",
+      "CI: Commands skip interactive prompts when --no-prompt is passed, CI=true, or stdin/stdout are non-TTY.",
+      "ANALYZE: Fixed missing setup guidance method crash and treats report write failures as command failures.",
+      "COMPLETE: Fixed --help crash and clarified completion summary counts for unique source keys versus total key insertions.",
+      "SUMMARY: Empty locale roots no longer print NaN averages and missing locale roots exit as invalid setup/argument failures.",
+      "TESTS: Added CLI reliability regression coverage for help output, manager failure propagation, flag aliases, CI prompt suppression, validation wording, summary averages, and completion summary labels.",
       "CONFIG: Shared .i18ntk-config now accepts extension-owned sections under extensions.workbench and extensions.lens; the CLI preserves the top-level extensions object while ignoring unknown nested extension settings.",
       "REPORTS: Likely-untranslated detection now ignores placeholder-only and symbol/dynamic values such as {file}, {path}, and emoji labels instead of treating them as untranslated English.",
       "REPORTS: Dynamic values with translated surrounding copy and English placeholder tokens are no longer flagged as untranslated.",
-      "AUTO TRANSLATE: Target-language placeholders such as [AR] What We Offer, [AR] Email, [zh] Email, and [TR] Password are detected, translated from source, and checked again before completion.",
-      "AUTO TRANSLATE: Runs now warn, report, and exit with validation failure if placeholder-prefixed or source-copy leftovers remain after the final retry.",
-      "AUTO TRANSLATE: Managed runs audit every selected file for a language before reporting leftover failures.",
-      "AUTO TRANSLATE: Short all-caps acronyms and codes such as XP may remain unchanged without failing the final leftover check.",
-      "FIX PLACEHOLDERS: Option 7 and i18ntk-fixer --check-placeholders audit English locale files for [LANG] placeholder leftovers and report a clean count of 0.",
-      "SIZING: Manager sizing uses the configured i18n directory unless --source-dir is explicitly provided, so usage analysis no longer poisons the next sizing run.",
-      "USAGE: Usage extraction now avoids false missing-key matches from ordinary methods such as get(), headers.get(), set(), and setItem().",
-      "USAGE: Usage insights now resolve tx() wrapper dynamic keys backed by bounded literal values, reducing false unused-key reports.",
-      "VALIDATION: Validation summary reports now include warning and error details, not only totals.",
-      "USAGE: Usage fallback source detection no longer writes its inferred app source directory back into the shared locale configuration."
+      "TRANSLATE: processFile() accepts project-relative source paths, matching direct CLI resolution.",
+      "TRANSLATE: only-missing mode keeps existing translations that intentionally preserve configured product terms.",
+      "TRANSLATE: broken target value detection now catches mojibake, replacement characters, repeated question marks, and target-language prefix leftovers.",
+      "TESTS: Auto Translate regression coverage expanded for relative paths, protected terms, placeholder handling, and residual checks.",
+      "SECURITY: Backup operations now validate all paths via SecurityUtils.validatePath — fixes path traversal enabling arbitrary filesystem writes.",
+      "SECURITY: i18ntk-complete --source-dir CLI override now validated; --source-language sanitized through SecurityUtils.sanitizeInput.",
+      "SECURITY: config-helper dual-path resolution wraps --source-dir / --i18n-dir in SecurityUtils.validatePath.",
+      "SECURITY: JSON parsing enforces depth (1000) and size (50 MB) limits in safeParseJSON to prevent DoS.",
+      "SECURITY: LibreTranslate custom URL now requires I18NTK_ALLOW_CUSTOM_LIBRETRANSLATE_HOST=1 flag.",
+      "SECURITY: sanitizeInput default whitelist tightened — removed backslash and curly brace characters.",
+      "SECURITY: VSCode Workbench now validates report paths, limits JSON input size, checks write paths within root.",
+      "SECURITY: i18ntk Lens rejects custom wrapper names >100 chars to prevent ReDoS.",
+      "USAGE: Dead-key detection now uses resolved dynamic key data from insights instead of crude text-overlap heuristics.",
+      "USAGE: Locale JSON imports are detected; telemetry/event call strings classified and excluded from translation counts.",
+      "USAGE: Confidence-split unused key reports — confirmed/likely/possibly used tiers.",
+      "USAGE: New --strict-unused, --json, --prune / --prune-keep flags.",
+      "USAGE: Mojibake detection, client-boundary warnings, copy-formatter detection, local wrapper resolution.",
+      "USAGE: Object-method .tx() calls and bounded dynamic key expansions now recognized.",
+      "VSCode: i18ntk.clearDiagnostics command, new diagnostic codes, stale diagnostics cleared at scan start.",
+      "TRANSLATE: Auto Translate residual reports and VS Code quick-fix integration."
     ],
     "breakingChanges": [
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.4.5",
+    "nextVersion": "4.5.5",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -342,11 +359,18 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.4.1 may be unstable or insecure. Upgrade to 4.4.4 or newer.",
+    "supportPolicy": "Versions earlier than 4.5.4 may be unstable or insecure in CI automation. Upgrade to 4.5.4 or newer.",
     "deprecations": [
-      "4.3.0"
+      "4.3.0",
+      "4.3.1",
+      "4.3.2",
+      "4.3.3"
     ],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.4.4 or newer: npm install -g i18ntk@latest"
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.5.4 or newer: npm install -g i18ntk@latest",
+    "securityAdvisories": [
+      "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
+      "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"
+    ]
   },
   "_comment": "This package is zero-dependency and uses only native Node.js modules"
 }

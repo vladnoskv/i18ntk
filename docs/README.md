@@ -1,6 +1,6 @@
-# i18ntk Documentation (v4.3.2)
+# i18ntk Documentation (v4.5.4)
 
-This documentation set covers the current `i18ntk` CLI, runtime API, configuration model, Auto Translate flow, and migration notes for `4.3.2`.
+This documentation set covers the current `i18ntk` CLI, runtime API, configuration model, Auto Translate flow, and migration notes.
 
 ## Start Here
 
@@ -59,6 +59,8 @@ i18ntk reads project settings from the project-local `.i18ntk-config` file. CLI 
 
 - Run `i18ntk` or `i18ntk --command=init` to initialize a project.
 - Use `--no-prompt` for CI or automated workflows.
+- CI and non-TTY runs do not prompt. Commands use exit code `0` for success, `1` for validation/report/runtime failures, and `2` for invalid arguments or missing required setup.
+- Prefer `--code-dir` or `--source-code-dir` for application source files, `--locales-dir` or `--i18n-dir` for locale files, and `--source-locale` for the source language. Legacy `--source-dir`, `--i18n-dir`, and `--source-language` remain supported.
 - Backup behavior is optional and disabled by default during setup.
 - Default target languages are `en`, `de`, `es`, `fr`, and `ru`.
 - Init and analysis reports default to Markdown. Set `reports.format` to `markdown`, `json`, or `text` to change the report format.

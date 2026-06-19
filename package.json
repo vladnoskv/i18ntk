@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.5.3",
+  "version": "4.5.4",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18ntk",
@@ -199,7 +199,7 @@
     "security:check": "node utils/security-check-improved.js",
     "security:test": "node --test tests/security.test.js",
     "security:audit": "npm run security:check && npm run security:test",
-    "test": "npm run security:test && node --test tests/usage-insights.test.js tests/usage-insights-new-features.test.js tests/regex-extractor-boundary.test.js tests/manifest-sync.test.js",
+    "test": "npm run security:test && node --test tests/cli-reliability.test.js tests/usage-insights.test.js tests/usage-insights-new-features.test.js tests/regex-extractor-boundary.test.js tests/manifest-sync.test.js",
     "test:all": "npm run security:audit",
     "package:public": "node scripts/build-public-package.js --dry-run",
     "pack:public": "node scripts/build-public-package.js --pack",
@@ -228,7 +228,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.5.3",
+    "version": "4.5.4",
     "releaseDate": "05/06/2026",
     "lastUpdated": "06/19/2026",
     "maintainer": "Vlad Noskov",
@@ -236,6 +236,13 @@
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "CLI: Standardized directory flags with --code-dir/--source-code-dir for application source files, --locales-dir/--i18n-dir for locale files, and --source-locale as the preferred source language flag while preserving legacy aliases.",
+      "CLI: Direct and manager-routed commands now propagate runtime failures and validation/report failures with non-zero exit codes, and no longer print success messages after failures.",
+      "CI: Commands skip interactive prompts when --no-prompt is passed, CI=true, or stdin/stdout are non-TTY.",
+      "ANALYZE: Fixed missing setup guidance method crash and treats report write failures as command failures.",
+      "COMPLETE: Fixed --help crash and clarified completion summary counts for unique source keys versus total key insertions.",
+      "SUMMARY: Empty locale roots no longer print NaN averages and missing locale roots exit as invalid setup/argument failures.",
+      "TESTS: Added CLI reliability regression coverage for help output, manager failure propagation, flag aliases, CI prompt suppression, validation wording, summary averages, and completion summary labels.",
       "CONFIG: Shared .i18ntk-config now accepts extension-owned sections under extensions.workbench and extensions.lens; the CLI preserves the top-level extensions object while ignoring unknown nested extension settings.",
       "REPORTS: Likely-untranslated detection now ignores placeholder-only and symbol/dynamic values such as {file}, {path}, and emoji labels instead of treating them as untranslated English.",
       "REPORTS: Dynamic values with translated surrounding copy and English placeholder tokens are no longer flagged as untranslated.",
@@ -264,7 +271,7 @@
       "i18ntk/runtime module-level helpers keep the first initialized runtime configuration for compatibility instead of being overwritten by later initRuntime() calls.",
       "utils/watch-locales.js returns a callable watcher object with EventEmitter methods and stop(); existing bare stop-function usage remains supported."
     ],
-    "nextVersion": "4.5.4",
+    "nextVersion": "4.5.5",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -286,14 +293,14 @@
       "spring-boot": ">=2.5.0",
       "laravel": ">=8.0.0"
     },
-    "supportPolicy": "Versions earlier than 4.4.1 may be unstable or insecure. Upgrade to 4.5.3 or newer.",
+    "supportPolicy": "Versions earlier than 4.5.4 may be unstable or insecure in CI automation. Upgrade to 4.5.4 or newer.",
     "deprecations": [
       "4.3.0",
       "4.3.1",
       "4.3.2",
       "4.3.3"
     ],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.5.3 or newer: npm install -g i18ntk@latest",
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.5.4 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"

@@ -1,4 +1,4 @@
-# i18ntk v4.5.3
+# i18ntk v4.5.4
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.5.3)](https://socket.dev/npm/package/i18ntk/overview/4.5.3)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.5.4)](https://socket.dev/npm/package/i18ntk/overview/4.5.4)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-i18ntk_Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-i18ntk_Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -63,6 +63,13 @@ i18next is mainly a runtime internationalization library. i18ntk is mainly workf
 | Unused key detection      | Yes           | No               |
 | Validation reports        | Yes           | Limited          |
 | Auto-translation workflow | Yes           | External tooling |
+
+## What's New in 4.5.4
+
+- **CLI RELIABILITY**: Direct and manager-routed commands now propagate runtime, validation, and report failures with non-zero exit codes and never print success after failure.
+- **CI READY**: Commands skip prompts under `--no-prompt`, `CI=true`, or non-TTY stdin/stdout.
+- **CLEAR FLAGS**: Added `--code-dir` / `--source-code-dir`, `--locales-dir` / `--i18n-dir`, and `--source-locale` while preserving legacy aliases.
+- **COMMAND FIXES**: Fixed `i18ntk-analyze` setup guidance crash, `i18ntk-complete --help`, `i18ntk-summary` `NaN` averages, validation success/failure wording, and completion summary labels.
 
 ## What's New in 4.5.3
 
@@ -193,20 +200,22 @@ Note: manager route `i18ntk --command=backup` is available via the interactive m
 
 Many commands support:
 
-- `--source-dir <path>`
-- `--i18n-dir <path>`
+- `--code-dir <path>` or `--source-code-dir <path>` for application source files
+- `--locales-dir <path>` or `--i18n-dir <path>` for locale files
 - `--output-dir <path>`
-- `--source-language <code>`
+- `--source-locale <code>`
 - `--ui-language <code>`
 - `--no-prompt`
 - `--help`
+
+Legacy `--source-dir` and `--source-language` remain supported. For scanner-style commands, `--source-dir` means source code. For locale-only commands, prefer `--locales-dir` to avoid ambiguity.
 
 Command-specific tools add their own flags such as `--dry-run`, `--output-report`, `--cleanup`, `--predict-expansion`, or Auto Translate provider options.
 
 Example:
 
 ```bash
-i18ntk --command=analyze --source-dir=./src --i18n-dir=./locales --output-dir=./i18ntk-reports
+i18ntk --command=analyze --code-dir=./src --locales-dir=./locales --source-locale=en --output-dir=./i18ntk-reports
 ```
 
 ## Auto Translate
@@ -358,8 +367,8 @@ Tune warnings in `.i18ntk-config`:
 `i18ntk-sizing` reports translation file sizes, key counts, average value length, and file-set mismatches across language folders.
 
 ```bash
-i18ntk-sizing --source-dir ./locales --format table
-i18ntk-sizing --source-dir ./locales --detailed --output-dir ./i18ntk-reports
+i18ntk-sizing --locales-dir ./locales --format table
+i18ntk-sizing --locales-dir ./locales --detailed --output-dir ./i18ntk-reports
 ```
 
 Use `--detailed` to print per-file rows in the terminal.
@@ -369,7 +378,7 @@ Use `--detailed` to print per-file rows in the terminal.
 Predict UI layout overflow risk by analyzing per-key character-count expansion across languages:
 
 ```bash
-i18ntk-sizing --source-dir ./locales --predict-expansion --output-report
+i18ntk-sizing --locales-dir ./locales --predict-expansion --output-report
 ```
 
 Expansion ratios are classified into risk tiers:
@@ -385,8 +394,8 @@ The report includes a built-in language-pair expansion reference table (EN→DE 
 `i18ntk-scanner` now supports detecting hardcoded text in multiple source languages beyond English:
 
 ```bash
-i18ntk-scanner --source-dir ./src --source-language de
-i18ntk-scanner --source-dir ./src --source-language ja --output-report
+i18ntk-scanner --code-dir ./src --source-locale de
+i18ntk-scanner --code-dir ./src --source-locale ja --output-report
 ```
 
 Supported language profiles (12+): English, German, French, Spanish, Japanese, Chinese, Russian, Korean, Arabic, Hindi, and more. Each profile includes language-specific character ranges, stopword lists for false-positive filtering, and transliteration rules for key generation.
@@ -396,8 +405,8 @@ Supported language profiles (12+): English, German, French, Spanish, Japanese, C
 `i18ntk-usage` can identify translation keys that are defined but never referenced in source code:
 
 ```bash
-i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup
-i18ntk-usage --source-dir ./src --i18n-dir ./locales --cleanup --dry-run-delete
+i18ntk-usage --code-dir ./src --locales-dir ./locales --cleanup
+i18ntk-usage --code-dir ./src --locales-dir ./locales --cleanup --dry-run-delete
 ```
 
 Each dead key receives a confidence score (0.0–1.0) factoring:
@@ -546,7 +555,7 @@ Example:
 
 ```json
 {
-  "version": "4.5.3",
+  "version": "4.5.4",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "outputDir": "./i18ntk-reports",

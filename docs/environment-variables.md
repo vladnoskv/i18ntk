@@ -1,4 +1,4 @@
-# Environment Variables (v4.3.2)
+# Environment Variables (v4.5.4)
 
 i18ntk uses fixed allowlists for environment variables. Core configuration variables are handled by `utils/env-manager.js`; Auto Translate provider variables are read by the translation provider layer.
 
@@ -27,6 +27,8 @@ i18ntk uses fixed allowlists for environment variables. Core configuration varia
 | `CONTINUOUS_INTEGRATION` | `false` | CI detection |
 | `NO_INTERACTIVE` | `false` | non-interactive detection |
 
+In CI/non-interactive runs, commands skip prompts when any of these are true: `--no-prompt` is passed, `CI=true`, stdin is not a TTY, or stdout is not a TTY. CLI exit codes are `0` for success, `1` for validation/report/runtime failure, and `2` for invalid arguments or missing required setup.
+
 ## Auto Translate Provider Variables
 
 | Variable | Purpose |
@@ -46,7 +48,7 @@ i18ntk uses fixed allowlists for environment variables. Core configuration varia
 I18NTK_SILENT=true I18NTK_OUTDIR=./i18ntk-reports i18ntk --command=validate --no-prompt
 
 # Force scanner framework preference
-I18NTK_FRAMEWORK_PREFERENCE=react i18ntk-scanner --source-dir=./src
+I18NTK_FRAMEWORK_PREFERENCE=react i18ntk-scanner --code-dir=./src
 
 # Runtime override
 I18NTK_RUNTIME_DIR=./locales node app.js

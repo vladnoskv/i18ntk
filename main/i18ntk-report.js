@@ -22,23 +22,32 @@ function parseArgs(argv = process.argv.slice(2)) {
     help: false,
   };
 
-  for (const raw of argv) {
+  for (let i = 0; i < argv.length; i++) {
+    const raw = argv[i];
     const arg = raw === 'report' ? '' : raw;
     if (!arg) continue;
+    const nextValue = () => {
+      if (i + 1 < argv.length && !String(argv[i + 1]).startsWith('--')) {
+        return argv[++i];
+      }
+      return null;
+    };
     if (arg === '--help' || arg === '-h') args.help = true;
     else if (arg === '--json') args.json = true;
     else if (arg === '--markdown' || arg === '--md') args.markdown = true;
     else if (arg === '--html') args.html = true;
     else if (arg.startsWith('--out=')) args.out = arg.slice('--out='.length);
-    else if (arg === '--out') args.expectOut = true;
-    else if (args.expectOut) {
-      args.out = arg;
-      args.expectOut = false;
-    } else if (arg.startsWith('--source-dir=')) args.sourceDir = arg.slice('--source-dir='.length);
+    else if (arg === '--out') args.out = nextValue();
+    else if (arg.startsWith('--source-dir=')) args.sourceDir = arg.slice('--source-dir='.length);
+    else if (arg.startsWith('--code-dir=')) args.sourceDir = arg.slice('--code-dir='.length);
+    else if (arg.startsWith('--source-code-dir=')) args.sourceDir = arg.slice('--source-code-dir='.length);
+    else if (arg === '--source-dir' || arg === '--code-dir' || arg === '--source-code-dir') args.sourceDir = nextValue();
     else if (arg.startsWith('--i18n-dir=')) args.i18nDir = arg.slice('--i18n-dir='.length);
     else if (arg.startsWith('--locales-dir=')) args.i18nDir = arg.slice('--locales-dir='.length);
+    else if (arg === '--i18n-dir' || arg === '--locales-dir') args.i18nDir = nextValue();
     else if (arg.startsWith('--source-language=')) args.sourceLocale = arg.slice('--source-language='.length);
     else if (arg.startsWith('--source-locale=')) args.sourceLocale = arg.slice('--source-locale='.length);
+    else if (arg === '--source-language' || arg === '--source-locale') args.sourceLocale = nextValue();
   }
 
   if (!args.json && !args.markdown && !args.html) {
@@ -107,9 +116,13 @@ Options:
   --markdown                Print/write Markdown report output
   --html                    Print/write HTML report output
   --out <dir>               Write selected report formats into a directory
-  --source-dir=<dir>        Source code directory to scan
-  --i18n-dir=<dir>          Locale directory
-  --source-language=<code>  Source locale code (default: en)
+  --code-dir=<dir>          Source code directory to scan
+  --source-code-dir=<dir>   Alias for --code-dir
+  --source-dir=<dir>        Legacy alias for --code-dir
+  --locales-dir=<dir>       Locale directory
+  --i18n-dir=<dir>          Alias for --locales-dir
+  --source-locale=<code>    Source locale code (default: en)
+  --source-language=<code>  Legacy alias for --source-locale
 `;
 }
 

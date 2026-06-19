@@ -1,4 +1,4 @@
-# Scanner Guide (v4.3.2)
+# Scanner Guide (v4.5.4)
 
 ## Purpose
 
@@ -9,19 +9,20 @@
 Primary CLI:
 
 ```bash
-i18ntk --command=scanner --source-dir=./src
+i18ntk --command=scanner --code-dir=./src
 ```
 
 Standalone binary:
 
 ```bash
-i18ntk-scanner --source-dir=./src
+i18ntk-scanner --code-dir=./src
 ```
 
 ## Common Options
 
-- `--source-dir` source files to scan
-- `--i18n-dir` locale directory (if different)
+- `--code-dir` or `--source-code-dir` source files to scan
+- `--source-dir` legacy alias for source files
+- `--locales-dir` or `--i18n-dir` locale directory (if different)
 - `--output-dir` report output directory
 - `--framework` framework hint (`auto`, `react`, `vue`, `angular`, `vanilla`, etc.)
 - `--exclude` exclude patterns
@@ -32,22 +33,23 @@ i18ntk-scanner --source-dir=./src
 - `--output-report` write report files
 - `--json` JSON terminal output
 - `--no-prompt` non-interactive mode
-- `--source-language` source-language profile for hardcoded text detection
+- `--source-locale` source-language profile for hardcoded text detection
+- `--source-language` legacy alias for `--source-locale`
 
 ## Practical Examples
 
 ```bash
 # Basic scan
-i18ntk-scanner --source-dir=./src --i18n-dir=./locales
+i18ntk-scanner --code-dir=./src --locales-dir=./locales
 
 # CI-friendly scan
-i18ntk-scanner --source-dir=./src --output-report --json --no-prompt
+i18ntk-scanner --code-dir=./src --output-report --json --no-prompt
 
 # Tuned scan for false-positive reduction
-i18ntk-scanner --source-dir=./src --exclude="*.test.js" --min-length=4 --max-length=80
+i18ntk-scanner --code-dir=./src --exclude="*.test.js" --min-length=4 --max-length=80
 
 # Scan source text in another language
-i18ntk-scanner --source-dir=./src --source-language=de --output-report
+i18ntk-scanner --code-dir=./src --source-locale=de --output-report
 ```
 
 ## Recommended Workflow
@@ -60,6 +62,6 @@ i18ntk-scanner --source-dir=./src --source-language=de --output-report
 
 ## Troubleshooting
 
-- If no files are scanned, confirm `--source-dir` path.
+- If no files are scanned, confirm the `--code-dir` path.
 - If output is noisy, increase `--min-length` and add `--exclude` patterns.
 - If framework detection is incorrect, set `--framework` explicitly.

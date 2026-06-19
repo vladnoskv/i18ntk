@@ -46,6 +46,7 @@ const JsonOutput = require('../utils/json-output');
 const SetupEnforcer = require('../utils/setup-enforcer');
 const { resolveUsageSourceDir } = require('../utils/usage-source');
 const { analyzeSourceForUsageInsights } = require('../utils/usage-insights');
+const { isInteractive } = require('../utils/prompt-helper');
 
 // Ensure setup is complete before running
 (async () => {
@@ -208,8 +209,9 @@ class I18nUsageAnalyzer {
   // Normalize CLI arguments to handle both camelCase and hyphenated flags
   normalizeArgs(a) {
     return {
-      sourceDir: a.sourceDir ?? a['source-dir'],
-      i18nDir: a.i18nDir ?? a['i18n-dir'],
+      sourceDir: a.sourceDir ?? a['source-dir'] ?? a['code-dir'] ?? a['source-code-dir'],
+      i18nDir: a.i18nDir ?? a['i18n-dir'] ?? a['locales-dir'],
+      sourceLanguage: a.sourceLanguage ?? a['source-language'] ?? a['source-locale'],
       outputReport: a.outputReport ?? a['output-report'],
       outputDir: a.outputDir ?? a['output-dir'],
       uiLanguage: a.uiLanguage ?? a['ui-language'],
@@ -231,9 +233,16 @@ class I18nUsageAnalyzer {
     const args = process.argv.slice(2);
     const parsed = {};
     
-    for (const arg of args) {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
       if (arg.startsWith('--')) {
-        const [key, value] = arg.substring(2).split('=');
+        let [key, value] = arg.substring(2).split('=');
+        if (value === undefined && args[i + 1] && !args[i + 1].startsWith('-')) {
+          value = args[++i];
+        }
+        if (key === 'code-dir' || key === 'source-code-dir') key = 'source-dir';
+        if (key === 'locales-dir') key = 'i18n-dir';
+        if (key === 'source-locale') key = 'source-language';
         if (value !== undefined) {
           parsed[key] = value;
         } else {
@@ -518,6 +527,10 @@ class I18nUsageAnalyzer {
         this.i18nDir = path.resolve(args.i18nDir);
         this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
       }
+      if (args.sourceLanguage) {
+        this.config.sourceLanguage = args.sourceLanguage;
+        this.sourceLanguageDir = path.join(this.i18nDir, this.config.sourceLanguage);
+      }
       
       if (this.sourceDir || this.i18nDir) {
         await configManager.updateConfig({
@@ -722,7 +735,7 @@ class I18nUsageAnalyzer {
       
       console.log('\n' + t('usage.analysisCompletedSuccessfully'));
     
-      if (require.main === module && !args.noPrompt) {
+      if (require.main === module && isInteractive(args)) {
         await this.prompt('\nPress Enter to continue...');
       }
       this.closeReadline();

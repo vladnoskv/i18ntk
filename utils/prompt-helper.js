@@ -7,7 +7,7 @@ function isInteractive(opts={}) {
     envManager.get('npm_config_loglevel') === 'silent';
   if (opts.noPrompt) return false;
   if (envSilent) return false;
-  return process.stdin.isTTY === true;
+  return process.stdin.isTTY === true && process.stdout.isTTY === true;
 }
 
 class NoopPrompt {

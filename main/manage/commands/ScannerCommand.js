@@ -123,6 +123,8 @@ class ScannerCommand {
 
                 switch (key) {
                     case 'source-dir':
+                    case 'code-dir':
+                    case 'source-code-dir':
                         parsed.sourceDir = value || '';
                         break;
                     case 'framework':
@@ -148,6 +150,10 @@ class ScannerCommand {
                         break;
                     case 'include-tests':
                         parsed.includeTests = true;
+                        break;
+                    case 'source-language':
+                    case 'source-locale':
+                        parsed.sourceLanguage = value || '';
                         break;
                     case 'help':
                     case 'h':
