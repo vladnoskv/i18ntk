@@ -2,7 +2,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const { getSourceExtensions, getExcludeDirs } = require('./framework-detector');
 const SecurityUtils = require('./security');
+
+const EXCLUDE_DIRS = new Set(getExcludeDirs());
+const SOURCE_EXTENSIONS = getSourceExtensions();
 
 const ISSUE_TYPES = new Set([
   'missing_key',
@@ -265,7 +269,7 @@ function discoverLocaleFiles(localesDir) {
 function walk(dir, extensions, acc = [], basePath = process.cwd()) {
   if (!SecurityUtils.safeExistsSync(dir, basePath)) return acc;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (['node_modules', '.git', 'dist', 'build', 'coverage', 'out', 'tmp', 'temp', 'test', 'tests', 'test_env', 'i18ntk-reports'].includes(entry.name)) continue;
+    if (EXCLUDE_DIRS.has(entry.name)) continue;
     const entryPath = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(entryPath, extensions, acc, basePath);
     else if (entry.isFile() && extensions.includes(path.extname(entry.name))) acc.push(entryPath);
@@ -290,7 +294,7 @@ function scanSourceFiles(sourceDir, availableKeys) {
   const hardcodedTexts = [];
   const translationValueIndex = new Map();
   const basePath = path.resolve(sourceDir);
-  const files = walk(sourceDir, ['.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'], [], basePath);
+  const files = walk(sourceDir, SOURCE_EXTENSIONS, [], basePath);
 
   for (const file of files) {
     const content = SecurityUtils.safeReadFileSync(file, basePath, 'utf8');
@@ -339,7 +343,13 @@ function findKeyByValue(_text, _availableKeys) {
 function extractPlaceholders(value) {
   const placeholders = new Set();
   const text = String(value || '');
-  const patterns = [/\{\{\s*([\w.-]+)\s*\}\}/g, /%\{([\w.-]+)\}/g, /\{([\w.-]+)\}/g];
+  const patterns = [
+    /\{\{\s*([\w.-]+)\s*\}\}/g,
+    /%\{([\w.-]+)\}/g,
+    /\{([\w.-]+)\}/g,
+    /\$\{([\w.-]+)\}/g,
+    /\$([a-zA-Z_][a-zA-Z0-9_-]+)/g
+  ];
   for (const pattern of patterns) {
     let match;
     while ((match = pattern.exec(text))) placeholders.add(match[1]);
@@ -356,7 +366,10 @@ function looksLikelyUntranslated(source, target, locale) {
 }
 
 function normalizeText(value) {
-  return String(value || '').replace(/\{\{[^}]+\}\}|\{[^}]+\}|%\{[^}]+\}/g, '').trim().toLowerCase();
+  return String(value || '')
+    .replace(/\{\{[^}]+\}\}|\{[^}]+\}|%\{[^}]+\}/g, '')
+    .replace(/\$[a-zA-Z_][a-zA-Z0-9_-]*(?:\s*\{\s*[^}]+\})?/g, '')
+    .trim().toLowerCase();
 }
 
 function getExpansionPercent(source, target) {

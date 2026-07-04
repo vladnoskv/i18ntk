@@ -15,7 +15,16 @@ const FRAMEWORK_COMPATIBILITY = {
   'python': { minVersion: '3.6.0' },
   'ruby': { minVersion: '2.7.0' },
   'ruby-on-rails': { minVersion: '6.0.0' },
-  'go': { minVersion: '1.16.0' }
+  'go': { minVersion: '1.16.0' },
+  'rust': { minVersion: '1.65.0' },
+  'fluent': { minVersion: '0.16.0' },
+  'remix': { minVersion: '1.0.0' },
+  'gatsby': { minVersion: '4.0.0' },
+  'astro': { minVersion: '2.0.0' },
+  'qwik': { minVersion: '1.0.0' },
+  'ember-intl': { minVersion: '5.0.0' },
+  'react-native-localize': { minVersion: '2.0.0' },
+  'ionic': { minVersion: '6.0.0' }
 };
 
 // Define framework detection in order of specificity
@@ -275,6 +284,27 @@ const FRAMEWORKS = {
     ]
   },
 
+  rust: {
+    name: 'rust',
+    deps: ['fluent', 'fluent-bundle', 'fluent-resmgr', 'fluent-rs', 'intl-memoizer', 'unic-langid'],
+    globs: ['**/*.rs'],
+    patterns: [
+      /\bLocalization::new\(\s*&\[\s*([^\]]+)\s*\],\s*&\[\s*([^\]]+)\s*\]\)/g,
+      /bundle\.get_message\(\s*["`]([^"`]+)["`]/g,
+      /\.get_message\s*\(\s*["`]([^"`]+)["`]/g,
+      /\bformat!\s*\(\s*["`]([^"`]+)["`]/g
+    ],
+    ignore: [
+      'target/**',
+      '**/*_test.rs',
+      '**/test/**',
+      '**/tests/**',
+      '**/examples/**',
+      '**/benches/**',
+      '**/migrations/**'
+    ]
+  },
+
   'ngx-translate': {
     name: 'Angular ngx-translate',
     deps: ['@ngx-translate/core', '@ngx-translate/http-loader'],
@@ -322,8 +352,286 @@ const FRAMEWORKS = {
       /\buseI18n\(\s*\)\s*\.\s*t\(\s*['"`]([^'"`]+)['"`]/g,
       /\bt\(\s*['"`]([^'"`]+)['"`]/g
     ]
+  },
+
+  remix: {
+    name: 'Remix i18n',
+    deps: ['remix-i18next', 'i18next-remix', '@remix-run/react'],
+    globs: ['app/**/*.{js,jsx,ts,tsx}'],
+    patterns: [
+      /\buseTranslation\(\s*['"`][^'"`]*['"`]?\s*\)/g,
+      /\bt\(\s*['"`]([^'"`]+)['"`]/g,
+      /\bgetServerSideTranslations\(/g
+    ]
+  },
+
+  gatsby: {
+    name: 'Gatsby i18n',
+    deps: ['gatsby-plugin-react-i18next', '@herob191/gatsby-plugin-react-i18next', 'gatsby-plugin-intl', 'gatsby-theme-i18n'],
+    globs: ['src/**/*.{js,jsx,ts,tsx}'],
+    patterns: [
+      /\bt\(\s*['"`]([^'"`]+)['"`]/g,
+      /\buseTranslation\(\s*['"`][^'"`]*['"`]?\s*\)/g,
+      /\bgraphql\s*`[^`]*locales[^`]*`/g
+    ]
+  },
+
+  astro: {
+    name: 'Astro i18n',
+    deps: ['astro-i18next', '@astrojs/i18n', 'astro-i18n', '@inox-tools/astro-i18n'],
+    globs: ['src/**/*.{astro,js,jsx,ts,tsx}'],
+    patterns: [
+      /\bt\(\s*['"`]([^'"`]+)['"`]/g,
+      /\bAstro\.i18n\(\s*['"`]([^'"`]+)['"`]/g,
+      /\buseTranslations\(\s*['"`][^'"`]*['"`]?\s*\)/g
+    ]
+  },
+
+  qwik: {
+    name: 'Qwik i18n',
+    deps: ['qwik-speak', 'qwik-i18n', '@qwikdev/i18n'],
+    globs: ['src/**/*.{tsx,ts,jsx,js}'],
+    patterns: [
+      /\buseTranslate\(\s*\)/g,
+      /\bt\(\s*['"`]([^'"`]+)['"`]/g,
+      /\buseSpeak\(\s*\)/g
+    ]
+  },
+
+  'ember-intl': {
+    name: 'Ember Intl',
+    deps: ['ember-intl', '@ember-intl/formatjs'],
+    globs: ['app/**/*.{js,ts,hbs}'],
+    patterns: [
+      /\bintl\.t\(\s*['"`]([^'"`]+)['"`]/g,
+      /\{\{\s*t\s+['"`]([^'"`]+)['"`]\s*\}\}/g,
+      /\{\{t\s+['"`]([^'"`]+)['"`]\s*\}\}/g
+    ]
+  },
+
+  'react-native-localize': {
+    name: 'React Native Localize',
+    deps: ['react-native-localize', 'i18n-js', 'expo-localization'],
+    globs: ['**/*.{js,jsx,ts,tsx}'],
+    patterns: [
+      /\bi18n\.t\(\s*['"`]([^'"`]+)['"`]/g,
+      /\bt\(\s*['"`]([^'"`]+)['"`]/g,
+      /\btranslate\(\s*['"`]([^'"`]+)['"`]/g
+    ]
+  },
+
+  ionic: {
+    name: 'Ionic i18n',
+    deps: ['@ionic/angular', 'ionic-react', '@ionic/vue'],
+    globs: ['src/**/*.{ts,tsx,html}'],
+    patterns: [
+      /\btranslateService\.instant\(\s*['"`]([^'"`]+)['"`]/g,
+      /\btranslateService\.get\(\s*['"`]([^'"`]+)['"`]/g,
+      /\|\s*translate\s*[^}]*\}\}/g
+    ]
   }
 };
+
+// ============================================================
+// CENTRALIZED SHARED CONSTANTS — single source of truth
+// All scanner/validator/extension code imports from here.
+// ============================================================
+
+const SOURCE_EXTENSIONS = new Set([
+  '.js', '.jsx', '.ts', '.tsx', '.mjs', '.mts', '.cjs', '.cts',
+  '.vue', '.svelte', '.astro', '.mdx', '.html', '.rs',
+  '.py', '.pyx', '.pyi', '.go', '.rb', '.java', '.php', '.hbs'
+]);
+
+const SCANNER_EXTENSIONS = new Set([
+  '.js', '.jsx', '.ts', '.tsx', '.mjs', '.mts', '.cjs', '.cts',
+  '.vue', '.html', '.svelte', '.astro', '.mdx',
+  '.py', '.pyx', '.pyi', '.php', '.rb', '.go', '.rs', '.java'
+]);
+
+const EXCLUDE_DIRS = new Set([
+  'node_modules', '.git', '.hg', '.svn',
+  '.next', '.nuxt', '.output', '.astro', '.svelte-kit', '.cache', '__generated__',
+  'dist', 'build', 'coverage', 'out', 'target',
+  'vendor', 'tmp', 'temp', '.terraform'
+]);
+
+const SOURCE_DIRS = [
+  'src', 'app', 'lib', 'source', 'pages', 'routes', 'components',
+  'layouts', 'api', 'content', 'modules', 'views'
+];
+
+const FRAMEWORK_PATTERNS = {
+  react: [
+    /children:\s*["']([^"']{2,99})["']/g,
+    /dangerouslySetInnerHTML={{\s*__html:\s*["']([^"']{2,99})["']/g,
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /<span[^>]*>([^<]{2,99})<\/span>/g,
+    /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  next: [
+    /children:\s*["']([^"']{2,99})["']/g,
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  vue: [
+    /v-text=["']([^"']{2,99})["']/g,
+    /v-html=["']([^"']{2,99})["']/g,
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /<span[^>]*>([^<]{2,99})<\/span>/g,
+    /\$t\(["']([^"']{2,99})["']\)/g,
+    /v-t=["']([^"']{2,99})["']/g
+  ],
+  angular: [
+    /\[innerHTML\]=["']([^"']{2,99})["']/g,
+    /\[textContent\]=["']([^"']{2,99})["']/g,
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /<span[^>]*>([^<]{2,99})<\/span>/g,
+    /i18n=["']([^"']{2,99})["']/g,
+    /\[attr\.title\]=["']([^"']{2,99})["']/g
+  ],
+  svelte: [
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /\$_\(["']([^"']{2,99})["']\)/g,
+    /t\.set\(["']([^"']{2,99})["']/g,
+    /\{#if[^}]*\}([^<]{2,99})\{\/if\}/g
+  ],
+  astro: [
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /t\(["']([^"']{2,99})["']\)/g
+  ],
+  remix: [
+    /children:\s*["']([^"']{2,99})["']/g,
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  qwik: [
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /t\(["']([^"']{2,99})["']\)/g,
+    /useTranslate\(\)/g
+  ],
+  solid: [
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /t\(["']([^"']{2,99})["']\)/g,
+    /useI18n\(\)\.t\(["']([^"']{2,99})["']\)/g
+  ],
+  ember: [
+    />([^<{][^<>{]*[^}>])</g,
+    /\{\{t\s+["']([^"']{2,99})["']\s*\}\}/g,
+    /\{\{intl\.t\s+["']([^"']{2,99})["']\s*\}\}/g
+  ],
+  gatsby: [
+    /children:\s*["']([^"']{2,99})["']/g,
+    />([^<{][^<>{]*[^}>])</g,
+    /<(?:Trans)[\s\S]*?\bi18nKey\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  django: [
+    /\{\%\s*trans\s+["']([^"']{2,99})["']\s*%\}/g,
+    /\{\%\s*blocktrans\s*%\}([^%]{2,99})\{\%\s*endblocktrans\s*%\}/g,
+    /{{\s*_["']([^"']{2,99})["']\s*}}/g,
+    /{{\s*gettext\(["']([^"']{2,99})["']\)\s*}}/g
+  ],
+  flask: [
+    /\{\{\s*_["']([^"']{2,99})["']\s*}}/g,
+    /\{\{\s*gettext\(["']([^"']{2,99})["']\)\s*}}/g,
+    /\{\{\s*lazy_gettext\(["']([^"']{2,99})["']\)\s*}}/g
+  ],
+  python: [
+    /gettext\(["']([^"']{2,99})["']\)/g,
+    /_\(["']([^"']{2,99})["']\)/g,
+    /gettext_lazy\(["']([^"']{2,99})["']\)/g,
+    /lazy_gettext\(["']([^"']{2,99})["']\)/g
+  ],
+  rust: [
+    /bundle\.get_message\(\s*["']([^"']{2,99})["']\)/g,
+    /\.get_message\s*\(\s*["']([^"']{2,99})["']\)/g,
+    /ts!\s*\(\s*["']([^"']{2,99})["']/g,
+    /fluent!\s*\(\s*["']([^"']{2,99})["']/g
+  ],
+  go: [
+    /i18n\.Translate\([^,]+,\s*["']([^"']{2,99})["']\)/g,
+    /i18n\.NewMessage\([^,]+,\s*["']([^"']{2,99})["']\)/g,
+    /t\.Get\([^,]+,\s*["']([^"']{2,99})["']\)/g
+  ],
+  vanilla: [
+    /t\(["']([^"']{2,99})["']\)/g,
+    /i18n\.t\(["']([^"']{2,99})["']\)/g,
+    /translate\(["']([^"']{2,99})["']\)/g
+  ]
+};
+
+const FRAMEWORK_SUGGESTIONS = {
+  react: { hook: 'const { t } = useTranslation();', usage: "{t('ui.KEY')}", component: "<Trans i18nKey=\"ui.KEY\">text</Trans>" },
+  next: { hook: 'const t = useTranslations();', usage: "{t('ui.KEY')}", component: "<Trans i18nKey=\"ui.KEY\">text</Trans>" },
+  vue: { directive: "{{ $t('ui.KEY') }}", method: "this.$t('ui.KEY')" },
+  angular: { pipe: "{{ 'text' | translate }}", service: "this.translateService.instant('ui.KEY')" },
+  svelte: { store: "$_(('ui.KEY'))", method: "t.set('ui.KEY', 'text')" },
+  astro: { import: "import { t } from 'astro-i18next';", usage: "{t('ui.KEY')}" },
+  remix: { hook: 'const { t } = useTranslation();', usage: "{t('ui.KEY')}", server: 'export const handle = i18next.handle;' },
+  qwik: { hook: 'const t = useTranslate();', usage: "{t('ui.KEY')}" },
+  solid: { hook: 'const [t] = useI18n();', usage: "{t('ui.KEY')}" },
+  ember: { template: "{{t 'ui.KEY'}}", helper: "this.intl.t('ui.KEY')" },
+  gatsby: { hook: 'const { t } = useTranslation();', usage: "{t('ui.KEY')}", plugin: "'gatsby-plugin-react-i18next'" },
+  django: { template: "{% trans 'text' %}", python: "from django.utils.translation import gettext as _\n_('text')", model: "from django.utils.translation import gettext_lazy as _\n_('text')" },
+  flask: { template: "{{ _('text') }}", python: "from flask_babel import gettext as _\n_('text')", lazy: "from flask_babel import lazy_gettext as _\n_('text')" },
+  python: { gettext: "import gettext\ngettext.gettext('text')", underscore: "from gettext import gettext as _\n_('text')", lazy: "from gettext import gettext_lazy as _\n_('text')" },
+  rust: { fluent: 'bundle.get_message("ui_KEY")', gettext: 'gettext("ui_KEY")' },
+  go: { translate: 'i18n.Translate("ui_KEY")', message: 'i18n.NewMessage("ui_KEY")' },
+  vanilla: { generic: "t('ui.KEY')" }
+};
+
+const WRAPPER_SKIP_PATTERNS = [
+  't(', 'tx(', 'i18n.t(', 'i18n.translate(', 'translate(',
+  'useI18n(', 'useTranslation(', '__', '__t', '$_(', '$t(',
+  'gettext(', 'gettext_lazy(', 'lazy_gettext(', 'pgettext(', 'ngettext('
+];
+
+function _keySnippet(text) {
+  return String(text || '').toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, '_')
+    .substring(0, 40);
+}
+
+function getFrameworkPatterns(framework) {
+  const base = [
+    /(?<![\w])["'`]([^"'`]{2,99})["'`]/g,
+    /`([^`]{2,99})`/g,
+    />([^<]{2,99})</g,
+    /title=["']([^"']{2,99})["']/g,
+    /alt=["']([^"']{2,99})["']/g,
+    /placeholder=["']([^"']{2,99})["']/g
+  ];
+  return [...base, ...(FRAMEWORK_PATTERNS[framework] || FRAMEWORK_PATTERNS.vanilla || [])];
+}
+
+function getFrameworkSuggestions(framework, text) {
+  const template = FRAMEWORK_SUGGESTIONS[framework] || FRAMEWORK_SUGGESTIONS.vanilla || {};
+  const result = {};
+  for (const [k, v] of Object.entries(template)) {
+    result[k] = v.replace(/ui\.KEY/g, `ui.${_keySnippet(text)}`).replace(/\btext\b/g, text);
+  }
+  return result;
+}
+
+function getSourceExtensions() { return [...SOURCE_EXTENSIONS]; }
+
+function getExcludeDirs() { return [...EXCLUDE_DIRS]; }
+
+function detectProjectFramework(projectRoot) {
+  const detected = detectFramework(projectRoot);
+  if (detected && detected.id) return detected.id;
+  return 'vanilla';
+}
 
 /**
  * Detects the i18n framework being used in the project
@@ -414,4 +722,7 @@ function detectFramework(projectRoot) {
   }
 }
 
-module.exports = { detectFramework, FRAMEWORKS };
+module.exports = { detectFramework, FRAMEWORKS, FRAMEWORK_COMPATIBILITY,
+  SOURCE_EXTENSIONS, SCANNER_EXTENSIONS, EXCLUDE_DIRS, SOURCE_DIRS,
+  FRAMEWORK_PATTERNS, FRAMEWORK_SUGGESTIONS, WRAPPER_SKIP_PATTERNS,
+  getFrameworkPatterns, getFrameworkSuggestions, getSourceExtensions, getExcludeDirs, detectProjectFramework };

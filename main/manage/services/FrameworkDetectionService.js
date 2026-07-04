@@ -40,6 +40,7 @@ module.exports = class FrameworkDetectionService {
     const goModPath = path.join(process.cwd(), 'go.mod');
     const pomPath = path.join(process.cwd(), 'pom.xml');
     const composerPath = path.join(process.cwd(), 'composer.json');
+    const cargoTomlPath = path.join(process.cwd(), 'Cargo.toml');
 
     let detectedLanguage = 'generic';
     let detectedFramework = 'generic';
@@ -89,12 +90,21 @@ module.exports = class FrameworkDetectionService {
 
         // Only check other frameworks if i18ntk-runtime wasn't detected
         if (detectedFramework !== 'i18ntk-runtime') {
-          if (deps.react || deps['react-dom']) detectedFramework = 'react';
-          else if (deps.vue || deps['vue-router']) detectedFramework = 'vue';
+          if (deps.next || deps['next-intl'] || deps['next-i18next']) detectedFramework = 'nextjs';
+          else if (deps.react || deps['react-dom']) detectedFramework = 'react';
           else if (deps['@angular/core']) detectedFramework = 'angular';
-          else if (deps.next) detectedFramework = 'nextjs';
-          else if (deps.nuxt) detectedFramework = 'nuxt';
+          else if (deps.vue || deps['vue-router']) detectedFramework = 'vue';
+          else if (deps.nuxt || deps['@nuxtjs/i18n']) detectedFramework = 'nuxt';
           else if (deps.svelte) detectedFramework = 'svelte';
+          else if (deps.astro || deps['astro-i18next'] || deps['@astrojs/i18n']) detectedFramework = 'astro';
+          else if (deps['@builder.io/qwik'] || deps['qwik-speak'] || deps['qwik-i18n']) detectedFramework = 'qwik';
+          else if (deps.gatsby || deps['gatsby-plugin-react-i18next'] || deps['gatsby-plugin-intl']) detectedFramework = 'gatsby';
+          else if (deps['@remix-run/react'] || deps['remix-i18next'] || deps['i18next-remix']) detectedFramework = 'remix';
+          else if (deps['solid-js'] || deps['@solid-primitives/i18n']) detectedFramework = 'solid';
+          else if (deps['ember-source'] || deps['ember-intl']) detectedFramework = 'ember';
+          else if (deps['react-native'] || deps['react-native-localize']) detectedFramework = 'react-native';
+          else if (deps['expo-localization'] || deps.expo) detectedFramework = 'expo';
+          else if (deps['@ionic/angular'] || deps['ionic-react'] || deps['@ionic/vue']) detectedFramework = 'ionic';
           else detectedFramework = 'generic';
         }
       } catch (error) {
@@ -140,6 +150,16 @@ module.exports = class FrameworkDetectionService {
       } catch (error) {
         detectedFramework = 'generic';
       }
+    } else if (SecurityUtils.safeExistsSync(cargoTomlPath)) {
+      detectedLanguage = 'rust';
+      try {
+        const cargoContent = SecurityUtils.safeReadFileSync(cargoTomlPath, path.dirname(cargoTomlPath), 'utf8');
+        if (cargoContent.includes('fluent') || cargoContent.includes('fluent-rs')) detectedFramework = 'fluent';
+        else if (cargoContent.includes('gettext')) detectedFramework = 'gettext-rs';
+        else detectedFramework = 'generic';
+      } catch (error) {
+        detectedFramework = 'generic';
+      }
     }
 
     return { detectedLanguage, detectedFramework };
@@ -155,13 +175,27 @@ module.exports = class FrameworkDetectionService {
       javascript: [
         { name: 'i18next', description: 'Feature-rich i18n framework for JavaScript' },
         { name: 'react-i18next', description: 'React integration for i18next' },
+        { name: 'next-intl', description: 'Next.js i18n integration' },
+        { name: 'remix-i18next', description: 'Remix i18n integration' },
+        { name: 'gatsby-plugin-react-i18next', description: 'Gatsby i18n integration' },
         { name: 'vue-i18n', description: 'Vue.js i18n plugin' },
-        { name: 'Angular i18n', description: 'Built-in Angular i18n' }
+        { name: 'Angular i18n', description: 'Built-in Angular i18n' },
+        { name: 'svelte-i18n', description: 'Svelte i18n library' },
+        { name: 'astro-i18next', description: 'Astro i18n integration' },
+        { name: 'qwik-speak', description: 'Qwik i18n library' },
+        { name: 'solid-i18n', description: 'SolidJS i18n library' },
+        { name: 'ember-intl', description: 'Ember i18n library' },
+        { name: 'react-native-localize', description: 'React Native localization' },
+        { name: 'ionic-angular', description: 'Ionic i18n support' }
       ],
       typescript: [
         { name: 'i18next', description: 'TypeScript-first i18n framework' },
         { name: 'react-i18next', description: 'React + TypeScript integration' },
-        { name: 'vue-i18n', description: 'Vue.js i18n with TypeScript support' }
+        { name: 'next-intl', description: 'Next.js + TypeScript i18n' },
+        { name: 'vue-i18n', description: 'Vue.js i18n with TypeScript support' },
+        { name: 'angular i18n', description: 'Angular i18n with TypeScript' },
+        { name: 'astro-i18next', description: 'Astro i18n with TypeScript' },
+        { name: 'qwik-speak', description: 'Qwik i18n with TypeScript' }
       ],
       python: [
         { name: 'Django i18n', description: 'Built-in Django internationalization' },
@@ -176,6 +210,11 @@ module.exports = class FrameworkDetectionService {
       go: [
         { name: 'go-i18n', description: 'Go i18n library with pluralization' },
         { name: 'nicksnyder/go-i18n', description: 'Feature-rich Go i18n' }
+      ],
+      rust: [
+        { name: 'fluent', description: 'Project Fluent localization for Rust' },
+        { name: 'fluent-rs', description: 'Rust implementation of Project Fluent' },
+        { name: 'gettext-rs', description: 'GNU gettext bindings for Rust' }
       ],
       php: [
         { name: 'Laravel i18n', description: 'Built-in Laravel localization' },
@@ -335,13 +374,32 @@ module.exports = class FrameworkDetectionService {
 
       const i18nFrameworks = [
         'react-i18next',
+        'next-intl',
+        'next-i18next',
+        'remix-i18next',
+        'i18next-remix',
+        'gatsby-plugin-react-i18next',
+        'gatsby-plugin-intl',
         'vue-i18n',
         'angular-i18n',
         'i18next',
-        'next-i18next',
         'svelte-i18n',
+        'sveltekit-i18n',
+        'astro-i18next',
+        '@astrojs/i18n',
+        'qwik-speak',
+        'qwik-i18n',
+        '@solid-primitives/i18n',
+        'ember-intl',
+        'react-native-localize',
+        'expo-localization',
+        '@ngx-translate/core',
+        '@ionic/angular',
         '@nuxtjs/i18n',
-        'i18ntk-runtime'
+        'formatjs',
+        '@lingui/core',
+        'i18ntk-runtime',
+        'i18ntk/runtime'
       ];
 
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);

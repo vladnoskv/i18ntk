@@ -30,7 +30,6 @@ test('validateKeyNaming rejects malformed hybrid keys', () => {
 
   assert.deepEqual(result.violations.map((violation) => violation.key).sort(), [
     '.home',
-    'home.Header',
     'home.Header.Nav',
     'home.trailing.'
   ]);

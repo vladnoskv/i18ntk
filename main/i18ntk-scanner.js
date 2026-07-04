@@ -22,6 +22,7 @@ const { getUnifiedConfig, displayHelp } = require('../utils/config-helper');
 const { loadTranslations } = require('../utils/i18n-helper');
 const SecurityUtils = require('../utils/security');
 const SetupEnforcer = require('../utils/setup-enforcer');
+const { detectProjectFramework, getFrameworkPatterns, getFrameworkSuggestions, SCANNER_EXTENSIONS, WRAPPER_SKIP_PATTERNS, getExcludeDirs } = require('../utils/framework-detector');
 
 // Ensure setup is complete before running
 (async () => {
@@ -225,11 +226,26 @@ class I18nTextScanner {
       const packageJson = SecurityUtils.safeParseJSON(packageJsonContent);
       const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
+      if (deps.next || deps['next-intl'] || deps['next-i18next']) return 'next';
       if (deps.react || deps['react-dom']) return 'react';
       if (deps.vue || deps['vue-router']) return 'vue';
       if (deps['@angular/core'] || deps.angular) return 'angular';
-      if (deps.next) return 'next';
       if (deps.svelte) return 'svelte';
+      if (deps.astro || deps['astro-i18next'] || deps['@astrojs/i18n']) return 'astro';
+      if (deps['@remix-run/react'] || deps['remix-i18next']) return 'remix';
+      if (deps.gatsby || deps['gatsby-plugin-react-i18next']) return 'gatsby';
+      if (deps['@builder.io/qwik'] || deps['qwik-speak']) return 'qwik';
+      if (deps['solid-js'] || deps['@solid-primitives/i18n']) return 'solid';
+      if (deps['ember-source'] || deps['ember-intl']) return 'ember';
+      if (deps.nuxt || deps['@nuxtjs/i18n']) return 'nuxt';
+
+      // Check for Rust project
+      const cargoTomlPath = path.join(projectRoot, 'Cargo.toml');
+      if (SecurityUtils.safeExistsSync(cargoTomlPath, projectRoot)) return 'rust';
+
+      // Check for Go project
+      const goModPath = path.join(projectRoot, 'go.mod');
+      if (SecurityUtils.safeExistsSync(goModPath, projectRoot)) return 'go';
 
       return 'vanilla';
     } catch (error) {
@@ -255,57 +271,110 @@ class I18nTextScanner {
 
     const frameworkSpecific = {
       react: [
-        // React specific patterns - enhanced for i18next detection
         /children:\s*["']([^"']{2,99})["']/g,
         /dangerouslySetInnerHTML={{\s*__html:\s*["']([^"']{2,99})["']/g,
-        // JSX text content without translation
         />([^<{][^<>{]*[^}>])</g,
-        // Button text
         /<button[^>]*>([^<]{2,99})<\/button>/g,
-        // Span text
-        /<span[^>]*>([^<]{2,99})<\/span>/g
+        /<span[^>]*>([^<]{2,99})<\/span>/g,
+        /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g,
+        /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*\{[']\s*([^'}]+\.[^'}]+)\s*[']/g
       ],
       vue: [
-        // Vue specific patterns - enhanced for vue-i18n detection
         /v-text=["']([^"']{2,99})["']/g,
         /v-html=["']([^"']{2,99})["']/g,
-        // Vue template text
         />([^<{][^<>{]*[^}>])</g,
-        // Button text
         /<button[^>]*>([^<]{2,99})<\/button>/g,
-        // Span text
-        /<span[^>]*>([^<]{2,99})<\/span>/g
+        /<span[^>]*>([^<]{2,99})<\/span>/g,
+        /\$t\(["']([^"']{2,99})["']\)/g,
+        /v-t=["']([^"']{2,99})["']/g
       ],
       angular: [
-        // Angular specific patterns - enhanced for ngx-translate detection
         /\[innerHTML\]=["']([^"']{2,99})["']/g,
         /\[textContent\]=["']([^"']{2,99})["']/g,
-        // Angular template text
         />([^<{][^<>{]*[^}>])</g,
-        // Button text
         /<button[^>]*>([^<]{2,99})<\/button>/g,
-        // Span text
-        /<span[^>]*>([^<]{2,99})<\/span>/g
+        /<span[^>]*>([^<]{2,99})<\/span>/g,
+        /i18n=["']([^"']{2,99})["']/g,
+        /\[attr\.title\]=["']([^"']{2,99})["']/g
+      ],
+      next: [
+        /children:\s*["']([^"']{2,99})["']/g,
+        />([^<{][^<>{]*[^}>])</g,
+        /<button[^>]*>([^<]{2,99})<\/button>/g,
+        /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+      ],
+      svelte: [
+        />([^<{][^<>{]*[^}>])</g,
+        /<button[^>]*>([^<]{2,99})<\/button>/g,
+        /\$_\(["']([^"']{2,99})["']\)/g,
+        /t\.set\(["']([^"']{2,99})["']/g,
+        /\{#if[^}]*\}([^<]{2,99})\{\/if\}/g
+      ],
+      astro: [
+        />([^<{][^<>{]*[^}>])</g,
+        /<button[^>]*>([^<]{2,99})<\/button>/g,
+        /t\(["']([^"']{2,99})["']\)/g
+      ],
+      remix: [
+        /children:\s*["']([^"']{2,99})["']/g,
+        />([^<{][^<>{]*[^}>])</g,
+        /<button[^>]*>([^<]{2,99})<\/button>/g,
+        /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+      ],
+      qwik: [
+        />([^<{][^<>{]*[^}>])</g,
+        /<button[^>]*>([^<]{2,99})<\/button>/g,
+        /t\(["']([^"']{2,99})["']\)/g,
+        /useTranslate\(\)/g
+      ],
+      solid: [
+        />([^<{][^<>{]*[^}>])</g,
+        /<button[^>]*>([^<]{2,99})<\/button>/g,
+        /t\(["']([^"']{2,99})["']\)/g,
+        /useI18n\(\)\.t\(["']([^"']{2,99})["']\)/g
+      ],
+      ember: [
+        />([^<{][^<>{]*[^}>])</g,
+        /\{\{t\s+["']([^"']{2,99})["']\s*\}\}/g,
+        /\{\{intl\.t\s+["']([^"']{2,99})["']\s*\}\}/g
+      ],
+      gatsby: [
+        /children:\s*["']([^"']{2,99})["']/g,
+        />([^<{][^<>{]*[^}>])</g,
+        /<(?:Trans)[\s\S]*?\bi18nKey\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
       ],
       django: [
-        // Django template patterns
         /\{\%\s*trans\s+["']([^"']{2,99})["']\s*%\}/g,
         /\{\%\s*blocktrans\s*%\}([^%]{2,99})\{\%\s*endblocktrans\s*%\}/g,
         /{{\s*_["']([^"']{2,99})["']\s*}}/g,
         /{{\s*gettext\(["']([^"']{2,99})["']\)\s*}}/g
       ],
       flask: [
-        // Flask/Jinja2 template patterns
         /\{\{\s*_["']([^"']{2,99})["']\s*}}/g,
         /\{\{\s*gettext\(["']([^"']{2,99})["']\)\s*}}/g,
         /\{\{\s*lazy_gettext\(["']([^"']{2,99})["']\)\s*}}/g
       ],
       python: [
-        // Python source patterns
         /gettext\(["']([^"']{2,99})["']\)/g,
         /_\(["']([^"']{2,99})["']\)/g,
         /gettext_lazy\(["']([^"']{2,99})["']\)/g,
         /lazy_gettext\(["']([^"']{2,99})["']\)/g
+      ],
+      rust: [
+        /bundle\.get_message\(\s*["']([^"']{2,99})["']\)/g,
+        /\.get_message\s*\(\s*["']([^"']{2,99})["']\)/g,
+        /ts!\s*\(\s*["']([^"']{2,99})["']/g,
+        /fluent!\s*\(\s*["']([^"']{2,99})["']/g
+      ],
+      go: [
+        /i18n\.Translate\([^,]+,\s*["']([^"']{2,99})["']\)/g,
+        /i18n\.NewMessage\([^,]+,\s*["']([^"']{2,99})["']\)/g,
+        /t\.Get\([^,]+,\s*["']([^"']{2,99})["']\)/g
+      ],
+      vanilla: [
+        /t\(["']([^"']{2,99})["']\)/g,
+        /i18n\.t\(["']([^"']{2,99})["']\)/g,
+        /translate\(["']([^"']{2,99})["']\)/g
       ]
     };
 
@@ -518,7 +587,7 @@ class I18nTextScanner {
       key: `ui.${key}`,
       original: text,
       translationKey: `t('ui.${key}')`,
-      frameworkSpecific: this.getFrameworkSpecific(text)
+      frameworkSpecific: getFrameworkSuggestions(this.framework, text)
     };
   }
 
@@ -526,16 +595,51 @@ class I18nTextScanner {
     const frameworks = {
       react: {
         hook: `const { t } = useTranslation();`,
-        usage: `{t('ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}')}`,
-        component: `<Trans i18nKey="ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}">${text}</Trans>`
+        usage: `{t('ui.${this._keySnippet(text)}')}`,
+        component: `<Trans i18nKey="ui.${this._keySnippet(text)}">${text}</Trans>`
+      },
+      next: {
+        hook: `const t = useTranslations();`,
+        usage: `{t('ui.${this._keySnippet(text)}')}`,
+        component: `<Trans i18nKey="ui.${this._keySnippet(text)}">${text}</Trans>`
       },
       vue: {
-        directive: `{{ $t('ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}') }}`,
-        method: `this.$t('ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}')`
+        directive: `{{ $t('ui.${this._keySnippet(text)}') }}`,
+        method: `this.$t('ui.${this._keySnippet(text)}')`
       },
       angular: {
         pipe: `{{ '${text}' | translate }}`,
-        service: `this.translateService.instant('ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}')`
+        service: `this.translateService.instant('ui.${this._keySnippet(text)}')`
+      },
+      svelte: {
+        store: `$_(('ui.${this._keySnippet(text)}'))`,
+        method: `t.set('ui.${this._keySnippet(text)}', '${text}')`
+      },
+      astro: {
+        import: `import { t } from 'astro-i18next';`,
+        usage: `{t('ui.${this._keySnippet(text)}')}`
+      },
+      remix: {
+        hook: `const { t } = useTranslation();`,
+        usage: `{t('ui.${this._keySnippet(text)}')}`,
+        server: `export const handle = i18next.handle;`
+      },
+      qwik: {
+        hook: `const t = useTranslate();`,
+        usage: `{t('ui.${this._keySnippet(text)}')}`
+      },
+      solid: {
+        hook: `const [t] = useI18n();`,
+        usage: `{t('ui.${this._keySnippet(text)}')}`
+      },
+      ember: {
+        template: `{{t 'ui.${this._keySnippet(text)}'}}`,
+        helper: `this.intl.t('ui.${this._keySnippet(text)}')`
+      },
+      gatsby: {
+        hook: `const { t } = useTranslation();`,
+        usage: `{t('ui.${this._keySnippet(text)}')}`,
+        plugin: `'gatsby-plugin-react-i18next'`
       },
       django: {
         template: `{% trans '${text}' %}`,
@@ -552,12 +656,27 @@ class I18nTextScanner {
         underscore: `from gettext import gettext as _\n_('${text}')`,
         lazy: `from gettext import gettext_lazy as _\n_('${text}')`
       },
+      rust: {
+        fluent: `bundle.get_message("ui_${this._keySnippet(text)}")`,
+        gettext: `gettext("ui_${this._keySnippet(text)}")`
+      },
+      go: {
+        translate: `i18n.Translate("ui_${this._keySnippet(text)}")`,
+        message: `i18n.NewMessage("ui_${this._keySnippet(text)}")`
+      },
       vanilla: {
-        generic: `t('ui.${text.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}')`
+        generic: `t('ui.${this._keySnippet(text)}')`
       }
     };
 
     return frameworks[this.framework] || frameworks.vanilla;
+  }
+
+  _keySnippet(text) {
+    return text.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '_')
+      .substring(0, 40);
   }
 
   async scanDirectory(dir, options = {}) {
@@ -574,7 +693,7 @@ class I18nTextScanner {
     }
 
     const allResults = [];
-    const extensions = ['.js', '.jsx', '.ts', '.tsx', '.vue', '.html', '.svelte', '.py', '.pyx', '.pyi'];
+    const extensions = [...SCANNER_EXTENSIONS];
 
     const scanRecursive = (currentDir) => {
       const items = SecurityUtils.safeReaddirSync(currentDir, path.dirname(currentDir), { withFileTypes: true });
@@ -736,7 +855,7 @@ class I18nTextScanner {
     } else if (fwPref && fwPref !== 'auto') {
       this.framework = fwPref;
     } else if (fwDetectEnabled) {
-      const detected = this.detectFramework(process.cwd());
+      const detected = detectProjectFramework(process.cwd());
       this.framework = detected || fwFallback;
     } else {
       this.framework = fwFallback;
@@ -762,7 +881,7 @@ class I18nTextScanner {
     console.log(this.t('scanner.starting', { framework: this.framework }));
     console.log(this.t('scanner.sourceDirectory', { sourceDir: this.sourceDir }));
 
-    const patterns = this.getFrameworkPatterns(this.framework);
+    const patterns = getFrameworkPatterns(this.framework);
     const exclusions = this.config.exclude || ['node_modules', '.git', 'dist', 'build'];
     const minLength = this.config.minLength || 3;
     const maxLength = this.config.maxLength || 100;

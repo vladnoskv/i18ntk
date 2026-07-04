@@ -2,8 +2,9 @@
 
 const path = require('path');
 const SecurityUtils = require('./security');
+const { SOURCE_DIRS } = require('./framework-detector');
 
-const DEFAULT_SOURCE_DIRS = ['src', 'app', 'lib', 'source'];
+const DEFAULT_SOURCE_DIRS = SOURCE_DIRS;
 
 function resolveUsageSourceDir(options = {}) {
   const projectRoot = path.resolve(options.projectRoot || process.cwd());

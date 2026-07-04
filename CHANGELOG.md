@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.6.0] - 2026-07-04
+
+### Added
+
+- **Framework Detection (10 new frameworks):** Added Rust (fluent, gettext-rs), Remix (remix-i18next), Gatsby (gatsby-plugin-react-i18next), Astro (astro-i18next, @astrojs/i18n), Qwik (qwik-speak, qwik-i18n), SolidJS (@solid-primitives/i18n), Ember (ember-intl), React Native (react-native-localize), Expo (expo-localization), and Ionic (ionic-angular/react/vue) to `utils/framework-detector.js`.
+- **FRAMEWORK_COMPATIBILITY:** Extended compatibility metadata with Rust, Fluent, Remix, Gatsby, Astro, Qwik, Ember, React Native, and Ionic version requirements.
+- **Rust/Cargo.toml detection:** `FrameworkDetectionService` now detects Rust projects via `Cargo.toml`. Supports `fluent`, `gettext-rs`, and generic Rust framework types.
+- **JSX Component Detection (Workbench & Lens):** Added `findJsxComponentKeys()` to both `keyDetector.ts` (Workbench) and `scanner.ts` (Lens) for detecting `<Trans i18nKey>`, `<FormattedMessage id>`, `<FormattedMessage defaultMessage>`, `<t message>`, and `<Translate id>` JSX components.
+- **ICU/Fluent placeholder support:** Added `$variable` (Fluent), `{var, plural, ...}`, `{var, select, ...}`, `{var, number}`, and `{var, date}` ICU MessageFormat patterns to `extractPlaceholders()` with overlap deduplication and token length safety.
+- **Framework-specific exclude defaults:** Added `.nuxt`, `.output`, `.astro`, `.svelte-kit`, `.cache`, `__generated__`, and `target` to default exclude lists in all scanners and configs.
+- **Framework-specific locale discovery paths:** Added `app/i18n`, `src/lib/i18n`, `content/locales`, `messages`, and `lang` to locale directory candidates.
+- **Framework-specific activation events:** Workbench and Lens now activate on Next.js, Astro, Remix, Svelte, Nuxt, Gatsby config files and Cargo.toml.
+- **Translation Grid:** Added `messages` and `lang` filename patterns to the custom editor selectors.
+- **Framework suggestions:** Expanded `getFrameworkSuggestions()` in FrameworkDetectionService with all newly supported frameworks by language.
+
+### Changed
+
+- **File extensions (all packages):** Added `.astro`, `.mdx`, `.mjs`, `.mts`, `.cjs`, `.cts`, `.rs` to `SOURCE_EXTENSIONS` in all scanners and file-walk functions. Astro single-file components, ESM modules, and Rust source files are now scanned for translation keys.
+- **Document selectors (Workbench & Lens):** Added `astro` language ID and extended pattern globs to include `mjs,mts,cjs,cts,astro,html`.
+- **Locate discovery excludes:** Added `.nuxt`, `.output`, `.astro`, `.svelte-kit`, `.cache`, `__generated__`, `target` to `DISCOVERY_EXCLUDES`.
+- **Config-helper:** Extended `supportedExtensions` to match new file types; excludeDirs now includes all framework-specific directories.
+- **Framework detection expansion (FrameworkDetectionService):** JS framework detection expanded from 7 to 15+ frameworks. `checkI18nDependencies()` i18n framework list expanded from 8 to 26 entries covering all new frameworks.
+- **Health score:** Penalty is now capped at `(totalKeys - 1) * 2` and uses a linear decay curve (`40%` max) to prevent negative or zero scores on small key sets with many issues.
+- **Test output:** manifest-sync test updated to match new 4.6.0 versionInfo.
+
+### Fixed
+
+- **Dot/snake key style validation:** The hybrid regex now correctly validates both dot path and snake_case segments simultaneously, matching the documented behavior.
+- **Manifest sync:** `package.public.json` `supportedFrameworks` synced with updated `package.json` to include all new framework entries.
+- **Centralized Architecture:** All framework data (extensions, patterns, suggestions, exclude dirs, source dirs, wrapper skip patterns) now lives in one place — `utils/framework-detector.js`. The scanner (`i18ntk-scanner.js`), managed scanner (`ScannerCommand.js`), report model (`report-model.js`), and usage source resolver (`usage-source.js`) all import from this single source of truth.
+- **Duplicate method removal:** `detectFramework()`, `getFrameworkPatterns()`, and `getFrameworkSpecific()` were duplicated with slight variations across 4+ files. All consumers now call the centralized `detectProjectFramework()`, `getFrameworkPatterns()`, and `getFrameworkSuggestions()` exports.
+- **Hardcoded extension lists eliminated:** `SOURCE_EXTENSIONS` (report model), `SCANNER_EXTENSIONS` (scanner commands), `EXCLUDE_DIRS` (walk functions), and `SOURCE_DIRS` (usage resolver) are now defined once and imported everywhere.
+- **Framework-specific registration:** Adding a new framework now requires changes in only ONE file (`framework-detector.js`) instead of 6+ scattered locations.
+
 ## [4.5.4] - 2026-06-19
 
 ### Fixed
