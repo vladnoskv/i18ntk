@@ -34,24 +34,32 @@ const ENGLISH_WORDS = new Set([
   'warning', 'when', 'with', 'without'
 ]);
 
-const DEFAULT_ALLOWED_ENGLISH_TERMS = new Set([
-  'api',
-]);
+const DEFAULT_ALLOWED_ENGLISH_TERMS = new Set(['api']);
+
+function resolveAllowedEnglishTerms(options, projectConfig) {
+  const terms = new Set(DEFAULT_ALLOWED_ENGLISH_TERMS);
+  const sources = [
+    options && options.allowedEnglishTerms,
+    projectConfig && projectConfig.allowedEnglishTerms
+  ];
+  for (const source of sources) {
+    if (Array.isArray(source)) {
+      source.forEach(term => {
+        if (typeof term === 'string' && term.trim()) {
+          terms.add(term.trim().toLowerCase());
+        }
+      });
+    }
+  }
+  return terms;
+}
 
 function normalizeLanguage(language) {
   return String(language || '').toLowerCase().split(/[-_]/)[0];
 }
 
 function toAllowedTermSet(terms) {
-  const allowed = new Set(DEFAULT_ALLOWED_ENGLISH_TERMS);
-  if (Array.isArray(terms)) {
-    terms.forEach(term => {
-      if (typeof term === 'string' && term.trim()) {
-        allowed.add(term.trim().toLowerCase());
-      }
-    });
-  }
-  return allowed;
+  return resolveAllowedEnglishTerms({ allowedEnglishTerms: terms });
 }
 
 function stripNonLanguageTokens(value) {
@@ -171,5 +179,6 @@ module.exports = {
   DEFAULT_ENGLISH_THRESHOLD_PERCENT,
   analyzeEnglishContent,
   detectTranslationContentRisks,
-  hasSecretLikeValue
+  hasSecretLikeValue,
+  resolveAllowedEnglishTerms
 };

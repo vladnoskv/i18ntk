@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.6.0",
+  "version": "4.6.1",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18ntk",
@@ -228,27 +228,27 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.6.0",
+    "version": "4.6.1",
     "releaseDate": "07/04/2026",
-    "lastUpdated": "07/04/2026",
+    "lastUpdated": "07/05/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
-      "FRAMEWORK DETECTION: Added 10 new framework detections — Rust (fluent, gettext-rs), Remix, Gatsby, Astro, Qwik, Solid, Ember, React Native, Expo, Ionic. Framework detection now unified across all code paths.",
-      "RUST SUPPORT: Cargo.toml detection added to FrameworkDetectionService; .rs file extension added to all scanners and source walkers.",
-      "FILE EXTENSIONS: Added .astro, .mdx, .mjs, .mts, .cjs, .cts, .rs to all file scan lists across CLI and VS Code extensions. Astro components, ESM modules, and Rust source files are now scanned for translation keys.",
-      "ACTIVATION EVENTS: Added 14 new framework-specific activation triggers (next.config, astro.config, remix.config, svelte.config, nuxt.config, gatsby-config, Cargo.toml) for faster VS Code extension startup.",
-      "ICU/FLUENT PLACEHOLDER SUPPORT: Added Fluent $variable and ICU MessageFormat {var, plural, ...} patterns to placeholder detection and comparison.",
-      "REACT JSX COMPONENT DETECTION: Added detection of <Trans i18nKey>, <FormattedMessage id>, <FormattedMessage defaultMessage>, <t message>, and <Translate id> JSX components in both VS Code extensions.",
-      "CONFIGURATION DEFAULTS: Updated exclude defaults and activation events with framework-specific directories (.nuxt, .output, .astro, .svelte-kit, .cache, __generated__, target).",
-      "HEALTH SCORE: Fixed health score calculation to prevent negative scores. Penalty is now capped and uses a linear decay curve instead of unbounded subtraction.",
-      "DOCUMENTATION: Updated README, CHANGELOG, and package metadata for 4.6.0. All supportedFrameworks now reflect actual detection capabilities.",
-      "COMPREHENSIVE TESTING: All 128+ tests pass across CLI (33), Workbench (65), and Lens (32) packages."
+      "BUG FIX: LANGUAGE_CONFIG expanded from 21 to 61 languages with comprehensive ISO 639-1 coverage. All common languages now display their native names in init output instead of 'Unknown'.",
+      "BUG FIX: defaultLanguages no longer silently truncates to 5 when the config value is an empty array or null. A validation guard preserves the caller's configured list.",
+      "BUG FIX: Auto Translate now exits 0 on success even when residual untranslated values exist (placeholders, branded terms, short labels). Only real failures (0 translated with >0 total) now produce non-zero exit codes.",
+      "BUG FIX: supportedExtensions is no longer unconditionally overridden by the format adapter during init. Users who configure extensions in .i18ntk-config keep them.",
+      "BUG FIX: allowedEnglishTerms now unifies between validation-risk.js and project config. resolveAllowedEnglishTerms() accepts both inline options and project-level .i18ntk-config terms as fallback sources.",
+      "FRAMEWORK DETECTION: Added 10 new framework detections — Rust, Remix, Gatsby, Astro, Qwik, SolidJS, Ember, React Native, Expo, Ionic. Centralized into framework-detector.js as single source of truth.",
+      "FILE EXTENSIONS: Added .astro, .mdx, .mjs, .mts, .cjs, .cts, .rs to all file scan lists via centralized SOURCE_EXTENSIONS and SCANNER_EXTENSIONS.",
+      "ICU/FLUENT PLACEHOLDER SUPPORT: Fluent $variable and ICU MessageFormat patterns added to placeholder detection and comparison.",
+      "JSX COMPONENT DETECTION: <Trans>, <FormattedMessage>, <Translate> JSX components detected in both VS Code extensions.",
+      "COMPREHENSIVE TESTING: All 384+ tests pass across CLI, Workbench, and Lens packages."
     ],
     "breakingChanges": [],
-    "nextVersion": "4.6.1",
+    "nextVersion": "4.6.2",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -277,9 +277,14 @@
       "fluent-rs": ">=0.16.0",
       "gettext-rs": ">=0.7.0"
     },
-    "supportPolicy": "Versions earlier than 4.6.0 may be unstable or insecure in CI automation. Upgrade to 4.6.0 or newer.",
-    "deprecations": ["4.3.0", "4.3.1", "4.3.2", "4.3.3"],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.6.0 or newer: npm install -g i18ntk@latest",
+    "supportPolicy": "Versions earlier than 4.6.1 may be unstable or insecure in CI automation. Upgrade to 4.6.1 or newer.",
+    "deprecations": [
+      "4.3.0",
+      "4.3.1",
+      "4.3.2",
+      "4.3.3"
+    ],
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.6.1 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"

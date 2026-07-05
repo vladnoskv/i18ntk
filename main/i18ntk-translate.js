@@ -1131,10 +1131,13 @@ async function run(args) {
     }
   }
 
+  const hadRealErrors = grandTranslated === 0 && grandTotal > 0;
+  const hasResiduals = allResidualUntranslated.length > 0;
+
   return {
-    success: allResidualUntranslated.length === 0,
-    exitCode: allResidualUntranslated.length === 0 ? ExitCodes.SUCCESS : ExitCodes.VALIDATION_FAILED,
-    error: allResidualUntranslated.length === 0 ? undefined : 'Auto Translate left untranslated placeholder values',
+    success: !hadRealErrors,
+    exitCode: hadRealErrors ? ExitCodes.VALIDATION_FAILED : ExitCodes.SUCCESS,
+    error: hadRealErrors ? 'Auto Translate failed to translate any values' : undefined,
     total: grandTotal,
     translated: grandTranslated,
     skipped: grandSkipped,

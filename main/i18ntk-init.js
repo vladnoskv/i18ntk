@@ -29,28 +29,55 @@ const { createPrompt, isInteractive } = require('../utils/prompt-helper');
 const { parseConfirmation } = require('../utils/localized-confirm');
 const { normalizeReportFormat, writeReportFile } = require('../utils/report-writer');
 
-// Language configurations with native names
+// Language configurations with native names — comprehensive ISO 639-1 coverage
 const LANGUAGE_CONFIG = {
-  'en': { name: 'English', nativeName: 'English' },
-  'de': { name: 'German', nativeName: 'Deutsch' },
-  'es': { name: 'Spanish', nativeName: 'Espa\u00f1ol' },
-  'fr': { name: 'French', nativeName: 'Fran\u00e7ais' },
-  'ru': { name: 'Russian', nativeName: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439' },
-  'it': { name: 'Italian', nativeName: 'Italiano' },
-  'ja': { name: 'Japanese', nativeName: '\u65e5\u672c\u8a9e' },
-  'ko': { name: 'Korean', nativeName: '\ud55c\uad6d\uc5b4' },
-  'zh': { name: 'Chinese', nativeName: '\u4e2d\u6587' },
-  'ar': { name: 'Arabic', nativeName: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' },
+  'af': { name: 'Afrikaans', nativeName: 'Afrikaans' },  'sq': { name: 'Albanian', nativeName: 'Shqip' },
+  'ar': { name: 'Arabic', nativeName: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' },  'hy': { name: 'Armenian', nativeName: '\u0540\u0561\u0575\u0565\u0580\u0565\u0576' },
+  'az': { name: 'Azerbaijani', nativeName: 'Az\u0259rbaycan' },  'eu': { name: 'Basque', nativeName: 'Euskara' },
+  'be': { name: 'Belarusian', nativeName: '\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u043a\u0430\u044f' },
+  'bn': { name: 'Bengali', nativeName: '\u09ac\u09be\u0982\u09b2\u09be' },
+  'bs': { name: 'Bosnian', nativeName: 'Bosanski' },  'bg': { name: 'Bulgarian', nativeName: '\u0411\u044a\u043b\u0433\u0430\u0440\u0441\u043a\u0438' },
+  'ca': { name: 'Catalan', nativeName: 'Catal\u00e0' },  'zh': { name: 'Chinese', nativeName: '\u4e2d\u6587' },
+  'hr': { name: 'Croatian', nativeName: 'Hrvatski' },  'cs': { name: 'Czech', nativeName: '\u010ce\u0161tina' },
+  'da': { name: 'Danish', nativeName: 'Dansk' },  'nl': { name: 'Dutch', nativeName: 'Nederlands' },
+  'en': { name: 'English', nativeName: 'English' },  'et': { name: 'Estonian', nativeName: 'Eesti' },
+  'fi': { name: 'Finnish', nativeName: 'Suomi' },  'fr': { name: 'French', nativeName: 'Fran\u00e7ais' },
+  'ka': { name: 'Georgian', nativeName: '\u10e5\u10d0\u10e0\u10d7\u10e3\u10da\u10d8' },
+  'de': { name: 'German', nativeName: 'Deutsch' },  'el': { name: 'Greek', nativeName: '\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac' },
+  'gu': { name: 'Gujarati', nativeName: '\u0a97\u0ac1\u0a9c\u0ab0\u0abe\u0aa4\u0ac0' },
+  'he': { name: 'Hebrew', nativeName: '\u05e2\u05d1\u05e8\u05d9\u05ea' },
   'hi': { name: 'Hindi', nativeName: '\u0939\u093f\u0928\u094d\u0926\u0940' },
-  'nl': { name: 'Dutch', nativeName: 'Nederlands' },
-  'sv': { name: 'Swedish', nativeName: 'Svenska' },
-  'da': { name: 'Danish', nativeName: 'Dansk' },
+  'hu': { name: 'Hungarian', nativeName: 'Magyar' },  'is': { name: 'Icelandic', nativeName: '\u00cdslenska' },
+  'id': { name: 'Indonesian', nativeName: 'Bahasa Indonesia' },
+  'ga': { name: 'Irish', nativeName: 'Gaeilge' },  'it': { name: 'Italian', nativeName: 'Italiano' },
+  'ja': { name: 'Japanese', nativeName: '\u65e5\u672c\u8a9e' },
+  'kk': { name: 'Kazakh', nativeName: '\u049a\u0430\u0437\u0430\u049b' },
+  'ko': { name: 'Korean', nativeName: '\ud55c\uad6d\uc5b4' },
+  'lv': { name: 'Latvian', nativeName: 'Latvie\u0161u' },  'lt': { name: 'Lithuanian', nativeName: 'Lietuvi\u0173' },
+  'mk': { name: 'Macedonian', nativeName: '\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438' },
+  'ms': { name: 'Malay', nativeName: 'Bahasa Melayu' },
+  'ml': { name: 'Malayalam', nativeName: '\u0d2e\u0d32\u0d2f\u0d3e\u0d33\u0d02' },
+  'mr': { name: 'Marathi', nativeName: '\u092e\u0930\u093e\u0920\u0940' },
+  'mn': { name: 'Mongolian', nativeName: '\u041c\u043e\u043d\u0433\u043e\u043b' },
   'no': { name: 'Norwegian', nativeName: 'Norsk' },
-  'fi': { name: 'Finnish', nativeName: 'Suomi' },
-  'pl': { name: 'Polish', nativeName: 'Polski' },
-  'cs': { name: 'Czech', nativeName: '\u010ce\u0161tina' },
-  'hu': { name: 'Hungarian', nativeName: 'Magyar' },
-  'tr': { name: 'Turkish', nativeName: 'T\u00fcrk\u00e7e' }
+  'fa': { name: 'Persian', nativeName: '\u0641\u0627\u0631\u0633\u06cc' },
+  'pl': { name: 'Polish', nativeName: 'Polski' },  'pt': { name: 'Portuguese', nativeName: 'Portugu\u00eas' },
+  'pa': { name: 'Punjabi', nativeName: '\u0a2a\u0a70\u0a1c\u0a3e\u0a2c\u0a40' },
+  'ro': { name: 'Romanian', nativeName: 'Rom\u00e2n\u0103' },
+  'ru': { name: 'Russian', nativeName: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439' },
+  'sr': { name: 'Serbian', nativeName: '\u0421\u0440\u043f\u0441\u043a\u0438' },
+  'sk': { name: 'Slovak', nativeName: 'Sloven\u010dina' },
+  'sl': { name: 'Slovenian', nativeName: 'Sloven\u0161\u010dina' },
+  'es': { name: 'Spanish', nativeName: 'Espa\u00f1ol' },
+  'sw': { name: 'Swahili', nativeName: 'Kiswahili' },  'sv': { name: 'Swedish', nativeName: 'Svenska' },
+  'tl': { name: 'Filipino', nativeName: 'Filipino' },
+  'ta': { name: 'Tamil', nativeName: '\u0ba4\u0bae\u0bbf\u0bb4\u0bcd' },
+  'te': { name: 'Telugu', nativeName: '\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41' },
+  'th': { name: 'Thai', nativeName: '\u0e44\u0e17\u0e22' },
+  'tr': { name: 'Turkish', nativeName: 'T\u00fcrk\u00e7e' },
+  'uk': { name: 'Ukrainian', nativeName: '\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430' },
+  'ur': { name: 'Urdu', nativeName: '\u0627\u0631\u062f\u0648' },
+  'vi': { name: 'Vietnamese', nativeName: 'Ti\u1ebfng Vi\u1ec7t' },
 };
 
 class I18nInitializer {
@@ -67,7 +94,9 @@ class I18nInitializer {
       ...config
     };
         this.format = getFormatAdapter(this.config.format);
-    this.config.supportedExtensions = [this.format.extension];
+    if (!this.config.supportedExtensions || !this.config.supportedExtensions.length) {
+      this.config.supportedExtensions = [this.format.extension];
+    }
     this.detectedFramework = detectFramework(process.cwd());
     if (this.detectedFramework && !this.config.translationPatterns) {
       this.config.translationPatterns = this.detectedFramework.patterns;
@@ -79,7 +108,9 @@ class I18nInitializer {
       : path.join(this.sourceDir, this.config.sourceLanguage);
     
     // Ensure defaultLanguages is properly initialized from config
-    this.config.defaultLanguages = this.config.defaultLanguages || ['en', 'de', 'es', 'fr', 'ru'];
+    if (!this.config.defaultLanguages || !Array.isArray(this.config.defaultLanguages) || this.config.defaultLanguages.length === 0) {
+      this.config.defaultLanguages = ['en', 'de', 'es', 'fr', 'ru'];
+    }
     
     // No longer create readline interface here - use CLI helpers
     this.rl = null;

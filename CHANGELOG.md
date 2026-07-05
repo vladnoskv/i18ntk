@@ -3,7 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [4.6.1] - 2026-07-05
+
+### Fixed
+
+- **LANGUAGE_CONFIG missing 22+ languages:** `i18ntk-init.js` and `InitService.js` expanded from 21 to 61 languages with native names. All common ISO 639-1 codes now display proper names instead of "Unknown".
+- **Init silently truncating defaultLanguages:** When `defaultLanguages` is an empty array or `null`, init no longer silently falls back to 5 languages.
+- **Auto Translate exiting non-zero on success:** Residual untranslated values (placeholders, branded terms) no longer cause non-zero exit codes. Only real failures produce exit 1.
+- **supportedExtensions silently overridden:** `i18ntk-init.js` no longer unconditionally overrides `supportedExtensions` from config with the format adapter's single extension.
+- **allowedEnglishTerms in two places:** `validation-risk.js` now exports `resolveAllowedEnglishTerms()` which accepts both per-call options and project-level config terms as fallback sources.
 
 ## [4.6.0] - 2026-07-04
 
