@@ -22,9 +22,17 @@ const FRAMEWORK_COMPATIBILITY = {
   'gatsby': { minVersion: '4.0.0' },
   'astro': { minVersion: '2.0.0' },
   'qwik': { minVersion: '1.0.0' },
+  'nuxt': { minVersion: '7.0.0' },
+  'nuxt-i18n': { minVersion: '7.0.0' },
+  'next-intl': { minVersion: '2.0.0' },
+  'ngx-translate': { minVersion: '13.0.0' },
+  'svelte-i18n': { minVersion: '3.0.0' },
+  'solid-i18n': { minVersion: '1.0.0' },
   'ember-intl': { minVersion: '5.0.0' },
   'react-native-localize': { minVersion: '2.0.0' },
-  'ionic': { minVersion: '6.0.0' }
+  'ionic': { minVersion: '6.0.0' },
+  'expo': { minVersion: '48.0.0' },
+  'vanilla': { minVersion: '1.0.0' }
 };
 
 // Define framework detection in order of specificity
@@ -462,6 +470,13 @@ const SOURCE_DIRS = [
 ];
 
 const FRAMEWORK_PATTERNS = {
+  'i18ntk-runtime': [
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /i18n\.t\(["']([^"']{2,99})["']\)/g,
+    /useI18n\(\)\.t\(["']([^"']{2,99})["']\)/g,
+    /<t\s[\s\S]*?\bmessage\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
   react: [
     /children:\s*["']([^"']{2,99})["']/g,
     /dangerouslySetInnerHTML={{\s*__html:\s*["']([^"']{2,99})["']/g,
@@ -475,6 +490,14 @@ const FRAMEWORK_PATTERNS = {
     />([^<{][^<>{]*[^}>])</g,
     /<button[^>]*>([^<]{2,99})<\/button>/g,
     /<(?:FormattedMessage|Trans)[\s\S]*?\b(?:id|defaultMessage|i18nKey)\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  nuxt: [
+    />([^<{][^<>{]*[^}>])</g,
+    /<button[^>]*>([^<]{2,99})<\/button>/g,
+    /\$t\(["']([^"']{2,99})["']\)/g,
+    /\$tc\(["']([^"']{2,99})["']\)/g,
+    /v-t=["']([^"']{2,99})["']/g,
+    /\blocalePath\(\s*\)/g
   ],
   vue: [
     /v-text=["']([^"']{2,99})["']/g,
@@ -562,6 +585,68 @@ const FRAMEWORK_PATTERNS = {
     /i18n\.NewMessage\([^,]+,\s*["']([^"']{2,99})["']\)/g,
     /t\.Get\([^,]+,\s*["']([^"']{2,99})["']\)/g
   ],
+  lingui: [
+    />([^<{][^<>{]*[^}>])</g,
+    /(?<![\w$.])t\s*\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /_\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /<Translate\s[\s\S]*?\bid\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  formatjs: [
+    />([^<{][^<>{]*[^}>])</g,
+    /formatMessage\(\s*\{\s*id:\s*['"`]([^'"`]{2,99})['"`]/g,
+    /<FormattedMessage\s[\s\S]*?\bid\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  'ngx-translate': [
+    />([^<{][^<>{]*[^}>])</g,
+    /\|\s*translate\s*[^}]*\}\}/g,
+    /translateService\.instant\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /translateService\.get\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /translate\s*=\s*["'`]([^"'`]{2,99})["'`]/g,
+    /\[innerHTML\]=["']([^"']{2,99})["']/g
+  ],
+  'next-intl': [
+    />([^<{][^<>{]*[^}>])</g,
+    /t\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /\buseTranslations\(\s*()\)/g
+  ],
+  'svelte-i18n': [
+    />([^<{][^<>{]*[^}>])</g,
+    /\$_\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /\$_\w*\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /\bt\.get\(\s*['"`]([^'"`]{2,99})['"`]/g
+  ],
+  'solid-i18n': [
+    />([^<{][^<>{]*[^}>])</g,
+    /\buseI18n\(\s*\)\s*\.\s*t\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /t\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /<Translate\s[\s\S]*?\bid\s*=\s*(?:\{|)(['"`])([^'"`}]+)\1[^>]*>/g
+  ],
+  fastapi: [
+    /_\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /i18n\.t\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /\{\{\s*_['"]([^'"]{2,99})['"]\s*\}\}/g,
+    /\{\{\s*gettext\(['"`]([^'"`]{2,99})['"`]\)\s*\}\}/g
+  ],
+  'ruby-on-rails': [
+    /I18n\.t\(\s*['"]([^'"]{2,99})['"]/g,
+    /I18n\.translate\(\s*['"]([^'"]{2,99})['"]/g,
+    /I18n\.l\(\s*['"]([^'"]{2,99})['"]/g,
+    /<%= t\(['"]([^'"]{2,99})['"]/g,
+    /<%= I18n\.t\(['"]([^'"]{2,99})['"]/g,
+    /(?<![\w$.])t\s*\(\s*['"]([^'"]{2,99})['"]/g
+  ],
+  'react-native-localize': [
+    />([^<{][^<>{]*[^}>])</g,
+    /\bi18n\.t\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /\bt\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /\btranslate\(\s*['"`]([^'"`]{2,99})['"`]/g
+  ],
+  ionic: [
+    />([^<{][^<>{]*[^}>])</g,
+    /\|\s*translate\s*[^}]*\}\}/g,
+    /translateService\.instant\(\s*['"`]([^'"`]{2,99})['"`]/g,
+    /translateService\.get\(\s*['"`]([^'"`]{2,99})['"`]/g
+  ],
   vanilla: [
     /t\(["']([^"']{2,99})["']\)/g,
     /i18n\.t\(["']([^"']{2,99})["']\)/g,
@@ -581,6 +666,18 @@ const FRAMEWORK_SUGGESTIONS = {
   solid: { hook: 'const [t] = useI18n();', usage: "{t('ui.KEY')}" },
   ember: { template: "{{t 'ui.KEY'}}", helper: "this.intl.t('ui.KEY')" },
   gatsby: { hook: 'const { t } = useTranslation();', usage: "{t('ui.KEY')}", plugin: "'gatsby-plugin-react-i18next'" },
+  nuxt: { directive: "{{ $t('ui.KEY') }}", method: "this.$t('ui.KEY')", component: "<NuxtLink :to=\"localePath('ui.KEY')\">" },
+  'i18ntk-runtime': { hook: 'const { t } = useI18n();', usage: "{t('ui.KEY')}", component: "<t message=\"ui.KEY\">text</t>" },
+  lingui: { hook: 'import { t } from \"@lingui/macro\";', usage: "{t('ui.KEY')}", component: "<Trans id=\"ui.KEY\">text</Trans>" },
+  formatjs: { hook: 'import { FormattedMessage, useIntl } from \"react-intl\";', usage: "intl.formatMessage({ id: 'ui.KEY' })", component: "<FormattedMessage id=\"ui.KEY\" />" },
+  'ngx-translate': { pipe: "{{ 'ui.KEY' | translate }}", service: "this.translateService.instant('ui.KEY')" },
+  'next-intl': { hook: 'const t = useTranslations();', usage: "{t('ui.KEY')}" },
+  'svelte-i18n': { store: "$_('ui.KEY')", method: "t.get('ui.KEY')" },
+  'solid-i18n': { hook: 'const [t] = useI18n();', usage: "{t('ui.KEY')}", component: "<Translate id=\"ui.KEY\" />" },
+  fastapi: { python: "from fastapi_i18n import _\n_('text')", template: "{{ _('text') }}" },
+  'ruby-on-rails': { helper: "t('ui.KEY')", method: "I18n.t('ui.KEY')", template: "<%= t('ui.KEY') %>" },
+  'react-native-localize': { hook: 'import { t } from \"i18n-js\";', usage: "{t('ui.KEY')}" },
+  ionic: { pipe: "{{ 'ui.KEY' | translate }}", service: "this.translateService.instant('ui.KEY')" },
   django: { template: "{% trans 'text' %}", python: "from django.utils.translation import gettext as _\n_('text')", model: "from django.utils.translation import gettext_lazy as _\n_('text')" },
   flask: { template: "{{ _('text') }}", python: "from flask_babel import gettext as _\n_('text')", lazy: "from flask_babel import lazy_gettext as _\n_('text')" },
   python: { gettext: "import gettext\ngettext.gettext('text')", underscore: "from gettext import gettext as _\n_('text')", lazy: "from gettext import gettext_lazy as _\n_('text')" },
@@ -591,8 +688,13 @@ const FRAMEWORK_SUGGESTIONS = {
 
 const WRAPPER_SKIP_PATTERNS = [
   't(', 'tx(', 'i18n.t(', 'i18n.translate(', 'translate(',
-  'useI18n(', 'useTranslation(', '__', '__t', '$_(', '$t(',
-  'gettext(', 'gettext_lazy(', 'lazy_gettext(', 'pgettext(', 'ngettext('
+  'useI18n(', 'useTranslation(', '__', '__t', '$_(', '$t(', '_(',
+  '$tc(', 'gettext(', 'gettext_lazy(', 'lazy_gettext(', 'pgettext(', 'ngettext(',
+  'I18n.t(', 'I18n.translate(', 'I18n.l(', 'I18n.localize(',
+  't.get(', 'useTranslate(', 'useSpeak(', 'withTranslation(',
+  'formatMessage(', 'bundle.get_message(', 'i18n.NewMessage(',
+  'i18n.Translate(', '_l(', '_n(', 't.set(', 'fluent!', 'ts!',
+  'translateService.instant(', 'translateService.get('
 ];
 
 function _keySnippet(text) {
@@ -643,83 +745,168 @@ function detectFramework(projectRoot) {
     throw new Error('Invalid project root path');
   }
 
-  const packageJsonPath = path.join(projectRoot, 'package.json');
   const detectedFrameworks = [];
 
-  // Only proceed if package.json exists
-  if (!SecurityUtils.safeExistsSync(packageJsonPath, projectRoot)) {
-    return null;
-  }
-
-  try {
-    // Read and parse package.json
-    const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, projectRoot, 'utf8');
-    if (!packageJsonContent) {
-      return null;
-    }
-    const packageJson = SecurityUtils.safeParseJSON(packageJsonContent);
-    if (!packageJson) {
-      return null;
-    }
-
-    const deps = {
-      ...(packageJson.dependencies || {}),
-      ...(packageJson.devDependencies || {}),
-      ...(packageJson.peerDependencies || {})
-    };
-
-    // Sort frameworks by priority (highest first)
-    const sortedFrameworks = Object.entries(FRAMEWORKS).sort((a, b) =>
-      (b[1].priority || 0) - (a[1].priority || 0)
-    );
-
-    // Check each framework's dependencies
-    for (const [id, framework] of sortedFrameworks) {
-      try {
-        const frameworkDeps = framework.deps || framework.dependencies || [];
-        const hasAnyDep = frameworkDeps.some(dep => dep in deps);
-
-        if (hasAnyDep) {
-          const mainDep = frameworkDeps[0];
-          const frameworkInfo = {
-            id,
-            name: framework.name || id,
-            description: framework.description,
-            confidence: 0.9, // Base confidence when dependencies are found
-            version: deps[mainDep] || '',
-            priority: framework.priority || 0
+  // Phase 1: Check package.json for Node.js-based i18n frameworks
+  const packageJsonPath = path.join(projectRoot, 'package.json');
+  if (SecurityUtils.safeExistsSync(packageJsonPath, projectRoot)) {
+    try {
+      const packageJsonContent = SecurityUtils.safeReadFileSync(packageJsonPath, projectRoot, 'utf8');
+      if (packageJsonContent) {
+        const packageJson = SecurityUtils.safeParseJSON(packageJsonContent);
+        if (packageJson) {
+          const deps = {
+            ...(packageJson.dependencies || {}),
+            ...(packageJson.devDependencies || {}),
+            ...(packageJson.peerDependencies || {})
           };
 
-          // Boost confidence for i18ntk-runtime
-          if (id === 'i18ntk-runtime') {
-            frameworkInfo.confidence = 0.95;
-          }
+          const sortedFrameworks = Object.entries(FRAMEWORKS).sort((a, b) =>
+            (b[1].priority || 0) - (a[1].priority || 0)
+          );
 
-          detectedFrameworks.push(frameworkInfo);
+          for (const [id, framework] of sortedFrameworks) {
+            try {
+              const frameworkDeps = framework.deps || framework.dependencies || [];
+              const hasAnyDep = frameworkDeps.some(dep => dep in deps);
+              if (hasAnyDep) {
+                const mainDep = frameworkDeps[0];
+                const frameworkInfo = {
+                  id, name: framework.name || id, description: framework.description,
+                  confidence: id === 'i18ntk-runtime' ? 0.95 : 0.9,
+                  version: deps[mainDep] || '', priority: framework.priority || 0
+                };
+                detectedFrameworks.push(frameworkInfo);
+              }
+            } catch (_) { /* skip */ }
+          }
         }
-      } catch (error) {
-        console.warn(`Error checking framework ${id}:`, error.message);
-        continue;
+      }
+    } catch (_) { /* skip */ }
+  }
+
+  // Phase 2: Check Python project files (no package.json or no Node matches)
+  if (detectedFrameworks.length === 0) {
+    const pyProjectFiles = ['requirements.txt', 'setup.py', 'setup.cfg', 'pyproject.toml', 'Pipfile', 'Pipfile.lock'];
+    const hasPyProject = pyProjectFiles.some(f => SecurityUtils.safeExistsSync(path.join(projectRoot, f), projectRoot));
+    if (hasPyProject) {
+      const pyDeps = readPyProjectDeps(projectRoot);
+      const pyFrameworks = ['django', 'flask', 'fastapi', 'python'];
+      for (const id of pyFrameworks) {
+        const framework = FRAMEWORKS[id];
+        if (!framework) continue;
+        const frameworkDeps = framework.deps || [];
+        const hasAnyDep = frameworkDeps.some(dep => pyDeps.includes(dep.toLowerCase().replace(/[_-]/g, '')));
+        if (hasAnyDep) {
+          detectedFrameworks.push({
+            id, name: framework.name || id, description: framework.description,
+            confidence: 0.8, version: '', priority: framework.priority || 0
+          });
+        }
+      }
+      if (detectedFrameworks.length === 0 && hasPyProject) {
+        detectedFrameworks.push({
+          id: 'python', name: 'Python', description: 'Python project with gettext/i18n',
+          confidence: 0.5, version: '', priority: 0
+        });
       }
     }
-
-    // Return the framework with highest confidence, if any
-    if (detectedFrameworks.length > 0) {
-      return detectedFrameworks.sort((a, b) => {
-        // First sort by confidence
-        const confidenceDiff = b.confidence - a.confidence;
-        if (confidenceDiff !== 0) return confidenceDiff;
-
-        // If confidence is equal, sort by priority
-        return (b.priority || 0) - (a.priority || 0);
-      })[0];
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error detecting framework:', error);
-    return null;
   }
+
+  // Phase 3: Check Rust project (Cargo.toml)
+  if (detectedFrameworks.length === 0) {
+    const cargoPath = path.join(projectRoot, 'Cargo.toml');
+    if (SecurityUtils.safeExistsSync(cargoPath, projectRoot)) {
+      try {
+        const cargoContent = SecurityUtils.safeReadFileSync(cargoPath, projectRoot, 'utf8');
+        if (cargoContent) {
+          const hasRustI18n = /fluent|rust-i18n|gettext/.test(cargoContent);
+          if (hasRustI18n || /^\[package\]/m.test(cargoContent)) {
+            detectedFrameworks.push({
+              id: 'rust', name: 'Rust', description: 'Rust project with i18n',
+              confidence: hasRustI18n ? 0.85 : 0.4, version: '', priority: 0
+            });
+          }
+        }
+      } catch (_) { /* skip */ }
+    }
+  }
+
+  // Phase 4: Check Go project (go.mod)
+  if (detectedFrameworks.length === 0) {
+    const goModPath = path.join(projectRoot, 'go.mod');
+    if (SecurityUtils.safeExistsSync(goModPath, projectRoot)) {
+      try {
+        const goModContent = SecurityUtils.safeReadFileSync(goModPath, projectRoot, 'utf8');
+        if (goModContent) {
+          const hasGoI18n = /go-i18n|x-text|i18n/.test(goModContent);
+          detectedFrameworks.push({
+            id: 'go', name: 'Go', description: 'Go project with i18n',
+            confidence: hasGoI18n ? 0.85 : 0.4, version: '', priority: 0
+          });
+        }
+      } catch (_) { /* skip */ }
+    }
+  }
+
+  // Phase 5: Check Ruby project (Gemfile)
+  if (detectedFrameworks.length === 0) {
+    const gemfilePaths = ['Gemfile', 'gems.rb'];
+    for (const gf of gemfilePaths) {
+      const gemfilePath = path.join(projectRoot, gf);
+      if (SecurityUtils.safeExistsSync(gemfilePath, projectRoot)) {
+        try {
+          const gemfileContent = SecurityUtils.safeReadFileSync(gemfilePath, projectRoot, 'utf8');
+          if (gemfileContent) {
+            const hasRails = /rails/.test(gemfileContent);
+            const hasI18n = /i18n/.test(gemfileContent);
+            if (hasRails) {
+              detectedFrameworks.push({
+                id: 'ruby-on-rails', name: 'Ruby on Rails', description: 'Rails project with i18n',
+                confidence: hasI18n ? 0.9 : 0.7, version: '', priority: 0
+              });
+              break;
+            }
+            if (hasI18n) {
+              detectedFrameworks.push({
+                id: 'ruby-on-rails', name: 'Ruby on Rails', description: 'Ruby project with i18n',
+                confidence: 0.6, version: '', priority: 0
+              });
+              break;
+            }
+          }
+        } catch (_) { /* skip */ }
+      }
+    }
+  }
+
+  // Return the framework with highest confidence, if any
+  if (detectedFrameworks.length > 0) {
+    return detectedFrameworks.sort((a, b) => {
+      const confidenceDiff = b.confidence - a.confidence;
+      if (confidenceDiff !== 0) return confidenceDiff;
+      return (b.priority || 0) - (a.priority || 0);
+    })[0];
+  }
+
+  return null;
+}
+
+function readPyProjectDeps(projectRoot) {
+  const deps = [];
+  try {
+    const reqPath = path.join(projectRoot, 'requirements.txt');
+    if (SecurityUtils.safeExistsSync(reqPath, projectRoot)) {
+      const content = SecurityUtils.safeReadFileSync(reqPath, projectRoot, 'utf8');
+      if (content) {
+        for (const line of content.split('\n')) {
+          const stripped = line.replace(/[<>=!~].*$/, '').trim();
+          if (stripped && !stripped.startsWith('#')) deps.push(stripped.toLowerCase().replace(/[_-]/g, ''));
+        }
+      }
+    }
+  } catch (_) { /* skip */ }
+  return deps;
 }
 
 module.exports = { detectFramework, FRAMEWORKS, FRAMEWORK_COMPATIBILITY,

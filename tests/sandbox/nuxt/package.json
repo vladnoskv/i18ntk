@@ -1,0 +1,9 @@
+{
+  "name": "nuxt-i18n-test",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "nuxt": "^3.8.0",
+    "@nuxtjs/i18n": "^8.0.0"
+  }
+}

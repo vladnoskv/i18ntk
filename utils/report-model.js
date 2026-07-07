@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { getSourceExtensions, getExcludeDirs } = require('./framework-detector');
+const { getSourceExtensions, getExcludeDirs, getFrameworkPatterns } = require('./framework-detector');
 const SecurityUtils = require('./security');
 
 const EXCLUDE_DIRS = new Set(getExcludeDirs());
@@ -83,7 +83,8 @@ function generateI18ntkReport(options = {}) {
     Object.keys(values).forEach(key => allKeys.add(key));
   }
 
-  const sourceScan = scanSourceFiles(sourceDir, new Set(Object.keys(sourceValues)));
+  const framework = options.framework || 'vanilla';
+  const sourceScan = scanSourceFiles(sourceDir, new Set(Object.keys(sourceValues)), framework);
   const usedKeys = sourceScan.usedKeys;
   const issues = [];
   const addIssue = issue => issues.push(normalizeIssue(issue, issues.length + 1, projectRoot));
@@ -288,7 +289,7 @@ function flattenObject(value, prefix = '', out = {}) {
   return out;
 }
 
-function scanSourceFiles(sourceDir, availableKeys) {
+function scanSourceFiles(sourceDir, availableKeys, framework) {
   const usedKeys = new Set();
   const usageLocations = new Map();
   const hardcodedTexts = [];
@@ -299,15 +300,25 @@ function scanSourceFiles(sourceDir, availableKeys) {
   for (const file of files) {
     const content = SecurityUtils.safeReadFileSync(file, basePath, 'utf8');
     const lines = content.split(/\r?\n/);
+    const frameworkPatterns = framework ? getFrameworkPatterns(framework) : [];
     const keyPatterns = [
       /\b(?:t|tx|__|_t)\s*\(\s*['"`]([^'"`]+)['"`]/g,
       /\bi18n\.t\s*\(\s*['"`]([^'"`]+)['"`]/g,
       /\bi18nKey\s*=\s*['"`]([^'"`]+)['"`]/g,
+      /\$t\(\s*['"`]([^'"`]+)['"`]/g,
+      /\|\s*translate/g,
+      /\{\{\s*t\s+['"`]([^'"`]+)['"`]/g,
+      /\b(I18n|i18n)\.(t|translate|localize|l)\s*\(\s*['"`]([^'"`]+)['"`]/g,
+      /\{\%\s*trans\s+['"`]([^'"`]+)['"`]\s*%\}/g,
+      /gettext\(['"`]([^'"`]+)['"`]\)/g,
+      /_\(['"`]([^'"`]+)['"`]\)/g,
+      /\$_\(\s*['"`]([^'"`]+)['"`]/g
     ];
-    for (const pattern of keyPatterns) {
+    for (const pattern of [...keyPatterns, ...frameworkPatterns]) {
       let match;
       while ((match = pattern.exec(content))) {
-        const key = match[1];
+        const key = match[1] || match[2];
+        if (!key) continue;
         usedKeys.add(key);
         const location = offsetToLocation(content, match.index);
         const list = usageLocations.get(key) || [];

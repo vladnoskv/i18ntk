@@ -1,0 +1,9 @@
+{
+  "name": "svelte-i18n-test",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "svelte": "^4.2.0",
+    "svelte-i18n": "^4.0.0"
+  }
+}

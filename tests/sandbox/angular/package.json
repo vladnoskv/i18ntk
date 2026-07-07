@@ -1,0 +1,10 @@
+{
+  "name": "angular-i18n-test",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@angular/core": "^17.0.0",
+    "@ngx-translate/core": "^15.0.0",
+    "@ngx-translate/http-loader": "^8.0.0"
+  }
+}

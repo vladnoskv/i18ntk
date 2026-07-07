@@ -1,4 +1,4 @@
-# i18ntk v4.6.1
+# i18ntk v4.7.0
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.6.1)](https://socket.dev/npm/package/i18ntk/overview/4.6.1)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.7.0)](https://socket.dev/npm/package/i18ntk/overview/4.7.0)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -27,15 +27,15 @@ npm install -g i18ntk
 npx i18ntk --help
 ```
 
-## What's New in 4.6.0
+## What's New in 4.7.0
 
-- **25+ framework detections** — Rust, Remix, Gatsby, Astro, Qwik, SolidJS, Ember, React Native, Expo, Ionic added. All drawn from a single centralized detector.
-- **Rust support** — Cargo.toml detection and `.rs` file scanning with fluent/gettext-rs framework patterns.
-- **File extensions** — `.astro`, `.mdx`, `.mjs`, `.mts`, `.cjs`, `.cts`, `.rs` scanned across all tools.
-- **ICU/Fluent placeholder support** — Fluent `$variable` and ICU `{var, plural, ...}` patterns detected.
-- **JSX component detection** — `<Trans>`, `<FormattedMessage>`, `<Translate>` components recognized.
-- **Health score fix** — No more negative or misleadingly low scores.
-- **Centralized architecture** — Framework data, extensions, excludes, and patterns live in one module consumed by all tools.
+- **30+ framework detection patterns** — 13 new FRAMEWORK_PATTERNS: `i18ntk-runtime`, `nuxt`, `lingui`, `formatjs`, `ngx-translate`, `next-intl`, `svelte-i18n`, `solid-i18n`, `fastapi`, `ruby-on-rails`, `react-native-localize`, `ionic`. Each with framework-specific scan regexes for translation calls, JSX components, template directives, and pipes.
+- **Non-Node project detection** — Python (`requirements.txt`, `pyproject.toml`, `setup.py`), Rust (`Cargo.toml`), Go (`go.mod`), Ruby (`Gemfile`) now detected when no `package.json` exists. Detects Django, Flask, FastAPI, Rails, and generic i18n.
+- **20+ new WRAPPER_SKIP_PATTERNS** — Covers I18n.t(), useTranslate(), translateService.instant(), formatMessage(), bundle.get_message(), fluent!, ts! and more.
+- **Framework-aware report generation** — `report-model.js` accepts optional framework parameter and uses framework-specific patterns for key extraction.
+- **Expanded namespace helpers** — `useTranslate` (Qwik), `useSpeak` (Qwik), `withTranslation` (react-i18next) added.
+- **Attribute key detection** — `i18nKey=`, `t-key=`, `data-i18n=` attributes detected in source scanning.
+- **All frame works now have FRAMEWORK_COMPATIBILITY entries and FRAMEWORK_SUGGESTIONS** for consistent tooling.
 
 [Full changelog →](./CHANGELOG.md)
 

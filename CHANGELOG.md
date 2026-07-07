@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [4.7.0] - 2026-07-07
+
+### Added
+
+- **13 new FRAMEWORK_PATTERNS:** `i18ntk-runtime` (hooks, `<t>` component), `nuxt` (`$tc()`, `localePath()`), `lingui` (`<Translate>` component), `formatjs` (`<FormattedMessage>`), `ngx-translate` (pipe, service patterns), `next-intl`, `svelte-i18n`, `solid-i18n` (`<Translate>`), `fastapi`, `ruby-on-rails` (`I18n.t/l/translate`), `react-native-localize`, `ionic`. Each has framework-specific scanning regex patterns.
+- **8 missing FRAMEWORK_COMPATIBILITY entries:** `nuxt`, `nuxt-i18n`, `next-intl`, `ngx-translate`, `svelte-i18n`, `solid-i18n`, `expo`, `vanilla` with min versions.
+- **Non-Node project detection:** `detectFramework()` now checks Python (`requirements.txt`, `pyproject.toml`, `setup.py`), Rust (`Cargo.toml`), Go (`go.mod`), Ruby (`Gemfile`) when no `package.json` exists. Detects Django, Flask, FastAPI, Rails, and generic i18n usage.
+- **20+ new WRAPPER_SKIP_PATTERNS:** `I18n.t(`, `I18n.translate(`, `useTranslate(`, `t.get(`, `$tc(`, `translateService.instant(`, `formatMessage(`, `bundle.get_message(`, `i18n.NewMessage(`, `_(`, `fluent!`, `ts!` and more.
+- **Expanded KNOWN_WRAPPERS in Lens scanner:** Added `$_`, `$tc`, `gettext`, `gettext_lazy`, `I18n.t`, `I18n.translate`, `I18n.l`, `I18n.localize`.
+- **Expanded NAMESPACE_HELPERS in both scanners:** Added `useTranslate`, `useSpeak`, `withTranslation`.
+- **Framework-aware report-model.js:** `scanSourceFiles()` accepts optional framework parameter, uses `getFrameworkPatterns()` for framework-specific key extraction.
+- **Expanded CLI init framework list:** `checkI18nDependencies()` now scans 27+ npm package names instead of 7.
+- **Sandbox test suite:** 98 new tests covering framework detection against real package.json, requirements.txt, Cargo.toml, go.mod, Gemfile fixtures. Coverage validation for all FRAMEWORK_PATTERNS, FRAMEWORK_SUGGESTIONS, FRAMEWORK_COMPATIBILITY, WRAPPER_SKIP_PATTERNS, and SCANNER_EXTENSIONS.
+
+### Changed
+
+- **Version bumped to 4.7.0** for the comprehensive framework detection expansion.
+- **detectFramework()** no longer returns `null` when only non-Node project files are present. Cascades through 5 detection phases: Node → Python → Rust → Go → Ruby.
+
 ## [4.6.1] - 2026-07-05
 
 ### Fixed

@@ -1,0 +1,9 @@
+{
+  "name": "vue-i18n-test",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "vue": "^3.3.0",
+    "vue-i18n": "^9.0.0"
+  }
+}

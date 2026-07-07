@@ -1,0 +1,11 @@
+[package]
+name = "rust-i18n-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fluent-bundle = "0.15"
+fluent-resmgr = "0.8"
+fluent-syntax = "0.11"
+gettext = "0.4"
+gettext-macros = "0.3"
