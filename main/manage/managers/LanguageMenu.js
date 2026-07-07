@@ -6,6 +6,7 @@
 const { t } = require('../../../utils/i18n-helper');
 const { loadTranslations } = require('../../../utils/i18n-helper');
 const SecurityUtils = require('../../../utils/security');
+const { formatLanguagePrompt } = require('../../../utils/language-menu');
 
 module.exports = class LanguageMenu {
   constructor(manager) {
@@ -30,7 +31,8 @@ module.exports = class LanguageMenu {
 
     console.log(`0. ${t('language.backToMainMenu')}`);
 
-    const choice = await this.manager.prompt('\n' + t('language.prompt'));
+    const languagePrompt = formatLanguagePrompt(t('language.prompt'), this.ui.availableLanguages.length);
+    const choice = await this.manager.prompt('\n' + languagePrompt);
     const choiceNum = parseInt(choice);
 
     if (choiceNum === 0) {

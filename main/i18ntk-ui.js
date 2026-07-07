@@ -9,7 +9,21 @@ const SettingsManager = require('../settings/settings-manager');
 const SecurityUtils = require('../utils/security');
 const legacyConfigManager = require('../utils/config-manager');
 const { getIcon, isUnicodeSupported } = require('../utils/terminal-icons');
+const { formatLanguagePrompt } = require('../utils/language-menu');
 const configManager = new SettingsManager();
+
+function getSupportedUiLanguages() {
+    return configManager.getAvailableLanguages();
+}
+
+function getSupportedUiLanguageCodes() {
+    return getSupportedUiLanguages().map(language => language.code);
+}
+
+function getSupportedUiLanguageName(langCode) {
+    const language = getSupportedUiLanguages().find(item => item.code === langCode);
+    return language ? language.name : langCode;
+}
 
 class UIi18n {
     constructor() {
@@ -100,7 +114,7 @@ this.translations = {};
      * @returns {string[]} Array of available language codes
      */
     detectAvailableLanguages() {
-        const all = ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'];
+        const all = getSupportedUiLanguageCodes();
         return all.filter(lang => {
             const filePath = path.join(this.uiLocalesDir, `${lang}.json`);
             return SecurityUtils.safeExistsSync(filePath, this.getValidationBase(filePath));
@@ -482,25 +496,15 @@ this.translations = {};
      * @returns {string} Display name of the language
      */
     getLanguageDisplayName(langCode) {
-        const displayNames = {
-            'en': 'English',
-            'de': 'Deutsch (German)',
-            'es': 'Español (Spanish)',
-            'fr': 'Français (French)',
-            'ru': 'Русский (Russian)',
-            'ja': '日本語 (Japanese)',
-            'zh': '中文 (Chinese)'
-         };
-
         // Hardcoded texts that are not part of the i18n system but need to be displayed
         this.hardcodedTexts = {
             autoDetectedI18nDirectory: this.t('ui.autoDetectedI18nDirectory'),
             executingCommand: this.t('ui.executingCommand'),
             unknownCommand: this.t('ui.unknownCommand'),
             errorExecutingCommand: this.t('ui.errorExecutingCommand')
-        
+
         };
-        return displayNames[langCode] || langCode;
+        return getSupportedUiLanguageName(langCode);
     }
 
     /**
@@ -528,7 +532,8 @@ this.translations = {};
                console.log(this.t('language.languageOption', { index: index + 1, displayName, current }));
             });
             
-            rl.question('\n' + this.t('language.prompt'), async (answer) => {
+            const languagePrompt = formatLanguagePrompt(this.t('language.prompt'), this.availableLanguages.length);
+            rl.question('\n' + languagePrompt, async (answer) => {
                 const choice = parseInt(answer);
 
                 if (choice === 0) {

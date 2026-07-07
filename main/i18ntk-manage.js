@@ -37,6 +37,7 @@ const SettingsCLI = require('../settings/settings-cli');
 // const I18nDebugger = require('../scripts/debug/debugger');
 const { createPrompt, isInteractive } = require('../utils/prompt-helper');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../utils/i18n-helper');
+const { formatLanguagePrompt } = require('../utils/language-menu');
 // Preload translations early to avoid missing key warnings
 loadTranslations();
 const cliHelper = require('../utils/cli-helper');
@@ -1207,7 +1208,8 @@ class I18nManager {
     
     console.log(`0. ${t('language.backToMainMenu')}`);
     
-    const choice = await this.prompt('\n' + t('language.prompt'));
+    const languagePrompt = formatLanguagePrompt(t('language.prompt'), this.ui.availableLanguages.length);
+    const choice = await this.prompt('\n' + languagePrompt);
     const choiceNum = parseInt(choice);
     
     if (choiceNum === 0) {

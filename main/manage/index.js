@@ -17,12 +17,13 @@ const path = require('path');
 const fs = require('fs');
 const AdminAuth = require('../../utils/admin-auth');
 const SecurityUtils = require('../../utils/security');
-const configManager = require('../../settings/settings-manager');
+const SettingsManager = require('../../settings/settings-manager');
 const { validateSourceDir } = require('../../utils/config-helper');
 const { checkInitialized } = require('../../utils/init-helper');
 const { showFrameworkWarningOnce } = require('../../utils/cli-helper');
 const { createPrompt, isInteractive } = require('../../utils/prompt-helper');
 const { loadTranslations, t, refreshLanguageFromSettings} = require('../../utils/i18n-helper');
+const { formatLanguagePrompt } = require('../../utils/language-menu');
 const cliHelper = require('../../utils/cli-helper');
 const { printUpgradeWarningIfOutdated } = require('../../utils/npm-version-warning');
 const { blue } = require('../../utils/colors-new');
@@ -33,6 +34,8 @@ const pkg = require('../../package.json');
 const SetupEnforcer = require('../../utils/setup-enforcer');
 const CommandRouter = require('./commands/CommandRouter');
 const { detectProjectFramework } = require('../../utils/framework-detector');
+
+const configManager = new SettingsManager();
 
 // Import services to replace circular dependencies
 const ConfigurationService = require('./services/ConfigurationService');
@@ -1005,29 +1008,27 @@ class I18nManager {
     // ... existing code for showLanguageMenu, showDebugMenu, deleteReports, showSettingsMenu, etc. ...
 
     async showLanguageMenu() {
+        const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
+        const currentLanguage = settings.uiLanguage || settings.language || this.config.uiLanguage || this.config.language || 'en';
+        const languages = configManager.getAvailableLanguages ? configManager.getAvailableLanguages() : [
+            { code: 'en', name: 'English' }
+        ];
+        const currentLanguageName = languages.find(lang => lang.code === currentLanguage)?.name || currentLanguage;
+
         console.log(`\n${t('language.title')}`);
         console.log(t('language.separator'));
-        console.log(t('language.current', { language: 'English' })); // Simplified since we don't have UIi18n
+        console.log(t('language.current', { language: currentLanguageName }));
         console.log('\n' + t('language.available'));
 
-        const languages = [
-            { code: 'en', name: 'English' },
-            { code: 'de', name: 'Deutsch' },
-            { code: 'es', name: 'Español' },
-            { code: 'fr', name: 'Français' },
-            { code: 'ru', name: 'Русский' },
-            { code: 'ja', name: '日本語' },
-            { code: 'zh', name: '中文' }
-        ];
-
         languages.forEach((lang, index) => {
-            const current = 'en' === 'en' ? ' ✓' : '';
+            const current = lang.code === currentLanguage ? ' ✓' : '';
             console.log(t('language.languageOption', { index: index + 1, displayName: lang.name, current }));
         });
 
         console.log(`0. ${t('language.backToMainMenu')}`);
 
-        const choice = await this.prompt('\n' + t('language.prompt'));
+        const languagePrompt = formatLanguagePrompt(t('language.prompt'), languages.length);
+        const choice = await this.prompt('\n' + languagePrompt);
         const choiceNum = parseInt(choice);
 
         if (choiceNum === 0) {
@@ -1035,6 +1036,14 @@ class I18nManager {
             return;
         } else if (choiceNum >= 1 && choiceNum <= languages.length) {
             const selectedLang = languages[choiceNum - 1];
+            settings.language = selectedLang.code;
+            settings.uiLanguage = selectedLang.code;
+            if (configManager.saveSettings) {
+                await configManager.saveSettings(settings);
+            } else if (configManager.saveConfig) {
+                await configManager.saveConfig(settings);
+            }
+
             console.log(t('language.changed', { language: selectedLang.name }));
 
             // Force reload translations for the entire system

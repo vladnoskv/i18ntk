@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [4.7.2] - 2026-07-07
+
+### Fixed
+
+- **Dynamic CLI language selector** — Option 12 now derives available languages and native display names from `SettingsManager.getAvailableLanguages()` instead of stale hardcoded 7-language lists.
+- **Future-proof prompt range** — Language selection prompts now render the numeric upper bound from the current available language count, so future UI locale expansion does not leave stale `0-8` prompt text behind.
+- **Fallback manager parity** — `main/manage/index.js` now instantiates `SettingsManager`, shows the real current UI language, persists `language` and `uiLanguage`, and uses the same 23-language registry as the rest of the CLI.
+
 ## [4.7.1] - 2026-07-07
 
 ### Added

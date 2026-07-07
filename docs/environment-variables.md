@@ -1,4 +1,4 @@
-# Environment Variables (v4.5.4)
+# Environment Variables (v4.7.2)
 
 i18ntk uses fixed allowlists for environment variables. Core configuration variables are handled by `utils/env-manager.js`; Auto Translate provider variables are read by the translation provider layer.
 
@@ -8,7 +8,7 @@ i18ntk uses fixed allowlists for environment variables. Core configuration varia
 |---|---:|---|
 | `I18NTK_LOG_LEVEL` | `error` | Logging level: `error`, `warn`, `info`, `debug`, or `silent` |
 | `I18NTK_OUTDIR` | `./i18ntk-reports` | Output/report directory override |
-| `I18NTK_UI_LANGUAGE` | `en` | CLI UI language: `en`, `de`, `es`, `fr`, `ru`, `ja`, or `zh` |
+| `I18NTK_UI_LANGUAGE` | `en` | CLI UI language code. Supported UI locales are discovered from the package registry and currently include `en`, `de`, `es`, `fr`, `it`, `pt`, `nl`, `pl`, `sv`, `uk`, `cs`, `tr`, `ru`, `ja`, `ko`, `zh`, `ar`, `hi`, `th`, `vi`, `he`, `el`, and `hu`. |
 | `I18NTK_SILENT` | `false` | Reduce interactive prompts/output |
 | `I18NTK_DEBUG_LOCALES` | `false` | Locale loading debug logs |
 | `I18NTK_RUNTIME_DIR` | `null` | Runtime locale base directory override |

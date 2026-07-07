@@ -51,7 +51,7 @@ Many commands support:
 - `--output-dir <path>`
 - `--source-locale <code>`
 - `--source-language <code>` legacy alias for `--source-locale`
-- `--ui-language <code>`
+- `--ui-language <code>` for the CLI UI locale. Supported UI locale codes match the package language registry used by the interactive language selector.
 - `--no-prompt`
 - `--help`
 

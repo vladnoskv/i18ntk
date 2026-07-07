@@ -1,4 +1,4 @@
-# i18ntk v4.7.1
+# i18ntk v4.7.2
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
@@ -9,7 +9,7 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.7.1)](https://socket.dev/npm/package/i18ntk/overview/4.7.1)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.7.2)](https://socket.dev/npm/package/i18ntk/overview/4.7.2)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -26,6 +26,11 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 npm install -g i18ntk
 npx i18ntk --help
 ```
+
+## What's New in 4.7.2
+
+- **Dynamic Language Selector** — The interactive "Change UI Language" menu now derives its options and display names from the package language registry, including the fallback `manage/index.js` entrypoint.
+- **Future-Proof Prompt Range** — The language selection prompt now renders `0-N` from the installed UI locale count instead of using a stale translated `0-8` range, so future locale expansion updates automatically.
 
 ## What's New in 4.7.1
 

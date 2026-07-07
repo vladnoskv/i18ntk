@@ -79,7 +79,7 @@ Example:
 - `outputDir`: report output directory.
 - `sourceLanguage`: base language for completeness checks and Auto Translate source values.
 - `defaultLanguages`: target languages used by init, completion, and manager Auto Translate.
-- `uiLanguage`: CLI message language.
+- `uiLanguage`: CLI message language. The interactive "Change UI Language" menu uses the package language registry and computes its numeric prompt range from the available UI locale count.
 - `reports.format`: report output format for init and analysis reports. Supported values are `markdown`, `json`, and `text`; default is `markdown`.
 - `setup.completed`: setup marker used by startup checks.
 - `backup.enabled`: enable or disable backup creation. Setup defaults this to `false`.
