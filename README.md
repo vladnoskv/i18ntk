@@ -1,4 +1,4 @@
-# i18ntk v4.7.2
+# i18ntk v4.7.3
 
 A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
 
