@@ -4,9 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
-## [4.7.2] - 2026-07-07
+## [4.7.3] - 2026-07-07
 
 ### Fixed
+
+- **PUBLISH INTEGRITY:** `utils/language-menu.js` and `utils/promptPin.js` were missing from the `files` array in `package.json`, causing `MODULE_NOT_FOUND` on install. Both added to `files` array in `package.json` and `package.public.json`.
+- **4.7.2 deprecated** — published with the missing-module bug. All users should upgrade to 4.7.3.
+- **Publish integrity test:** New `tests/publish-integrity.test.js` validates every production `require()` resolves to a file listed in the `files` array. Prevents future missing-module regressions.
+
+## [4.7.2] - 2026-07-07
+
+### FIXED
 
 - **Dynamic CLI language selector** — Option 12 now derives available languages and native display names from `SettingsManager.getAvailableLanguages()` instead of stale hardcoded 7-language lists.
 - **Future-proof prompt range** — Language selection prompts now render the numeric upper bound from the current available language count, so future UI locale expansion does not leave stale `0-8` prompt text behind.

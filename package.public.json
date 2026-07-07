@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.7.2",
+  "version": "4.7.3",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
@@ -144,12 +144,14 @@
     "utils/localized-confirm.js",
     "utils/mini-commander.js",
     "utils/locale-optimizer.js",
+    "utils/language-menu.js",
     "utils/logger.js",
     "utils/menu-layout.js",
     "utils/npm-version-warning.js",
     "utils/plugin-loader.js",
     "utils/prompt-helper.js",
     "utils/prompt.js",
+    "utils/promptPin.js",
     "utils/report-writer.js",
     "utils/report-model.js",
     "utils/secure-errors.js",
@@ -179,7 +181,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.7.2",
+    "version": "4.7.3",
     "releaseDate": "07/07/2026",
     "lastUpdated": "07/07/2026",
     "maintainer": "Vlad Noskov",
@@ -204,7 +206,7 @@
       "PATCH: Language selection prompts now render their numeric range dynamically from the installed UI locale count, preventing stale bounds during future locale expansion."
     ],
     "breakingChanges": [],
-    "nextVersion": "4.7.3",
+    "nextVersion": "4.7.4",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -233,9 +235,15 @@
       "fluent-rs": ">=0.16.0",
       "gettext-rs": ">=0.7.0"
     },
-    "supportPolicy": "Versions earlier than 4.7.0 may be unstable or insecure in CI automation. Upgrade to 4.7.2 or newer.",
-    "deprecations": ["4.3.0", "4.3.1", "4.3.2", "4.3.3"],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.7.2 or newer: npm install -g i18ntk@latest",
+    "supportPolicy": "Versions earlier than 4.7.3 may be unstable or insecure in CI automation. Upgrade to 4.7.3 or newer.",
+    "deprecations": [
+      "4.3.0",
+      "4.3.1",
+      "4.3.2",
+      "4.3.3",
+      "4.7.2"
+    ],
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). i18ntk 4.7.2 has a missing-module bug. Upgrade to i18ntk@4.7.3 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"
