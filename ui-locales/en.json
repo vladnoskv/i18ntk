@@ -2025,7 +2025,23 @@
       "fr": "French",
       "ru": "Russian",
       "ja": "Japanese",
-      "zh": "Chinese"
+      "zh": "Chinese",
+      "it": "Italian",
+      "pt": "Portuguese",
+      "nl": "Dutch",
+      "pl": "Polish",
+      "sv": "Swedish",
+      "uk": "Ukrainian",
+      "cs": "Czech",
+      "tr": "Turkish",
+      "ko": "Korean",
+      "ar": "Arabic",
+      "hi": "Hindi",
+      "th": "Thai",
+      "vi": "Vietnamese",
+      "he": "Hebrew",
+      "el": "Greek",
+      "hu": "Hungarian"
     },
     "viewAll": {
       "title": "View All Settings"

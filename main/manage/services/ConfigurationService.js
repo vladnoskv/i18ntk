@@ -311,7 +311,7 @@ module.exports = class ConfigurationService {
             break;
           default:
             // Handle language shorthand flags like --de, --fr
-            if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(sanitizedKey)) {
+            if (['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(sanitizedKey)) {
               parsed.uiLanguage = sanitizedKey;
             }
             break;

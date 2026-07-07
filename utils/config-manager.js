@@ -106,10 +106,9 @@ const DEFAULT_CONFIG = {
     "setupId": null
   },
   "framework": {
-    "preference": "auto", // one of: auto | vanilla | react | vue | angular | svelte | i18next | nuxt | next
-    "fallback": "vanilla", // when auto detects nothing, use this value
-    "detect": true,
-    "supported": ["react", "vue", "angular", "svelte", "i18next", "nuxt", "next", "vanilla"]
+    "preference": "auto",
+    "fallback": "vanilla",
+    "detect": true
   },
   "scriptDirectories": {
     "init": null,

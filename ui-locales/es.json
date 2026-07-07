@@ -2057,7 +2057,23 @@
       "fr": "Francés",
       "ru": "Ruso",
       "ja": "Japonés",
-      "zh": "Chino"
+      "zh": "Chino",
+      "it": "Italiano",
+      "pt": "Portugués",
+      "nl": "Neerlandés",
+      "pl": "Polaco",
+      "sv": "Sueco",
+      "uk": "Ucraniano",
+      "cs": "Checo",
+      "tr": "Turco",
+      "ko": "Coreano",
+      "ar": "Árabe",
+      "hi": "Hindi",
+      "th": "Tailandés",
+      "vi": "Vietnamita",
+      "he": "Hebreo",
+      "el": "Griego",
+      "hu": "Húngaro"
     },
     "viewAll": {
       "title": "Ver todas las configuraciones"

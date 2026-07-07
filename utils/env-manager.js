@@ -71,7 +71,7 @@ const ALLOWED_ENV_VARS = {
   // UI and interaction
   'I18NTK_UI_LANGUAGE': {
     default: 'en',
-    validate: (value) => ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(value.toLowerCase()),
+    validate: (value) => ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(value.toLowerCase()),
     transform: (value) => value.toLowerCase()
   },
   

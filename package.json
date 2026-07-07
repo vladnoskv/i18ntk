@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.7.0",
+  "version": "4.7.1",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18ntk",
@@ -228,7 +228,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.7.0",
+    "version": "4.7.1",
     "releaseDate": "07/07/2026",
     "lastUpdated": "07/07/2026",
     "maintainer": "Vlad Noskov",
@@ -246,10 +246,12 @@
       "ICU/FLUENT PLACEHOLDER SUPPORT: Fluent $variable and ICU MessageFormat patterns added to placeholder detection and comparison.",
       "JSX COMPONENT DETECTION: <Trans>, <FormattedMessage>, <Translate> JSX components detected in both VS Code extensions.",
       "COMPREHENSIVE TESTING: All 384+ tests pass across CLI, Workbench, and Lens packages.",
-      "FRAMEWORK DETECTION v2: Added 13 additional FRAMEWORK_PATTERNS (i18ntk-runtime, nuxt, formatjs, lingui, ngx-translate, next-intl, svelte-i18n, solid-i18n, fastapi, ruby-on-rails, react-native-localize, ionic). Expanded detectFramework() to check Python/Rust/Go/Ruby project files. Added 20+ WRAPPER_SKIP_PATTERNS. Added 8 missing FRAMEWORK_COMPATIBILITY versions. Now supports 30+ frameworks across 15+ languages."
+      "FRAMEWORK DETECTION v2: Added 13 additional FRAMEWORK_PATTERNS (i18ntk-runtime, nuxt, formatjs, lingui, ngx-translate, next-intl, svelte-i18n, solid-i18n, fastapi, ruby-on-rails, react-native-localize, ionic). Expanded detectFramework() to check Python/Rust/Go/Ruby project files. Added 20+ WRAPPER_SKIP_PATTERNS. Added 8 missing FRAMEWORK_COMPATIBILITY versions. Now supports 30+ frameworks across 15+ languages.",
+      "UI LOCALE EXPANSION: Expanded from 7 to 23 languages (Italian, Portuguese, Dutch, Polish, Swedish, Ukrainian, Czech, Turkish, Korean, Arabic, Hindi, Thai, Vietnamese, Hebrew, Greek, Hungarian). All 2,211 keys auto-translated with placeholder preservation. Native language names in all locale files. getAvailableLanguages(), settings schema enums, and UI language picker expanded to 23. 95-98% translated per language, 0 missing keys.",
+      "FRAMEWORK DETECTION CLEANUP: manage/index.js now uses centralized detectProjectFramework() instead of 6-framework inline check. Removed hardcoded framework.supported from config templates — only detected frameworks appear. checkI18nDependencies() unified across 4 modules (8→29 entries). 12 production files updated — hardcoded 7-language arrays expanded to 23."
     ],
     "breakingChanges": [],
-    "nextVersion": "4.7.1",
+    "nextVersion": "4.7.2",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -278,14 +280,9 @@
       "fluent-rs": ">=0.16.0",
       "gettext-rs": ">=0.7.0"
     },
-    "supportPolicy": "Versions earlier than 4.7.0 may be unstable or insecure in CI automation. Upgrade to 4.7.0 or newer.",
-    "deprecations": [
-      "4.3.0",
-      "4.3.1",
-      "4.3.2",
-      "4.3.3"
-    ],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.7.0 or newer: npm install -g i18ntk@latest",
+    "supportPolicy": "Versions earlier than 4.7.0 may be unstable or insecure in CI automation. Upgrade to 4.7.1 or newer.",
+    "deprecations": ["4.3.0", "4.3.1", "4.3.2", "4.3.3"],
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). Upgrade to i18ntk@4.7.1 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"

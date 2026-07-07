@@ -2057,7 +2057,23 @@
       "fr": "Français",
       "ru": "russe",
       "ja": "japonais",
-      "zh": "Chinois"
+      "zh": "Chinois",
+      "it": "Italien",
+      "pt": "Portugais",
+      "nl": "Néerlandais",
+      "pl": "Polonais",
+      "sv": "Suédois",
+      "uk": "Ukrainien",
+      "cs": "Tchèque",
+      "tr": "Turc",
+      "ko": "Coréen",
+      "ar": "Arabe",
+      "hi": "Hindi",
+      "th": "Thaï",
+      "vi": "Vietnamien",
+      "he": "Hébreu",
+      "el": "Grec",
+      "hu": "Hongrois"
     },
     "viewAll": {
       "title": "Afficher tous les paramètres"

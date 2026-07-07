@@ -550,7 +550,7 @@ class I18nManager {
           const hasLanguageDirs = items.some(item => {
             const itemPath = path.join(resolvedPath, item);
             return fs.statSync(itemPath).isDirectory() && 
-                   ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
+                   ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(item);
           });
           
           if (hasLanguageDirs) {
@@ -584,14 +584,15 @@ class I18nManager {
       };
       
       const i18nFrameworks = [
-        'react-i18next',
-        'vue-i18n', 
-        'angular-i18n',
-        'i18next',
-        'next-i18next',
-        'svelte-i18n',
-        '@nuxtjs/i18n',
-        'i18ntk-runtime'
+        'react-i18next', 'vue-i18n', 'i18next', 'next-i18next',
+        'svelte-i18n', '@nuxtjs/i18n', 'next-intl', 'remix-i18next',
+        'i18next-remix', 'gatsby-plugin-react-i18next', 'gatsby-plugin-intl',
+        'sveltekit-i18n', 'astro-i18next', '@astrojs/i18n',
+        'qwik-speak', 'qwik-i18n', '@solid-primitives/i18n',
+        'ember-intl', 'react-native-localize', 'expo-localization',
+        '@ngx-translate/core', '@ionic/angular',
+        'formatjs', '@lingui/core', 'i18ntk-runtime', 'i18ntk/runtime',
+        'angular-i18n', '@angular/localize', 'i18ntk'
       ];
       
       const installedFrameworks = i18nFrameworks.filter(framework => dependencies[framework]);
@@ -679,7 +680,7 @@ class I18nManager {
             break;
           default:
             // Handle language shorthand flags like --de, --fr
-            if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(sanitizedKey)) {
+            if (['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(sanitizedKey)) {
               parsed.uiLanguage = sanitizedKey;
             }
             break;

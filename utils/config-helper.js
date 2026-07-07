@@ -534,7 +534,7 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
   SecurityUtils.safeWriteFileSync(sourceFile, JSON.stringify(defaultContent, null, 2), sourceDir, 'utf8');
   
   // Create directories for supported languages
-  const supportedLanguages = ['es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'];
+  const supportedLanguages = ['es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt', 'it', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ko', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'];
   
   supportedLanguages.forEach(lang => {
     const langFile = path.join(sourceDir, `${lang}.json`);
@@ -564,7 +564,7 @@ async function initializeSourceFiles(sourceDir, sourceLang) {
       sourceDir: sourceDir,
       outputDir: "./i18ntk-reports",
       defaultLanguage: sourceLang,
-      supportedLanguages: [sourceLang, 'es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt'],
+      supportedLanguages: [sourceLang, 'es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt', 'it', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ko', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'],
       setup: {
         completed: true,
         completedAt: new Date().toISOString(),

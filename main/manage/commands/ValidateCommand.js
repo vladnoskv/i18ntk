@@ -163,7 +163,7 @@ class ValidateCommand {
                 const sanitizedArg = SecurityUtils.sanitizeInput(arg);
                 if (sanitizedArg.startsWith('--') && !sanitizedArg.includes('=')) {
                     const key = sanitizedArg.substring(2);
-                    if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(key)) {
+                    if (['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(key)) {
                         baseArgs.uiLanguage = key;
                     }
                 }

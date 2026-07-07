@@ -780,13 +780,13 @@ class SettingsManager {
                 language: {
                     type: 'string',
                     description: 'Default language for translations',
-                    enum: ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'],
+                    enum: ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'],
                     default: 'en'
                 },
                 uiLanguage: {
                     type: 'string',
                     description: 'UI language for toolkit interface',
-                    enum: ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'],
+                    enum: ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'],
                     default: 'en'
                 },
                 theme: {
@@ -1129,9 +1129,25 @@ class SettingsManager {
             { code: 'de', name: 'Deutsch' },
             { code: 'es', name: 'Español' },
             { code: 'fr', name: 'Français' },
+            { code: 'it', name: 'Italiano' },
+            { code: 'pt', name: 'Português' },
+            { code: 'nl', name: 'Nederlands' },
+            { code: 'pl', name: 'Polski' },
+            { code: 'sv', name: 'Svenska' },
+            { code: 'uk', name: 'Українська' },
+            { code: 'cs', name: 'Čeština' },
+            { code: 'tr', name: 'Türkçe' },
             { code: 'ru', name: 'Русский' },
             { code: 'ja', name: '日本語' },
-            { code: 'zh', name: '中文' }
+            { code: 'ko', name: '한국어' },
+            { code: 'zh', name: '中文' },
+            { code: 'ar', name: 'العربية' },
+            { code: 'hi', name: 'हिन्दी' },
+            { code: 'th', name: 'ไทย' },
+            { code: 'vi', name: 'Tiếng Việt' },
+            { code: 'he', name: 'עברית' },
+            { code: 'el', name: 'Ελληνικά' },
+            { code: 'hu', name: 'Magyar' }
         ];
     }
 }

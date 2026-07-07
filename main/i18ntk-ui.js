@@ -100,7 +100,7 @@ this.translations = {};
      * @returns {string[]} Array of available language codes
      */
     detectAvailableLanguages() {
-        const all = ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'];
+        const all = ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'];
         return all.filter(lang => {
             const filePath = path.join(this.uiLocalesDir, `${lang}.json`);
             return SecurityUtils.safeExistsSync(filePath, this.getValidationBase(filePath));

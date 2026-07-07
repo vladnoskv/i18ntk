@@ -674,7 +674,7 @@ class UsageService {
           });
 
         for (const lang of allLanguageDirs) {
-          if (['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(lang)) {
+          if (['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(lang)) {
             languages.add(lang);
           }
         }
@@ -683,7 +683,7 @@ class UsageService {
         const directFiles = fs.readdirSync(this.i18nDir)
           .filter(file => file.endsWith('.json'))
           .map(file => path.basename(file, '.json'))
-          .filter(lang => ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(lang));
+          .filter(lang => ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(lang));
 
         directFiles.forEach(lang => languages.add(lang));
       } catch (error) {

@@ -10,7 +10,7 @@ const path = require('path');
 const SecurityUtils = require('./security');
 
 class MissingKeyValidator {
-  constructor(supportedLanguages = ['en', 'es', 'fr', 'de', 'ja', 'ru', 'zh']) {
+  constructor(supportedLanguages = ['en', 'es', 'fr', 'de', 'ja', 'ru', 'zh', 'pt', 'it', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ko', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu']) {
     this.supportedLanguages = supportedLanguages;
     this.projectRoot = path.resolve(__dirname, '..');
     this.requiredKeys = this.loadRequiredKeys();

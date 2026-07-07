@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [4.7.1] - 2026-07-07
+
+### Added
+
+- **23 UI locale languages** — Expanded from 7 to 23: Italian, Portuguese, Dutch, Polish, Swedish, Ukrainian, Czech, Turkish, Korean, Arabic, Hindi, Thai, Vietnamese, Hebrew, Greek, Hungarian. All 2,211 keys auto-translated with placeholder preservation via i18ntk's own pipeline. 95-98% translation completeness, 0 missing keys.
+- **Native language names** — `settings.languages.{code}` entries added to all 23 locale files with names in native script (Italiano, 日本語, العربية, हिन्दी, etc.). `getAvailableLanguages()` returns all 23 with display names.
+- **Settings schema expanded** — `language` and `uiLanguage` enum constraints expanded from 7 to 23 entries. Language selector in settings UI and CLI picks up all available languages.
+
+### Changed
+
+- **Framework detection centralized** — `manage/index.js` `detectEnvironmentAndFramework()` now calls `detectProjectFramework()` from the centralized detector instead of a 6-framework inline check. Detects all 30+ supported frameworks.
+- **Hardcoded `framework.supported` removed** — Config templates (`config-manager.js`) and runtime config (`.i18ntk-config`) no longer ship a static framework list. Only actually-detected frameworks appear.
+- **`checkI18nDependencies()` expanded** — Framework package lists unified across `manage/index.js`, `i18ntk-manage.js`, `InitService.js`, and `FrameworkDetectionService.js` (8→29 entries each).
+- **Hardcoded 7-language lists expanded to 23** — Updated in 12 production files: `i18n-usage.js`, `i18n-validate.js`, `ValidateCommand.js`, `UsageService.js`, `FrameworkDetectionService.js`, `ConfigurationService.js`, `i18ntk-manage.js`, `locale-optimizer.js` ×2, `env-manager.js`, `i18ntk-ui.js`, `manage/index.js`.
+- **Default config template expanded** — `config-helper.js` `supportedLanguages` and template skeleton files expanded from 8 to 23 languages.
+- **Missing key validator** — Default constructor argument expanded from 7 to 23 languages.
+- **Version bumped to 4.7.1** for language expansion and framework detection cleanup.
+
+### Verified
+
+- Language switching tested via `i18n-helper.loadTranslations()` across all 23 locales — all return non-English values.
+- 69 core tests pass, 98 sandbox tests pass.
+- Package JSON manifest sync test passes (version, versionInfo, nextVersion aligned).
+- All 23 locale files have valid JSON syntax.
+
 ## [4.7.0] - 2026-07-07
 
 ### Added

@@ -330,7 +330,7 @@ module.exports = class FrameworkDetectionService {
           const hasLanguageDirs = items.some(item => {
             const itemPath = path.join(resolvedPath, item);
             return fs.statSync(itemPath).isDirectory() &&
-                   ['en', 'de', 'es', 'fr', 'ru', 'ja', 'zh'].includes(item);
+                   ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(item);
           });
 
           if (hasLanguageDirs) {
