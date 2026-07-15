@@ -2,9 +2,9 @@
 
 ## Supported Versions
 
-The supported production line is `4.x`.
+The supported production line is `5.x`.
 
-Versions earlier than `4.2.0` are not recommended for production use because later releases include Auto Translate provider hardening, dynamic-require elimination, path-validation hardening, runtime language validation, lazy loading with manifest validation, incremental backup hash-chain verification, and post-4.0.0 critical bug fixes for runtime staleness, backup verification, and CLI flag parsing.
+Versions earlier than `5.0.0` are not recommended for new production use. v5 includes the current path-containment, translation-provider, framework-configuration, and release-verification controls. Earlier MIT releases retain their original license grants; the v5 licensing change does not revoke them.
 
 ## Security Model
 
@@ -23,6 +23,12 @@ Security priorities:
 ## Published Package Controls
 
 The npm package uses a stripped public manifest. It must not contain install-time lifecycle commands, dependency fields, local setup state, or development tooling.
+
+## Commercial license verification markers
+
+The optional `i18ntk-license` marker is intentionally public metadata for licensed public deployments; it is not a credential, access-control mechanism, or proof of license validity. The generator and verifier run locally and make no network request, phone-home call, telemetry event, or deployment scan.
+
+Only publish an opaque license identifier assigned by the licensor and approved public domains. Never place license keys, contracts, names, email addresses, billing information, private domains, internal URLs, API keys, or other secrets in the marker. Validate marker structure locally with `i18ntk-license verify`; confirm commercial entitlement against the licensor's private records.
 
 ## Socket.dev Analysis Disclaimer
 

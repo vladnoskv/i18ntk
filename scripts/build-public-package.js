@@ -6,6 +6,8 @@ const { spawnSync } = require('child_process');
 const SecurityUtils = require('../utils/security');
 
 const root = path.resolve(__dirname, '..');
+const workspaceCache = path.resolve(root, '..', '.npm-cache');
+fs.mkdirSync(workspaceCache, { recursive: true });
 const rootManifestPath = path.join(root, 'package.json');
 const publicManifestPath = path.join(root, 'package.public.json');
 const stageDir = path.join(root, '.release', 'i18ntk-public');
@@ -82,7 +84,8 @@ function run(command, args, cwd = root) {
   const result = spawnSync(executable, commandArgs, {
     cwd,
     stdio: 'inherit',
-    shell: typeof executable === 'string' && /\.cmd$/i.test(executable)
+    shell: typeof executable === 'string' && /\.cmd$/i.test(executable),
+    env: { ...process.env, npm_config_cache: workspaceCache }
   });
 
   if (result.status !== 0) {

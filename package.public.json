@@ -179,6 +179,7 @@
     "README.md",
     "CHANGELOG.md",
     "docs/reliability.md",
+    "docs/migration-v4-to-v5.md",
     "docs/framework-templates.md",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",

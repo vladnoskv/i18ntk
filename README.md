@@ -59,6 +59,8 @@ Use `npx i18ntk` for the guided menu. It detects the project framework and adds 
 
 See the [release notes](./CHANGELOG.md) for the full list of user-facing changes.
 
+Upgrading from v4? Follow the [v4 to v5 migration guide](./docs/migration-v4-to-v5.md), including the licensing change and one-time configuration migration.
+
 ## Everyday workflows
 
 ```bash
@@ -233,6 +235,7 @@ Features: 300ms debounce, SHA-256 hash tracking, 50-directory cap. The callback 
 
 ## Documentation
 
+- [Upgrade from v4 to v5](./docs/migration-v4-to-v5.md)
 - [Getting Started](./docs/getting-started.md)
 - [Configuration](./docs/api/CONFIGURATION.md)
 - [API Reference](./docs/api/API_REFERENCE.md)
@@ -280,6 +283,6 @@ Commercial customers can also request custom integration support for frameworks,
 
 Licensed public sites can use `i18ntk-license` to generate a searchable verification meta tag and `/i18ntk-license.json`. The tool does not phone home or collect visitor data; verification uses only intentionally published markers and licensing records.
 
-Downloading from npm does not grant commercial-use rights. See [Commercial licensing](./COMMERCIAL-LICENSE.md) for examples and how to request a license.
+Downloading from npm does not grant commercial-use rights. See [Commercial licensing](./COMMERCIAL-LICENSE.md) for examples and how to request a license. For the technical upgrade and privacy-safe public marker workflow, see the [v4 to v5 migration guide](./docs/migration-v4-to-v5.md).
 
 Earlier versions released under MIT remain available under their original license terms.

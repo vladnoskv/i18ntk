@@ -18,7 +18,7 @@ Choose what you want to do and jump straight to the relevant guide.
 
 - [API Reference](./api/API_REFERENCE.md)
 - [5.0.0 reliability and extraction APIs](./reliability.md)
-- [Migration Guide v4.3.2](./migration-guide-v4.3.2.md)
+- [Upgrade from v4 to v5](./migration-v4-to-v5.md)
 
 ## Everyday workflow
 
@@ -69,8 +69,7 @@ i18ntk reads project settings from the project-local `.i18ntk-config` file. CLI 
 
 ## Maintainer and contributor notes
 
-- The root `package.json` is the development manifest.
-- The public npm metadata lives in `package.public.json`.
+- The workspace root `package.json` is private; `i18ntk/package.json` is the publishable npm manifest.
 - `npm run package:public` stages the public package and runs a dry-run pack.
 - `npm run pack:public` creates the public tarball from the staged package.
 - `npm run publish:public` publishes the staged package after `npm whoami` succeeds.
