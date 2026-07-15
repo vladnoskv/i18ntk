@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 
-const localesDir = path.resolve(__dirname, '..', 'locales');
+const localesDir = path.resolve(__dirname, '..', 'test_env', 'locales');
 
 test('bundled locale fixtures expose the same namespace files for every target language', () => {
   const sourceLanguage = 'en';

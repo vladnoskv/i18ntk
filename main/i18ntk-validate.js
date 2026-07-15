@@ -18,6 +18,7 @@
 
 // Check for uppercase command usage and provide helpful error
 const commandLine = process.argv.join(' ');
+const { isSourceCopyMarker } = require('../utils/translation-quality');
 const isUppercase = /NPX I18NTK|NPM I18NTK/i.test(commandLine);
 
 if (isUppercase) {
@@ -476,7 +477,7 @@ class I18nValidator {
         totalKeys++;
         
         const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
-        if (markers.some(m => value === m)) {
+        if (markers.some(m => value === m) || isSourceCopyMarker(value)) {
           issues.push({
             type: 'not_translated',
             key: fullKey,

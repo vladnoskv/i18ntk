@@ -60,6 +60,8 @@ i18ntk-scanner --code-dir=./src --source-locale=de --output-report
 4. Run `i18ntk --command=validate`.
 5. Run `i18ntk --command=complete` if keys are still missing.
 
+`--exclude` is merged with `excludeFiles`/`excludeDirs` from project configuration and standard framework build/dependency exclusions. The scanner also omits module imports, route/CSS tokens, metadata literals, and strings already passed to common translation wrappers; results are intended to represent likely user-facing hardcoded text.
+
 ## Troubleshooting
 
 - If no files are scanned, confirm the `--code-dir` path.

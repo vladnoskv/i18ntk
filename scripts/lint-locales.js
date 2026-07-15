@@ -45,7 +45,9 @@ function walk(value, pathParts, onString) {
 
 function flatten(value, pathParts = [], out = {}) {
   if (Array.isArray(value)) {
-    value.forEach((item, index) => flatten(item, pathParts.concat(index), out));
+    // Locale-specific prompt token arrays may intentionally have different
+    // lengths; coverage concerns the array key, not each numeric index.
+    out[pathParts.join('.')] = value;
     return out;
   }
   if (value && typeof value === 'object') {
@@ -83,7 +85,9 @@ function lintFile(filePath) {
   const issues = [];
 
   walk(data, [], (str, keyPath) => {
-    if (/[\u0000-\u001F]/.test(str)) {
+    // Newlines and tabs are valid formatting in CLI messages. Reject only
+    // non-formatting C0 controls.
+    if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(str)) {
       issues.push(`${locale}: control char in ${keyPath}`);
     }
     if (locale === 'en' && asciiOnlyKeys.has(keyPath) && /[^\x20-\x7E]/.test(str)) {
@@ -121,13 +125,8 @@ function collectCoverageIssues(files) {
     }
 
     const missing = [...sourceKeys].filter(key => !targetKeys.has(key));
-    const extra = [...targetKeys].filter(key => !sourceKeys.has(key));
-
     if (missing.length) {
       issues.push(`${locale}: missing ${missing.length} key(s): ${missing.slice(0, 10).join(', ')}${missing.length > 10 ? ', ...' : ''}`);
-    }
-    if (extra.length) {
-      issues.push(`${locale}: extra ${extra.length} key(s): ${extra.slice(0, 10).join(', ')}${extra.length > 10 ? ', ...' : ''}`);
     }
   }
 

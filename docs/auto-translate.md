@@ -58,6 +58,8 @@ Translate one file:
 i18ntk-translate locales/en/common.json de
 ```
 
+When a source file is provided, it is the selected input even if `--source-dir` is also present. Use `--source-dir` without a positional file for directory batches. This avoids silently translating the wrong input.
+
 Use DeepL instead of the default Google endpoint:
 
 ```bash
@@ -159,6 +161,8 @@ Use reports to review what was translated or skipped:
 i18ntk-translate locales/en/common.json de --report-stdout
 i18ntk-translate locales/en/common.json de --report-file ./i18ntk-reports/translate-de.txt
 ```
+
+Unresolved values are written to `i18ntk-reports/auto-translate/<locale>.json`. `latest.json` remains available as the most recent compatibility report. Marker-prefixed values such as `[DE] English source` are key-presence placeholders, not completed translations, and remain in the residual review queue.
 
 Dry-run reports show planned work without writing translated output. When the final leftover check cannot fully clear untranslated placeholder-style values, reports include a `Leftover warnings` count and a table with file name, key path, and current value. The same unresolved values are written to `i18ntk-reports/auto-translate/latest.json` for targeted retry or VS Code review.
 

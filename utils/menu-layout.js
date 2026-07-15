@@ -15,9 +15,14 @@ const DEFAULT_OPTIONS = [
   [12, 'language'],
   [13, 'scanner'],
   [14, 'translate'],
+  [15, 'skills'],
   null,
   [0, 'exit'],
 ];
+
+const OPTION_FALLBACKS = {
+  skills: 'Install i18ntk skill for LLM agents',
+};
 
 function buildMainMenuLines(translate, options = {}) {
   const t = typeof translate === 'function' ? translate : key => key;
@@ -31,7 +36,12 @@ function buildMainMenuLines(translate, options = {}) {
     ...menuOptions.map(option => {
       if (!option) return '';
       const [number, key] = option;
-      return `${String(number).padStart(2, ' ')}. ${t(`menu.options.${key}`)}`;
+      const translationKey = `menu.options.${key}`;
+      const translated = t(translationKey);
+      const label = !translated || translated === translationKey || translated.includes(translationKey)
+        ? (OPTION_FALLBACKS[key] || translationKey)
+        : translated;
+      return `${String(number).padStart(2, ' ')}. ${label}`;
     }),
   ];
 }

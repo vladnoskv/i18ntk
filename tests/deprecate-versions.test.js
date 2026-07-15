@@ -46,16 +46,17 @@ exit 1
   }
 }
 
-test('release metadata marks 4.3.x as deprecated in favor of 4.6.1', () => {
+test('release metadata marks vulnerable releases as deprecated in favor of current', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
-  assert.deepStrictEqual(manifest.versionInfo.deprecations, ['4.3.0', '4.3.1', '4.3.2', '4.3.3']);
+  assert.deepStrictEqual(manifest.versionInfo.deprecations, ['4.3.0', '4.3.1', '4.3.2', '4.3.3', '4.7.2']);
   assert.match(manifest.versionInfo.deprecationMessage, /4\.3\.x/);
   assert.match(manifest.versionInfo.deprecationMessage, /path traversal/i);
-  assert.match(manifest.versionInfo.deprecationMessage, /4\.6\.1/);
+  assert.ok(manifest.versionInfo.deprecationMessage.includes(manifest.version));
 });
 
-test('deprecation script targets 4.3.x with the upgrade-to-4.6.1 message', () => {
+test('deprecation script targets vulnerable releases with the current upgrade message', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-deprecate-'));
   const binDir = path.join(tmpDir, 'bin');
   const logPath = path.join(tmpDir, 'npm.log');
@@ -76,7 +77,7 @@ test('deprecation script targets 4.3.x with the upgrade-to-4.6.1 message', () =>
 
   const log = fs.readFileSync(logPath, 'utf8');
   assert.match(log, /security/i);
-  assert.match(log, /4\.6\.1/);
+  assert.ok(log.includes(manifest.version));
   assert.match(log, /4\.3\.x/);
   assert.doesNotMatch(log, /1\.10\.0/);
 });

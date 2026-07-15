@@ -25,6 +25,7 @@ const FixerCommand = require('./FixerCommand');
 const ScannerCommand = require('./ScannerCommand');
 const TranslateCommand = require('./TranslateCommand');
 const ReportCommand = require('./ReportCommand');
+const SkillsCommand = require('./SkillsCommand');
 
 class CommandRouter {
     constructor(config = {}, ui = null, adminAuth = null) {
@@ -49,7 +50,8 @@ class CommandRouter {
             'fix': new FixerCommand(config, ui),
             'scanner': new ScannerCommand(config, ui),
             'translate': new TranslateCommand(config, ui),
-            'report': new ReportCommand(config, ui)
+            'report': new ReportCommand(config, ui),
+            'skills': new SkillsCommand(config, ui)
         };
     }
 
@@ -244,6 +246,9 @@ class CommandRouter {
 
             case 'report':
                 return await this.commandHandlers.report.execute(options);
+
+            case 'skills':
+                return await this.commandHandlers.skills.execute(options);
 
             case 'debug':
                 console.log('Debug functionality is not available in this version.');

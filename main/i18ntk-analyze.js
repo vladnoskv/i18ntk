@@ -10,6 +10,7 @@
 const path = require('path');
 const cliHelper = require('../utils/cli-helper');
 const { loadTranslations, t } = require('../utils/i18n-helper');
+const { isSourceCopyMarker } = require('../utils/translation-quality');
 const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../utils/config-helper');
 const SecurityUtils = require('../utils/security');
 const AdminCLI = require('../utils/admin-cli');
@@ -424,7 +425,7 @@ class I18nAnalyzer {
     const count = (item) => {
       if (typeof item === 'string') {
         total++;
-        if (markers.some(m => item === m)) {
+        if (markers.some(m => item === m) || isSourceCopyMarker(item)) {
           notTranslated++;
         } else if (item === '') {
           empty++;

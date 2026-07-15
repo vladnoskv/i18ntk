@@ -22,6 +22,7 @@ const I18nInitializer = require('../../i18ntk-init');
 const JsonOutput = require('../../../utils/json-output');
 const ExitCodes = require('../../../utils/exit-codes');
 const { detectTranslationContentRisks } = require('../../../utils/validation-risk');
+const { isSourceCopyMarker } = require('../../../utils/translation-quality');
 
 loadTranslations('en', path.resolve(__dirname, '../../../ui-locales'));
 
@@ -444,7 +445,7 @@ class ValidateCommand {
                 totalKeys++;
 
                 const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
-                if (markers.some(m => value === m)) {
+                if (markers.some(m => value === m) || isSourceCopyMarker(value)) {
                     issues.push({
                         type: 'not_translated',
                         key: fullKey,

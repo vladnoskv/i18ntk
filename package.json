@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "4.7.3",
+  "version": "5.0.0",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "keywords": [
     "i18ntk",
@@ -43,7 +43,7 @@
     "type": "individual",
     "url": "https://www.charitynavigator.org/"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "Vlad Noskov",
     "url": "https://github.com/vladnoskv"
@@ -65,6 +65,7 @@
     },
     "./runtime/*": "./runtime/*",
     "./report": "./utils/report-model.js",
+    "./license-marker": "./utils/license-marker.js",
     "./ui-locales/*": "./ui-locales/*",
     "./package.json": "./package.json"
   },
@@ -84,7 +85,8 @@
     "i18ntk-fixer": "main/i18ntk-fixer.js",
     "i18ntk-scanner": "main/i18ntk-scanner.js",
     "i18ntk-backup": "main/i18ntk-backup.js",
-    "i18ntk-translate": "main/i18ntk-translate.js"
+    "i18ntk-translate": "main/i18ntk-translate.js",
+    "i18ntk-license": "main/i18ntk-license.js"
   },
   "directories": {
     "doc": "docs",
@@ -99,6 +101,7 @@
     "main/i18ntk-doctor.js",
     "main/i18ntk-fixer.js",
     "main/i18ntk-init.js",
+    "main/i18ntk-license.js",
     "main/i18ntk-scanner.js",
     "main/i18ntk-setup.js",
     "main/i18ntk-report.js",
@@ -115,9 +118,11 @@
     "main/manage/",
     "runtime/",
     "settings/language-config.json",
+    "settings/framework-templates.json",
     "settings/settings-cli.js",
     "settings/settings-manager.js",
     "ui-locales/",
+    "skills/i18ntk/",
     "utils/admin-auth.js",
     "utils/admin-cli.js",
     "utils/cli-helper.js",
@@ -140,7 +145,9 @@
     "utils/translate/report.js",
     "utils/translate/cli.js",
     "utils/translate/protection.js",
+    "utils/translation-quality.js",
     "utils/framework-detector.js",
+    "utils/framework-config-templates.js",
     "utils/i18n-helper.js",
     "utils/init-helper.js",
     "utils/json-output.js",
@@ -148,6 +155,10 @@
     "utils/mini-commander.js",
     "utils/locale-optimizer.js",
     "utils/language-menu.js",
+    "utils/skill-installer.js",
+    "utils/language-registry.js",
+    "utils/license-marker.js",
+    "utils/locale-discovery.js",
     "utils/logger.js",
     "utils/menu-layout.js",
     "utils/npm-version-warning.js",
@@ -167,8 +178,11 @@
     "utils/version-utils.js",
     "utils/watch-locales.js",
     "LICENSE",
+    "COMMERCIAL-LICENSE.md",
     "README.md",
     "CHANGELOG.md",
+    "docs/reliability.md",
+    "docs/framework-templates.md",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
     "FUNDING.md",
@@ -201,8 +215,8 @@
     "security:check": "node utils/security-check-improved.js",
     "security:test": "node --test tests/security.test.js",
     "security:audit": "npm run security:check && npm run security:test",
-    "test": "npm run security:test && node --test tests/cli-reliability.test.js tests/usage-insights.test.js tests/usage-insights-new-features.test.js tests/regex-extractor-boundary.test.js tests/manifest-sync.test.js",
-    "test:all": "npm run security:audit",
+    "test": "node --test tests/*.test.js tests/sandbox/*.test.js",
+    "test:all": "npm run security:check && npm test",
     "package:public": "node scripts/build-public-package.js --dry-run",
     "pack:public": "node scripts/build-public-package.js --pack",
     "publish:public:dry-run": "node scripts/build-public-package.js --publish --dry-run",
@@ -219,7 +233,8 @@
     "languages:select": "node settings/settings-cli.js",
     "languages:list": "node settings/settings-cli.js --list-languages",
     "languages:status": "node settings/settings-cli.js --language-status",
-    "lint:locales": "node scripts/lint-locales.js"
+    "lint:locales": "node scripts/lint-locales.js",
+    "verify:packed-install": "node scripts/verify-packed-install.js"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -230,9 +245,9 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "4.7.3",
-    "releaseDate": "07/07/2026",
-    "lastUpdated": "07/07/2026",
+    "version": "5.0.0",
+    "releaseDate": "07/11/2026",
+    "lastUpdated": "07/11/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
@@ -255,7 +270,7 @@
       "PATCH: Language selection prompts now render their numeric range dynamically from the installed UI locale count, preventing stale bounds during future locale expansion."
     ],
     "breakingChanges": [],
-    "nextVersion": "4.7.4",
+    "nextVersion": "5.0.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -284,7 +299,7 @@
       "fluent-rs": ">=0.16.0",
       "gettext-rs": ">=0.7.0"
     },
-    "supportPolicy": "Versions earlier than 4.7.3 may be unstable or insecure in CI automation. Upgrade to 4.7.3 or newer.",
+    "supportPolicy": "Versions earlier than 5.0.0 use different licensing or may lack current reliability controls. Upgrade to 5.0.0 or newer.",
     "deprecations": [
       "4.3.0",
       "4.3.1",
@@ -292,7 +307,7 @@
       "4.3.3",
       "4.7.2"
     ],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). i18ntk 4.7.2 has a missing-module bug. Upgrade to i18ntk@4.7.3 or newer: npm install -g i18ntk@latest",
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). i18ntk 4.7.2 has a missing-module bug. Upgrade to i18ntk@5.0.0 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"

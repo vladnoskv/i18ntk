@@ -46,7 +46,8 @@ function findRelativeRequires(dir, skipDirs = []) {
 }
 
 function expandPackageFiles(filesArray) {
-  const included = new Set();
+  // npm always includes package.json, README, LICENSE and the main/bin targets.
+  const included = new Set(['package.json']);
   for (const f of filesArray) {
     if (f.endsWith('/')) {
       const dirPath = path.join(ROOT, f);
@@ -72,7 +73,7 @@ function expandPackageFiles(filesArray) {
 // ── Module Resolution ─────────────────────────────────────────────────
 
 describe('Module Resolution', () => {
-  const allRequires = findRelativeRequires('');
+  const allRequires = Object.assign({}, ...['main', 'settings', 'utils', 'runtime'].map(dir => findRelativeRequires(dir)));
 
   it('all production require() calls resolve to existing files', () => {
     const missing = [];
@@ -102,7 +103,7 @@ describe('Module Resolution', () => {
 
 describe('Publish Coverage', () => {
   const included = expandPackageFiles(pkg.files);
-  const allRequires = findRelativeRequires('');
+  const allRequires = Object.assign({}, ...['main', 'settings', 'utils', 'runtime'].map(dir => findRelativeRequires(dir)));
 
   it('utils/language-menu.js is in package.json files array', () => {
     assert.ok(included.has('utils/language-menu.js') || FILES_SET.has('utils/language-menu.js'),
@@ -122,15 +123,7 @@ describe('Publish Coverage', () => {
         missing.push(mod);
       }
     }
-    if (missing.length > 0) {
-      console.log('  Missing from files: ' + missing.join(', '));
-    }
-    // Only assert on the known-critical ones
-    const critical = ['utils/language-menu.js', 'utils/promptPin.js'];
-    for (const c of critical) {
-      assert.ok(!missing.includes(c) || included.has(c) || FILES_SET.has(c),
-        'Critical file must be included: ' + c);
-    }
+    assert.deepStrictEqual(missing, [], 'Every statically required production module must be published');
   });
 
   it('package.json version matches package.public.json', () => {

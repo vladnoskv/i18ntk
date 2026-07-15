@@ -19,6 +19,7 @@ const SecurityUtils = require('../utils/security');
 const AdminAuth = require('../utils/admin-auth');
 const { loadTranslations, t } = require('../utils/i18n-helper');
 const { detectFramework } = require('../utils/framework-detector');
+const { upgradeConfig } = require('../utils/framework-config-templates');
 const { getFormatAdapter } = require('../utils/format-manager');
 // Ensure UIi18n is available for this initializer class
 const UIi18n = require('./i18ntk-ui');
@@ -117,6 +118,20 @@ class I18nInitializer {
     this.shouldCloseRL = false;
     this.announcedExistingDir = false;
     this.promptInstance = null;
+  }
+
+  async applyDetectedFrameworkTemplate() {
+    const framework = this.detectedFramework?.id;
+    if (!framework) return null;
+
+    const current = configManager.loadConfig();
+    const result = upgradeConfig(current, framework);
+    if (!result.needsUpgrade) return result;
+
+    await configManager.saveConfig(result.config);
+    this.config = { ...this.config, ...result.patch };
+    console.log(`Updated the configuration with the ${result.template.label} template. Existing settings were kept.`);
+    return result;
   }
 
   // Updated checkI18nDependencies method that uses configuration
@@ -1262,6 +1277,8 @@ class I18nInitializer {
         this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
       }
 
+      await this.applyDetectedFrameworkTemplate();
+
       // Check admin authentication for sensitive operations (only when called directly and not in no-prompt mode)
       const AdminAuth = require('../utils/admin-auth');
       const adminAuth = new AdminAuth();
@@ -1322,6 +1339,8 @@ class I18nInitializer {
       
       this.sourceDir = this.config.sourceDir;
       this.sourceLanguageDir = path.join(this.sourceDir, this.config.sourceLanguage);
+
+      await this.applyDetectedFrameworkTemplate();
       
       // Load translations for UI messages
       const uiLanguage = this.config.uiLanguage || 'en';

@@ -256,7 +256,9 @@ static _logging = false;
       const dangerousReason = detectDangerReason(filePath);
       const source = isInternalPath(filePath) ? 'internal' : 'user';
 
-      if (isAbsolutePath && isInternalPath(filePath)) {
+      // Only host-native absolute paths may use the internal-root fast path.
+      // A foreign drive path can otherwise resolve as a relative filename.
+      if (path.isAbsolute(filePath) && isInternalPath(filePath)) {
         return path.resolve(filePath);
       }
 
@@ -301,7 +303,10 @@ static _logging = false;
 
       // Check for actual path traversal (going outside the base directory)
       const relativePath = path.relative(base, finalPath);
-      if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+      // path.isAbsolute() follows the host OS, so also reject foreign-platform
+      // absolute forms (for example a Windows drive path while running on Linux).
+      const foreignAbsolute = /^[A-Z]:[\\/]/i.test(relativePath) || /^\\\\/.test(relativePath);
+      if (relativePath.startsWith('..') || path.isAbsolute(relativePath) || foreignAbsolute) {
         const message = useI18n
           ? i18n.t('security.pathTraversalAttempt')
           : 'Path traversal attempt';

@@ -2,6 +2,12 @@
 
 Thanks for helping improve i18ntk.
 
+## Contribution licensing
+
+i18ntk uses a noncommercial and commercial dual-license model. By intentionally submitting a contribution, you represent that you have the right to submit it and grant Vlad Noskov a perpetual, worldwide, irrevocable, non-exclusive, royalty-free license to use, reproduce, modify, distribute, sublicense, and commercially license that contribution as part of i18ntk.
+
+You retain ownership of your contribution. Do not submit employer-owned or third-party code unless you have written authority to grant these rights. Maintainers may request confirmation of that authority before accepting a contribution.
+
 ## Project Priorities
 
 - Keep the npm package zero-dependency.
@@ -39,3 +45,4 @@ Include:
 - the user-visible behavior change
 - validation commands that were run
 - any remaining risk or unverified behavior
+- confirmation that you agree to the contribution licensing terms above

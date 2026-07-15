@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "defaults": {
+    "processing": {
+      "cacheEnabled": true,
+      "parallelProcessing": true
+    },
+    "reports": {
+      "includeUsageStats": true,
+      "includeValidationErrors": true,
+      "generateSummary": true
+    },
+    "advanced": {
+      "performanceTracking": true,
+      "sizingThreshold": 50
+    }
+  },
+  "templates": {
+    "generic": {
+      "label": "Generic project",
+      "supportedExtensions": [".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts", ".cjs", ".cts", ".vue", ".svelte", ".astro", ".py", ".php", ".rb", ".go", ".rs", ".java", ".kt"],
+      "excludeDirs": ["node_modules", ".git", "dist", "build", "coverage", ".cache", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "node": {
+      "label": "Node.js or React project",
+      "supportedExtensions": [".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts", ".cjs", ".cts"],
+      "excludeDirs": ["node_modules", ".git", "dist", "build", "coverage", ".cache", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "next": {
+      "label": "Next.js project",
+      "supportedExtensions": [".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts", ".cjs", ".cts", ".mdx"],
+      "excludeDirs": ["node_modules", ".next", ".turbo", "out", "dist", "build", "coverage", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "vue": {
+      "label": "Vue or Nuxt project",
+      "supportedExtensions": [".js", ".ts", ".jsx", ".tsx", ".vue", ".mjs", ".mts"],
+      "excludeDirs": ["node_modules", ".nuxt", ".output", ".vite", "dist", "build", "coverage", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "angular": {
+      "label": "Angular or Ionic project",
+      "supportedExtensions": [".ts", ".tsx", ".js", ".html"],
+      "excludeDirs": ["node_modules", ".angular", ".ionic", "www", "dist", "coverage", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "svelte": {
+      "label": "Svelte project",
+      "supportedExtensions": [".js", ".ts", ".svelte", ".mjs", ".mts"],
+      "excludeDirs": ["node_modules", ".svelte-kit", ".vercel", "build", "dist", "coverage", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "astro": {
+      "label": "Astro project",
+      "supportedExtensions": [".js", ".ts", ".jsx", ".tsx", ".astro", ".mdx"],
+      "excludeDirs": ["node_modules", ".astro", "dist", "build", "coverage", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "python": {
+      "label": "Python project",
+      "supportedExtensions": [".py", ".pyi", ".pyw", ".html", ".j2", ".jinja2", ".txt"],
+      "excludeDirs": ["__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", "venv", ".venv", "env", ".env", "dist", "build", ".eggs", "*.egg-info", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "django": {
+      "label": "Django project",
+      "supportedExtensions": [".py", ".html", ".txt"],
+      "excludeDirs": ["__pycache__", "venv", ".venv", "staticfiles", "media", "migrations", "locale", "dist", "build", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "php": {
+      "label": "Laravel or PHP project",
+      "supportedExtensions": [".php", ".blade.php", ".twig", ".html"],
+      "excludeDirs": ["vendor", "node_modules", "storage", "bootstrap/cache", "public/build", "public/hot", "dist", "build", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "ruby": {
+      "label": "Ruby on Rails project",
+      "supportedExtensions": [".rb", ".erb", ".haml", ".slim", ".yml", ".yaml"],
+      "excludeDirs": ["vendor", "tmp", "log", "coverage", "public/assets", ".bundle", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "java": {
+      "label": "Spring Boot or JVM project",
+      "supportedExtensions": [".java", ".kt", ".kts", ".properties", ".html", ".yml", ".yaml"],
+      "excludeDirs": ["target", "build", ".gradle", ".mvn", ".idea", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "go": {
+      "label": "Go project",
+      "supportedExtensions": [".go", ".html", ".tmpl", ".tpl"],
+      "excludeDirs": ["vendor", "bin", "dist", "build", ".git", "i18ntk-reports", "i18ntk-backups"]
+    },
+    "rust": {
+      "label": "Rust project",
+      "supportedExtensions": [".rs", ".html", ".hbs", ".tera"],
+      "excludeDirs": ["target", ".cargo", "dist", "build", ".git", "i18ntk-reports", "i18ntk-backups"]
+    }
+  }
+}

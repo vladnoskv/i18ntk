@@ -13,6 +13,8 @@ const SettingsManager = require('../settings/settings-manager');
 const { envManager } = require('./env-manager');
 const { checkInitialized } = require('./init-helper');
 const { closeGlobalReadline } = require('./cli');
+const { detectFramework } = require('./framework-detector');
+const { getConfigUpgradeStatus } = require('./framework-config-templates');
 const settingsManager = new SettingsManager();
 
 const { ask } = require('./cli');
@@ -74,6 +76,20 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
         cfg.projectRoot = '.';
       }
 
+      // Older project configs may predate one or more path fields. Keep those
+      // setups usable while the interactive v5 upgrade prompt is shown.
+      cfg.sourceDir = cfg.sourceDir || './locales';
+      cfg.i18nDir = cfg.i18nDir || cfg.sourceDir;
+      cfg.outputDir = cfg.outputDir || './i18ntk-reports';
+
+      const detectedFramework = detectFramework(projectRoot);
+      if (detectedFramework?.id) {
+        const upgrade = getConfigUpgradeStatus(cfg, detectedFramework.id);
+        if (cfg.setup?.completed !== false && upgrade.needsUpgrade && !cliArgs.json) {
+          console.warn(`[i18ntk] Your configuration needs a v${upgrade.requiredVersion} update for ${upgrade.template.label}. Run the interactive i18ntk menu to review and apply the recommended safe defaults.`);
+        }
+      }
+
       const updates = {};
       const sourceDirArg = toStr(cliArgs.sourceDir);
       if (sourceDirArg) {
@@ -121,7 +137,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
         cfg.i18nDir = cfg.sourceDir;
       }
 
-      settingsDir = settingsManager.configDir;
+      settingsDir = settingsManager.configDir || projectRoot;
     }
 
     const hasExplicitSourceDir = Boolean(cliArgs.sourceDir);

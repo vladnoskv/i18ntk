@@ -46,6 +46,7 @@ const JsonOutput = require('../utils/json-output');
 const SetupEnforcer = require('../utils/setup-enforcer');
 const { resolveUsageSourceDir } = require('../utils/usage-source');
 const { analyzeSourceForUsageInsights } = require('../utils/usage-insights');
+const { discoverLocales } = require('../utils/locale-discovery');
 const { isInteractive } = require('../utils/prompt-helper');
 
 // Ensure setup is complete before running
@@ -1220,6 +1221,8 @@ Analysis Features (v1.10.1):
           .filter(lang => ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(lang));
         
         directFiles.forEach(lang => languages.add(lang));
+        discoverLocales(this.i18nDir, { excludeDirs: this.config.excludeDirs })
+          .forEach(lang => languages.add(lang));
       } catch (error) {
         console.warn(`${t('usage.errorReadingI18nDirectory')} ${error.message}`);
         return;

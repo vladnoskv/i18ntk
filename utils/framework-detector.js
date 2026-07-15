@@ -26,11 +26,14 @@ const FRAMEWORK_COMPATIBILITY = {
   'nuxt-i18n': { minVersion: '7.0.0' },
   'next-intl': { minVersion: '2.0.0' },
   'ngx-translate': { minVersion: '13.0.0' },
+  'angular-i18n': { minVersion: '12.0.0' },
   'svelte-i18n': { minVersion: '3.0.0' },
   'solid-i18n': { minVersion: '1.0.0' },
   'ember-intl': { minVersion: '5.0.0' },
   'react-native-localize': { minVersion: '2.0.0' },
   'ionic': { minVersion: '6.0.0' },
+  'spring-boot': { minVersion: '2.5.0' },
+  'laravel': { minVersion: '8.0.0' },
   'expo': { minVersion: '48.0.0' },
   'vanilla': { minVersion: '1.0.0' }
 };
@@ -324,6 +327,18 @@ const FRAMEWORKS = {
     ]
   },
 
+  'angular-i18n': {
+    name: 'Angular built-in i18n',
+    deps: ['@angular/core'],
+    globs: ['src/**/*.{ts,html}'],
+    patterns: [
+      /\$localize`([^`]+)`/g,
+      /\bi18n(?:-[\w-]+)?=["']([^"']+)["']/g,
+      /<ng-container\s+i18n[^>]*>([^<]+)<\/ng-container>/g
+    ],
+    priority: -1
+  },
+
   'next-intl': {
     name: 'next-intl (Next.js)',
     deps: ['next-intl', 'next-i18next', '@next-intl/core'],
@@ -430,12 +445,35 @@ const FRAMEWORKS = {
 
   ionic: {
     name: 'Ionic i18n',
-    deps: ['@ionic/angular', 'ionic-react', '@ionic/vue'],
+    deps: ['@ionic/angular', 'ionic-angular', 'ionic-react', '@ionic/vue'],
     globs: ['src/**/*.{ts,tsx,html}'],
     patterns: [
       /\btranslateService\.instant\(\s*['"`]([^'"`]+)['"`]/g,
       /\btranslateService\.get\(\s*['"`]([^'"`]+)['"`]/g,
       /\|\s*translate\s*[^}]*\}\}/g
+    ],
+    priority: 5
+  },
+
+  'spring-boot': {
+    name: 'Spring Boot i18n',
+    deps: [],
+    globs: ['src/**/*.{java,html,properties}'],
+    patterns: [
+      /messageSource\.getMessage\(\s*["']([^"']+)["']/g,
+      /\#\{([^}]+)\}/g,
+      /getMessage\(\s*["']([^"']+)["']/g
+    ]
+  },
+
+  laravel: {
+    name: 'Laravel localization',
+    deps: [],
+    globs: ['**/*.{php,blade.php}'],
+    patterns: [
+      /__\(\s*["']([^"']+)["']/g,
+      /(?:trans|Lang::get)\(\s*["']([^"']+)["']/g,
+      /@lang\(\s*["']([^"']+)["']/g
     ]
   }
 };
@@ -497,7 +535,7 @@ const FRAMEWORK_PATTERNS = {
     /\$t\(["']([^"']{2,99})["']\)/g,
     /\$tc\(["']([^"']{2,99})["']\)/g,
     /v-t=["']([^"']{2,99})["']/g,
-    /\blocalePath\(\s*\)/g
+    /\blocalePath\(\s*['"`]([^'"`]{2,99})['"`]\s*\)/g
   ],
   vue: [
     /v-text=["']([^"']{2,99})["']/g,
@@ -604,10 +642,15 @@ const FRAMEWORK_PATTERNS = {
     /translate\s*=\s*["'`]([^"'`]{2,99})["'`]/g,
     /\[innerHTML\]=["']([^"']{2,99})["']/g
   ],
+  'angular-i18n': [
+    /\$localize`([^`]{2,99})`/g,
+    /\bi18n(?:-[\w-]+)?=["']([^"']{2,99})["']/g,
+    />([^<{][^<>{]*[^}>])</g
+  ],
   'next-intl': [
     />([^<{][^<>{]*[^}>])</g,
     /t\(\s*['"`]([^'"`]{2,99})['"`]/g,
-    /\buseTranslations\(\s*()\)/g
+    /\buseTranslations\(\s*['"`]([^'"`]{1,99})['"`]\s*\)/g
   ],
   'svelte-i18n': [
     />([^<{][^<>{]*[^}>])</g,
@@ -647,6 +690,16 @@ const FRAMEWORK_PATTERNS = {
     /translateService\.instant\(\s*['"`]([^'"`]{2,99})['"`]/g,
     /translateService\.get\(\s*['"`]([^'"`]{2,99})['"`]/g
   ],
+  'spring-boot': [
+    /messageSource\.getMessage\(\s*["']([^"']{2,99})["']/g,
+    /\#\{([^}]{2,99})\}/g,
+    /getMessage\(\s*["']([^"']{2,99})["']/g
+  ],
+  laravel: [
+    /__\(\s*["']([^"']{2,99})["']/g,
+    /(?:trans|Lang::get)\(\s*["']([^"']{2,99})["']/g,
+    /@lang\(\s*["']([^"']{2,99})["']/g
+  ],
   vanilla: [
     /t\(["']([^"']{2,99})["']\)/g,
     /i18n\.t\(["']([^"']{2,99})["']\)/g,
@@ -671,6 +724,7 @@ const FRAMEWORK_SUGGESTIONS = {
   lingui: { hook: 'import { t } from \"@lingui/macro\";', usage: "{t('ui.KEY')}", component: "<Trans id=\"ui.KEY\">text</Trans>" },
   formatjs: { hook: 'import { FormattedMessage, useIntl } from \"react-intl\";', usage: "intl.formatMessage({ id: 'ui.KEY' })", component: "<FormattedMessage id=\"ui.KEY\" />" },
   'ngx-translate': { pipe: "{{ 'ui.KEY' | translate }}", service: "this.translateService.instant('ui.KEY')" },
+  'angular-i18n': { template: '<span i18n>text</span>', code: '$localize`text`' },
   'next-intl': { hook: 'const t = useTranslations();', usage: "{t('ui.KEY')}" },
   'svelte-i18n': { store: "$_('ui.KEY')", method: "t.get('ui.KEY')" },
   'solid-i18n': { hook: 'const [t] = useI18n();', usage: "{t('ui.KEY')}", component: "<Translate id=\"ui.KEY\" />" },
@@ -678,6 +732,8 @@ const FRAMEWORK_SUGGESTIONS = {
   'ruby-on-rails': { helper: "t('ui.KEY')", method: "I18n.t('ui.KEY')", template: "<%= t('ui.KEY') %>" },
   'react-native-localize': { hook: 'import { t } from \"i18n-js\";', usage: "{t('ui.KEY')}" },
   ionic: { pipe: "{{ 'ui.KEY' | translate }}", service: "this.translateService.instant('ui.KEY')" },
+  'spring-boot': { java: 'messageSource.getMessage("ui.KEY", null, locale)', template: '#{ui.KEY}' },
+  laravel: { php: "__('ui.KEY')", blade: "@lang('ui.KEY')" },
   django: { template: "{% trans 'text' %}", python: "from django.utils.translation import gettext as _\n_('text')", model: "from django.utils.translation import gettext_lazy as _\n_('text')" },
   flask: { template: "{{ _('text') }}", python: "from flask_babel import gettext as _\n_('text')", lazy: "from flask_babel import lazy_gettext as _\n_('text')" },
   python: { gettext: "import gettext\ngettext.gettext('text')", underscore: "from gettext import gettext as _\n_('text')", lazy: "from gettext import gettext_lazy as _\n_('text')" },
@@ -716,6 +772,36 @@ function getFrameworkPatterns(framework) {
   return [...base, ...(FRAMEWORK_PATTERNS[framework] || FRAMEWORK_PATTERNS.vanilla || [])];
 }
 
+/**
+ * Run framework patterns through a stable result contract. Regexes inherited
+ * from older releases use either capture 1 or capture 2; the last non-empty
+ * capture is the value while offsets always refer to the full match.
+ */
+function extractFrameworkMessages(source, framework = 'vanilla', options = {}) {
+  const text = String(source || '');
+  const maxMatches = Math.max(1, Math.min(Number(options.maxMatches) || 10000, 100000));
+  const patterns = options.includeGeneric === false
+    ? (FRAMEWORK_PATTERNS[framework] || FRAMEWORK_PATTERNS.vanilla)
+    : getFrameworkPatterns(framework);
+  const results = [];
+  for (const original of patterns) {
+    const regex = new RegExp(original.source, original.flags.includes('g') ? original.flags : original.flags + 'g');
+    let match;
+    while ((match = regex.exec(text)) !== null && results.length < maxMatches) {
+      const captures = match.slice(1).filter(value => typeof value === 'string' && value.length > 0);
+      const value = captures[captures.length - 1];
+      if (value) results.push({
+        value, kind: /(?:\bt\s*\(|\$t\s*\(|i18n|gettext|Message|Translate|trans\b)/i.test(match[0]) ? 'key' : 'hardcodedText',
+        framework, start: match.index, end: match.index + match[0].length,
+        confidence: captures.length ? 0.9 : 0.5, pattern: original.source
+      });
+      if (match[0] === '') regex.lastIndex++;
+    }
+    if (results.length >= maxMatches) break;
+  }
+  return results;
+}
+
 function getFrameworkSuggestions(framework, text) {
   const template = FRAMEWORK_SUGGESTIONS[framework] || FRAMEWORK_SUGGESTIONS.vanilla || {};
   const result = {};
@@ -733,6 +819,35 @@ function detectProjectFramework(projectRoot) {
   const detected = detectFramework(projectRoot);
   if (detected && detected.id) return detected.id;
   return 'vanilla';
+}
+
+function detectProjectFrameworks(projectRoot) {
+  const primaryResult = detectFramework(projectRoot);
+  const primary = primaryResult?.id || 'vanilla';
+  const detected = new Set([primary]);
+  const evidence = [];
+  const packagePath = path.join(projectRoot, 'package.json');
+  try {
+    if (SecurityUtils.safeExistsSync(packagePath, projectRoot)) {
+      const pkg = SecurityUtils.safeParseJSON(SecurityUtils.safeReadFileSync(packagePath, projectRoot, 'utf8')) || {};
+      const dependencies = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}), ...(pkg.peerDependencies || {}) };
+      const platforms = { next: ['next'], react: ['react'], nuxt: ['nuxt'], vue: ['vue'], angular: ['@angular/core'], svelte: ['svelte'], astro: ['astro'], remix: ['@remix-run/react'], solid: ['solid-js'], qwik: ['@builder.io/qwik'] };
+      for (const [id, packages] of Object.entries(platforms)) for (const dependency of packages) {
+        if (dependencies[dependency]) {
+          detected.add(id);
+          evidence.push({ framework: id, source: 'package.json', dependency, version: dependencies[dependency], kind: 'platform' });
+        }
+      }
+      for (const [id, info] of Object.entries(FRAMEWORKS)) {
+        const packages = [...(info.deps || info.dependencies || [])].filter(Boolean);
+        for (const dependency of packages) if (dependencies[dependency]) {
+          detected.add(id);
+          evidence.push({ framework: id, source: 'package.json', dependency, version: dependencies[dependency], kind: 'i18n-library' });
+        }
+      }
+    }
+  } catch (_) { /* primary detection remains usable */ }
+  return { primary, detected: [...detected], evidence };
 }
 
 /**
@@ -880,6 +995,48 @@ function detectFramework(projectRoot) {
     }
   }
 
+  // Phase 6: Check PHP Composer projects.
+  if (detectedFrameworks.length === 0) {
+    const composerPath = path.join(projectRoot, 'composer.json');
+    if (SecurityUtils.safeExistsSync(composerPath, projectRoot)) {
+      try {
+        const composer = SecurityUtils.safeParseJSON(
+          SecurityUtils.safeReadFileSync(composerPath, projectRoot, 'utf8')
+        ) || {};
+        const dependencies = { ...(composer.require || {}), ...(composer['require-dev'] || {}) };
+        if (dependencies['laravel/framework']) {
+          detectedFrameworks.push({
+            id: 'laravel', name: FRAMEWORKS.laravel.name,
+            description: 'Laravel project with built-in localization',
+            confidence: 0.9, version: dependencies['laravel/framework'], priority: 0
+          });
+        }
+      } catch (_) { /* skip */ }
+    }
+  }
+
+  // Phase 7: Check Maven and Gradle projects for Spring Boot.
+  if (detectedFrameworks.length === 0) {
+    const javaManifests = ['pom.xml', 'build.gradle', 'build.gradle.kts'];
+    for (const manifest of javaManifests) {
+      const manifestPath = path.join(projectRoot, manifest);
+      if (!SecurityUtils.safeExistsSync(manifestPath, projectRoot)) continue;
+      try {
+        const content = SecurityUtils.safeReadFileSync(manifestPath, projectRoot, 'utf8') || '';
+        if (/org\.springframework\.boot|spring-boot-(?:starter|dependencies|plugin)/i.test(content)) {
+          const versionMatch = content.match(/spring-boot[^\n<]*[<:'"\s]+([0-9]+\.[0-9]+(?:\.[0-9]+)?)/i)
+            || content.match(/<version>\s*([0-9]+\.[0-9]+(?:\.[0-9]+)?)\s*<\/version>/i);
+          detectedFrameworks.push({
+            id: 'spring-boot', name: FRAMEWORKS['spring-boot'].name,
+            description: 'Spring Boot project with message bundle support',
+            confidence: 0.85, version: versionMatch?.[1] || '', priority: 0
+          });
+          break;
+        }
+      } catch (_) { /* skip */ }
+    }
+  }
+
   // Return the framework with highest confidence, if any
   if (detectedFrameworks.length > 0) {
     return detectedFrameworks.sort((a, b) => {
@@ -912,4 +1069,5 @@ function readPyProjectDeps(projectRoot) {
 module.exports = { detectFramework, FRAMEWORKS, FRAMEWORK_COMPATIBILITY,
   SOURCE_EXTENSIONS, SCANNER_EXTENSIONS, EXCLUDE_DIRS, SOURCE_DIRS,
   FRAMEWORK_PATTERNS, FRAMEWORK_SUGGESTIONS, WRAPPER_SKIP_PATTERNS,
-  getFrameworkPatterns, getFrameworkSuggestions, getSourceExtensions, getExcludeDirs, detectProjectFramework };
+  getFrameworkPatterns, extractFrameworkMessages, getFrameworkSuggestions, getSourceExtensions, getExcludeDirs,
+  detectProjectFramework, detectProjectFrameworks };

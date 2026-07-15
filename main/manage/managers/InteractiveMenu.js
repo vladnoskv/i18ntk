@@ -133,6 +133,9 @@ module.exports = class InteractiveMenu {
       case '13':
         await this.manager.executeCommand('scanner', {fromMenu: true});
         break;
+      case '15':
+        await this.manager.executeCommand('skills', {fromMenu: true});
+        break;
       case '0':
         console.log(t('menu.goodbye'));
         this.manager.safeClose();

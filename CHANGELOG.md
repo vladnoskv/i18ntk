@@ -4,65 +4,65 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [5.0.0] - 2026-07-11
+
+### Highlights
+
+- **Better translation quality checks.** Catch placeholder and tag mismatches, untranslated source text, corrupted characters, suspicious markers, and unsafe bidirectional text before it reaches users.
+- **Safer Auto Translate.** Unresolved translations now report a failure instead of a false success. Protected product names and approved acronyms stay untouched and are no longer repeatedly selected for translation.
+- **More accurate project support.** i18ntk better recognises mixed projects and supports Laravel, Spring Boot, Nuxt, next-intl, and a wider range of locale folder layouts.
+- **Smarter scanning.** Find translation usage across monolithic, namespaced, regional, and underscore-style locale structures while reducing false positives from routes, imports, styles, and metadata.
+- **Clearer translation status.** Source-copy markers are identified separately from completed translations, so coverage reports more accurately reflect work still to do.
+- **More flexible locales.** Regional and legacy language codes such as `pt-BR`, `zh_CN`, and `iw-IL` resolve to their supported language where appropriate. Right-to-left languages are handled more clearly in CLI output.
+- **Faster repeat scans.** Unchanged files can be reused during a session, helping larger projects complete repeat checks sooner.
+- **LLM-ready guidance.** The package now includes an i18ntk skill for Codex, Claude Code, GitHub Copilot, and compatible agents. Use menu option 15 or `i18ntk --command=skills` to discover and install it.
+- **Framework-aware configuration upgrades.** Older project setups are identified during startup and can be updated from the interactive UI with framework-specific source types, safe exclusions, cached scanning, richer reports, and performance defaults. Existing settings are preserved.
+
+### Licensing
+
+- Changed i18ntk 5.0.0 and later from MIT to a dual-license model: PolyForm Noncommercial 1.0.0 for permitted personal/noncommercial use and a separate commercial license for business use. The major version reflects this material licensing change.
+- Added `COMMERCIAL-LICENSE.md` defining common commercial-use cases, the licensing request path, and the treatment of prior MIT releases.
+- Documented optional custom integration support for commercial customers, with scope, fees, response targets, and deliverables established by separate written agreement.
+- This change is prospective: versions already distributed under MIT retain their original license grants.
+- Added `i18ntk-license` to help licensed public sites publish an optional verification marker. It does not collect visitor data or send information to i18ntk.
+
 ## [4.7.3] - 2026-07-07
 
 ### Fixed
 
-- **PUBLISH INTEGRITY:** `utils/language-menu.js` and `utils/promptPin.js` were missing from the `files` array in `package.json`, causing `MODULE_NOT_FOUND` on install. Both added to `files` array in `package.json` and `package.public.json`.
-- **4.7.2 deprecated** — published with the missing-module bug. All users should upgrade to 4.7.3.
-- **Publish integrity test:** New `tests/publish-integrity.test.js` validates every production `require()` resolves to a file listed in the `files` array. Prevents future missing-module regressions.
+- Fixed an installation issue that could prevent some CLI commands from starting.
+- Version 4.7.2 had this installation issue; upgrade to 4.7.3 or later.
 
 ## [4.7.2] - 2026-07-07
 
 ### FIXED
 
-- **Dynamic CLI language selector** — Option 12 now derives available languages and native display names from `SettingsManager.getAvailableLanguages()` instead of stale hardcoded 7-language lists.
-- **Future-proof prompt range** — Language selection prompts now render the numeric upper bound from the current available language count, so future UI locale expansion does not leave stale `0-8` prompt text behind.
-- **Fallback manager parity** — `main/manage/index.js` now instantiates `SettingsManager`, shows the real current UI language, persists `language` and `uiLanguage`, and uses the same 23-language registry as the rest of the CLI.
+- The CLI language picker now shows the languages available in your installation, using their native names.
+- Language selection remains accurate as more interface languages are added.
 
 ## [4.7.1] - 2026-07-07
 
 ### Added
 
-- **23 UI locale languages** — Expanded from 7 to 23: Italian, Portuguese, Dutch, Polish, Swedish, Ukrainian, Czech, Turkish, Korean, Arabic, Hindi, Thai, Vietnamese, Hebrew, Greek, Hungarian. All 2,211 keys auto-translated with placeholder preservation via i18ntk's own pipeline. 95-98% translation completeness, 0 missing keys.
-- **Native language names** — `settings.languages.{code}` entries added to all 23 locale files with names in native script (Italiano, 日本語, العربية, हिन्दी, etc.). `getAvailableLanguages()` returns all 23 with display names.
-- **Settings schema expanded** — `language` and `uiLanguage` enum constraints expanded from 7 to 23 entries. Language selector in settings UI and CLI picks up all available languages.
+- The CLI interface is now available in 23 languages, including Arabic, Czech, Greek, Hebrew, Hindi, Italian, Japanese, Korean, Polish, Portuguese, Swedish, Thai, Turkish, Ukrainian, and Vietnamese.
+- Language names appear in their native form in the selector.
 
 ### Changed
 
-- **Framework detection centralized** — `manage/index.js` `detectEnvironmentAndFramework()` now calls `detectProjectFramework()` from the centralized detector instead of a 6-framework inline check. Detects all 30+ supported frameworks.
-- **Hardcoded `framework.supported` removed** — Config templates (`config-manager.js`) and runtime config (`.i18ntk-config`) no longer ship a static framework list. Only actually-detected frameworks appear.
-- **`checkI18nDependencies()` expanded** — Framework package lists unified across `manage/index.js`, `i18ntk-manage.js`, `InitService.js`, and `FrameworkDetectionService.js` (8→29 entries each).
-- **Hardcoded 7-language lists expanded to 23** — Updated in 12 production files: `i18n-usage.js`, `i18n-validate.js`, `ValidateCommand.js`, `UsageService.js`, `FrameworkDetectionService.js`, `ConfigurationService.js`, `i18ntk-manage.js`, `locale-optimizer.js` ×2, `env-manager.js`, `i18ntk-ui.js`, `manage/index.js`.
-- **Default config template expanded** — `config-helper.js` `supportedLanguages` and template skeleton files expanded from 8 to 23 languages.
-- **Missing key validator** — Default constructor argument expanded from 7 to 23 languages.
-- **Version bumped to 4.7.1** for language expansion and framework detection cleanup.
-
-### Verified
-
-- Language switching tested via `i18n-helper.loadTranslations()` across all 23 locales — all return non-English values.
-- 69 core tests pass, 98 sandbox tests pass.
-- Package JSON manifest sync test passes (version, versionInfo, nextVersion aligned).
-- All 23 locale files have valid JSON syntax.
+- Project setup and framework detection now recognise a broader range of projects and keep configuration focused on what is actually detected.
+- New projects can start with the full set of supported interface languages.
 
 ## [4.7.0] - 2026-07-07
 
 ### Added
 
-- **13 new FRAMEWORK_PATTERNS:** `i18ntk-runtime` (hooks, `<t>` component), `nuxt` (`$tc()`, `localePath()`), `lingui` (`<Translate>` component), `formatjs` (`<FormattedMessage>`), `ngx-translate` (pipe, service patterns), `next-intl`, `svelte-i18n`, `solid-i18n` (`<Translate>`), `fastapi`, `ruby-on-rails` (`I18n.t/l/translate`), `react-native-localize`, `ionic`. Each has framework-specific scanning regex patterns.
-- **8 missing FRAMEWORK_COMPATIBILITY entries:** `nuxt`, `nuxt-i18n`, `next-intl`, `ngx-translate`, `svelte-i18n`, `solid-i18n`, `expo`, `vanilla` with min versions.
-- **Non-Node project detection:** `detectFramework()` now checks Python (`requirements.txt`, `pyproject.toml`, `setup.py`), Rust (`Cargo.toml`), Go (`go.mod`), Ruby (`Gemfile`) when no `package.json` exists. Detects Django, Flask, FastAPI, Rails, and generic i18n usage.
-- **20+ new WRAPPER_SKIP_PATTERNS:** `I18n.t(`, `I18n.translate(`, `useTranslate(`, `t.get(`, `$tc(`, `translateService.instant(`, `formatMessage(`, `bundle.get_message(`, `i18n.NewMessage(`, `_(`, `fluent!`, `ts!` and more.
-- **Expanded KNOWN_WRAPPERS in Lens scanner:** Added `$_`, `$tc`, `gettext`, `gettext_lazy`, `I18n.t`, `I18n.translate`, `I18n.l`, `I18n.localize`.
-- **Expanded NAMESPACE_HELPERS in both scanners:** Added `useTranslate`, `useSpeak`, `withTranslation`.
-- **Framework-aware report-model.js:** `scanSourceFiles()` accepts optional framework parameter, uses `getFrameworkPatterns()` for framework-specific key extraction.
-- **Expanded CLI init framework list:** `checkI18nDependencies()` now scans 27+ npm package names instead of 7.
-- **Sandbox test suite:** 98 new tests covering framework detection against real package.json, requirements.txt, Cargo.toml, go.mod, Gemfile fixtures. Coverage validation for all FRAMEWORK_PATTERNS, FRAMEWORK_SUGGESTIONS, FRAMEWORK_COMPATIBILITY, WRAPPER_SKIP_PATTERNS, and SCANNER_EXTENSIONS.
+- Added support for more i18n libraries and frameworks, including Nuxt, next-intl, Lingui, FormatJS, ngx-translate, Svelte, Solid, FastAPI, Rails, React Native, and Ionic.
+- Project detection now also works for Python, Rust, Go, and Ruby projects.
+- Key discovery recognises more translation helpers, components, and namespace patterns.
 
 ### Changed
 
-- **Version bumped to 4.7.0** for the comprehensive framework detection expansion.
-- **detectFramework()** no longer returns `null` when only non-Node project files are present. Cascades through 5 detection phases: Node → Python → Rust → Go → Ruby.
+- Framework detection now works even when a project does not use Node.js.
 
 ## [4.6.1] - 2026-07-05
 
@@ -81,32 +81,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Framework Detection (10 new frameworks):** Added Rust (fluent, gettext-rs), Remix (remix-i18next), Gatsby (gatsby-plugin-react-i18next), Astro (astro-i18next, @astrojs/i18n), Qwik (qwik-speak, qwik-i18n), SolidJS (@solid-primitives/i18n), Ember (ember-intl), React Native (react-native-localize), Expo (expo-localization), and Ionic (ionic-angular/react/vue) to `utils/framework-detector.js`.
 - **FRAMEWORK_COMPATIBILITY:** Extended compatibility metadata with Rust, Fluent, Remix, Gatsby, Astro, Qwik, Ember, React Native, and Ionic version requirements.
 - **Rust/Cargo.toml detection:** `FrameworkDetectionService` now detects Rust projects via `Cargo.toml`. Supports `fluent`, `gettext-rs`, and generic Rust framework types.
-- **JSX Component Detection (Workbench & Lens):** Added `findJsxComponentKeys()` to both `keyDetector.ts` (Workbench) and `scanner.ts` (Lens) for detecting `<Trans i18nKey>`, `<FormattedMessage id>`, `<FormattedMessage defaultMessage>`, `<t message>`, and `<Translate id>` JSX components.
+- **JSX component detection:** Added support for `<Trans>`, `<FormattedMessage>`, `<t>`, and `<Translate>` components when finding translation keys.
 - **ICU/Fluent placeholder support:** Added `$variable` (Fluent), `{var, plural, ...}`, `{var, select, ...}`, `{var, number}`, and `{var, date}` ICU MessageFormat patterns to `extractPlaceholders()` with overlap deduplication and token length safety.
 - **Framework-specific exclude defaults:** Added `.nuxt`, `.output`, `.astro`, `.svelte-kit`, `.cache`, `__generated__`, and `target` to default exclude lists in all scanners and configs.
 - **Framework-specific locale discovery paths:** Added `app/i18n`, `src/lib/i18n`, `content/locales`, `messages`, and `lang` to locale directory candidates.
-- **Framework-specific activation events:** Workbench and Lens now activate on Next.js, Astro, Remix, Svelte, Nuxt, Gatsby config files and Cargo.toml.
-- **Translation Grid:** Added `messages` and `lang` filename patterns to the custom editor selectors.
 - **Framework suggestions:** Expanded `getFrameworkSuggestions()` in FrameworkDetectionService with all newly supported frameworks by language.
 
 ### Changed
 
 - **File extensions (all packages):** Added `.astro`, `.mdx`, `.mjs`, `.mts`, `.cjs`, `.cts`, `.rs` to `SOURCE_EXTENSIONS` in all scanners and file-walk functions. Astro single-file components, ESM modules, and Rust source files are now scanned for translation keys.
-- **Document selectors (Workbench & Lens):** Added `astro` language ID and extended pattern globs to include `mjs,mts,cjs,cts,astro,html`.
 - **Locate discovery excludes:** Added `.nuxt`, `.output`, `.astro`, `.svelte-kit`, `.cache`, `__generated__`, `target` to `DISCOVERY_EXCLUDES`.
 - **Config-helper:** Extended `supportedExtensions` to match new file types; excludeDirs now includes all framework-specific directories.
 - **Framework detection expansion (FrameworkDetectionService):** JS framework detection expanded from 7 to 15+ frameworks. `checkI18nDependencies()` i18n framework list expanded from 8 to 26 entries covering all new frameworks.
 - **Health score:** Penalty is now capped at `(totalKeys - 1) * 2` and uses a linear decay curve (`40%` max) to prevent negative or zero scores on small key sets with many issues.
-- **Test output:** manifest-sync test updated to match new 4.6.0 versionInfo.
 
 ### Fixed
 
 - **Dot/snake key style validation:** The hybrid regex now correctly validates both dot path and snake_case segments simultaneously, matching the documented behavior.
-- **Manifest sync:** `package.public.json` `supportedFrameworks` synced with updated `package.json` to include all new framework entries.
-- **Centralized Architecture:** All framework data (extensions, patterns, suggestions, exclude dirs, source dirs, wrapper skip patterns) now lives in one place — `utils/framework-detector.js`. The scanner (`i18ntk-scanner.js`), managed scanner (`ScannerCommand.js`), report model (`report-model.js`), and usage source resolver (`usage-source.js`) all import from this single source of truth.
-- **Duplicate method removal:** `detectFramework()`, `getFrameworkPatterns()`, and `getFrameworkSpecific()` were duplicated with slight variations across 4+ files. All consumers now call the centralized `detectProjectFramework()`, `getFrameworkPatterns()`, and `getFrameworkSuggestions()` exports.
-- **Hardcoded extension lists eliminated:** `SOURCE_EXTENSIONS` (report model), `SCANNER_EXTENSIONS` (scanner commands), `EXCLUDE_DIRS` (walk functions), and `SOURCE_DIRS` (usage resolver) are now defined once and imported everywhere.
-- **Framework-specific registration:** Adding a new framework now requires changes in only ONE file (`framework-detector.js`) instead of 6+ scattered locations.
 
 ## [4.5.4] - 2026-06-19
 
@@ -126,14 +117,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **CI Behavior:** Commands skip prompts when `--no-prompt` is passed, `CI=true`, stdin is not a TTY, or stdout is not a TTY.
 - **Complete Summary:** Completion output now distinguishes locales scanned, target locales changed, unique source keys added, total key insertions, files modified, files skipped, and dry-run status.
 
-### Documentation
-
-- Updated README, API, configuration, scanner, and environment-variable docs with canonical CLI flags, legacy alias notes, and CI exit-code behavior.
-
-### Tests
-
-- Added CLI reliability regression coverage for the analyze crash, manager failure propagation, complete help output, directory/source-locale aliases, summary `NaN`, non-interactive prompt suppression, validation wording, and completion summary labels.
-
 ## [4.5.3] - 2026-06-19
 
 ### Fixed
@@ -148,15 +131,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Complete (Namespace Wrapper):** Fixed critical bug where missing keys were inserted at the wrong nesting level in target locale files. When a file (e.g., `auth.json`) contains a namespace wrapper matching its filename (`{ "auth": { ... } }`), the `complete` command now detects this wrapper and inserts keys inside it (`auth.panel.sign_in`) instead of at root level (`panel.sign_in`). This prevents runtime lookup failures for `t("auth.panel.sign_in")`.
 - **Translate (--output-dir):** Fixed bug where the `--output-dir` flag wrote translated files directly to `<output-dir>/<filename>` instead of `<output-dir>/<targetLang>/<filename>`. This caused all translations (regardless of target language) to land in the same directory, silently overwriting files from other languages in multi-language projects. When `args.outputDir` is provided, `processFile()` now appends `targetLang` to construct the correct output path.
 
-### Tests
-
-- Added `tests/regression-v452.test.js` with 18 regression tests covering:
-  - Complete command namespace wrapper detection (parseKeyPath, setNestedValue, hasNestedKey, wrapper detection logic)
-  - Validate getAllKeys leaf-only mode and completeness calculation
-  - Runtime alias parameter support (localeDir/targetLocale/sourceLocale)
-  - Scanner source directory fallback when sourceDir equals i18nDir
-  - Doctor auto-detection of languages from i18n directory
-  - Version consistency across package files
 - Added `--output-dir` target language subdirectory tests to `tests/regression-v452.test.js`: verifies `processFile()` places output in `<outputDir>/<targetLang>/<file>` and that CLI `--output-dir` produces the correct nested path
 - Added 8 tests in `tests/usage-insights.test.js` for hardcoded text false-positive filtering:
   - JS/TS built-in type name rejection (Promise, Boolean, String)
@@ -224,13 +198,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - **Framework detection:** Added support for ngx-translate (Angular), next-intl (Next.js), nuxt-i18n (Nuxt), svelte-i18n (Svelte), and solid-i18n (Solid) framework detection via dependency lookup.
 - `detectFramework()` now also checks the `dependencies` property as a fallback for the `deps` array, ensuring backward compatibility.
-- Created `tests/fixtures/test.json` fixture so file system security tests validate real file reads instead of passing vacuously.
 
 ### Changed
 
 - Removed dead `{ gte }` import from `version-utils` and unused `FRAMEWORK_COMPATIBILITY` object from `framework-detector.js`.
-- Security test `logSecurityEvent` now properly sets `I18NTK_DEBUG` and `I18NTK_ENABLE_SECURITY_LOGS` env vars and uses try/catch to verify non-throw behavior.
-- `validateConfig` "reject invalid configuration" test now uses `assert.strictEqual` for stronger path traversal assertions.
 
 ## [4.4.4] - 2026-06-05
 
@@ -241,8 +212,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- `.i18ntk-config` now accepts a top-level `extensions` object for VS Code Workbench and Lens settings. The CLI preserves this section during config validation and ignores unknown extension-owned nested keys.
-- Documented shared config edge cases so editor extensions can sync workspace defaults without changing CLI behavior.
 
 ## [4.4.3] - 2026-06-04
 
@@ -258,10 +227,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Auto Translate now treats protected product terms as allowed English when deciding whether existing target values should be kept in `only-missing` mode.
 - Auto Translate detects and retries more visibly broken target values, including replacement-character artifacts, mojibake, repeated question marks, and target-language prefix leftovers.
 
-### Added
-
-- Added regression coverage for relative source paths, protected product terms, broken target values, placeholder handling, and managed Auto Translate residual checks.
-
 ## [4.4.1] - 2026-06-02
 
 ### Security
@@ -273,9 +238,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **MEDIUM**: JSON parsing now enforces maximum depth (1000) and maximum size (50 MB) limits in `safeParseJSON` to prevent denial-of-service via deeply nested or oversized JSON files.
 - **MEDIUM**: LibreTranslate custom URL (`LIBRETRANSLATE_URL`) now requires `I18NTK_ALLOW_CUSTOM_LIBRETRANSLATE_HOST=1` env flag to add arbitrary hosts to the allowed list, bringing parity with DeepL's gated approach.
 - **MEDIUM**: `sanitizeInput` default character whitelist tightened — removed `\\`, `{`, `}` characters that could enable path traversal or template injection.
-- **MEDIUM**: VSCode Workbench `workspaceScanner.ts` now validates auto-translate report paths with `normalizeWithinRoot()` and rejects JSON content > 50 MB.
-- **MEDIUM**: VSCode Workbench `localeFileService.ts` now validates `addKey()` write paths via `isPathWithinRoot()` and rejects locale files > 10 MB before parsing.
-- **LOW**: i18ntk Lens `scanner.ts` now rejects custom wrapper names > 100 characters to prevent ReDoS via malicious VSCode config values.
 
 ### Added
 
@@ -296,11 +258,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Copy-formatter detection: identifies local `const tx = ...` functions that do not call known translation runtimes.
 - Wrapper configuration: `.i18ntk-config` now supports `usage.translationFunctions`, `usage.serverWrappers`, and `usage.copyFormatters`.
 - Next.js App Router detection: identifies `"use server"` / `"use client"` directives and reports component type.
-- VSCode `i18ntk.clearDiagnostics` command. Stale diagnostics now cleared at scan start.
-- VSCode new diagnostic codes: `i18ntk.clientBoundary` (warning), `i18ntk.copyFormatter` (warning).
-- Lens scanner: `detectSuspectedCopyFormatters()` and `findClientBoundaryLocaleImports()` exported.
 - Auto Translate now writes `i18ntk-reports/auto-translate/latest.json` when residual untranslated values remain after the final targeted retry, so follow-up tooling can retry only unresolved keys.
-- i18ntk Workbench and i18ntk Lens can read Auto Translate residual reports, show the affected key in the VS Code editor, and offer a quick action to add intentionally unchanged keys to Auto Translate protection.
 - Bounded dynamic expansion suggestions in usage report with explicit-map recommendation pattern.
 - Telemetry/event literal classification: known-key strings inside `trackEvent()`, `emitDomainEvent()`, `analytics.track()`, etc. are classified as `literal-telemetry` and excluded from translation usage counts. Non-translation calls get context notes in the report.
 - Object-method translation calls: `input.tx("key")`, `helper.tx("key")`, and `.tx(\`key.${var}\`)`are now recognized as translation calls alongside standalone`tx()`.
@@ -313,12 +271,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Dead-key detection `_matchesDynamicPattern` replaced with `_matchesDynamicPrefix` using actual resolved data.
 - Locale JSON import detection properly deduplicates namespace prefix (e.g., `leaderboard.error` not `leaderboard.leaderboard.error`).
 - Literal key matching no longer credits telemetry/event call strings (e.g., `trackEvent("leaderboard.view")`) as translation usage, preventing CLI false negatives on genuinely unused keys.
-- Object-method `tx()` calls and local wrapper functions are now included in usage analysis, preventing Lens false positives on keys used through these patterns.
-
-### Changed
-
-- VSCode workbench bumped to 1.1.0, lens extension to 1.1.0.
-- Major changes list in package.json and package.public.json updated for 4.4.0.
 
 ## [4.3.3] - 2026-06-01
 
@@ -417,7 +369,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `i18ntk-setup --help` now exits after printing help instead of running setup and writing project files.
 - `npm run languages:list` and `npm run languages:status` now produce non-interactive output instead of opening the settings menu.
 - `i18ntk-backup create locales` now recursively backs up modular locale layouts such as `locales/en/common.json`, and restore safely recreates nested JSON paths without allowing traversal.
-- Removed a stale bundled `locales/es/navigation.json` fixture that made `i18ntk-doctor` report a dangling namespace after setup/init tests.
 
 ## [4.1.0] - 2026-05-21
 

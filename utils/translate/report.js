@@ -134,7 +134,7 @@ function writeReport(reportText, filePath) {
 function writeResidualReport(residualUntranslated, options = {}) {
   if (!Array.isArray(residualUntranslated) || residualUntranslated.length === 0) return null;
   const reportDir = path.resolve(process.cwd(), 'i18ntk-reports', 'auto-translate');
-  const reportPath = path.join(reportDir, 'latest.json');
+  const reportPath = path.join(reportDir, options.fileName || 'latest.json');
   const timestamp = options.timestamp || new Date().toISOString();
   const report = {
     kind: 'i18ntk.autoTranslateResiduals',

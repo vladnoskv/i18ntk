@@ -58,6 +58,8 @@ class I18nTextScanner {
     this.locale = this.loadLocale();
     this.results = [];
     this.framework = null;
+    this.scanCache = new Map();
+    this.telemetry = { filesScanned: 0, cacheHits: 0, filesSkipped: 0, durationMs: 0 };
   }
 
   loadLocale() {
@@ -383,13 +385,29 @@ class I18nTextScanner {
 
   shouldExcludeFile(filePath, exclusions) {
     const fileName = path.basename(filePath);
+    const relativePath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
     return exclusions.some(pattern => {
-      if (pattern.includes('*')) {
-        const regex = new RegExp(pattern.replace(/\*/g, '.*'));
-        return regex.test(fileName) || regex.test(filePath);
-      }
-      return fileName.includes(pattern) || filePath.includes(pattern);
+      const value = String(pattern || '').replace(/\\/g, '/').replace(/^\.\//, '');
+      if (!value) return false;
+      const escaped = part => part.replace(/[.+?^$()|[\]\\]/g, '\\$&').replace(/[{}]/g, '\\$&');
+      const regex = new RegExp(`^${value.split('*').map(escaped).join('.*')}$`, 'i');
+      return regex.test(fileName) || regex.test(relativePath) || relativePath.split('/').includes(value);
     });
+  }
+
+  isNonUserFacingLiteral(text, context = '') {
+    const value = String(text || '').trim();
+    const line = String(context || '').trim();
+    return !value ||
+      /^(?:[A-Za-z0-9_-]+\/)+[A-Za-z0-9_./@-]+$/.test(value) ||
+      /^(?:@|#|\.|/)[A-Za-z0-9_./@#:-]+$/.test(value) ||
+      /^[a-z][a-z0-9+.-]*:\/\//i.test(value) ||
+      /^(?:force-dynamic|use client|use server|javascript|typescript|text|button|div|span|main|true|false|null|undefined)$/i.test(value) ||
+      /^(?:[a-z-]+:)?[a-z-]+(?:\/[a-z-]+)*$/.test(value) ||
+      /^(?:[a-z-]+\.)+[a-z-]+$/.test(value) ||
+      /^(?:import\s|export\s.*\sfrom\s|const\s+\w+\s*=\s*require\s*\()/.test(line) ||
+      /\b(?:t|i18n\.t|translate|\$t)\s*\(/.test(line) ||
+      /^[a-z][a-z0-9_.-]*$/.test(value) && value.includes('.');
   }
 
   isEnglishText(text) {
@@ -520,6 +538,14 @@ class I18nTextScanner {
 
   scanFile(filePath, patterns, minLength, maxLength) {
     try {
+      const stat = SecurityUtils.safeStatSync(filePath, path.dirname(filePath));
+      const patternKey = patterns.map(pattern => `${pattern.source}/${pattern.flags}`).join('|');
+      const cacheKey = stat && `${stat.size}:${stat.mtimeMs}:${this.sourceLanguage || 'en'}:${minLength}:${maxLength}:${patternKey}`;
+      const cached = this.config.cache !== false && cacheKey && this.scanCache.get(filePath);
+      if (cached && cached.key === cacheKey) {
+        this.telemetry.cacheHits++;
+        return cached.results.map(result => ({ ...result }));
+      }
       const content = SecurityUtils.safeReadFileSync(filePath, path.dirname(filePath), 'utf8');
       const lines = content.split('\n');
       const results = [];
@@ -536,13 +562,13 @@ class I18nTextScanner {
             continue;
           }
 
-          if (text && this.isTextInLanguage(text, sourceLang) &&
+          if (text && !this.isNonUserFacingLiteral(text, lines[content.substring(0, match.index).split('\n').length - 1]) && this.isTextInLanguage(text, sourceLang) &&
               text.length >= minLength && text.length <= maxLength) {
 
             const lineNumber = content.substring(0, match.index).split('\n').length;
             const lineContent = lines[lineNumber - 1] || '';
 
-            results.push({
+            if (!results.some(existing => existing.line === lineNumber && existing.text === text.trim())) results.push({
               text: text.trim(),
               line: lineNumber,
               column: match.index - content.lastIndexOf('\n', match.index),
@@ -554,6 +580,8 @@ class I18nTextScanner {
         }
       });
 
+      this.telemetry.filesScanned++;
+      if (this.config.cache !== false && cacheKey) this.scanCache.set(filePath, { key: cacheKey, results });
       return results;
     } catch (error) {
       console.warn(`Warning: Could not read file ${filePath}: ${error.message}`);
@@ -680,6 +708,7 @@ class I18nTextScanner {
   }
 
   async scanDirectory(dir, options = {}) {
+    const startedAt = Date.now();
     const {
       patterns = [],
       exclusions = [],
@@ -712,6 +741,7 @@ class I18nTextScanner {
           const ext = path.extname(item.name);
           if (extensions.includes(ext) && !this.shouldExcludeFile(fullPath, exclusions)) {
             if (!includeTests && (item.name.includes('.test.') || item.name.includes('.spec.'))) {
+              this.telemetry.filesSkipped++;
               continue;
             }
 
@@ -728,8 +758,13 @@ class I18nTextScanner {
     };
 
     scanRecursive(dir);
+    this.telemetry.durationMs += Date.now() - startedAt;
     return allResults;
   }
+
+  getScanTelemetry() { return { ...this.telemetry, cacheEntries: this.scanCache.size }; }
+
+  clearScanCache() { this.scanCache.clear(); }
 
   async generateReport(results, outputDir) {
     if (!SecurityUtils.safeExistsSync(outputDir, path.dirname(outputDir))) {
@@ -882,7 +917,15 @@ class I18nTextScanner {
     console.log(this.t('scanner.sourceDirectory', { sourceDir: this.sourceDir }));
 
     const patterns = getFrameworkPatterns(this.framework);
-    const exclusions = this.config.exclude || ['node_modules', '.git', 'dist', 'build'];
+    const exclusions = [
+      ...(this.config.exclude || []),
+      ...(this.config.excludeFiles || []),
+      ...(this.config.excludeDirs || []),
+      ...(this.config.processing?.excludeFiles || []),
+      ...(this.config.processing?.excludeDirs || []),
+      'node_modules', '.git', 'dist', 'build', '.next', '.nuxt', '.output',
+      '.svelte-kit', '.astro', '.cache', '__generated__', 'coverage'
+    ];
     const minLength = this.config.minLength || 3;
     const maxLength = this.config.maxLength || 100;
     const includeTests = this.config.includeTests || false;

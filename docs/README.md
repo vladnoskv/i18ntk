@@ -1,38 +1,40 @@
-# i18ntk Documentation (v4.5.4)
+# i18ntk Documentation (v5.0.0)
 
-This documentation set covers the current `i18ntk` CLI, runtime API, configuration model, Auto Translate flow, and migration notes.
+Choose what you want to do and jump straight to the relevant guide.
 
-## Start Here
+## New to i18ntk?
 
 - [Getting Started](./getting-started.md)
-- [API Reference](./api/API_REFERENCE.md)
 - [Configuration Guide](./api/CONFIGURATION.md)
-- [Runtime API Guide](./runtime.md)
-- [Auto Translate Guide](./auto-translate.md)
-- [Scanner Guide](./scanner-guide.md)
-- [Environment Variables](./environment-variables.md)
+
+## Solve a translation problem
+
+- [Auto Translate](./auto-translate.md) — fill missing translations while preserving placeholders and protected terms
+- [Scanner](./scanner-guide.md) — find user-facing text that has not been internationalized
+- [Runtime](./runtime.md) — load and switch translations in an application
+- [Environment Variables](./environment-variables.md) — configure providers and automation safely
+
+## Look up technical details
+
+- [API Reference](./api/API_REFERENCE.md)
+- [5.0.0 reliability and extraction APIs](./reliability.md)
 - [Migration Guide v4.3.2](./migration-guide-v4.3.2.md)
 
-## Command Model
+## Everyday workflow
 
 Primary CLI:
 
 ```bash
 i18ntk
-i18ntk --help
-i18ntk --version
 i18ntk --command=init
 i18ntk --command=analyze
 i18ntk --command=validate
 i18ntk --command=usage
-i18ntk --command=scanner
-i18ntk --command=sizing
-i18ntk --command=complete
-i18ntk --command=translate
-i18ntk --command=summary
 ```
 
-Standalone executables:
+Run `i18ntk` without arguments for the interactive menu. In a local project installation, prefix commands with `npx`.
+
+Other focused commands:
 
 ```bash
 i18ntk-init
@@ -49,7 +51,7 @@ i18ntk-backup
 i18ntk-translate
 ```
 
-Backup operations are exposed through `i18ntk-backup`. The manager route `i18ntk --command=backup` is intentionally disabled in current builds.
+Use `i18ntk --help` or `<command> --help` when you need flags and examples. Backup operations are exposed through `i18ntk-backup`.
 
 ## Configuration Source
 
@@ -65,16 +67,18 @@ i18ntk reads project settings from the project-local `.i18ntk-config` file. CLI 
 - Default target languages are `en`, `de`, `es`, `fr`, and `ru`.
 - Init and analysis reports default to Markdown. Set `reports.format` to `markdown`, `json`, or `text` to change the report format.
 
-## Maintainer Packaging Notes
+## Maintainer and contributor notes
 
 - The root `package.json` is the development manifest.
 - The public npm metadata lives in `package.public.json`.
 - `npm run package:public` stages the public package and runs a dry-run pack.
 - `npm run pack:public` creates the public tarball from the staged package.
 - `npm run publish:public` publishes the staged package after `npm whoami` succeeds.
+- `npm run verify:packed-install` verifies the exact tarball in a fresh randomized consumer project.
 
 ## Community Files
 
+- [Licensing](../COMMERCIAL-LICENSE.md)
 - [Contributing](../CONTRIBUTING.md)
 - [Code of Conduct](../CODE_OF_CONDUCT.md)
 - [Security Policy](../SECURITY.md)

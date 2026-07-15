@@ -260,6 +260,12 @@ function loadCustomTranslateFn(modulePath) {
 }
 
 function resolveSourceFiles(sourceFile, sourceDir, filesPattern) {
+  // A file argument is unambiguous and wins over --source-dir.
+  if (sourceFile) {
+    const resolved = path.resolve(process.cwd(), sourceFile);
+    const stat = SecurityUtils.safeStatSync(resolved, path.dirname(resolved));
+    if (stat && stat.isFile()) return [resolved];
+  }
   if (sourceDir) {
     const resolvedDir = path.resolve(process.cwd(), sourceDir);
     const sourceDirBase = path.dirname(resolvedDir);
@@ -415,11 +421,25 @@ function isBrokenTranslationValue(value) {
   return mojibakePatterns.some((pattern) => pattern.test(text));
 }
 
+function hasSuspiciousSourceLeakage(sourceValue, targetValue, args = {}) {
+  const allowedWords = new Set(
+    (Array.isArray(args.allowedEnglishTerms) ? args.allowedEnglishTerms : [])
+      .flatMap(term => String(term).toLowerCase().match(/[a-z]{3,}/g) || [])
+  );
+  const stripPlaceholders = value => String(value || '').replace(/\{\{[^}]+\}\}|\{[^}]+\}|%[sdifjoO]/g, ' ');
+  const sourceWords = stripPlaceholders(sourceValue).toLowerCase().match(/[a-z]{3,}/g) || [];
+  const target = stripPlaceholders(targetValue).toLowerCase();
+  const ignoredWords = new Set(['the', 'and', 'from', 'with', 'your', 'this', 'that']);
+  const meaningful = [...new Set(sourceWords)].filter(word => !ignoredWords.has(word) && !allowedWords.has(word));
+  return meaningful.length >= 3 && meaningful.filter(word => target.includes(word)).length >= 3;
+}
+
 function shouldTranslateTargetValue(sourceValue, targetValue, args) {
   if (targetValue === undefined || targetValue === null) return true;
   if (typeof targetValue !== 'string') return true;
   if (isUntranslatedMarker(targetValue)) return true;
   if (isBrokenTranslationValue(targetValue)) return true;
+  if (hasSuspiciousSourceLeakage(sourceValue, targetValue, args) && targetValue.trim() !== String(sourceValue ?? '').trim()) return true;
   if (isLanguagePrefixedEnglish(targetValue, args)) return true;
   if (targetValue.trim() === String(sourceValue ?? '').trim()) {
     return !isSafeUnchangedSourceCopy(targetValue, args);
@@ -433,6 +453,7 @@ function getResidualUntranslatedReason(sourceValue, targetValue, args) {
   if (typeof targetValue !== 'string') return 'non_string';
   if (isUntranslatedMarker(targetValue)) return 'marker';
   if (isBrokenTranslationValue(targetValue)) return 'broken';
+  if (hasSuspiciousSourceLeakage(sourceValue, targetValue, args) && targetValue.trim() !== String(sourceValue ?? '').trim()) return 'source_leakage';
   if (isLanguagePrefixedEnglish(targetValue, args)) return 'language_prefix';
   if (targetValue.trim() === String(sourceValue ?? '').trim()) {
     return isSafeUnchangedSourceCopy(targetValue, args) ? null : 'source_copy';
@@ -862,12 +883,17 @@ async function processFile(sourcePath, targetLang, args) {
   }
 
   const targetData = readExistingTargetData(targetPath);
-  const { translatableLeaves: candidateLeaves, existingLeaves } = planTargetAwareLeaves(leaves, targetData, runArgs);
-
   const protection = runArgs.protection || loadProtectionConfig(runArgs.protectionFile, {
     enabled: runArgs.protectionEnabled,
     create: runArgs.createProtectionFile,
   });
+  const protectedTerms = Array.isArray(protection.terms) ? protection.terms : [];
+  runArgs.allowedEnglishTerms = [
+    ...(Array.isArray(runArgs.allowedEnglishTerms) ? runArgs.allowedEnglishTerms : []),
+    ...protectedTerms,
+  ];
+
+  const { translatableLeaves: candidateLeaves, existingLeaves } = planTargetAwareLeaves(leaves, targetData, runArgs);
   const protectedLeaves = candidateLeaves
     .filter((leaf) => shouldPreserveWholeValue(leaf.keyPath, leaf.value, protection))
     .map((leaf) => ({ ...leaf, skipReason: 'protected' }));
@@ -1101,6 +1127,12 @@ async function run(args) {
     const residualReportPath = writeResidualReport(allResidualUntranslated, {
       sourceFile: sourceFiles.length === 1 ? sourceFiles[0] : `${sourceFiles.length} files`,
       targetLang: args.targetLang,
+      fileName: `${String(args.targetLang).toLowerCase().replace(/[^a-z0-9-]/g, '_')}.json`,
+    });
+    writeResidualReport(allResidualUntranslated, {
+      sourceFile: sourceFiles.length === 1 ? sourceFiles[0] : `${sourceFiles.length} files`,
+      targetLang: args.targetLang,
+      fileName: 'latest.json',
     });
     if (residualReportPath) {
       console.warn(`Auto Translate resume report written: ${residualReportPath}`);
@@ -1133,11 +1165,14 @@ async function run(args) {
 
   const hadRealErrors = grandTranslated === 0 && grandTotal > 0;
   const hasResiduals = allResidualUntranslated.length > 0;
+  const failedValidation = hadRealErrors || hasResiduals;
 
   return {
-    success: !hadRealErrors,
-    exitCode: hadRealErrors ? ExitCodes.VALIDATION_FAILED : ExitCodes.SUCCESS,
-    error: hadRealErrors ? 'Auto Translate failed to translate any values' : undefined,
+    success: !failedValidation,
+    exitCode: failedValidation ? ExitCodes.VALIDATION_FAILED : ExitCodes.SUCCESS,
+    error: hadRealErrors
+      ? 'Auto Translate failed to translate any values'
+      : (hasResiduals ? 'Auto Translate left values that still look untranslated after retry' : undefined),
     total: grandTotal,
     translated: grandTranslated,
     skipped: grandSkipped,
@@ -1165,6 +1200,7 @@ module.exports = {
   parseArgs,
   resolveSourceFiles,
   isBrokenTranslationValue,
+  hasSuspiciousSourceLeakage,
   processFile,
   run,
 };

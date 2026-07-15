@@ -1,6 +1,6 @@
-# i18ntk v4.7.3
+# i18ntk
 
-A zero-dependency internationalization toolkit for setup, scanning, analysis, validation, usage tracking, translation completion, automatic JSON locale translation, reporting, and runtime translation loading.
+Keep every translation in your project accurate, complete, and easy to maintain.
 
 ![i18ntk Logo](https://raw.githubusercontent.com/vladnoskv/i18ntk/main/docs/screenshots/i18ntk-logo-public.PNG)
 
@@ -8,79 +8,82 @@ A zero-dependency internationalization toolkit for setup, scanning, analysis, va
 [![npm downloads](https://img.shields.io/npm/dt/i18ntk.svg)](https://www.npmjs.com/package/i18ntk)
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
-[![license](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/4.7.3)](https://socket.dev/npm/package/i18ntk/overview/4.7.3)
+[![license](https://img.shields.io/badge/license-personal%20use%20free-blue.svg)](LICENSE)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/5.0.0)](https://socket.dev/npm/package/i18ntk/overview/5.0.0)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
 
-## Ecosystem
+## What it does
 
-- **i18ntk** — CLI toolkit and runtime (this package)
-- **i18ntk Workbench** — VS Code dashboard, reports, and key management
-- **i18ntk Lens** — inline hovers, CodeLens, and diagnostics
+- Finds missing and unused keys across your source code and locale files.
+- Checks placeholders, tags, source-language leftovers, and other translation-quality issues.
+- Completes missing keys and translates only the entries that need attention.
+- Supports JavaScript, TypeScript, Python, Ruby, Go, Rust, and 30+ frameworks and i18n libraries.
+- Works interactively on your machine or non-interactively in automation, with no production dependencies.
 
-## Install
+Use the CLI on its own, or pair it with [i18ntk Workbench](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench) for project-wide management and [i18ntk Lens](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens) for inline editor feedback.
+
+## Get started in minutes
+
+Try it without installing:
 
 ```bash
-npm install -g i18ntk
-npx i18ntk --help
+npx i18ntk
 ```
 
-## What's New in 4.7.3
-
-- **Publish integrity fix** — `language-menu.js` and `promptPin.js` now included in npm package. Fixes `MODULE_NOT_FOUND` crash on install. **4.7.2 is deprecated.**
-
-## What's New in 4.7.1
-
-- **23 UI Languages** — Expanded from 7 to 23: Italian, Portuguese, Dutch, Polish, Swedish, Ukrainian, Czech, Turkish, Korean, Arabic, Hindi, Thai, Vietnamese, Hebrew, Greek, Hungarian. All 2,211 keys auto-translated and verified.
-- **Framework Detection Cleanup** — Removed hardcoded `framework.supported` lists from config templates. `manage/index.js` now uses centralized `detectProjectFramework()` covering all 30+ frameworks. Only detected frameworks appear in setup — no more static catalog.
-- **Language Selector** — Settings UI, `getAvailableLanguages()`, and schema enums all expanded from 7 to 23 languages with native names.
-- **12 Production Files Updated** — Hardcoded 7-language arrays expanded to 23: validators, locale optimizers, env manager, usage tracking, UI, and config helpers.
-
-## What's New in 4.7.0
-
-- **30+ framework detection patterns** — 13 new FRAMEWORK_PATTERNS: `i18ntk-runtime`, `nuxt`, `lingui`, `formatjs`, `ngx-translate`, `next-intl`, `svelte-i18n`, `solid-i18n`, `fastapi`, `ruby-on-rails`, `react-native-localize`, `ionic`. Each with framework-specific scan regexes for translation calls, JSX components, template directives, and pipes.
-- **Non-Node project detection** — Python (`requirements.txt`, `pyproject.toml`, `setup.py`), Rust (`Cargo.toml`), Go (`go.mod`), Ruby (`Gemfile`) now detected when no `package.json` exists. Detects Django, Flask, FastAPI, Rails, and generic i18n.
-- **20+ new WRAPPER_SKIP_PATTERNS** — Covers I18n.t(), useTranslate(), translateService.instant(), formatMessage(), bundle.get_message(), fluent!, ts! and more.
-- **Framework-aware report generation** — `report-model.js` accepts optional framework parameter and uses framework-specific patterns for key extraction.
-- **Expanded namespace helpers** — `useTranslate` (Qwik), `useSpeak` (Qwik), `withTranslation` (react-i18next) added.
-- **Attribute key detection** — `i18nKey=`, `t-key=`, `data-i18n=` attributes detected in source scanning.
-- **All frame works now have FRAMEWORK_COMPATIBILITY entries and FRAMEWORK_SUGGESTIONS** for consistent tooling.
-  [Full changelog →](./CHANGELOG.md)
-
-## Quick Start
+Or install it for your project:
 
 ```bash
-i18ntk                                    # interactive menu
-i18ntk --command=analyze                  # coverage report
+npm install --save-dev i18ntk
+npx i18ntk --command=init
+```
+
+Start with a quick health check:
+
+```bash
+npx i18ntk --command=analyze
+npx i18ntk --command=validate
+npx i18ntk --command=usage
+```
+
+Use `npx i18ntk` at any time for the guided menu. For a walkthrough, see [Getting started](./docs/getting-started.md).
+
+## What's new in 5.0.0
+
+- **Stronger quality checks** for placeholders, tags, corrupted text, source-language leftovers, and unsafe bidirectional characters.
+- **Better framework detection** for Laravel, Spring Boot, Nuxt, next-intl, and mixed-stack projects.
+- **Faster repeat scans** and more reliable discovery across regional, namespaced, and underscore-style locale folders.
+- **Safer Auto Translate** that respects protected terms and reports unresolved work clearly.
+- **An optional LLM skill** for Codex, Claude Code, GitHub Copilot, and compatible agents.
+
+See the [release notes](./CHANGELOG.md) for the full list of user-facing changes.
+
+## Everyday commands
+
+```bash
+i18ntk                                    # guided menu
+i18ntk --command=analyze                  # translation coverage
 i18ntk --command=validate                 # quality checks
-i18ntk --command=usage                    # key usage tracking
-i18ntk report --json --out ./reports      # full report
-i18ntk --command=complete                 # fill missing keys
-i18ntk --command=translate                # auto-translate
-i18ntk --command=summary                  # status overview
+i18ntk --command=usage                    # missing and unused keys
+i18ntk --command=complete                 # add missing keys
+i18ntk --command=translate                # translate eligible entries
+i18ntk report --json --out ./reports      # shareable report
 ```
 
-See [docs/getting-started.md](./docs/getting-started.md) for the full onboarding guide.
+Use `npx` before these commands when i18ntk is installed locally.
 
 ## Command Reference
 
-| Command     | Purpose                                    | Output                        |
-| ----------- | ------------------------------------------ | ----------------------------- |
-| `i18ntk`    | Interactive management menu                | —                             |
-| `init`      | Setup locale folders and target files      | Locale JSON, `.i18ntk-config` |
-| `analyze`   | Translation coverage comparison            | Reports                       |
-| `validate`  | Structure, quality, and risk validation    | Summary report                |
-| `usage`     | Map keys to source, find dead/missing keys | Usage report                  |
-| `report`    | Stable schema report (JSON/MD/HTML)        | stdout or file output         |
-| `scanner`   | Detect hardcoded text in source files      | Scanner report                |
-| `complete`  | Fill missing keys in target files          | Target locale JSON            |
-| `translate` | Auto-translate via provider AI             | Target locale JSON            |
-| `sizing`    | Expansion risk and layout analysis         | Sizing report                 |
-| `summary`   | Project translation status overview        | Console output                |
-| `fixer`     | Fix placeholders and markers               | Locale JSON                   |
-| `backup`    | Create/verify/restore locale backups       | Backup archives               |
+| Command | When to use it |
+| --- | --- |
+| `i18ntk` | You want guided setup or a menu of common tasks. |
+| `init` | You are adding i18ntk to a project. |
+| `analyze`, `validate`, `usage` | You want to review coverage, quality, and key usage. |
+| `complete`, `translate` | You want to add or translate missing entries. |
+| `report`, `summary`, `sizing` | You need a shareable status or planning view. |
+| `scanner`, `fixer`, `backup` | You need to find hardcoded text, repair locale data, or protect a snapshot. |
+| `skills` | You want to add i18ntk guidance to an LLM agent. |
 
 Each is available as `i18ntk --command=<name>` or standalone `i18ntk-<name>`.
 
@@ -110,7 +113,7 @@ export DEEPL_API_KEY="your-key"
 i18ntk-translate locales/en/common.json de --provider deepl --no-confirm
 ```
 
-**Placeholder-aware translation** detects `{name}`, `{{count}}`, `%s`, `:id`, `${value}`, `$t(key)`, and ICU pattern syntax. The default mode is `--only-missing` — existing translations are preserved.
+**Placeholder-aware translation** recognises `{name}`, `{{count}}`, `%s`, `:id`, `${value}`, `$t(key)`, and ICU patterns. By default, existing translations are left unchanged.
 
 Protected terms and keys via `i18ntk-auto-translate.json`:
 
@@ -126,13 +129,13 @@ Protected terms and keys via `i18ntk-auto-translate.json`:
 
 [Auto Translate guide →](./docs/auto-translate.md)
 
-## Configuration
+## Configure your project
 
 Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "4.6.1",
+  "version": "5.0.0",
   "sourceDir": "./locales",
   "i18nDir": "./locales",
   "sourceLanguage": "en",
@@ -144,28 +147,26 @@ Example `.i18ntk-config`:
     "placeholderMode": "preserve",
     "concurrency": 12,
     "onlyMissingOrEnglish": true
-  },
-  "extensions": {
-    "workbench": { "localeDirectory": "./locales", "sourceLocale": "en" },
-    "lens": { "localeDirectory": "./locales", "sourceLocale": "en", "keyFormats": ["dot", "snake"] }
   }
 }
 ```
 
 [Configuration reference →](./docs/api/CONFIGURATION.md)
 
-## Scanner
+When i18ntk detects a supported framework, it checks whether your setup version and configuration need a v5 update. The interactive menu asks before adding safe defaults for source file types, generated directories, scan caching, report summaries, and performance tracking. Your existing choices are preserved. See [framework configuration templates](./docs/framework-templates.md).
 
-Detects hardcoded text in 12+ languages with language-specific character ranges and stopword filtering. Framework-specific patterns for React, Vue, Angular, Svelte, Astro, Django, Flask, Python, Rust, Go, and more.
+## Find hardcoded text
+
+Scan source files for text that should move into locale files. i18ntk understands common patterns across React, Vue, Angular, Svelte, Astro, Django, Flask, Python, Rust, Go, and more.
 
 ```bash
 i18ntk-scanner --code-dir ./src --source-locale de
 i18ntk-scanner --code-dir ./src --source-locale ja --output-report
 ```
 
-## Usage Analysis
+## Find unused and missing keys
 
-Tracks key references, detects dead keys with confidence scores, resolves dynamic patterns (templates, arrays, object maps), and recommends namespace alignment.
+Trace key references, find likely unused entries, and recognise common dynamic patterns such as templates, arrays, and object maps.
 
 ```bash
 i18ntk-usage --code-dir ./src --locales-dir ./locales --cleanup --dry-run-delete
@@ -236,6 +237,19 @@ Features: 300ms debounce, SHA-256 hash tracking, 50-directory cap. The callback 
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
 
+## Use i18ntk with an LLM agent
+
+Give your coding agent the same up-to-date i18ntk guidance you use. The installer finds supported skill locations and lets you choose where to add it:
+
+```bash
+npx i18ntk --command=skills
+npx i18ntk --command=skills --agents=codex,claude,copilot --scope=personal --dry-run --no-prompt
+```
+
+The installer supports Codex, Claude Code, GitHub Copilot, shared Agent Skills, and compatible project folders. It shows the destinations it finds and asks before changing anything. Existing skills are kept unless you choose to update them.
+
+For manual installation, copy the complete `skills/i18ntk` folder into your agent's skills directory.
+
 ## Security
 
 - No API key required for default Auto Translate
@@ -253,4 +267,15 @@ Features: 300ms debounce, SHA-256 hash tracking, 50-directory cap. The callback 
 
 ## License
 
-See [LICENSE](./LICENSE).
+i18ntk 5.0.0 and later is source-available under a dual-license model:
+
+- **Personal and qualifying noncommercial use:** free under the [PolyForm Noncommercial License 1.0.0](./LICENSE).
+- **Business and commercial use:** requires a separate paid commercial license. This includes internal company tooling, CI/CD, consulting or client work, and use connected to a commercial product or service.
+
+Commercial customers can also request custom integration support for frameworks, monorepos, CI/CD pipelines, migrations, translation providers, and organization-specific workflows. Scope and support terms are agreed separately.
+
+Licensed public sites can use `i18ntk-license` to generate a searchable verification meta tag and `/i18ntk-license.json`. The tool does not phone home or collect visitor data; verification uses only intentionally published markers and licensing records.
+
+Downloading from npm does not grant commercial-use rights. See [Commercial licensing](./COMMERCIAL-LICENSE.md) for examples and how to request a license.
+
+Earlier versions released under MIT remain available under their original license terms.

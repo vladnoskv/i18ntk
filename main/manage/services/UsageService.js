@@ -24,6 +24,8 @@ const JsonOutput = require('../../../utils/json-output');
 const SetupEnforcer = require('../../../utils/setup-enforcer');
 const { resolveUsageSourceDir } = require('../../../utils/usage-source');
 const { analyzeSourceForUsageInsights } = require('../../../utils/usage-insights');
+const { discoverLocaleFiles, discoverLocales } = require('../../../utils/locale-discovery');
+const { isSourceCopyMarker } = require('../../../utils/translation-quality');
 
 class UsageService {
   constructor(config = {}) {
@@ -185,77 +187,11 @@ class UsageService {
 
   // Recursively discover all translation files in modular structure
   async discoverTranslationFiles(baseDir, language = (this.config && this.config.sourceLanguage) || 'en') {
-    const translationFiles = [];
-
-    const traverse = async (currentDir) => {
-      try {
-        const absoluteDir = path.resolve(currentDir);
-        const validatedPath = SecurityUtils.validatePath(absoluteDir, process.cwd());
-
-        if (!validatedPath || !SecurityUtils.safeExistsSync(validatedPath)) {
-          return;
-        }
-
-        const items = fs.readdirSync(validatedPath);
-
-        for (const item of items) {
-          const itemPath = path.join(validatedPath, item);
-
-          try {
-            const stat = fs.statSync(itemPath);
-
-            if (stat.isDirectory()) {
-              // Skip excluded directories with null-safety
-              const excludes = Array.isArray(this.config.excludeDirs) ? this.config.excludeDirs : [];
-              if (!excludes.includes(item)) {
-                await traverse(itemPath);
-              }
-            } else if (stat.isFile()) {
-              // Look for translation files:
-              // 1. Direct language files: en.json, de.json, etc.
-              // 2. Language directory files: en/common.json, de/auth.json, etc.
-              // 3. Nested modular files: components/en.json, features/auth/en.json, etc.
-
-              const fileName = path.basename(item, '.json');
-              const parentDir = path.basename(path.dirname(itemPath));
-
-              if (item.endsWith('.json')) {
-                // Case 1: Direct language files (en.json)
-                if (fileName === language) {
-                  translationFiles.push({
-                    filePath: itemPath,
-                    namespace: path.relative(baseDir, path.dirname(itemPath)).replace(/[\\/]/g, '.') || 'root',
-                    language: language,
-                    type: 'direct'
-                  });
-                }
-                // Case 2: Files in language directories (en/common.json)
-                else if (parentDir === language) {
-                  translationFiles.push({
-                    filePath: itemPath,
-                    namespace: fileName,
-                    language: language,
-                    type: 'namespaced'
-                  });
-                }
-              }
-            }
-          } catch (statError) {
-            // Skip files that can't be accessed
-            continue;
-          }
-        }
-      } catch (error) {
-        await SecurityUtils.logSecurityEvent(t('usage.translationDiscoveryError'), 'error', {
-          component: 'i18ntk-usage',
-          directory: currentDir,
-          error: error.message
-        });
-      }
-    };
-
-    await traverse(baseDir);
-    return translationFiles;
+    return discoverLocaleFiles(baseDir, {
+      sourceLocale: language,
+      sourceOnly: true,
+      excludeDirs: this.config.excludeDirs,
+    }).map(item => ({ ...item, language: item.locale }));
   }
 
   // Get all files recursively from a directory with enhanced filtering
@@ -663,7 +599,7 @@ class UsageService {
 
       try {
         // Discover translation files for all languages
-        const allLanguageDirs = fs.readdirSync(this.i18nDir)
+        /* const allLanguageDirs = fs.readdirSync(this.i18nDir)
           .filter(item => {
             try {
               const itemPath = path.join(this.i18nDir, item);
@@ -685,7 +621,9 @@ class UsageService {
           .map(file => path.basename(file, '.json'))
           .filter(lang => ['en', 'de', 'es', 'fr', 'it', 'pt', 'nl', 'pl', 'sv', 'uk', 'cs', 'tr', 'ru', 'ja', 'ko', 'zh', 'ar', 'hi', 'th', 'vi', 'he', 'el', 'hu'].includes(lang));
 
-        directFiles.forEach(lang => languages.add(lang));
+        directFiles.forEach(lang => languages.add(lang)); */
+        discoverLocales(this.i18nDir, { excludeDirs: this.config.excludeDirs })
+          .forEach(lang => languages.add(lang));
       } catch (error) {
         console.warn(`${t('usage.errorReadingI18nDirectory')} ${error.message}`);
         return;
@@ -800,7 +738,7 @@ class UsageService {
           traverse(value);
         } else {
           total++;
-          if (value !== 'NOT_TRANSLATED' && value !== '(NOT TRANSLATED)' &&
+          if (!isSourceCopyMarker(value) && value !== 'NOT_TRANSLATED' && value !== '(NOT TRANSLATED)' &&
               value !== 'TRANSLATED' && value !== '(TRANSLATED)' &&
               value && value.toString().trim() !== '') {
             translated++;

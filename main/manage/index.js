@@ -28,12 +28,15 @@ const cliHelper = require('../../utils/cli-helper');
 const { printUpgradeWarningIfOutdated } = require('../../utils/npm-version-warning');
 const { blue } = require('../../utils/colors-new');
 const { loadConfig, saveConfig, ensureConfigDefaults } = require('../../utils/config');
+const projectConfigManager = require('../../utils/config-manager');
+const { detectFramework, detectProjectFramework } = require('../../utils/framework-detector');
+const { getConfigUpgradeStatus, upgradeConfig } = require('../../utils/framework-config-templates');
+const { parseConfirmation } = require('../../utils/localized-confirm');
 const { buildMainMenuLines } = require('../../utils/menu-layout');
 const SettingsCLI = require('../../settings/settings-cli');
 const pkg = require('../../package.json');
 const SetupEnforcer = require('../../utils/setup-enforcer');
 const CommandRouter = require('./commands/CommandRouter');
-const { detectProjectFramework } = require('../../utils/framework-detector');
 
 const configManager = new SettingsManager();
 
@@ -65,6 +68,37 @@ class I18nManager {
         // Use centralized CLI helper instead of direct readline
         this.rl = null;
         this.isReadlineClosed = false;
+    }
+
+    async maybeUpgradeProjectConfig(prompt, interactive) {
+        const config = projectConfigManager.loadConfig();
+        if (config.setup?.completed === false) return null;
+        const detected = detectFramework(process.cwd());
+        const configuredFramework = ['auto', 'none', undefined, null].includes(config.framework?.preference)
+            ? 'vanilla'
+            : config.framework.preference;
+        const framework = detected?.id || configuredFramework;
+        const status = getConfigUpgradeStatus(config, framework);
+        if (!status.needsUpgrade) return status;
+
+        const message = `Your i18ntk configuration is from v${status.currentVersion} and can be improved for ${status.template.label}. Existing settings will be kept.`;
+        if (!interactive) {
+            console.warn(`[i18ntk] ${message} Run i18ntk interactively to review the update.`);
+            return status;
+        }
+
+        console.log(`\n[i18ntk] ${message}`);
+        const answer = await prompt.question('Apply the recommended configuration update? [Y/n] ');
+        if (!parseConfirmation(answer, { language: config.uiLanguage || config.language || 'en', defaultValue: true })) {
+            console.log('[i18ntk] Configuration update skipped. Your current settings were not changed.');
+            return status;
+        }
+
+        const upgraded = upgradeConfig(config, framework);
+        const saved = await projectConfigManager.saveConfig(upgraded.config);
+        if (!saved) throw new Error('Unable to save the configuration update');
+        console.log(`[i18ntk] Updated configuration for ${upgraded.template.label}. Existing settings were kept.`);
+        return upgraded;
     }
 
     // Initialize configuration using unified system
@@ -287,6 +321,18 @@ class I18nManager {
                     case 'no-prompt':
                         parsed.noPrompt = true;
                         break;
+                    case 'agents':
+                        parsed.agents = sanitizedValue;
+                        break;
+                    case 'scope':
+                        parsed.scope = sanitizedValue;
+                        break;
+                    case 'force':
+                        parsed.force = true;
+                        break;
+                    case 'dry-run':
+                        parsed.dryRun = true;
+                        break;
                     case 'admin-pin':
                         parsed.adminPin = sanitizedValue || '';
                         break;
@@ -313,13 +359,13 @@ class I18nManager {
         const args = this.parseArgs();
         const rawArgs = process.argv.slice(2);
         const directCommands = [
-            'init', 'analyze', 'validate', 'usage', 'scanner', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow', 'report'
+            'init', 'analyze', 'validate', 'usage', 'scanner', 'sizing', 'complete', 'fix', 'summary', 'debug', 'workflow', 'report', 'skills'
         ];
         const commandFlagArg = rawArgs.find(arg => arg.startsWith('--command='));
         const requestedCommand = commandFlagArg
             ? commandFlagArg.split('=')[1]
             : (rawArgs.length > 0 && directCommands.includes(rawArgs[0]) ? rawArgs[0] : null);
-        const shouldSkipInitCheck = requestedCommand === 'init' || requestedCommand === 'report';
+        const shouldSkipInitCheck = requestedCommand === 'init' || requestedCommand === 'report' || requestedCommand === 'skills';
 
         // Show help immediately without any setup/auth (useful for CI/uninitialized projects)
         if (args.help) {
@@ -366,6 +412,10 @@ class I18nManager {
 
             prompt = createPrompt({ noPrompt: args.noPrompt });
             const interactive = isInteractive({ noPrompt: args.noPrompt });
+
+            if (requestedCommand !== 'init' && requestedCommand !== 'skills') {
+                await this.maybeUpgradeProjectConfig(prompt, interactive);
+            }
 
             // Load settings and UI language
             const settings = configManager.loadSettings ? configManager.loadSettings() : (configManager.getConfig ? configManager.getConfig() : {});
@@ -993,6 +1043,10 @@ class I18nManager {
                 return;
             case '14':
                 await this.executeCommand('translate', {fromMenu: true});
+                await this.showInteractiveMenu();
+                return;
+            case '15':
+                await this.executeCommand('skills', {fromMenu: true});
                 await this.showInteractiveMenu();
                 return;
             case '0':

@@ -75,6 +75,18 @@ describe('Framework Detection Sandbox', () => {
     assert.strictEqual(result.id, 'ruby-on-rails');
   });
 
+  it('detects Laravel from composer.json', () => {
+    const result = detectFramework(fixture('laravel'));
+    assert.ok(result);
+    assert.strictEqual(result.id, 'laravel');
+  });
+
+  it('detects Spring Boot from Maven metadata', () => {
+    const result = detectFramework(fixture('spring-boot'));
+    assert.ok(result);
+    assert.strictEqual(result.id, 'spring-boot');
+  });
+
   it('detects Nuxt from package.json', () => {
     const result = detectFramework(fixture('nuxt'));
     assert.ok(result);
@@ -124,6 +136,7 @@ const FRAMEWORK_KEY_ALIAS = {
   'ember-intl': 'ember',
   'next-intl': 'next',
   'react-native-localize': 'react-native-localize',
+  'angular-i18n': 'angular-i18n',
 };
 
 describe('FRAMEWORK_PATTERNS coverage', () => {

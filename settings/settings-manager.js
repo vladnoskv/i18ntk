@@ -1124,31 +1124,7 @@ class SettingsManager {
      * @returns {Array} Array of language objects with code and name
      */
     getAvailableLanguages() {
-        return [
-            { code: 'en', name: 'English' },
-            { code: 'de', name: 'Deutsch' },
-            { code: 'es', name: 'Español' },
-            { code: 'fr', name: 'Français' },
-            { code: 'it', name: 'Italiano' },
-            { code: 'pt', name: 'Português' },
-            { code: 'nl', name: 'Nederlands' },
-            { code: 'pl', name: 'Polski' },
-            { code: 'sv', name: 'Svenska' },
-            { code: 'uk', name: 'Українська' },
-            { code: 'cs', name: 'Čeština' },
-            { code: 'tr', name: 'Türkçe' },
-            { code: 'ru', name: 'Русский' },
-            { code: 'ja', name: '日本語' },
-            { code: 'ko', name: '한국어' },
-            { code: 'zh', name: '中文' },
-            { code: 'ar', name: 'العربية' },
-            { code: 'hi', name: 'हिन्दी' },
-            { code: 'th', name: 'ไทย' },
-            { code: 'vi', name: 'Tiếng Việt' },
-            { code: 'he', name: 'עברית' },
-            { code: 'el', name: 'Ελληνικά' },
-            { code: 'hu', name: 'Magyar' }
-        ];
+        return require('../utils/language-registry').getLanguages();
     }
 }
 

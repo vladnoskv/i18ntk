@@ -333,6 +333,7 @@ class I18nCompletionTool {
             file: fileName,
             key: keyPath,
             value,
+            status: 'source-copy-marker',
             action: 'added'
           });
         }
@@ -662,6 +663,7 @@ class I18nCompletionTool {
       console.log(`Target locales changed: ${targetLocalesChanged}`);
       console.log(`Unique source keys added: ${missingKeys.length}`);
       console.log(`Total key insertions: ${totalChanges}`);
+      console.log(`Translation status: ${totalChanges > 0 ? 'key presence added; source-copy markers require translation review' : 'no missing keys'}`);
       console.log(`Files modified: ${args.dryRun ? 0 : filesModified}`);
       console.log(`Files skipped: ${filesSkipped}`);
       if (args.dryRun) {
