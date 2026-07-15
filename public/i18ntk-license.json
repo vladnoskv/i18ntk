@@ -1,0 +1,12 @@
+{
+  "$schema": "https://i18ntk.dev/schemas/license-marker/v1",
+  "product": "i18ntk",
+  "marker": "i18ntk-site-verification",
+  "licenseId": "LIC-EXAMPLE-123456",
+  "licenseType": "commercial",
+  "domains": [
+    "example.com"
+  ],
+  "productVersion": "5.0.0",
+  "verification": "i18ntk-site-verification:LIC-EXAMPLE-123456"
+}

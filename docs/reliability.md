@@ -62,7 +62,7 @@ console.log(quality.valid, quality.errors, quality.warnings);
 Generate the manifest and HTML tag assigned to a licensed public deployment:
 
 ```bash
-i18ntk-license generate \
+npx i18ntk-license generate \
   --license-id LIC-CUSTOMER-ID \
   --domains example.com,www.example.com \
   --output ./public/i18ntk-license.json
@@ -71,8 +71,8 @@ i18ntk-license generate \
 Add the printed meta tag to the site's HTML and deploy the JSON file at `/i18ntk-license.json`. Validate a deployment manifest locally:
 
 ```bash
-i18ntk-license verify --file ./public/i18ntk-license.json --domain example.com
-i18ntk-license queries --license-id LIC-CUSTOMER-ID
+npx i18ntk-license verify --file ./public/i18ntk-license.json --domain example.com
+npx i18ntk-license queries --license-id LIC-CUSTOMER-ID
 ```
 
 The `queries` command prints exact search phrases that can locate indexed public markers. It does not perform a web search or transmit data. The marker API is also available through `require('i18ntk/license-marker')`.

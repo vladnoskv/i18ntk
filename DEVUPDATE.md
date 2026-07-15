@@ -1,35 +1,38 @@
-# i18ntk v5 Release and Update Runbook
+# i18ntk v5 release and update runbook
 
-Use this runbook for v5 maintenance releases. The workspace root is private; the publishable npm package is `i18ntk/`.
+This document is for maintainers of i18ntk v5. The private workspace root contains the CLI package (`i18ntk/`) and the two VS Code extensions. Only `i18ntk/` is published to npm.
 
-## Release gate: required and automatic
+## The required release gate
 
-From the workspace root, run:
+Run this from the workspace root before every version update, build, package, or publish:
 
 ```bash
 npm ci
 npm run release:verify
 ```
 
-`release:verify` fails on the first error and runs:
+The command is fail-fast: the next step does not run after any error. It verifies all three packages:
 
-1. Core security checks, security tests, locale lint, full CLI tests, and production dependency audit.
-2. Workbench compile and unit tests.
-3. Lens compile and unit tests.
+1. The core CLI security checks, security tests, UI-locale lint, complete test suite, isolated packed-package install, and production dependency audit.
+2. The Workbench extension compilation and unit tests.
+3. The Lens extension compilation and unit tests.
 
-The same gate runs automatically before `build.bat`, `update.bat`, `npm run package:public`, `npm run pack:public`, and both publish commands. Do not bypass a failure: fix it, rerun the gate, then continue.
+The packed-package test is important: it creates a temporary consumer project, installs a newly packed i18ntk tarball, loads its public entrypoints, checks every CLI target, and checks the licence marker API. This catches files or exports that source-tree tests cannot see.
 
-## Update versions
+`build.bat`, `update.bat`, `npm run package:public`, `npm run pack:public`, `npm run publish:public:dry-run`, and `npm run publish:public` all invoke this gate automatically. Do not bypass it. Fix the failure and rerun the command.
 
-From the workspace root:
+## Update versions safely
+
+Use the root update command:
 
 ```bat
 update.bat patch
 update.bat minor
 update.bat 5.0.1 1.4.1 1.3.1
+update.bat --dry-run
 ```
 
-`update.bat` validates the entire workspace before changing version files. If validation fails, it exits before writing any version change. Review the updated package manifests, public manifest, and lockfiles before committing.
+The script validates the entire workspace before it changes any version file. A failed gate stops the update before the version-write step. Review the core manifest, public manifest, development manifest, extension manifests, and lockfiles after a successful update.
 
 ## Build release artifacts
 
@@ -37,29 +40,28 @@ update.bat 5.0.1 1.4.1 1.3.1
 build.bat
 ```
 
-The build runs the full release gate before deleting or creating artifacts. It produces the core `.tgz` and both `.vsix` files only when all checks pass.
+The build runs the full release gate before deleting old artifacts or creating new ones. On success it creates:
 
-For the core package alone:
+- `i18ntk-<version>.tgz`
+- `i18ntk-workbench-<version>.vsix`
+- `i18ntk-lens-<version>.vsix`
+
+To prepare just the public npm package:
 
 ```bash
 cd i18ntk
 npm run pack:public
-npm run verify:packed-install
 ```
 
-The packed-install verifier installs the produced tarball in a fresh temporary consumer project and checks public entrypoints.
+The public packer verifies that the staged npm package has the public manifest, README, licensing files, runtime exports, CLI files, locale data, documentation, and i18ntk skill, while excluding tests, release scripts, configuration, secrets, and private packaging files.
 
-## Documentation and licensing review
+## Review before publishing
 
-Before publishing, update and review:
+Update and review the public-facing changes in `CHANGELOG.md`, `README.md`, `docs/README.md`, and the relevant migration documentation. Review `LICENSE`, `COMMERCIAL-LICENSE.md`, and `SECURITY.md` whenever licensing or security behaviour changes.
 
-- `CHANGELOG.md`, `README.md`, `docs/README.md`, and the relevant migration guide.
-- `LICENSE`, `COMMERCIAL-LICENSE.md`, and `SECURITY.md` whenever terms or verification behavior changes.
-- `docs/migration-v4-to-v5.md` for changes that affect v4 upgrades, configuration migration, CI, or agents.
+i18ntk v5 uses PolyForm Noncommercial 1.0.0 for qualifying personal and noncommercial use. Commercial use requires a separate written licence; older MIT releases retain their original terms. This is operational guidance, not legal advice.
 
-i18ntk v5 is available for qualifying personal and noncommercial use under PolyForm Noncommercial 1.0.0. Commercial use requires a separate written commercial license. Earlier MIT releases retain their original terms. This runbook is operational guidance, not legal advice.
-
-For licensed public deployments, the optional `i18ntk-license` marker is public metadata only. Never put keys, contracts, names, email addresses, billing data, private domains, or secrets in it. The local verifier makes no network request; commercial entitlement is confirmed against the licensor's private records.
+The optional `i18ntk-license` marker is public metadata only. Never include licence keys, contracts, customer details, emails, billing data, private domains, or secrets. Its local verifier makes no network request; commercial entitlement is confirmed from the licensor's private records.
 
 ## Publish
 
@@ -69,7 +71,7 @@ npm whoami
 npm run publish:public
 ```
 
-Publishing runs the required release gate again. Publish only from the core package after confirming the exact tarball, changelog, licensing documentation, and intended npm version.
+Publishing runs the mandatory release gate again before staging and publishing the public package. Confirm the exact version, generated tarball, changelog, licence terms, and npm account before executing it.
 
 ## After publishing
 
@@ -78,4 +80,4 @@ npm view i18ntk version dist-tags bin
 npx --yes i18ntk@latest --version
 ```
 
-Verify the Marketplace artifacts separately after uploading the generated VSIX files. Record the published version, artifact checksums, and any follow-up actions in the release notes.
+Upload and verify the two generated VSIX files separately. Record published versions, artifact checksums, and follow-up work in the release notes.

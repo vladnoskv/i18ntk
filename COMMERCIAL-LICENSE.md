@@ -56,7 +56,7 @@ Commercial licenses may assign a public license identifier and approved domains.
 Generate both values with:
 
 ```bash
-i18ntk-license generate --license-id LIC-CUSTOMER-ID --domains example.com,www.example.com
+npx i18ntk-license generate --license-id LIC-CUSTOMER-ID --domains example.com,www.example.com
 ```
 
 The marker is deliberately public so the licensor, customer, search engines, and third parties can verify the claimed license identity. It must not contain a license key, personal data, billing data, or other secret. Publishing a marker does not prove that a license is valid unless the identifier and domains match the licensor's records.

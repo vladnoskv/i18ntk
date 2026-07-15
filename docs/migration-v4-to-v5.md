@@ -74,7 +74,14 @@ npx i18ntk --command=skills --agents=codex,claude,copilot --scope=project --dry-
 
 Most users do not need to do anything in this section. Use a public marker only when your written commercial licence specifically requires it. The marker is not a licence key and is not an authentication method.
 
-Never put private API keys, contracts, names, email addresses, billing details, private hostnames, internal domains, or secrets in public translation files.
+Generate and check the marker locally with the opaque identifier supplied by the licensor:
+
+```bash
+npx i18ntk-license generate --license-id LIC-EXAMPLE-123456 --domains example.com --output ./public/i18ntk-license.json
+npx i18ntk-license verify --file ./public/i18ntk-license.json --domain example.com
+```
+
+Only publish the generated JSON and the printed HTML meta tag. Never put API keys, contracts, names, email addresses, billing details, private hostnames, internal domains, or secrets in it. The verifier only checks the local file and domain format: it makes no network request, sends no telemetry, and does not inspect your site.
 
 ## Upgrade checklist
 

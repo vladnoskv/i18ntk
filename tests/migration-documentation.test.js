@@ -17,6 +17,7 @@ test('v4 to v5 migration guide is published and linked from core documentation',
   assert.match(guide, /PolyForm Noncommercial 1\.0\.0/);
   assert.match(guide, /one-time configuration migration/);
   assert.match(guide, /makes no network request/i);
+  assert.match(guide, /npx i18ntk-license generate/);
   assert.match(readme, /docs\/migration-v4-to-v5\.md/);
   assert.match(docsIndex, /migration-v4-to-v5\.md/);
   assert.ok(manifest.files.includes('docs/migration-v4-to-v5.md'));
