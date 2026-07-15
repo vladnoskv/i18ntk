@@ -1,6 +1,6 @@
-# i18ntk
+# i18ntk v5.0.0
 
-Keep every translation in your project accurate, complete, and easy to maintain.
+Find, validate, and maintain application translations without adding runtime dependencies.
 
 ![i18ntk Logo](https://raw.githubusercontent.com/vladnoskv/i18ntk/main/docs/screenshots/i18ntk-logo-public.PNG)
 
@@ -14,17 +14,17 @@ Keep every translation in your project accurate, complete, and easy to maintain.
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
 
-## What it does
+## Why i18ntk
 
 - Finds missing and unused keys across your source code and locale files.
 - Checks placeholders, tags, source-language leftovers, and other translation-quality issues.
 - Completes missing keys and translates only the entries that need attention.
-- Supports JavaScript, TypeScript, Python, Ruby, Go, Rust, and 30+ frameworks and i18n libraries.
+- Supports JavaScript, TypeScript, Python, PHP, Ruby, Go, Rust, JVM templates, and 30+ framework or i18n integrations.
 - Works interactively on your machine or non-interactively in automation, with no production dependencies.
 
 Use the CLI on its own, or pair it with [i18ntk Workbench](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench) for project-wide management and [i18ntk Lens](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens) for inline editor feedback.
 
-## Get started in minutes
+## Quick start
 
 Try it without installing:
 
@@ -32,14 +32,14 @@ Try it without installing:
 npx i18ntk
 ```
 
-Or install it for your project:
+Or install it for your project (required if using i18ntk/runtime):
 
 ```bash
 npm install --save-dev i18ntk
 npx i18ntk --command=init
 ```
 
-Start with a quick health check:
+Then inspect translation health before making changes:
 
 ```bash
 npx i18ntk --command=analyze
@@ -47,7 +47,7 @@ npx i18ntk --command=validate
 npx i18ntk --command=usage
 ```
 
-Use `npx i18ntk` at any time for the guided menu. For a walkthrough, see [Getting started](./docs/getting-started.md).
+Use `npx i18ntk` for the guided menu. It detects the project framework and adds only compatible source types and safe generated-file exclusions to a newly created configuration. For a walkthrough, see [Getting started](./docs/getting-started.md).
 
 ## What's new in 5.0.0
 
@@ -59,7 +59,7 @@ Use `npx i18ntk` at any time for the guided menu. For a walkthrough, see [Gettin
 
 See the [release notes](./CHANGELOG.md) for the full list of user-facing changes.
 
-## Everyday commands
+## Everyday workflows
 
 ```bash
 i18ntk                                    # guided menu
@@ -68,24 +68,24 @@ i18ntk --command=validate                 # quality checks
 i18ntk --command=usage                    # missing and unused keys
 i18ntk --command=complete                 # add missing keys
 i18ntk --command=translate                # translate eligible entries
-i18ntk report --json --out ./reports      # shareable report
+i18ntk --command=report --format=json     # shareable report
 ```
 
-Use `npx` before these commands when i18ntk is installed locally.
+Use `npx i18ntk --command=<name>` when i18ntk is installed locally.
 
 ## Command Reference
 
-| Command | When to use it |
+| Command | Use it when you want to |
 | --- | --- |
-| `i18ntk` | You want guided setup or a menu of common tasks. |
-| `init` | You are adding i18ntk to a project. |
-| `analyze`, `validate`, `usage` | You want to review coverage, quality, and key usage. |
-| `complete`, `translate` | You want to add or translate missing entries. |
-| `report`, `summary`, `sizing` | You need a shareable status or planning view. |
-| `scanner`, `fixer`, `backup` | You need to find hardcoded text, repair locale data, or protect a snapshot. |
-| `skills` | You want to add i18ntk guidance to an LLM agent. |
+| `i18ntk` | Open the guided setup and maintenance menu. |
+| `init` | Create or extend a project configuration. |
+| `analyze`, `validate`, `usage` | Review coverage, translation quality, and key usage. |
+| `complete`, `translate` | Add missing entries or translate eligible values. |
+| `report`, `summary`, `sizing` | Produce a shareable status or planning view. |
+| `scanner`, `fixer`, `backup` | Find hardcoded text, repair locale data, or protect a snapshot. |
+| `skills` | Install i18ntk guidance for an AI coding agent. |
 
-Each is available as `i18ntk --command=<name>` or standalone `i18ntk-<name>`.
+Each command is also available as a standalone `i18ntk-<name>` executable.
 
 ## Common Options
 
@@ -109,7 +109,11 @@ i18ntk-translate locales/en/common.json fr --dry-run --preserve-placeholders
 **Providers:** Google (default), DeepL, LibreTranslate
 
 ```bash
-export DEEPL_API_KEY="your-key"
+# POSIX
+DEEPL_API_KEY="your-key" i18ntk-translate locales/en/common.json de --provider deepl --no-confirm
+
+# PowerShell
+$env:DEEPL_API_KEY = "your-key"
 i18ntk-translate locales/en/common.json de --provider deepl --no-confirm
 ```
 
@@ -136,7 +140,7 @@ Example `.i18ntk-config`:
 ```json
 {
   "version": "5.0.0",
-  "sourceDir": "./locales",
+  "sourceDir": "./src",
   "i18nDir": "./locales",
   "sourceLanguage": "en",
   "defaultLanguages": ["en", "de", "es", "fr", "ru"],
@@ -237,7 +241,7 @@ Features: 300ms debounce, SHA-256 hash tracking, 50-directory cap. The callback 
 - [Scanner Guide](./docs/scanner-guide.md)
 - [Environment Variables](./docs/environment-variables.md)
 
-## Use i18ntk with an LLM agent
+## Use i18ntk with an AI coding agent
 
 Give your coding agent the same up-to-date i18ntk guidance you use. The installer finds supported skill locations and lets you choose where to add it:
 
@@ -246,7 +250,7 @@ npx i18ntk --command=skills
 npx i18ntk --command=skills --agents=codex,claude,copilot --scope=personal --dry-run --no-prompt
 ```
 
-The installer supports Codex, Claude Code, GitHub Copilot, shared Agent Skills, and compatible project folders. It shows the destinations it finds and asks before changing anything. Existing skills are kept unless you choose to update them.
+The installer supports Codex, Claude Code, GitHub Copilot, shared Agent Skills, and compatible project folders. The core instructions are model-neutral; Codex receives optional OpenAI UI metadata, while Claude and Copilot receive the same portable workflow. The installer shows destinations and asks before changing anything. Existing skills are kept unless you choose to update them.
 
 For manual installation, copy the complete `skills/i18ntk` folder into your agent's skills directory.
 

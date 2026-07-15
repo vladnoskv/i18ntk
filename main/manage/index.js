@@ -70,7 +70,7 @@ class I18nManager {
         this.isReadlineClosed = false;
     }
 
-    async maybeUpgradeProjectConfig(prompt, interactive) {
+    async maybeUpgradeProjectConfig() {
         const config = projectConfigManager.loadConfig();
         if (config.setup?.completed === false) return null;
         const detected = detectFramework(process.cwd());
@@ -81,23 +81,10 @@ class I18nManager {
         const status = getConfigUpgradeStatus(config, framework);
         if (!status.needsUpgrade) return status;
 
-        const message = `Your i18ntk configuration is from v${status.currentVersion} and can be improved for ${status.template.label}. Existing settings will be kept.`;
-        if (!interactive) {
-            console.warn(`[i18ntk] ${message} Run i18ntk interactively to review the update.`);
-            return status;
-        }
-
-        console.log(`\n[i18ntk] ${message}`);
-        const answer = await prompt.question('Apply the recommended configuration update? [Y/n] ');
-        if (!parseConfirmation(answer, { language: config.uiLanguage || config.language || 'en', defaultValue: true })) {
-            console.log('[i18ntk] Configuration update skipped. Your current settings were not changed.');
-            return status;
-        }
-
         const upgraded = upgradeConfig(config, framework);
         const saved = await projectConfigManager.saveConfig(upgraded.config);
         if (!saved) throw new Error('Unable to save the configuration update');
-        console.log(`[i18ntk] Updated configuration for ${upgraded.template.label}. Existing settings were kept.`);
+        console.log(`[i18ntk] Applied the one-time v${pkg.version} configuration update for ${upgraded.template.label}; existing settings were kept.`);
         return upgraded;
     }
 
@@ -391,10 +378,7 @@ class I18nManager {
             // Keep startup resilient if registry access is unavailable.
         }
 
-        let startupTimeout = setTimeout(() => {
-            console.error('❌ CLI startup timeout - something is hanging');
-            process.exit(1);
-        }, 10000); // 10 second timeout
+        let startupTimeout = null;
 
         const clearStartupTimeout = () => {
             if (startupTimeout) {
@@ -412,6 +396,15 @@ class I18nManager {
 
             prompt = createPrompt({ noPrompt: args.noPrompt });
             const interactive = isInteractive({ noPrompt: args.noPrompt });
+
+            // Prompts are allowed to wait for a human. The watchdog protects
+            // unattended startup only, after setup has finished.
+            if (!interactive) {
+                startupTimeout = setTimeout(() => {
+                    console.error('❌ CLI startup timeout - something is hanging');
+                    process.exit(1);
+                }, 10000);
+            }
 
             if (requestedCommand !== 'init' && requestedCommand !== 'skills') {
                 await this.maybeUpgradeProjectConfig(prompt, interactive);
@@ -1570,25 +1563,21 @@ if (require.main === module) {
             const packageJson = JSON.parse(packageJsonContent);
             const versionInfo = packageJson.versionInfo || {};
 
-            console.log(`\n🌍 i18n Toolkit (i18ntk)`);
-            console.log(`Version: ${packageJson.version}`);
-            console.log(`Release Date: ${versionInfo.releaseDate || 'N/A'}`);
-            console.log(`Maintainer: ${versionInfo.maintainer || packageJson.author}`);
-            console.log(`Node.js: ${versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0'}`);
-            console.log(`License: ${packageJson.license}`);
-            if (versionInfo.supportPolicy) {
-                console.log(`\n⚠️ Support: ${versionInfo.supportPolicy}`);
+            console.log(`\ni18ntk ${packageJson.version}`);
+            console.log(`Internationalization toolkit • Node.js ${versionInfo.supportedNodeVersions || packageJson.engines?.node || '>=16.0.0'} • ${packageJson.license}`);
+            const highlights = [
+                'Translation QA and safer Auto Translate.',
+                'Broader framework and locale-layout detection.',
+                'Agent Skills for Codex, Claude Code, and GitHub Copilot.',
+                'Hardened path containment and release verification.'
+            ];
+            console.log('\nHighlights');
+            for (const change of highlights) {
+                console.log(`  • ${change}`);
             }
-
-            if (versionInfo.majorChanges && versionInfo.majorChanges.length > 0) {
-                console.log(`\n✨ What's New in ${packageJson.version}:`);
-                versionInfo.majorChanges.forEach(change => {
-                    console.log(`  • ${change}`);
-                });
-            }
-
-            console.log(`\n📖 Documentation: ${packageJson.homepage}`);
-            console.log(`🐛 Report Issues: ${packageJson.bugs?.url}`);
+            console.log(`\nDocs: ${packageJson.homepage}`);
+            console.log(`Changelog: ${packageJson.homepage?.replace(/#readme$/, '') || packageJson.homepage}/blob/main/CHANGELOG.md`);
+            console.log(`Issues: ${packageJson.bugs?.url}`);
 
         } catch (error) {
             console.log(`\n❌ Version information unavailable`);

@@ -1,6 +1,7 @@
 {
   "version": 1,
   "defaults": {
+    "excludeFiles": ["**/*.min.*", "**/*.map", "**/*.generated.*", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "composer.lock", "poetry.lock", "Cargo.lock", "go.sum"],
     "processing": {
       "cacheEnabled": true,
       "parallelProcessing": true

@@ -9,6 +9,13 @@ const TEMPLATE_BY_FRAMEWORK = {
   i18next: 'node',
   'next-intl': 'next',
   next: 'next',
+  react: 'node',
+  remix: 'node',
+  gatsby: 'node',
+  expo: 'node',
+  'react-native': 'node',
+  solid: 'node',
+  qwik: 'node',
   vue: 'vue',
   'vue-i18n': 'vue',
   nuxt: 'vue',
@@ -52,6 +59,7 @@ function getFrameworkConfigTemplate(framework) {
   return {
     id,
     ...clone(template),
+    excludeFiles: unique([...(defaults.excludeFiles || []), ...(template.excludeFiles || [])]),
     processing: { ...(defaults.processing || {}), ...(template.processing || {}) },
     reports: { ...(defaults.reports || {}), ...(template.reports || {}) },
     advanced: { ...(defaults.advanced || {}), ...(template.advanced || {}) }
@@ -85,6 +93,7 @@ function applyFrameworkConfigTemplate(config = {}, framework = 'vanilla') {
   const existing = clone(config);
   const extensions = unique([...(existing.supportedExtensions || []), ...template.supportedExtensions]);
   const excludeDirs = unique([...(existing.excludeDirs || []), ...template.excludeDirs]);
+  const excludeFiles = unique([...(existing.excludeFiles || []), ...(template.excludeFiles || [])]);
   const processing = {
     ...(template.processing || {}),
     ...(existing.processing || {}),
@@ -105,6 +114,7 @@ function applyFrameworkConfigTemplate(config = {}, framework = 'vanilla') {
     ...existing,
     supportedExtensions: extensions,
     excludeDirs,
+    excludeFiles,
     processing,
     reports,
     advanced,
@@ -114,7 +124,7 @@ function applyFrameworkConfigTemplate(config = {}, framework = 'vanilla') {
   const changed = JSON.stringify(existing) !== JSON.stringify(next);
   return {
     config: next,
-    patch: { supportedExtensions: extensions, excludeDirs, processing, reports, advanced, framework: nextFramework },
+    patch: { supportedExtensions: extensions, excludeDirs, excludeFiles, processing, reports, advanced, framework: nextFramework },
     template,
     changed,
     outdated: changed

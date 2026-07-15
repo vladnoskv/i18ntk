@@ -14,7 +14,7 @@ const { envManager } = require('./env-manager');
 const { checkInitialized } = require('./init-helper');
 const { closeGlobalReadline } = require('./cli');
 const { detectFramework } = require('./framework-detector');
-const { getConfigUpgradeStatus } = require('./framework-config-templates');
+const { getConfigUpgradeStatus, upgradeConfig } = require('./framework-config-templates');
 const settingsManager = new SettingsManager();
 
 const { ask } = require('./cli');
@@ -85,8 +85,13 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       const detectedFramework = detectFramework(projectRoot);
       if (detectedFramework?.id) {
         const upgrade = getConfigUpgradeStatus(cfg, detectedFramework.id);
-        if (cfg.setup?.completed !== false && upgrade.needsUpgrade && !cliArgs.json) {
-          console.warn(`[i18ntk] Your configuration needs a v${upgrade.requiredVersion} update for ${upgrade.template.label}. Run the interactive i18ntk menu to review and apply the recommended safe defaults.`);
+        if (cfg.setup?.completed !== false && upgrade.needsUpgrade) {
+          const upgraded = upgradeConfig(cfg, detectedFramework.id);
+          await configManager.saveConfig(upgraded.config);
+          cfg = upgraded.config;
+          if (!cliArgs.json) {
+            console.warn(`[i18ntk] Applied the one-time v${upgraded.requiredVersion} configuration update for ${upgraded.template.label}; existing settings were kept.`);
+          }
         }
       }
 
@@ -154,9 +159,8 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       cfg.i18nDir = SecurityUtils.validatePath(normalizePath(cliArgs.i18nDir), projectRoot) || normalizePath(cliArgs.i18nDir);
       cfg.sourceDir = cfg.sourceDir || cfg.i18nDir;
     } else {
-      const chosenDir = normalizePath(cliArgs.sourceDir || cfg.sourceDir || './locales');
-      cfg.sourceDir = chosenDir;
-      cfg.i18nDir = chosenDir;
+      cfg.sourceDir = normalizePath(cfg.sourceDir || './locales');
+      cfg.i18nDir = normalizePath(cfg.i18nDir || cfg.sourceDir);
     }
 
     const displayPaths = {

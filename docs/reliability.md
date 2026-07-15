@@ -7,11 +7,14 @@ Run the complete suite and then verify the exact npm artifact:
 ```bash
 npm test
 npm run verify:packed-install
+npm run package:public
 ```
 
 The packed-install verifier creates a randomized temporary consumer project, runs `npm pack`, installs only the resulting tarball, loads the package and public runtime/report entry points, and verifies every declared CLI target. The temporary project and tarball are removed on completion.
 
 The publish-integrity test walks static relative `require()` calls under `main`, `settings`, `utils`, and `runtime`. Any production module absent from the package's `files` coverage fails the test.
+
+`npm run package:public` stages the public manifest and verifies it can be packed without including private release material, tests, scripts, secrets, or user configuration. User-facing docs listed in the manifest remain intentionally included.
 
 ## Language registry
 

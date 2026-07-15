@@ -51,7 +51,7 @@ Adapt rather than copy blindly:
 
 ## Framework template upgrades
 
-For projects created before v5.0.0, inspect `setup.version` and `framework.templateVersion`. When the setup is older than v5.0.0 or framework defaults are missing, tell the user that i18ntk will offer an interactive upgrade. It appends framework-specific extensions and safe exclusions, enables cached scanning and useful report detail, and preserves existing values.
+On the next i18ntk run, a new or outdated configuration is upgraded after framework detection. i18ntk merges framework-specific source extensions, build-output exclusions, and common generated-file/lockfile exclusions while preserving user values. Inspect `setup.version` and `framework.templateVersion` when troubleshooting an upgrade.
 
 Do not replace a user's explicit framework preference, locale paths, language list, exclusions, or report settings. In non-interactive environments, surface the update notice instead of changing the saved configuration.
 

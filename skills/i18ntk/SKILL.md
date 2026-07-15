@@ -7,6 +7,14 @@ description: Configure, use, audit, troubleshoot, and release projects that use 
 
 Use i18ntk as an evidence-producing localization tool. Adapt paths, commands, framework patterns, exclusions, quality thresholds, and translation protection to the current repository instead of imposing generic defaults.
 
+## Work across agent environments
+
+- Follow the host agent's repository, permission, and tool policies first. Treat commands here as portable examples, not permission to write files or call external providers.
+- Do not depend on Codex-only syntax, tools, or environment variables. Use the host's available terminal and file tools; on Windows prefer PowerShell syntax and on POSIX use shell syntax.
+- State the detected locale layout, framework evidence, and intended configuration patch before writing. Keep changes minimal and preserve user-owned rules.
+- Report concise evidence: commands run, exit status, changed files, and unresolved translation-review items.
+- For unattended agent work, never run bare `npx i18ntk`: it opens an interactive menu. Use an explicit `--command=…`, explicit paths, and `--no-prompt`; use `CI=true` when the host can set environment variables.
+
 ## Inspect before changing
 
 1. Read repository instructions and package-manager metadata.
@@ -39,6 +47,7 @@ Use i18ntk as an evidence-producing localization tool. Adapt paths, commands, fr
 - Add brands, acronyms, and required English UI terms to `allowedEnglishTerms`; use `i18ntk-auto-translate.json` for terms, keys, values, and patterns that Auto Translate must preserve.
 - Keep extension settings aligned under `extensions.workbench` and `extensions.lens` when the project uses the VS Code extensions.
 - Override framework detection only after inspecting dependency and source evidence. Mixed stacks may contain both a platform and an i18n library.
+- On a new or outdated configuration, merge the detected framework template's source extensions plus common generated-file, lockfile, and build-output exclusions. Never replace existing `supportedExtensions`, `excludeDirs`, or `excludeFiles`.
 
 ## Treat quality separately from coverage
 

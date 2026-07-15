@@ -84,13 +84,7 @@ module.exports = class ConfigurationService {
     // Add timeout to prevent hanging
     const args = this.parseArgs();
 
-    const timeout = setTimeout(() => {
-      console.error('❌ CLI startup timeout - something is hanging');
-      if (args.debug) {
-        console.error('🔍 DEBUG: Last known execution point reached');
-      }
-      process.exit(1);
-    }, 10000); // 10 second timeout
+    let timeout = null;
 
     if (args.debug) {
       console.log('🔍 DEBUG: Starting configuration service...');
@@ -105,6 +99,13 @@ module.exports = class ConfigurationService {
 
       prompt = createPrompt({ noPrompt: args.noPrompt });
       const interactive = isInteractive({ noPrompt: args.noPrompt });
+      if (!interactive) {
+        timeout = setTimeout(() => {
+          console.error('❌ CLI startup timeout - something is hanging');
+          if (args.debug) console.error('🔍 DEBUG: Last known execution point reached');
+          process.exit(1);
+        }, 10000);
+      }
 
       // Load settings and UI language
       const settings = this.settings || (this.configManager.loadSettings ? this.configManager.loadSettings() : (this.configManager.getConfig ? this.configManager.getConfig() : {}));
@@ -138,6 +139,7 @@ module.exports = class ConfigurationService {
       }
       process.exit(1);
     } finally {
+      if (timeout) clearTimeout(timeout);
       if (prompt && typeof prompt.close === 'function') {
         prompt.close();
       }

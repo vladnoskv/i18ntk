@@ -293,12 +293,24 @@ static _logging = false;
       const base = fs.realpathSync(basePath);
       const resolvedPath = path.resolve(base, filePath);
 
-      // Resolve symlinks if the path exists
+      // Resolve the nearest existing ancestor as well as an existing target.
+      // A new file can otherwise be written through a pre-existing symlink or
+      // Windows junction in one of its parent directories.
       let finalPath = resolvedPath;
+      let existingAncestor = resolvedPath;
+      const missingParts = [];
+      while (!fs.existsSync(existingAncestor)) {
+        const parent = path.dirname(existingAncestor);
+        if (parent === existingAncestor) break;
+        missingParts.unshift(path.basename(existingAncestor));
+        existingAncestor = parent;
+      }
       try {
-        finalPath = fs.realpathSync(resolvedPath);
+        const resolvedAncestor = fs.realpathSync(existingAncestor);
+        finalPath = path.join(resolvedAncestor, ...missingParts);
       } catch {
-        // If the path doesn't exist yet, fall back to the resolved path
+        // The base path is realpath-validated above. Retain the resolved path
+        // only if an unexpected filesystem error prevents ancestor resolution.
       }
 
       // Check for actual path traversal (going outside the base directory)

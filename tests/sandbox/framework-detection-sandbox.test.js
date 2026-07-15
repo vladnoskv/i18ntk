@@ -1,5 +1,7 @@
 'use strict';
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
 
@@ -97,6 +99,19 @@ describe('Framework Detection Sandbox', () => {
     const result = detectFramework(fixture('next-intl'));
     assert.ok(result);
     assert.strictEqual(result.id, 'next-intl');
+  });
+
+  it('detects a Next.js platform without requiring an i18n library', () => {
+    const project = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-next-platform-'));
+    try {
+      fs.writeFileSync(path.join(project, 'package.json'), JSON.stringify({ dependencies: { next: '15.0.0' } }), 'utf8');
+      const result = detectFramework(project);
+      assert.ok(result);
+      assert.strictEqual(result.id, 'next');
+      assert.equal(result.confidence, 0.7);
+    } finally {
+      fs.rmSync(project, { recursive: true, force: true });
+    }
   });
 
   it('detects svelte-i18n from package.json', () => {

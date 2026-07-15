@@ -63,6 +63,30 @@ describe('Security Tests', () => {
       }
     });
 
+    test('safe write should reject a destination beneath a symlinked parent directory', (t) => {
+      const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-safe-write-link-'));
+      const base = path.join(parent, 'base');
+      const outside = path.join(parent, 'outside');
+      const linkedParent = path.join(base, 'linked');
+      fs.mkdirSync(base);
+      fs.mkdirSync(outside);
+
+      try {
+        try {
+          fs.symlinkSync(outside, linkedParent, process.platform === 'win32' ? 'junction' : 'dir');
+        } catch (error) {
+          t.skip(`Unable to create test symlink: ${error.code || error.message}`);
+          return;
+        }
+
+        const result = SecurityUtils.safeWriteFileSync(path.join('linked', 'escape.json'), 'blocked', base, 'utf8');
+        assert.strictEqual(result, false, 'A symlinked parent must not redirect secure writes outside the base');
+        assert.strictEqual(fs.existsSync(path.join(outside, 'escape.json')), false);
+      } finally {
+        fs.rmSync(parent, { recursive: true, force: true });
+      }
+    });
+
     test('should reject absolute paths when relative path remains absolute', () => {
       const originalRelative = path.relative;
       try {

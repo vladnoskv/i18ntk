@@ -1163,7 +1163,8 @@ async function run(args) {
     }
   }
 
-  const hadRealErrors = grandTranslated === 0 && grandTotal > 0;
+  const hadRealErrors = !args.dryRun && grandTranslated === 0 && grandTotal > 0 &&
+    (grandSkipped + grandSkippedExisting) === 0;
   const hasResiduals = allResidualUntranslated.length > 0;
   const failedValidation = hadRealErrors || hasResiduals;
 

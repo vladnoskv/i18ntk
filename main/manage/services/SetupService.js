@@ -10,6 +10,13 @@
 const path = require('path');
 const SecurityUtils = require('../../../utils/security');
 const configManager = require('../../../utils/config-manager');
+const { detectFramework } = require('../../../utils/framework-detector');
+
+const FRAMEWORK_LANGUAGES = {
+  django: 'python', flask: 'python', fastapi: 'python', python: 'python',
+  go: 'go', rust: 'rust', 'ruby-on-rails': 'ruby', laravel: 'php',
+  'spring-boot': 'java'
+};
 
 class SetupService {
   constructor() {
@@ -66,7 +73,12 @@ class SetupService {
     const pomPath = path.join(process.cwd(), 'pom.xml');
     const composerPath = path.join(process.cwd(), 'composer.json');
 
-    if (SecurityUtils.safeExistsSync(packageJsonPath)) {
+    const detected = detectFramework(process.cwd());
+    if (detected?.id) {
+      this.config.detectedFramework = detected.id;
+      this.config.detectedLanguage = FRAMEWORK_LANGUAGES[detected.id]
+        || (SecurityUtils.safeExistsSync(packageJsonPath) ? 'javascript' : 'generic');
+    } else if (SecurityUtils.safeExistsSync(packageJsonPath)) {
       this.config.detectedLanguage = 'javascript';
       await this.detectNodeFramework(packageJsonPath);
     } else if (SecurityUtils.safeExistsSync(pyprojectPath) || SecurityUtils.safeExistsSync(requirementsPath)) {
@@ -230,13 +242,7 @@ class SetupService {
       nodeVersion: process.version,
       nodeVersionValid: parseInt(process.version.slice(1).split('.')[0]) >= 16,
       hasPackageJson: SecurityUtils.safeExistsSync('package.json'),
-      hasLocales: SecurityUtils.safeExistsSync(this.config.sourceDir),
-      hasGit: this.checkCommand('git'),
-      hasNpm: this.checkCommand('npm'),
-      hasPython: this.checkCommand('python3') || this.checkCommand('python'),
-      hasJava: this.checkCommand('java'),
-      hasGo: this.checkCommand('go'),
-      hasPhp: this.checkCommand('php')
+      hasLocales: SecurityUtils.safeExistsSync(this.config.sourceDir)
     };
 
     // Check for i18n libraries
@@ -246,8 +252,9 @@ class SetupService {
         const packageJson = JSON.parse(SecurityUtils.safeReadFileSync(packageJsonPath, path.dirname(packageJsonPath), 'utf8'));
         const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
+        const i18nLibraries = this.config.frameworkConfig?.i18nLibraries || [];
         this.config.prerequisites.hasI18nLibrary = Object.keys(deps).some(dep =>
-          this.config.frameworkConfig.i18nLibraries.some(lib => dep.includes(lib))
+          i18nLibraries.some(lib => dep.includes(lib))
         );
       }
     }
@@ -259,13 +266,6 @@ class SetupService {
         console.log(`   ${key}: ${value}`);
       }
     });
-  }
-
-  checkCommand(command) {
-    // Command probing via PATH inspection is intentionally disabled to avoid
-    // reading process environment variables in restricted scanner environments.
-    void command;
-    return false;
   }
 
   async optimizeForLanguage() {

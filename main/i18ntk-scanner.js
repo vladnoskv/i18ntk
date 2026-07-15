@@ -24,15 +24,18 @@ const SecurityUtils = require('../utils/security');
 const SetupEnforcer = require('../utils/setup-enforcer');
 const { detectProjectFramework, getFrameworkPatterns, getFrameworkSuggestions, SCANNER_EXTENSIONS, WRAPPER_SKIP_PATTERNS, getExcludeDirs } = require('../utils/framework-detector');
 
-// Ensure setup is complete before running
-(async () => {
-  try {
-    await SetupEnforcer.checkSetupCompleteAsync();
-  } catch (error) {
-    console.error('Setup check failed:', error.message);
-    process.exit(1);
-  }
-})();
+// Enforce setup only for the executable CLI. Keeping module loading side-effect
+// free lets integrations and tests use the scanner helpers safely.
+if (require.main === module) {
+  (async () => {
+    try {
+      await SetupEnforcer.checkSetupCompleteAsync();
+    } catch (error) {
+      console.error('Setup check failed:', error.message);
+      process.exit(1);
+    }
+  })();
+}
 
 loadTranslations();
 
@@ -400,7 +403,7 @@ class I18nTextScanner {
     const line = String(context || '').trim();
     return !value ||
       /^(?:[A-Za-z0-9_-]+\/)+[A-Za-z0-9_./@-]+$/.test(value) ||
-      /^(?:@|#|\.|/)[A-Za-z0-9_./@#:-]+$/.test(value) ||
+      /^(?:@|#|\.|\/)[A-Za-z0-9_./@#:-]+$/.test(value) ||
       /^[a-z][a-z0-9+.-]*:\/\//i.test(value) ||
       /^(?:force-dynamic|use client|use server|javascript|typescript|text|button|div|span|main|true|false|null|undefined)$/i.test(value) ||
       /^(?:[a-z-]+:)?[a-z-]+(?:\/[a-z-]+)*$/.test(value) ||
@@ -866,7 +869,10 @@ class I18nTextScanner {
     }
 
     const baseConfig = await getUnifiedConfig('scanner', args);
-    this.config = { ...baseConfig, ...(this.config || {}) };
+    // Scanner-specific CLI flags must take effect immediately. getUnifiedConfig
+    // handles shared settings, while these switches control this command's report
+    // output and scan bounds.
+    this.config = { ...baseConfig, ...args, ...(this.config || {}) };
 
     this.sourceDir = this.config.sourceDir || './src';
     // If sourceDir equals the locale/i18n directory, fall back to ./src for source code scanning

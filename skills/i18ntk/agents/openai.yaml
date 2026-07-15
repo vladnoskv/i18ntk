@@ -1,4 +1,4 @@
 interface:
   display_name: "i18ntk"
-  short_description: "Configure, audit, and operate i18ntk projects"
-  default_prompt: "Use $i18ntk to configure and validate this project internationalization workflow."
+  short_description: "Configure, audit, and release i18ntk projects"
+  default_prompt: "Use $i18ntk to inspect and improve this project's internationalization workflow."

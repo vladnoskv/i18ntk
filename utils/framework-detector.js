@@ -478,6 +478,26 @@ const FRAMEWORKS = {
   }
 };
 
+// Platform evidence is intentionally separate from i18n-library evidence.
+// It gives first-run configuration a useful, conservative template even when
+// a project relies on a framework's built-in localization facilities.
+const PLATFORM_DEPENDENCIES = {
+  next: { deps: ['next'], name: 'Next.js', template: 'next' },
+  nuxt: { deps: ['nuxt'], name: 'Nuxt', template: 'vue' },
+  vue: { deps: ['vue'], name: 'Vue', template: 'vue' },
+  angular: { deps: ['@angular/core'], name: 'Angular', template: 'angular' },
+  ionic: { deps: ['@ionic/angular', 'ionic-angular'], name: 'Ionic', template: 'angular' },
+  svelte: { deps: ['svelte'], name: 'Svelte', template: 'svelte' },
+  astro: { deps: ['astro'], name: 'Astro', template: 'astro' },
+  react: { deps: ['react'], name: 'React', template: 'node' },
+  remix: { deps: ['@remix-run/react'], name: 'Remix', template: 'node' },
+  gatsby: { deps: ['gatsby'], name: 'Gatsby', template: 'node' },
+  expo: { deps: ['expo'], name: 'Expo', template: 'node' },
+  'react-native': { deps: ['react-native'], name: 'React Native', template: 'node' },
+  solid: { deps: ['solid-js'], name: 'Solid', template: 'node' },
+  qwik: { deps: ['@builder.io/qwik'], name: 'Qwik', template: 'node' }
+};
+
 // ============================================================
 // CENTRALIZED SHARED CONSTANTS — single source of truth
 // All scanner/validator/extension code imports from here.
@@ -485,14 +505,16 @@ const FRAMEWORKS = {
 
 const SOURCE_EXTENSIONS = new Set([
   '.js', '.jsx', '.ts', '.tsx', '.mjs', '.mts', '.cjs', '.cts',
-  '.vue', '.svelte', '.astro', '.mdx', '.html', '.rs',
-  '.py', '.pyx', '.pyi', '.go', '.rb', '.java', '.php', '.hbs'
+  '.vue', '.svelte', '.astro', '.mdx', '.html', '.rs', '.kt', '.kts',
+  '.py', '.pyx', '.pyi', '.go', '.rb', '.java', '.php', '.hbs', '.tera',
+  '.twig', '.erb', '.haml', '.slim', '.j2', '.jinja', '.jinja2', '.tmpl', '.tpl'
 ]);
 
 const SCANNER_EXTENSIONS = new Set([
   '.js', '.jsx', '.ts', '.tsx', '.mjs', '.mts', '.cjs', '.cts',
-  '.vue', '.html', '.svelte', '.astro', '.mdx',
-  '.py', '.pyx', '.pyi', '.php', '.rb', '.go', '.rs', '.java'
+  '.vue', '.html', '.svelte', '.astro', '.mdx', '.kt', '.kts',
+  '.py', '.pyx', '.pyi', '.php', '.rb', '.go', '.rs', '.java', '.hbs',
+  '.tera', '.twig', '.erb', '.haml', '.slim', '.j2', '.jinja', '.jinja2', '.tmpl', '.tpl'
 ]);
 
 const EXCLUDE_DIRS = new Set([
@@ -831,7 +853,9 @@ function detectProjectFrameworks(projectRoot) {
     if (SecurityUtils.safeExistsSync(packagePath, projectRoot)) {
       const pkg = SecurityUtils.safeParseJSON(SecurityUtils.safeReadFileSync(packagePath, projectRoot, 'utf8')) || {};
       const dependencies = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}), ...(pkg.peerDependencies || {}) };
-      const platforms = { next: ['next'], react: ['react'], nuxt: ['nuxt'], vue: ['vue'], angular: ['@angular/core'], svelte: ['svelte'], astro: ['astro'], remix: ['@remix-run/react'], solid: ['solid-js'], qwik: ['@builder.io/qwik'] };
+      const platforms = Object.fromEntries(
+        Object.entries(PLATFORM_DEPENDENCIES).map(([id, platform]) => [id, platform.deps])
+      );
       for (const [id, packages] of Object.entries(platforms)) for (const dependency of packages) {
         if (dependencies[dependency]) {
           detected.add(id);
@@ -894,6 +918,21 @@ function detectFramework(projectRoot) {
                 detectedFrameworks.push(frameworkInfo);
               }
             } catch (_) { /* skip */ }
+          }
+
+          if (detectedFrameworks.length === 0) {
+            for (const [id, platform] of Object.entries(PLATFORM_DEPENDENCIES)) {
+              const dependency = platform.deps.find(name => name in deps);
+              if (!dependency) continue;
+              detectedFrameworks.push({
+                id,
+                name: platform.name,
+                description: `${platform.name} project`,
+                confidence: 0.7,
+                version: deps[dependency] || '',
+                priority: -1
+              });
+            }
           }
         }
       }
@@ -1067,6 +1106,7 @@ function readPyProjectDeps(projectRoot) {
 }
 
 module.exports = { detectFramework, FRAMEWORKS, FRAMEWORK_COMPATIBILITY,
+  PLATFORM_DEPENDENCIES,
   SOURCE_EXTENSIONS, SCANNER_EXTENSIONS, EXCLUDE_DIRS, SOURCE_DIRS,
   FRAMEWORK_PATTERNS, FRAMEWORK_SUGGESTIONS, WRAPPER_SKIP_PATTERNS,
   getFrameworkPatterns, extractFrameworkMessages, getFrameworkSuggestions, getSourceExtensions, getExcludeDirs,

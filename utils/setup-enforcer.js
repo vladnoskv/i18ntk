@@ -14,6 +14,7 @@ const { blue, yellow, gray, cyan, green, red } = require('./colors-new');
 const SecurityUtils = require('./security');
 const I18nSetupModule = require('../main/i18ntk-setup');
 const { envManager } = require('./env-manager');
+const INTERACTIVE_PROMPT_TIMEOUT_MS = 5 * 60 * 1000;
 
 async function runSetupModule() {
     if (I18nSetupModule && typeof I18nSetupModule.run === 'function') {
@@ -107,13 +108,13 @@ class SetupEnforcer {
         });
 
         return new Promise((resolve, reject) => {
-            // Set timeout for user input (30 seconds)
+            // Give a human enough time to inspect setup output and answer.
             const timeout = setTimeout(() => {
                 console.log(yellow('\n⏰ Timeout reached - no response received.'));
                 console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                 rl.close();
                 process.exit(1);
-            }, 30000); // 30 second timeout
+            }, INTERACTIVE_PROMPT_TIMEOUT_MS);
 
             rl.question(cyan('Would you like to run setup now? (Y/n): '), async (answer) => {
                 clearTimeout(timeout);
@@ -168,13 +169,13 @@ static async handleIncompleteSetup() {
         });
 
         return new Promise((resolve, reject) => {
-            // Set timeout for user input (30 seconds)
+            // Give a human enough time to inspect setup output and answer.
             const timeout = setTimeout(() => {
                 console.log(yellow('\n⏰ Timeout reached - no response received.'));
                 console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                 rl.close();
                 process.exit(1);
-            }, 30000); // 30 second timeout
+            }, INTERACTIVE_PROMPT_TIMEOUT_MS);
 
             rl.question(cyan('Would you like to re-run setup? (Y/n): '), async (answer) => {
                 clearTimeout(timeout);
@@ -226,13 +227,13 @@ static async handleInvalidConfig() {
         });
 
         return new Promise((resolve, reject) => {
-            // Set timeout for user input (30 seconds)
+            // Give a human enough time to inspect setup output and answer.
             const timeout = setTimeout(() => {
                 console.log(yellow('\n⏰ Timeout reached - no response received.'));
                 console.log(gray('Setup cancelled. Run "npm run i18ntk-setup" when you\'re ready.'));
                 rl.close();
                 process.exit(1);
-            }, 30000); // 30 second timeout
+            }, INTERACTIVE_PROMPT_TIMEOUT_MS);
 
             rl.question(cyan('Would you like to re-run setup to fix this? (Y/n): '), async (answer) => {
                 clearTimeout(timeout);

@@ -17,6 +17,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Faster repeat scans.** Unchanged files can be reused during a session, helping larger projects complete repeat checks sooner.
 - **LLM-ready guidance.** The package now includes an i18ntk skill for Codex, Claude Code, GitHub Copilot, and compatible agents. Use menu option 15 or `i18ntk --command=skills` to discover and install it.
 - **Framework-aware configuration upgrades.** Older project setups are identified during startup and can be updated from the interactive UI with framework-specific source types, safe exclusions, cached scanning, richer reports, and performance defaults. Existing settings are preserved.
+- **Compact version output.** `i18ntk --version` now provides a concise release summary and links to the full changelog instead of printing the complete release history.
+- **Platform-aware setup.** Framework detection now recognises platform dependencies even without a separate i18n library, and configuration upgrades automatically merge matching source extensions plus safe build, generated-file, and lockfile exclusions without overwriting user rules.
+- **Reliable setup and release checks.** Setup reports only verified prerequisites, interactive prompts are not interrupted by the startup watchdog, and the public-package verifier permits the documented public files included by the manifest.
+
+### Fixed
+
+- **Scanner startup.** Fixed a pattern that could prevent the hardcoded-text scanner from starting.
+- **Separate source and locale folders.** Existing projects can keep application source and locale files in different directories without validation looking in the wrong place.
+- **Auto Translate previews.** A dry run now succeeds when every target value is already translated instead of reporting a false validation failure.
+- **Scanner reports.** `--output-report` now reliably creates the detailed report users request.
+- **Clearer configuration guidance.** Projects already on v5 are now told when optional framework defaults are available, rather than being described as out of date.
+- **Path containment.** Secure writes now resolve existing parent symlinks and Windows junctions before writing, preventing a new file from escaping its approved project directory.
 
 ### Licensing
 

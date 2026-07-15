@@ -38,6 +38,8 @@ test('template upgrade appends safe defaults without replacing user configuratio
   assert.ok(result.config.supportedExtensions.includes('.tsx'));
   assert.ok(result.config.excludeDirs.includes('generated-by-user'));
   assert.ok(result.config.excludeDirs.includes('.next'));
+  assert.ok(result.config.excludeFiles.includes('package-lock.json'));
+  assert.ok(result.config.excludeFiles.includes('**/*.min.*'));
   assert.ok(result.config.processing.excludeDirs.includes('private-build'));
   assert.equal(result.config.processing.cacheEnabled, true);
   assert.equal(result.config.reports.includeUsageStats, true);
@@ -55,7 +57,7 @@ test('an up-to-date template does not produce another upgrade', () => {
   assert.equal(second.changed, false);
 });
 
-test('existing configurations are warned about a required v5 framework update', () => {
+test('existing configurations receive the one-time v5 framework update automatically', () => {
   const project = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-template-upgrade-'));
   const configHelper = path.resolve(__dirname, '../utils/config-helper.js');
   try {
@@ -74,11 +76,13 @@ test('existing configurations are warned about a required v5 framework update', 
     const script = `require(${JSON.stringify(configHelper)}).getUnifiedConfig('analyze').catch(error => { console.error(error); process.exit(1); });`;
     const result = spawnSync(process.execPath, ['-e', script], { cwd: project, encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stderr, /needs a v5\.0\.0 update for Node\.js or React project/);
+    assert.match(result.stderr, /Applied the one-time v5\.0\.0 configuration update for Node\.js or React project/);
 
     const existing = JSON.parse(fs.readFileSync(path.join(project, '.i18ntk-config'), 'utf8'));
-    assert.equal(existing.supportedExtensions.includes('.tsx'), false);
-    assert.equal(existing.framework.template, undefined);
+    assert.ok(existing.supportedExtensions.includes('.custom'));
+    assert.ok(existing.supportedExtensions.includes('.tsx'));
+    assert.ok(existing.excludeDirs.includes('generated-by-user'));
+    assert.equal(existing.framework.template, 'node');
   } finally {
     fs.rmSync(project, { recursive: true, force: true });
   }
@@ -100,4 +104,15 @@ test('v5 upgrades preserve setup details and append recommended framework defaul
   assert.deepEqual(upgraded.defaultLanguages, ['en', 'fr']);
   assert.ok(upgraded.excludeDirs.includes('project-generated'));
   assert.ok(upgraded.excludeDirs.includes('vendor'));
+  assert.ok(upgraded.excludeFiles.includes('composer.lock'));
+});
+
+test('a v5 config missing framework defaults is optimizable, not version-outdated', () => {
+  const status = getConfigUpgradeStatus({
+    setup: { completed: true, version: '5.0.0' },
+    framework: { preference: 'react-i18next' }
+  }, 'react-i18next');
+
+  assert.equal(status.versionOutdated, false);
+  assert.equal(status.needsUpgrade, true);
 });

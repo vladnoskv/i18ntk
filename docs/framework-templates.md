@@ -6,7 +6,7 @@ Templates are available for Node.js and React, Next.js, Vue and Nuxt, Angular an
 
 ## How upgrades work
 
-On normal CLI use, i18ntk detects the project framework and checks `.i18ntk-config` against the matching template. A setup version below 5.0.0, or missing template settings, triggers an update notice. In the interactive UI, i18ntk asks before making any saved change. When you approve it, i18ntk:
+On normal CLI use, i18ntk detects the project framework and checks `.i18ntk-config` against the matching template. A setup version below 5.0.0, or missing template settings, triggers a one-time automatic update. i18ntk prints what it updated and then:
 
 1. Appends missing source extensions and safe excluded directories.
 2. Records the template name and version in `framework`.
@@ -15,4 +15,4 @@ On normal CLI use, i18ntk detects the project framework and checks `.i18ntk-conf
 
 For example, a Next.js project gains `.tsx` and `.mdx` source support while ignoring `node_modules`, `.next`, `.turbo`, generated output, and coverage folders. A Django project gains Python and template support while ignoring virtual environments, caches, migrations, and generated static files.
 
-Non-interactive commands never overwrite an out-of-date configuration; they print the update notice instead. You can always edit `.i18ntk-config` afterwards. i18ntk only adds safe defaults; it does not delete or replace your configuration.
+The update is additive: it keeps existing values and adds only missing safe defaults. It does not delete or replace your configuration. You can edit `.i18ntk-config` afterwards; a fully merged template does not run again.

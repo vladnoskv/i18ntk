@@ -180,6 +180,28 @@ test('usage accepts space-separated aliases in CI without prompting', () => {
   }
 });
 
+test('scanner writes an inspectable report when --output-report is requested', () => {
+  const projectRoot = makeProject();
+  try {
+    fs.writeFileSync(path.join(projectRoot, 'src', 'app.js'), "export const heading = 'Welcome to your profile';\n");
+    const result = run(path.join(mainDir, 'i18ntk-scanner.js'), [
+      '--code-dir', './src',
+      '--output-report',
+      '--no-prompt'
+    ], projectRoot);
+    const output = outputOf(result);
+    const reportDir = path.join(projectRoot, 'i18ntk-reports');
+    const reportFile = fs.existsSync(reportDir) && fs.readdirSync(reportDir)
+      .find(file => file.startsWith('text-analysis-') && file.endsWith('.json'));
+
+    assert.equal(result.status, 0, output);
+    assert.ok(reportFile, output);
+    assert.match(fs.readFileSync(path.join(reportDir, reportFile), 'utf8'), /Welcome to your profile/);
+  } finally {
+    fs.rmSync(projectRoot, { recursive: true, force: true });
+  }
+});
+
 test('complete summary distinguishes unique source keys from total insertions', () => {
   const projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-complete-summary-'));
   try {

@@ -241,7 +241,8 @@ function assertStageContents() {
     /^scripts\//,
     /^tests\//,
     /^benchmarks\//,
-    /^docs\//,
+    // Selected user-facing documentation is intentionally published. The
+    // package manifest controls the exact docs included in the staging area.
     /^\.release\//,
     /^\.kilo\//,
     /^node_modules\//,
