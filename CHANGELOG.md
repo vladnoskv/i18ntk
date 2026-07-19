@@ -1,8 +1,37 @@
 # CHANGELOG
 
-All notable changes to this project will be documented in this file.
+Release notes explain what changed, who benefits, and whether you need to take action. Older entries retain more technical detail for historical reference.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+## [5.1.1] - 2026-07-19
+
+### At a glance
+
+5.1.1 is a recommended update for everyone using 5.1.0. It makes translation status more dependable in CI and smooths out runtime compatibility for browser, Node, and enhanced-runtime applications.
+
+### What you will notice
+
+- **Release checks reflect real translation work.** Empty values and untranslated markers are now visible in the result. Strict validation blocks the release when they remain.
+- **Progress is easier to understand.** The validation and usage commands report the same unfinished strings, and incomplete work is never shown as 100% complete.
+- **TypeScript suggestions match your application.** Browser projects no longer see Node-only methods, and existing 5.x imports continue to compile.
+- **Language selectors can show the full list sooner.** Applications can discover available locales without downloading every translation first.
+- **Fallback behavior is consistent.** Presence checks and translation lookups follow the same regional and configured fallbacks.
+- **Existing enhanced-runtime applications work as expected again.** Named translation groups, encryption startup, and cache preferences are honored.
+
+### Do I need to change anything?
+
+For most 5.1.0 projects, no. Upgrade with:
+
+```bash
+npm install i18ntk@5.1.1
+```
+
+- Use normal `validate` when unfinished translations should be reported but allowed.
+- Use `validate --strict` when unfinished translations must block deployment.
+- For new runtime integrations, choose the explicit entry for your environment: `runtime/node`, `runtime/static`, `runtime/fetch`, or `runtime/core`.
+
+### A note for enhanced-runtime users
+
+`runtime/enhanced` remains available during 5.x, but it is deprecated. If encrypted values must survive an application restart, supply and securely retain a stable encryption key. Cache settings for refresh time, maximum languages, and disabling the cache now take effect rather than acting as placeholders.
 
 ## [5.1.0] - 2026-07-19
 

@@ -22,7 +22,7 @@ const I18nInitializer = require('../../i18ntk-init');
 const JsonOutput = require('../../../utils/json-output');
 const ExitCodes = require('../../../utils/exit-codes');
 const { detectTranslationContentRisks } = require('../../../utils/validation-risk');
-const { isSourceCopyMarker } = require('../../../utils/translation-quality');
+const { analyzeTranslationCompleteness, completionPercentage } = require('../../../utils/translation-quality');
 
 loadTranslations('en', path.resolve(__dirname, '../../../ui-locales'));
 
@@ -432,53 +432,13 @@ class ValidateCommand {
 
     // Validate translation completeness
     validateTranslation(obj, language, fileName, prefix = '') {
-        let totalKeys = 0;
-        let translatedKeys = 0;
-        let issues = [];
-
-        for (const [key, value] of Object.entries(obj)) {
-            const fullKey = prefix ? `${prefix}.${key}` : key;
-
-            if (value && typeof value === 'object' && !Array.isArray(value)) {
-                const nested = this.validateTranslation(value, language, fileName, fullKey);
-                totalKeys += nested.totalKeys;
-                translatedKeys += nested.translatedKeys;
-                issues.push(...nested.issues);
-            } else if (typeof value === 'string') {
-                totalKeys++;
-
-                const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
-                if (markers.some(m => value === m) || isSourceCopyMarker(value)) {
-                    issues.push({
-                        type: 'not_translated',
-                        key: fullKey,
-                        value,
-                        language,
-                        fileName
-                    });
-                } else if (value === '') {
-                    issues.push({
-                        type: 'empty_value',
-                        key: fullKey,
-                        value,
-                        language,
-                        fileName
-                    });
-                } else if (markers.some(m => value.includes(m))) {
-                    issues.push({
-                        type: 'partial_translation',
-                        key: fullKey,
-                        value,
-                        language,
-                        fileName
-                    });
-                } else {
-                    translatedKeys++;
-                }
-            }
-        }
-
-        return { totalKeys, translatedKeys, issues };
+        const markers = this.config.notTranslatedMarkers || [this.config.notTranslatedMarker];
+        const result = analyzeTranslationCompleteness(obj, { markers }, prefix);
+        return {
+            totalKeys: result.total,
+            translatedKeys: result.translated,
+            issues: result.issues.map(issue => ({ ...issue, language, fileName }))
+        };
     }
 
     countTranslatableLeaves(value) {
@@ -580,6 +540,10 @@ class ValidateCommand {
 
                 // Validate translations
                 const translations = this.validateTranslation(targetContent, language, fileName);
+                for (const issue of translations.issues) {
+                    const reporter = this.config.strictMode ? this.addError.bind(this) : this.addWarning.bind(this);
+                    reporter(`Incomplete translation in ${language}/${fileName}`, issue);
+                }
                 this.checkPlaceholders(sourceContent, targetContent, language, fileName);
                 this.detectRiskyKeys(targetContent, language, fileName);
 
@@ -611,9 +575,7 @@ class ValidateCommand {
 
             // Calculate completion percentage
             const referenceTotal = validation.summary.sourceTotalKeys || validation.summary.totalKeys;
-            validation.summary.percentage = referenceTotal > 0
-                ? Math.min(100, Math.round((validation.summary.translatedKeys / referenceTotal) * 100))
-                : 0;
+            validation.summary.percentage = completionPercentage(validation.summary.translatedKeys, referenceTotal);
 
             return validation;
         } catch (error) {

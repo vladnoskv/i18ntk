@@ -10,6 +10,45 @@ function isSourceCopyMarker(value) {
   return typeof value === 'string' && SOURCE_COPY_MARKER.test(value);
 }
 
+function classifyTranslationValue(value, options = {}) {
+  if (typeof value !== 'string') return null;
+  const markers = (options.markers || []).filter(marker => typeof marker === 'string' && marker.length > 0);
+  if (value.trim().length === 0) return 'empty_value';
+  if (isSourceCopyMarker(value) || markers.includes(value)) return 'not_translated';
+  if (markers.some(marker => value.includes(marker))) return 'partial_translation';
+  return null;
+}
+
+function analyzeTranslationCompleteness(value, options = {}, prefix = '') {
+  let total = 0;
+  let translated = 0;
+  const issues = [];
+  const visit = (current, keyPath) => {
+    if (typeof current === 'string') {
+      total++;
+      const type = classifyTranslationValue(current, options);
+      if (type) issues.push({ type, key: keyPath || '<root>', value: current });
+      else translated++;
+      return;
+    }
+    if (Array.isArray(current)) {
+      current.forEach((child, index) => visit(child, `${keyPath}[${index}]`));
+      return;
+    }
+    if (current && typeof current === 'object') {
+      for (const [key, child] of Object.entries(current)) visit(child, keyPath ? `${keyPath}.${key}` : key);
+    }
+  };
+  visit(value, prefix);
+  return { total, translated, issues };
+}
+
+function completionPercentage(translated, total) {
+  if (!total) return 0;
+  if (translated >= total) return 100;
+  return Math.min(99.9, Number(((translated / total) * 100).toFixed(1)));
+}
+
 function collect(regex, value) {
   const found = []; let match;
   regex.lastIndex = 0;
@@ -59,4 +98,12 @@ function validateTranslationEntries(entries, locale) {
   };
 }
 
-module.exports = { validateTranslation, validateTranslationEntries, isolateForTerminal, isSourceCopyMarker };
+module.exports = {
+  validateTranslation,
+  validateTranslationEntries,
+  isolateForTerminal,
+  isSourceCopyMarker,
+  classifyTranslationValue,
+  analyzeTranslationCompleteness,
+  completionPercentage
+};

@@ -3,7 +3,7 @@ import type { InitOptions, RuntimeEvent, RuntimeInstance, TranslateParams, Trans
 
 export interface EnhancedOptions extends InitOptions {
   defaultLanguage?: string;
-  encryption?: { enabled?: boolean };
+  encryption?: { enabled?: boolean; key?: string };
   cache?: { enabled?: boolean; maxSize?: number; ttl?: number };
   security?: { validateInputs?: boolean; sanitizeOutput?: boolean; maxKeyLength?: number; maxValueLength?: number };
 }

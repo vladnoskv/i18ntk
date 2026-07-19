@@ -1,4 +1,4 @@
-# i18ntk Runtime API (v5.1.0)
+# i18ntk Runtime API (v5.1.1)
 
 i18ntk 5.1 provides one runtime model with explicit adapters for each environment. Runtime instances are isolated: they own their active locale, subscriptions, plugins, diagnostics, and loaded resources, and they never install process signal or exception handlers.
 
@@ -15,6 +15,8 @@ i18ntk 5.1 provides one runtime model with explicit adapters for each environmen
 | `i18ntk/runtime/enhanced` | Existing Node.js integrations during the 5.x compatibility period | Provide a separate implementation; it now delegates to the unified runtime and is deprecated |
 
 The conditional `i18ntk/runtime` export selects the Node adapter under Node conditions and the universal core under browser/default conditions. Prefer an explicit subpath in framework configuration so the intended environment is obvious.
+
+The conditional export also selects matching TypeScript declarations. In Node, `initRuntime()` is synchronous and includes filesystem/cache methods. In browser/default conditions, `initRuntime()` is asynchronous and exposes the universal resource-loader API. Explicit subpaths remain the clearest choice for libraries and framework packages.
 
 Rust, Go, Python, PHP, Ruby, Java, and other non-JavaScript applications can be scanned and validated by the i18ntk CLI, but they cannot execute this JavaScript runtime natively. Use their framework's i18n runtime, consume generated JSON through a language-specific adapter, or run i18ntk in a JavaScript sidecar. WebAssembly alone does not provide Node filesystem APIs.
 
@@ -40,6 +42,8 @@ Each `initRuntime()` call creates a new instance and never changes module-level 
 
 Node lazy mode indexes namespace filenames without parsing every JSON file. A matching namespace is read on first access; an unconventional layout is read once as a safe fallback. Use `getDiagnostics()` to distinguish malformed/unreadable files from missing keys.
 
+The Node resource cache accepts `cache: { enabled, maxSize, ttl }`. `maxSize` limits cached languages, and `ttl` is measured in milliseconds (`0` disables time-based expiry). With caching disabled, filesystem resources are reread on every lookup; resources added through `addResources()` remain available until removed or disposed.
+
 ## Universal and static resources
 
 The universal core imports no `fs`, `path`, `crypto`, `process`, `Buffer`, or EventEmitter APIs. Translation lookup is synchronous after resources have loaded.
@@ -60,6 +64,8 @@ i18n.t('save', {}, { namespace: 'common' });
 ```
 
 Locale fallback follows exact tag, parent tags, then configured fallback: `zh-Hant-HK → zh-Hant → zh → en`. Tags are canonicalized with `Intl.getCanonicalLocales()` when available. `has()` tracks presence independently, so a valid translation equal to its key is not treated as missing.
+
+Loaders that implement `listLocales()` are queried during `initRuntime()`, so `listLocales()` can show available locales without downloading all translations. Call `refreshLocales()` when a custom loader's available locale set changes.
 
 ## Fetch and Edge loading
 
@@ -128,6 +134,8 @@ Use `has(key, options)` when presence matters. Do not infer presence by comparin
 ## Enhanced migration
 
 `i18ntk/runtime/enhanced` remains a compatibility wrapper for 5.x and will be removed in the next major release. It no longer installs process handlers, creates timers, injects sample English strings, shares `initI18nRuntime()` state, or HTML-escapes output. Partial nested configuration updates preserve defaults, metrics report real counts and derived averages, and encryption is loaded only from the explicit Node crypto adapter.
+
+When enhanced encryption is enabled, the constructor accepts `encryption: { enabled: true, key }`. The key must be a 64-character hexadecimal string. If no key is supplied, the runtime generates an ephemeral key for that instance; encrypted values cannot be decrypted after restart unless the application supplies and securely retains a stable key. Keys are never returned from `getConfig()`.
 
 Migration mapping:
 

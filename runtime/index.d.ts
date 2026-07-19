@@ -1,4 +1,6 @@
 export type TranslateParams = Record<string, unknown>;
+/** @deprecated Runtime translation methods return strings. Kept for source compatibility with 5.0.x. */
+export type TranslationValue = string | number | boolean | null | Record<string, unknown> | unknown[];
 export type TranslateBatchParams = TranslateParams | TranslateParams[];
 export type MissingKeyPolicy = 'key' | 'empty' | 'throw' | ((event: RuntimeEvent) => string);
 
@@ -25,6 +27,9 @@ export interface InitOptions {
   lazy?: boolean;
   missingKeyPolicy?: MissingKeyPolicy;
   loadErrorPolicy?: 'report-and-fallback' | 'throw';
+  cache?: { enabled?: boolean; maxSize?: number; ttl?: number };
+  /** Deterministic clock hook for tests and embedded runtimes. */
+  now?: () => number;
 }
 
 export interface RuntimeEvent { type: string; [key: string]: unknown; }
@@ -33,6 +38,9 @@ export interface RuntimeCacheInfo {
   language: string;
   fallbackLanguage: string;
   lazy: boolean;
+  enabled: boolean;
+  maxSize: number;
+  ttl: number;
   cachedLanguages: string[];
   manifestLanguages: string[];
   loadedFileCount: number;

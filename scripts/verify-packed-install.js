@@ -8,6 +8,7 @@ const { spawnSync } = require('child_process');
 const SecurityUtils = require('../utils/security');
 
 const root = path.resolve(__dirname, '..');
+const expectedVersion = require(path.join(root, 'package.json')).version;
 const inferredNpmCli = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
 const npmCli = process.env.npm_execpath ||
   (SecurityUtils.safeExistsSync(inferredNpmCli, path.dirname(inferredNpmCli)) ? inferredNpmCli : null);
@@ -86,7 +87,7 @@ try {
   const installed = path.join(installDir, 'node_modules', 'i18ntk');
   installedRoot = installed;
   const pkg = require(path.join(installed, 'package.json'));
-  if (pkg.version !== '5.1.0') throw new Error(`Expected packed version 5.1.0, received ${pkg.version}`);
+  if (pkg.version !== expectedVersion) throw new Error(`Expected packed version ${expectedVersion}, received ${pkg.version}`);
   require(installed);
   for (const target of Object.values(pkg.bin || {})) {
     const absolute = path.join(installed, target);
@@ -156,6 +157,16 @@ try {
   if (validateJson.data?.results?.fr?.summary?.percentage !== 100) {
     throw new Error('Packed validator did not report matching non-string locale structures as 100% complete');
   }
+  writeJson(path.join(project, 'locales', 'fr', 'common.json'), {
+    greeting: '[FR] Hello {name}', group: { count: 2, enabled: true, choices: ['', 'Prefix NOT_TRANSLATED suffix'] }
+  });
+  const strictValidation = execute(process.execPath, [path.join(installed, pkg.bin['i18ntk-validate']),
+    '--source-dir=./locales', '--source-locale=en', '--strict', '--json', '--no-prompt'], project, cliEnv);
+  if (strictValidation.status === 0) throw new Error('Packed strict validator accepted incomplete translation markers');
+  const strictJson = JSON.parse(strictValidation.stdout);
+  if (strictJson.stats?.errors < 3 || strictJson.data?.results?.fr?.summary?.percentage >= 100) {
+    throw new Error('Packed validator did not promote or count incomplete translation values');
+  }
 
   const runtimeProbe = `
     const assert = module['require']('node:assert/strict');
@@ -164,24 +175,39 @@ try {
     const before = [process.listenerCount('SIGINT'), process.listenerCount('uncaughtException')];
     const runtime = runtimeApi.initRuntime({ projectRoot: process.env.I18NTK_FIXTURE, localeDir: 'runtime-locales', language: 'de-CH', fallbackLanguage: 'en' });
     assert.equal(runtime.t('greeting', { name: 'Ada' }), 'Hallo Ada');
+    assert.equal(runtime.has('greeting', { language: 'es', fallbackLanguage: 'de' }), true);
     assert.deepEqual(runtime.getAvailableLanguages().sort(), ['de', 'en', 'fr']);
     const one = new enhancedApi.I18nEnhancedRuntime({ projectRoot: process.env.I18NTK_FIXTURE, localeDir: 'runtime-locales', defaultLanguage: 'en', cache: { ttl: 1 } });
     const two = new enhancedApi.I18nEnhancedRuntime({ projectRoot: process.env.I18NTK_FIXTURE, localeDir: 'runtime-locales', defaultLanguage: 'fr' });
     assert.notEqual(one, two);
     assert.equal(one.getConfig().cache.maxSize, 1000);
+    one.addNamespace('custom', { en: { hello: 'Hello namespace' } });
+    assert.equal(await one.translate('hello', {}, { namespace: 'custom' }), 'Hello namespace');
+    assert.equal(await one.translate('hello'), 'Hello namespace');
+    const encryptedRuntime = new enhancedApi.I18nEnhancedRuntime({ encryption: { enabled: true } });
+    assert.equal(encryptedRuntime.getEncryptionStatus(), true);
+    const encrypted = await encryptedRuntime.translateEncrypted('missing');
+    assert.equal(await encryptedRuntime.decryptData(encrypted), 'missing');
+    encryptedRuntime.dispose();
     assert.deepEqual([process.listenerCount('SIGINT'), process.listenerCount('uncaughtException')], before);
     one.dispose(); two.dispose(); runtime.dispose();
   `;
-  run(process.execPath, ['-e', runtimeProbe], installDir, { I18NTK_FIXTURE: project });
+  run(process.execPath, ['-e', `(async () => { ${runtimeProbe} })().catch(error => { console.error(error); process.exitCode = 1; })`], installDir, { I18NTK_FIXTURE: project });
 
   const esmProbe = `
     import assert from 'node:assert/strict';
     const runtime = await import('i18ntk/runtime/core');
     assert.equal(runtime.createRuntime({ resources: { en: { common: { ready: 'Ready' } } } }).t('ready', {}, { namespace: 'common' }), 'Ready');
+    const staticApi = await import('i18ntk/runtime/static');
+    const discovered = await staticApi.initRuntime({ locale: 'en', preload: false, loader: staticApi.createStaticLoader({ en: {}, fr: {}, de: {} }) });
+    assert.deepEqual(discovered.listLocales(), ['de', 'en', 'fr']);
+    assert.throws(() => discovered.addResources('not valid!', 'default', { ready: 'No' }), error => error.code === 'I18NTK_RUNTIME_VALIDATION');
   `;
   run(process.execPath, ['--input-type=module', '-e', esmProbe], installDir);
   const browserTarget = run(process.execPath, ['--conditions=browser', '-e', "process.stdout.write(module['require']('node:module').createRequire(process.cwd() + '/probe.js').resolve('i18ntk/runtime'))"], installDir);
   if (!browserTarget.replace(/\\/g, '/').endsWith('/runtime/core.js')) throw new Error(`Browser condition resolved Node runtime: ${browserTarget}`);
+  const browserApiProbe = run(process.execPath, ['--conditions=browser', '--input-type=module', '-e',
+    "const m=await import('i18ntk/runtime'); if(typeof m.createRuntime!=='function'||typeof m.translate!=='undefined'||typeof m.initRuntime!=='function') process.exit(1);"], installDir);
 
   const adapterProbe = `
     const assert = module['require']('node:assert/strict');

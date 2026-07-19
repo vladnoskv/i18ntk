@@ -27,6 +27,20 @@ function canonicalizeLocale(value, fallback = 'en') {
   catch (_) { return fallback; }
 }
 
+function requireValidLocale(value, label = 'locale') {
+  if (typeof value !== 'string' || !value.trim() || value.length > 100) {
+    throw new RuntimeValidationError(`${label} must be a valid locale identifier`, { value });
+  }
+  const locale = value.trim().replace(/_/g, '-');
+  try {
+    const canonical = Intl.getCanonicalLocales(locale)[0];
+    if (!canonical) throw new Error('Locale is empty');
+    return canonical;
+  } catch (_) {
+    throw new RuntimeValidationError(`${label} must be a valid locale identifier`, { value });
+  }
+}
+
 function cloneResource(value, seen = new WeakSet()) {
   if (value === null || typeof value !== 'object') return value;
   if (seen.has(value)) throw new RuntimeValidationError('Translation resources cannot contain cycles');
@@ -85,14 +99,15 @@ function interpolate(value, params) {
 
 function createRuntime(options = {}) {
   const config = {
-    locale: canonicalizeLocale(options.locale || options.language || options.defaultLanguage, 'en'),
-    fallbackLocale: canonicalizeLocale(options.fallbackLocale || options.fallbackLanguage, 'en'),
+    locale: requireValidLocale(options.locale || options.language || options.defaultLanguage || 'en', 'locale'),
+    fallbackLocale: requireValidLocale(options.fallbackLocale || options.fallbackLanguage || 'en', 'fallbackLocale'),
     keySeparator: typeof options.keySeparator === 'string' && options.keySeparator ? options.keySeparator : '.',
     missingKeyPolicy: options.missingKeyPolicy || 'key',
     loadErrorPolicy: options.loadErrorPolicy || 'throw',
     maxKeyLength: Number.isInteger(options.maxKeyLength) ? Math.max(1, Math.min(options.maxKeyLength, 10000)) : 1000
   };
   const resources = new Map();
+  const discoveredLocales = new Set();
   const listeners = new Set();
   const plugins = [];
   const diagnostics = [];
@@ -114,10 +129,17 @@ function createRuntime(options = {}) {
     emit({ type: 'diagnostic', diagnostic: safe });
   };
   const localeNamespaces = locale => {
-    const canonical = canonicalizeLocale(locale, '');
+    const canonical = requireValidLocale(locale);
     if (!resources.has(canonical)) resources.set(canonical, new Map());
     return resources.get(canonical);
   };
+  const resolveLocales = translateOptions => ({
+    locale: requireValidLocale(translateOptions.locale || translateOptions.language || config.locale, 'locale'),
+    fallbackLocale: requireValidLocale(
+      translateOptions.fallbackLocale || translateOptions.fallbackLanguage || config.fallbackLocale,
+      'fallbackLocale'
+    )
+  });
 
   const runtime = {
     t(key, params = {}, translateOptions = {}) {
@@ -128,11 +150,11 @@ function createRuntime(options = {}) {
         throw error;
       }
       const started = Date.now();
-      const locale = canonicalizeLocale(translateOptions.locale || translateOptions.language, config.locale);
+      const { locale, fallbackLocale } = resolveLocales(translateOptions);
       const namespace = translateOptions.namespace || 'default';
       let value;
       let resolvedLocale;
-      for (const candidate of fallbackChain(locale, translateOptions.fallbackLocale || translateOptions.fallbackLanguage || config.fallbackLocale)) {
+      for (const candidate of fallbackChain(locale, fallbackLocale)) {
         const namespaceResource = resources.get(candidate)?.get(namespace);
         value = resolvePath(namespaceResource, key, config.keySeparator);
         if (value !== undefined) { resolvedLocale = candidate; break; }
@@ -162,9 +184,9 @@ function createRuntime(options = {}) {
     translate(key, params, translateOptions) { return runtime.t(key, params, translateOptions); },
     has(key, translateOptions = {}) {
       if (typeof key !== 'string' || !key) return false;
-      const locale = canonicalizeLocale(translateOptions.locale || translateOptions.language, config.locale);
+      const { locale, fallbackLocale } = resolveLocales(translateOptions);
       const namespace = translateOptions.namespace || 'default';
-      return fallbackChain(locale, translateOptions.fallbackLocale || config.fallbackLocale)
+      return fallbackChain(locale, fallbackLocale)
         .some(candidate => resolvePath(resources.get(candidate)?.get(namespace), key, config.keySeparator) !== undefined);
     },
     translateBatch(keys, params = {}, translateOptions = {}) {
@@ -172,14 +194,13 @@ function createRuntime(options = {}) {
     },
     setLocale(locale) {
       assertActive();
-      const next = canonicalizeLocale(locale, '');
-      if (!next) throw new RuntimeValidationError('Invalid locale');
+      const next = requireValidLocale(locale);
       if (next !== config.locale) { const previous = config.locale; config.locale = next; emit({ type: 'localeChanged', locale: next, previous }); }
     },
     setLanguage(locale) { runtime.setLocale(locale); },
     getLocale() { return config.locale; },
     getLanguage() { return config.locale; },
-    listLocales() { return [...resources.keys()].sort(); },
+    listLocales() { return [...new Set([...discoveredLocales, ...resources.keys()])].sort(); },
     getAvailableLanguages() { return runtime.listLocales(); },
     addResources(locale, namespace = 'default', data, resourceOptions = {}) {
       assertActive();
@@ -192,11 +213,11 @@ function createRuntime(options = {}) {
         throw new RuntimeValidationError('Resource precedence must be override or fallback', { precedence });
       }
       localeNamespaces(locale).set(namespace, precedence === 'fallback' ? deepMerge(data, current) : deepMerge(current, data));
-      emit({ type: 'resourcesChanged', locale: canonicalizeLocale(locale), namespace });
+      emit({ type: 'resourcesChanged', locale: requireValidLocale(locale), namespace });
       return runtime;
     },
     removeResources(locale, namespace) {
-      const canonical = canonicalizeLocale(locale, '');
+      const canonical = requireValidLocale(locale);
       if (!resources.has(canonical)) return;
       if (namespace) resources.get(canonical).delete(namespace); else resources.delete(canonical);
       emit({ type: 'resourcesChanged', locale: canonical, namespace: namespace || null });
@@ -204,7 +225,7 @@ function createRuntime(options = {}) {
     async load(locale = config.locale, namespaces) {
       assertActive();
       if (!options.loader || typeof options.loader.load !== 'function') return runtime;
-      const canonical = canonicalizeLocale(locale, config.locale);
+      const canonical = requireValidLocale(locale);
       const requested = namespaces === undefined ? undefined : (Array.isArray(namespaces) ? namespaces : [namespaces]);
       const loadKey = `${canonical}\0${(requested || []).join(',')}`;
       if (inFlight.has(loadKey)) return inFlight.get(loadKey);
@@ -229,6 +250,24 @@ function createRuntime(options = {}) {
     async refresh(locale = config.locale, namespaces) {
       runtime.removeResources(locale);
       return runtime.load(locale, namespaces);
+    },
+    async refreshLocales() {
+      assertActive();
+      if (!options.loader || typeof options.loader.listLocales !== 'function') return runtime.listLocales();
+      try {
+        const listed = await options.loader.listLocales();
+        if (!Array.isArray(listed)) throw new RuntimeLoadError('Loader listLocales() must return an array');
+        const next = listed.map(locale => requireValidLocale(locale, 'loader locale'));
+        discoveredLocales.clear();
+        next.forEach(locale => discoveredLocales.add(locale));
+        return runtime.listLocales();
+      } catch (error) {
+        const wrapped = error instanceof RuntimeError ? error : new RuntimeLoadError(error.message);
+        metrics.loadErrorCount++;
+        addDiagnostic({ category: 'load-error', operation: 'list-locales', code: wrapped.code, message: wrapped.message });
+        if (config.loadErrorPolicy === 'throw') throw wrapped;
+        return runtime.listLocales();
+      }
     },
     subscribe(listener) {
       if (typeof listener !== 'function') throw new RuntimeValidationError('Runtime listener must be a function');
@@ -277,6 +316,7 @@ function createRuntime(options = {}) {
 
 async function initRuntime(options = {}) {
   const runtime = createRuntime(options);
+  if (options.loader && typeof options.loader.listLocales === 'function') await runtime.refreshLocales();
   if (options.loader && options.preload !== false) {
     await runtime.load(runtime.getLocale(), options.namespaces);
     const fallback = runtime.getConfig().fallbackLocale;
@@ -289,6 +329,7 @@ module.exports = {
   createRuntime,
   initRuntime,
   canonicalizeLocale,
+  requireValidLocale,
   RuntimeError,
   RuntimeValidationError,
   RuntimeLoadError

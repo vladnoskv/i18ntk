@@ -43,6 +43,7 @@ const settingsManager = new SettingsManager();
 const { getUnifiedConfig, parseCommonArgs, displayHelp, validateSourceDir, displayPaths } = require('../utils/config-helper');
 const I18nInitializer = require('./i18ntk-init');
 const JsonOutput = require('../utils/json-output');
+const { analyzeTranslationCompleteness } = require('../utils/translation-quality');
 const SetupEnforcer = require('../utils/setup-enforcer');
 const { resolveUsageSourceDir } = require('../utils/usage-source');
 const { analyzeSourceForUsageInsights } = require('../utils/usage-insights');
@@ -1331,36 +1332,15 @@ Analysis Features (v1.10.1):
 
   // NEW: Analyze completeness of a single translation file
   analyzeFileCompleteness(obj) {
-    let total = 0;
-    let translated = 0;
-    
-    // Validate input object before processing
     if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-      return { total: 0, translated: 0 }; // Return empty stats for invalid input
+      return { total: 0, translated: 0, issues: [] };
     }
-    
-    const traverse = (current) => {
-      // Validate current object before processing
-      if (typeof current !== 'object' || current === null || Array.isArray(current)) {
-        return;
-      }
-      
-      for (const [key, value] of Object.entries(current)) {
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          traverse(value);
-        } else {
-          total++;
-          if (value !== 'NOT_TRANSLATED' && value !== '(NOT TRANSLATED)' && 
-              value !== 'TRANSLATED' && value !== '(TRANSLATED)' &&
-              value && value.toString().trim() !== '') {
-            translated++;
-          }
-        }
-      }
-    };
-    
-    traverse(obj);
-    return { total, translated };
+    const markers = this.config.notTranslatedMarkers || [
+      this.config.notTranslatedMarker,
+      'NOT_TRANSLATED',
+      '(NOT TRANSLATED)'
+    ];
+    return analyzeTranslationCompleteness(obj, { markers });
   }
 
   // NEW: Get statistics about NOT_TRANSLATED values

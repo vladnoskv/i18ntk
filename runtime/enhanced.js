@@ -70,14 +70,24 @@ function freezeConfig(config) {
   });
 }
 
+function withoutEncryptionKey(options = {}) {
+  if (!options.encryption || !Object.prototype.hasOwnProperty.call(options.encryption, 'key')) return options;
+  const sanitized = { ...options, encryption: { ...options.encryption } };
+  delete sanitized.encryption.key;
+  return sanitized;
+}
+
 class I18nEnhancedRuntime {
   constructor(options = {}) {
-    this.config = validateConfig(mergeConfig(DEFAULT_CONFIG, options));
+    const requestedEncryptionKey = options.encryption?.key;
+    this.config = validateConfig(mergeConfig(DEFAULT_CONFIG, withoutEncryptionKey(options)));
     if (options.localeDir && !Object.prototype.hasOwnProperty.call(options, 'baseDir')) this.config.baseDir = undefined;
     this.config = freezeConfig(this.config);
     this.listeners = new Map();
     this.namespaces = new Map();
     this.encryptionKey = null;
+    if (requestedEncryptionKey !== undefined) this.setEncryptionKey(requestedEncryptionKey);
+    else if (this.config.encryption.enabled) this.encryptionKey = require('./crypto').generateEncryptionKey();
     this.resetMetrics();
     this._createRuntime();
   }
@@ -91,7 +101,9 @@ class I18nEnhancedRuntime {
       fallbackLanguage: config.fallbackLanguage,
       keySeparator: config.keySeparator,
       preload: config.preload,
-      missingKeyPolicy: config.missingKeyPolicy
+      missingKeyPolicy: config.missingKeyPolicy,
+      loadErrorPolicy: config.loadErrorPolicy,
+      cache: config.cache
     });
     for (const [name, translations] of this.namespaces) this._addNamespaceToRuntime(name, translations, nextRuntime);
     const nextUnsubscribe = nextRuntime.subscribe(event => this._emit(event.type, event));
@@ -132,11 +144,14 @@ class I18nEnhancedRuntime {
     const started = Date.now();
     try {
       if (this.config.security.validateInputs) this.validateTranslationKey(key);
-      const value = this.runtime.translate(key, params, {
-        language: options.language,
-        fallbackLanguage: options.fallbackLanguage,
-        missingKeyPolicy: options.missingKeyPolicy
-      });
+      const resolvedOptions = { ...options };
+      if (!resolvedOptions.namespace && !this.runtime.has(key, resolvedOptions)) {
+        const namespace = [...this.namespaces.keys()].find(name =>
+          name !== 'default' && this.runtime.has(key, { ...resolvedOptions, namespace: name })
+        );
+        if (namespace) resolvedOptions.namespace = namespace;
+      }
+      const value = this.runtime.translate(key, params, resolvedOptions);
       this.metrics.translationCount++;
       this.metrics.translationDurationMsTotal += Date.now() - started;
       return value;
@@ -164,15 +179,18 @@ class I18nEnhancedRuntime {
   }
 
   async updateConfig(updates = {}) {
+    const requestedEncryptionKey = updates.encryption?.key;
     const previous = this.config;
-    const next = mergeConfig(previous, updates);
+    const next = mergeConfig(previous, withoutEncryptionKey(updates));
     if (updates.localeDir && !Object.prototype.hasOwnProperty.call(updates, 'baseDir')) next.baseDir = undefined;
     validateConfig(next);
-    const runtimeChanged = ['baseDir', 'localeDir', 'projectRoot', 'defaultLanguage', 'fallbackLanguage', 'keySeparator', 'preload']
-      .some(key => next[key] !== previous[key]);
+    const runtimeChanged = ['baseDir', 'localeDir', 'projectRoot', 'defaultLanguage', 'fallbackLanguage', 'keySeparator', 'preload', 'missingKeyPolicy', 'loadErrorPolicy']
+      .some(key => next[key] !== previous[key]) ||
+      ['enabled', 'maxSize', 'ttl'].some(key => next.cache[key] !== previous.cache[key]);
     if (runtimeChanged) this._createRuntime(next);
     this.config = freezeConfig(next);
-    if (next.encryption.enabled && !this.encryptionKey) this.encryptionKey = require('./crypto').generateEncryptionKey();
+    if (requestedEncryptionKey !== undefined) this.setEncryptionKey(requestedEncryptionKey);
+    else if (next.encryption.enabled && !this.encryptionKey) this.encryptionKey = require('./crypto').generateEncryptionKey();
     return this;
   }
 
@@ -197,7 +215,11 @@ class I18nEnhancedRuntime {
   getAvailableLanguages() { return this.runtime.getAvailableLanguages(); }
   refresh(language) { this.runtime.refresh(language); }
   clearCache(language) { this.runtime.clearCache(language); }
-  has(key, options) { return this.runtime.has(key, options); }
+  has(key, options = {}) {
+    if (this.runtime.has(key, options)) return true;
+    if (options.namespace) return false;
+    return [...this.namespaces.keys()].some(name => name !== 'default' && this.runtime.has(key, { ...options, namespace: name }));
+  }
   subscribe(listener) { return this.runtime.subscribe(listener); }
   getDiagnostics() { return this.runtime.getDiagnostics(); }
 
@@ -218,7 +240,12 @@ class I18nEnhancedRuntime {
   addPlugin(plugin) { return this.runtime.addPlugin(plugin); }
   removePlugin(name) { this.runtime.removePlugin(name); }
 
-  setEncryptionKey(key) { this.encryptionKey = key; }
+  setEncryptionKey(key) {
+    if (typeof key !== 'string' || !/^[a-f0-9]{64}$/i.test(key)) {
+      throw new ValidationError('Encryption key must be a 32-byte hexadecimal string');
+    }
+    this.encryptionKey = key;
+  }
   getEncryptionStatus() { return this.config.encryption.enabled && Boolean(this.encryptionKey); }
   generateEncryptionKey() { return require('./crypto').generateEncryptionKey(); }
   encryptData(data) { return require('./crypto').encryptData(data, this.encryptionKey); }
@@ -249,9 +276,7 @@ class I18nEnhancedRuntime {
 }
 
 async function initI18nRuntime(options = {}) {
-  const runtime = new I18nEnhancedRuntime(options);
-  if (options.encryption?.enabled) await runtime.updateConfig(options);
-  return runtime;
+  return new I18nEnhancedRuntime(options);
 }
 
 let defaultRuntime;

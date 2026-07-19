@@ -42,12 +42,19 @@ function getLocaleFallbackChain(language, fallbackLanguage) {
 }
 
 function createState(options = {}) {
+  const cacheOptions = options.cache && typeof options.cache === 'object' ? options.cache : {};
   return {
     baseDir: resolveBaseDir(options.baseDir),
     language: normalizeLanguageCode(options.language, 'en'),
     fallbackLanguage: normalizeLanguageCode(options.fallbackLanguage, 'en'),
     keySeparator: options.keySeparator || '.',
     cache: new Map(),
+    cacheMeta: new Map(),
+    cacheEnabled: cacheOptions.enabled !== false,
+    cacheMaxSize: Number.isInteger(cacheOptions.maxSize) && cacheOptions.maxSize > 0 ? cacheOptions.maxSize : 1000,
+    cacheTtl: Number.isFinite(cacheOptions.ttl) && cacheOptions.ttl >= 0 ? cacheOptions.ttl : 0,
+    now: typeof options.now === 'function' ? options.now : Date.now,
+    resourceOverrides: new Map(),
     lazy: options.lazy === true,
     keyManifest: new Map(),
     loadedFiles: new Set(),
@@ -67,6 +74,12 @@ const singletonState = {
   fallbackLanguage: 'en',
   keySeparator: '.',
   cache: new Map(),             // lang -> merged translations object
+  cacheMeta: new Map(),
+  cacheEnabled: true,
+  cacheMaxSize: 1000,
+  cacheTtl: 0,
+  now: Date.now,
+  resourceOverrides: new Map(),
   lazy: false,
   keyManifest: new Map(),       // lang -> Map: keyName -> filePath
   loadedFiles: new Set(),       // tracks loaded files in lazy mode
@@ -78,6 +91,43 @@ const singletonState = {
   missingKeyPolicy: 'key',
 };
 let singletonInitialized = false;
+
+function cacheGet(runtimeState, lang) {
+  if (!runtimeState.cacheEnabled || !runtimeState.cache.has(lang)) return undefined;
+  const now = runtimeState.now();
+  const meta = runtimeState.cacheMeta.get(lang);
+  if (runtimeState.cacheTtl > 0 && meta && now - meta.createdAt >= runtimeState.cacheTtl) {
+    runtimeState.cache.delete(lang);
+    runtimeState.cacheMeta.delete(lang);
+    return undefined;
+  }
+  runtimeState.cacheMeta.set(lang, { createdAt: meta?.createdAt ?? now, lastAccess: now });
+  return runtimeState.cache.get(lang);
+}
+
+function cacheSet(runtimeState, lang, value) {
+  if (!runtimeState.cacheEnabled) return value;
+  const now = runtimeState.now();
+  runtimeState.cache.set(lang, value);
+  runtimeState.cacheMeta.set(lang, { createdAt: now, lastAccess: now });
+  while (runtimeState.cache.size > runtimeState.cacheMaxSize) {
+    let oldest;
+    let oldestAccess = Infinity;
+    for (const [candidate, meta] of runtimeState.cacheMeta) {
+      if (meta.lastAccess < oldestAccess) { oldest = candidate; oldestAccess = meta.lastAccess; }
+    }
+    if (oldest === undefined) break;
+    runtimeState.cache.delete(oldest);
+    runtimeState.cacheMeta.delete(oldest);
+  }
+  return value;
+}
+
+function mergeResourceOverrides(runtimeState, lang, data) {
+  const overrides = runtimeState.resourceOverrides.get(lang);
+  if (overrides) deepMerge(data, overrides);
+  return data;
+}
 
 class RuntimeValidationError extends Error {
   constructor(message, details = {}) {
@@ -313,10 +363,10 @@ function loadFileLazy(runtimeState, filePath, lang) {
 
   const data = readJsonSafe(validatedPath);
   if (data && typeof data === 'object') {
-    let cacheEntry = runtimeState.cache.get(lang);
+    let cacheEntry = cacheGet(runtimeState, lang);
     if (!cacheEntry) cacheEntry = {};
     deepMerge(cacheEntry, data);
-    runtimeState.cache.set(lang, cacheEntry);
+    cacheSet(runtimeState, lang, cacheEntry);
   }
   return data;
 }
@@ -355,17 +405,22 @@ function getTranslationsForState(runtimeState, lang) {
   if (!runtimeState.baseDir) runtimeState.baseDir = resolveBaseDir();
   lang = normalizeLanguageCode(lang, runtimeState.fallbackLanguage || 'en');
 
-  if (runtimeState.lazy) {
-    if (runtimeState.cache.has(lang)) return runtimeState.cache.get(lang);
-    runtimeState.cache.set(lang, {});
-    getManifestForLanguage(runtimeState, lang);
-    return runtimeState.cache.get(lang);
+  if (!runtimeState.cacheEnabled) {
+    return mergeResourceOverrides(runtimeState, lang, readLanguageFromBase(runtimeState.baseDir, lang, runtimeState));
   }
 
-  if (runtimeState.cache.has(lang)) return runtimeState.cache.get(lang);
-  const data = readLanguageFromBase(runtimeState.baseDir, lang, runtimeState);
-  runtimeState.cache.set(lang, data);
-  return data;
+  if (runtimeState.lazy) {
+    const cached = cacheGet(runtimeState, lang);
+    if (cached) return cached;
+    cacheSet(runtimeState, lang, mergeResourceOverrides(runtimeState, lang, {}));
+    getManifestForLanguage(runtimeState, lang);
+    return cacheGet(runtimeState, lang);
+  }
+
+  const cached = cacheGet(runtimeState, lang);
+  if (cached) return cached;
+  const data = mergeResourceOverrides(runtimeState, lang, readLanguageFromBase(runtimeState.baseDir, lang, runtimeState));
+  return cacheSet(runtimeState, lang, data);
 }
 
 function interpolate(template, params) {
@@ -403,15 +458,16 @@ function resolveKey(obj, key, sep = '.', runtimeState = null, lang = null) {
                 console.warn(`[i18ntk/runtime] Lazy load failed for ${filePath}: ${lazyErr.message}`);
               }
             }
-            const langData = runtimeState.cache.get(lang);
+            const langData = cacheGet(runtimeState, lang);
             return resolveKey(langData, key, sep, runtimeState, lang);
           }
         }
         if (!runtimeState.eagerLoadedLanguages.has(lang)) {
           const fullData = readLanguageFromBase(runtimeState.baseDir, lang, runtimeState);
-          const langData = runtimeState.cache.get(lang) || {};
+          const langData = cacheGet(runtimeState, lang) || {};
           deepMerge(langData, fullData);
-          runtimeState.cache.set(lang, langData);
+          mergeResourceOverrides(runtimeState, lang, langData);
+          cacheSet(runtimeState, lang, langData);
           runtimeState.eagerLoadedLanguages.add(lang);
           return resolveKey(langData, key, sep, runtimeState, lang);
         }
@@ -455,13 +511,13 @@ function preload(runtimeState, shouldPreload) {
   if (shouldPreload === true) {
     if (runtimeState.lazy) {
       getManifestForLanguage(runtimeState, runtimeState.language);
-      if (!runtimeState.cache.has(runtimeState.language)) {
-        runtimeState.cache.set(runtimeState.language, {});
+      if (!cacheGet(runtimeState, runtimeState.language)) {
+        cacheSet(runtimeState, runtimeState.language, {});
       }
       if (runtimeState.fallbackLanguage && runtimeState.fallbackLanguage !== runtimeState.language) {
         getManifestForLanguage(runtimeState, runtimeState.fallbackLanguage);
-        if (!runtimeState.cache.has(runtimeState.fallbackLanguage)) {
-          runtimeState.cache.set(runtimeState.fallbackLanguage, {});
+        if (!cacheGet(runtimeState, runtimeState.fallbackLanguage)) {
+          cacheSet(runtimeState, runtimeState.fallbackLanguage, {});
         }
       }
     } else {
@@ -510,15 +566,19 @@ function translateWithState(runtimeState, key, params = {}, options = {}) {
   params = params && typeof params === 'object' ? params : {};
   options = options && typeof options === 'object' ? options : {};
 
-  const activeLanguage = normalizeLanguageCode(options.language, runtimeState.language);
-  const fallbackLanguage = typeof options.fallbackLanguage === 'string'
-    ? normalizeLanguageCode(options.fallbackLanguage, '')
+  const activeLanguage = normalizeLanguageCode(options.locale || options.language, runtimeState.language);
+  const fallbackOption = options.fallbackLocale || options.fallbackLanguage;
+  const fallbackLanguage = typeof fallbackOption === 'string'
+    ? normalizeLanguageCode(fallbackOption, '')
     : runtimeState.fallbackLanguage;
+  const lookupKey = options.namespace && options.namespace !== 'default'
+    ? `${options.namespace}${runtimeState.keySeparator}${key}`
+    : key;
 
   let value;
   for (const candidate of getLocaleFallbackChain(activeLanguage, fallbackLanguage)) {
     const languageData = getTranslationsForState(runtimeState, candidate);
-    value = resolveKey(languageData, key, runtimeState.keySeparator, runtimeState, candidate);
+    value = resolveKey(languageData, lookupKey, runtimeState.keySeparator, runtimeState, candidate);
     if (typeof value !== 'undefined') break;
   }
 
@@ -548,26 +608,41 @@ function translateWithState(runtimeState, key, params = {}, options = {}) {
 
 function hasWithState(runtimeState, key, options = {}) {
   if (typeof key !== 'string' || !key) return false;
-  const language = normalizeLanguageCode(options.language, runtimeState.language);
-  return resolveKey(getTranslationsForState(runtimeState, language), key, runtimeState.keySeparator, runtimeState, language) !== undefined;
+  const language = normalizeLanguageCode(options.locale || options.language, runtimeState.language);
+  const fallback = normalizeLanguageCode(options.fallbackLocale || options.fallbackLanguage, runtimeState.fallbackLanguage);
+  const lookupKey = options.namespace && options.namespace !== 'default'
+    ? `${options.namespace}${runtimeState.keySeparator}${key}`
+    : key;
+  return getLocaleFallbackChain(language, fallback).some(candidate =>
+    resolveKey(getTranslationsForState(runtimeState, candidate), lookupKey, runtimeState.keySeparator, runtimeState, candidate) !== undefined
+  );
 }
 
 function addResourcesForState(runtimeState, lang, namespace = 'default', data = {}) {
   lang = normalizeLanguageCode(lang, '');
   if (!lang || !data || typeof data !== 'object') throw new RuntimeValidationError('Resources require a valid language and object data');
+  const overrides = runtimeState.resourceOverrides.get(lang) || {};
+  if (namespace && namespace !== 'default') overrides[namespace] = deepMerge(overrides[namespace] || {}, stripPrototypeKeys(data));
+  else deepMerge(overrides, stripPrototypeKeys(data));
+  runtimeState.resourceOverrides.set(lang, overrides);
+  runtimeState.cache.delete(lang);
+  runtimeState.cacheMeta.delete(lang);
   const current = getTranslationsForState(runtimeState, lang);
-  if (namespace && namespace !== 'default') current[namespace] = deepMerge(current[namespace] || {}, stripPrototypeKeys(data));
-  else deepMerge(current, stripPrototypeKeys(data));
-  runtimeState.cache.set(lang, current);
+  cacheSet(runtimeState, lang, current);
   emitForState(runtimeState, { type: 'resourcesChanged', language: lang, namespace });
 }
 
 function removeResourcesForState(runtimeState, lang, namespace) {
   lang = normalizeLanguageCode(lang, '');
   if (!lang) return;
-  if (!namespace || namespace === 'default') refreshForState(runtimeState, lang);
+  if (!namespace || namespace === 'default') {
+    runtimeState.resourceOverrides.delete(lang);
+    refreshForState(runtimeState, lang);
+  }
   else {
-    const current = runtimeState.cache.get(lang);
+    const overrides = runtimeState.resourceOverrides.get(lang);
+    if (overrides) delete overrides[namespace];
+    const current = cacheGet(runtimeState, lang);
     if (current) delete current[namespace];
   }
   emitForState(runtimeState, { type: 'resourcesChanged', language: lang, namespace: namespace || null });
@@ -593,6 +668,7 @@ function removePluginForState(runtimeState, name) {
 function disposeForState(runtimeState) {
   if (runtimeState.disposed) return;
   clearCacheForState(runtimeState);
+  runtimeState.resourceOverrides.clear();
   runtimeState.listeners.clear();
   runtimeState.plugins.length = 0;
   runtimeState.disposed = true;
@@ -667,6 +743,7 @@ function clearCacheForState(runtimeState, lang) {
   }
 
   runtimeState.cache.clear();
+  runtimeState.cacheMeta.clear();
   if (runtimeState.keyManifest) runtimeState.keyManifest.clear();
   if (runtimeState.loadedFiles) runtimeState.loadedFiles.clear();
   if (runtimeState.eagerLoadedLanguages) runtimeState.eagerLoadedLanguages.clear();
@@ -681,6 +758,9 @@ function getCacheInfoForState(runtimeState) {
     language: runtimeState.language,
     fallbackLanguage: runtimeState.fallbackLanguage,
     lazy: runtimeState.lazy === true,
+    enabled: runtimeState.cacheEnabled !== false,
+    maxSize: runtimeState.cacheMaxSize,
+    ttl: runtimeState.cacheTtl,
     cachedLanguages: Array.from(runtimeState.cache.keys()).sort(),
     manifestLanguages: runtimeState.keyManifest ? Array.from(runtimeState.keyManifest.keys()).sort() : [],
     loadedFileCount: runtimeState.loadedFiles ? runtimeState.loadedFiles.size : 0,
@@ -696,6 +776,7 @@ function refreshForState(runtimeState, lang = runtimeState.language) {
   lang = normalizeLanguageCode(lang, '');
   if (!lang) return;
   if (runtimeState.cache.has(lang)) runtimeState.cache.delete(lang);
+  runtimeState.cacheMeta.delete(lang);
   if (runtimeState.eagerLoadedLanguages) runtimeState.eagerLoadedLanguages.delete(lang);
   if (runtimeState.keyManifest) runtimeState.keyManifest.delete(lang);
   if (runtimeState.loadedFiles) {

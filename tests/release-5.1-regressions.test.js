@@ -12,6 +12,8 @@ const FIXER = path.join(ROOT, 'main', 'i18ntk-fixer.js');
 const VALIDATOR = path.join(ROOT, 'main', 'i18ntk-validate.js');
 const FixerCommand = require('../main/manage/commands/FixerCommand');
 const { parseCommonArgs } = require('../utils/config-helper');
+const { analyzeTranslationCompleteness, completionPercentage } = require('../utils/translation-quality');
+const I18nUsageAnalyzer = require('../main/i18ntk-usage');
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -142,6 +144,40 @@ test('validator defaults outputDir and reports 100% for matching non-string leav
     assert.equal(output.data.results.fr.summary.sourceTotalKeys, 4);
     assert.equal(output.data.results.fr.summary.translatedKeys, 4);
     assert.doesNotMatch(result.stdout, /Source directory:/);
+  } finally {
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('validation and usage agree on incomplete markers without rounding up to 100%', () => {
+  const translations = {
+    sourceCopy: '[FR] Source copy',
+    empty: '',
+    partial: 'Prefix NOT_TRANSLATED suffix',
+    legitimateSameValue: 'same',
+    nestedArray: ['Traduit', '(NOT TRANSLATED)']
+  };
+  const markers = ['NOT_TRANSLATED', '(NOT TRANSLATED)'];
+  const shared = analyzeTranslationCompleteness(translations, { markers });
+  const usage = new I18nUsageAnalyzer({ notTranslatedMarkers: markers }).analyzeFileCompleteness(translations);
+  assert.deepEqual({ total: usage.total, translated: usage.translated }, { total: shared.total, translated: shared.translated });
+  assert.equal(shared.total, 6);
+  assert.equal(shared.translated, 2);
+  assert.equal(completionPercentage(999, 1000), 99.9);
+  assert.equal(completionPercentage(1000, 1000), 100);
+});
+
+test('strict validator exits non-zero for incomplete translation values', () => {
+  const project = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-511-strict-validator-'));
+  try {
+    writeMinimalConfig(project);
+    writeJson(path.join(project, 'locales', 'en', 'common.json'), { one: 'One', two: 'Two', three: 'Three' });
+    writeJson(path.join(project, 'locales', 'fr', 'common.json'), { one: '[FR] One', two: '', three: 'NOT_TRANSLATED' });
+    const result = run(VALIDATOR, ['--source-dir=./locales', '--source-locale=en', '--strict', '--json', '--no-prompt'], project);
+    assert.notEqual(result.status, 0, result.stdout);
+    const output = JSON.parse(result.stdout);
+    assert.equal(output.data.results.fr.summary.percentage, 0);
+    assert.ok(output.stats.errors >= 3);
   } finally {
     fs.rmSync(project, { recursive: true, force: true });
   }

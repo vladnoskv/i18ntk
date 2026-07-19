@@ -1,6 +1,6 @@
-# i18ntk v5.1.0
+# i18ntk v5.1.1
 
-Find, validate, and maintain application translations without adding runtime dependencies.
+Ship multilingual applications with confidence. i18ntk finds translation gaps, checks quality, and keeps locale files healthy without adding production dependencies to CLI-only projects.
 
 ![i18ntk Logo](https://raw.githubusercontent.com/vladnoskv/i18ntk/main/docs/screenshots/i18ntk-logo-public.PNG)
 
@@ -9,18 +9,18 @@ Find, validate, and maintain application translations without adding runtime dep
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-personal%20use%20free-blue.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/5.1.0)](https://socket.dev/npm/package/i18ntk/overview/5.1.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/5.1.1)](https://socket.dev/npm/package/i18ntk/overview/5.1.1)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
 
-## Why i18ntk
+## What i18ntk helps you do
 
-- Finds missing and unused keys across your source code and locale files.
-- Checks placeholders, tags, source-language leftovers, and other translation-quality issues.
-- Completes missing keys and translates only the entries that need attention.
-- Supports JavaScript, TypeScript, Python, PHP, Ruby, Go, Rust, JVM templates, and 30+ framework or i18n integrations.
-- Works interactively on your machine or non-interactively in automation, with no production dependencies.
+- **Catch problems before release:** find missing keys, unused keys, broken placeholders, mismatched tags, and untranslated copy.
+- **Focus translation work:** complete missing entries and translate only the values that still need attention.
+- **Fit your stack:** scan JavaScript, TypeScript, Python, PHP, Ruby, Go, Rust, JVM templates, and more than 30 framework or i18n integrations.
+- **Use it your way:** work from the guided menu locally or produce stable JSON results in CI.
+- **Add a runtime only when you need one:** CLI-only projects have no production dependencies, while applications can opt into the environment-specific runtime.
 
 Use the CLI on its own, or pair it with [i18ntk Workbench](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench) for project-wide management and [i18ntk Lens](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens) for inline editor feedback.
 
@@ -55,46 +55,42 @@ npx i18ntk --command=usage
 
 Use `npx i18ntk` for the guided menu. It detects the project framework and adds only compatible source types and safe generated-file exclusions to a newly created configuration. For a walkthrough, see [Getting started](./docs/getting-started.md).
 
-## What's new in 5.1.0
+## What improves in 5.1.1
 
-- **Correct fixer paths:** use `--code-dir` for application code and `--locales-dir` for translations without one overriding the other.
-- **Dependable automation:** fixer and validator `--json` output is parseable, invalid locale layouts fail, and fixer respects `--languages` and `--markers`.
-- **Accurate validation:** non-string settings no longer lower translation completion percentages, while strings inside arrays are counted.
-- **One safer runtime:** dedicated Node, browser, Edge, React, and React Native entry points now share isolated locale behavior, regional fallbacks, and useful load diagnostics.
-- **Reliable React updates:** translations rerender after resource refreshes as well as locale changes, without loading during render.
-- **Complete npm documentation:** every guide linked here is included in the installed package, without a duplicate nested source tree.
+- **CI results you can trust.** Empty translations and untranslated markers now appear in validation totals. Strict mode fails the build, and unfinished locales never look 100% complete.
+- **One clear coverage result.** `validate` and `usage` now agree about which strings still need work, including strings inside arrays.
+- **Better TypeScript guidance.** Browser projects see the browser API and Node projects see the Node API, so autocomplete no longer suggests methods that will be missing at runtime. Existing 5.x `TranslationValue` imports continue to work.
+- **Accurate language pickers.** Static and custom loaders can list every available locale without downloading every translation first.
+- **A smoother 5.x migration.** Applications still using the enhanced runtime regain named namespaces, ready-to-use encryption, and working cache controls.
+- **Fresher translations when you need them.** Node applications can disable caching, expire cached locales after a TTL, or cap the number of cached languages.
+
+Upgrade with:
+
+```bash
+npm install i18ntk@5.1.1
+```
+
+Most 5.1.0 projects need no configuration changes. Keep normal validation when unfinished translations should be reported but allowed; use `--strict` when they must block a release.
 
 See the [release notes](./CHANGELOG.md) for the full list of user-facing changes.
 
 Upgrading from v4? Follow the [v4 to v5 migration guide](./docs/migration-v4-to-v5.md), including the licensing change and one-time configuration migration.
 
-## Everyday workflows
+## Choose your next step
 
-```bash
-i18ntk                                    # guided menu
-i18ntk --command=analyze                  # translation coverage
-i18ntk --command=validate                 # quality checks
-i18ntk --command=usage                    # missing and unused keys
-i18ntk --command=complete                 # add missing keys
-i18ntk --command=translate                # translate eligible entries
-i18ntk --command=report --format=json     # shareable report
-```
-
-Use `npx i18ntk --command=<name>` when i18ntk is installed locally.
-
-## Command Reference
-
-| Command | Use it when you want to |
+| I want to... | Start with |
 | --- | --- |
-| `i18ntk` | Open the guided setup and maintenance menu. |
-| `init` | Create or extend a project configuration. |
-| `analyze`, `validate`, `usage` | Review coverage, translation quality, and key usage. |
-| `complete`, `translate` | Add missing entries or translate eligible values. |
-| `report`, `summary`, `sizing` | Produce a shareable status or planning view. |
-| `scanner`, `fixer`, `backup` | Find hardcoded text, repair locale data, or protect a snapshot. |
-| `skills` | Install i18ntk guidance for an AI coding agent. |
+| Set up i18ntk for a project | `npx i18ntk --command=init` |
+| See how complete my translations are | `npx i18ntk --command=analyze` |
+| Block a release when translations are unfinished | `npx i18ntk --command=validate --strict --no-prompt` |
+| Find missing, unused, or hard-to-trace keys | `npx i18ntk --command=usage` |
+| Find user-facing text still embedded in source code | `npx i18ntk --command=scanner` |
+| Add missing locale entries | `npx i18ntk --command=complete` |
+| Translate eligible values | `npx i18ntk --command=translate` |
+| Create a report for teammates or stakeholders | `npx i18ntk --command=report --format=json` |
+| Use translations inside my application | Choose an entry point in [Runtime](#runtime) |
 
-Each command is also available as a standalone `i18ntk-<name>` executable.
+Run `npx i18ntk` when you prefer the guided menu. Every command is also available as a standalone `i18ntk-<name>` executable.
 
 ## Common Options
 
@@ -150,7 +146,7 @@ Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "5.1.0",
+  "version": "5.1.1",
   "sourceDir": "./src",
   "i18nDir": "./locales",
   "sourceLanguage": "en",
@@ -189,15 +185,15 @@ i18ntk-usage --code-dir ./src --locales-dir ./locales --cleanup --dry-run-delete
 
 ## Runtime
 
-Choose the entry point that matches where your application code runs:
+Choose the entry point by where the translation code will actually run:
 
-| Your application code | Import |
-| --- | --- |
-| Node server, Express/Fastify, or Node Server Component | `i18ntk/runtime/node` |
-| Bundled browser, Edge, React Native, Expo, Deno, or Bun resources | `i18ntk/runtime/static` |
-| Browser or Edge resources loaded over HTTP | `i18ntk/runtime/fetch` |
-| React Client Components and hooks | `i18ntk/runtime/react` with `static` or `fetch` |
-| Framework-independent browser-safe core | `i18ntk/runtime/core` |
+| Your application code                                             | Import                                          |
+| ----------------------------------------------------------------- | ----------------------------------------------- |
+| Node server, Express/Fastify, or a Node Server Component          | `i18ntk/runtime/node`                           |
+| Browser, Edge, React Native, Expo, Deno, or Bun with bundled translations | `i18ntk/runtime/static`                  |
+| Browser or Edge application that downloads translations          | `i18ntk/runtime/fetch`                          |
+| React Client Components that need providers and hooks             | `i18ntk/runtime/react` with `static` or `fetch` |
+| Library code that needs the smallest browser-safe API             | `i18ntk/runtime/core`                           |
 
 Rust, Go, Python, Java, and other non-JavaScript applications can use the i18ntk CLI and generated JSON, but cannot run the JavaScript runtime natively.
 

@@ -1,4 +1,6 @@
 export type Params = Record<string, unknown>;
+/** @deprecated Runtime translation methods return strings. Kept for source compatibility with 5.0.x. */
+export type TranslationValue = string | number | boolean | null | Record<string, unknown> | unknown[];
 export type MissingKeyPolicy = 'key' | 'empty' | 'throw' | ((event: RuntimeEvent) => string);
 export interface RuntimeEvent { type: string; [key: string]: unknown; }
 export interface RuntimeOptions {
@@ -44,6 +46,7 @@ export interface UniversalRuntime {
   removeResources(locale: string, namespace?: string): void;
   load(locale?: string, namespaces?: string | string[]): Promise<UniversalRuntime>;
   refresh(locale?: string, namespaces?: string | string[]): Promise<UniversalRuntime>;
+  refreshLocales(): Promise<string[]>;
   subscribe(listener: (event: RuntimeEvent) => void): () => void;
   addPlugin(plugin: { name: string; transform?(value: string, params: Params, options: TranslateOptions): string }): () => void;
   removePlugin(name: string): void;
@@ -61,5 +64,6 @@ export class RuntimeError extends Error { code: string; details: Record<string, 
 export class RuntimeValidationError extends RuntimeError {}
 export class RuntimeLoadError extends RuntimeError {}
 export function canonicalizeLocale(locale: string, fallback?: string): string;
+export function requireValidLocale(locale: string, label?: string): string;
 export function createRuntime(options?: RuntimeOptions): UniversalRuntime;
 export function initRuntime(options?: RuntimeOptions): Promise<UniversalRuntime>;

@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
@@ -55,10 +55,16 @@
   "exports": {
     ".": "./main/manage/index.js",
     "./runtime": {
-      "types": "./runtime/index.d.ts",
-      "browser": "./runtime/core.js",
-      "node": "./runtime/index.js",
-      "require": "./runtime/index.js",
+      "browser": {
+        "types": "./runtime/core.d.ts",
+        "default": "./runtime/core.js"
+      },
+      "node": {
+        "types": "./runtime/index.d.ts",
+        "require": "./runtime/index.js",
+        "default": "./runtime/index.js"
+      },
+      "types": "./runtime/core.d.ts",
       "default": "./runtime/core.js"
     },
     "./runtime/enhanced": {
@@ -228,7 +234,7 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "5.1.0",
+    "version": "5.1.1",
     "releaseDate": "07/19/2026",
     "lastUpdated": "07/19/2026",
     "maintainer": "Vlad Noskov",
@@ -262,7 +268,7 @@
       "PATCH: Language selection prompts now render their numeric range dynamically from the installed UI locale count, preventing stale bounds during future locale expansion."
     ],
     "breakingChanges": [],
-    "nextVersion": "5.1.1",
+    "nextVersion": "5.1.2",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -291,7 +297,7 @@
       "fluent-rs": ">=0.16.0",
       "gettext-rs": ">=0.7.0"
     },
-    "supportPolicy": "Versions earlier than 5.1.0 use different licensing or may lack current reliability controls. Upgrade to 5.1.0 or newer.",
+    "supportPolicy": "Versions earlier than 5.1.1 use different licensing or may lack current reliability fixes. Upgrade to 5.1.1 or newer.",
     "deprecations": [
       "4.3.0",
       "4.3.1",
@@ -299,7 +305,7 @@
       "4.3.3",
       "4.7.2"
     ],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). i18ntk 4.7.2 has a missing-module bug. Upgrade to i18ntk@5.1.0 or newer: npm install -g i18ntk@latest",
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). i18ntk 4.7.2 has a missing-module bug. Upgrade to i18ntk@5.1.1 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"

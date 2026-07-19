@@ -57,6 +57,26 @@ test('universal loader deduplicates concurrent loads and exposes real locales', 
   assert.equal(staticRuntime.t('hello', {}, { namespace: 'common' }), 'Static hello');
 });
 
+test('universal locale discovery, fallback aliases, and invalid locale handling are consistent', async () => {
+  let discoveries = 0;
+  const runtime = await core.initRuntime({
+    locale: 'fr-CA',
+    fallbackLanguage: 'en',
+    preload: false,
+    resources: { en: { common: { hello: 'Hello' } } },
+    loader: {
+      async listLocales() { discoveries++; return ['fr_CA', 'de']; },
+      async load() { return {}; }
+    }
+  });
+  assert.equal(discoveries, 1);
+  assert.deepEqual(runtime.listLocales(), ['de', 'en', 'fr-CA']);
+  assert.equal(runtime.has('hello', { namespace: 'common', language: 'fr-CA', fallbackLanguage: 'en' }), true);
+  assert.throws(() => runtime.addResources('%%%invalid', 'common', { hello: 'No' }),
+    error => error.code === 'I18NTK_RUNTIME_VALIDATION');
+  assert.equal(runtime.listLocales().includes(''), false);
+});
+
 test('universal runtime isolates plugin failures and completes disposed in-flight loads safely', async () => {
   let releaseLoad;
   const runtime = core.createRuntime({
@@ -203,6 +223,62 @@ test('enhanced compatibility instances are isolated and do not own process lifec
   }
 });
 
+test('enhanced namespaces, encryption, and cache settings are functional', async () => {
+  const project = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-511-enhanced-'));
+  try {
+    writeJson(path.join(project, 'en.json'), { disk: 'Before' });
+    const runtime = new enhanced.I18nEnhancedRuntime({
+      baseDir: project,
+      defaultLanguage: 'en',
+      encryption: { enabled: true },
+      cache: { enabled: false, maxSize: 1, ttl: 0 }
+    });
+    runtime.addNamespace('custom', { en: { hello: 'Namespaced hello' } });
+    assert.equal(await runtime.translate('hello', {}, { namespace: 'custom' }), 'Namespaced hello');
+    assert.equal(await runtime.translate('hello'), 'Namespaced hello');
+    assert.equal(runtime.has('hello'), true);
+    assert.equal(runtime.getEncryptionStatus(), true);
+    const encrypted = await runtime.translateEncrypted('hello');
+    assert.equal(await runtime.decryptData(encrypted), 'Namespaced hello');
+    assert.equal(runtime.getConfig().encryption.key, undefined);
+    assert.equal(runtime.getCacheInfo().enabled, false);
+    assert.deepEqual(runtime.getCacheInfo().cachedLanguages, []);
+    assert.equal(await runtime.translate('disk'), 'Before');
+    writeJson(path.join(project, 'en.json'), { disk: 'After' });
+    assert.equal(await runtime.translate('disk'), 'After');
+    assert.throws(() => runtime.setEncryptionKey('weak'), error => error.code === 'I18NTK_RUNTIME_VALIDATION');
+    runtime.dispose();
+  } finally {
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
+test('Node cache TTL and maxSize reload and evict deterministically', () => {
+  const project = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-511-cache-'));
+  let now = 0;
+  try {
+    writeJson(path.join(project, 'en.json'), { value: 'English one' });
+    writeJson(path.join(project, 'fr.json'), { value: 'French' });
+    const runtime = nodeRuntime.initRuntime({
+      baseDir: project,
+      language: 'en',
+      fallbackLanguage: 'en',
+      cache: { enabled: true, maxSize: 1, ttl: 10 },
+      now: () => now
+    });
+    assert.equal(runtime.t('value'), 'English one');
+    writeJson(path.join(project, 'en.json'), { value: 'English two' });
+    now = 9;
+    assert.equal(runtime.t('value'), 'English one');
+    now = 10;
+    assert.equal(runtime.t('value'), 'English two');
+    assert.equal(runtime.t('value', {}, { language: 'fr' }), 'French');
+    assert.deepEqual(runtime.getCacheInfo().cachedLanguages, ['fr']);
+  } finally {
+    fs.rmSync(project, { recursive: true, force: true });
+  }
+});
+
 test('runtime declarations do not advertise missing top-level exports', () => {
   for (const name of ['core', 'index', 'enhanced', 'crypto']) {
     const declarations = fs.readFileSync(path.join(__dirname, `../runtime/${name}.d.ts`), 'utf8');
@@ -221,5 +297,10 @@ test('runtime package exports explicit environment adapters without a wildcard',
     assert.ok(pkg.exports[entry], `Missing export ${entry}`);
   }
   assert.equal(pkg.exports['./runtime/*'], undefined);
-  assert.equal(pkg.exports['./runtime'].browser, './runtime/core.js');
+  assert.equal(pkg.exports['./runtime'].browser.types, './runtime/core.d.ts');
+  assert.equal(pkg.exports['./runtime'].browser.default, './runtime/core.js');
+  assert.equal(pkg.exports['./runtime'].node.types, './runtime/index.d.ts');
+  assert.equal(pkg.exports['./runtime'].node.default, './runtime/index.js');
+  assert.match(fs.readFileSync(path.join(__dirname, '../runtime/core.d.ts'), 'utf8'), /export type TranslationValue/);
+  assert.match(fs.readFileSync(path.join(__dirname, '../runtime/index.d.ts'), 'utf8'), /export type TranslationValue/);
 });
