@@ -53,6 +53,8 @@ Many commands support:
 - `--source-language <code>` legacy alias for `--source-locale`
 - `--ui-language <code>` for the CLI UI locale. Supported UI locale codes match the package language registry used by the interactive language selector.
 - `--no-prompt`
+- `--json` for one machine-readable JSON document on stdout
+- `--indent <0-10>` to control JSON indentation (default: `2`)
 - `--help`
 
 Exit codes are standardized for automation: `0` means successful execution, `1` means validation/report/runtime failure, and `2` means invalid arguments or missing required setup in non-interactive mode. Commands do not prompt when `--no-prompt` is passed, `CI=true`, stdin is not a TTY, or stdout is not a TTY.
@@ -61,7 +63,9 @@ Command-specific tools add their own flags, such as `--dry-run`, `--output-repor
 
 ## Fix Placeholder
 
-`i18ntk --command=fix` and `i18ntk-fixer` repair missing keys, empty values, and untranslated markers from the source language.
+`i18ntk --command=fix` and `i18ntk-fixer` repair missing keys, empty values, and untranslated markers from the source language. Use `--code-dir` for application code and `--locales-dir` for locale files; fixer reads and writes only the locale root. Directory locales, monolith files such as `fr.json`, nested namespaces, and regional locales such as `pt-BR` are supported.
+
+Use `--languages=fr,de` to limit a run and `--markers=NOT_TRANSLATED,TODO` to override untranslated markers. An invalid locale layout, a missing source locale, or an unknown requested target locale returns a non-zero exit status.
 
 Use the English placeholder checker when the source files may still contain copied target placeholders:
 

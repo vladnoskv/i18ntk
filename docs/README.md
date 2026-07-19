@@ -1,4 +1,4 @@
-# i18ntk Documentation (v5.0.0)
+# i18ntk Documentation (v5.1.0)
 
 Choose what you want to do and jump straight to the relevant guide.
 
@@ -17,7 +17,7 @@ Choose what you want to do and jump straight to the relevant guide.
 ## Look up technical details
 
 - [API Reference](./api/API_REFERENCE.md)
-- [5.0.0 reliability and extraction APIs](./reliability.md)
+- [Reliability and extraction APIs](./reliability.md)
 - [Upgrade from v4 to v5](./migration-v4-to-v5.md)
 
 ## Everyday workflow

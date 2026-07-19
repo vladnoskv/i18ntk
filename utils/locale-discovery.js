@@ -10,7 +10,17 @@ function normalizeLocale(locale) {
 }
 
 function isLocaleName(name) {
-  return /^[a-z]{2,3}(?:[-_][a-z0-9]{2,8})*$/i.test(String(name || ''));
+  const value = String(name || '');
+  if (!/^[a-z]{2,3}(?:[-_][a-z0-9]{2,8})*$/i.test(value)) return false;
+  try {
+    const baseLanguage = value.split(/[-_]/)[0].toLowerCase();
+    const displayNames = new Intl.DisplayNames(['en'], { type: 'language', fallback: 'none' });
+    return Boolean(displayNames.of(baseLanguage));
+  } catch (_) {
+    // Older/small-ICU Node builds may not expose DisplayNames. Retain the
+    // structural validation in that environment.
+    return true;
+  }
 }
 
 /** Discover monolith (en.json) and directory (en/*.json) layouts. */
@@ -23,19 +33,21 @@ function discoverLocaleFiles(baseDir, options = {}) {
   const rootStat = SecurityUtils.safeStatSync(root, path.dirname(root));
   if (!rootStat || !rootStat.isDirectory()) return found;
 
-  const walk = (dir, localeHint = '') => {
+  const walk = (dir, localeHint = '', displayLocale = '') => {
     const entries = SecurityUtils.safeReaddirSync(dir, path.dirname(dir), { withFileTypes: true }) || [];
     for (const entry of entries) {
       if (excludes.has(entry.name)) continue;
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        const nextLocale = isLocaleName(entry.name) ? normalizeLocale(entry.name) : localeHint;
-        walk(fullPath, nextLocale);
+        const entryIsLocale = isLocaleName(entry.name);
+        const nextLocale = entryIsLocale ? normalizeLocale(entry.name) : localeHint;
+        walk(fullPath, nextLocale, entryIsLocale ? entry.name : displayLocale);
       } else if (entry.isFile() && path.extname(entry.name).toLowerCase() === '.json') {
         const fileLocale = localeHint || normalizeLocale(path.basename(entry.name, '.json'));
         if (!isLocaleName(fileLocale)) continue;
         if (sourceLocale && fileLocale !== sourceLocale && options.sourceOnly) continue;
         found.push({ filePath: fullPath, locale: fileLocale,
+          displayLocale: displayLocale || path.basename(entry.name, '.json'),
           namespace: localeHint ? path.basename(entry.name, '.json') : 'default',
           type: localeHint ? 'namespaced' : 'direct' });
       }

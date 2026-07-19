@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [5.1.0] - 2026-07-19
+
+### What this release means for you
+
+- **Use the runtime in more places.** Choose a dedicated entry point for Node servers, browsers, Edge routes, React, React Native, or bundled translation files. Server and client rendering can now share the same translation behavior without pulling Node filesystem code into browser bundles.
+- **Safer server rendering.** Every runtime you create is isolated, making it suitable for concurrent requests, tests, multiple React roots, and multi-tenant services. The runtime no longer takes control of application process handlers or timers.
+- **Fixer commands use the folders you specify.** `--code-dir` is now only application code and `--locales-dir` is only translations. Source folders such as `app` and `components` are no longer reported as languages.
+- **CI receives dependable results.** Fixer and validator `--json` output contains one parseable document, invalid locale layouts return a failure, and requested languages and markers are respected.
+- **Completion percentages are accurate.** Numbers, booleans, nulls, and other settings no longer make complete translations look incomplete. Translatable strings inside arrays are still counted.
+- **Installed documentation works.** All guides linked from the README are included, and the accidental duplicate package tree has been removed.
+
+### Runtime improvements
+
+- Locale fallback now follows regional parents before the configured fallback, such as `pt-BR` to `pt` to `en`.
+- Node projects can reliably combine `projectRoot` and a relative `localeDir`, even when launched from another working directory.
+- Missing keys and broken locale files are reported separately, so an unreadable resource is not mistaken for untranslated copy.
+- React components update when either the locale or loaded resources change, including refreshes that keep the same locale.
+- Project translations always take precedence over compatibility fallbacks. Plugins, observers, and failed in-progress loads cannot corrupt runtime state.
+- The former enhanced runtime remains available for 5.x applications, but now uses the same isolated runtime behavior. Migrate to the environment-specific entry points before the next major release.
+
+### Upgrade notes
+
+- Existing CLI commands and locale layouts continue to work. Monolith files, namespaced folders, and regional locale directories are supported.
+- Node applications should import `i18ntk/runtime/node`.
+- Browser, Edge, and React Native applications should use `i18ntk/runtime/static`, `i18ntk/runtime/fetch`, or `i18ntk/runtime/core`.
+- React applications can add `i18ntk/runtime/react` for `I18nProvider`, `useTranslation`, and `useLocale`.
+- `i18ntk/runtime/enhanced` is deprecated but remains compatible throughout 5.x.
+
 ## [5.0.0] - 2026-07-11
 
 ### Highlights

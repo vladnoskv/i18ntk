@@ -61,7 +61,7 @@ describe('runtime initRuntime state isolation', () => {
     }
   });
 
-  test('module-level singleton exports are not overwritten by later initRuntime calls', () => {
+  test('initRuntime does not mutate the explicit module-level default runtime', () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-singleton-'));
 
     try {
@@ -72,7 +72,7 @@ describe('runtime initRuntime state isolation', () => {
       writeLocale(firstBaseDir, 'de', { common: { hello: 'Hallo' } });
       writeLocale(secondBaseDir, 'fr', { common: { hello: 'Bonjour' } });
 
-      runtimeModule.initRuntime({
+      runtimeModule.initDefaultRuntime({
         baseDir: firstBaseDir,
         language: 'de',
         fallbackLanguage: 'de',
@@ -138,7 +138,7 @@ describe('runtime initRuntime state isolation', () => {
 
       assert.strictEqual(runtimeA.t('common.hello'), 'Hallo');
       assert.strictEqual(runtimeB.t('common.hello'), 'Bonjour');
-      assert.strictEqual(runtimeModule.t('common.hello'), 'Hallo');
+      assert.strictEqual(runtimeModule.getLanguage(), 'en');
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
@@ -360,17 +360,20 @@ describe('runtime initRuntime state isolation', () => {
     }
   });
 
-  test('enhanced runtime exports the top-level helpers declared by its types', async () => {
+  test('enhanced runtime delegates helpers to project resources without built-in sample strings', async () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-runtime-enhanced-'));
     const enhanced = loadFreshEnhancedRuntime();
-
-    assert.strictEqual(typeof enhanced.translateBatch, 'function');
-    assert.strictEqual(typeof enhanced.translateBatchEncrypted, 'function');
-    assert.strictEqual(typeof enhanced.tTyped, 'function');
-
-    assert.deepStrictEqual(
-      await enhanced.translateBatch(['greeting', 'goodbye']),
-      ['Hello', 'Goodbye']
-    );
-    assert.strictEqual(await enhanced.tTyped('greeting'), 'Hello');
+    try {
+      writeLocale(tempRoot, 'en', { greeting: 'Project greeting', goodbye: 'Project goodbye' });
+      const runtime = await enhanced.initI18nRuntime({ baseDir: tempRoot, defaultLanguage: 'en', preload: true });
+      assert.strictEqual(typeof enhanced.translateBatch, 'function');
+      assert.strictEqual(typeof enhanced.translateBatchEncrypted, 'function');
+      assert.strictEqual(typeof enhanced.tTyped, 'function');
+      assert.deepStrictEqual(await runtime.translateBatch(['greeting', 'goodbye']), ['Project greeting', 'Project goodbye']);
+      assert.strictEqual(await runtime.translate('greeting'), 'Project greeting');
+      runtime.dispose();
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
   });
 });

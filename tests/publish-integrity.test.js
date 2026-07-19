@@ -130,6 +130,27 @@ describe('Publish Coverage', () => {
     const pub = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.public.json'), 'utf8'));
     assert.strictEqual(pub.version, pkg.version, 'package.json and package.public.json versions must match');
   });
+
+  it('publishes JavaScript and declaration targets for every explicit runtime adapter', () => {
+    for (const name of ['core', 'node', 'static', 'fetch', 'react', 'crypto', 'enhanced']) {
+      const entry = pkg.exports[`./runtime/${name}`];
+      assert.ok(entry, `Missing runtime export: ${name}`);
+      const jsTarget = typeof entry === 'string' ? entry : entry.default || entry.require;
+      const typeTarget = typeof entry === 'object' ? entry.types : null;
+      assert.ok(jsTarget && included.has(jsTarget.replace(/^\.\//, '')), `Missing JavaScript target for ${name}`);
+      assert.ok(typeTarget && included.has(typeTarget.replace(/^\.\//, '')), `Missing declaration target for ${name}`);
+    }
+  });
+
+  it('publishes every relative README link target without a nested package copy', () => {
+    const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+    const links = [...readme.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)]
+      .map(match => match[1].trim().split('#')[0])
+      .filter(target => target && !target.startsWith('#') && !/^[a-z][a-z0-9+.-]*:/i.test(target));
+    const missing = links.filter(target => !included.has(target.replace(/^\.\//, '')));
+    assert.deepStrictEqual(missing, [], 'Every relative README link target must be published');
+    assert.equal(FILES_SET.has('i18ntk/'), false, 'The publish list must not include a nested package tree');
+  });
 });
 
 // ── Import Analysis ───────────────────────────────────────────────────

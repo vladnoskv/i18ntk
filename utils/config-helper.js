@@ -29,6 +29,23 @@ function normalizePath(dirPath) {
   return path.resolve(dirPath);
 }
 
+function applyRequiredPathDefaults(cfg) {
+  const normalized = cfg && typeof cfg === 'object' ? cfg : {};
+  normalized.projectRoot = typeof normalized.projectRoot === 'string' && normalized.projectRoot.trim()
+    ? normalized.projectRoot
+    : '.';
+  normalized.sourceDir = typeof normalized.sourceDir === 'string' && normalized.sourceDir.trim()
+    ? normalized.sourceDir
+    : './locales';
+  normalized.i18nDir = typeof normalized.i18nDir === 'string' && normalized.i18nDir.trim()
+    ? normalized.i18nDir
+    : normalized.sourceDir;
+  normalized.outputDir = typeof normalized.outputDir === 'string' && normalized.outputDir.trim()
+    ? normalized.outputDir
+    : './i18ntk-reports';
+  return normalized;
+}
+
 /**
  * Get unified configuration for any script
  * @param {string} scriptName - Name of the script (e.g., 'complete', 'analyze', 'validate')
@@ -78,9 +95,7 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
 
       // Older project configs may predate one or more path fields. Keep those
       // setups usable while the interactive v5 upgrade prompt is shown.
-      cfg.sourceDir = cfg.sourceDir || './locales';
-      cfg.i18nDir = cfg.i18nDir || cfg.sourceDir;
-      cfg.outputDir = cfg.outputDir || './i18ntk-reports';
+      cfg = applyRequiredPathDefaults(cfg);
 
       const detectedFramework = detectFramework(projectRoot);
       if (detectedFramework?.id) {
@@ -128,6 +143,11 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
         cfg = configManager.getConfig();
       }
 
+      // Loading, upgrading, or applying CLI overrides can replace the object
+      // that received the initial defaults. Re-establish path invariants before
+      // resolving or displaying them.
+      cfg = applyRequiredPathDefaults(cfg);
+
       // Resolve all paths to absolute
       cfg = configManager.resolvePaths(cfg);
 
@@ -162,6 +182,9 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       cfg.sourceDir = normalizePath(cfg.sourceDir || './locales');
       cfg.i18nDir = normalizePath(cfg.i18nDir || cfg.sourceDir);
     }
+
+    cfg = applyRequiredPathDefaults(cfg);
+    cfg.outputDir = normalizePath(cfg.outputDir);
 
     const displayPaths = {
       projectRoot: '.',
@@ -212,7 +235,9 @@ async function getUnifiedConfig(scriptName, cliArgs = {}) {
       debug: cfg.debug || {},
       displayPaths,
     };
-    config.codeDir = config.sourceDir;
+    config.codeDir = cliArgs.codeDir
+      ? (SecurityUtils.validatePath(normalizePath(cliArgs.codeDir), projectRoot) || normalizePath(cliArgs.codeDir))
+      : config.sourceDir;
     config.localesDir = config.i18nDir;
 
     SecurityUtils.validateConfig(config);
@@ -280,6 +305,12 @@ function parseCommonArgs(args) {
       switch (sanitizedKey) {
         case 'code-dir':
         case 'source-code-dir':
+          // Keep sourceDir populated for commands that historically treated
+          // --code-dir as their scan root, while exposing the explicit role to
+          // commands (such as fixer) that also accept a separate locale root.
+          parsed.codeDir = sanitizedValue;
+          parsed.sourceDir = sanitizedValue;
+          break;
         case 'source-dir':
           parsed.sourceDir = sanitizedValue;
           break;
@@ -331,6 +362,14 @@ function parseCommonArgs(args) {
         case 'watch':
           parsed.watch = true;
           break;
+        case 'json':
+          parsed.json = true;
+          break;
+        case 'indent': {
+          const indent = Number.parseInt(sanitizedValue, 10);
+          parsed.indent = Number.isInteger(indent) && indent >= 0 && indent <= 10 ? indent : 2;
+          break;
+        }
         default:
           // Handle language shorthand flags like --de, --fr
           if (availableLangCodes.includes(sanitizedKey)) {

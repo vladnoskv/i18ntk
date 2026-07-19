@@ -1,953 +1,281 @@
-// runtime/enhanced.js
-// Enhanced runtime API with AES-256-GCM encryption and full TypeScript support
+'use strict';
 
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
-const EventEmitter = require('events');
+// Deprecated compatibility adapter. All translation and resource behavior is
+// delegated to the isolated runtime implementation in ./index.
 
-// Import secure error handling
-const { 
-  SecureError, 
-  ValidationError, 
-  SecurityError, 
-  EncryptionError 
-} = require('../utils/secure-errors');
+const baseRuntime = require('./index');
 
-// Import existing runtime for backward compatibility
-const baseRuntime = require('./index.js');
+const DEFAULT_CONFIG = Object.freeze({
+  baseDir: './locales',
+  projectRoot: undefined,
+  localeDir: undefined,
+  defaultLanguage: 'en',
+  fallbackLanguage: 'en',
+  keySeparator: '.',
+  preload: false,
+  encryption: Object.freeze({ enabled: false }),
+  cache: Object.freeze({ enabled: true, maxSize: 1000, ttl: 300000 }),
+  security: Object.freeze({ validateInputs: true, sanitizeOutput: false, maxKeyLength: 1000, maxValueLength: 10000 })
+});
 
-// Constants for AES-256-GCM encryption
-const ALGORITHM = 'aes-256-gcm';
-const KEY_LENGTH = 32;
-const IV_LENGTH = 16;
-const AUTH_TAG_LENGTH = 16;
-const SALT_LENGTH = 32;
+class ValidationError extends Error {
+  constructor(message, details = {}) {
+    super(message);
+    this.name = 'ValidationError';
+    this.code = 'I18NTK_RUNTIME_VALIDATION';
+    this.details = details;
+  }
+}
 
-// Track active instances to ensure cleanup is registered only once
-let activeInstances = new Set();
-let processHandlersRegistered = false;
+function mergeConfig(current, updates = {}) {
+  return {
+    ...current,
+    ...updates,
+    encryption: { ...current.encryption, ...(updates.encryption || {}) },
+    cache: { ...current.cache, ...(updates.cache || {}) },
+    security: { ...current.security, ...(updates.security || {}) }
+  };
+}
 
-function registerProcessHandlers() {
-  if (processHandlersRegistered) return;
-  processHandlersRegistered = true;
-
-  process.on('exit', () => {
-    for (const instance of activeInstances) {
-      try { instance.cleanup(); } catch (_) { /* best-effort */ }
+function validateConfig(config) {
+  for (const field of ['baseDir', 'projectRoot', 'localeDir']) {
+    if (config[field] !== undefined && (typeof config[field] !== 'string' || !config[field].trim())) {
+      throw new ValidationError(`${field} must be a non-empty string when provided`);
     }
-  });
-  process.on('SIGINT', () => {
-    for (const instance of activeInstances) {
-      try { instance.cleanup(); } catch (_) { /* best-effort */ }
-    }
-    process.exit(0);
-  });
-  process.on('uncaughtException', () => {
-    for (const instance of activeInstances) {
-      try { instance.cleanup(); } catch (_) { /* best-effort */ }
-    }
-    process.exit(1);
+  }
+  for (const field of ['defaultLanguage', 'fallbackLanguage', 'keySeparator']) {
+    if (typeof config[field] !== 'string' || !config[field]) throw new ValidationError(`${field} must be a non-empty string`);
+  }
+  for (const field of ['defaultLanguage', 'fallbackLanguage']) {
+    if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,35}$/.test(config[field])) throw new ValidationError(`${field} must be a valid locale identifier`);
+  }
+  if (typeof config.cache.enabled !== 'boolean' || !Number.isInteger(config.cache.maxSize) || config.cache.maxSize < 1 ||
+      !Number.isFinite(config.cache.ttl) || config.cache.ttl < 0) {
+    throw new ValidationError('cache requires enabled, a positive integer maxSize, and a non-negative ttl');
+  }
+  if (typeof config.security.validateInputs !== 'boolean' || typeof config.encryption.enabled !== 'boolean' ||
+      !Number.isInteger(config.security.maxKeyLength) || config.security.maxKeyLength < 1 ||
+      !Number.isInteger(config.security.maxValueLength) || config.security.maxValueLength < 1) {
+    throw new ValidationError('security and encryption options contain invalid values');
+  }
+  return config;
+}
+
+function freezeConfig(config) {
+  return Object.freeze({
+    ...config,
+    encryption: Object.freeze({ ...config.encryption }),
+    cache: Object.freeze({ ...config.cache }),
+    security: Object.freeze({ ...config.security })
   });
 }
 
-class I18nEnhancedRuntime extends EventEmitter {
-  constructor() {
-    super();
-    // Generate a unique salt for this instance
-    const instanceSalt = crypto.randomBytes(16).toString('hex');
-    
-    this.config = {
-      baseDir: './locales',
-      defaultLanguage: 'en',
-      fallbackLanguage: 'en',
-      keySeparator: '.',
-      preload: false,
-      encryption: {
-        enabled: false,
-        algorithm: ALGORITHM,
-        keyLength: KEY_LENGTH,
-        ivLength: IV_LENGTH,
-        authTagLength: AUTH_TAG_LENGTH,
-        salt: instanceSalt, // Store the instance-specific salt
-        saltRounds: 16, // Number of bytes for salt generation
-      },
-      cache: {
-        enabled: true,
-        maxSize: 1000, // Maximum number of entries
-        maxMemoryMB: 100, // Maximum memory in MB before eviction
-        ttl: 300000, // 5 minutes
-        checkFrequency: 100, // Check memory every 100 operations
-        entrySizeLimit: 1024 * 10, // 10KB max per entry
-      },
-      security: {
-        validateInputs: true,
-        sanitizeOutput: true,
-        maxKeyLength: 1000,
-        maxValueLength: 10000,
-      },
-    };
-    this.encryptionKey = null;
-    this.cache = new Map();
-    this.cacheSize = 0; // Track total cache size in bytes
-    this.cacheOpsSinceLastCheck = 0;
-    this.plugins = [];
-    this.metrics = {
-      totalTranslations: 0,
-      cacheHitRate: 0,
-      averageTranslationTime: 0,
-      encryptionTime: 0,
-      memoryUsage: 0,
-      cacheEvictions: 0,
-      cacheSizeBytes: 0,
-      cacheEntryCount: 0,
-      cacheHits: 0,
-      cacheMisses: 0,
-    };
+class I18nEnhancedRuntime {
+  constructor(options = {}) {
+    this.config = validateConfig(mergeConfig(DEFAULT_CONFIG, options));
+    if (options.localeDir && !Object.prototype.hasOwnProperty.call(options, 'baseDir')) this.config.baseDir = undefined;
+    this.config = freezeConfig(this.config);
+    this.listeners = new Map();
     this.namespaces = new Map();
-    
-    // Setup periodic memory checks
-    this.memoryCheckInterval = setInterval(
-      () => this.checkMemoryUsage(), 
-      30000 // Check every 30 seconds
-    );
-    if (typeof this.memoryCheckInterval.unref === 'function') {
-      this.memoryCheckInterval.unref();
-    }
-    
-    // Register this instance for process-wide cleanup
-    activeInstances.add(this);
-    registerProcessHandlers();
-    
-    // Add default translations namespace
-    this.addNamespace('default', {
-      en: {
-        greeting: 'Hello',
-        welcome: 'Welcome',
-        goodbye: 'Goodbye',
-        thank_you: 'Thank you',
-        yes: 'Yes',
-        no: 'No',
-        error: 'Error',
-        success: 'Success',
-        loading: 'Loading...',
-        submit: 'Submit'
-      }
+    this.encryptionKey = null;
+    this.resetMetrics();
+    this._createRuntime();
+  }
+
+  _createRuntime(config = this.config) {
+    const nextRuntime = baseRuntime.initRuntime({
+      baseDir: config.baseDir,
+      localeDir: config.localeDir,
+      projectRoot: config.projectRoot,
+      language: config.defaultLanguage,
+      fallbackLanguage: config.fallbackLanguage,
+      keySeparator: config.keySeparator,
+      preload: config.preload,
+      missingKeyPolicy: config.missingKeyPolicy
     });
+    for (const [name, translations] of this.namespaces) this._addNamespaceToRuntime(name, translations, nextRuntime);
+    const nextUnsubscribe = nextRuntime.subscribe(event => this._emit(event.type, event));
+    const previousRuntime = this.runtime;
+    const previousUnsubscribe = this.unsubscribe;
+    this.runtime = nextRuntime;
+    this.unsubscribe = nextUnsubscribe;
+    previousUnsubscribe?.();
+    previousRuntime?.dispose?.();
   }
 
-  // Encryption/decryption methods with secure error handling
-  async encryptData(data, key = this.encryptionKey) {
-    if (!key) {
-      throw new EncryptionError('Encryption key not set', { 
-        operation: 'encrypt',
-        keyType: typeof key
-      });
-    }
-    
-    const startTime = Date.now();
-    
-    try {
-      if (typeof data !== 'string') {
-        try {
-          data = JSON.stringify(data);
-        } catch (e) {
-          throw new ValidationError('Failed to stringify data for encryption', {
-            dataType: typeof data,
-            error: e.message
-          });
-        }
-      }
-      
-      const iv = crypto.randomBytes(IV_LENGTH);
-      const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(key, 'hex'), iv);
-      
-      let encrypted;
-      try {
-        encrypted = cipher.update(data, 'utf8', 'hex');
-        encrypted += cipher.final('hex');
-      } catch (e) {
-        throw new EncryptionError('Failed to encrypt data', {
-          dataLength: data ? data.length : 0,
-          error: e.message
-        });
-      }
-      
-      const authTag = cipher.getAuthTag();
-      
-      const result = {
-        encrypted,
-        iv: iv.toString('hex'),
-        authTag: authTag.toString('hex'),
-        timestamp: Date.now(),
-        version: 1
-      };
-      
-      this.metrics.encryptionTime += Date.now() - startTime;
-      
-      try {
-        return JSON.stringify(result);
-      } catch (e) {
-        throw new EncryptionError('Failed to stringify encrypted result', {
-          resultType: typeof result,
-          error: e.message
-        });
-      }
-    } catch (error) {
-      if (error instanceof SecureError) throw error;
-      
-      // Sanitize error message to prevent information leakage
-      throw new EncryptionError('Encryption failed', {
-        operation: 'encrypt',
-        errorId: crypto.randomBytes(4).toString('hex')
-      });
+  on(type, listener) {
+    if (typeof listener !== 'function') throw new ValidationError('Event listener must be a function');
+    if (!this.listeners.has(type)) this.listeners.set(type, new Set());
+    this.listeners.get(type).add(listener);
+    return this;
+  }
+
+  off(type, listener) {
+    this.listeners.get(type)?.delete(listener);
+    return this;
+  }
+
+  _emit(type, event) {
+    for (const listener of [...(this.listeners.get(type) || [])]) {
+      try { listener(event); } catch (_) { /* telemetry is observational */ }
     }
   }
 
-  async decryptData(encryptedData, key = this.encryptionKey) {
-    if (!key) {
-      throw new EncryptionError('Encryption key not set', {
-        operation: 'decrypt',
-        keyType: typeof key
-      });
+  validateTranslationKey(key) {
+    if (typeof key !== 'string' || !key || key.length > this.config.security.maxKeyLength) {
+      throw new ValidationError('Translation key must be a non-empty string within maxKeyLength', { keyType: typeof key });
     }
-    
-    try {
-      let data;
-      try {
-        data = JSON.parse(encryptedData);
-      } catch (parseError) {
-        throw new EncryptionError('Failed to parse encrypted data', {
-          operation: 'decrypt',
-          error: parseError.message
-        });
-      }
-      
-      if (!data || !data.iv || !data.authTag || !data.encrypted) {
-        throw new EncryptionError('Invalid encrypted data format', {
-          operation: 'decrypt',
-          missingFields: ['iv', 'authTag', 'encrypted'].filter(f => !(f in (data || {})))
-        });
-      }
-      
-      const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(key, 'hex'), Buffer.from(data.iv, 'hex'));
-      decipher.setAuthTag(Buffer.from(data.authTag, 'hex'));
-      
-      let decrypted = decipher.update(data.encrypted, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
-      
-      return decrypted;
-    } catch (error) {
-      if (error instanceof SecureError) throw error;
-      
-      throw new EncryptionError('Decryption failed', {
-        operation: 'decrypt',
-        errorId: crypto.randomBytes(4).toString('hex')
-      });
-    }
+    return true;
   }
 
-  // Generate secure encryption key with optional salt
-  generateEncryptionKey(salt = null) {
-    // If no salt provided, generate a new one
-    if (!salt) {
-      salt = crypto.randomBytes(16).toString('hex');
-    }
-    // Derive key using scrypt for additional security
-    const key = crypto.scryptSync(
-      crypto.randomBytes(32).toString('hex'),
-      salt,
-      KEY_LENGTH
-    );
-    return {
-      key: key.toString('hex'),
-      salt: salt
-    };
-  }
-
-  // Hash key for storage with secure salt management
-  hashKey(key, salt = null) {
-    // Generate a new random salt if none provided
-    if (!salt) {
-      salt = crypto.randomBytes(16).toString('hex');
-      // Store the salt in config if not already set
-      if (!this.config.encryption.salt) {
-        this.config.encryption.salt = salt;
-      }
-    }
-    // Use scrypt with the salt (either provided, generated, or from config)
-    const derivedKey = crypto.scryptSync(
-      key, 
-      salt || this.config.encryption.salt, 
-      KEY_LENGTH
-    );
-    return {
-      key: derivedKey.toString('hex'),
-      salt: salt || this.config.encryption.salt
-    };
-  }
-
-  // Enhanced translation with TypeScript support and secure error handling
   async translate(key, params = {}, options = {}) {
-    const startTime = Date.now();
-    
+    const started = Date.now();
     try {
-      // Validate inputs with secure error handling
-      if (this.config.security.validateInputs) {
-        try {
-          this.validateTranslationKey(key);
-          this.validateParams(params);
-        } catch (error) {
-          throw new ValidationError('Invalid translation input', {
-            key: key ? 'Provided' : 'Missing',
-            params: params ? 'Provided' : 'Missing',
-            details: error.message
-          });
-        }
-      }
-
-      // Merge options with config
-      const mergedOptions = { ...this.config, ...options };
-      const language = mergedOptions.language || this.config.defaultLanguage;
-      const fallbackLanguage = mergedOptions.fallbackLanguage || this.config.fallbackLanguage;
-
-      // Check cache
-      const cacheKey = this.getCacheKey(key, params, language);
-      if (this.config.cache.enabled && this.cache.has(cacheKey)) {
-        const cached = this.cache.get(cacheKey);
-        if (Date.now() - cached.timestamp < this.config.cache.ttl) {
-          this.metrics.cacheHitRate++;
-          return cached.value;
-        }
-      }
-
-      // Get translation
-      let translation = await this.getTranslation(key, language, params);
-      
-      // Fallback to fallback language
-      if (!translation && fallbackLanguage && fallbackLanguage !== language) {
-        translation = await this.getTranslation(key, fallbackLanguage, params);
-      }
-
-      // Use key as fallback
-      if (!translation) {
-        translation = key;
-      }
-
-      // Apply plugins
-      for (const plugin of this.plugins) {
-        if (plugin.transform) {
-          translation = plugin.transform(translation, params, mergedOptions);
-        }
-      }
-
-      // Sanitize output
-      if (this.config.security.sanitizeOutput) {
-        translation = this.sanitizeTranslation(translation);
-      }
-
-      // Cache result
-      if (this.config.cache.enabled) {
-        this.setCache(cacheKey, translation);
-      }
-
-      // Update metrics
-      this.metrics.totalTranslations++;
-      this.metrics.averageTranslationTime += Date.now() - startTime;
-
-      // Emit event
-      this.emit('translation', {
-        type: 'translation',
-        key,
-        language,
-        params,
-        result: translation,
-        timestamp: new Date(),
-        duration: Date.now() - startTime,
+      if (this.config.security.validateInputs) this.validateTranslationKey(key);
+      const value = this.runtime.translate(key, params, {
+        language: options.language,
+        fallbackLanguage: options.fallbackLanguage,
+        missingKeyPolicy: options.missingKeyPolicy
       });
-
-      return translation;
+      this.metrics.translationCount++;
+      this.metrics.translationDurationMsTotal += Date.now() - started;
+      return value;
     } catch (error) {
-      this.emit('error', {
-        type: 'error',
-        key,
-        language: this.config.defaultLanguage,
-        params,
-        error: error.message,
-        timestamp: new Date(),
-      });
+      this._emit('translationError', { type: 'translationError', key, error });
       throw error;
     }
   }
 
-  // Async translate with encryption support
-  async translateEncrypted(key, params = {}, options = {}) {
-    const translation = await this.translate(key, params, options);
-    
-    if (this.config.encryption.enabled && this.encryptionKey) {
-      return await this.encryptData(translation);
-    }
-    
-    return translation;
+  async t(key, params = {}, options = {}) { return this.translate(key, params, options); }
+
+  async translateBatch(keys, params = {}, options = {}) {
+    if (!Array.isArray(keys)) throw new ValidationError('Batch keys must be an array');
+    return Promise.all(keys.map((key, index) => this.translate(key, Array.isArray(params) ? params[index] || {} : params, options)));
   }
 
-  // Batch translation
-  async translateBatch(keys, paramsArray = [], options = {}) {
-    const results = [];
-    
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const params = paramsArray[i] || {};
-      const result = await this.translate(key, params, options);
-      results.push(result);
-    }
-    
-    return results;
+  async translateEncrypted(key, params, options) {
+    const value = await this.translate(key, params, options);
+    if (!this.config.encryption.enabled) return value;
+    return this.encryptData(value);
   }
 
-  // Batch translation with encryption
-  async translateBatchEncrypted(keys, paramsArray = [], options = {}) {
-    const results = [];
-    
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const params = paramsArray[i] || {};
-      const result = await this.translateEncrypted(key, params, options);
-      results.push(result);
-    }
-    
-    return results;
+  async translateBatchEncrypted(keys, params, options) {
+    return Promise.all(keys.map((key, index) => this.translateEncrypted(key, Array.isArray(params) ? params[index] || {} : params, options)));
   }
 
-  // Get translation with namespace support
-  async getTranslation(key, language, params) {
-    // Check namespaces first
-    for (const [namespace, translations] of this.namespaces) {
-      if (translations[language] && translations[language][key]) {
-        return this.interpolate(translations[language][key], params);
-      }
-    }
-
-    // Fall back to base runtime
-    const baseInstance = baseRuntime.initRuntime({
-      baseDir: this.config.baseDir,
-      language,
-      fallbackLanguage: this.config.fallbackLanguage,
-    });
-
-    return baseInstance.translate(key, params);
-  }
-
-  // Interpolation with advanced features
-  interpolate(template, params) {
-    if (typeof template !== 'string') return template;
-    
-    let result = template;
-    
-    // Handle pluralization
-    if (params.count !== undefined) {
-      const pluralRules = this.getPluralRules(this.config.defaultLanguage);
-      const pluralForm = pluralRules.rule(params.count);
-      
-      // Simple pluralization support
-      const pluralKey = result.includes('|') ? 
-        result.split('|')[pluralForm] || result.split('|')[0] : 
-        result;
-      result = pluralKey;
-    }
-
-    // Standard interpolation
-    result = result.replace(/\{\{?(\w+)\}?\}/g, (match, key) => {
-      return params[key] !== undefined ? String(params[key]) : match;
-    });
-
-    return result;
-  }
-
-  // Plural rules for different languages
-  getPluralRules(language) {
-    const rules = {
-      en: { rule: (n) => n === 1 ? 0 : 1, examples: ['one', 'other'] },
-      es: { rule: (n) => n === 1 ? 0 : 1, examples: ['one', 'other'] },
-      fr: { rule: (n) => n <= 1 ? 0 : 1, examples: ['one', 'other'] },
-      de: { rule: (n) => n === 1 ? 0 : 1, examples: ['one', 'other'] },
-      ja: { rule: () => 0, examples: ['other'] },
-      ru: { rule: (n) => {
-        const rem = n % 10;
-        const rem100 = n % 100;
-        if (rem === 1 && rem100 !== 11) return 0;
-        if (rem >= 2 && rem <= 4 && (rem100 < 10 || rem100 >= 20)) return 1;
-        return 2;
-      }, examples: ['one', 'few', 'other'] },
-      zh: { rule: () => 0, examples: ['other'] },
-    };
-
-    return rules[language] || rules.en;
-  }
-
-  // Validation methods
-  validateTranslationKey(key) {
-    if (typeof key !== 'string') {
-      throw new Error('Translation key must be a string');
-    }
-    if (key.length > this.config.security.maxKeyLength) {
-      throw new Error(`Translation key too long (max ${this.config.security.maxKeyLength})`);
-    }
-    return true;
-  }
-
-  validateParams(params) {
-    if (typeof params !== 'object' || params === null) {
-      throw new Error('Translation params must be an object');
-    }
-    return true;
-  }
-
-  sanitizeTranslation(text) {
-    if (typeof text !== 'string') return text;
-    
-    // Basic HTML sanitization
-    return text
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;');
-  }
-
-  // Cache management with secure key generation
-  getCacheKey(key, params, language) {
-    // Sanitize inputs
-    const sanitizedKey = this.sanitizeCacheKey(key);
-    const sanitizedLanguage = this.sanitizeLanguageCode(language);
-    
-    // Create a stable string representation of params
-    let paramsString = '';
-    if (params && typeof params === 'object') {
-      try {
-        // Sort keys to ensure consistent ordering
-        const sortedParams = {};
-        Object.keys(params).sort().forEach(k => {
-          if (params[k] !== undefined && params[k] !== null) {
-            sortedParams[k] = params[k];
-          }
-        });
-        paramsString = JSON.stringify(sortedParams);
-      } catch (e) {
-        // If we can't stringify params, use a hash of the params object
-        paramsString = crypto.createHash('sha256')
-          .update(JSON.stringify(params) || '')
-          .digest('hex')
-          .substring(0, 16);
-      }
-    }
-    
-    // Create a hash of the combined components to prevent injection
-    const cacheKey = crypto.createHash('sha256')
-      .update(`${sanitizedLanguage}:${sanitizedKey}:${paramsString}`)
-      .digest('hex');
-      
-    return `i18n:${cacheKey}`;
-  }
-  
-  // Sanitize cache key input
-  sanitizeCacheKey(key) {
-    if (typeof key !== 'string') {
-      throw new ValidationError('Cache key must be a string');
-    }
-    
-    // Remove any potentially dangerous characters
-    return key.replace(/[^\w\-.:@]/g, '_');
-  }
-  
-  // Sanitize language code
-  sanitizeLanguageCode(lang) {
-    if (typeof lang !== 'string') {
-      return 'en'; // Default to English
-    }
-    
-    // Only allow letters and hyphens, convert to lowercase
-    return lang.replace(/[^a-zA-Z\-]/g, '').toLowerCase();
-  }
-
-  // Calculate the approximate size of an object in bytes
-  getObjectSize(obj) {
-    if (obj === null || obj === undefined) return 0;
-    
-    let bytes = 0;
-    
-    if (typeof obj === 'string') {
-      // UTF-16 uses 2 bytes per character
-      bytes = obj.length * 2;
-    } else if (typeof obj === 'number') {
-      // Numbers are 8 bytes (64 bits)
-      bytes = 8;
-    } else if (typeof obj === 'boolean') {
-      // Booleans are 4 bytes
-      bytes = 4;
-    } else if (typeof obj === 'object') {
-      // For objects and arrays, sum the size of all properties
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          bytes += this.getObjectSize(obj[key]);
-          // Add the size of the key itself
-          bytes += key.length * 2; // UTF-16
-        }
-      }
-    }
-    
-    return bytes;
-  }
-  
-  // Check if we need to free up memory
-  checkMemoryUsage(force = false) {
-    this.cacheOpsSinceLastCheck++;
-    
-    // Only check every N operations or if forced
-    if (!force && this.cacheOpsSinceLastCheck < this.config.cache.checkFrequency) {
-      return;
-    }
-    
-    this.cacheOpsSinceLastCheck = 0;
-    
-    // Check memory usage
-    const memoryUsage = process.memoryUsage();
-    const heapUsedMB = memoryUsage.heapUsed / (1024 * 1024);
-    
-    // If we're using too much memory, clear some cache entries
-    if (heapUsedMB > this.config.cache.maxMemoryMB || force) {
-      const targetReduction = Math.ceil(this.cache.size * 0.2); // Remove 20% of entries
-      let removed = 0;
-      
-      // Sort entries by last access time (oldest first)
-      const entries = Array.from(this.cache.entries())
-        .sort((a, b) => a[1].timestamp - b[1].timestamp);
-      
-      // Remove oldest entries
-      for (const [key, entry] of entries) {
-        if (removed >= targetReduction) break;
-        
-        // Reduce cache size
-        this.cacheSize -= this.getObjectSize(entry);
-        this.cache.delete(key);
-        removed++;
-        this.metrics.cacheEvictions++;
-      }
-      
-      this.emit('cachePruned', {
-        timestamp: new Date(),
-        entriesRemoved: removed,
-        remainingEntries: this.cache.size,
-        heapUsedMB,
-        maxMemoryMB: this.config.cache.maxMemoryMB
-      });
-    }
-    
-    // Update metrics
-    this.metrics.memoryUsage = heapUsedMB;
-    this.metrics.cacheSizeBytes = this.cacheSize;
-    this.metrics.cacheEntryCount = this.cache.size;
-  }
-  
-  // Clean up resources
-  cleanup() {
-    if (this.memoryCheckInterval) {
-      clearInterval(this.memoryCheckInterval);
-      this.memoryCheckInterval = null;
-    }
-    
-    // Clear all caches
-    this.cache.clear();
-    this.cacheSize = 0;
-    
-    // Clear namespaces
-    this.namespaces.clear();
-    
-    // Clear encryption key from memory
-    if (this.encryptionKey) {
-      this.encryptionKey = null;
-    }
-    
-    // Clear any sensitive data from config
-    if (this.config.encryption) {
-      this.config.encryption.salt = null;
-    }
-    
-    activeInstances.delete(this);
-  }
-  
-  // Add or update a cache entry
-  setCache(key, value) {
-    // Check entry size limit
-    const entrySize = this.getObjectSize(value);
-    if (entrySize > this.config.cache.entrySizeLimit) {
-      this.emit('cacheReject', {
-        reason: 'entry_too_large',
-        key,
-        size: entrySize,
-        maxSize: this.config.cache.entrySizeLimit
-      });
-      return false;
-    }
-    
-    // Check if we need to make space
-    if (this.cache.size >= this.config.cache.maxSize) {
-      // Remove the least recently used entry
-      const lruKey = this.cache.keys().next().value;
-      const lruEntry = this.cache.get(lruKey);
-      
-      if (lruEntry) {
-        this.cacheSize -= this.getObjectSize(lruEntry);
-        this.cache.delete(lruKey);
-        this.metrics.cacheEvictions++;
-      }
-    }
-    
-    // Add the new entry
-    const entry = {
-      value,
-      timestamp: Date.now(),
-      size: entrySize
-    };
-    
-    // Update cache size
-    this.cacheSize += entrySize;
-    
-    // Store the entry
-    this.cache.set(key, entry);
-    
-    // Check memory usage periodically
-    this.checkMemoryUsage();
-    
-    return true;
-  }
-
-  // Configuration management
-  async updateConfig(updates) {
-    this.config = { ...this.config, ...updates };
-    this.cache.clear();
-    
-    if (updates.encryption?.enabled && !this.encryptionKey) {
-      const { key, salt } = this.generateEncryptionKey(updates.encryption.salt);
-      this.encryptionKey = key;
-      this.config.encryption.salt = salt;
-    }
+  async updateConfig(updates = {}) {
+    const previous = this.config;
+    const next = mergeConfig(previous, updates);
+    if (updates.localeDir && !Object.prototype.hasOwnProperty.call(updates, 'baseDir')) next.baseDir = undefined;
+    validateConfig(next);
+    const runtimeChanged = ['baseDir', 'localeDir', 'projectRoot', 'defaultLanguage', 'fallbackLanguage', 'keySeparator', 'preload']
+      .some(key => next[key] !== previous[key]);
+    if (runtimeChanged) this._createRuntime(next);
+    this.config = freezeConfig(next);
+    if (next.encryption.enabled && !this.encryptionKey) this.encryptionKey = require('./crypto').generateEncryptionKey();
+    return this;
   }
 
   getConfig() {
-    return { ...this.config };
+    return {
+      ...this.config,
+      encryption: { ...this.config.encryption },
+      cache: { ...this.config.cache },
+      security: { ...this.config.security }
+    };
   }
 
-  // Namespace management
+  setLanguage(language) {
+    if (typeof language !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,35}$/.test(language)) {
+      throw new ValidationError('defaultLanguage must be a valid locale identifier');
+    }
+    this.runtime.setLanguage(language);
+    this.config = freezeConfig({ ...this.config, defaultLanguage: this.runtime.getLanguage() });
+  }
+
+  getLanguage() { return this.runtime.getLanguage(); }
+  getAvailableLanguages() { return this.runtime.getAvailableLanguages(); }
+  refresh(language) { this.runtime.refresh(language); }
+  clearCache(language) { this.runtime.clearCache(language); }
+  has(key, options) { return this.runtime.has(key, options); }
+  subscribe(listener) { return this.runtime.subscribe(listener); }
+  getDiagnostics() { return this.runtime.getDiagnostics(); }
+
   addNamespace(name, translations) {
+    if (!name || !translations || typeof translations !== 'object') throw new ValidationError('Namespace requires a name and translations');
     this.namespaces.set(name, translations);
+    this._addNamespaceToRuntime(name, translations);
   }
-
+  _addNamespaceToRuntime(name, translations, targetRuntime = this.runtime) {
+    for (const [language, data] of Object.entries(translations)) targetRuntime.addResources(language, name === 'default' ? 'default' : name, data);
+  }
   removeNamespace(name) {
+    for (const language of this.runtime.getAvailableLanguages()) this.runtime.removeResources(language, name);
     this.namespaces.delete(name);
   }
+  getNamespace(name) { return this.namespaces.get(name) || null; }
+  listNamespaces() { return [...this.namespaces.keys()]; }
+  addPlugin(plugin) { return this.runtime.addPlugin(plugin); }
+  removePlugin(name) { this.runtime.removePlugin(name); }
 
-  getNamespace(name) {
-    return this.namespaces.get(name) || null;
-  }
+  setEncryptionKey(key) { this.encryptionKey = key; }
+  getEncryptionStatus() { return this.config.encryption.enabled && Boolean(this.encryptionKey); }
+  generateEncryptionKey() { return require('./crypto').generateEncryptionKey(); }
+  encryptData(data) { return require('./crypto').encryptData(data, this.encryptionKey); }
+  decryptData(data) { return require('./crypto').decryptData(data, this.encryptionKey); }
 
-  listNamespaces() {
-    return Array.from(this.namespaces.keys());
-  }
-
-  // Plugin system
-  addPlugin(plugin) {
-    this.plugins.push(plugin);
-  }
-
-  removePlugin(pluginName) {
-    this.plugins = this.plugins.filter(p => p.name !== pluginName);
-  }
-
-  // Performance metrics
   getMetrics() {
-    return { ...this.metrics };
-  }
-
-  resetMetrics() {
-    this.metrics = {
-      totalTranslations: 0,
-      cacheHitRate: 0,
-      averageTranslationTime: 0,
-      encryptionTime: 0,
-      memoryUsage: process.memoryUsage().heapUsed,
-      cacheHits: 0,
-      cacheMisses: 0,
-      cacheEvictions: 0,
-    };
-  }
-
-  getCacheInfo() {
-    const memoryUsage = process.memoryUsage();
-    
     return {
-      entries: this.cache.size,
-      maxEntries: this.config.cache.maxSize,
-      sizeBytes: this.cacheSize,
-      maxMemoryMB: this.config.cache.maxMemoryMB,
-      entrySizeLimit: this.config.cache.entrySizeLimit,
-      hits: this.metrics.cacheHits,
-      misses: this.metrics.cacheMisses,
-      hitRate: this.metrics.cacheHits / (this.metrics.cacheHits + this.metrics.cacheMisses) || 0,
-      evictions: this.metrics.cacheEvictions,
-      memoryUsage: {
-        heapUsedMB: memoryUsage.heapUsed / (1024 * 1024),
-        heapTotalMB: memoryUsage.heapTotal / (1024 * 1024),
-        externalMB: memoryUsage.external / (1024 * 1024) || 0,
-        arrayBuffersMB: memoryUsage.arrayBuffers / (1024 * 1024) || 0,
-        rssMB: memoryUsage.rss / (1024 * 1024)
-      },
-      ttl: this.config.cache.ttl,
-      lastChecked: new Date().toISOString()
+      ...this.metrics,
+      averageTranslationDurationMs: this.metrics.translationCount
+        ? this.metrics.translationDurationMsTotal / this.metrics.translationCount
+        : 0
     };
   }
+  resetMetrics() { this.metrics = { translationCount: 0, translationDurationMsTotal: 0 }; }
+  getCacheInfo() { return this.runtime.getCacheInfo(); }
+  createTypedTranslator() { return { t: this.translate.bind(this), translate: this.translate.bind(this) }; }
+  getTranslationMetadata(key) { return { text: this.runtime.t(key), language: this.getLanguage(), key, params: {}, encrypted: this.getEncryptionStatus() }; }
+  sanitizeTranslation(text) { return String(text ?? ''); }
 
-  clearCache() {
-    this.cache.clear();
+  dispose() {
+    this.unsubscribe?.();
+    this.runtime?.dispose?.();
+    this.listeners.clear();
+    this.namespaces.clear();
+    this.encryptionKey = null;
   }
+  cleanup() { this.dispose(); }
 }
 
-// Global runtime instance
-let runtimeInstance = null;
-
-// Enhanced initialization
 async function initI18nRuntime(options = {}) {
-  if (!runtimeInstance) {
-    runtimeInstance = new I18nEnhancedRuntime();
-  }
-  
-  await runtimeInstance.updateConfig(options);
-  
-  return {
-    t: runtimeInstance.translate.bind(runtimeInstance),
-    translate: runtimeInstance.translate.bind(runtimeInstance),
-    translateEncrypted: runtimeInstance.translateEncrypted.bind(runtimeInstance),
-    translateBatch: runtimeInstance.translateBatch.bind(runtimeInstance),
-    translateBatchEncrypted: runtimeInstance.translateBatchEncrypted.bind(runtimeInstance),
-    
-    setLanguage: async (lang) => {
-      await runtimeInstance.updateConfig({ defaultLanguage: lang });
-    },
-    
-    getLanguage: () => runtimeInstance.config.defaultLanguage,
-    
-    getAvailableLanguages: () => {
-      // This would scan the base directory for available languages
-      return ['en', 'es', 'fr', 'de', 'ja', 'ru', 'zh'];
-    },
-    
-    refresh: async (lang) => {
-      runtimeInstance.cache.clear();
-    },
-    
-    getConfig: () => runtimeInstance.getConfig(),
-    updateConfig: runtimeInstance.updateConfig.bind(runtimeInstance),
-    
-    setEncryptionKey: (key) => {
-      runtimeInstance.encryptionKey = key;
-    },
-    
-    getEncryptionStatus: () => runtimeInstance.config.encryption.enabled && !!runtimeInstance.encryptionKey,
-    
-    encryptData: runtimeInstance.encryptData.bind(runtimeInstance),
-    decryptData: runtimeInstance.decryptData.bind(runtimeInstance),
-    
-    validateTranslationKey: runtimeInstance.validateTranslationKey.bind(runtimeInstance),
-    sanitizeTranslation: runtimeInstance.sanitizeTranslation.bind(runtimeInstance),
-    getTranslationMetadata: (key) => ({
-      text: key,
-      language: runtimeInstance.config.defaultLanguage,
-      key,
-      params: {},
-      encrypted: runtimeInstance.config.encryption.enabled,
-    }),
-    
-    createTypedTranslator: () => ({
-      t: runtimeInstance.translate.bind(runtimeInstance),
-      translate: runtimeInstance.translate.bind(runtimeInstance),
-    }),
-    
-    // Additional methods
-    addNamespace: runtimeInstance.addNamespace.bind(runtimeInstance),
-    removeNamespace: runtimeInstance.removeNamespace.bind(runtimeInstance),
-    getNamespace: runtimeInstance.getNamespace.bind(runtimeInstance),
-    listNamespaces: runtimeInstance.listNamespaces.bind(runtimeInstance),
-    addPlugin: runtimeInstance.addPlugin.bind(runtimeInstance),
-    removePlugin: runtimeInstance.removePlugin.bind(runtimeInstance),
-    getMetrics: runtimeInstance.getMetrics.bind(runtimeInstance),
-    resetMetrics: runtimeInstance.resetMetrics.bind(runtimeInstance),
-  };
+  const runtime = new I18nEnhancedRuntime(options);
+  if (options.encryption?.enabled) await runtime.updateConfig(options);
+  return runtime;
 }
 
-// Backward compatibility
-function translate(key, params, options) {
-  if (!runtimeInstance) {
-    runtimeInstance = new I18nEnhancedRuntime();
-  }
-  return runtimeInstance.translate(key, params, options);
+let defaultRuntime;
+function getDefaultRuntime() {
+  if (!defaultRuntime) defaultRuntime = new I18nEnhancedRuntime();
+  return defaultRuntime;
 }
+const translate = (key, params, options) => getDefaultRuntime().translate(key, params, options);
+const translateBatch = (keys, params, options) => getDefaultRuntime().translateBatch(keys, params, options);
+const translateEncrypted = (key, params, options) => getDefaultRuntime().translateEncrypted(key, params, options);
+const translateBatchEncrypted = (keys, params, options) => getDefaultRuntime().translateBatchEncrypted(keys, params, options);
 
-const t = translate;
-const tTyped = translate;
-
-async function translateBatch(keys, paramsArray, options) {
-  if (!runtimeInstance) {
-    runtimeInstance = new I18nEnhancedRuntime();
-  }
-  return runtimeInstance.translateBatch(keys, paramsArray, options);
-}
-
-async function translateBatchEncrypted(keys, paramsArray, options) {
-  if (!runtimeInstance) {
-    runtimeInstance = new I18nEnhancedRuntime();
-  }
-  return runtimeInstance.translateBatchEncrypted(keys, paramsArray, options);
-}
-
-async function translateEncrypted(key, params, options) {
-  if (!runtimeInstance) {
-    runtimeInstance = new I18nEnhancedRuntime();
-  }
-  return runtimeInstance.translateEncrypted(key, params, options);
-}
-
-// Export for both CommonJS and ES modules
 module.exports = {
   initI18nRuntime,
+  initRuntime: initI18nRuntime,
+  getDefaultRuntime,
   translate,
-  t,
-  tTyped,
+  t: translate,
+  tTyped: translate,
   translateEncrypted,
   translateBatch,
   translateBatchEncrypted,
-  
-  // TypeScript compatibility exports
   I18nEnhancedRuntime,
-  
-  // Encryption utilities
-  generateEncryptionKey: () => {
-    const runtime = new I18nEnhancedRuntime();
-    return runtime.generateEncryptionKey();
-  },
-  
-  // Constants
-  ALGORITHM,
-  KEY_LENGTH,
-  IV_LENGTH,
-  AUTH_TAG_LENGTH,
+  ValidationError,
+  generateEncryptionKey: () => require('./crypto').generateEncryptionKey()
 };
-
-// ES module support
-module.exports.default = {
-  initI18nRuntime,
-  translate,
-  t,
-  tTyped,
-  translateEncrypted,
-  translateBatch,
-  translateBatchEncrypted,
-};
+module.exports.default = module.exports;

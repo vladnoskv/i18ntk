@@ -1,152 +1,142 @@
-# i18ntk Runtime API (v4.5.4)
+# i18ntk Runtime API (v5.1.0)
 
-Use the runtime API when your application needs to read translation JSON files directly at runtime.
+i18ntk 5.1 provides one runtime model with explicit adapters for each environment. Runtime instances are isolated: they own their active locale, subscriptions, plugins, diagnostics, and loaded resources, and they never install process signal or exception handlers.
 
-## Install
+## Choose the right entry point
 
-```bash
-npm install i18ntk
-```
+| Entry point | Runs in | Does not do |
+| --- | --- | --- |
+| `i18ntk/runtime/node` | Node.js servers, Next.js Node Server Components and Route Handlers, Express, Fastify, Electron main process, Bun with Node compatibility | Browser, React Native, or Edge bundles; it uses Node filesystem APIs |
+| `i18ntk/runtime/core` | Browsers, Edge workers, React Native/Expo, Deno, Bun, Node, and framework-independent bundles | Read files or fetch resources by itself |
+| `i18ntk/runtime/static` | The same environments as core, with imported/bundled locale objects | Discover files at runtime |
+| `i18ntk/runtime/fetch` | Browsers, Edge workers, React Native, and servers with a Fetch API | Access local files; the caller supplies the URL pattern and deployment policy |
+| `i18ntk/runtime/react` | React 18+ and React 19 Client Components, using an injected React package and a preloaded runtime | Load during render or run as a hook in React Server Components |
+| `i18ntk/runtime/crypto` | Node.js only, when encrypted translation output is explicitly required | Ship in the universal/browser core |
+| `i18ntk/runtime/enhanced` | Existing Node.js integrations during the 5.x compatibility period | Provide a separate implementation; it now delegates to the unified runtime and is deprecated |
 
-## Import
+The conditional `i18ntk/runtime` export selects the Node adapter under Node conditions and the universal core under browser/default conditions. Prefer an explicit subpath in framework configuration so the intended environment is obvious.
 
-CommonJS:
+Rust, Go, Python, PHP, Ruby, Java, and other non-JavaScript applications can be scanned and validated by the i18ntk CLI, but they cannot execute this JavaScript runtime natively. Use their framework's i18n runtime, consume generated JSON through a language-specific adapter, or run i18ntk in a JavaScript sidecar. WebAssembly alone does not provide Node filesystem APIs.
 
-```js
-const runtime = require('i18ntk/runtime');
-```
-
-## Exported API
-
-- `initRuntime(options)`
-- `t(key, params?)`
-- `translate(key, params?)`
-- `translateBatch(keys, params?, options?)`
-- `setLanguage(language)`
-- `getLanguage()`
-- `getAvailableLanguages()`
-- `clearCache(language?)`
-- `getCacheInfo()`
-- `refresh(language?)`
-
-## Initialization
+## Node filesystem runtime
 
 ```js
-const i18n = runtime.initRuntime({
-  baseDir: './locales',
-  language: 'en',
-  fallbackLanguage: 'en',
-  keySeparator: '.',
-  preload: true
-});
-```
+const { initRuntime } = require('i18ntk/runtime/node');
 
-Supported options:
-
-- `baseDir`: explicit locale base directory
-- `language`: active language
-- `fallbackLanguage`: fallback language for missing keys
-- `keySeparator`: nested key separator, defaults to `.`
-- `preload`: pre-cache active and fallback language files
-- `lazy`: defer locale file loading until first key access
-
-Production guidance:
-
-- Prefer the instance returned by `initRuntime()` in application code. Module-level helpers such as `runtime.t()` are kept for compatibility and use the first initialized runtime configuration.
-- Pass an explicit absolute or app-root-relative `baseDir` in production. Falling back to config/env/CWD is useful for tools, but less predictable in bundled or serverless deployments.
-- Use `lazy: true` for large modular locale folders when memory matters. The runtime still scans JSON files to build a capped key-to-file manifest, then loads matching files on demand.
-- Use `preload: true` without `lazy` when the locale set is small or when first-request latency matters more than memory.
-- Call `refresh(language)` after locale files are changed on disk. It clears cached translations, lazy manifests, and loaded-file markers for that language.
-- Use per-call language overrides when rendering one-off alternate-language strings: `i18n.t('common.hello', {}, { language: 'de' })`.
-- Use `translateBatch()` for small groups of labels and `clearCache()` / `getCacheInfo()` for cache maintenance and diagnostics.
-
-## Example Usage
-
-```js
-const runtime = require('i18ntk/runtime');
-
-const i18n = runtime.initRuntime({
-  baseDir: './locales',
-  language: 'en',
+const i18n = initRuntime({
+  projectRoot: process.cwd(),
+  localeDir: 'locales',
+  language: 'en-GB',
   fallbackLanguage: 'en',
   preload: true
 });
 
-console.log(i18n.t('common.hello'));
-console.log(i18n.translate('menu.home'));
-
-i18n.setLanguage('fr');
-console.log(i18n.getLanguage());
-console.log(i18n.getAvailableLanguages());
-i18n.refresh('fr');
+console.log(i18n.t('common.hello', { name: 'Ada' }));
 ```
 
-Per-call language overrides do not mutate the active runtime language:
+`baseDir` may be absolute or relative to the current working directory. `projectRoot + localeDir` resolves a relative locale directory against the project root, which is safer in monorepos and server processes whose working directory may differ. Both `locales/en.json` and `locales/en/common.json` layouts are supported.
+
+Each `initRuntime()` call creates a new instance and never changes module-level helpers. Legacy module helpers use a separate default runtime; configure it deliberately with `initDefaultRuntime()` if required. Request-driven servers should use an instance or pass `language` per call instead of changing shared mutable locale state.
+
+Node lazy mode indexes namespace filenames without parsing every JSON file. A matching namespace is read on first access; an unconventional layout is read once as a safe fallback. Use `getDiagnostics()` to distinguish malformed/unreadable files from missing keys.
+
+## Universal and static resources
+
+The universal core imports no `fs`, `path`, `crypto`, `process`, `Buffer`, or EventEmitter APIs. Translation lookup is synchronous after resources have loaded.
 
 ```js
-console.log(i18n.translate('common.hello', {}, { language: 'de' }));
-console.log(i18n.getLanguage()); // still the configured active language
+const { createRuntime } = require('i18ntk/runtime/static');
+
+const i18n = createRuntime({
+  locale: 'fr-CA',
+  fallbackLocale: 'en',
+  resources: {
+    fr: { common: { save: 'Enregistrer' } },
+    en: { common: { save: 'Save', cancel: 'Cancel' } }
+  }
+});
+
+i18n.t('save', {}, { namespace: 'common' });
 ```
 
-Batch translation supports shared params or one params object per key:
+Locale fallback follows exact tag, parent tags, then configured fallback: `zh-Hant-HK → zh-Hant → zh → en`. Tags are canonicalized with `Intl.getCanonicalLocales()` when available. `has()` tracks presence independently, so a valid translation equal to its key is not treated as missing.
+
+## Fetch and Edge loading
 
 ```js
-const labels = i18n.translateBatch(
-  ['common.hello', 'common.goodbye'],
-  [{ name: 'Ada' }, { name: 'Lin' }]
-);
+const { initRuntime, createFetchLoader } = require('i18ntk/runtime/fetch');
+
+const i18n = await initRuntime({
+  locale: 'de',
+  fallbackLocale: 'en',
+  namespaces: ['common', 'checkout'],
+  loader: createFetchLoader({ url: '/locales/{locale}/{namespace}.json' })
+});
 ```
 
-Use cache helpers after changing locale files on disk or for lightweight diagnostics:
+Concurrent requests for the same locale and namespace set are deduplicated. Loading is explicit and asynchronous; `t()` never starts network I/O. Configure authentication, caching, integrity, and trusted origins at the fetch/deployment layer.
+
+## React, Server Components, and hydration
+
+Server Components should use `i18ntk/runtime/node` in Node routes or `i18ntk/runtime/static`/`fetch` in Edge routes. Resolve the locale per request and preload route namespaces before rendering. Do not call `setLocale()` on a runtime shared across requests.
+
+Serialize only the resources needed by interactive client islands. Create the browser runtime from that exact snapshot before hydration:
 
 ```js
-i18n.clearCache('fr');
-console.log(i18n.getCacheInfo());
+// Client Component module
+import React from 'react';
+import { createRuntime } from 'i18ntk/runtime/static';
+import { createReactBindings } from 'i18ntk/runtime/react';
+
+const { I18nProvider, useTranslation } = createReactBindings(React);
+const runtime = createRuntime({ locale, fallbackLocale: 'en', resources: serverResources });
+
+export function AppI18nProvider({ children }) {
+  return React.createElement(I18nProvider, { runtime }, children);
+}
 ```
 
-## Behavior
+The bindings use `useSyncExternalStore`, so locale/resource updates are safe with concurrent React rendering. Server and client must use the same locale, namespaces, resource version, and fallback settings to avoid hydration mismatches. Loading or creating a runtime during render is unsupported.
 
-- The runtime reads JSON files only.
-- Missing keys fall back to the fallback language when available.
-- If a key is still missing, the key string is returned.
-- Interpolation supports `{{name}}` and `{name}`.
-- Each `initRuntime()` call returns an independent runtime instance with its own language, fallback language, base directory, and cache.
-- Module-level helpers such as `runtime.t()` remain available for compatibility and use the first initialized runtime configuration. Prefer the returned instance for new code.
-- Unsafe language names such as `../secret` are rejected before any locale path is resolved.
-- When `lazy: true`, stale or incomplete manifests fall back to safe eager loading instead of throwing.
-- Valid JSON is parsed before comment-stripping fallback, so translation text such as `/* token */` is preserved.
-- `i18ntk/runtime/enhanced` remains available as a legacy public subpath for projects already using the async/encryption-oriented API. New production sites should prefer `i18ntk/runtime` unless they explicitly need that legacy API.
+Vue/Nuxt, Svelte/SvelteKit, Angular, Astro, Remix, and other frameworks should inject the universal runtime into their own request/application context and subscribe to changes using `subscribe()`. SSR integrations must keep mutable locale selection request-scoped. React Native and Expo should use static/imported resources or a platform fetch/asset loader; the core does not require AsyncStorage.
 
-## Directory Layout
+## Resources, plugins, and lifecycle
 
-Both locale layouts are supported:
+```js
+const unsubscribe = i18n.subscribe(event => instrumentation.record(event));
+i18n.addResources('en', 'account', { title: 'Account' });
+const removePlugin = i18n.addPlugin({
+  name: 'trim',
+  transform: value => value.trim()
+});
 
-```text
-locales/
-  en/common.json
-  fr/common.json
+unsubscribe();
+removePlugin();
+i18n.dispose();
 ```
 
-and:
+Plugins are synchronous and ordered. Plugin and listener failures are isolated from translation and recorded as bounded diagnostics. `dispose()` is idempotent, prevents an in-flight loader from repopulating resources, and clears resources, listeners, plugins, and load tracking; it creates no global process listeners or timers.
 
-```text
-locales/
-  en.json
-  fr.json
-```
+Formatting helpers use the host's `Intl.NumberFormat`, `Intl.DateTimeFormat`, `Intl.RelativeTimeFormat`, `Intl.ListFormat`, and `Intl.PluralRules`. The runtime returns plain translation text and does not HTML-escape it. React, Vue, template engines, URL builders, and rich-text renderers must escape for their own output context. Raw HTML execution is intentionally not provided.
 
-## Base Directory Resolution
+## Missing keys and load failures
 
-If `baseDir` is not provided, runtime uses:
+`missingKeyPolicy` supports `key` (default), `empty`, `throw`, or a callback. `loadErrorPolicy` supports `throw` (universal initialization default) or `report-and-fallback`. `getDiagnostics()` returns bounded structured events without exposing Node absolute paths.
 
-1. `I18NTK_RUNTIME_DIR`
-2. `I18NTK_I18N_DIR`
-3. `I18NTK_SOURCE_DIR`
-4. `.i18ntk-config` (`i18nDir` or `sourceDir`)
-5. `./locales` relative to the project root
+Use `has(key, options)` when presence matters. Do not infer presence by comparing `t(key)` with the key string.
 
-## Notes
+## Enhanced migration
 
-- Runtime is zero dependency.
-- Runtime is framework agnostic.
-- Use the CLI for analysis, validation, and completion workflows.
+`i18ntk/runtime/enhanced` remains a compatibility wrapper for 5.x and will be removed in the next major release. It no longer installs process handlers, creates timers, injects sample English strings, shares `initI18nRuntime()` state, or HTML-escapes output. Partial nested configuration updates preserve defaults, metrics report real counts and derived averages, and encryption is loaded only from the explicit Node crypto adapter.
+
+Migration mapping:
+
+| Legacy enhanced API | Unified API |
+| --- | --- |
+| `initI18nRuntime()` | `initRuntime()` for Node, or `createRuntime()`/async loader initialization elsewhere |
+| `defaultLanguage` | `language` / `locale` |
+| `addNamespace(name, resources)` | `addResources(locale, name, resources)` |
+| `getAvailableLanguages()` | `getAvailableLanguages()` (Node) or `listLocales()` (universal) |
+| `cleanup()` | `dispose()` |
+
+The runtime is zero-dependency. The React adapter uses dependency injection and does not install React; applications provide React 18 or newer.

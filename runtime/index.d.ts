@@ -1,28 +1,34 @@
-// runtime/index.d.ts
-// Public runtime API types for i18ntk
+export type TranslateParams = Record<string, unknown>;
+export type TranslateBatchParams = TranslateParams | TranslateParams[];
+export type MissingKeyPolicy = 'key' | 'empty' | 'throw' | ((event: RuntimeEvent) => string);
+
+export interface TranslationOptions {
+  language?: string;
+  locale?: string;
+  fallbackLanguage?: string;
+  fallbackLocale?: string;
+  namespace?: string;
+  missingKeyPolicy?: MissingKeyPolicy;
+}
 
 export interface InitOptions {
-  /** Locale base directory. Defaults to config/env resolution when omitted. */
+  /** Node locale root. Prefer projectRoot + localeDir when the root is relative. */
   baseDir?: string;
+  localeDir?: string;
+  projectRoot?: string;
   language?: string;
+  targetLocale?: string;
   fallbackLanguage?: string;
+  sourceLocale?: string;
   keySeparator?: string;
-  /** Eagerly cache the active and fallback languages during initialization. */
   preload?: boolean;
-  /** Build a key manifest and load matching JSON files on first key access. */
   lazy?: boolean;
+  missingKeyPolicy?: MissingKeyPolicy;
+  loadErrorPolicy?: 'report-and-fallback' | 'throw';
 }
 
-export type TranslateParams = Record<string, unknown>;
-export interface TranslationOptions {
-  /** Translate this call with a different language without mutating runtime state. */
-  language?: string;
-  /** Fallback language for this call. */
-  fallbackLanguage?: string;
-}
-export type TranslationValue = string | number | boolean | null | object | unknown[];
-export type TranslateBatchParams = TranslateParams | TranslateParams[];
-
+export interface RuntimeEvent { type: string; [key: string]: unknown; }
+export interface RuntimeDiagnostic { category?: string; type?: string; [key: string]: unknown; }
 export interface RuntimeCacheInfo {
   language: string;
   fallbackLanguage: string;
@@ -32,29 +38,43 @@ export interface RuntimeCacheInfo {
   loadedFileCount: number;
   eagerLoadedLanguages: string[];
 }
-
-export interface RuntimeInstance {
-  t(key: string, params?: TranslateParams, options?: TranslationOptions): TranslationValue;
-  translate(key: string, params?: TranslateParams, options?: TranslationOptions): TranslationValue;
-  translateBatch(keys: string[], params?: TranslateBatchParams, options?: TranslationOptions): TranslationValue[];
-  setLanguage(lang: string): void;
-  getLanguage(): string;
-  getAvailableLanguages(): string[];
-  clearCache(lang?: string): void;
-  getCacheInfo(): RuntimeCacheInfo;
-  refresh(lang?: string): void;
+export interface TranslationPlugin {
+  name: string;
+  transform?(value: string, params: TranslateParams, options: TranslationOptions): string;
 }
 
-export function translate(key: string, params?: TranslateParams, options?: TranslationOptions): TranslationValue;
-export const t: typeof translate;
-export function translateBatch(keys: string[], params?: TranslateBatchParams, options?: TranslationOptions): TranslationValue[];
+export interface RuntimeInstance {
+  t(key: string, params?: TranslateParams, options?: TranslationOptions): string;
+  translate(key: string, params?: TranslateParams, options?: TranslationOptions): string;
+  translateBatch(keys: string[], params?: TranslateBatchParams, options?: TranslationOptions): string[];
+  has(key: string, options?: TranslationOptions): boolean;
+  setLanguage(locale: string): void;
+  getLanguage(): string;
+  getAvailableLanguages(): string[];
+  addResources(locale: string, namespace: string, data: Record<string, unknown>): void;
+  removeResources(locale: string, namespace?: string): void;
+  subscribe(listener: (event: RuntimeEvent) => void): () => void;
+  addPlugin(plugin: TranslationPlugin): () => void;
+  removePlugin(name: string): void;
+  getDiagnostics(): RuntimeDiagnostic[];
+  clearCache(locale?: string): void;
+  getCacheInfo(): RuntimeCacheInfo;
+  refresh(locale?: string): void;
+  dispose(): void;
+}
 
+export class RuntimeValidationError extends Error { code: 'I18NTK_RUNTIME_VALIDATION'; details: Record<string, unknown>; }
 export function initRuntime(options?: InitOptions): RuntimeInstance;
-
-export function setLanguage(lang: string): void;
+export function initDefaultRuntime(options?: InitOptions): RuntimeInstance;
+export function createRuntime(options?: import('./core').RuntimeOptions): import('./core').UniversalRuntime;
+export const createUniversalRuntime: typeof createRuntime;
+export function translate(key: string, params?: TranslateParams, options?: TranslationOptions): string;
+export const t: typeof translate;
+export function translateBatch(keys: string[], params?: TranslateBatchParams, options?: TranslationOptions): string[];
+export function setLanguage(locale: string): void;
 export function getLanguage(): string;
 export function getAvailableLanguages(): string[];
-export function clearCache(lang?: string): void;
+export function clearCache(locale?: string): void;
 export function getCacheInfo(): RuntimeCacheInfo;
-export function refresh(lang?: string): void;
+export function refresh(locale?: string): void;
 export function loadKeyManifest(baseDir?: string): Map<string, string>;

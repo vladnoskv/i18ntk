@@ -1,6 +1,6 @@
 {
   "name": "i18ntk",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "i18n Tool Kit - Zero-dependency internationalization toolkit for setup, scanning, analysis, validation, auto translation, fixing, reporting, and runtime translation loading.",
   "readmeFilename": "README.md",
   "keywords": [
@@ -56,15 +56,40 @@
     ".": "./main/manage/index.js",
     "./runtime": {
       "types": "./runtime/index.d.ts",
+      "browser": "./runtime/core.js",
+      "node": "./runtime/index.js",
       "require": "./runtime/index.js",
-      "default": "./runtime/index.js"
+      "default": "./runtime/core.js"
     },
     "./runtime/enhanced": {
       "types": "./runtime/enhanced.d.ts",
       "require": "./runtime/enhanced.js",
       "default": "./runtime/enhanced.js"
     },
-    "./runtime/*": "./runtime/*",
+    "./runtime/core": {
+      "types": "./runtime/core.d.ts",
+      "default": "./runtime/core.js"
+    },
+    "./runtime/node": {
+      "types": "./runtime/node.d.ts",
+      "default": "./runtime/node.js"
+    },
+    "./runtime/static": {
+      "types": "./runtime/static.d.ts",
+      "default": "./runtime/static.js"
+    },
+    "./runtime/fetch": {
+      "types": "./runtime/fetch.d.ts",
+      "default": "./runtime/fetch.js"
+    },
+    "./runtime/react": {
+      "types": "./runtime/react.d.ts",
+      "default": "./runtime/react.js"
+    },
+    "./runtime/crypto": {
+      "types": "./runtime/crypto.d.ts",
+      "default": "./runtime/crypto.js"
+    },
     "./report": "./utils/report-model.js",
     "./license-marker": "./utils/license-marker.js",
     "./ui-locales/*": "./ui-locales/*",
@@ -181,6 +206,13 @@
     "docs/reliability.md",
     "docs/migration-v4-to-v5.md",
     "docs/framework-templates.md",
+    "docs/getting-started.md",
+    "docs/api/CONFIGURATION.md",
+    "docs/api/API_REFERENCE.md",
+    "docs/runtime.md",
+    "docs/auto-translate.md",
+    "docs/scanner-guide.md",
+    "docs/environment-variables.md",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
     "FUNDING.md",
@@ -196,14 +228,23 @@
   },
   "preferGlobal": true,
   "versionInfo": {
-    "version": "5.0.0",
-    "releaseDate": "07/11/2026",
-    "lastUpdated": "07/11/2026",
+    "version": "5.1.0",
+    "releaseDate": "07/19/2026",
+    "lastUpdated": "07/19/2026",
     "maintainer": "Vlad Noskov",
     "changelog": "./CHANGELOG.md",
     "documentation": "./README.md",
     "apiReference": "./docs/api/API_REFERENCE.md",
     "majorChanges": [
+      "UNIFIED RUNTIME: Added a Node-free core with explicit Node filesystem, static, fetch, React, and optional crypto adapters for SSR, Edge, browser, React Native, and Node applications.",
+      "RUNTIME SAFETY: Enhanced is now a deprecated compatibility wrapper with isolated instances, no process handlers or timers, no built-in sample strings, deep configuration merging, real locale discovery, structured diagnostics, and correct metrics.",
+      "RUNTIME PERFORMANCE: Node lazy mode indexes namespace filenames without parsing every locale file up front, while universal loaders deduplicate concurrent asynchronous loads.",
+      "FIXER PATHS: --code-dir and --locales-dir now remain separate, so fixer scans and changes locale files instead of application source folders.",
+      "FIXER AUTOMATION: --json and bounded --indent output are machine-readable, requested languages and markers are respected, and invalid locale layouts fail with a non-zero exit.",
+      "LOCALE LAYOUTS: Fixer now handles directory, monolith, nested namespace, and regional locale layouts without treating ordinary source folders as languages.",
+      "VALIDATION ACCURACY: Translation percentages count translatable strings consistently, including strings in arrays, while valid numbers, booleans, and nulls no longer lower completion.",
+      "CONFIGURATION DEFAULTS: Minimal documented configurations can omit outputDir and safely use ./i18ntk-reports, including after configuration upgrades.",
+      "PACKAGE CONTENTS: Every README documentation link is shipped, duplicate nested package trees are prohibited, and packed-install verification checks public exports and documentation targets.",
       "BUG FIX: LANGUAGE_CONFIG expanded from 21 to 61 languages with comprehensive ISO 639-1 coverage. All common languages now display their native names in init output instead of 'Unknown'.",
       "BUG FIX: defaultLanguages no longer silently truncates to 5 when the config value is an empty array or null. A validation guard preserves the caller's configured list.",
       "BUG FIX: Auto Translate now exits 0 on success even when residual untranslated values exist (placeholders, branded terms, short labels). Only real failures (0 translated with >0 total) now produce non-zero exit codes.",
@@ -221,7 +262,7 @@
       "PATCH: Language selection prompts now render their numeric range dynamically from the installed UI locale count, preventing stale bounds during future locale expansion."
     ],
     "breakingChanges": [],
-    "nextVersion": "5.0.1",
+    "nextVersion": "5.1.1",
     "supportedNodeVersions": ">=16.0.0",
     "supportedFrameworks": {
       "react-i18next": ">=11.0.0",
@@ -250,7 +291,7 @@
       "fluent-rs": ">=0.16.0",
       "gettext-rs": ">=0.7.0"
     },
-    "supportPolicy": "Versions earlier than 5.0.0 use different licensing or may lack current reliability controls. Upgrade to 5.0.0 or newer.",
+    "supportPolicy": "Versions earlier than 5.1.0 use different licensing or may lack current reliability controls. Upgrade to 5.1.0 or newer.",
     "deprecations": [
       "4.3.0",
       "4.3.1",
@@ -258,7 +299,7 @@
       "4.3.3",
       "4.7.2"
     ],
-    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). i18ntk 4.7.2 has a missing-module bug. Upgrade to i18ntk@5.0.0 or newer: npm install -g i18ntk@latest",
+    "deprecationMessage": "i18ntk 4.3.x and earlier have known security vulnerabilities (path traversal, JSON DoS). i18ntk 4.7.2 has a missing-module bug. Upgrade to i18ntk@5.1.0 or newer: npm install -g i18ntk@latest",
     "securityAdvisories": [
       "GHSA-i18ntk-4.3.x-path-traversal: Backup command accepted arbitrary paths without validation (fixed in 4.4.1)",
       "GHSA-i18ntk-4.3.x-json-dos: Deeply nested JSON files could cause denial of service (fixed in 4.4.1)"

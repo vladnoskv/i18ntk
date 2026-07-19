@@ -117,8 +117,10 @@ class ValidateCommand {
                 }
             }
 
-            displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
-            this.pathsDisplayed = true;
+            if (!args.json) {
+                displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
+                this.pathsDisplayed = true;
+            }
             this.initialized = true;
 
             SecurityUtils.logSecurityEvent(
@@ -248,11 +250,12 @@ class ValidateCommand {
     getAllKeys(obj, prefix = '') {
         const keys = new Set();
 
-        for (const [key, value] of Object.entries(obj)) {
+        const entries = Array.isArray(obj) ? obj.entries() : Object.entries(obj || {});
+        for (const [key, value] of entries) {
             const fullKey = prefix ? `${prefix}.${key}` : key;
             keys.add(fullKey);
 
-            if (value && typeof value === 'object' && !Array.isArray(value)) {
+            if (value && typeof value === 'object') {
                 const nestedKeys = this.getAllKeys(value, fullKey);
                 nestedKeys.forEach(k => keys.add(k));
             }
@@ -478,6 +481,13 @@ class ValidateCommand {
         return { totalKeys, translatedKeys, issues };
     }
 
+    countTranslatableLeaves(value) {
+        if (typeof value === 'string') return 1;
+        if (!value || typeof value !== 'object') return 0;
+        return (Array.isArray(value) ? value : Object.values(value))
+            .reduce((total, child) => total + this.countTranslatableLeaves(child), 0);
+    }
+
     // Validate a single language
     async validateLanguage(language) {
         try {
@@ -586,6 +596,7 @@ class ValidateCommand {
                 validation.summary.validFiles++;
                 validation.summary.totalKeys += translations.totalKeys;
                 validation.summary.translatedKeys += translations.translatedKeys;
+                validation.summary.sourceTotalKeys = (validation.summary.sourceTotalKeys || 0) + this.countTranslatableLeaves(sourceContent);
 
                 if (!structural.isConsistent) {
                     validation.summary.structuralIssues.push({
@@ -599,8 +610,9 @@ class ValidateCommand {
             }
 
             // Calculate completion percentage
-            validation.summary.percentage = validation.summary.totalKeys > 0
-                ? Math.round((validation.summary.translatedKeys / validation.summary.totalKeys) * 100)
+            const referenceTotal = validation.summary.sourceTotalKeys || validation.summary.totalKeys;
+            validation.summary.percentage = referenceTotal > 0
+                ? Math.min(100, Math.round((validation.summary.translatedKeys / referenceTotal) * 100))
                 : 0;
 
             return validation;
@@ -1014,8 +1026,10 @@ class ValidateCommand {
         }
         const execute = async () => {
 
-            console.log('\n' + t('validate.startingValidationProcess'));
-            this.validationBannerDisplayed = true;
+            if (!args.json) {
+                console.log('\n' + t('validate.startingValidationProcess'));
+                this.validationBannerDisplayed = true;
+            }
             SecurityUtils.logSecurityEvent(
                 t('validate.runStarted'),
                 'info',
@@ -1024,9 +1038,9 @@ class ValidateCommand {
 
             const result = await this.validate();
 
-            if (result.success) {
+            if (!args.json && result.success) {
                 console.log(t('validate.validationProcessCompletedSuccessfully'));
-            } else {
+            } else if (!args.json) {
                 console.log('❌ Validation failed.');
             }
             SecurityUtils.logSecurityEvent(

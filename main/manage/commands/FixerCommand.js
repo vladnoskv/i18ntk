@@ -16,6 +16,7 @@ const { getUnifiedConfig, parseCommonArgs, displayHelp } = require('../../../uti
 const JsonOutput = require('../../../utils/json-output');
 const SetupEnforcer = require('../../../utils/setup-enforcer');
 const { scanEnglishPlaceholders } = require('../../../utils/english-placeholder-checker');
+const { discoverLocaleFiles, isLocaleName, normalizeLocale } = require('../../../utils/locale-discovery');
 
 class FixerCommand {
     constructor(config = {}, ui = null) {
@@ -27,6 +28,8 @@ class FixerCommand {
 
         // Initialize fixer properties
         this.sourceDir = null;
+        this.codeDir = null;
+        this.localesDir = null;
         this.outputDir = null;
         this.backupDir = null;
         this.dryRun = false;
@@ -79,13 +82,21 @@ class FixerCommand {
             const uiLanguage = (this.config && this.config.uiLanguage) || 'en';
             loadTranslations(uiLanguage, path.resolve(__dirname, '../../../ui-locales'));
 
-            this.sourceDir = this.config.sourceDir;
+            const providedLocaleDir = args.i18nDir || (!args.codeDir && args.sourceDir ? args.sourceDir : null);
+            this.codeDir = path.resolve(args.codeDir || this.config.codeDir || this.config.sourceDir);
+            this.localesDir = path.resolve(providedLocaleDir || this.config.localesDir || this.config.i18nDir || this.config.sourceDir);
+            // sourceDir remains an internal compatibility alias for the locale
+            // root used by older integrations and direct FixerCommand callers.
+            this.sourceDir = this.localesDir;
             this.outputDir = this.config.outputDir;
             this.backupDir = path.resolve(this.config.backup?.location || './i18ntk-backups', 'fixer');
 
-            // Validate source directory exists
-            const { validateSourceDir } = require('../../../utils/config-helper');
-            validateSourceDir(this.sourceDir, 'i18ntk-fixer');
+            const localeStat = SecurityUtils.safeStatSync(this.localesDir, process.cwd());
+            if (!localeStat || !localeStat.isDirectory()) {
+                const error = new Error(`Locale directory not found: ${this.localesDir}`);
+                error.exitCode = 2;
+                throw error;
+            }
 
         } catch (error) {
             console.error(`Fatal fixer error: ${error.message}`);
@@ -133,52 +144,36 @@ class FixerCommand {
     // Get all available languages
     getAvailableLanguages() {
         try {
-            const items = SecurityUtils.safeReaddirSync(this.sourceDir, process.cwd(), { withFileTypes: true });
-            if (!items) {
-                console.error('Error reading source directory: Unable to access directory');
-                return [];
+            const sourceLocale = normalizeLocale(this.config.sourceLanguage);
+            const byLocale = new Map();
+            for (const entry of discoverLocaleFiles(this.sourceDir, { excludeDirs: this.config.excludeDirs })) {
+                if (entry.locale === sourceLocale || !isLocaleName(entry.displayLocale)) continue;
+                if (!byLocale.has(entry.locale)) byLocale.set(entry.locale, entry.displayLocale);
             }
-
-            const languages = [];
-
-            // Check for directory-based structure
-            const directories = items
-                .filter(item => item.isDirectory())
-                .map(item => item.name)
-                .filter(name =>
-                    name !== 'node_modules' &&
-                    !name.startsWith('.') &&
-                    name !== this.config.sourceLanguage &&
-                    !this.isExcludedLanguageDirectory(name)
-                );
-
-            // Check for monolith files (language.json files)
-            const files = items
-                .filter(item => item.isFile() && item.name.endsWith('.json'))
-                .map(item => item.name);
-
-            // Add directories as languages
-            languages.push(...directories);
-
-            // Add monolith files as languages (without .json extension)
-            const monolithLanguages = files
-                .map(file => file.replace('.json', ''))
-                .filter(lang =>
-                    !languages.includes(lang) &&
-                    lang !== this.config.sourceLanguage &&
-                    !this.isExcludedLanguageDirectory(lang)
-                );
-            languages.push(...monolithLanguages);
-
-            return [...new Set(languages)].sort();
+            return [...byLocale.values()].sort((a, b) => a.localeCompare(b));
         } catch (error) {
-            console.error('Error reading source directory:', error.message);
             return [];
         }
     }
 
+    getLanguageFileEntries(language) {
+        const wantedLocale = normalizeLocale(language);
+        return discoverLocaleFiles(this.sourceDir, { excludeDirs: this.config.excludeDirs })
+            .filter(entry => entry.locale === wantedLocale)
+            .map(entry => {
+                const logicalName = entry.type === 'direct'
+                    ? 'default'
+                    : path.relative(path.join(this.sourceDir, entry.displayLocale), entry.filePath).replace(/\\/g, '/');
+                return { ...entry, logicalName };
+            });
+    }
+
     // Get all JSON files from a language directory
     getLanguageFiles(language) {
+        const discovered = this.getLanguageFileEntries(language);
+        if (discovered.length > 0) {
+            return discovered.map(entry => entry.type === 'direct' ? path.basename(entry.filePath) : entry.logicalName);
+        }
         if (!this.sourceDir) {
             console.warn('Source directory not set');
             return [];
@@ -259,11 +254,11 @@ class FixerCommand {
 
         for (const [key, value] of Object.entries(obj)) {
             const fullKey = prefix ? `${prefix}.${key}` : key;
-            keys.add(fullKey);
-
             if (value && typeof value === 'object' && !Array.isArray(value)) {
                 const nestedKeys = this.getAllKeys(value, fullKey);
                 nestedKeys.forEach(k => keys.add(k));
+            } else {
+                keys.add(fullKey);
             }
         }
 
@@ -330,12 +325,15 @@ class FixerCommand {
             const languages = this.getAvailableLanguages();
             languages.push(this.config.sourceLanguage); // Include source language
 
-            for (const language of languages) {
-                const languageFiles = this.getLanguageFiles(language);
+            for (const language of [...new Set(languages)]) {
+                const languageFiles = this.getLanguageFileEntries(language);
 
-                for (const fileName of languageFiles) {
-                    const sourcePath = path.join(this.sourceDir, language, fileName);
-                    const backupPath = path.join(this.backupDir, language, fileName);
+                for (const entry of languageFiles) {
+                    const sourcePath = entry.filePath;
+                    const backupRelativePath = entry.type === 'direct'
+                        ? path.basename(entry.filePath)
+                        : path.join(entry.displayLocale, entry.logicalName);
+                    const backupPath = path.join(this.backupDir, backupRelativePath);
 
                     // Ensure backup subdirectory exists
                     const backupSubDir = path.dirname(backupPath);
@@ -397,15 +395,14 @@ class FixerCommand {
     // Analyze translation issues for fixing
     analyzeIssues(language, fileName) {
         const issues = [];
-        const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
-        const targetFiles = this.getLanguageFiles(language);
+        const sourceEntry = this.getLanguageFileEntries(this.config.sourceLanguage)
+            .find(entry => entry.logicalName === fileName);
+        const targetEntry = this.getLanguageFileEntries(language)
+            .find(entry => entry.logicalName === sourceEntry?.logicalName);
+        if (!sourceEntry || !targetEntry) return issues;
 
-        if (!sourceFiles.includes(fileName) || !targetFiles.includes(fileName)) {
-            return issues;
-        }
-
-        const sourceFilePath = path.join(this.sourceDir, this.config.sourceLanguage, fileName);
-        const targetFilePath = path.join(this.sourceDir, language, fileName);
+        const sourceFilePath = sourceEntry.filePath;
+        const targetFilePath = targetEntry.filePath;
 
         try {
             const sourceContent = SecurityUtils.safeReadFileSync(sourceFilePath, this.sourceDir, 'utf8');
@@ -474,9 +471,10 @@ class FixerCommand {
             fixedIssues: 0
         };
 
-        const sourceFiles = this.getLanguageFiles(this.config.sourceLanguage);
+        const sourceFiles = this.getLanguageFileEntries(this.config.sourceLanguage);
 
-        for (const fileName of sourceFiles) {
+        for (const sourceEntry of sourceFiles) {
+            const fileName = sourceEntry.logicalName;
             const issues = this.analyzeIssues(language, fileName);
 
             if (issues.length > 0) {
@@ -489,9 +487,12 @@ class FixerCommand {
 
                 if (!this.dryRun) {
                     // Apply fixes
-                    const targetFilePath = path.join(this.sourceDir, language, fileName);
+                    const targetEntry = this.getLanguageFileEntries(language)
+                        .find(entry => entry.logicalName === fileName);
+                    const targetFilePath = targetEntry?.filePath;
 
                     try {
+                        if (!targetFilePath) continue;
                         const targetContent = SecurityUtils.safeReadFileSync(targetFilePath, this.sourceDir, 'utf8');
                         if (!targetContent) continue;
 
@@ -577,6 +578,22 @@ class FixerCommand {
             // Set options from args
             this.dryRun = args.dryRun || false;
             this.force = args.force || false;
+            if (args.markers?.length) {
+                this.config.notTranslatedMarkers = args.markers;
+                this.config.notTranslatedMarker = args.markers[0];
+            }
+
+            const sourceFiles = this.getLanguageFileEntries(this.config.sourceLanguage);
+            if (sourceFiles.length === 0) {
+                const error = `No JSON locale files found for source locale '${this.config.sourceLanguage}' in ${this.sourceDir}.`;
+                if (args.json) {
+                    jsonOutput.setStatus('error', error);
+                    console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent ?? 2));
+                } else {
+                    console.error(error);
+                }
+                return { success: false, error };
+            }
 
             const placeholderCheck = this.checkEnglishPlaceholders({ print: !args.json });
             if (args.checkPlaceholders) {
@@ -591,7 +608,7 @@ class FixerCommand {
                     jsonOutput.data.message = 'English placeholder check completed';
                     jsonOutput.data.placeholders = placeholderCheck.placeholders;
                     jsonOutput.data.errors = placeholderCheck.errors;
-                    console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
+                    console.log(JSON.stringify(jsonOutput.data, null, args.indent ?? 2));
                 }
                 return placeholderCheck;
             }
@@ -607,14 +624,30 @@ class FixerCommand {
                     jsonOutput.data.message = error;
                     jsonOutput.data.placeholders = placeholderCheck.placeholders;
                     jsonOutput.data.errors = placeholderCheck.errors;
-                    console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
+                    console.log(JSON.stringify(jsonOutput.data, null, args.indent ?? 2));
                     return { ...placeholderCheck, success: false, error };
                 }
                 console.log(`\n${error}`);
                 return { ...placeholderCheck, success: false, error };
             }
 
-            const languages = this.getAvailableLanguages();
+            const availableLanguages = this.getAvailableLanguages();
+            const requestedLanguages = args.languages || [];
+            const languages = requestedLanguages.length > 0
+                ? availableLanguages.filter(language => requestedLanguages.some(requested => normalizeLocale(requested) === normalizeLocale(language)))
+                : availableLanguages;
+
+            if (requestedLanguages.length > 0 && languages.length !== new Set(requestedLanguages.map(normalizeLocale)).size) {
+                const missing = requestedLanguages.filter(requested => !availableLanguages.some(language => normalizeLocale(language) === normalizeLocale(requested)));
+                const error = `Requested target locale(s) not found: ${missing.join(', ')}.`;
+                if (args.json) {
+                    jsonOutput.setStatus('error', error);
+                    console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent ?? 2));
+                } else {
+                    console.error(error);
+                }
+                return { success: false, error };
+            }
 
             if (!args.json) {
                 console.log(t('fixer.starting', { languages: languages.join(', ') || 'none' }));
@@ -632,11 +665,11 @@ class FixerCommand {
                 if (args.json) {
                     jsonOutput.setStatus('error');
                     jsonOutput.data.message = error;
-                    console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
-                    return;
+                    console.log(JSON.stringify(jsonOutput.data, null, args.indent ?? 2));
+                    return { success: false, error };
                 }
                 console.log(error);
-                return;
+                return { success: false, error };
             }
 
             if (!args.json) {
@@ -679,7 +712,7 @@ class FixerCommand {
                 });
                 jsonOutput.data.message = 'Fixer completed';
 
-                console.log(JSON.stringify(jsonOutput.data, null, args.indent || 2));
+                console.log(JSON.stringify(jsonOutput.data, null, args.indent ?? 2));
                 return { success: true, totalIssues, totalFixed, results };
             }
 
@@ -723,7 +756,9 @@ class FixerCommand {
                 const uiLanguage = this.config.uiLanguage || 'en';
                 loadTranslations(uiLanguage, path.resolve(__dirname, '../../../ui-locales'));
 
-                this.sourceDir = this.config.sourceDir;
+                this.codeDir = this.config.codeDir || this.config.sourceDir;
+                this.localesDir = this.config.localesDir || this.config.i18nDir || this.config.sourceDir;
+                this.sourceDir = this.localesDir;
                 this.outputDir = this.config.outputDir;
             }
 

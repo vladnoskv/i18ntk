@@ -1,4 +1,4 @@
-# i18ntk v5.0.0
+# i18ntk v5.1.0
 
 Find, validate, and maintain application translations without adding runtime dependencies.
 
@@ -9,7 +9,7 @@ Find, validate, and maintain application translations without adding runtime dep
 [![node](https://img.shields.io/badge/node-%3E%3D16-339933)](https://nodejs.org)
 [![dependencies](https://img.shields.io/badge/dependencies-0-success)](https://www.npmjs.com/package/i18ntk)
 [![license](https://img.shields.io/badge/license-personal%20use%20free-blue.svg)](LICENSE)
-[![socket](https://socket.dev/api/badge/npm/package/i18ntk/5.0.0)](https://socket.dev/npm/package/i18ntk/overview/5.0.0)
+[![socket](https://socket.dev/api/badge/npm/package/i18ntk/5.1.0)](https://socket.dev/npm/package/i18ntk/overview/5.1.0)
 
 [![i18ntk Workbench](https://img.shields.io/badge/VS_Code-Workbench-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-workbench)
 [![i18ntk Lens](https://img.shields.io/badge/VS_Code-Lens-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=VladNoskov.i18ntk-lens)
@@ -32,11 +32,17 @@ Try it without installing:
 npx i18ntk
 ```
 
-Or install it for your project (required if using i18ntk/runtime):
+Install it as a development tool when you only use the CLI:
 
 ```bash
 npm install --save-dev i18ntk
 npx i18ntk --command=init
+```
+
+Applications that import `i18ntk/runtime` should install it as a production dependency instead:
+
+```bash
+npm install i18ntk
 ```
 
 Then inspect translation health before making changes:
@@ -49,13 +55,14 @@ npx i18ntk --command=usage
 
 Use `npx i18ntk` for the guided menu. It detects the project framework and adds only compatible source types and safe generated-file exclusions to a newly created configuration. For a walkthrough, see [Getting started](./docs/getting-started.md).
 
-## What's new in 5.0.0
+## What's new in 5.1.0
 
-- **Stronger quality checks** for placeholders, tags, corrupted text, source-language leftovers, and unsafe bidirectional characters.
-- **Better framework detection** for Laravel, Spring Boot, Nuxt, next-intl, and mixed-stack projects.
-- **Faster repeat scans** and more reliable discovery across regional, namespaced, and underscore-style locale folders.
-- **Safer Auto Translate** that respects protected terms and reports unresolved work clearly.
-- **An optional LLM skill** for Codex, Claude Code, GitHub Copilot, and compatible agents.
+- **Correct fixer paths:** use `--code-dir` for application code and `--locales-dir` for translations without one overriding the other.
+- **Dependable automation:** fixer and validator `--json` output is parseable, invalid locale layouts fail, and fixer respects `--languages` and `--markers`.
+- **Accurate validation:** non-string settings no longer lower translation completion percentages, while strings inside arrays are counted.
+- **One safer runtime:** dedicated Node, browser, Edge, React, and React Native entry points now share isolated locale behavior, regional fallbacks, and useful load diagnostics.
+- **Reliable React updates:** translations rerender after resource refreshes as well as locale changes, without loading during render.
+- **Complete npm documentation:** every guide linked here is included in the installed package, without a duplicate nested source tree.
 
 See the [release notes](./CHANGELOG.md) for the full list of user-facing changes.
 
@@ -97,6 +104,8 @@ Each command is also available as a standalone `i18ntk-<name>` executable.
 --output-dir <path>     Report output directory
 --source-locale <code>  Source language code (e.g. en)
 --framework <name>      Override framework detection
+--json                  Write one JSON document to stdout
+--indent <0-10>         JSON indentation (default: 2)
 --no-prompt             Skip interactive prompts
 --help                  Show help
 ```
@@ -141,7 +150,7 @@ Example `.i18ntk-config`:
 
 ```json
 {
-  "version": "5.0.0",
+  "version": "5.1.0",
   "sourceDir": "./src",
   "i18nDir": "./locales",
   "sourceLanguage": "en",
@@ -180,10 +189,23 @@ i18ntk-usage --code-dir ./src --locales-dir ./locales --cleanup --dry-run-delete
 
 ## Runtime
 
+Choose the entry point that matches where your application code runs:
+
+| Your application code | Import |
+| --- | --- |
+| Node server, Express/Fastify, or Node Server Component | `i18ntk/runtime/node` |
+| Bundled browser, Edge, React Native, Expo, Deno, or Bun resources | `i18ntk/runtime/static` |
+| Browser or Edge resources loaded over HTTP | `i18ntk/runtime/fetch` |
+| React Client Components and hooks | `i18ntk/runtime/react` with `static` or `fetch` |
+| Framework-independent browser-safe core | `i18ntk/runtime/core` |
+
+Rust, Go, Python, Java, and other non-JavaScript applications can use the i18ntk CLI and generated JSON, but cannot run the JavaScript runtime natively.
+
 ```js
-const runtime = require('i18ntk/runtime');
+const runtime = require('i18ntk/runtime/node');
 const i18n = runtime.initRuntime({
-  baseDir: './locales',
+  projectRoot: process.cwd(),
+  localeDir: 'locales',
   language: 'en',
   fallbackLanguage: 'en',
 });
@@ -213,10 +235,11 @@ i18n.translateBatch(['menu.home', 'menu.settings']);
 
 Production guidance:
 
-- Use the instance from `initRuntime()` — not module-level `runtime.t()` — in multi-tenant apps
-- Use `lazy: true` for large folders; `preload: true` for small sets
-- Call `refresh(language)` after deploying changed locale files
-- `i18ntk/runtime/enhanced` remains available for async/encryption compatibility
+- Use `i18ntk/runtime/node` only for Node servers and Node Server Components.
+- Use `i18ntk/runtime/static` or `i18ntk/runtime/fetch` in browsers, Edge routes, client islands, React Native, and Expo.
+- Keep mutable locale state request-scoped for SSR and multi-tenant services.
+- Preload the same locale resources on the server and client to avoid hydration mismatches.
+- `i18ntk/runtime/enhanced` is a deprecated 5.x compatibility wrapper and will be removed in the next major release.
 
 [Runtime guide →](./docs/runtime.md)
 

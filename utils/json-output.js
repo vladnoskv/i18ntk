@@ -36,8 +36,9 @@ class JsonOutput {
    * Set the overall status
    * @param {'ok'|'warn'|'error'} status 
    */
-  setStatus(status) {
+  setStatus(status, message) {
     this.data.status = status;
+    if (message !== undefined) this.data.message = message;
   }
 
   /**
@@ -46,6 +47,28 @@ class JsonOutput {
    */
   setStats(stats) {
     this.data.stats = { ...this.data.stats, ...stats };
+  }
+
+  addStats(stats) {
+    this.setStats(stats);
+  }
+
+  addData(data) {
+    this.data.data = { ...(this.data.data || {}), ...(data || {}) };
+  }
+
+  getOutput(sortKeys = false) {
+    this.data.metadata.duration = Date.now() - this.startTime;
+    if (!sortKeys) return this.data;
+    const sortObject = value => {
+      if (Array.isArray(value)) return value.map(sortObject);
+      if (!value || typeof value !== 'object') return value;
+      return Object.keys(value).sort().reduce((result, key) => {
+        result[key] = sortObject(value[key]);
+        return result;
+      }, {});
+    };
+    return sortObject(this.data);
   }
 
   /**
@@ -74,13 +97,13 @@ class JsonOutput {
    * Finalize and output the JSON
    */
   output() {
-    this.data.metadata.duration = Date.now() - this.startTime;
+    const output = this.getOutput();
     
     if (envManager.get('NODE_ENV') !== 'test') {
-      console.log(JSON.stringify(this.data, null, 2));
+      console.log(JSON.stringify(output, null, 2));
     }
     
-    return this.data;
+    return output;
   }
 
   /**

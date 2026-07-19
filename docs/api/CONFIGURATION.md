@@ -76,7 +76,7 @@ Example:
 
 - `sourceDir`: source path for project/app scanning.
 - `i18nDir`: locale directory used by translation analysis, validation, completion, and usage comparison.
-- `outputDir`: report output directory.
+- `outputDir`: report output directory. Optional; defaults to `./i18ntk-reports`, including after a configuration upgrade.
 - `sourceLanguage`: base language for completeness checks and Auto Translate source values.
 - `defaultLanguages`: target languages used by init, completion, and manager Auto Translate.
 - `uiLanguage`: CLI message language. The interactive "Change UI Language" menu uses the package language registry and computes its numeric prompt range from the available UI locale count.

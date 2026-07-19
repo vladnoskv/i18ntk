@@ -1,4 +1,4 @@
-# i18ntk Components (v4.5.4)
+# i18ntk Components (v5.1.0)
 
 ## Core Entry Points
 
@@ -34,14 +34,17 @@
 
 ## Runtime Package
 
-- `runtime/index.js`: runtime translation API exported as `i18ntk/runtime`
-- `runtime/index.d.ts`: TypeScript types for the lightweight synchronous runtime
-- `runtime/enhanced.js`: optional async enhanced runtime exported as `i18ntk/runtime/enhanced`
-- `runtime/enhanced.js` is retained as a legacy public subpath for compatibility; prefer `runtime/index.js` for new production integrations.
+- `runtime/core.js`: universal resource store, fallback, formatting, diagnostics, subscriptions, and loader lifecycle; contains no Node built-ins
+- `runtime/index.js` / `runtime/node.js`: Node filesystem compatibility and synchronous lookup after loading
+- `runtime/static.js`: imported-object loader for browser, Edge, SSR, and React Native bundles
+- `runtime/fetch.js`: Fetch API loader for browser, Edge, and platform runtimes
+- `runtime/react.js`: dependency-injected React 18/19 bindings using `useSyncExternalStore`
+- `runtime/crypto.js`: optional Node-only encryption adapter
+- `runtime/enhanced.js`: deprecated 5.x compatibility wrapper over the unified runtime; it is not a second runtime implementation
 
 Exports:
 
-- `initRuntime`
+- `createRuntime` / `initRuntime`
 - `translate` / `t`
 - `translateBatch`
 - `setLanguage`
@@ -50,6 +53,7 @@ Exports:
 - `clearCache`
 - `getCacheInfo`
 - `refresh`
+- `has`, `addResources`, `removeResources`, `subscribe`, `getDiagnostics`, and `dispose`
 
 ## Notes
 

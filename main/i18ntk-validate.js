@@ -136,8 +136,10 @@ class I18nValidator {
         }
       }
 
-      displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
-      this.pathsDisplayed = true;
+      if (!args.json) {
+        displayPaths({ sourceDir: this.sourceDir, i18nDir: this.i18nDir, outputDir: this.config.outputDir });
+        this.pathsDisplayed = true;
+      }
       this.initialized = true;
       
       SecurityUtils.logSecurityEvent(
@@ -465,10 +467,11 @@ class I18nValidator {
     let translatedKeys = 0;
     let issues = [];
     
-    for (const [key, value] of Object.entries(obj)) {
+    const entries = Array.isArray(obj) ? obj.entries() : Object.entries(obj || {});
+    for (const [key, value] of entries) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
       
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
+      if (value && typeof value === 'object') {
         const nested = this.validateTranslation(value, language, fileName, fullKey);
         totalKeys += nested.totalKeys;
         translatedKeys += nested.translatedKeys;
@@ -508,6 +511,13 @@ class I18nValidator {
     }
     
     return { totalKeys, translatedKeys, issues };
+  }
+
+  countTranslatableLeaves(value) {
+    if (typeof value === 'string') return 1;
+    if (!value || typeof value !== 'object') return 0;
+    return (Array.isArray(value) ? value : Object.values(value))
+      .reduce((total, child) => total + this.countTranslatableLeaves(child), 0);
   }
 
   // Validate a single language
@@ -641,7 +651,7 @@ class I18nValidator {
       validation.summary.translatedKeys += translations.translatedKeys;
       // Count source locale leaf keys as reference total
       if (sourceContent) {
-        validation.summary.sourceTotalKeys += this.getAllKeys(sourceContent).size;
+        validation.summary.sourceTotalKeys += this.countTranslatableLeaves(sourceContent);
       }
       
       if (!structural.isConsistent) {
@@ -658,7 +668,7 @@ class I18nValidator {
     // Calculate completion percentage against source locale total
     const refTotal = validation.summary.sourceTotalKeys || validation.summary.totalKeys;
     validation.summary.percentage = refTotal > 0 
-      ? Math.round((validation.summary.translatedKeys / refTotal) * 100) 
+      ? Math.min(100, Math.round((validation.summary.translatedKeys / refTotal) * 100))
       : 0;
     
     return validation;
@@ -871,7 +881,7 @@ class I18nValidator {
         
         if (args.json) {
           jsonOutput.setStatus('error', error);
-          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent ?? 2));
           return { success: false, error };
         }
         throw new Error(error);
@@ -890,7 +900,7 @@ class I18nValidator {
         this.addError(error, { requestedLanguage: args.language, availableLanguages });
         if (args.json) {
           jsonOutput.setStatus('error', error);
-          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent ?? 2));
           return { success: false, error };
         }
         throw new Error(error);
@@ -900,7 +910,7 @@ class I18nValidator {
         const message = t('validate.noTargetLanguages') || 'No target languages configured; skipping target validation.';
         if (args.json) {
           jsonOutput.setStatus('ok', message);
-          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+          console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent ?? 2));
           return { success: true, message };
         }
         console.log(message);
@@ -952,7 +962,7 @@ class I18nValidator {
           errors: this.errors.length,
           warnings: this.warnings.length,
           languages: targetLanguages.length,
-          files: Object.values(results).reduce((sum, lang) => sum + (lang.files?.length || 0), 0)
+          files: Object.values(results).reduce((sum, lang) => sum + Object.keys(lang.files || {}).length, 0)
         });
         
         // Add issues from errors and warnings
@@ -968,7 +978,7 @@ class I18nValidator {
         // Add per-language results
         jsonOutput.addData({ results });
         
-        console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent || 2));
+        console.log(JSON.stringify(jsonOutput.getOutput(), null, args.indent ?? 2));
         
         return {
           success: !hasErrors,
@@ -1134,8 +1144,10 @@ class I18nValidator {
       }
       const execute = async () => {
 
-      console.log('\n' + t('validate.startingValidationProcess'));
-      this.validationBannerDisplayed = true;
+      if (!args.json) {
+        console.log('\n' + t('validate.startingValidationProcess'));
+        this.validationBannerDisplayed = true;
+      }
       SecurityUtils.logSecurityEvent(
         t('validate.runStarted'),
         'info',
@@ -1144,9 +1156,9 @@ class I18nValidator {
 
       const result = await this.validate();
 
-      if (result.success) {
+      if (!args.json && result.success) {
         console.log(t('validate.validationProcessCompletedSuccessfully'));
-      } else {
+      } else if (!args.json) {
         console.log('❌ Validation failed.');
       }
       SecurityUtils.logSecurityEvent(
