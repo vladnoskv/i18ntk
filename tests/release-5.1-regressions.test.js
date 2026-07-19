@@ -41,6 +41,29 @@ function run(script, args, cwd) {
   });
 }
 
+function canCreateSymlinkOrJunction() {
+  try {
+    const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'symlink-test-'));
+    const target = path.join(testDir, 'target');
+    const link = path.join(testDir, 'link');
+    fs.mkdirSync(target);
+    fs.writeFileSync(path.join(target, 'test.txt'), 'test');
+    // Try symlink first, then junction on Windows
+    try {
+      fs.symlinkSync(target, link, 'dir');
+    } catch {
+      fs.symlinkSync(target, link, 'junction');
+    }
+    const works = fs.existsSync(path.join(link, 'test.txt'));
+    fs.rmSync(testDir, { recursive: true, force: true });
+    return works;
+  } catch {
+    return false;
+  }
+}
+
+const SYMLINKS_SUPPORTED = canCreateSymlinkOrJunction();
+
 test('common JSON flags are parsed centrally with bounded indentation', () => {
   assert.deepEqual(parseCommonArgs(['--json', '--indent=0']), { json: true, indent: 0 });
   assert.equal(parseCommonArgs(['--indent=99']).indent, 2);
@@ -182,3 +205,93 @@ test('strict validator exits non-zero for incomplete translation values', () => 
     fs.rmSync(project, { recursive: true, force: true });
   }
 });
+
+if (SYMLINKS_SUPPORTED) {
+  test('fixer rejects locale root that escapes via symlinked/junction parent directory', () => {
+    const project = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-511-fixer-symlink-'));
+    let outside;
+    try {
+      writeMinimalConfig(project, { sourceDir: './src', i18nDir: './locales' });
+
+      // Create actual locale directory
+      writeJson(path.join(project, 'locales', 'en', 'common.json'), { hello: 'Hello' });
+      writeJson(path.join(project, 'locales', 'fr', 'common.json'), { hello: '' });
+
+      // Create a symlink/junction from locales/symlink-dir -> ../../outside
+      outside = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-outside-'));
+      writeJson(path.join(outside, 'en', 'common.json'), { hello: 'Escaped' });
+      writeJson(path.join(outside, 'fr', 'common.json'), { hello: 'Échappé' });
+      try {
+        fs.symlinkSync(outside, path.join(project, 'locales', 'symlink-escape'), 'dir');
+      } catch {
+        fs.symlinkSync(outside, path.join(project, 'locales', 'symlink-escape'), 'junction');
+      }
+
+      const result = run(FIXER, [
+        '--code-dir=./src', '--locales-dir=./locales', '--source-locale=en',
+        '--languages=fr', '--dry-run', '--json', '--indent=0', '--no-prompt'
+      ], project);
+
+      assert.equal(result.status, 0, result.stderr || result.stdout);
+      const output = JSON.parse(result.stdout);
+      // Should only process real locales (fr), not the symlink escape
+      // The escape attempt should be blocked by SecurityUtils
+      assert.equal(output.stats.languages, 1);
+      assert.equal(output.stats.issues, 1);
+      assert.equal(output.stats.fixed, 1);
+    } finally {
+      fs.rmSync(project, { recursive: true, force: true });
+      // Clean up outside dir if it exists
+      if (outside) {
+        try { fs.rmSync(outside, { recursive: true, force: true }); } catch (_) {}
+      }
+    }
+  });
+
+  test('fixer handles locale directory that is a symlink/junction to valid target inside sourceDir', async () => {
+    const project = fs.mkdtempSync(path.join(os.tmpdir(), 'i18ntk-511-fixer-symlink-locale-'));
+    let realLocaleDir;
+    try {
+      writeMinimalConfig(project, { sourceDir: './src', i18nDir: './locales' });
+
+      // Create actual locales
+      writeJson(path.join(project, 'locales', 'en', 'common.json'), { hello: 'Hello', nested: { label: 'Label' } });
+
+      // Create a separate real locale directory INSIDE the locales dir and symlink/junction to it
+      // Target must be within the sourceDir (locales) base for SecurityUtils to allow it
+      realLocaleDir = fs.mkdtempSync(path.join(project, 'locales', 'real-locale-'));
+      writeJson(path.join(realLocaleDir, 'fr', 'common.json'), { hello: '', nested: { label: '' } });
+      try {
+        fs.symlinkSync(realLocaleDir, path.join(project, 'locales', 'fr'), 'dir');
+      } catch {
+        fs.symlinkSync(realLocaleDir, path.join(project, 'locales', 'fr'), 'junction');
+      }
+
+      const command = new FixerCommand({
+        sourceDir: path.join(project, 'locales'),
+        sourceLanguage: 'en',
+        notTranslatedMarker: 'NOT_TRANSLATED',
+        backup: { enabled: false }
+      });
+      command.sourceDir = path.join(project, 'locales');
+      command.codeDir = path.join(project, 'src');
+      command.localesDir = path.join(project, 'locales');
+
+      const result = await command.fixLanguage('fr');
+
+      // Should have fixed through the symlink/junction (target is inside sourceDir)
+      assert.equal(result.fixedIssues, 2);
+      assert.deepEqual(JSON.parse(fs.readFileSync(path.join(realLocaleDir, 'fr', 'common.json'), 'utf8')), {
+        hello: 'Hello', nested: { label: 'Label' }
+      });
+    } finally {
+      fs.rmSync(project, { recursive: true, force: true });
+      if (realLocaleDir) {
+        try { fs.rmSync(realLocaleDir, { recursive: true, force: true }); } catch (_) {}
+      }
+    }
+  });
+} else {
+  test.skip('fixer rejects locale root that escapes via symlinked parent directory (symlinks/junctions not supported)');
+  test.skip('fixer handles locale directory that is a symlink (symlinks/junctions not supported)');
+}

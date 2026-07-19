@@ -156,14 +156,23 @@ class FixerCommand {
         }
     }
 
-    getLanguageFileEntries(language) {
+getLanguageFileEntries(language) {
         const wantedLocale = normalizeLocale(language);
         return discoverLocaleFiles(this.sourceDir, { excludeDirs: this.config.excludeDirs })
             .filter(entry => entry.locale === wantedLocale)
             .map(entry => {
-                const logicalName = entry.type === 'direct'
-                    ? 'default'
-                    : path.relative(path.join(this.sourceDir, entry.displayLocale), entry.filePath).replace(/\\/g, '/');
+                let logicalName;
+                if (entry.type === 'direct') {
+                    logicalName = 'default';
+                } else if (entry.namespace) {
+                    // For namespaced entries, use the namespace (filename without extension)
+                    logicalName = entry.namespace;
+                } else {
+                    // Fallback: compute relative path from the locale directory
+                    // Use the actual parent directory of the file to handle symlinks correctly
+                    const localeDir = path.dirname(entry.filePath);
+                    logicalName = path.relative(localeDir, entry.filePath).replace(/\\/g, '/');
+                }
                 return { ...entry, logicalName };
             });
     }

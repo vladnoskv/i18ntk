@@ -582,6 +582,18 @@ static _logging = false;
     }
   }
 
+  /**
+   * Sanitize input string by removing HTML, scripts, and disallowed characters.
+   * @param {string} input - Input string to sanitize
+   * @param {object} [options] - Sanitization options
+   * @param {RegExp} [options.allowedChars=/^[a-zA-Z0-9\s\-_\.\,\!\?\(\)\[\]:;"'\/]+$/] - Allowed character set.
+   *   Default excludes: curly braces {}, @, $, %, ^, &, *, =, +, |, ~, `, <, >, backslash.
+   *   Callers handling ICU messages, emails, currency, or code MUST override this.
+   * @param {number} [options.maxLength=1000] - Maximum output length
+   * @param {boolean} [options.removeHTML=true] - Strip HTML tags
+   * @param {boolean} [options.removeScripts=true] - Strip script-like patterns
+   * @returns {string} Sanitized string
+   */
   static sanitizeInput(input, options = {}) {
     if (!input || typeof input !== 'string') {
       return '';
@@ -753,8 +765,10 @@ static _logging = false;
       'theme', 'ui', 'setup', 'reports', 'display', 'interface',
       // Security and settings
       'security', 'settings', 'preferences', 'config', 'configuration',
-      // Extension-owned config sections. The CLI preserves these but ignores unknown nested keys.
+// Extension-owned config sections. The CLI preserves these but ignores unknown nested keys.
       'extensions',
+      // Custom namespace for preserving unknown user/extension config keys
+      'custom',
       // Additional common properties
       'autoSave', 'autoBackup', 'validateOnSave', 'showWarnings', 'verbose',
       'timeout', 'retries', 'batchSize', 'maxConcurrency', 'cacheEnabled',
@@ -762,7 +776,8 @@ static _logging = false;
       'dateFormat', 'timeFormat', 'timezone', 'reportLanguage', 'dateTime'
     ]);
 
-    // Remove unknown properties
+    // Remove unknown properties - preserve them under a custom namespace
+    const customProperties = {};
     Object.keys(sanitized).forEach(key => {
       if (!allowedProperties.has(key)) {
         // Only log warnings for properties that might be security risks
@@ -778,15 +793,21 @@ static _logging = false;
             value: sanitized[key]
           });
         } else {
-          // Use info level for normal unknown properties to reduce noise
-          SecurityUtils.logSecurityEvent('Removing unknown configuration property', 'info', {
+          // Preserve unknown non-suspicious properties under custom namespace
+          SecurityUtils.logSecurityEvent('Preserving unknown configuration property under custom namespace', 'info', {
             property: key,
             value: sanitized[key]
           });
+          customProperties[key] = sanitized[key];
         }
         delete sanitized[key];
       }
     });
+
+    // Store preserved custom properties
+    if (Object.keys(customProperties).length > 0) {
+      sanitized.custom = { ...(sanitized.custom || {}), ...customProperties };
+    }
 
     // Validate and sanitize path properties
     const pathProperties = ['projectRoot', 'sourceDir', 'i18nDir', 'outputDir', 'backupDir', 'tempDir', 'cacheDir', 'configDir'];

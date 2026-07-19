@@ -281,13 +281,43 @@ async function initI18nRuntime(options = {}) {
 
 let defaultRuntime;
 function getDefaultRuntime() {
-  if (!defaultRuntime) defaultRuntime = new I18nEnhancedRuntime();
+  if (!defaultRuntime) {
+    const warn = typeof process !== 'undefined' && process.emitWarning
+      ? process.emitWarning
+      : (msg) => console.warn('[i18ntk/runtime/enhanced] ' + msg);
+    warn('getDefaultRuntime() is deprecated and will be removed in v6.0. Use initI18nRuntime() to create isolated instances instead.', 'DeprecationWarning');
+    defaultRuntime = new I18nEnhancedRuntime();
+  }
   return defaultRuntime;
 }
-const translate = (key, params, options) => getDefaultRuntime().translate(key, params, options);
-const translateBatch = (keys, params, options) => getDefaultRuntime().translateBatch(keys, params, options);
-const translateEncrypted = (key, params, options) => getDefaultRuntime().translateEncrypted(key, params, options);
-const translateBatchEncrypted = (keys, params, options) => getDefaultRuntime().translateBatchEncrypted(keys, params, options);
+const translate = (key, params, options) => {
+  const warn = typeof process !== 'undefined' && process.emitWarning
+    ? process.emitWarning
+    : (msg) => console.warn('[i18ntk/runtime/enhanced] ' + msg);
+  warn('Module-level translate() is deprecated and will be removed in v6.0. Use runtime instance methods instead.', 'DeprecationWarning');
+  return getDefaultRuntime().translate(key, params, options);
+};
+const translateBatch = (keys, params, options) => {
+  const warn = typeof process !== 'undefined' && process.emitWarning
+    ? process.emitWarning
+    : (msg) => console.warn('[i18ntk/runtime/enhanced] ' + msg);
+  warn('Module-level translateBatch() is deprecated and will be removed in v6.0. Use runtime instance methods instead.', 'DeprecationWarning');
+  return getDefaultRuntime().translateBatch(keys, params, options);
+};
+const translateEncrypted = (key, params, options) => {
+  const warn = typeof process !== 'undefined' && process.emitWarning
+    ? process.emitWarning
+    : (msg) => console.warn('[i18ntk/runtime/enhanced] ' + msg);
+  warn('Module-level translateEncrypted() is deprecated and will be removed in v6.0. Use runtime instance methods instead.', 'DeprecationWarning');
+  return getDefaultRuntime().translateEncrypted(key, params, options);
+};
+const translateBatchEncrypted = (keys, params, options) => {
+  const warn = typeof process !== 'undefined' && process.emitWarning
+    ? process.emitWarning
+    : (msg) => console.warn('[i18ntk/runtime/enhanced] ' + msg);
+  warn('Module-level translateBatchEncrypted() is deprecated and will be removed in v6.0. Use runtime instance methods instead.', 'DeprecationWarning');
+  return getDefaultRuntime().translateBatchEncrypted(keys, params, options);
+};
 
 module.exports = {
   initI18nRuntime,

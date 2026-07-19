@@ -25,3 +25,18 @@ test('public package manifest keeps searchable keywords in sync', () => {
 
   assert.deepStrictEqual(publicManifest.keywords, rootManifest.keywords);
 });
+
+test('public package files list does not contain self-referential i18ntk/ entries', () => {
+  const publicManifest = readJson('package.public.json');
+  const files = publicManifest.files || [];
+
+  const selfRefEntries = files.filter(f => f.startsWith('i18ntk/') || f === 'i18ntk');
+  assert.deepStrictEqual(selfRefEntries, [], 'files list must not contain i18ntk/ nested package entries');
+});
+
+test('public package exports do not use wildcard for runtime', () => {
+  const publicManifest = readJson('package.public.json');
+  const exports = publicManifest.exports || {};
+
+  assert.equal(exports['./runtime/*'], undefined, 'runtime wildcard export must not exist');
+});
